@@ -1,0 +1,124 @@
+
+///WEAPONS\\\
+
+weapons/select	WSELECT
+
+//== Painkiller
+
+weapons/painkiller/start		PKILSTRT
+weapons/painkiller/stop			PKILSTOP
+weapons/painkiller/spin			PKILSPIN
+weapons/painkiller/hitwall		PKILHITW
+weapons/painkiller/killer		PKILSHOT
+weapons/painkiller/hit			PKILHIT
+weapons/painkiller/killerback	PKILBACK
+weapons/painkiller/return		PKILRETR
+weapons/painkiller/laser		PKILLASR
+weapons/painkiller/laserhit		PKILLHIT
+
+$limit weapons/painkiller/hit 0
+$limit weapons/painkiller/hitwall 0
+
+
+//== Shotgun-Freezer
+
+weapons/shotgun/fire		STGNFIRE
+weapons/shotgun/freezer		STGNFREZ
+
+$random weapons/shotgunshells { weapons/shell1 weapons/shell2 weapons/shell3 }
+weapons/shell1			     SHELLS1
+weapons/shell2			     SHELLS2
+weapons/shell3			     SHELLS3
+
+
+//== Stakegun
+
+weapons/stakegun/shot		STAKSHOT
+weapons/stakegun/grenade	STAKGREN
+weapons/stakegun/combo		STAKCOMB
+
+weapons/grenade/bounce		GRENBOUN
+weapons/grenade/explosion	GRENEXPL
+
+
+//== Rocket-minigun
+
+$random weapons/rmini/shot { weapons/rmini/shot1 weapons/rmini/shot2 weapons/rmini/shot3 }
+weapons/rmini/shot1	MNSHOT1
+weapons/rmini/shot2	MNSHOT2
+weapons/rmini/shot3	MNSHOT3
+weapons/rmini/shot4	MNSHOT4
+
+weapons/rmini/spin	MNGRSPIN
+weapons/rmini/stop	MNGRSTOP
+weapons/rmini/rocket	MNGRROCK
+
+weapons/rocket/explosion	ROCKEXPL
+
+$random weapons/ricochet { weapons/ricochet1 weapons/ricochet2 weapons/ricochet3 weapons/ricochet4 }
+weapons/ricochet1	RICO1
+weapons/ricochet2	RICO2
+weapons/ricochet3	RICO3
+weapons/ricochet4	RICO4
+
+
+//== Electrodriver
+
+weapons/eldriver/shot		ELDRSHOT
+weapons/eldriver/electro	ELDRELEC
+
+weapons/shuricane/explosion	SHUREXPL
+
+
+
+///PICKUPS\\\
+
+pickups/ammo/shells		SHELPKUP
+pickups/ammo/freezerammo	FREZPKUP
+pickups/ammo/stakes		STKSPKUP
+pickups/ammo/bombs		BOMBPKUP
+pickups/ammo/bullets		BULLPKUP
+pickups/ammo/electrons		ELECPKUP
+pickups/ammo/shuricanes		SHURPKUP
+
+pickups/ammopack	AMMOPACK
+
+pickups/weapons/shotgun		STGNPKUP
+pickups/weapons/stakegun	STAKPKUP
+pickups/weapons/rmini		MNGRPKUP
+pickups/weapons/eldriver	ELDRPKUP
+
+pickups/powerups/wmodifier/take	WMODTAKE
+pickups/powerups/wmodifier/loop	WMODLOOP
+pickups/powerups/wmodifier/out	WMODOUT
+
+$random pickups/soul { pickups/soul1 pickups/soul2 pickups/soul3 pickups/soul4 pickups/soul5 }
+pickups/soul1	SOULTAK1
+pickups/soul2	SOULTAK2
+pickups/soul3	SOULTAK3
+pickups/soul4	SOULTAK4
+pickups/soul5	SOULTAK5
+pickups/soul/red	SOULRED
+pickups/soul/MEGA	SOULMEGA
+pickups/soul/gold	SOULGOLD
+
+pickups/armor/medium	ARMMEDI
+pickups/armor/heavy	ARMHEAVY
+
+
+///SPECIAL\\\
+
+special/soul/appear		SOULAPPR
+
+special/demonmorph/start	DEMNSTRT
+special/demonmorph/loop		DEMNLOOP
+special/demonmorph/stop		DEMNSTOP
+
+$random weapons/demonmorph/attack { demonattack1 demonattack2 }
+demonattack1	DMNSHOT1
+demonattack2	DMNSHOT2
+
+
+gibs/blooddrop		bloddrop
+gibs/splash		flesh
+gibs/spiderdeath	spiddeth

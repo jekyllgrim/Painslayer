@@ -1,0 +1,6 @@
+version "4.2.0"
+
+#include "ZPainkiller/pk_main.zc"
+#include "ZPainkiller/w_painkiller.zc"
+#include "ZPainkiller/w_shotgun.zc"
+#include "ZPainkiller/w_stakegun.zc"

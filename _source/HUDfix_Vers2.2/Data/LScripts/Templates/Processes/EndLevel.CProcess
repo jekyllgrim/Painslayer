@@ -1,0 +1,639 @@
+--============================================================================
+-- Flash Screen Task
+--============================================================================
+EndLevel.TickCount = 0
+EndLevel.Color = Color:New(255,0,0)
+EndLevel.showCard = false
+EndLevel.giveMultiModel = false
+EndLevel.giveCardsUse = false
+EndLevel.startTime = 0
+EndLevel.statStep = 0
+EndLevel.statTime = 0
+EndLevel.incTime = 0
+EndLevel.incStep = 0
+EndLevel.time = 0
+EndLevel.mode = 0
+
+--============================================================================
+function EndLevel:Update()
+	if not self.initialized then
+		Game.LastPlayerHealth = Player.Health
+        Player._died = true
+        ENTITY.PO_Enable(Player._Entity,false)
+        Player:ResetStatusAfterDeath()    
+		self.initialized = true
+		self.time = Game.LevelTime
+		self.startTime = 0
+		self.statStep = 0
+		Hud.Enabled = false
+	    Player._died = true
+	    Game.EndOfLevelActive = true
+--		Game.freezeUpdate = true					-- narazie
+		SOUND.StreamPause(0)
+		SOUND.StreamPause(1)
+	end
+end
+
+
+function EndLevel:Tick(delta)
+	if self.time > 0 then Game.LevelTime = self.time end
+
+    if INP.Action(Actions.Fire) then
+		INP.Reset()
+
+		Game:UpdateLevelStats()
+		local cardStatus = Lev:GetCardStatus()
+		local bonus1Status = self:CanGiveBonus1()
+		local bonus2Status = self:CanGiveBonus2()
+		
+		if not bonus1Status then
+			Game:Print( "no bonus1Status" )
+		else
+			Game:Print( "bonus1Status" )
+		end
+		
+		if not bonus2Status then
+			Game:Print( "no bonus2Status" )
+		else
+			Game:Print( "bonus2Status" )
+		end
+
+		if self.mode == 0 then
+			if self.statStep > 10 then
+				self.startTime = 0
+				self.statStep = 0
+				if cardStatus >= 0 or Game.Difficulty == 0 then
+					--MagicBoard_LoadStatus()
+					
+					if bonus1Status and not Game.BonusMPModel then
+						self.mode = 2
+					elseif bonus2Status and not Game.GoldenCardsUseUnlimited then
+						self.mode = 3
+					else
+						self:LastClick()
+					end
+				else
+					self.showCard = true
+					self.mode = 1
+					local imgName = Lev:GetCardBigImage()
+					if imgName ~= "" then
+						self.bigCard = MATERIAL.Create(imgName, TextureFlags.NoLOD + TextureFlags.NoMipMaps)
+					else
+						self.bigCard = nil
+					end
+--					SOUND.Play2D("menu/menu/option-accept",100,true)
+					SOUND.Play2D("misc/card-found",100,true)
+					INP.Reset()
+				end
+			else
+				self.statTime = INP.GetTime()
+				self.statStep = 11
+				self.incStep = 0
+				INP.Reset()
+			end
+		elseif self.mode == 1 then
+			MagicBoard_LoadStatus()
+			Lev:GiveCard()
+			if bonus1Status and not Game.BonusMPModel then
+				self.mode = 2
+			elseif bonus2Status and not Game.GoldenCardsUseUnlimited then
+				self.mode = 3
+			else
+				self:LastClick()
+			end
+		elseif self.mode == 2 then
+			if not Game.AddOn then
+				Game.BonusMPModel = true
+				PMENU.SetRegistryBonus1( true )
+			else
+				Game.BonusMPModel2 = true
+				PMENU.SetRegistryBonus3( true )
+			end
+			if bonus2Status and not Game.GoldenCardsUseUnlimited then
+				self.mode = 3
+			else
+				self:LastClick()
+			end
+		elseif self.mode == 3 then
+			Game.GoldenCardsUseUnlimited = true
+			PMENU.SetRegistryBonus2( true )
+			self:LastClick()
+		end
+    end
+
+--	if Game.LevelStarted == false then
+--		self.statTime = INP.GetTime()
+--		self.statStep = 11
+--		self.incStep = 0
+--	end
+end
+
+function EndLevel:LastClick()
+	Game.LevelStarted = false
+	Game.EndOfLevelActive = false
+	SOUND.Play2D("menu/menu/option-accept",100,true)
+	local delay = INP.GetTime()
+	while INP.GetTime() - delay < 1 do self.startTime = 0 end
+	self.startTime = 0
+	self.statStep = 0
+	Game.LevelStarted = false
+	MATERIAL.Release(self.bigCard)
+	self.bigCard = nil
+--	MagicBoard_SaveStatus()
+	local lastLevel = false
+	if (Game.CurrChapter == table.getn(Levels) or (Game.CurrChapter == 4 and Game.Difficulty == Difficulties.Trauma)) and Game.CurrLevel == table.getn(Levels[Game.CurrChapter]) then
+		lastLevel = true
+	end
+
+	if Lev._Name == "C6L0_PCFHQ" then
+		Game.LevelStarted = false
+		Game.EndOfLevelActive = false
+		PMENU.MapSetCurrLevel( 1, 1 )
+		PMENU.SwitchToMenu()
+		INP.Reset()
+		return
+	end
+
+	if lastLevel and Game.AddOn then
+		if Game.Difficulty == Difficulties.Trauma then
+			Game.CardsAvailable[23] = true -- free cards usage
+		end
+	end
+
+	SaveGame:Save(nil,"AutoNewLevel")
+
+	PMENU.Activate(false)
+	PMENU.MapSetCurrLevel( Game.CurrLevel, Game.CurrChapter )
+	PMENU.PauseSounds()
+
+	if Levels[Game.CurrChapter] and Levels[Game.CurrChapter][Game.CurrLevel] then
+		if Game.CurrChapter == 4 and lastLevel then
+			Game:Print("Playing movie ".."../Data/Movies/outro.bik")
+			MOUSE.Lock(false)
+			PMENU.PlayMovie("../Data/Movies/outro.bik")
+			MOUSE.Lock(true)
+		elseif Levels[Game.CurrChapter][Game.CurrLevel][7] then
+			Game:Print("Playing movie ".."../Data/Movies/"..Levels[Game.CurrChapter][Game.CurrLevel][7])
+			MOUSE.Lock(false)
+			PMENU.PlayMovie("../Data/Movies/"..Levels[Game.CurrChapter][Game.CurrLevel][7],PainMenu.movSndTrack)
+			MOUSE.Lock(true)
+		end
+		
+		if lastLevel then
+			INP.Reset()
+			MOUSE.Lock(false)
+			if Game.AddOn then
+				PMENU.ShowCredits( true )
+			else
+				PMENU.ShowCredits( false )
+			end
+			MOUSE.Lock(true)
+		end
+	end
+
+	if Game.Difficulty == 3 then
+		PMENU.ActivateMap()
+	elseif Game.CurrLevel * Game.CurrChapter > 6 and math.random(100) == 32 then
+		PMENU.SwitchToMap()
+	else
+		PMENU.SwitchToLevelSel()
+	end
+	PMENU.MapNextLevel()
+	if lastLevel then
+		Cfg.Credits = true
+		Cfg:Save()
+		if Game.AddOn then
+			if Game.Difficulty == Difficulties.Trauma then
+				Lev._Name = "C6L0_PCFHQ"
+				EDITOR.PostMessage(1,0)
+				PMENU.MapSetCurrLevel( 1, 1 )
+				PMENU.SwitchToMenu()
+				PMENU.Activate(false)
+			end
+		else
+			PMENU.MapSetCurrLevel( 1, 1 )
+			PMENU.SwitchToMenu()
+		end
+	end
+	INP.Reset()
+end
+
+-- all secrets found
+function EndLevel:CanGiveBonus1()
+	local ret = true
+
+	-- no bonus for all secrets in BooH
+	if Game.AddOn then return false end
+
+	for i=1,table.getn(Levels) do
+		for j=1,table.getn(Levels[i]) do
+			local stats = Game.LevelsStats[Levels[i][j][1]]
+			if not stats then
+				ret = false
+			elseif stats.GameplayTime == 0 or stats.SecretsFound < stats.TotalSecrets then
+				ret = false
+			end
+		end
+	end
+
+	if not ret then Game:Print( "no bonus1" ) end
+	return ret
+end
+
+-- all * on all levels
+function EndLevel:CanGiveBonus2()
+	local ret = true
+
+	for i=1,table.getn(Levels) do
+		for j=1,table.getn(Levels[i]) do
+			local stats = Game.LevelsStats[Levels[i][j][1]]
+			if not stats then
+				ret = false
+			elseif stats.GameplayTime == 0 then
+				ret = false
+			elseif stats.SecretsFound < stats.TotalSecrets then
+				ret = false
+			elseif stats.ObjectsDestroyed < stats.TotalObjects then
+				ret = false
+			elseif stats.AmmoFound < stats.TotalAmmo then
+				ret = false
+			elseif stats.HolyItemsFound < stats.TotalHolyItems then
+				ret = false
+			elseif stats.ArmorsFound < stats.TotalArmors then
+				ret = false
+			end
+		end
+	end
+
+	if not ret then Game:Print( "no bonus2" ) end
+	return ret
+end
+
+function EndLevel:PostRender(delta)
+	if self.initialized then
+		local w,h = R3D.ScreenSize()
+		
+		if self.mode < 2 then
+			HUD.DrawBorder(150,80,724,640)
+		else
+			HUD.DrawBorder(150,280,724,240)
+		end
+		HUD.SetFont("timesbd",22)
+		local pressWidth = HUD.GetTextWidth(TXT.SPStats.PressFire)
+		local incSpeed = 100.0
+
+		if self.mode == 0 then
+			local colorTxt = { 230, 161, 97 }
+			local colorMin = { 214, 0, 23 }
+			local colorMax = { 189, 0, 0 }
+
+			local w,h = R3D.ScreenSize()
+
+			HUD.SetFont("timesbd",26)
+			local fh = HUD.GetTextHeight() + 8 * h/AspectRatio
+
+			HUD.PrintXY(-1,h/2-fh*7,TXT.SPStats.YourScore,"timesbd",colorTxt[1],colorTxt[2],colorTxt[3],26)
+
+			local min = math.abs(self.time / 60)
+			local sec = math.mod(self.time, 60)
+
+			local sepPos = w/2 + 50*w/1024
+			local spos = 0
+			local sepWidth = HUD.GetTextWidth( ": " )
+			local slashWidth = HUD.GetTextWidth( "/" )
+			local numWidth = HUD.GetTextWidth( "000" )
+			local minPos = sepPos + sepWidth
+			local slashPos = minPos + numWidth
+			local maxPos = slashPos + slashWidth
+
+			local curTime = INP.GetTime()
+			if self.statStep == 0 then
+				self.startTime = curTime
+				self.statStep = 1
+				PMENU.PlaySound( "menu/stats/rollnumbers-show" )
+			end
+
+			local timeDiff = curTime - self.startTime
+			local statDiff = curTime - self.statTime
+
+			if self.statStep > 0 then
+				spos = sepPos - HUD.GetTextWidth( TXT.SPStats.GameplayTime )
+				HUD.PrintXY(spos,h/2-fh*5,TXT.SPStats.GameplayTime..": ","timesbd",colorTxt[1],colorTxt[2],colorTxt[3],26)
+
+				if self.statStep ~= 1 or timeDiff > 0.5 then
+					if min < 60 then
+						HUD.PrintXY(minPos,h/2-fh*5,string.format("%02d",min)..":"..string.format("%02d",sec),"timesbd",colorMin[1],colorMin[2],colorMin[3],26)
+					else
+						local hour = math.floor(min/60)
+						min = min - hour * 60
+						HUD.PrintXY(minPos,h/2-fh*5,string.format("%02d",hour)..":"..string.format("%02d",min)..":"..string.format("%02d",sec),"timesbd",colorMin[1],colorMin[2],colorMin[3],26)
+					end
+				end
+				if self.statStep == 1 and timeDiff > 1.0 then
+					self.statTime = curTime
+					self.statStep = 2
+					PMENU.StopSound()
+					PMENU.PlaySound( "menu/stats/rollnumbers-show" )
+				end
+			end
+
+			if self.statStep > 1 then
+				local diff = { TXT.Menu.Daydream, TXT.Menu.Insomnia, TXT.Menu.Nightmare, TXT.Menu.Trauma }
+
+				spos = sepPos - HUD.GetTextWidth( TXT.SPStats.Difficulty )
+				HUD.PrintXY(spos,h/2-fh*4,TXT.SPStats.Difficulty..": ","timesbd",colorTxt[1],colorTxt[2],colorTxt[3],26)
+
+				if self.statStep ~= 2 or timeDiff > 1.5 then
+					HUD.PrintXY(minPos,h/2-fh*4,diff[Game.Difficulty+1],"timesbd",colorMin[1],colorMin[2],colorMin[3],26)
+				end
+
+				if self.statStep == 2 and timeDiff > 2 then
+					self.statTime = curTime
+					self.statStep = 3
+					PMENU.StopSound()
+					PMENU.PlaySound( "menu/stats/rollnumbers-show" )
+					PMENU.PlaySound( "menu/stats/rollnumbers-loop", true )
+				end
+			end
+
+			if self.statStep > 2 then
+				local value = ( curTime - self.statTime ) * incSpeed
+				if value >= Game.BodyCountTotal or self.statStep > 3 then
+					value = Game.BodyCountTotal
+					if self.statStep == 3 and self.incStep == 0 then
+						self.incTime = curTime
+						self.incStep = 1
+						PMENU.StopSound()
+					end
+				end
+				
+				Hud:DrawSingleStat(2,TXT.SPStats.MonstersKilled,value,Game.TotalActors)
+
+				if value == Game.BodyCountTotal then
+					if self.statStep == 3 and curTime - self.incTime > 0.5 then
+						self.statTime = curTime
+						self.statStep = 4
+						self.incStep = 0
+						PMENU.PlaySound( "menu/stats/rollnumbers-show" )
+						PMENU.PlaySound( "menu/stats/rollnumbers-loop", true )
+					end
+				end
+			end
+
+			if self.statStep > 3 then
+				local value = ( curTime - self.statTime ) * incSpeed
+				if value >= Player.TotalSoulsCount or self.statStep > 4 then
+					value = Player.TotalSoulsCount
+					if self.statStep == 4 and self.incStep == 0 then
+						self.incTime = curTime
+						self.incStep = 1
+						PMENU.StopSound()
+					end
+				end
+				
+				Hud:DrawSingleStat(3,TXT.SPStats.SoulsCollected,value,Game.TotalSouls)
+
+				if value == Player.TotalSoulsCount and curTime - self.incTime > 0.5 then
+					if self.statStep == 4 then
+						self.statTime = curTime
+						self.statStep = 5
+						self.incStep = 0
+						PMENU.PlaySound( "menu/stats/rollnumbers-show" )
+						PMENU.PlaySound( "menu/stats/rollnumbers-loop", true )
+					end
+				end
+			end
+			
+			if self.statStep > 4 then
+				local value = ( curTime - self.statTime ) * incSpeed
+				if value >= (Game.PlayerMoneyFound-Player.BonusItems) or self.statStep > 5 then
+					value = Game.PlayerMoneyFound-Player.BonusItems
+					if self.statStep == 5 and self.incStep == 0 then
+						self.incTime = curTime
+						self.incStep = 1
+						PMENU.StopSound()
+					end
+				end
+
+				Hud:DrawSingleStat(4,TXT.SPStats.GoldFound,value,Game.TotalMoney,Player.BonusItems)
+
+				if value == (Game.PlayerMoneyFound-Player.BonusItems) and curTime - self.incTime > 0.5 then
+					if self.statStep == 5 then
+						self.statTime = curTime
+						self.statStep = 6
+						self.incStep = 0
+						if Player.ArmorFound ~= Game.TotalArmor then
+							PMENU.PlaySound( "menu/stats/rollnumbers-show" )
+						end
+						PMENU.PlaySound( "menu/stats/rollnumbers-loop", true )
+					end
+				end
+			end
+			
+			if self.statStep > 5 then
+				local value = ( curTime - self.statTime ) * incSpeed
+				if value >= Player.ArmorFound or self.statStep > 6 then
+					value = Player.ArmorFound
+					if self.statStep == 6 and self.incStep == 0 then
+						self.incTime = curTime
+						self.incStep = 1
+						PMENU.StopSound()
+						if value == Game.TotalArmor then PMENU.PlaySound( "menu/stats/star-for-perfect" ) end
+					end
+				end
+				
+				HUD.DrawQuadRGBA(nil,300*w/1024,h/2-5*h/AspectRatio,440*w/1024,1,230,161,97,255)
+				Hud:DrawSingleStat(5,TXT.SPStats.ArmorFound,value,Game.TotalArmor,nil,true)
+
+				if value == Player.ArmorFound and curTime - self.incTime > 0.5 then
+					if self.statStep == 6 then
+						self.statTime = curTime
+						self.statStep = 7
+						self.incStep = 0
+						if Player.HolyItems ~= Game.TotalHolyItems then
+							PMENU.PlaySound( "menu/stats/rollnumbers-show" )
+						end
+						PMENU.PlaySound( "menu/stats/rollnumbers-loop", true )
+					end
+				end
+			end
+
+			if self.statStep > 6 then
+				local value = ( curTime - self.statTime ) * incSpeed
+				if value >= Player.HolyItems or self.statStep > 7 then
+					value = Player.HolyItems
+					if self.statStep == 7 and self.incStep == 0 then
+						self.incTime = curTime
+						self.incStep = 1
+						PMENU.StopSound()
+						if value == Game.TotalHolyItems then PMENU.PlaySound( "menu/stats/star-for-perfect" ) end
+					end
+				end
+				
+				Hud:DrawSingleStat(6,TXT.SPStats.HolyItemsFound,value,Game.TotalHolyItems,nil,true)
+
+				if value == Player.HolyItems and curTime - self.incTime > 0.5 then
+					if self.statStep == 7 then
+						self.statTime = curTime
+						self.statStep = 8
+						self.incStep = 0
+						if Game.PlayerAmmoFound ~= Game.TotalAmmo then
+							PMENU.PlaySound( "menu/stats/rollnumbers-show" )
+						end
+						PMENU.PlaySound( "menu/stats/rollnumbers-loop", true )
+					end
+				end
+			end
+
+			if self.statStep > 7 then
+				local value = ( curTime - self.statTime ) * incSpeed
+				if value >= Game.PlayerAmmoFound or self.statStep > 8 then
+					value = Game.PlayerAmmoFound
+					if self.statStep == 8 and self.incStep == 0 then
+						PMENU.StopSound()
+						self.incTime = curTime
+						self.incStep = 1
+						if value == Game.TotalAmmo then PMENU.PlaySound( "menu/stats/star-for-perfect" ) end
+					end
+				end
+				
+				Hud:DrawSingleStat(7,TXT.SPStats.AmmoFound,value,Game.TotalAmmo,nil,true)
+
+				if value == Game.PlayerAmmoFound and curTime - self.incTime > 0.5 then
+					if self.statStep == 8 then
+						self.statTime = curTime
+						self.statStep = 9
+						self.incStep = 0
+						if Game.PlayerDestroyedItems ~= Game.TotalDestroyed then
+							PMENU.PlaySound( "menu/stats/rollnumbers-show" )
+						end
+						PMENU.PlaySound( "menu/stats/rollnumbers-loop", true )
+					end
+				end
+			end
+
+			if self.statStep > 8 then
+				local value = ( curTime - self.statTime ) * incSpeed
+				if value >= Game.PlayerDestroyedItems or self.statStep > 9 then
+					value = Game.PlayerDestroyedItems
+					if self.statStep == 9 and self.incStep == 0 then
+						PMENU.StopSound()
+						self.incTime = curTime
+						self.incStep = 1
+						if value == Game.TotalDestroyed then PMENU.PlaySound( "menu/stats/star-for-perfect" ) end
+					end
+				end
+				
+				Hud:DrawSingleStat(8,TXT.SPStats.ObjectsDestroyed,value,Game.TotalDestroyed,nil,true)
+
+				if value == Game.PlayerDestroyedItems and curTime - self.incTime > 0.5 then
+					if self.statStep == 9 then
+						self.statTime = curTime
+						self.statStep = 10
+						self.incStep = 0
+						if Player.SecretsFound ~= Game.TotalSecrets then
+							PMENU.PlaySound( "menu/stats/rollnumbers-show" )
+						end
+						PMENU.PlaySound( "menu/stats/rollnumbers-loop", true )
+					end
+				end
+			end
+
+			if self.statStep > 9 then
+				local value = ( curTime - self.statTime ) * incSpeed
+				if value >= Player.SecretsFound or self.statStep > 9 then
+					PMENU.StopSound()
+					value = Player.SecretsFound
+					if self.statStep == 10 and self.incStep == 0 then
+						self.incTime = curTime
+						self.incStep = 1
+						if value == Game.TotalSecrets then PMENU.PlaySound( "menu/stats/star-for-perfect" ) end
+					end
+				end
+				
+				Hud:DrawSingleStat(9,TXT.SPStats.SecretsFound,value,Game.TotalSecrets,nil,true)
+
+				if value == Player.SecretsFound and curTime - self.incTime > 0.5 then
+					if self.statStep == 10 then
+						self.statTime = curTime
+						self.statStep = 11
+						self.incStep = 0
+						local cardStatus = Lev:GetCardStatus()
+						if cardStatus == -1 and Game.Difficulty > 0 then
+							PMENU.PlaySound( "menu/stats/card-unlocked" )
+						else
+							PMENU.PlaySound( "menu/stats/rollnumbers-show" )
+						end
+					end
+				end
+			end
+
+			if self.statStep > 10 then
+				HUD.PrintXY(-1,h/2+fh*6-10*w/AspectRatio,TXT.SPStats.CardCondition..":","timesbd",colorTxt[1],colorTxt[2],colorTxt[3],26)
+				HUD.PrintXY(-1,h/2+fh*7-10*w/AspectRatio,Lev._CardTask,"timesbd",colorMax[1],colorMax[2],colorMax[3],26)
+
+				local cardStatus = Lev:GetCardStatus()
+				local cardText = TXT.SPStats.Unlocked
+				if cardStatus == 0 then
+					cardText = TXT.SPStats.Failed
+				end
+				
+				if Game.Difficulty == 0 or Lev._Name == "C6L0_PCFHQ" then
+					cardText = TXT.SPStats.NA
+				end
+
+				local statLen = HUD.GetTextWidth(TXT.SPStats.Status..": "..cardText)
+				HUD.PrintXY(w/2-statLen/2,h/2+fh*8-10*w/AspectRatio,TXT.SPStats.Status..": ","timesbd",colorTxt[1],colorTxt[2],colorTxt[3],26)
+				HUD.PrintXY(w/2+statLen/2-HUD.GetTextWidth(cardText),h/2+fh*8-10*w/AspectRatio,cardText,"timesbd",colorMin[1],colorMin[2],colorMin[3],26)
+			end
+
+			HUD.PrintXY((w-pressWidth)/2+1,h-29,TXT.SPStats.PressFire,"timesbd",15,15,15,22)
+			HUD.PrintXY((w-pressWidth)/2,h-30,TXT.SPStats.PressFire,"timesbd",225,65,68,22)
+		elseif self.mode == 1 then
+--			HUD.DrawQuad(self.bigCard,256*w/1024,128*h/AspectRatio,512*w/1024*0.75,512*h/AspectRatio*0.75)
+			if self.bigCard then
+				HUD.DrawQuad(self.bigCard,128*w/1024,110*h/AspectRatio,512*w/1024*0.75,512*h/AspectRatio*0.75)
+			end
+			HUD.SetFont("timesbd",28)
+			local posx = 490
+			local lemx = 128
+			local lemy = 128
+			HUD.PrintXY((posx*w/1024+212*w/1024-HUD.GetTextWidth(Languages.Texts[455])/2)-lemx,(200*h/AspectRatio)-lemy,Languages.Texts[455],"timesbd",230,161,97,28)
+			HUD.PrintXY((posx*w/1024+212*w/1024-HUD.GetTextWidth(Languages.Texts[456])/2)-lemx,(240*h/AspectRatio)-lemy,Languages.Texts[456],"timesbd",230,161,97,28)
+			HUD.PrintXY((posx*w/1024+212*w/1024-HUD.GetTextWidth(Languages.Texts[457])/2)-lemx,(280*h/AspectRatio)-lemy,Languages.Texts[457],"timesbd",230,161,97,28)
+			HUD.DrawQuadRGBA(nil,(520*w/1024)-lemx+25,(340*h/AspectRatio)-lemy,(360*w/1024)-50,1,230,161,97,255)
+			HUD.SetFont("timesbd",36)
+			local name,desc,cost = Lev:GetCardName()
+			HUD.PrintXY((posx*w/1024+212*w/1024-HUD.GetTextWidth(name)/2)-lemx,(370*h/AspectRatio)-lemy,name,"timesbd",235,25,28,36)
+			HUD.SetFont("timesbd",22)
+			
+			local d1 = string.find(desc,"\\n")
+			if d1 == nil then
+				HUD.PrintXY((posx*w/1024+212*w/1024-HUD.GetTextWidth(desc)/2)-lemx,(430*h/AspectRatio)-lemy,desc,"timesbd",230,161,97,22)
+				HUD.PrintXY((posx*w/1024+212*w/1024-HUD.GetTextWidth(TXT.Board.Cost..": 0000")/2)-lemx,(500*h/AspectRatio)-lemy,TXT.Board.Cost..": ","timesbd",230,161,97,22)
+				HUD.DrawQuadRGBA(nil,(520*w/1024)-lemx+25,(480*h/AspectRatio)-lemy,(360*w/1024)-50,1,230,161,97,255)
+				HUD.PrintXY((posx*w/1024+212*w/1024-HUD.GetTextWidth(string.format("%d",cost))+HUD.GetTextWidth(TXT.Board.Cost..": 0000")/2)-lemx,(500*h/AspectRatio)-lemy,string.format("%d",cost),"timesbd",235,25,28,22)
+			else
+				local p1 = string.sub(desc,0,d1-1)
+				local p2 = string.sub(desc,d1+2)
+				HUD.PrintXY((posx*w/1024+212*w/1024-HUD.GetTextWidth(p1)/2)-lemx,(430*h/AspectRatio)-lemy,p1,"timesbd",230,161,97,22)
+				HUD.PrintXY((posx*w/1024+212*w/1024-HUD.GetTextWidth(p2)/2)-lemx,(470*h/AspectRatio)-lemy,p2,"timesbd",230,161,97,22)
+				HUD.PrintXY((posx*w/1024+212*w/1024-HUD.GetTextWidth(TXT.Board.Cost..": 0000")/2)-lemx,(540*h/AspectRatio)-lemy,TXT.Board.Cost..": ","timesbd",230,161,97,22)
+				HUD.PrintXY((posx*w/1024+212*w/1024-HUD.GetTextWidth(string.format("%d",cost))+HUD.GetTextWidth(TXT.Board.Cost..": 0000")/2)-lemx,(540*h/AspectRatio)-lemy,string.format("%d",cost),"timesbd",235,25,28,22)
+				HUD.DrawQuadRGBA(nil,(520*w/1024)-lemx+25,(510*h/AspectRatio)-lemy,(360*w/1024)-50,1,230,161,97,255)
+			end
+
+			HUD.PrintXY((w-pressWidth)/2+1,h-29,TXT.SPStats.PressFire,"timesbd",15,15,15,22)
+			HUD.PrintXY((w-pressWidth)/2,h-30,TXT.SPStats.PressFire,"timesbd",225,65,68,22)
+		elseif self.mode == 2 then
+			HUD.PrintXY(-1,h/2,Languages.Texts[577],"timesbd",230,161,97,26)
+			HUD.PrintXY((w-pressWidth)/2+1,h-29,TXT.SPStats.PressFire,"timesbd",15,15,15,22)
+			HUD.PrintXY((w-pressWidth)/2,h-30,TXT.SPStats.PressFire,"timesbd",225,65,68,22)
+		elseif self.mode == 3 then
+			HUD.PrintXY(-1,h/2,Languages.Texts[578],"timesbd",230,161,97,26)
+			HUD.PrintXY((w-pressWidth)/2+1,h-29,TXT.SPStats.PressFire,"timesbd",15,15,15,22)
+			HUD.PrintXY((w-pressWidth)/2,h-30,TXT.SPStats.PressFire,"timesbd",225,65,68,22)
+		end
+	end
+end
+--============================================================================

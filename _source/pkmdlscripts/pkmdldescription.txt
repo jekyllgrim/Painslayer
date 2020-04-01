@@ -1,0 +1,88 @@
+This file explains in a very informal way (c pseudocode) how the painkiller model
+file format works. Lots of data I still haven't figured out, and data listed here
+might have more functionality than I am aware of.
+
+struct string
+{
+	int length
+	char carray[length]
+}
+
+note: both values include terminating zero byte in models but not in animations
+
+struct model
+{
+	int identifier = 3
+	string filename
+	string pathname
+	string ameshtext = "AnimatedMesh"
+	int ????[4] = 1,0,2,1
+	int restoffilesize = the actual filesize minus restoffilestart
+	int restoffilestart = &restoffilestart + 4
+	string pathname2
+	short ???? = 1 (number of skeletons perhaps?)
+	struct skeleton
+	{
+		int numbones
+		struct bone 
+		{
+			string bonename
+			float localmatrix[16]
+			unsigned char numchildren
+		} bones[numbones]
+	} skeleton
+	int numpolysurfaces
+	struct polysurface
+	{
+		string surfacename
+		int ????[3] = 0,0,0
+		int numtextures
+		struct texturedef
+		{
+			string texturefilename[numtextures]
+			int firstvertexindex = prev firstvertexindex + 3 * prev numtriangles
+			int numtriangles
+		} textures[numtextures]
+		int numvertindices = 3 * the sum of all numtriangles
+		short triangles[3][numtriangles]
+		int ???? = 0
+		int numvertices
+		struct vertex
+		{
+			float position[3]
+			float normal[3]
+			float uvcoordinates[2]
+		} vertices[numvertices]
+		int ????[2] = 0,0
+		int numvertices2 = numvertices
+		struct skininfo
+		{
+			int numbonesaffectedby
+			struct
+			{
+				unsigned short boneindex
+				float weight
+			} boneinfo [numbonesaffectedby]
+		} skininfos[numvertices]
+	} polysurfaces[numpolysurfaces]
+}
+
+struct animation
+{
+	char skel[4] = "skel"
+	float animlength
+	int numboneanims
+	struct boneanim
+	{
+		string bonename
+		int numframes
+		struct frame
+		{
+			float timestamp
+			float matrix[16]
+		} frames [numframes]
+	} boneanims [numboneanims]
+}
+
+An = behind a value means all of the PKMDL files and ANI files I checked have 
+that value, so that's a good way to check whether it's a correctly working file.

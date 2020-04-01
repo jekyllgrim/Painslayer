@@ -1,0 +1,51 @@
+Model PK_Painkiller {
+	path "Models/Painkiller"
+	Model 0 "Painkiller.obj"
+	Skin 0 "pkilskin.tga"
+	Scale 2 2 2
+	offset 0 4 24
+	ROTATING
+	rotation-speed 1.5
+	
+	Frame MODL A 0 0
+	}
+	
+Model PK_Stake {
+	path "Models/Stake"
+	Model 0 "pkstake.obj"
+	Skin 0 "pkstake.png"
+	Scale 1 1 1
+	USEACTORPITCH
+	
+	Frame MODL A 0 0
+	}
+
+Model PK_StakeStuck {
+	path "Models/Stake"
+	Model 0 "pkstake.obj"
+	Skin 0 "pkstake.png"
+	Scale 1 1 1
+	USEACTORPITCH
+	
+	Frame MODL A 0 0
+	}
+
+Model PK_Tracer {
+	Path "models"
+	Model 0 "tracer.md3"
+	Skin 0 "spark.png"
+	Scale 1.0 1.0 1.0
+	PITCHFROMMOMENTUM
+	
+	FrameIndex MODL A 0 0
+	}
+
+Model PK_RicochetTracer {
+	Path "models"
+	Model 0 "tracer.md3"
+	Skin 0 "spark.png"
+	Scale 1.0 1.0 1.0
+	PITCHFROMMOMENTUM
+	
+	FrameIndex MODL A 0 0
+	}
