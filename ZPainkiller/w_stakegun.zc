@@ -159,7 +159,7 @@ Class PK_Stake : PK_Projectile {
 				else if (target) {
 					let stakegun = PK_Stakegun(target.FindInventory("PK_Stakegun"));
 					if (stakegun && stakegun.grenades.size() > 0) {
-						for (int i = stakegun.grenades.size(); i > 0; i--) {
+						for (int i = stakegun.grenades.size()-1; i >= 0; i--) {
 							if (stakegun.grenades[i] && Distance3D(stakegun.grenades[i]) < 24) {
 								let a = Spawn("Rocket",stakegun.grenades[i].pos);
 								if (a) {
