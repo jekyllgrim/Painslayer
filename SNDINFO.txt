@@ -33,7 +33,7 @@ weapons/shell3			     SHELLS3
 
 //== Stakegun
 
-weapons/stakegun/shot		STAKSHOT
+weapons/stakegun/fire		STAKSHOT
 weapons/stakegun/grenade	STAKGREN
 weapons/stakegun/combo		STAKCOMB
 
@@ -43,17 +43,20 @@ weapons/grenade/explosion	GRENEXPL
 
 //== Rocket-minigun
 
-$random weapons/rmini/shot { weapons/rmini/shot1 weapons/rmini/shot2 weapons/rmini/shot3 }
-weapons/rmini/shot1	MNSHOT1
-weapons/rmini/shot2	MNSHOT2
-weapons/rmini/shot3	MNSHOT3
-weapons/rmini/shot4	MNSHOT4
+$random weapons/chaingun/fire { mgunfire1 mgunfire2 mgunfire3 }
+mgunfire1	MGUN1
+mgunfire2	MGUN2
+mgunfire3	MGUN3
+mgunfire4	MGUN4
 
-weapons/rmini/spin	MNGRSPIN
-weapons/rmini/stop	MNGRSTOP
-weapons/rmini/rocket	MNGRROCK
+weapons/chaingun/spin		MGUNSPIN
+weapons/chaingun/loop		MGUNLOOP
+weapons/chaingun/stop		MGUNSTOP
 
-weapons/rocket/explosion	ROCKEXPL
+weapons/chaingun/rocketfire	MROCKETF
+weapons/chaingun/rocketboom	MROCKEX
+$limit weapons/chaingun/rocketboom	0
+weapons/chaingun/rocketfly	ROCKLOOP
 
 $random weapons/ricochet { weapons/ricochet1 weapons/ricochet2 weapons/ricochet3 weapons/ricochet4 }
 weapons/ricochet1	RICO1
@@ -73,19 +76,19 @@ weapons/shuricane/explosion	SHUREXPL
 
 ///PICKUPS\\\
 
-pickups/ammo/shells		SHELPKUP
+pickups/ammo/shells			SHELPKUP
 pickups/ammo/freezerammo	FREZPKUP
-pickups/ammo/stakes		STKSPKUP
-pickups/ammo/bombs		BOMBPKUP
+pickups/ammo/stakes			STKSPKUP
+pickups/ammo/bombs			BOMBPKUP
 pickups/ammo/bullets		BULLPKUP
 pickups/ammo/electrons		ELECPKUP
 pickups/ammo/shuricanes		SHURPKUP
 
 pickups/ammopack	AMMOPACK
 
-pickups/weapons/shotgun		STGNPKUP
-pickups/weapons/stakegun	STAKPKUP
-pickups/weapons/rmini		MNGRPKUP
+pickups/weapons/shotgun		STGNTAKE
+pickups/weapons/stakegun	STAKTAKE
+pickups/weapons/chaingun	MGUNTAKE
 pickups/weapons/eldriver	ELDRPKUP
 
 pickups/powerups/wmodifier/take	WMODTAKE
@@ -115,8 +118,8 @@ special/demonmorph/loop		DEMNLOOP
 special/demonmorph/stop		DEMNSTOP
 
 $random weapons/demonmorph/attack { demonattack1 demonattack2 }
-demonattack1	DMNSHOT1
-demonattack2	DMNSHOT2
+demonattack1	DMGUN1
+demonattack2	DMGUN2
 
 
 gibs/blooddrop		bloddrop
