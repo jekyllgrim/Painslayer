@@ -32,7 +32,7 @@ Class PK_Stakegun : PKWeapon {
 			loop;
 		Fire:
 			TNT1 A 0 {
-				A_PlaySound("weapons/stakegun/shot");
+				A_PlaySound("weapons/stakegun/fire");
 				A_WeaponOffset(7,5,WOF_ADD);
 				A_FireProjectile("PK_Stake",spawnheight:5,flags:FPF_NOAUTOAIM,pitch:-2.5);
 			}
