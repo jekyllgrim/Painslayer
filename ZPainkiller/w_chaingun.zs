@@ -60,7 +60,7 @@ Class PK_Chaingun : PKWeapon {
 				return ResolveState("AltFireEnd");
 			invoker.holddur++;
 			A_StartSound("weapons/chaingun/fire",flags:CHANF_OVERLAP);
-			A_FireBullets(2.5,2.5,-1,(8));			
+			A_FireBullets(2.5,2.5,-1,(5));			
 			return ResolveState(null);
 		}
 		TNT1 A 0 A_ReFire();
