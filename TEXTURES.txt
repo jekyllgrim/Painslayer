@@ -21,7 +21,6 @@ Sprite "PKILC0", 283, 189
 	Offset -54, -13
 	Patch "PKILC", 0, 0
 }
-
 Sprite "PKILD0", 283, 189
 {
 	YScale 1.200
@@ -376,49 +375,49 @@ Sprite "MIGNA0", 213, 95
 {
 	YScale 1.200
 	Offset -166, -107
-	Patch "MIGN01", 0, 0
+	Patch "MIGN00", 0, 0
 }
 
 Sprite "MIGNB0", 213, 95
 {
 	YScale 1.200
 	Offset -166, -107
-	Patch "MIGN02", 0, 0
+	Patch "MIGN01", 0, 0
 }
 
 Sprite "MIGNC0", 213, 95
 {
 	YScale 1.200
 	Offset -166, -107
-	Patch "MIGN03", 0, 0
+	Patch "MIGN02", 0, 0
 }
 
 Sprite "MIGND0", 213, 95
 {
 	YScale 1.200
 	Offset -166, -107
-	Patch "MIGN04", 0, 0
+	Patch "MIGN03", 0, 0
 }
 
 Sprite "MIGNE0", 213, 95
 {
 	YScale 1.200
 	Offset -166, -107
-	Patch "MIGN05", 0, 0
+	Patch "MIGN04", 0, 0
 }
 
 Sprite "MIGNF0", 213, 95
 {
 	YScale 1.200
 	Offset -166, -107
-	Patch "MIGN06", 0, 0
+	Patch "MIGN05", 0, 0
 }
 
 Sprite "MIGNG0", 213, 95
 {
 	YScale 1.200
 	Offset -166, -107
-	Patch "MIGN07", 0, 0
+	Patch "MIGN06", 0, 0
 }
 
 // End of texture definitions

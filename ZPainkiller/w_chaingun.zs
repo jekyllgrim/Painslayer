@@ -14,6 +14,13 @@ Class PK_Chaingun : PKWeapon {
 		Tag "Rocket Launcher/Chaingun";
 	}
 	States {
+	Deselect:
+		TNT1 A 0 {
+			invoker.holddur = 0;
+			invoker.atkzoom = 0;
+			A_ZoomFactor(1,ZOOM_NOSCALETURNING);
+		}
+		goto super::deselect;
 	Ready:
 		MIGN A 1 {
 			invoker.holddur = 0;
@@ -49,11 +56,15 @@ Class PK_Chaingun : PKWeapon {
 		goto AltHold;
 	AltHold:
 		TNT1 AAA 2 {
+			if (invoker.ammo2.amount < 1)
+				return ResolveState("AltFireEnd");
 			invoker.holddur++;
 			A_StartSound("weapons/chaingun/fire",flags:CHANF_OVERLAP);
-			A_FireBullets(2.5,2.5,-1,(8));
+			A_FireBullets(2.5,2.5,-1,(8));			
+			return ResolveState(null);
 		}
 		TNT1 A 0 A_ReFire();
+	AltFireEnd:
 		TNT1 A 0 {
 			invoker.holddur = 0;
 			A_ClearOverlays(5,5);
