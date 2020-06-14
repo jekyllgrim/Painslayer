@@ -4,8 +4,8 @@ Class PK_Chaingun : PKWeapon {
 	Default {
 		weapon.slotnumber 4;
 		weapon.ammotype1	"PK_Bombs";
-		weapon.ammogive1	0;
-		weapon.ammouse1	5;
+		weapon.ammouse1	1;
+		weapon.ammogive1	5;
 		weapon.ammotype2	"PK_Bullets";
 		weapon.ammouse2	1;
 		weapon.ammogive2	50;
