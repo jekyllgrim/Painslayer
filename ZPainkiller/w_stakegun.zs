@@ -8,6 +8,7 @@ Class PK_Stakegun : PKWeapon {
 		weapon.ammotype2	"PK_Bombs";
 		weapon.ammogive2	0;
 		weapon.ammouse2		1;
+		scale 0.23;
 		inventory.pickupmessage "Picked up Stakegun";
 		inventory.pickupsound "pickups/weapons/stakegun";
 		Tag "Stakegun/Grenade Launcher";
@@ -18,7 +19,7 @@ Class PK_Stakegun : PKWeapon {
 	}*/
 	states {
 		Spawn:
-			PSGN ABCDEFGH 4;
+			PSGZ ABCDEFGH 4;
 			loop;
 		Ready:
 			PSGN A 1 {

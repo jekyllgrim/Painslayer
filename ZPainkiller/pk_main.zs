@@ -16,6 +16,13 @@ Class PKWeapon : Weapon abstract {
 		if (owner.player.readyweapon)
 			owner.player.WeaponState |= WF_WEAPONBOBBING;
 	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		let icon = Spawn("PK_WeaponIcon",pos + (0,0,18));
+		if (icon)  {
+			icon.master = self;
+		}
+	}		
 	states {
 		Ready:
 			TNT1 A 1;
@@ -39,7 +46,8 @@ Class PK_WeaponIcon : Actor {
 	state mspawn;
 	Default {
 		+BRIGHT
-		scale 0.1;
+		xscale 0.14;
+		yscale 0.1162;
 		+NOINTERACTION
 		+FLOATBOB
 	}
@@ -50,20 +58,23 @@ Class PK_WeaponIcon : Actor {
 			return;
 		}
 		mspawn = master.FindState("Spawn");
-		SetOrigin((master.pos.x,master.pos.y,master.pos.z+18),false);
 		FloatBobStrength = master.FloatBobStrength;
 		FloatBobPhase = master.FloatBobPhase;
+		if (master.GetClassName() == "PK_Shotgun")
+			frame = 0;
+		else if (master.GetClassName() == "PK_Stakegun")
+			frame = 1;
 	}
 	override void Tick () {
 		super.Tick();
-		if (!master || (master && !master.InStateSequence(master.curstate,mspawn))) {
+		if (!master || !master.InStateSequence(master.curstate,mspawn)) {
 			destroy();
 			return;
 		}
 	}
 	states {
 		Spawn:
-			PSHT X -1;
+			PWIC # -1;
 			stop;
 	}
 }

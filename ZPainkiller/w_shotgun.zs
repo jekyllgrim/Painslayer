@@ -8,7 +8,7 @@ Class PK_Shotgun : PKWeapon {
 		weapon.ammotype2 "PK_FreezerAmmo";
 		weapon.ammogive2 0;
 		weapon.ammouse2 1;
-		scale 0.2;
+		scale 0.23;
 		inventory.pickupmessage "Picked up Shotgun/Freezer";
 		inventory.pickupsound "pickups/weapons/shotgun";
 		Tag "Shotgun/Freezer";
@@ -21,12 +21,6 @@ Class PK_Shotgun : PKWeapon {
 			freload--;
 		//Console.Printf("%d",freload);
 	}
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		let icon = Spawn("PK_WeaponIcon",pos);
-		if (icon) 
-			icon.master = self;
-	}		
 	states {
 	Spawn:
 		PSHZ ABCDEFGH 4;
