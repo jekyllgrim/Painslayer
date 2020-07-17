@@ -33,7 +33,7 @@ Class PK_Stakegun : PKWeapon {
 			loop;
 		Fire:
 			TNT1 A 0 {
-				A_PlaySound("weapons/stakegun/fire");
+				A_StartSound("weapons/stakegun/fire");
 				A_WeaponOffset(7,5,WOF_ADD);
 				A_FireProjectile("PK_Stake",spawnheight:5,flags:FPF_NOAUTOAIM,pitch:-2.5);
 			}
@@ -52,7 +52,7 @@ Class PK_Stakegun : PKWeapon {
 			goto ready;
 		AltFire:
 			TNT1 A 0 {
-				A_PlaySound("weapons/stakegun/grenade");
+				A_StartSound("weapons/stakegun/grenade");
 				A_WeaponOffset(6,2,WOF_ADD);
 				let a = A_FireProjectile("PK_Grenade",spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-32);
 				if (a) invoker.grenades.push(a);
@@ -370,7 +370,7 @@ Class PK_Grenade : PK_Projectile {
 				A_SetScale(rs,rs);
 				A_SetRoll(random(0,359));
 				A_Quake(1,8,0,256,"");
-				A_PlaySound("weapons/grenade/explosion",CHAN_5);
+				A_StartSound("weapons/grenade/explosion",CHAN_5);
 				//for (int i = 8; i > 0; i--) 
 					//A_SpawnItemEx("SmokingPiece",0,0,0, random(3,6),0,random(5,8),random(0,360),0,48);
 				A_Explode();

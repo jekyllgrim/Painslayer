@@ -1,14 +1,3 @@
-Model PK_Painkiller {
-	path "Models/Painkiller"
-	Model 0 "Painkiller.obj"
-	Skin 0 "pkilskin.tga"
-	Scale 2 2 2
-	offset 0 4 24
-	ROTATING
-	rotation-speed 1.5
-	
-	Frame MODL A 0 0
-	}
 	
 Model PK_Stake {
 	path "Models/Stake"
@@ -18,7 +7,7 @@ Model PK_Stake {
 	USEACTORPITCH
 	
 	Frame MODL A 0 0
-	}
+}
 
 Model PK_StakeStuck {
 	path "Models/Stake"
@@ -28,7 +17,7 @@ Model PK_StakeStuck {
 	USEACTORPITCH
 	
 	Frame MODL A 0 0
-	}
+}
 
 Model PK_Tracer {
 	Path "models"
@@ -38,7 +27,7 @@ Model PK_Tracer {
 	PITCHFROMMOMENTUM
 	
 	FrameIndex MODL A 0 0
-	}
+}
 
 Model PK_RicochetTracer {
 	Path "models"
@@ -48,4 +37,14 @@ Model PK_RicochetTracer {
 	PITCHFROMMOMENTUM
 	
 	FrameIndex MODL A 0 0
-	}
+}
+
+model "PK_TrackingBeam"
+{
+	model 0 "models/CrossSectionPrimitive.obj"
+	skin 0 "models/shaftB.png"
+	scale 1.0 1.0 1.2 //the 1.2 z-scale is for pixel ratio adjustment
+	USEACTORPITCH
+	DONTCULLBACKFACES //the model has only two planes
+	FrameIndex MODL A 0 0
+}

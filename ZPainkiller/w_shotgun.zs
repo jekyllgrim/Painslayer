@@ -37,7 +37,7 @@ Class PK_Shotgun : PKWeapon {
 		PSHT A 2 {
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			A_Quake(1,7,0,32,"");
-			A_PlaySound("weapons/shotgun/fire",CHAN_VOICE);
+			A_StartSound("weapons/shotgun/fire",CHAN_VOICE);
 			A_firebullets(5,5,14,3);
 			A_ZoomFactor(0.99,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			//A_Eject				
@@ -56,7 +56,7 @@ Class PK_Shotgun : PKWeapon {
 	AltFire:
 		PSHT A 5 {
 			//A_FireProjectile("FreezerProjectile");
-			A_PlaySound("weapons/shotgun/freezer",CHAN_7);
+			A_StartSound("weapons/shotgun/freezer",CHAN_7);
 			A_FireProjectile("PK_FreezerProjectile",0,true,-7,spawnheight:6);
 			A_FireProjectile("PK_FreezerProjectile",0,false,7,spawnheight:6);
 			invoker.freload = 55;
@@ -163,11 +163,11 @@ Class PK_FreezerProjectile : PK_Projectile {
 	}
 }
 	
-Class PK_FreezerTrail : PK_Flarebase {
+Class PK_FreezerTrail : PK_BaseFlare {
 	Default {
 		scale 0.08;
 		alpha 0.65;
-		PK_Flarebase.fcolor 'blue';
+		PK_BaseFlare.fcolor 'blue';
 	}
 	states {
 	Spawn:
