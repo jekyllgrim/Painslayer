@@ -54,15 +54,25 @@ Class PK_Stakegun : PKWeapon {
 			TNT1 A 0 {
 				A_StartSound("weapons/stakegun/grenade");
 				A_WeaponOffset(6,2,WOF_ADD);
-				let a = A_FireProjectile("PK_Grenade",spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-32);
-				if (a) invoker.grenades.push(a);
+				let a = A_FireProjectile("PK_Grenade",spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
+				if (a) 
+					invoker.grenades.push(a);
 			}
 			PSGN AAALLL 1 A_WeaponOffset(2,1,WOF_ADD);
 			PSGN MMM 1 A_WeaponOffset(2,2,WOF_ADD);
+			TNT1 A 0 {
+				if (CountInv("PK_Bombs") > 0)
+					A_StartSound("weapons/grenade/load",CHAN_AUTO);
+			}
 			PSGN MMMMLLLL 1 A_WeaponOffset(-2.5,-1.16,WOF_ADD);
-			PSGN AAAA 1 A_WeaponOffset(-1,-1.16,WOF_ADD);
-			TNT1 A 0 A_WeaponOffset(0,32,WOF_INTERPOLATE);
-			PSGN A 5 A_WeaponReady(WRF_NOFIRE|WRF_NOSWITCH);
+			PSGN AAAA 1 {
+				A_WeaponOffset(-1,-1.16,WOF_ADD);
+				A_WeaponReady(WRF_NOSECONDARY|WRF_NOSWITCH);
+			}
+			PSGN A 5 {
+				A_WeaponOffset(0,32,WOF_INTERPOLATE);
+				A_WeaponReady(WRF_NOSECONDARY|WRF_NOSWITCH);
+			}
 			goto ready;
 	}
 }
@@ -99,6 +109,7 @@ Class PK_Stake : PK_Projectile {
 	override int SpecialMissileHit (Actor victim) {
 		if (victim && (victim.bisMonster || victim.player) && victim != target && !hitvictim) { //We only do the following block if the actor hit by the stake exists, isn't the shooter, and the stake has never hit anyone yet
 			victim.DamageMobj (self, target, 100, 'normal');
+			A_StartSound("weapons/stakegun/hit",volume:0.7,attenuation:3);
 			hitvictim = victim; //store the victim hit; when this is non-null, stake won't deal damage to anyone else
 			if (!victim.bBOSS && victim.health <= 0 && victim.mass <= 400) { //we do the "pin to the wall" effect only if the victim is dead, not a boss and not huge (mass <= 400)
 				pinvictim = PK_PinVictim(Spawn("PK_PinVictim",victim.pos)); //spawn fake corpse and give it appearance identical to the monster
@@ -283,16 +294,17 @@ Class PK_PinToWall : Inventory {
 		+INVENTORY.UNCLEARABLE
 		inventory.maxamount 1;
 	}
-	override void AttachToOwner(actor user) {
-		super.AttachToOwner(user);
-		if (!user)
+	override void AttachToOwner(actor other) {
+		super.AttachToOwner(other);
+		if (!other)
 			return;
-		PrevRenderstyle = user.GetRenderstyle();	//save existing renderstyle
-		user.A_SetRenderstyle(alpha,STYLE_None);	//make it invisible
+		PrevRenderstyle = other.GetRenderstyle();	//save existing renderstyle
+		other.A_SetRenderstyle(alpha,STYLE_None);	//make it invisible
+		other.bNOGRAVITY = true;
 	}
 	override void DoEffect() {
 		super.DoEffect();
-		if (owner && owner.health > 0) {		//destroy the item if the monster is resurrected
+		if (!owner || !owner.bKILLED) {
 			DepleteOrDestroy();
 			return;
 		}
@@ -301,6 +313,7 @@ Class PK_PinToWall : Inventory {
 		if (!owner)
 			return;
 		owner.A_SetRenderstyle(alpha,PrevRenderstyle);		//when the item is removed, we reset the monster's renderstyle
+		owner.bNOGRAVITY = owner.default.bNOGRAVITY;
 		super.DetachFromOwner();
 	}
 }
@@ -315,10 +328,11 @@ Class PK_PinVictim : Actor {		//the fake corpse (receives its visuals from the s
 	}
 	override void Tick(){
 		super.Tick();
-		if (!target || (target && target.health > 0)) {	//if the target is resurrected, remove fake corpse
+		if (!target || !target.bKILLED) {	//if the target is non dead or doesn't exist, remove fake corpse
 			destroy();
 			return;
 		}
+		target.SetOrigin(pos,true);
 	}
 	states {
 		Spawn:
@@ -335,18 +349,20 @@ Class PK_Grenade : PK_Projectile {
 		PK_Projectile.trailalpha 0.3;
 		PK_Projectile.TranslucentTrail true;
 		-NOGRAVITY
-		bouncetype "Doom";
+		bouncetype 'hexen';
 		bouncefactor 0.35;
-		+BOUNCEAUTOOFFFLOORONLY
-		gravity 0.3;
+		gravity 0.45;
 		bouncesound "weapons/grenade/bounce";
-		height 4;
-		radius 4;
-		speed 12;
-		scale 0.5;
+		height 6;
+		radius 8;
+		speed 13;
+		scale 0.6;
 	}
 	override void Tick() {
 		super.Tick();
+		if (pos.z <= floorz) {
+			vel *= 0.9999;
+		}
 		if (target && target.FindInventory("PK_Stakegun") && vel ~== (0,0,0)) {
 			let stakegun = PK_Stakegun(target.FindInventory("PK_Stakegun"));
 			stakegun.grenades.delete(stakegun.grenades.Find(self));
@@ -355,10 +371,14 @@ Class PK_Grenade : PK_Projectile {
 			
 	states {
 		Spawn:
-			BAL1 A 1;
+			BAL1 A 1 {
+				if (vel.length() < 3) {
+					bMISSILE = false;
+				}
+				if (GetAge() > 35*2)
+					SetStateLabel("XDeath");
+			}
 			loop;
-		Death:
-			BAL1 A 15;
 		XDeath:
 			TNT1 A 0 { 
 				bNOGRAVITY = true;
@@ -384,16 +404,17 @@ Class PK_Stakes : Ammo {
 	Default {
 		inventory.pickupmessage "You picked up a box of stakes.";
 		inventory.pickupsound "pickups/ammo/stakes";
-		inventory.icon "STKSA0";
 		inventory.amount 15;
 		inventory.maxamount 100;
 		ammo.backpackamount 12;
 		ammo.backpackmaxamount 666;
+		xscale 0.3;
+		yscale 0.25;
 	}
 	states	{
-		spawn:
-			STKS A -1;
-			stop;
+	spawn:
+		AMST A -1;
+		stop;
 	}
 }
 
@@ -401,15 +422,15 @@ Class PK_Bombs : Ammo {
 	Default {
 		inventory.pickupmessage "You picked up a box of bombs.";
 		inventory.pickupsound "pickups/ammo/bombs";
-		inventory.icon "BMBSA0";
 		inventory.amount 7;
 		inventory.maxamount 100;
 		ammo.backpackamount 12;
 		ammo.backpackmaxamount 666;
+		scale 0.4;
 	}
 	states	{
-		spawn:
-			BMBS A -1;
-			stop;
+	spawn:
+		AMBO A -1;
+		stop;
 	}
 }
