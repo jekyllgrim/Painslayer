@@ -282,10 +282,10 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 	}
 	//a chad tick override that skips Actor's super.tick!
 	override void Tick() {
-		if (alpha < 0){
+		/*if (alpha < 0){
 			destroy();
 			return;
-		}
+		}*/
 		if (isFrozen())
 			return;
 		//animation:
@@ -665,4 +665,61 @@ Class PK_Projectile : Actor abstract {
 		}
 	}
 }
-	
+		
+
+Class PK_EnemyDeathControl : Inventory {
+	KillerFlyTarget kft;
+	private int counter;
+	Default {
+		inventory.maxamount 1;
+	}
+	override void AttachToOwner(actor other) {
+		super.AttachToOwner(other);
+		if (!owner)
+			return;
+		kft = KillerFlyTarget(Spawn("KillerFlyTarget",owner.pos));
+		if (kft) {
+			kft.target = owner;
+			kft.A_SetSize(owner.radius,owner.default.height*0.5);
+			kft.vel = owner.vel;
+		}
+	}	
+	override void Tick () {}
+	override void DoEffect() {
+		super.DoEffect();
+		if (!owner) {
+			if (kft)
+				kft.destroy();
+			destroy();
+			return;
+		}
+		if (GetAge() == 1 && kft)
+			kft.vel = owner.vel;	
+		if  (owner.vel ~== (0,0,0)) {
+			counter++;
+		}
+		else
+			counter = 0;
+		if (counter >= 42 || GetAge() > 35*5) {
+			if (kft)
+				kft.destroy();
+			owner.A_StartSound("world/bodypoof",CHAN_AUTO);
+			int rad = owner.radius;
+			for (int i = 64; i > 0; i--) {
+				owner.A_SpawnParticle("green",SPF_FULLBRIGHT|SPF_RELATIVE, 
+					lifetime:random(20,35),size:7,
+					angle: random(0,359),
+					xoff: frandom[part](-rad,rad), yoff:frandom[part](-rad,rad),zoff:frandom[part](owner.pos.z,owner.height),
+					velx:0.5,velz:frandom[part](0.2,1),
+					//accelx:0.1,accelz:-0.05,
+					startalphaf:0.9,sizestep:-0.35
+				);
+			}
+			owner.destroy();
+			destroy();
+			return;
+		}
+	}
+}
+
+//Shader.SetEnabled( players[consoleplayer], "DemonMode", true);
