@@ -87,15 +87,16 @@ Class PK_Shells : Ammo {
 	Default {
 		inventory.pickupmessage "You picked up shotgun shells.";
 		inventory.pickupsound "pickups/ammo/shells";
-		inventory.icon "SHELA0";
 		inventory.amount 18;
 		inventory.maxamount 100;
 		ammo.backpackamount 15;
 		ammo.backpackmaxamount 666;
+		xscale 0.3;
+		yscale 0.25;
 	}
 	states {
 	spawn:
-		SHEL A -1;
+		AMSH A -1;
 		stop;
 	}
 }
@@ -104,15 +105,16 @@ Class PK_FreezerAmmo : Ammo {
 	Default {
 		inventory.pickupmessage "You picked up freezer ammo.";
 		inventory.pickupsound "pickups/ammo/freezerammo";
-		inventory.icon "FRZRA0";
 		inventory.amount 15;
 		inventory.maxamount 100;
 		ammo.backpackamount 6;
 		ammo.backpackmaxamount 666;
+		xscale 0.3;
+		yscale 0.25;
 	}
 	states	{
 	spawn:
-		FRZR A -1;
+		AMFR A -1;
 		stop;
 	}
 }
