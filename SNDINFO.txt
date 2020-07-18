@@ -1,3 +1,5 @@
+world/bodypoof	BODYPOOF
+
 
 ///WEAPONS\\\
 
@@ -12,6 +14,7 @@ weapons/painkiller/hitwall		PKILHITW
 weapons/painkiller/killer		PKILSHOT
 weapons/painkiller/hit			PKILHIT
 weapons/painkiller/killerback	PKILBACK
+weapons/painkiller/stuck		PKILSTUK
 weapons/painkiller/return		PKILRETR
 weapons/painkiller/laser		PKILLASR
 weapons/painkiller/laserhit		PKILLHIT
@@ -36,9 +39,13 @@ weapons/shell3			     SHELLS3
 weapons/stakegun/fire		STAKSHOT
 weapons/stakegun/grenade	STAKGREN
 weapons/stakegun/combo		STAKCOMB
+$random weapons/stakegun/hit	{ stakhit1 stakhit2 }
+stakhit1	stakhit1
+stakhit2	stakhit2
 
 weapons/grenade/bounce		GRENBOUN
 weapons/grenade/explosion	GRENEXPL
+weapons/grenade/load		GRENLOAD
 
 
 //== Rocket-minigun
@@ -110,8 +117,6 @@ pickups/armor/heavy	ARMHEAVY
 
 
 ///SPECIAL\\\
-
-special/soul/appear		SOULAPPR
 
 special/demonmorph/start	DEMNSTRT
 special/demonmorph/loop		DEMNLOOP
