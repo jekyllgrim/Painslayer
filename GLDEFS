@@ -1,0 +1,7 @@
+HardwareShader PostProcess Scene
+{
+	Name "DemonMode"
+	Shader "shaders/DemonMode.fp" 330
+	Uniform float saturation
+	//Enabled
+}
