@@ -35,7 +35,7 @@ Class PK_Chaingun : PKWeapon {
 			A_ZoomFactor(0.98,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 		}
 		TNT1 A 0 A_ZoomFactor(1,ZOOM_NOSCALETURNING);
-		MIGN EEEFFF 1 A_WeaponOffset(4,1,WOF_ADD);
+		MIGN EF 1 A_WeaponOffset(12,3,WOF_ADD);
 		MIGN GGG 1 A_WeaponOffset(2,3,WOF_ADD);
 		MIGN FFF 1 A_WeaponOffset(-3,0,WOF_ADD);
 		MIGN EEE 2 A_WeaponOffset(-3,-2,WOF_ADD);
