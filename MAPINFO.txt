@@ -1,0 +1,3 @@
+Gameinfo {
+	AddEventHandlers = "KillerTargetHandler"
+}
