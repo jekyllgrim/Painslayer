@@ -4,4 +4,9 @@ Class KillerTargetHandler : EventHandler {
 			return;
 		e.thing.GiveInventory("PK_EnemyDeathControl",1);
 	}
+	override void WorldThingspawned (worldevent e) {
+		if (!e.thing || !(e.thing is "PlayerPawn") || e.thing.FindInventory("PK_DemonMorphControl"))
+			return;
+		e.thing.GiveInventory("PK_DemonMorphControl",1);
+	}
 }

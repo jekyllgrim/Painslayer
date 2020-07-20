@@ -511,7 +511,9 @@ Class PK_BaseFlare : PK_SmallDebris {
 	double falpha;		//alpha; used to when scale needs to be easily set externally from the spawner
 	property fcolor : fcolor;
 	double fade;
+	property fadefactor : fade;
 	double shrink;
+	property shrinkfactor : shrink;
 	Default {
 		+BRIGHT
 		+NOINTERACTION
@@ -535,6 +537,7 @@ Class PK_BaseFlare : PK_SmallDebris {
 			case 'blue'		: frame = 2; break;
 			case 'yellow'	: frame = 3; break;
 			case 'white'	: frame = 4; break;
+			case 'gold'	: 	frame = 5; break;
 			case ''			: destroy(); return;
 		}
 		if (fscale != 0)
@@ -547,8 +550,9 @@ Class PK_BaseFlare : PK_SmallDebris {
 		FLAR # 1 {
 			if (fade != 0)
 				A_FadeOut(fade);
-			if (shrink != 0)
-				scale*=shrink;
+			if (shrink != 0) {
+				scale *= shrink;
+			}
 		}
 		loop;
 	}
@@ -670,6 +674,8 @@ Class PK_Projectile : Actor abstract {
 Class PK_EnemyDeathControl : Inventory {
 	KillerFlyTarget kft;
 	private int counter;
+	private int restlife;
+	private int maxlife;
 	Default {
 		inventory.maxamount 1;
 	}
@@ -677,6 +683,8 @@ Class PK_EnemyDeathControl : Inventory {
 		super.AttachToOwner(other);
 		if (!owner)
 			return;
+		restlife = random[cont](42,60);
+		maxlife = int(35*frandom[cont](5,8));
 		kft = KillerFlyTarget(Spawn("KillerFlyTarget",owner.pos));
 		if (kft) {
 			kft.target = owner;
@@ -700,13 +708,13 @@ Class PK_EnemyDeathControl : Inventory {
 		}
 		else
 			counter = 0;
-		if (counter >= 42 || GetAge() > 35*5) {
+		if (counter >= restlife || GetAge() > maxlife) {
 			if (kft)
 				kft.destroy();
 			owner.A_StartSound("world/bodypoof",CHAN_AUTO);
 			int rad = owner.radius;
 			for (int i = 64; i > 0; i--) {
-				owner.A_SpawnParticle("gray",SPF_FULLBRIGHT|SPF_RELATIVE, 
+				owner.A_SpawnParticle("404040",SPF_FULLBRIGHT|SPF_RELATIVE, 
 					lifetime:random(20,35),size:10,
 					angle: random(0,359),
 					xoff: frandom[part](-rad,rad), yoff:frandom[part](-rad,rad),zoff:frandom[part](owner.pos.z,owner.height),
@@ -715,66 +723,15 @@ Class PK_EnemyDeathControl : Inventory {
 					startalphaf:0.9,sizestep:-0.4
 				);
 			}
-			Spawn("PK_Soul",owner.pos);
+			Class<Inventory> soul = (owner.default.health >= 500) ? "PK_RedSoul" : "PK_Soul";
+			Spawn(soul,owner.pos);
 			owner.destroy();
 			destroy();
 			return;
 		}
 	}
 }
-
-Class PK_Soul : Health {
-	sound takesound;
-	property takesound : takesound;
-	Default {
-		inventory.pickupmessage "";
-		inventory.amount 1;
-		inventory.maxamount 200;
-		inventory.pickupsound "";
-		renderstyle 'Add';
-		+NOGRAVITY;
-		alpha 0.9;
-		xscale 0.25;
-		yscale 0.2;
-		PK_soul.takesound "world/soulpickup";
-		+BRIGHT;
-	}
-	override bool TryPickup (in out Actor other) {
-		let try = super.TryPickup(other);
-		if (try) {
-			A_StartSound(takesound,CHAN_AUTO,CHANF_OVERLAP);
-			let cont = PK_DemonMorphControl(other.FindInventory("PK_DemonMorphControl"));
-			if (cont)
-				cont.pk_souls += 1;				
-		}
-		return try;
-	}
-	states {
-	Spawn:
-		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
-		DSOU ABCDEFGHIJKLMNOPQRSTU 2;
-		goto spawn+1;
-	}
-}
-
-Class PK_RedSoul : PK_Soul {
-	Default {
-		inventory.amount 10;
-		translation "0:255=%[0.00,0.00,0.00]:[2.00,0.00,0.00]";
-	}
-}
-
-Class PK_Megahealth : PK_Soul {
-	Default {
-		inventory.amount 100;
-		translation "0:255=%[0.00,0.00,0.00]:[2.00,1.49,0.42]";
-		xscale 0.29;
-		yscale 0.24;
-		+COUNTITEM
-		PK_Soul.takesound "world/goldensoul";
-	}
-}
-		
+	
 Class PK_DemonMorphControl : Inventory {
 	int pk_souls;
 	Default {
