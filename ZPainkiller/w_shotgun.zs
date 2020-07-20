@@ -43,11 +43,11 @@ Class PK_Shotgun : PKWeapon {
 			//A_Eject				
 		}
 		TNT1 A 0 A_ZoomFactor(1,ZOOM_NOSCALETURNING);
-		PSHT BCD 2 A_WeaponOffset(10,2,WOF_ADD);
-		PSHT DDDD 1 A_WeaponOffset(0.5,2.5,WOF_ADD);
-		PSHT DDDD 1 A_WeaponOffset(-0.5,2,WOF_ADD);
-		PSHT DDDCCC 1 A_WeaponOffset(-2.5,-3,WOF_ADD);
-		PSHT BBBAAA 1 A_WeaponOffset(-2.5,-1,WOF_ADD);
+		PSHT CDF 2 A_WeaponOffset(10,2,WOF_ADD);
+		PSHT HHHH 1 A_WeaponOffset(0.5,2.5,WOF_ADD);
+		PSHT HHHH 1 A_WeaponOffset(-0.5,2,WOF_ADD);
+		PSHT GGFFEE 1 A_WeaponOffset(-2.5,-3,WOF_ADD);
+		PSHT DDCCBB 1 A_WeaponOffset(-2.5,-1,WOF_ADD);
 		PSHT A 8 { //allows immediate primary refire but prevents using altfire immediately
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			A_WeaponReady(WRF_NOSECONDARY|WRF_NOBOB);
@@ -80,42 +80,6 @@ Class PK_Shotgun : PKWeapon {
 		PSHT A 1 A_WeaponOffset(0,32,WOF_INTERPOLATE);
 		TNT1 A 0 A_ReFire();			
 		goto ready;
-	}
-}
-	
-Class PK_Shells : Ammo {
-	Default {
-		inventory.pickupmessage "You picked up shotgun shells.";
-		inventory.pickupsound "pickups/ammo/shells";
-		inventory.amount 18;
-		inventory.maxamount 100;
-		ammo.backpackamount 15;
-		ammo.backpackmaxamount 666;
-		xscale 0.3;
-		yscale 0.25;
-	}
-	states {
-	spawn:
-		AMSH A -1;
-		stop;
-	}
-}
-
-Class PK_FreezerAmmo : Ammo {
-	Default {
-		inventory.pickupmessage "You picked up freezer ammo.";
-		inventory.pickupsound "pickups/ammo/freezerammo";
-		inventory.amount 15;
-		inventory.maxamount 100;
-		ammo.backpackamount 6;
-		ammo.backpackmaxamount 666;
-		xscale 0.3;
-		yscale 0.25;
-	}
-	states	{
-	spawn:
-		AMFR A -1;
-		stop;
 	}
 }
 	

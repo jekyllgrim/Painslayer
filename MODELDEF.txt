@@ -46,5 +46,17 @@ model "PK_TrackingBeam"
 	scale 1.0 1.0 1.2 //the 1.2 z-scale is for pixel ratio adjustment
 	USEACTORPITCH
 	DONTCULLBACKFACES //the model has only two planes
+	
 	FrameIndex MODL A 0 0
 }
+
+Model PK_Shuriken {
+	Path "models/disk"
+	Model 0 "shuriken.obj"
+	Skin 0 "edisk.png"
+	Scale 5.0 5.0 6.02
+	USEACTORPITCH
+	
+	FrameIndex MODL A 0 0
+}
+	

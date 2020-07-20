@@ -6,10 +6,10 @@ Class PK_Soul : Health {
 		inventory.pickupsound "";
 		renderstyle 'Add';
 		+NOGRAVITY;
-		alpha 0.9;
+		alpha 1;
 		xscale 0.25;
 		yscale 0.2;
-		inventory.pickupsound "world/soulpickup";
+		inventory.pickupsound "pickups/soul";
 		+BRIGHT;
 		+INVENTORY.ALWAYSPICKUP;
 	}
@@ -58,22 +58,23 @@ Class PK_RedSoul : PK_Soul {
 	Default {
 		inventory.amount 10;
 		translation "0:255=%[0.00,0.00,0.00]:[2.00,0.00,0.00]";
+		alpha 0.85;
+		inventory.pickupsound "pickups/soul/red";
 	}
 }
 
-Class PK_Megahealth : PK_Soul {
+Class PK_GoldSoul : Health {
 	Default {
-		inventory.pickupmessage "Mega Soul!";
+		inventory.pickupmessage "Gold Soul!";
 		inventory.amount 100;
-		inventory.maxamount 200;
+		inventory.maxamount 100;
 		inventory.pickupsound "";
 		renderstyle 'Add';
 		+NOGRAVITY;
 		alpha 0.9;
-		inventory.amount 100;
 		xscale 0.4;
 		yscale 0.332;
-		inventory.pickupsound "world/goldensoul";
+		inventory.pickupsound "pickups/soul/gold";
 		+COUNTITEM
 		+BRIGHT;
 		+RANDOMIZE;
@@ -82,16 +83,8 @@ Class PK_Megahealth : PK_Soul {
 		super.Tick();
 		if (isFrozen())
 			return;	
-		/*for (int i = 8; i > 0; i--) {
-			A_SpawnParticle("gold",SPF_FULLBRIGHT|SPF_RELATIVE, 
-				lifetime:random(20,35),size:5,
-				angle: random(0,359),
-				xoff: frandom[part](-8,8), yoff:frandom[part](-8,8),zoff:frandom[part](8,32),
-				velx:-0.5,velz:frandom[part](0.8,2.2),
-				startalphaf:0.9,sizestep:-0.05
-			);*/
 		A_SpawnItemEx(
-			"PK_MegahealthParticle",
+			"GoldSoulparticle",
 			xofs: frandom[part](4,10),zofs:frandom[part](16,32),
 			xvel:-0.35,zvel:frandom[part](0.5,2),
 			angle:frandom[part](0,359)
@@ -99,17 +92,37 @@ Class PK_Megahealth : PK_Soul {
 	}
 	states {
 	Spawn:
-		MSOU ABCDEFGHIJKLMNOPQRSTU 2;
+		GSOU ABCDEFGHIJKLMNOPQRSTU 2;
 		loop;
 	}
 }
 
-Class PK_MegahealthParticle : PK_BaseFlare {
+Class GoldSoulparticle : PK_BaseFlare {
 	Default {
 		scale 0.025;
 		PK_BaseFlare.fcolor 'gold';
 		PK_BaseFlare.fadefactor 0.02;
 		PK_BaseFlare.shrinkfactor 0.9;
 		alpha 1;
+	}
+}
+
+Class PK_MegaSoul : PK_GoldSoul {
+	Default {
+		inventory.amount 200;
+		inventory.maxamount 200;
+		inventory.pickupsound "pickups/soul/mega";
+		inventory.pickupmessage "Mega soul!";
+		xscale 0.3;
+		yscale 0.25;
+		alpha 2.5;
+	}
+	override void Tick() {
+		Actor.Tick();
+	}
+	states {
+	Spawn:
+		MSOU ABCDEFGHIJKLMNOPQRSTU 2;
+		loop;
 	}
 }

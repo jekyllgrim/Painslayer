@@ -35,7 +35,7 @@ Class PK_Stakegun : PKWeapon {
 			TNT1 A 0 {
 				A_StartSound("weapons/stakegun/fire");
 				A_WeaponOffset(7,5,WOF_ADD);
-				A_FireProjectile("PK_Stake",spawnheight:5,flags:FPF_NOAUTOAIM,pitch:-2.5);
+				A_FireProjectile("PK_Stake",spawnofs_xy:4,spawnheight:5,flags:FPF_NOAUTOAIM,pitch:-2.5);
 			}
 			PSGN BBBBB 2 A_WeaponOffset(1.44,1.2,WOF_ADD);
 			PSGN CDEF 3 A_WeaponOffset(-0.8,-0.5,WOF_ADD);
@@ -54,7 +54,7 @@ Class PK_Stakegun : PKWeapon {
 			TNT1 A 0 {
 				A_StartSound("weapons/stakegun/grenade");
 				A_WeaponOffset(6,2,WOF_ADD);
-				let a = A_FireProjectile("PK_Grenade",spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
+				let a = A_FireProjectile("PK_Grenade",spawnofs_xy:4,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
 				if (a) 
 					invoker.grenades.push(a);
 			}
@@ -82,6 +82,7 @@ but at the same time it's NOT a piercing projectile, i.e. it should only damage
 only one victim and fly through others if they exist. For that we employ a few tricks.
 */
 Class PK_Stake : PK_Projectile {
+	protected int basedmg;
 	actor hitvictim; //Stores the first monster hit. Allows us to deal damage only once and to only one victim
 	actor pinvictim; //The fake corpse that will be pinned to a wall
 	Default {
@@ -90,7 +91,6 @@ Class PK_Stake : PK_Projectile {
 		PK_Projectile.trailfade 0.02;
 		PK_Projectile.trailalpha 0.2;
 		PK_Projectile.TranslucentTrail true;
-		projectile;
 		-NOGRAVITY
 		+NOEXTREMEDEATH
 		speed 60;
@@ -101,14 +101,33 @@ Class PK_Stake : PK_Projectile {
 		decal "";
 		obituary "%k pinned %o to the wall";
 	}
+	override void Tick () {
+		Vector3 oldPos = self.pos;		
+		super.Tick();
+		if (isFrozen())
+			return;
+		if (age < 12)
+			return;
+		Vector3 path = level.vec3Diff( self.pos, oldPos );
+		double distance = path.length() / clamp(int(trailscale * 50),1,8); //this determines how far apart the particles are
+		Vector3 direction = path / distance;
+		int steps = int( distance );		
+		for( int i = 0; i < steps; i++ )  {
+			let trl = Spawn("PK_StakeFlame",oldPos+(frandom[stake](-5,5),frandom[stake](-5,5),frandom[stake](-5,5)));
+			oldPos = level.vec3Offset( oldPos, direction );
+		}
+	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
+		basedmg = 100;
 		if (target)
 			pitch = target.pitch; //In case it's fired at a floor or ceiling at point-blank range, the Spawn state won't be used and the stake won't receive proper pitch. So, we do this.
 	}
 	override int SpecialMissileHit (Actor victim) {
 		if (victim && (victim.bisMonster || victim.player) && victim != target && !hitvictim) { //We only do the following block if the actor hit by the stake exists, isn't the shooter, and the stake has never hit anyone yet
-			victim.DamageMobj (self, target, 100, 'normal');
+			if (age >= 12)
+				basedmg *= 1.5;
+			victim.DamageMobj (self, target, basedmg, 'normal');
 			A_StartSound("weapons/stakegun/hit",volume:0.7,attenuation:3);
 			hitvictim = victim; //store the victim hit; when this is non-null, stake won't deal damage to anyone else
 			if (!victim.bBOSS && victim.health <= 0 && victim.mass <= 400) { //we do the "pin to the wall" effect only if the victim is dead, not a boss and not huge (mass <= 400)
@@ -212,9 +231,27 @@ Class PK_Stake : PK_Projectile {
 				A_SprayDecal("Stakedecal",8);
 			}
 			stop;
+		Crash:
 		XDeath:
 			TNT1 A 1;
 			stop;
+	}
+}
+
+Class PK_StakeFlame : PK_BaseFlare {
+	Default {
+		scale 0.05;
+		renderstyle 'translucent';
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		roll = random(0,359);
+	}
+	states {
+	Spawn:
+		BOM4 JKLMNOPQ 1;
+		BOM5 ABCDEFGHIJKLMN 1 A_FadeOut(0.02);
+		wait;
 	}
 }
 
@@ -375,7 +412,7 @@ Class PK_Grenade : PK_Projectile {
 				if (vel.length() < 3) {
 					bMISSILE = false;
 				}
-				if (GetAge() > 35*2)
+				if (age > 35*2)
 					SetStateLabel("XDeath");
 			}
 			loop;
@@ -400,37 +437,3 @@ Class PK_Grenade : PK_Projectile {
 	}
 }	
 
-Class PK_Stakes : Ammo {
-	Default {
-		inventory.pickupmessage "You picked up a box of stakes.";
-		inventory.pickupsound "pickups/ammo/stakes";
-		inventory.amount 15;
-		inventory.maxamount 100;
-		ammo.backpackamount 12;
-		ammo.backpackmaxamount 666;
-		xscale 0.3;
-		yscale 0.25;
-	}
-	states	{
-	spawn:
-		AMST A -1;
-		stop;
-	}
-}
-
-Class PK_Bombs : Ammo {
-	Default {
-		inventory.pickupmessage "You picked up a box of bombs.";
-		inventory.pickupsound "pickups/ammo/bombs";
-		inventory.amount 7;
-		inventory.maxamount 100;
-		ammo.backpackamount 12;
-		ammo.backpackmaxamount 666;
-		scale 0.4;
-	}
-	states	{
-	spawn:
-		AMBO A -1;
-		stop;
-	}
-}

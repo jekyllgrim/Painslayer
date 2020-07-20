@@ -37,7 +37,7 @@ Class PK_Chaingun : PKWeapon {
 		TNT1 A 0 A_ZoomFactor(1,ZOOM_NOSCALETURNING);
 		MIGN EF 1 A_WeaponOffset(12,3,WOF_ADD);
 		MIGN GGG 1 A_WeaponOffset(2,3,WOF_ADD);
-		MIGN FFF 1 A_WeaponOffset(-3,0,WOF_ADD);
+		MIGN FFF 2 A_WeaponOffset(-3,0,WOF_ADD);
 		MIGN EEE 2 A_WeaponOffset(-3,-2,WOF_ADD);
 		MIGN AAA 2 A_WeaponOffset(-4,-3,WOF_ADD);
 		MIGN A 0 A_WeaponOffset(0,32);
@@ -105,22 +105,7 @@ Class PK_Chaingun : PKWeapon {
 }
 		
 
-Class PK_Bullets : Ammo {
-	Default {
-		inventory.pickupmessage "You picked up a box of bullets.";
-		inventory.pickupsound "pickups/ammo/bullets";
-		inventory.icon "BULSA0";
-		inventory.amount 50;
-		inventory.maxamount 500;
-		ammo.backpackamount 100;
-		ammo.backpackmaxamount 666;
-	}
-	states	{
-	spawn:
-		BULS A -1;
-		stop;
-	}
-}
+
 
 Class PK_Rocket : Rocket {
 	Default {

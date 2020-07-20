@@ -1,11 +1,4 @@
 world/bodypoof	BODYPOOF
-$random world/soulpickup {	soulpk1	soulpk2	soulpk3	soulpk4 }
-soulpk1	soulpk1	
-soulpk2	soulpk2
-soulpk3	soulpk3
-soulpk4	soulpk4
-world/goldensoul PKMEGA
-
 
 ///WEAPONS\\\
 
@@ -80,11 +73,20 @@ weapons/ricochet4	RICO4
 
 //== Electrodriver
 
-weapons/eldriver/shot		ELDRSHOT
-weapons/eldriver/electro	ELDRELEC
-
-weapons/shuricane/explosion	SHUREXPL
-
+weapons/edriver/starshot			"sounds/ElectroDriver/driver-shoot.wav"
+weapons/edriver/electroloop			"sounds/ElectroDriver/electro-shoot-loop.wav"
+weapons/edriver/electroloopstart	"sounds/ElectroDriver/electro-shoot-start.wav"
+weapons/edriver/electroloopend		"sounds/ElectroDriver/electro-shoot-stop.wav"
+weapons/edriver/shockloop			"sounds/ElectroDriver/electro-lock-loop.wav"
+weapons/edriver/diskshot			"sounds/ElectroDriver/electrodisk-shoot.wav"
+weapons/edriver/starfly				"sounds/ElectroDriver/shuricane-onfly-loop.wav"
+weapons/edriver/starboom			"sounds/ElectroDriver/shuricane-explosion.wav"
+$limit weapons/edriver/starboom		0
+$random weapons/edriver/starwall	{ starwall1 starwall2 starwall3 }
+$limit weapons/edriver/starwall		0
+starwall1	"sounds/ElectroDriver/driver-default1.wav"
+starwall2	"sounds/ElectroDriver/driver-default2.wav"
+starwall3	"sounds/ElectroDriver/driver-default3.wav"
 
 
 ///PICKUPS\\\
@@ -94,8 +96,8 @@ pickups/ammo/freezerammo	FREZPKUP
 pickups/ammo/stakes			STKSPKUP
 pickups/ammo/bombs			BOMBPKUP
 pickups/ammo/bullets		BULLPKUP
-pickups/ammo/electrons		ELECPKUP
-pickups/ammo/shuricanes		SHURPKUP
+pickups/ammo/battery		ELECPKUP
+pickups/ammo/stars			SHURPKUP
 
 pickups/ammopack	AMMOPACK
 
@@ -108,12 +110,12 @@ pickups/powerups/wmodifier/take	WMODTAKE
 pickups/powerups/wmodifier/loop	WMODLOOP
 pickups/powerups/wmodifier/out	WMODOUT
 
-$random pickups/soul { pickups/soul1 pickups/soul2 pickups/soul3 pickups/soul4 pickups/soul5 }
-pickups/soul1	SOULTAK1
-pickups/soul2	SOULTAK2
-pickups/soul3	SOULTAK3
-pickups/soul4	SOULTAK4
-pickups/soul5	SOULTAK5
+$random pickups/soul { soul1 soul2 soul3 soul4 soul5 }
+soul1	SOULTAK1
+soul2	SOULTAK2
+soul3	SOULTAK3
+soul4	SOULTAK4
+soul5	SOULTAK5
 pickups/soul/red	SOULRED
 pickups/soul/MEGA	SOULMEGA
 pickups/soul/gold	SOULGOLD
