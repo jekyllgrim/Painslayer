@@ -191,8 +191,11 @@ Class PK_Killer : PK_Projectile {
 					tracer.VelFromAngle(hvel,angle);
 					tracer.vel.z = vvel;
 					let kft = KillerFlyTarget(tracer);
-					if (kft)
+					if (kft) {
 						kft.hitcounter++;
+						if (tracer.target && kft.hitcounter % 3 == 0)
+							tracer.target.A_NoBlocking();
+					}
 				}
 				return ResolveState(null);
 			}

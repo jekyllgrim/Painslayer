@@ -1,4 +1,10 @@
 world/bodypoof	BODYPOOF
+$random world/soulpickup {	soulpk1	soulpk2	soulpk3	soulpk4 }
+soulpk1	soulpk1	
+soulpk2	soulpk2
+soulpk3	soulpk3
+soulpk4	soulpk4
+world/goldensoul PKMEGA
 
 
 ///WEAPONS\\\

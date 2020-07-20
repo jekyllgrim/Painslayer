@@ -706,18 +706,89 @@ Class PK_EnemyDeathControl : Inventory {
 			owner.A_StartSound("world/bodypoof",CHAN_AUTO);
 			int rad = owner.radius;
 			for (int i = 64; i > 0; i--) {
-				owner.A_SpawnParticle("green",SPF_FULLBRIGHT|SPF_RELATIVE, 
-					lifetime:random(20,35),size:7,
+				owner.A_SpawnParticle("gray",SPF_FULLBRIGHT|SPF_RELATIVE, 
+					lifetime:random(20,35),size:10,
 					angle: random(0,359),
 					xoff: frandom[part](-rad,rad), yoff:frandom[part](-rad,rad),zoff:frandom[part](owner.pos.z,owner.height),
 					velx:0.5,velz:frandom[part](0.2,1),
 					//accelx:0.1,accelz:-0.05,
-					startalphaf:0.9,sizestep:-0.35
+					startalphaf:0.9,sizestep:-0.4
 				);
 			}
+			Spawn("PK_Soul",owner.pos);
 			owner.destroy();
 			destroy();
 			return;
+		}
+	}
+}
+
+Class PK_Soul : Health {
+	sound takesound;
+	property takesound : takesound;
+	Default {
+		inventory.pickupmessage "";
+		inventory.amount 1;
+		inventory.maxamount 200;
+		inventory.pickupsound "";
+		renderstyle 'Add';
+		+NOGRAVITY;
+		alpha 0.9;
+		xscale 0.25;
+		yscale 0.2;
+		PK_soul.takesound "world/soulpickup";
+		+BRIGHT;
+	}
+	override bool TryPickup (in out Actor other) {
+		let try = super.TryPickup(other);
+		if (try) {
+			A_StartSound(takesound,CHAN_AUTO,CHANF_OVERLAP);
+			let cont = PK_DemonMorphControl(other.FindInventory("PK_DemonMorphControl"));
+			if (cont)
+				cont.pk_souls += 1;				
+		}
+		return try;
+	}
+	states {
+	Spawn:
+		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
+		DSOU ABCDEFGHIJKLMNOPQRSTU 2;
+		goto spawn+1;
+	}
+}
+
+Class PK_RedSoul : PK_Soul {
+	Default {
+		inventory.amount 10;
+		translation "0:255=%[0.00,0.00,0.00]:[2.00,0.00,0.00]";
+	}
+}
+
+Class PK_Megahealth : PK_Soul {
+	Default {
+		inventory.amount 100;
+		translation "0:255=%[0.00,0.00,0.00]:[2.00,1.49,0.42]";
+		xscale 0.29;
+		yscale 0.24;
+		+COUNTITEM
+		PK_Soul.takesound "world/goldensoul";
+	}
+}
+		
+Class PK_DemonMorphControl : Inventory {
+	int pk_souls;
+	Default {
+		inventory.maxamount 1;
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+	}
+	override void Tick() {}
+	override void DoEffect() {
+		super.DoEffect();
+		if (pk_souls >= 66) {
+			Console.Printf("Demon mode!");
+			pk_souls = 0;
 		}
 	}
 }
