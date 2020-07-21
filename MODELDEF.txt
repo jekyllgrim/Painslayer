@@ -55,8 +55,107 @@ Model PK_Shuriken {
 	Model 0 "shuriken.obj"
 	Skin 0 "edisk.png"
 	Scale 5.0 5.0 6.02
-	USEACTORPITCH
 	
+	PITCHFROMMOMENTUM
 	FrameIndex MODL A 0 0
+	
+	USEACTORPITCH
+	FrameIndex MODL B 0 0
+}
+
+Model PK_Lightning {
+	Path "models"
+	Model 0 "flatbeam.obj"
+	Scale 1.0 1.0 1.2
+	USEACTORPITCH
+	DONTCULLBACKFACES
+	
+	AngleOffset 45
+	SurfaceSkin 0 0 "lightning/electrobolt_01.png"
+	FrameIndex MODL A 0 0
+	
+	AngleOffset 50
+	SurfaceSkin 0 0 "lightning/electrobolt_02.png"	
+	FrameIndex MODL B 0 0
+	
+	AngleOffset 55
+	SurfaceSkin 0 0 "lightning/electrobolt_03.png"	
+	FrameIndex MODL C 0 0
+	
+	AngleOffset 60
+	SurfaceSkin 0 0 "lightning/electrobolt_04.png"	
+	FrameIndex MODL D 0 0
+	
+	AngleOffset 65
+	SurfaceSkin 0 0 "lightning/electrobolt_05.png"	
+	FrameIndex MODL E 0 0
+	
+	AngleOffset 60
+	SurfaceSkin 0 0 "lightning/electrobolt_06.png"	
+	FrameIndex MODL F 0 0
+	
+	AngleOffset 55
+	SurfaceSkin 0 0 "lightning/electrobolt_07.png"	
+	FrameIndex MODL G 0 0
+	
+	AngleOffset 50
+	SurfaceSkin 0 0 "lightning/electrobolt_08.png"	
+	FrameIndex MODL H 0 0
+	
+	AngleOffset 45
+	SurfaceSkin 0 0 "lightning/electrobolt_09.png"	
+	FrameIndex MODL I 0 0
+	
+	AngleOffset 50
+	SurfaceSkin 0 0 "lightning/electrobolt_10.png"	
+	FrameIndex MODL J 0 0
 }
 	
+	
+Model PK_Lightning2 {
+	Path "models"
+	Model 0 "flatbeam.obj"
+	Scale 1.0 1.0 1.2
+	USEACTORPITCH
+	DONTCULLBACKFACES
+	
+	AngleOffset -15
+	SurfaceSkin 0 0 "lightning/electrobolt_01.png"
+	FrameIndex MODL A 0 0
+	
+	AngleOffset -10
+	SurfaceSkin 0 0 "lightning/electrobolt_02.png"	
+	FrameIndex MODL B 0 0
+	
+	AngleOffset 5
+	SurfaceSkin 0 0 "lightning/electrobolt_03.png"	
+	FrameIndex MODL C 0 0
+	
+	AngleOffset 0
+	SurfaceSkin 0 0 "lightning/electrobolt_04.png"	
+	FrameIndex MODL D 0 0
+	
+	AngleOffset 5
+	SurfaceSkin 0 0 "lightning/electrobolt_05.png"	
+	FrameIndex MODL E 0 0
+	
+	AngleOffset 10
+	SurfaceSkin 0 0 "lightning/electrobolt_06.png"	
+	FrameIndex MODL F 0 0
+	
+	AngleOffset 15
+	SurfaceSkin 0 0 "lightning/electrobolt_07.png"	
+	FrameIndex MODL G 0 0
+	
+	AngleOffset 10
+	SurfaceSkin 0 0 "lightning/electrobolt_08.png"	
+	FrameIndex MODL H 0 0
+	
+	AngleOffset 5
+	SurfaceSkin 0 0 "lightning/electrobolt_09.png"	
+	FrameIndex MODL I 0 0
+	
+	AngleOffset 0
+	SurfaceSkin 0 0 "lightning/electrobolt_10.png"	
+	FrameIndex MODL J 0 0
+}

@@ -282,11 +282,11 @@ Class Killer_BeamEmitter : Actor {
 			species = master.species;
 			//Console.printf("master species: %s",master.species);
 		}
-		beam1 = PK_TrackingBeam.MakeBeam("PK_TrackingBeam",master,tracer,"f2ac21",radius: 9.0,masterOffset:(0,0,-12), style: STYLE_ADDSHADED);
+		beam1 = PK_TrackingBeam.MakeBeam("PK_TrackingBeam",master,tracer,"f2ac21",radius: 9.0,masterOffset:(13,13,12), style: STYLE_ADDSHADED);
 		if(beam1) {
 			beam1.alpha = 0.5;
 		}
-		beam2 = PK_TrackingBeam.MakeBeam("PK_TrackingBeam",master,tracer,"FFFFFF",radius: 1.6,masterOffset:(0,0,-12),style: STYLE_ADDSHADED);
+		beam2 = PK_TrackingBeam.MakeBeam("PK_TrackingBeam",master,tracer,"FFFFFF",radius: 1.6,masterOffset:(13,13,12),style: STYLE_ADDSHADED);
 		if(beam2) {
 			beam2.alpha = 3.0;
 		}
@@ -329,9 +329,13 @@ Class Killer_BeamEmitter : Actor {
 			StopBeams();
 			return;
 		}
-		FLineTraceData data;
+		/*FLineTraceData data;
 		LineTrace(angle,4096,pitch,data:data);
 		if (data.HitType == TRACE_HITWALL) {
+			StopBeams();
+			return;
+		}*/
+		if (!CheckSight(master,SF_IGNOREWATERBOUNDARY)) {
 			StopBeams();
 			return;
 		}

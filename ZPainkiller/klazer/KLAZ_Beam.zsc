@@ -37,7 +37,7 @@ class PK_TrackingBeam : actor
 		lifetimer++;
 	}
 	
-	static PK_TrackingBeam MakeBeam(class<PK_TrackingBeam> beamclass, actor master, actor target,color col, double radius = 1.0, vector3 hitpoint = (0,0,0), vector3 masterOffset = (0,0,0), vector3 targetOffset = (0,0,0), int lifetimer = 2,  int style = STYLE_AddShaded)
+	static PK_TrackingBeam MakeBeam(class<PK_TrackingBeam> beamclass, actor master, actor target = null, color col = color("FFFFFF"), double radius = 1.0, vector3 hitpoint = (0,0,0), vector3 masterOffset = (0,0,0), vector3 targetOffset = (0,0,0), int lifetimer = 2,  int style = STYLE_AddShaded)
 	{
 		if(!master)
 		{
@@ -50,6 +50,7 @@ class PK_TrackingBeam : actor
 		beam.master = master;
 		beam.scale.x = radius;
 		beam.masterOffset = masterOffset;
+		beam.style = style;
 		if(target)
 		{
 			beam.target = target;
@@ -78,7 +79,7 @@ class PK_TrackingBeam : actor
 		}
 		if(getage() == 1)
 		{
-			A_SetRenderStyle(1.0,STYLE_ADDSHADED);
+			A_SetRenderStyle(1.0,style);
 		}
 		vector3 from;
 		vector3 to;
@@ -90,7 +91,9 @@ class PK_TrackingBeam : actor
 				Vector3 ofs = master.pos+(0,0,master.player.viewz - master.pos.z);
 				Vector3 x, y, z;
 				[x, y, z] = Matrix4.getaxes(master.pitch,master.angle,master.roll);
-				from = level.Vec3Offset(ofs+x*17+y*17-z*3,self.masterOffset);
+				vector3 mofs = self.masterOffset;
+				from = level.Vec3Offset(ofs, x*mofs.x + y*mofs.y - z*mofs.z);
+				//from = level.Vec3Offset(ofs+x*17+y*17-z*3,self.masterOffset);
 			}
 			else
 			{

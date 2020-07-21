@@ -598,84 +598,84 @@ Sprite "PSGZH0", 192, 102
 Sprite "ELDRA0", 158, 106
 {
 	YScale 1.200
-	Offset -160, -96
+	Offset -180, -96
 	Patch "ELDRA", 0, 0
 }
 
 Sprite "ELDRB0", 158, 106
 {
 	YScale 1.200
-	Offset -160, -96
+	Offset -180, -96
 	Patch "ELDRB", 0, 0
 }
 
 Sprite "ELDRC0", 158, 106
 {
 	YScale 1.200
-	Offset -160, -96
+	Offset -180, -96
 	Patch "ELDRC", 0, 0
 }
 
 Sprite "ELDRD0", 158, 106
 {
 	YScale 1.200
-	Offset -160, -96
+	Offset -180, -96
 	Patch "ELDRD", 0, 0
 }
 
 Sprite "ELDRE0", 158, 106
 {
 	YScale 1.200
-	Offset -160, -96
+	Offset -180, -96
 	Patch "ELDRE", 0, 0
 }
 
 Sprite "ELDRF0", 158, 106
 {
 	YScale 1.200
-	Offset -160, -96
+	Offset -180, -96
 	Patch "ELDRF", 0, 0
 }
 
 Sprite "ELDRG0", 158, 106
 {
 	YScale 1.200
-	Offset -160, -96
+	Offset -180, -96
 	Patch "ELDRG", 0, 0
 }
 
 Sprite "ELDRH0", 158, 106
 {
 	YScale 1.200
-	Offset -160, -96
+	Offset -180, -96
 	Patch "ELDRH", 0, 0
 }
 
 Sprite "ELDRI0", 158, 106
 {
 	YScale 1.200
-	Offset -160, -96
+	Offset -180, -96
 	Patch "ELDRI", 0, 0
 }
 
 Sprite "ELDRJ0", 158, 106
 {
 	YScale 1.200
-	Offset -160, -96
+	Offset -180, -96
 	Patch "ELDRJ", 0, 0
 }
 
 Sprite "ELDRK0", 158, 106
 {
 	YScale 1.200
-	Offset -160, -96
+	Offset -180, -96
 	Patch "ELDRK", 0, 0
 }
 
 Sprite "ELDRL0", 158, 106
 {
 	YScale 1.200
-	Offset -160, -96
+	Offset -180, -96
 	Patch "ELDRL", 0, 0
 }
 

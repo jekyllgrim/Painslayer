@@ -33,8 +33,74 @@ Class PK_ElectroDriver : PKWeapon {
 		ELDR A 2 A_WeaponOffset(-0.5,-0.5,WOF_ADD);
 		TNT1 A 0 A_ReFire();
 		goto ready;
+	AltFire:
+		TNT1 A 0 A_StartSound("weapons/edriver/electroloopstart",CHAN_VOICE);
+	AltHold:
+		ELDR A 1 {
+			int atkdist = 256;
+			actor ltarget;			
+			double closestDist = double.infinity;
+			BlockThingsIterator itr = BlockThingsIterator.Create(self,atkdist);
+			while (itr.next()) {
+				let next = itr.thing;
+				if (next == self)
+					continue; 
+				if (!next.bShootable || (!next.bIsMonster && !(next is "PlayerPawn")))
+					continue;
+				double dist = Distance3D(next);
+				if (dist > atkdist)
+					continue;
+				if (dist < closestDist)
+					closestDist = dist;
+				if (!CheckSight(next,SF_IGNOREWATERBOUNDARY))
+					continue;
+				double adiff = abs(DeltaAngle(angle,AngleTo(next,true)));
+				Console.Printf("%s angle %d",next.Getclassname(),adiff);
+				if (adiff > 15)
+					continue;
+				ltarget = next;
+			}
+			vector3 atkpos;
+			if (!ltarget) {
+				FLineTraceData hit;
+				LineTrace(angle,atkdist,pitch,offsetz:player.viewz,data:hit);
+				atkpos = hit.HitLocation;
+			}
+			else
+				atkpos = ltarget.pos+(0,0,ltarget.height*0.5);
+			PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(30,8.5,10),style:STYLE_ADD);
+			PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(30,8.5,10),style:STYLE_ADD);
+			A_StartSound("weapons/edriver/electroloop",CHAN_WEAPON,CHANF_LOOPING);
+			A_WeaponOffset(frandom[eld](-0.3,0.3),frandom[eld](32,32.4));
+		}
+		TNT1 A 0 {
+			A_WeaponOffset(0,32);
+			A_Refire();
+		}
+		TNT1 A 0 {
+			A_StopSound(CHAN_WEAPON);
+			A_StartSound("weapons/edriver/electroloopend");
+		}
+		goto ready;		
 	}
 }
+
+Class PK_Lightning : PK_TrackingBeam {
+	States	{
+		cache:
+			MODL ABCDEFGHIJ 0;
+		Spawn:
+			TNT1 A 0;
+			MODL A 1 NoDelay bright {
+				lifetimer--;
+				frame = random(0,9);
+			}
+			#### # 0 A_JumpIf(lifetimer <=0,"death");
+			loop;
+	}
+}
+
+Class PK_Lightning2 : PK_Lightning {}
 
 Class PK_Shuriken : PK_Projectile {
 	Default {
@@ -51,22 +117,29 @@ Class PK_Shuriken : PK_Projectile {
 		+FORCEXYBILLBOARD;
 		+ROLLSPRITE;
 	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		spriterotation = random(0,359);
+		if (target)
+			pitch = target.pitch;
+	}
 	states {
 	Spawn:
 		MODL A 1 {
 			A_FaceMovementDirection(flags:FMDF_INTERPOLATE );
+			spriterotation += 10;
 			if (age > 16)
-				SetStateLabel("Boom");
+				SetStateLabel("Boom");				
 		}
 		loop;
 	Death:
-		MODL A 100 {
+		MODL B 100 {
 			bNOINTERACTION = true;
 			A_Stop();
 			A_StartSound("weapons/edriver/starwall",attenuation:2);
 		}
-		#### A 0 A_SetRenderstyle(alpha,STYLE_Translucent);
-		#### A 1 A_FadeOut(0.03);
+		#### # 0 A_SetRenderstyle(alpha,STYLE_Translucent);
+		#### # 1 A_FadeOut(0.03);
 		wait;
 	Boom:
 		TNT1 A 0 {
