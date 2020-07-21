@@ -35,7 +35,7 @@ Class PK_Stakegun : PKWeapon {
 			TNT1 A 0 {
 				A_StartSound("weapons/stakegun/fire");
 				A_WeaponOffset(7,5,WOF_ADD);
-				A_FireProjectile("PK_Stake",spawnofs_xy:4,spawnheight:5,flags:FPF_NOAUTOAIM,pitch:-2.5);
+				A_FireProjectile("PK_Stake",spawnofs_xy:2,spawnheight:5,flags:FPF_NOAUTOAIM,pitch:-2.5);
 			}
 			PSGN BBBBB 2 A_WeaponOffset(1.44,1.2,WOF_ADD);
 			PSGN CDEF 3 A_WeaponOffset(-0.8,-0.5,WOF_ADD);
@@ -54,16 +54,17 @@ Class PK_Stakegun : PKWeapon {
 			TNT1 A 0 {
 				A_StartSound("weapons/stakegun/grenade");
 				A_WeaponOffset(6,2,WOF_ADD);
-				let a = A_FireProjectile("PK_Grenade",spawnofs_xy:4,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
+				let a = A_FireProjectile("PK_Grenade",spawnofs_xy:1,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
 				if (a) 
 					invoker.grenades.push(a);
 			}
-			PSGN AAALLL 1 A_WeaponOffset(2,1,WOF_ADD);
-			PSGN MMM 1 A_WeaponOffset(2,2,WOF_ADD);
+			PSGN AAA 1 A_WeaponOffset(2,1,WOF_ADD);
 			TNT1 A 0 {
 				if (CountInv("PK_Bombs") > 0)
-					A_StartSound("weapons/grenade/load",CHAN_AUTO);
+					A_StartSound("weapons/grenade/load",CHAN_7);
 			}
+			PSGN LLL 1 A_WeaponOffset(2,1,WOF_ADD);
+			PSGN MMM 1 A_WeaponOffset(2,2,WOF_ADD);
 			PSGN MMMMLLLL 1 A_WeaponOffset(-2.5,-1.16,WOF_ADD);
 			PSGN AAAA 1 {
 				A_WeaponOffset(-1,-1.16,WOF_ADD);
@@ -71,7 +72,7 @@ Class PK_Stakegun : PKWeapon {
 			}
 			PSGN A 5 {
 				A_WeaponOffset(0,32,WOF_INTERPOLATE);
-				A_WeaponReady(WRF_NOSECONDARY|WRF_NOSWITCH);
+				A_WeaponReady();
 			}
 			goto ready;
 	}
@@ -86,11 +87,10 @@ Class PK_Stake : PK_Projectile {
 	actor hitvictim; //Stores the first monster hit. Allows us to deal damage only once and to only one victim
 	actor pinvictim; //The fake corpse that will be pinned to a wall
 	Default {
-		PK_Projectile.trailcolor 'white';
+		PK_Projectile.trailcolor "f4f4f4";
 		PK_Projectile.trailscale 0.012;
 		PK_Projectile.trailfade 0.02;
 		PK_Projectile.trailalpha 0.2;
-		PK_Projectile.TranslucentTrail true;
 		-NOGRAVITY
 		+NOEXTREMEDEATH
 		speed 60;
@@ -102,19 +102,10 @@ Class PK_Stake : PK_Projectile {
 		obituary "%k pinned %o to the wall";
 	}
 	override void Tick () {
-		Vector3 oldPos = self.pos;		
 		super.Tick();
-		if (isFrozen())
-			return;
-		if (age < 12)
-			return;
-		Vector3 path = level.vec3Diff( self.pos, oldPos );
-		double distance = path.length() / clamp(int(trailscale * 50),1,8); //this determines how far apart the particles are
-		Vector3 direction = path / distance;
-		int steps = int( distance );		
-		for( int i = 0; i < steps; i++ )  {
-			let trl = Spawn("PK_StakeFlame",oldPos+(frandom[stake](-5,5),frandom[stake](-5,5),frandom[stake](-5,5)));
-			oldPos = level.vec3Offset( oldPos, direction );
+		if (age >= 12) {
+			trailactor = "PK_StakeFlame";
+			trailscale = 0.08;
 		}
 	}
 	override void PostBeginPlay() {
@@ -380,11 +371,10 @@ Class PK_PinVictim : Actor {		//the fake corpse (receives its visuals from the s
 	
 Class PK_Grenade : PK_Projectile {
 	Default {
-		PK_Projectile.trailcolor 'white';
+		PK_Projectile.trailcolor "f4f4f4";
 		PK_Projectile.trailscale 0.04;
 		PK_Projectile.trailfade 0.035;
 		PK_Projectile.trailalpha 0.3;
-		PK_Projectile.TranslucentTrail true;
 		-NOGRAVITY
 		bouncetype 'hexen';
 		bouncefactor 0.35;

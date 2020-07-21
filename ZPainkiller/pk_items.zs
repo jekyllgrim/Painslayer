@@ -100,7 +100,8 @@ Class PK_GoldSoul : Health {
 Class GoldSoulparticle : PK_BaseFlare {
 	Default {
 		scale 0.025;
-		PK_BaseFlare.fcolor 'gold';
+		renderstyle 'Add';
+		PK_BaseFlare.style 1;
 		PK_BaseFlare.fadefactor 0.02;
 		PK_BaseFlare.shrinkfactor 0.9;
 		alpha 1;

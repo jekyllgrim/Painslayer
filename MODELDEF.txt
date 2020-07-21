@@ -63,6 +63,20 @@ Model PK_Shuriken {
 	FrameIndex MODL B 0 0
 }
 
+Model PK_DiskProjectile {
+	Path "models/disk"
+	Model 0 "edisk.md3"
+	Skin 0 "edisk.png"
+	Scale 3.5 3.5 4.22
+	DONTCULLBACKFACES
+	
+	PITCHFROMMOMENTUM
+	FrameIndex MODL A 0 0
+	
+	USEACTORPITCH
+	FrameIndex MODL B 0 0
+}
+
 Model PK_Lightning {
 	Path "models"
 	Model 0 "flatbeam.obj"

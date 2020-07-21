@@ -72,20 +72,18 @@ Class PK_Painkiller : PKWeapon {
 		AltFire:
 			TNT1 A 0 {
 				if (invoker.pk_killer) {
-					invoker.pk_killer.SetStateLabel("XDeath");
+					if (!(player.oldbuttons & BT_ALTATTACK))
+						invoker.pk_killer.SetStateLabel("XDeath");
 					return ResolveState("Ready");
-				}
+				}				
 				A_StartSound("weapons/painkiller/killer");
 				if (invoker.combofire) {
 					invoker.pk_killer = PK_ComboKiller(A_FireProjectile("PK_ComboKiller"));
 				}
 				else {
-					/*invoker.kptarget = Killer_Ptarget(Spawn("Killer_Ptarget",player.mo.pos));
-					if (invoker.kptarget) {
-						invoker.kptarget.plr = player;
-					}*/
 					invoker.pk_killer = PK_Killer(A_FireProjectile("PK_Killer"));
 				}
+				A_WeaponOffset(0,32,WOF_INTERPOLATE);
 				invoker.combofire = false;
 				invoker.killer_fired = true;
 				return ResolveState(null);
@@ -137,9 +135,10 @@ Class PK_PainkillerPuff : PKPuff {
 Class PK_Killer : PK_Projectile {
 	bool returning;
 	Default {
-		PK_Projectile.flarecolor 'yellow';
-		PK_Projectile.flarescale 0.09;
-		PK_Projectile.flarealpha 0.7;
+		PK_Projectile.flarecolor "fed101";
+		PK_Projectile.flarescale 0.11;
+		PK_Projectile.flarealpha 0.9;
+		PK_Projectile.flareactor "PK_KillerFlare";
 		+SKYEXPLODE
 		+NOEXTREMEDEATH
 		+NODAMAGETHRUST
@@ -164,6 +163,13 @@ Class PK_Killer : PK_Projectile {
 			emit.pitch = pitch;
 			//console.printf("killer pitch %d", pitch);
 		}
+	}
+	override void Tick() {
+		super.Tick();
+		if (isFrozen() || !target)
+			return;
+		if (target.player.readyweapon && !(target.player.readyweapon is "PK_Painkiller") && !InStateSequence(curstate,FindState("XDeath")))
+			SetStateLabel("XDeath");
 	}
 	states {
 		Spawn:
@@ -207,6 +213,9 @@ Class PK_Killer : PK_Projectile {
 					A_FaceTarget(flags:FAF_MIDDLE);
 					if (Distance3D(target) <= 64) {
 						target.A_StartSound("weapons/painkiller/killerback",CHAN_AUTO);
+						let pk = PK_Painkiller(target.FindInventory("PK_Painkiller"));
+						if (pk && target.player && target.player.readyweapon && target.player.readyweapon != pk)
+							pk.killer_fired = false;
 						destroy();
 						return;
 					}
@@ -224,6 +233,18 @@ Class PK_Killer : PK_Projectile {
 	}
 }
 
+Class PK_KillerFlare : PK_ProjFlare {
+	Default {
+		scale 0.11;		
+	}
+	override void Tick() {
+		super.Tick();
+		if (scale.x > 0.05)
+			scale *= 0.96;
+		else
+			A_SetScale(0.11);
+	}
+}
 
 
 Class KillerFlyTarget : Actor {

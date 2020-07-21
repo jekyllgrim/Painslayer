@@ -86,7 +86,7 @@ Class PK_Shotgun : PKWeapon {
 Class PK_FreezerProjectile : PK_Projectile {
 	Default {
 		Translation "112:127=%[0.00,2.00,2.00]:[0.00,0.00,1.01]";
-		renderstyle "Add";
+		renderstyle 'Add';
 		alpha 0.4;
 		+BRIGHT
 		+HITTRACER
@@ -97,10 +97,10 @@ Class PK_FreezerProjectile : PK_Projectile {
 		deathsound "";
 		speed 50;
 		damage 0;		
-		PK_Projectile.flarecolor 'blue';
+		PK_Projectile.flarecolor "08caed";
 		PK_Projectile.flarescale 0.065;
 		PK_Projectile.flarealpha 0.7;
-		PK_Projectile.trailcolor 'blue';
+		PK_Projectile.trailcolor "08caed";
 		PK_Projectile.trailscale 0.05;
 		PK_Projectile.trailalpha 0.2;
 		PK_Projectile.trailfade 0.06;
@@ -128,19 +128,7 @@ Class PK_FreezerProjectile : PK_Projectile {
 		wait;
 	}
 }
-	
-Class PK_FreezerTrail : PK_BaseFlare {
-	Default {
-		scale 0.08;
-		alpha 0.65;
-		PK_BaseFlare.fcolor 'blue';
-	}
-	states {
-	Spawn:
-		FLAR C 1 A_FadeOut(0.03);
-		loop;
-	}
-}
+
 	
 Class PK_FreezeControl : Inventory {
 	int fcounter;

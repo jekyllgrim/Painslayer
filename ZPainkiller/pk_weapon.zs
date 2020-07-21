@@ -41,6 +41,34 @@ Class PKWeapon : Weapon abstract {
 			stop;
 	}
 }
+
+Class PKPuff : Actor abstract {
+	Default {
+		+NOBLOCKMAP
+		+NOGRAVITY
+		+FORCEXYBILLBOARD
+		-ALLOWPARTICLES
+		+DONTSPLASH
+		-FLOORCLIP
+	}
+}
+
+Class PK_NullPuff : Actor {
+	Default {
+		decal "none";
+		+NODECAL
+		+NOINTERACTION
+		+BLOODLESSIMPACT
+		+PAINLESS
+		+PUFFONACTORS
+		+NODAMAGETHRUST
+	}
+	states {
+		Spawn:
+			TNT1 A 1;
+			stop;
+	}
+}
 	
 Class PK_WeaponIcon : Actor {
 	state mspawn;
@@ -81,29 +109,23 @@ Class PK_WeaponIcon : Actor {
 
 Class PK_Projectile : Actor abstract {
 	protected int age;
-	Default {
-		projectile;
-		PK_Projectile.flarescale 0.065;
-		PK_Projectile.flarealpha 0.7;
-		PK_Projectile.trailscale 0.04;
-		PK_Projectile.trailalpha 0.4;
-		PK_Projectile.trailfade 0.1;
-	}
-	vector3 spawnpos;
-	bool farenough;
+	protected vector3 spawnpos;
+	protected bool farenough;
 	
-	name flarecolor;
+	color flarecolor;
 	double flarescale;
 	double flarealpha;
-	name trailcolor;
+	color trailcolor;
 	double trailscale;
 	double trailalpha;
 	double trailfade;
 	double trailvel;
 	double trailshrink;
-	bool TranslucentTrail;
-	//class<Actor> trailactor;
 	
+	class<PK_BaseFlare> trailactor;
+	property trailactor : trailactor;
+	class<PK_ProjFlare> flareactor;	
+	property flareactor : flareactor;
 	property flarecolor : flarecolor;
 	property flarescale : flarescale;
 	property flarealpha : flarealpha;
@@ -113,7 +135,16 @@ Class PK_Projectile : Actor abstract {
 	property trailfade : trailfade;
 	property trailshrink : trailshrink;
 	property trailvel : trailvel;
-	property TranslucentTrail : TranslucentTrail;
+	Default {
+		projectile;
+		PK_Projectile.flarescale 0.065;
+		PK_Projectile.flarealpha 0.7;
+		PK_Projectile.trailscale 0.04;
+		PK_Projectile.trailalpha 0.4;
+		PK_Projectile.trailfade 0.1;
+		PK_Projectile.flareactor "PK_ProjFlare";
+		PK_Projectile.trailactor "PK_BaseFlare";
+	}
 	
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -121,7 +152,7 @@ Class PK_Projectile : Actor abstract {
 			spawnpos = pos;
 		if (!flarecolor)
 			return;
-		let fl = PK_ProjFlare( Spawn("PK_ProjFlare",pos) );
+		let fl = PK_ProjFlare( Spawn(flareactor,pos) );
 		if (fl) {
 			fl.master = self;
 			fl.fcolor = flarecolor;
@@ -148,22 +179,21 @@ Class PK_Projectile : Actor abstract {
 		int steps = int( distance );
 		
 		for( int i = 0; i < steps; i++ )  {
-			//if (target && distance3d(target) > 128) { //give us some distance so that the smoke doesn't spawn right in the players face
-				let trl = PK_BaseFlare( Spawn("PK_BaseFlare",oldPos) );
-				if (trl) {
-					trl.master = self;
-					trl.fcolor = trailcolor;
-					trl.fscale = trailscale;
-					trl.falpha = trailalpha;
-					if (TranslucentTrail)
-						trl.A_SetRenderstyle(alpha,STYLE_Translucent);
-					if (trailfade != 0)
-						trl.fade = trailfade;
-					if (trailshrink != 0)
-						trl.shrink = trailshrink;
-					if (trailvel != 0)
-						trl.vel = (frandom(-trailvel,trailvel),frandom(-trailvel,trailvel),frandom(-trailvel,trailvel));
-				}
+			let trl = PK_BaseFlare( Spawn(trailactor,oldPos) );
+			if (trl) {
+				trl.master = self;
+				trl.fcolor = trailcolor;
+				trl.fscale = trailscale;
+				trl.falpha = trailalpha;
+				if (trailactor.GetClassName() == "PK_BaseFlare")
+					trl.A_SetRenderstyle(alpha,Style_Shaded);
+				if (trailfade != 0)
+					trl.fade = trailfade;
+				if (trailshrink != 0)
+					trl.shrink = trailshrink;
+				if (trailvel != 0)
+					trl.vel = (frandom(-trailvel,trailvel),frandom(-trailvel,trailvel),frandom(-trailvel,trailvel));
+			}
 			oldPos = level.vec3Offset( oldPos, direction );
 		}
 	}

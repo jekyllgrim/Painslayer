@@ -21,14 +21,14 @@ Class PK_BaseActor : Actor abstract {
 		return ret;
 	}
 	
-	int BD_Sign (int i) {
+	int PK_Sign (int i) {
 		if (i >= 0)
 			return 1;
 		else
 			return -1;
 	}
 	
-	static const string BD_LiquidFlats[] = { 
+	static const string PK_LiquidFlats[] = { 
 		"BLOOD", "LAVA", "NUKAGE", "SLIME01", "SLIME02", "SLIME03", "SLIME04", "SLIME05", "SLIME06", "SLIME07", "SLIME08", "BDT_"
 	};
 	
@@ -38,8 +38,8 @@ Class PK_BaseActor : Actor abstract {
 		if (GetFloorTerrain().isLiquid == true)
 			return true;
 		string tex = TexMan.GetName(floorpic);
-		for (int i = 0; i < BD_LiquidFlats.Size(); i++) {
-			if (tex.IndexOf(BD_LiquidFlats[i]) >= 0 )
+		for (int i = 0; i < PK_LiquidFlats.Size(); i++) {
+			if (tex.IndexOf(PK_LiquidFlats[i]) >= 0 )
 				return true;
 		}
 		return false;
@@ -65,41 +65,12 @@ Class PK_BaseActor : Actor abstract {
 }
 
 	
-Class PKPuff : Actor abstract {
-	Default {
-		+NOBLOCKMAP
-		+NOGRAVITY
-		+FORCEXYBILLBOARD
-		-ALLOWPARTICLES
-		+DONTSPLASH
-		-FLOORCLIP
-	}
-}
 
-Class PK_NullPuff : Actor {
-	Default {
-		decal "none";
-		+NODECAL
-		+NOINTERACTION
-		+BLOODLESSIMPACT
-		+PAINLESS
-		+PUFFONACTORS
-		+NODAMAGETHRUST
-	}
-	states {
-		Spawn:
-			TNT1 A 1;
-			stop;
-	}
-}
 
 Class PK_BaseDebris : PK_BaseActor abstract {
 	protected bool landed;			//true if object landed on the floor (or ceiling, if can stick to ceiling)
 	protected bool moving; 		//marks actor as moving; sets to true automatically if actor spawns with non-zero vel
-	name sfxtype; //'debris', 'flames', 'blood', 'gibs' — based on the value the thing gets put into a special array that controls their number, see bd_events.zc
-	property sfxtype : sfxtype;
 	Default {
-		PK_BaseDebris.sfxtype 'debris';
 		+ROLLSPRITE
 		+FORCEXYBILLBOARD
 		+INTERPOLATEANGLES
@@ -221,7 +192,7 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 			if (d_spawn && InStateSequence(curstate,d_spawn)) {
 				//check if hit ceiling: (if hitceiling is true)
 				if (hitceiling && pos.z >= ceilingz - 10 && vel.z > 0) {
-					BD_Hitceiling();
+					PK_Hitceiling();
 					if (!self)
 						return;
 				}
@@ -250,7 +221,7 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 							A_FaceMovementDirection();
 						}
 						else
-							BD_HitWall();
+							PK_HitWall();
 					}
 					if (!self)
 						return;
@@ -288,7 +259,7 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 					if (liquid || !bBOUNCEONFLOORS || abs(vel.z) <= 2) {
 						if (liquid)
 							onliquid = true;
-						BD_HitFloor();	
+						PK_HitFloor();	
 					}
 					else {
 						SetZ(floorz+Voffset);
@@ -307,7 +278,7 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 		if (moving)
 			SetOrigin(level.vec3offset(pos, vel),true);
 	}
-	virtual void BD_HitFloor() {			//hit floor if close enough
+	virtual void PK_HitFloor() {			//hit floor if close enough
 		if (removeonfall) {
 			destroy();
 			return;
@@ -335,7 +306,7 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 			SetState(d_death);
 		SetZ(floorz+Voffset);
 	}
-	virtual void BD_Hitceiling() {
+	virtual void PK_Hitceiling() {
 		if (ceilingpic == skyflatnum) {
 			destroy();
 			return;
@@ -344,7 +315,7 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 		if (d_ceiling)
 			SetState(d_ceiling);
 	}
-	virtual void BD_HitWall() {
+	virtual void PK_HitWall() {
 		if (d_wall)
 			SetState(d_wall);	
 	}
@@ -352,6 +323,32 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 	Spawn:
 		#### # -1;
 		stop;
+	}
+}
+
+Class PK_RicochetSpark : PK_SmallDebris {
+	Default {
+		PK_SmallDebris.dbrake 0.9;
+		alpha 1.5;
+		radius 3;
+		height 3;
+		scale 0.035;
+		+BRIGHT
+	}
+	override Void PostBeginPlay() {
+		if (waterlevel > 1) {
+			destroy();
+			return;
+		}
+		super.PostbeginPlay();
+	}
+	states {
+	Spawn:
+		SPRK # 1 {
+			A_FadeOut(0.03);
+			scale *= 0.95;
+		}
+		loop;
 	}
 }
 
@@ -425,10 +422,12 @@ Class PK_Tracer : FastProjectile {
 Class PK_BaseFlare : PK_SmallDebris {
 	protected state mdeath;
 	protected state mxdeath;
-	name fcolor;		//flare of the color; can be set as a property or externally
+	color fcolor;
+	property fcolor : fcolor;
+	bool style;
+	property style : style;
 	double fscale;		//scale; used to when scale needs to be easily set externally from the spawner
 	double falpha;		//alpha; used to when scale needs to be easily set externally from the spawner
-	property fcolor : fcolor;
 	double fade;
 	property fadefactor : fade;
 	double shrink;
@@ -436,7 +435,7 @@ Class PK_BaseFlare : PK_SmallDebris {
 	Default {
 		+BRIGHT
 		+NOINTERACTION
-		renderstyle 'Add';
+		renderstyle 'AddShaded';
 		alpha 0.4;
 		scale 0.4;
 		gravity 0;
@@ -450,15 +449,16 @@ Class PK_BaseFlare : PK_SmallDebris {
 		SetColor();
 	}
 	virtual void SetColor() { //fcolor is meant to be set by the actor that spawns the flare
-		switch (fcolor) {
-			case 'red'		: frame = 0; break;
-			case 'green'	: frame = 1; break;
-			case 'blue'		: frame = 2; break;
-			case 'yellow'	: frame = 3; break;
-			case 'white'	: frame = 4; break;
-			case 'gold'	: 	frame = 5; break;
-			case ''			: destroy(); return;
+		if (GetRenderstyle() == Style_AddShaded || GetRenderstyle() == Style_Shaded) {
+			if (!fcolor) {
+				destroy();
+				return;
+			}				
+			else {
+				SetShade(fcolor);
+			}
 		}
+		frame = style;
 		if (fscale != 0)
 			A_SetScale(fscale);
 		if (falpha != 0)
@@ -477,11 +477,10 @@ Class PK_BaseFlare : PK_SmallDebris {
 	}
 }
 
-	
 Class PK_ProjFlare : PK_BaseFlare {
 	double xoffset;
 	Default {
-		PK_BaseFlare.fcolor "Red";
+		PK_BaseFlare.fcolor "FF0000";
 		alpha 0.8;
 		scale 0.11;
 	}
@@ -501,13 +500,84 @@ Class PK_ProjFlare : PK_BaseFlare {
 	}
 }
 
-	
+Class PK_BaseSmoke : PK_SmallDebris abstract {
+	Default {
+		+NOINTERACTION
+		gravity 0;
+		renderstyle 'Add';
+		alpha 0.3;
+		scale 0.1;
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		if (waterlevel > 1) {
+			self.destroy();
+			return;
+		}
+		scale.x *= frandom[bdsfx](0.8,1.2);
+		scale.y *= frandom[bdsfx](0.8,1.2);
+		bSPRITEFLIP = randompick(0,1);
+	}
+	states	{
+	Spawn:
+		#### # 1 {
+			A_Fadeout(0.01);
+		}
+		loop;
+	}
+}
+
+//medium-sized dark smoke that raises over burnt bodies
+class PK_BlackSmoke : PK_BaseSmoke {
+	Default {
+		renderstyle 'Translucent';
+		alpha 0.3;
+		scale 0.3;
+	}
+	override void Tick() {
+		if (isFrozen())
+			return;
+		vel *= 0.99;
+		super.Tick();
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		roll += frandom[bdsfx](-40,40);
+	}
+	states	{
+	Spawn:
+		SMOK ABCDEFGHIJKLMNOPQ 2 NoDelay {
+			A_FadeOut(0.01);
+		}
+		SMOK R 2 {
+			A_FadeOut(0.005);
+			scale *= 0.99;
+		}
+		wait;
+	}
+}
+
+
+
+Class PK_RocketTrail : PK_BaseSmoke {
+	Default {
+		scale 0.1;
+		renderstyle 'Translucent';
+		alpha 0.3;
+	}
+	states {
+	Spawn:
+		SMOK ABCDEFGHIJKLMNOPQ 1 NoDelay A_FadeOut(0.03);
+		stop;
+	}
+}
 
 Class PK_EnemyDeathControl : Inventory {
 	KillerFlyTarget kft;
-	private int counter;
+	private int restcounter;
 	private int restlife;
 	private int maxlife;
+	private int age;
 	Default {
 		inventory.maxamount 1;
 	}
@@ -516,7 +586,7 @@ Class PK_EnemyDeathControl : Inventory {
 		if (!owner)
 			return;
 		restlife = random[cont](42,60);
-		maxlife = int(35*frandom[cont](5,8));
+		maxlife = int(35*frandom[cont](6,10));
 		kft = KillerFlyTarget(Spawn("KillerFlyTarget",owner.pos));
 		if (kft) {
 			kft.target = owner;
@@ -533,14 +603,16 @@ Class PK_EnemyDeathControl : Inventory {
 			destroy();
 			return;
 		}
+		if (!owner.isFrozen())
+			age++;
 		if (GetAge() == 1 && kft)
 			kft.vel = owner.vel;	
 		if  (owner.vel ~== (0,0,0)) {
-			counter++;
+			restcounter++;
 		}
 		else
-			counter = 0;
-		if (counter >= restlife || GetAge() > maxlife) {
+			restcounter = 0;
+		if (restcounter >= restlife || age > maxlife) {
 			if (kft)
 				kft.destroy();
 			owner.A_StartSound("world/bodypoof",CHAN_AUTO);
