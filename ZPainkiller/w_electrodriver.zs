@@ -13,6 +13,37 @@ Class PK_ElectroDriver : PKWeapon {
 		inventory.pickupsound "pickups/weapons/eldriver";
 		Tag "Electro/Driver";
 	}
+	action vector3 FindElectroTarget(int atkdist = 256) {
+		actor ltarget;			
+		double closestDist = double.infinity;
+		BlockThingsIterator itr = BlockThingsIterator.Create(self,atkdist);
+		while (itr.next()) {
+			let next = itr.thing;
+			if (next == self)
+				continue; 
+			if (!next.bShootable || !(next.bIsMonster || (next is "PlayerPawn")))
+				continue;
+			double dist = Distance3D(next);
+			if (dist > atkdist)
+				continue;
+			if (dist < closestDist)
+				closestDist = dist;
+			if (!CheckSight(next,SF_IGNOREWATERBOUNDARY))
+				continue;
+			double adiff = abs(DeltaAngle(angle,AngleTo(next,true)));
+			//Console.Printf("%s angle %d",next.Getclassname(),adiff);
+			if (adiff > 15)
+				continue;
+			ltarget = next;
+		}
+		vector3 atkpos;
+		if (!ltarget) {
+			FLineTraceData hit;
+			LineTrace(angle,atkdist,pitch,offsetz:player.viewz,data:hit);
+			return hit.HitLocation;
+		}
+		return ltarget.pos+(0,0,ltarget.height*0.5);
+	}
 	states {
 	Ready:
 		ELDR A 1 A_WeaponReady();
@@ -37,37 +68,7 @@ Class PK_ElectroDriver : PKWeapon {
 		TNT1 A 0 A_StartSound("weapons/edriver/electroloopstart",CHAN_VOICE);
 	AltHold:
 		ELDR A 1 {
-			int atkdist = 256;
-			actor ltarget;			
-			double closestDist = double.infinity;
-			BlockThingsIterator itr = BlockThingsIterator.Create(self,atkdist);
-			while (itr.next()) {
-				let next = itr.thing;
-				if (next == self)
-					continue; 
-				if (!next.bShootable || (!next.bIsMonster && !(next is "PlayerPawn")))
-					continue;
-				double dist = Distance3D(next);
-				if (dist > atkdist)
-					continue;
-				if (dist < closestDist)
-					closestDist = dist;
-				if (!CheckSight(next,SF_IGNOREWATERBOUNDARY))
-					continue;
-				double adiff = abs(DeltaAngle(angle,AngleTo(next,true)));
-				Console.Printf("%s angle %d",next.Getclassname(),adiff);
-				if (adiff > 15)
-					continue;
-				ltarget = next;
-			}
-			vector3 atkpos;
-			if (!ltarget) {
-				FLineTraceData hit;
-				LineTrace(angle,atkdist,pitch,offsetz:player.viewz,data:hit);
-				atkpos = hit.HitLocation;
-			}
-			else
-				atkpos = ltarget.pos+(0,0,ltarget.height*0.5);
+			vector3 atkpos = FindElectroTarget();
 			PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(30,8.5,10),style:STYLE_ADD);
 			PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(30,8.5,10),style:STYLE_ADD);
 			A_StartSound("weapons/edriver/electroloop",CHAN_WEAPON,CHANF_LOOPING);
