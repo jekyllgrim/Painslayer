@@ -120,6 +120,7 @@ Class PK_Projectile : Actor abstract {
 	double trailalpha;
 	double trailfade;
 	double trailvel;
+	double trailz;
 	double trailshrink;
 	
 	class<PK_BaseFlare> trailactor;
@@ -135,6 +136,7 @@ Class PK_Projectile : Actor abstract {
 	property trailfade : trailfade;
 	property trailshrink : trailshrink;
 	property trailvel : trailvel;
+	property trailz : trailz;
 	Default {
 		projectile;
 		PK_Projectile.flarescale 0.065;
@@ -179,7 +181,7 @@ Class PK_Projectile : Actor abstract {
 		int steps = int( distance );
 		
 		for( int i = 0; i < steps; i++ )  {
-			let trl = PK_BaseFlare( Spawn(trailactor,oldPos) );
+			let trl = PK_BaseFlare( Spawn(trailactor,oldPos+(0,0,trailz)) );
 			if (trl) {
 				trl.master = self;
 				trl.fcolor = trailcolor;
@@ -196,6 +198,43 @@ Class PK_Projectile : Actor abstract {
 			}
 			oldPos = level.vec3Offset( oldPos, direction );
 		}
+	}
+}
+
+Class PK_BulletTracer : FastProjectile {
+	Default {
+		-ACTIVATEIMPACT;
+		-ACTIVATEPCROSS;
+		+BLOODLESSIMPACT;
+		damage 0;
+		radius 4;
+		height 4;
+		speed 180;
+		renderstyle 'add';
+		alpha 0.85;
+		scale 0.3;
+	}    
+	states {
+	Spawn:
+		MODL A -1;
+		stop;
+	Death:
+		TNT1 A 1;
+		stop;
+	}
+}
+
+Class PK_RicochetBullet : PK_SmallDebris {
+	Default {
+		renderstyle 'Add';
+		alpha 0.8;
+		scale 0.4;
+		+BRIGHT
+	}
+	states {
+	Spawn:
+		MODL A 3;
+		stop;
 	}
 }
 

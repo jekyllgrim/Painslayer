@@ -683,32 +683,5 @@ Sprite "ELDSE0", 75, 77
 	Patch "ELDSE", 0, 0
 }
 
-Texture "ELSRA0", 128, 124
-{
-	YScale 1.200
-	Offset 64, 64
-	Patch "ELSR_1", 0, 0
-}
-
-Texture "ELSRB0", 128, 124
-{
-	YScale 1.200
-	Offset 64, 64
-	Patch "ELSR_2", 0, 0
-}
-
-Texture "ELSRC0[", 128, 124
-{
-	YScale 1.200
-	Offset 64, 64
-	Patch "ELSR_3", 0, 0
-}
-
-Texture "ELSRD0", 128, 124
-{
-	YScale 1.200
-	Offset 64, 64
-	Patch "ELSR_4", 0, 0
-}
 
 // End of texture definitions

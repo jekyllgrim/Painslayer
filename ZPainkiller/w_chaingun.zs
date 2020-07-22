@@ -60,7 +60,7 @@ Class PK_Chaingun : PKWeapon {
 				return ResolveState("AltFireEnd");
 			invoker.holddur++;
 			A_StartSound("weapons/chaingun/fire",flags:CHANF_OVERLAP);
-			A_FireBullets(2.5,2.5,-1,(5));			
+			A_FireBullets(2.5,2.5,-1,(5),pufftype:"PK_ShotgunPuff",missile:"PK_BulletTracer",spawnheight:player.viewz-40,spawnofs_xy:6);		
 			return ResolveState(null);
 		}
 		TNT1 A 0 A_ReFire();
@@ -73,11 +73,31 @@ Class PK_Chaingun : PKWeapon {
 			A_StartSound("weapons/chaingun/stop");
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 		}
-		MIGN ABCD 1 {
+		MIGN #### 1 {
+			let psp = player.FindPsprite(PSP_Weapon);
+			if (psp) {
+				psp.frame++;
+				if (psp.frame > 3)
+					psp.frame = 0;
+			}
 			A_WeaponReady();
 			invoker.atkzoom = Clamp(invoker.atkzoom - 0.006,0,0.1);
 			A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
 		}
+		MIGN # 1 {
+			let psp = player.FindPsprite(PSP_Weapon);
+			if (psp && psp.frame < 3) {
+				psp.frame++;
+			}
+			else
+				return ResolveState("AltFireEndDo");
+			A_WeaponReady();
+			invoker.atkzoom = Clamp(invoker.atkzoom - 0.003,0,0.1);
+			A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
+			return ResolveState(null);
+		}
+		wait;
+	AltFireEndDo:
 		MIGN AABBCCDD 1 {
 			A_WeaponReady();
 			invoker.atkzoom = Clamp(invoker.atkzoom - 0.006,0,0.1);
@@ -103,19 +123,86 @@ Class PK_Chaingun : PKWeapon {
 		loop;
 	}
 }
-		
 
 
-
-Class PK_Rocket : Rocket {
+Class PK_Rocket : PK_Projectile {
 	Default {
+		PK_Projectile.trailcolor "f4f4f4";
+		PK_Projectile.trailscale 0.04;
+		PK_Projectile.trailfade 0.035;
+		PK_Projectile.trailalpha 0.12;
 		speed 30;
-		scale 0.6;
 		seesound "weapons/chaingun/rocketfire";
 		deathsound "weapons/chaingun/rocketboom";
+		height 8;
+		radius 10;
+		decal 'Scorch';
 	}
 	override void PostBeginplay() {
 		super.PostBeginplay();
 		A_StartSound("weapons/chaingun/rocketfly",flags:CHANF_LOOPING,volume:0.8,attenuation:7);
+	}
+	override void Tick () {
+		Vector3 oldPos = self.pos;		
+		Super.Tick();
+		if (!farenough)
+			return;
+		Vector3 path = level.vec3Diff( self.pos, oldPos );
+		double distance = path.length() / clamp(int(trailscale * 50),1,8); //this determines how far apart the particles are
+		Vector3 direction = path / distance;
+		int steps = int( distance );
+		
+		for( int i = 0; i < steps; i++ )  {
+			let smk = Spawn("PK_RocketSmoke",oldPos+(frandom[smk](-4,4),frandom[smk](-4,4),frandom[smk](-4,4)));
+			if (smk) {
+				smk.vel = (frandom[smk](-1,1),frandom[smk](-1,1),frandom[smk](-1,1));
+			}
+			oldPos = level.vec3Offset( oldPos, direction );
+		}
+	}
+	states {
+	Spawn:
+		MODL A 1 NoDelay A_FaceMovementDirection(flags:FMDF_INTERPOLATE);
+		loop;
+	Death:
+		TNT1 A 0 { 
+			bNOGRAVITY = true;
+			A_RemoveChildren(1,RMVF_EVERYTHING);
+			A_StopSound(4);
+			bFORCEXYBILLBOARD = true;
+			A_SetRenderStyle(0.5,STYLE_Add);
+			double rs = (frandom(0.38,0.42)*randompick(-1,1));
+			A_SetScale(rs,rs);
+			A_SetRoll(random(0,359));
+			A_Quake(1,8,0,256,"");
+			A_StartSound("weapons/grenade/explosion",CHAN_5);
+			//for (int i = 8; i > 0; i--) 
+				//A_SpawnItemEx("SmokingPiece",0,0,0, random(3,6),0,random(5,8),random(0,360),0,48);
+			A_Explode();
+		}
+		BOM6 ABCDEFGHIJKLMNOPQRST 1 bright;
+		stop;
+	}
+}
+
+Class PK_RocketSmoke : PK_BaseSmoke {
+	Default {
+		alpha 0.5;
+		scale 0.05;
+		renderstyle 'translucent';
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		frame = random[smk](0,5);
+		wrot = frandom[smk](8,15)*randompick[smk](-1,1);
+	}
+	states	{
+	Spawn:		
+		SMO2 A 1 {
+			A_FadeOut(0.03);
+			scale *= 1.03;
+			roll+=wrot;
+		}
+		wait;
 	}
 }

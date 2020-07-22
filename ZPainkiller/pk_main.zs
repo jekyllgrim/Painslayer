@@ -172,10 +172,6 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 	}
 	//a chad tick override that skips Actor's super.tick!
 	override void Tick() {
-		/*if (alpha < 0){
-			destroy();
-			return;
-		}*/
 		if (isFrozen())
 			return;
 		//animation:
@@ -328,7 +324,7 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 
 Class PK_RicochetSpark : PK_SmallDebris {
 	Default {
-		PK_SmallDebris.dbrake 0.9;
+		PK_SmallDebris.dbrake 0.8;
 		alpha 1.5;
 		radius 3;
 		height 3;
@@ -352,24 +348,40 @@ Class PK_RicochetSpark : PK_SmallDebris {
 	}
 }
 
-Class PK_RicochetTracer : PK_SmallDebris {
+Class PK_RandomDebris : PK_SmallDebris {
 	Default {
-		+NOINTERACTION
-		+THRUACTORS
-		+DONTSPLASH
-		bouncetype "Hexen";
-		speed 40;
-		seesound "none";
-		deathsound "none";
-		renderstyle "Add";
-		alpha 0.8;
+		PK_SmallDebris.removeonliquid true;
+		PK_SmallDebris.dbrake 0.8;
+		+BOUNCEONWALLS
+		+ROLLCENTER
+		wallbouncefactor 0.5;
+		height 8;
+		renderstyle 'shaded';
+		stencilcolor "101010";
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		wrot = random[rnd](14,20)*randompick(-1,1);
+		frame = random (0,5);
+		roll = random[rnd](0,359);
+		A_SetScale(frandom[rnd](0.1,0.3)*randompick[rnd](-1,1));
 	}
 	states {
-		Spawn:
-			MODL A 2;
-			stop;
+	spawn:
+		PDEB # 1 {			
+			roll+=wrot;
+			wrot *= 0.99;
+		}
+		loop;
+	Death:
+		PDEB # 1 {
+			A_FadeOut(0.03);
+			scale *= 0.95;
+		}
+		loop;
 	}
 }
+		
 
 Class PK_Tracer : FastProjectile {
 	Default {
@@ -504,7 +516,7 @@ Class PK_BaseSmoke : PK_SmallDebris abstract {
 	Default {
 		+NOINTERACTION
 		gravity 0;
-		renderstyle 'Add';
+		renderstyle 'Translucent';
 		alpha 0.3;
 		scale 0.1;
 	}
@@ -517,6 +529,7 @@ Class PK_BaseSmoke : PK_SmallDebris abstract {
 		scale.x *= frandom[bdsfx](0.8,1.2);
 		scale.y *= frandom[bdsfx](0.8,1.2);
 		bSPRITEFLIP = randompick(0,1);
+		roll = random[bdsfx](0,359);
 	}
 	states	{
 	Spawn:
@@ -530,7 +543,6 @@ Class PK_BaseSmoke : PK_SmallDebris abstract {
 //medium-sized dark smoke that raises over burnt bodies
 class PK_BlackSmoke : PK_BaseSmoke {
 	Default {
-		renderstyle 'Translucent';
 		alpha 0.3;
 		scale 0.3;
 	}
@@ -557,18 +569,35 @@ class PK_BlackSmoke : PK_BaseSmoke {
 	}
 }
 
-
-
-Class PK_RocketTrail : PK_BaseSmoke {
+class PK_WhiteSmoke : PK_BaseSmoke {
 	Default {
+		alpha 0.5;
 		scale 0.1;
-		renderstyle 'Translucent';
-		alpha 0.3;
+		renderstyle 'add';
 	}
-	states {
-	Spawn:
-		SMOK ABCDEFGHIJKLMNOPQ 1 NoDelay A_FadeOut(0.03);
+	states	{
+	Spawn:		
+		SMOK ABCDEFGHIJKLMNOPQR 1 {
+			A_FadeOut(0.05);
+			scale *= 1.05;
+		}
 		stop;
+	}
+}
+
+Class PK_DeathSmoke : PK_BaseSmoke {
+	Default {
+		alpha 0.3;
+		scale 0.6;
+	}
+	states	{
+	Spawn:		
+		BSMO ABCDEFGHIJKLMNOPQRSTU 2 {
+			vel *= 0.97;
+			A_FadeOut(0.01);
+			scale *= 0.9;
+		}
+		wait;
 	}
 }
 
@@ -617,15 +646,30 @@ Class PK_EnemyDeathControl : Inventory {
 				kft.destroy();
 			owner.A_StartSound("world/bodypoof",CHAN_AUTO);
 			int rad = owner.radius;
-			for (int i = 64; i > 0; i--) {
-				owner.A_SpawnParticle("404040",SPF_FULLBRIGHT|SPF_RELATIVE, 
+			for (int i = 26; i > 0; i--) {
+				/*owner.A_SpawnItemEx("PK_DeathSmoke",frandom[part](4,rad),0,frandom[part](0,owner.height),
+					-0.5,0,frandom[part](0.5,1),
+					angle:random(0,359)
+				);*/
+				let smk = Spawn("PK_DeathSmoke",owner.pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,owner.height*1.5)));
+				if (smk)
+					smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
+				/*owner.A_SpawnParticle("404040",SPF_FULLBRIGHT|SPF_RELATIVE, 
 					lifetime:random(20,35),size:10,
 					angle: random(0,359),
 					xoff: frandom[part](-rad,rad), yoff:frandom[part](-rad,rad),zoff:frandom[part](owner.pos.z,owner.height),
 					velx:0.5,velz:frandom[part](0.2,1),
 					//accelx:0.1,accelz:-0.05,
 					startalphaf:0.9,sizestep:-0.4
-				);
+				);*/
+			}
+			for (int i = 8; i > 0; i--) {
+				let smk = Spawn("PK_WhiteSmoke",owner.pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](owner.pos.z,owner.height)));
+				if (smk) {
+					smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
+					smk.A_SetScale(0.4);
+					smk.alpha = 0.5;
+				}
 			}
 			Class<Inventory> soul = (owner.default.health >= 500) ? "PK_RedSoul" : "PK_Soul";			
 			double pz = (owner.pos.z == floorz) ? frandom[soul](8,14) : 0;

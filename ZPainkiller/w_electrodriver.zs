@@ -1,5 +1,6 @@
 Class PK_ElectroDriver : PKWeapon {
 	private bool attackrate;
+	private int celldepleterate;
 	Default {
 		weapon.slotnumber 5;
 		weapon.ammotype1 "PK_ShurikenBox";
@@ -87,6 +88,11 @@ Class PK_ElectroDriver : PKWeapon {
 				A_ClearRefire();
 				return ResolveState("DiskFire");
 			}
+			invoker.celldepleterate++;
+			if (invoker.celldepleterate > 3) {
+				TakeInventory("PK_Battery",1);
+				invoker.celldepleterate = 0;
+			}
 			vector3 atkpos = FindElectroTarget();
 			PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(30,8.5,10),style:STYLE_ADD);
 			PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(30,8.5,10),style:STYLE_ADD);
@@ -145,7 +151,7 @@ Class PK_ElectricPuff : PKPuff {
 				}
 			}
 			for (int i = random[eld](2,4); i > 0; i--) {
-				let part = Spawn("PK_ElectroSmoke",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
+				let part = Spawn("PK_WhiteSmoke",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
 				if (part) {
 					part.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](0.2,0.5));
 				}
@@ -155,26 +161,6 @@ Class PK_ElectricPuff : PKPuff {
 	}
 }
 			
-
-class PK_ElectroSmoke : PK_BaseSmoke {
-	Default {
-		alpha 0.25;
-		scale 0.2;
-		renderstyle 'add';
-	}
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		roll = random[bdsfx](0,359);
-	}
-	states	{
-	Spawn:		
-		SMOK ABCDEFGHIJKLMNOPQR 1 {
-			A_FadeOut(0.01);
-			scale *= 1.05;
-		}
-		stop;
-	}
-}
 
 Class PK_ElectroTargetControl : Inventory {
 	protected int deadtics;
@@ -212,6 +198,7 @@ Class PK_ElectroTargetControl : Inventory {
 			smk.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](0.6,0.9));
 		}
 		if (owner.health <= 0) {
+			owner.A_SetTRanslation("Scorched");
 			owner.SetOrigin(owner.pos + (frandom[eld](-1,1),frandom[eld](-1,1),frandom[eld](0.5,1.5)),false);
 			age++;
 			if (age > deadtics){
@@ -263,7 +250,7 @@ Class PK_ElectroTarget : PK_BaseFlare {
 		}
 		loop;
 	End:
-		ELTE E 1 {
+		ELTE # 1 {
 			A_FadeOut(0.1);
 		}
 		wait;
@@ -311,7 +298,7 @@ Class PK_Shuriken : PK_Projectile {
 	}
 	states {
 	Spawn:
-		MODL A 1 {
+		MODL A 1 NoDelay {
 			A_FaceMovementDirection(flags:FMDF_INTERPOLATE );
 			spriterotation += 10;
 			if (age > 16)
@@ -435,9 +422,9 @@ Class PK_DiskProjectile : PK_Shuriken {
 				}
 			}
 			for (int i = random[eld](2,4); i > 0; i--) {
-				let part = Spawn("PK_ElectroSmoke",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
-				if (part) {
-					part.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](0.2,0.5));
+				let smk = Spawn("PK_WhiteSmoke",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
+				if (smk) {
+					smk.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](0.2,0.5));
 				}
 			}
 			deadtics++;

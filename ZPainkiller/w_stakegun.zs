@@ -77,6 +77,8 @@ Class PK_Stakegun : PKWeapon {
 			goto ready;
 	}
 }
+		
+
 
 /* The stake can pierce a monster and pin them to a wall (or a solid actor)
 but at the same time it's NOT a piercing projectile, i.e. it should only damage
@@ -182,12 +184,14 @@ Class PK_Stake : PK_Projectile {
 					let stakegun = PK_Stakegun(target.FindInventory("PK_Stakegun"));
 					if (stakegun && stakegun.grenades.size() > 0) {
 						for (int i = stakegun.grenades.size()-1; i >= 0; i--) {
-							if (stakegun.grenades[i] && Distance3D(stakegun.grenades[i]) < 24) {
-								let a = Spawn("Rocket",stakegun.grenades[i].pos);
+							if (stakegun.grenades[i] && Distance3D(stakegun.grenades[i]) < 32) {
+								let a = Spawn("PK_ExplosiveStake",stakegun.grenades[i].pos);
 								if (a) {
 									a.vel = vel;
 									a.angle = angle;
-									a.pitch = pitch;
+									a.pitch = pitch+5;
+									a.target = target;
+									A_StartSound("weapons/stakegun/combo");
 								}
 								stakegun.grenades[i].destroy();
 								destroy();
@@ -199,7 +203,7 @@ Class PK_Stake : PK_Projectile {
 			}
 			loop;
 		Death: 
-			MODL A -1 { 
+			MODL A 100 { 
 				bNOINTERACTION = true;
 				bNOGRAVITY = true;
 				A_Stop();
@@ -219,9 +223,11 @@ Class PK_Stake : PK_Projectile {
 					pinvictim.destroy();
 					hitvictim.TakeInventory("PK_PinToWall",1);
 				}
-				A_SprayDecal("Stakedecal",8);
+				A_SprayDecal("Stakedecal",8);				
 			}
-			stop;
+			TNT1 A 0 A_SetRenderStyle(1.0,Style_Translucent);
+			MODL A 1 A_FadeOut(0.03);
+			wait;
 		Crash:
 		XDeath:
 			TNT1 A 1;
@@ -293,13 +299,14 @@ Class PK_StakeStuck : Actor {
 					pitch = 0;
 					bRELATIVETOFLOOR = true;
 					bMOVEWITHSECTOR = true;
+					A_SetRenderStyle(1.0,Style_Translucent);
 					SetStateLabel("End");
 				}
 			}
 			loop;
 		End:
-			MODL A -1;
-			stop;
+			MODL A 1 A_FadeOut(0.03);
+			loop;
 	}
 }
 
@@ -383,7 +390,6 @@ Class PK_Grenade : PK_Projectile {
 		height 6;
 		radius 8;
 		speed 13;
-		scale 0.6;
 	}
 	override void Tick() {
 		super.Tick();
@@ -395,13 +401,22 @@ Class PK_Grenade : PK_Projectile {
 			stakegun.grenades.delete(stakegun.grenades.Find(self));
 		}
 	}
-			
 	states {
 		Spawn:
-			BAL1 A 1 {
+			MODL A 1 {
 				if (vel.length() < 3) {
 					bMISSILE = false;
 				}
+				if (pos.z <= floorz+4) {
+					pitch+= 15;
+					let smk = Spawn("PK_WhiteSmoke",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
+					if (smk) {
+						smk.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](0.2,0.5));
+						smk.A_SetScale(0.32);
+					}
+				}
+				else
+					A_FaceMovementDirection(flags:FMDF_INTERPOLATE);
 				if (age > 35*2)
 					SetStateLabel("XDeath");
 			}
@@ -427,3 +442,38 @@ Class PK_Grenade : PK_Projectile {
 	}
 }	
 
+Class PK_ExplosiveStake : PK_Projectile {
+	Default {
+		PK_Projectile.trailcolor "ffe8b1";
+		PK_Projectile.trailscale 0.02;
+		PK_Projectile.trailfade 0.04;
+		PK_Projectile.trailalpha 0.35;
+		-NOGRAVITY
+		speed 60;
+		gravity 0.45;
+		radius 4;
+		height 4;
+		damage 0;
+		decal "Scorch";
+		obituary "%k was impressed by %o's grenade-on-a-stick";
+	}
+	states {
+	Spawn:
+		MODL A 1;
+		loop;
+	Death:
+		TNT1 A 0 { 
+			bNOGRAVITY = true;
+			bFORCEXYBILLBOARD = true;
+			A_SetRenderStyle(0.5,STYLE_Add);
+			double rs = (frandom(0.38,0.42)*randompick(-1,1));
+			A_SetScale(rs,rs);
+			A_SetRoll(random(0,359));
+			A_Quake(1,8,0,256,"");
+			A_StartSound("weapons/stakegun/comboexplosion",CHAN_AUTO);
+			A_Explode(280,200);
+		}
+		BOM6 ABCDEFGHIJKLMNOPQRST 1 bright;
+		stop;
+	}
+}

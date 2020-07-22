@@ -35,9 +35,10 @@ weapons/shell3			     SHELLS3
 
 //== Stakegun
 
-weapons/stakegun/fire		STAKSHOT
-weapons/stakegun/grenade	STAKGREN
-weapons/stakegun/combo		STAKCOMB
+weapons/stakegun/fire			STAKSHOT
+weapons/stakegun/grenade		STAKGREN
+weapons/stakegun/combo			STAKCOMB
+weapons/stakegun/comboexplosion	STAKEXP
 $random weapons/stakegun/hit	{ stakhit1 stakhit2 }
 stakhit1	stakhit1
 stakhit2	stakhit2
@@ -45,6 +46,9 @@ stakhit2	stakhit2
 weapons/grenade/bounce		GRENBOUN
 weapons/grenade/explosion	GRENEXPL
 weapons/grenade/load		GRENLOAD
+$limit weapons/grenade/bounce 0
+$limit weapons/grenade/explosion 0
+$limit weapons/grenade/load 0
 
 
 //== Rocket-minigun

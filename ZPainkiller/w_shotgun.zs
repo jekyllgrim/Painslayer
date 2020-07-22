@@ -38,7 +38,7 @@ Class PK_Shotgun : PKWeapon {
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			A_Quake(1,7,0,32,"");
 			A_StartSound("weapons/shotgun/fire",CHAN_VOICE);
-			A_firebullets(5,5,14,3);
+			A_firebullets(5,5,14,3,pufftype:"PK_ShotgunPuff");
 			A_ZoomFactor(0.99,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			//A_Eject				
 		}
@@ -80,6 +80,39 @@ Class PK_Shotgun : PKWeapon {
 		PSHT A 1 A_WeaponOffset(0,32,WOF_INTERPOLATE);
 		TNT1 A 0 A_ReFire();			
 		goto ready;
+	}
+}
+
+Class PK_ShotgunPuff : PKPuff {
+	states {
+	Spawn:
+		TNT1 A 1 NoDelay {
+			if (random[sfx](0,10) > 7)
+				A_SpawnItemEx("PK_RicochetBullet",xvel:30,zvel:frandom[sfx](-10,10),angle:random[sfx](0,359));
+			A_SpawnItemEx("PK_RandomDebris",xvel:frandom[sfx](-4,4),yvel:frandom[sfx](-4,4),zvel:frandom[sfx](3,5));
+			for (int i = 3; i > 0; i--) {
+				let smk = Spawn("PK_ShotgunPuffSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
+				if (smk) {
+					smk.vel = (frandom[sfx](-0.4,0.4),frandom[sfx](-0.4,0.4),frandom[sfx](0.1,0.5));
+				}
+			}
+		}
+		stop;
+	}
+}
+
+class PK_ShotgunPuffSmoke : PK_BlackSmoke {
+	Default {
+		alpha 0.3;
+		scale 0.12;
+	}
+	states	{
+	Spawn:
+		SMOK ABCDEFGHIJKLMNOPQR 1 NoDelay {
+			A_FadeOut(0.02);
+			scale *= 0.9;
+		}
+		wait;
 	}
 }
 	
