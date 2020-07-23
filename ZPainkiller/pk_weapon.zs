@@ -335,6 +335,7 @@ Class PK_DebrisFlame : PK_BaseFlare {
 	Default {
 		scale 0.05;
 		renderstyle 'translucent';
+		alpha 1;
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -343,7 +344,7 @@ Class PK_DebrisFlame : PK_BaseFlare {
 	}
 	states {
 	Spawn:
-		BOM6 IJKLMNOP 1 {
+		BOM4 KLMNOPQ 1 {
 			A_FadeOut(0.05);
 			roll += wrot;
 			scale *= 1.05;

@@ -61,6 +61,7 @@ Class PK_Chaingun : PKWeapon {
 				return ResolveState("AltFireEnd");
 			invoker.holddur++;
 			A_StartSound("weapons/chaingun/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
+			A_Overlay(-100,"AltFlash");
 			A_FireBullets(2.5,2.5,-1,7,pufftype:"PK_ShotgunPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-40,spawnofs_xy:8.6);
 			
 			A_QuakeEX(1,1,0,2,0,1,sfx:"world/null");
@@ -105,6 +106,16 @@ Class PK_Chaingun : PKWeapon {
 				A_ZoomFactor(frandom[mgun](0.96,0.9575),ZOOM_NOSCALETURNING);				
 		}
 		loop;
+	AltFlash:
+		CMUZ A 1 bright {
+			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
+			A_OverlayRenderstyle(OverlayID(),Style_Add);
+			A_OverlayAlpha(OverlayID(),0.95);
+			let fl = Player.FindPsprite(OverlayID());
+			if (fl)
+				fl.frame = random[sfx](0,3);
+			}
+		stop;
 	}
 }
 
@@ -117,14 +128,13 @@ Class PK_Rocket : PK_Projectile {
 		PK_Projectile.trailalpha 0.12;
 		speed 30;
 		seesound "weapons/chaingun/rocketfire";
-		deathsound "weapons/chaingun/rocketboom";
 		height 8;
 		radius 10;
 		decal 'Scorch';
 	}
 	override void PostBeginplay() {
 		super.PostBeginplay();
-		A_StartSound("weapons/chaingun/rocketfly",flags:CHANF_LOOPING,volume:0.8,attenuation:7);
+		A_StartSound("weapons/chaingun/rocketfly",CHAN_5,flags:CHANF_LOOPING,volume:0.8,attenuation:4);
 	}
 	override void Tick () {
 		Vector3 oldPos = self.pos;		
@@ -152,9 +162,8 @@ Class PK_Rocket : PK_Projectile {
 		TNT1 A 1 { 
 			bNOGRAVITY = true;
 			A_RemoveChildren(1,RMVF_EVERYTHING);
-			A_StopSound(4);
 			A_Quake(1,8,0,256,"");
-			A_StartSound("weapons/grenade/explosion",CHAN_5);
+			A_StartSound("weapons/chaingun/rocketboom",CHAN_5);
 			A_Explode();
 			Spawn("PK_GenericExplosion",pos);
 		}

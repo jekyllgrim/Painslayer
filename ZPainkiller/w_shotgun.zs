@@ -39,6 +39,7 @@ Class PK_Shotgun : PKWeapon {
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			A_Quake(1,7,0,1,"");
 			A_StartSound("weapons/shotgun/fire",CHAN_VOICE);
+			A_Overlay(-100,"Flash");
 			A_firebullets(5,5,10,9,pufftype:"PK_ShotgunPuff",flags:FBF_NORANDOM|FBF_USEAMMO);
 			A_ZoomFactor(0.99,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			//A_Eject				
@@ -81,6 +82,16 @@ Class PK_Shotgun : PKWeapon {
 		PSHT A 1 A_WeaponOffset(0,32,WOF_INTERPOLATE);
 		TNT1 A 0 A_ReFire();			
 		goto ready;
+	Flash:
+		SMUZ A 2 bright {
+			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
+			A_OverlayRenderstyle(OverlayID(),Style_Add);
+			A_OverlayAlpha(OverlayID(),0.95);
+			let fl = Player.FindPsprite(OverlayID());
+			if (fl)
+				fl.frame = random[sfx](0,3);
+			}
+		stop;
 	}
 }
 
