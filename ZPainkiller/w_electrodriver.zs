@@ -2,6 +2,7 @@ Class PK_ElectroDriver : PKWeapon {
 	private bool attackrate;
 	private int celldepleterate;
 	Default {
+		PKWeapon.emptysound "weapons/empty/electrodriver";
 		weapon.slotnumber 5;
 		weapon.ammotype1 "PK_ShurikenBox";
 		weapon.ammogive1 20;
@@ -56,10 +57,12 @@ Class PK_ElectroDriver : PKWeapon {
 	states {
 	Ready:
 		ELDR A 1 {
-			A_WeaponReady();
-			let psp = player.FindPSprite(-10);
-			if (!psp)
-				A_Overlay(-10,"ElectricSpark");
+			PK_WeaponReady();
+			if (CountInv("PK_Battery") > 0) {
+				let psp = player.FindPSprite(-10);
+				if (!psp)
+					A_Overlay(-10,"ElectricSpark");
+			}
 		}
 		loop;
 	Fire:
@@ -127,7 +130,7 @@ Class PK_ElectroDriver : PKWeapon {
 				A_OverlayRenderstyle(OverlayID(),STYLE_Add);
 			}
 			ELDS A 1 bright {
-				if (!player.readyweapon || player.readyweapon != invoker)	
+				if (!player.readyweapon || player.readyweapon != invoker || CountInv("PK_Battery") < 1)	
 					return ResolveState("Null");
 				let psp = player.FindPSprite(overlayID());
 				if (psp)

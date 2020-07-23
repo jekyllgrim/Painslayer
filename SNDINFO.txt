@@ -1,8 +1,21 @@
 world/bodypoof	BODYPOOF
+world/null	DSEMPTY
 
 ///WEAPONS\\\
 
 weapons/select	WSELECT
+
+weapons/empty/shotgun			drySTG
+weapons/empty/rifle				dryRIFL
+weapons/empty/electrodriver		dryELD
+weapons/empty/chaingun			dryMGUN
+
+$random weapons/bullet/ricochet { brico1 brico2 brico3 brico4 }
+$limit weapons/bullet/ricochet 1
+brico1	bulletw1
+brico2	bulletw2
+brico3	bulletw3
+brico4	bulletw4
 
 //== Painkiller
 
@@ -48,6 +61,13 @@ weapons/stakegun/comboexplosion	STAKEXP
 $random weapons/stakegun/hit	{ stakhit1 stakhit2 }
 stakhit1	stakhit1
 stakhit2	stakhit2
+
+$random weapons/stakegun/stakewall { stakewall1 stakewall2 stakewall3 stakewall4 stakewall5 }
+stakewall1	"sounds/stakegun/stake-default1.wav"
+stakewall2	"sounds/stakegun/stake-default2.wav"
+stakewall3	"sounds/stakegun/stake-default3.wav"
+stakewall4	"sounds/stakegun/stake-default4.wav"
+stakewall5	"sounds/stakegun/stake-default5.wav"
 
 weapons/grenade/bounce		GRENBOUN
 weapons/grenade/explosion	GRENEXPL

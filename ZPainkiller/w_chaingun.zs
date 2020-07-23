@@ -2,6 +2,7 @@ Class PK_Chaingun : PKWeapon {
 	private int holddur;
 	private double atkzoom;
 	Default {
+		PKWeapon.emptysound "weapons/empty/chaingun";
 		weapon.slotnumber 4;
 		weapon.ammotype1	"PK_Bombs";
 		weapon.ammouse1	1;
@@ -24,14 +25,14 @@ Class PK_Chaingun : PKWeapon {
 	Ready:
 		MIGN A 1 {
 			invoker.holddur = 0;
-			A_WeaponReady();
+			PK_WeaponReady();
 		}
 		loop;
 	Fire:
 		MIGN A 2 {
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			A_Quake(1,9,0,32,"");
-			A_FireProjectile("PK_Rocket",spawnofs_xy:7,spawnheight:-2);
+			A_FireProjectile("PK_Rocket",spawnofs_xy:6,spawnheight:-2);
 			A_ZoomFactor(0.98,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 		}
 		TNT1 A 0 A_ZoomFactor(1,ZOOM_NOSCALETURNING);
@@ -59,8 +60,10 @@ Class PK_Chaingun : PKWeapon {
 			if (invoker.ammo2.amount < 1)
 				return ResolveState("AltFireEnd");
 			invoker.holddur++;
-			A_StartSound("weapons/chaingun/fire",flags:CHANF_OVERLAP);
-			A_FireBullets(2.5,2.5,-1,(5),pufftype:"PK_ShotgunPuff",missile:"PK_BulletTracer",spawnheight:player.viewz-40,spawnofs_xy:6);		
+			A_StartSound("weapons/chaingun/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
+			A_FireBullets(2.5,2.5,-1,7,pufftype:"PK_ShotgunPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-40,spawnofs_xy:8.6);
+			
+			A_QuakeEX(1,1,0,2,0,1,sfx:"world/null");
 			return ResolveState(null);
 		}
 		TNT1 A 0 A_ReFire();
@@ -74,18 +77,18 @@ Class PK_Chaingun : PKWeapon {
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 		}
 		MIGN ABCD 1 {
-			A_WeaponReady();
+			PK_WeaponReady();
 			invoker.atkzoom = Clamp(invoker.atkzoom - 0.006,0,0.1);
 			A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
 		}
 	AltFireEndDo:
 		MIGN AABBCCDD 1 {
-			A_WeaponReady();
+			PK_WeaponReady();
 			invoker.atkzoom = Clamp(invoker.atkzoom - 0.006,0,0.1);
 			A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
 		}
 		MIGN AAABBBCCCCDDDD 1 {
-			A_WeaponReady();
+			PK_WeaponReady();
 			invoker.atkzoom = Clamp(invoker.atkzoom - 0.006,0,0.1);
 			A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
 		}

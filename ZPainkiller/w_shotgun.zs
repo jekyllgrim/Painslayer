@@ -1,6 +1,7 @@
 Class PK_Shotgun : PKWeapon {
 	int freload; //counter for freezer reload to prevent from quickly re-entering AltFire by using Fire first
 	Default {
+		PKWeapon.emptysound "weapons/empty/shotgun";
 		weapon.slotnumber 2;
 		weapon.ammotype1 "PK_Shells";
 		weapon.ammogive1 20;
@@ -28,17 +29,17 @@ Class PK_Shotgun : PKWeapon {
 	Ready:
 		PSHT A 1 {
 			if (invoker.freload <= 0)
-				A_WeaponReady();
+				PK_WeaponReady();
 			else
-				A_WeaponReady(WRF_NOSECONDARY);
+				PK_WeaponReady(WRF_NOSECONDARY);
 		}
 		loop;
 	Fire:
 		PSHT A 2 {
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
-			A_Quake(1,7,0,32,"");
+			A_Quake(1,7,0,1,"");
 			A_StartSound("weapons/shotgun/fire",CHAN_VOICE);
-			A_firebullets(5,5,10,9,pufftype:"PK_ShotgunPuff",flags:FBF_NORANDOM);
+			A_firebullets(5,5,10,9,pufftype:"PK_ShotgunPuff",flags:FBF_NORANDOM|FBF_USEAMMO);
 			A_ZoomFactor(0.99,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			//A_Eject				
 		}
@@ -50,7 +51,7 @@ Class PK_Shotgun : PKWeapon {
 		PSHT DDCCBBAAA 1 A_WeaponOffset(-1.66,-0.66,WOF_ADD);
 		PSHT A 8 { //allows immediate primary refire but prevents using altfire immediately
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
-			A_WeaponReady(WRF_NOSECONDARY|WRF_NOBOB);
+			PK_WeaponReady(WRF_NOSECONDARY|WRF_NOBOB);
 		}
 		goto ready;
 	AltFire:
@@ -63,19 +64,19 @@ Class PK_Shotgun : PKWeapon {
 		}
 		PSHF BCDE 2 {
 			A_WeaponOffset(-1,   1.2,WOF_ADD);
-			A_WeaponReady(WRF_NOSECONDARY|WRF_DISABLESWITCH|WRF_NOBOB);
+			PK_WeaponReady(WRF_NOSECONDARY|WRF_DISABLESWITCH|WRF_NOBOB);
 		}
 		PSHF FGHI 4 {
 			A_WeaponOffset(-0.4, 0.4,WOF_ADD);
-			A_WeaponReady(WRF_NOSECONDARY|WRF_DISABLESWITCH|WRF_NOBOB);
+			PK_WeaponReady(WRF_NOSECONDARY|WRF_DISABLESWITCH|WRF_NOBOB);
 		}
 		PSHF JKLM 4 {
 			A_WeaponOffset( 0.4,-0.4,WOF_ADD);
-			A_WeaponReady(WRF_NOSECONDARY|WRF_DISABLESWITCH|WRF_NOBOB);
+			PK_WeaponReady(WRF_NOSECONDARY|WRF_DISABLESWITCH|WRF_NOBOB);
 		}
 		PSHF EDCB 2 {
 			A_WeaponOffset( 1,  -1.2,WOF_ADD);
-			A_WeaponReady(WRF_NOSECONDARY|WRF_DISABLESWITCH|WRF_NOBOB);
+			PK_WeaponReady(WRF_NOSECONDARY|WRF_DISABLESWITCH|WRF_NOBOB);
 		}
 		PSHT A 1 A_WeaponOffset(0,32,WOF_INTERPOLATE);
 		TNT1 A 0 A_ReFire();			
@@ -90,8 +91,10 @@ Class PK_ShotgunPuff : PKPuff {
 	states {
 	Spawn:
 		TNT1 A 1 NoDelay {
-			if (random[sfx](0,10) > 7)
+			if (random[sfx](0,10) > 7) {
+				//A_StartSound("weapons/bullet/ricochet",attenuation:3);
 				A_SpawnItemEx("PK_RicochetBullet",xvel:30,zvel:frandom[sfx](-10,10),angle:random[sfx](0,359));
+			}
 			A_SpawnItemEx("PK_RandomDebris",xvel:frandom[sfx](-4,4),yvel:frandom[sfx](-4,4),zvel:frandom[sfx](3,5));
 			for (int i = 3; i > 0; i--) {
 				let smk = Spawn("PK_ShotgunPuffSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));

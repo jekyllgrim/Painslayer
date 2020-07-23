@@ -1,11 +1,15 @@
 Class PKWeapon : Weapon abstract {
+	sound emptysound;
+	property emptysound : emptysound;
 	Default {
 		weapon.BobRangeX 0.31;
 		weapon.BobRangeY 0.15;
 		weapon.BobStyle "InverseSmooth";
 		weapon.BobSpeed 1.7;
 		weapon.upsound "weapons/select";
-		+FLOATBOB
+		+FLOATBOB;
+		+WEAPON.AMMO_OPTIONAL;
+		+WEAPON.ALT_AMMO_OPTIONAL;
 		FloatBobStrength  0.3;
 	}
 	override void DoEffect()
@@ -22,7 +26,20 @@ Class PKWeapon : Weapon abstract {
 		if (icon)  {
 			icon.master = self;
 		}
-	}		
+	}
+	action void PK_WeaponReady(int flags = 0) {
+		if (player.cmd.buttons & BT_ATTACK && invoker.ammo1 && invoker.ammo1.amount < 1) {
+			if (!(player.oldbuttons & BT_ATTACK))
+				A_StartSound(invoker.emptysound);
+			return;
+		}
+		if (player.cmd.buttons & BT_ALTATTACK && invoker.ammo2 && invoker.ammo2.amount < 1) {
+			if (!(player.oldbuttons & BT_ALTATTACK))
+				A_StartSound(invoker.emptysound);
+			return;
+		}
+		A_WeaponReady(flags);
+	}
 	states {
 		Ready:
 			TNT1 A 1;

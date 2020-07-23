@@ -1,6 +1,7 @@
 Class PK_Stakegun : PKWeapon {
 	Array <Actor> grenades;
 	Default {
+		PKWeapon.emptysound "weapons/empty/rifle";
 		weapon.slotnumber 3;
 		weapon.ammotype1	"PK_Stakes";
 		weapon.ammouse1		1;
@@ -18,12 +19,14 @@ Class PK_Stakegun : PKWeapon {
 		Console.Printf("greandes: %d",grenades.size());
 	}*/
 	states {
+		Cache:
+			PSGT AHIJKLMN 0;
 		Spawn:
 			PSGZ ABCDEFGH 4;
 			loop;
 		Ready:
 			PSGN A 1 {
-				A_WeaponReady();
+				PK_WeaponReady();
 				if (CountInv("PK_Stakes") < 1) {
 					let psp = player.FindPSprite(PSP_Weapon);
 					if (psp)
@@ -51,28 +54,32 @@ Class PK_Stakegun : PKWeapon {
 			TNT1 A 0 A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			goto ready;
 		AltFire:
-			TNT1 A 0 {
+			PSGN A 0 {
 				A_StartSound("weapons/stakegun/grenade");
 				A_WeaponOffset(6,2,WOF_ADD);
 				let a = A_FireProjectile("PK_Grenade",spawnofs_xy:1,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
 				if (a) 
 					invoker.grenades.push(a);
+				if (CountInv("PK_Stakes") < 1) {
+					let psp = Player.FindPSprite(PSP_WEAPON);
+					if (psp)
+						psp.sprite = GetSpriteIndex("PSGT");
+				}
 			}
-			PSGN AAA 1 A_WeaponOffset(2,1,WOF_ADD);
-			TNT1 A 0 {
+			#### AL 1 A_WeaponOffset(5,3,WOF_ADD);
+			#### A 0 {
 				if (CountInv("PK_Bombs") > 0)
 					A_StartSound("weapons/grenade/load",CHAN_7);
 			}
-			PSGN LLL 1 A_WeaponOffset(2,1,WOF_ADD);
-			PSGN MMM 1 A_WeaponOffset(2,2,WOF_ADD);
-			PSGN MMMMLLLL 1 A_WeaponOffset(-2.5,-1.16,WOF_ADD);
-			PSGN AAAA 1 {
-				A_WeaponOffset(-1,-1.16,WOF_ADD);
-				A_WeaponReady(WRF_NOSECONDARY|WRF_NOSWITCH);
+			#### MNN 1 A_WeaponOffset(3.5,2.5,WOF_ADD);
+			#### NNNNMMMMLLLL 1 A_WeaponOffset(-1.6,-1,WOF_ADD);
+			#### AAAA 1 {
+				A_WeaponOffset(-0.32,-0.35,WOF_ADD);
+				PK_WeaponReady(WRF_NOSECONDARY|WRF_NOSWITCH);
 			}
-			PSGN A 5 {
+			#### A 5 {
 				A_WeaponOffset(0,32,WOF_INTERPOLATE);
-				A_WeaponReady();
+				PK_WeaponReady();
 			}
 			goto ready;
 	}
@@ -204,11 +211,13 @@ Class PK_Stake : PK_Projectile {
 			loop;
 		Death: 
 			MODL A 100 { 
+				if (blockingline) {
+					A_StartSound("weapons/stakegun/stakewall",attenuation:2);
+					A_SprayDecal("Stakedecal",8);		
+				}
 				bNOINTERACTION = true;
 				bNOGRAVITY = true;
 				A_Stop();
-				/*if (blockingline)
-					Console.printf("line side: %d",blockingline.side);*/
 				if (hitvictim)
 					hitvictim.A_Stop();	//stop moving the real corpse, otherwise it can slide pretty far away if we hit a floor, for example
 				if (pinvictim) {
@@ -222,8 +231,7 @@ Class PK_Stake : PK_Projectile {
 				if (pinvictim && hitvictim && !blockingline && pos.z <= floorz+4) { //remove the pinned corpse completely if the stake is basically on the floor
 					pinvictim.destroy();
 					hitvictim.TakeInventory("PK_PinToWall",1);
-				}
-				A_SprayDecal("Stakedecal",8);				
+				}		
 			}
 			TNT1 A 0 A_SetRenderStyle(1.0,Style_Translucent);
 			MODL A 1 A_FadeOut(0.03);
