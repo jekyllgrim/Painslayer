@@ -38,7 +38,7 @@ Class PK_Shotgun : PKWeapon {
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			A_Quake(1,7,0,32,"");
 			A_StartSound("weapons/shotgun/fire",CHAN_VOICE);
-			A_firebullets(5,5,14,3,pufftype:"PK_ShotgunPuff");
+			A_firebullets(5,5,10,9,pufftype:"PK_ShotgunPuff",flags:FBF_NORANDOM);
 			A_ZoomFactor(0.99,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			//A_Eject				
 		}
@@ -162,6 +162,50 @@ Class PK_FreezerProjectile : PK_Projectile {
 	}
 }
 
+Class PK_FrozenChunk : PK_SmallDebris {
+	Default {
+		PK_SmallDebris.dbrake 0.9;
+		renderstyle 'normal';
+		scale 0.6;
+		gravity 0.3;
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		wrot = frandom[sfx](4,8)*randompick[sfx](-1,1);
+		scale *= frandom[sfx](0.7,1.1);
+		frame = random[sfx](1,4);
+	}
+	override void Tick() {
+		super.Tick();
+		if (!master) {
+			let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-4,4),frandom[part](-4,4),frandom[part](0,4)));
+			if (smk) {
+				smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
+				smk.scale *= 0.6;
+			}
+			destroy();
+			return;
+		}
+	}
+	states {
+	Cache:
+		IGIB ABCDE 0;
+	Spawn:
+		IGIB # 1 {
+			roll += wrot;
+		}
+		loop;
+	Death:
+		IGIB # 1 {
+			scale *= 0.99;
+			if (scale.x < 0.01) {
+				destroy();
+				return;
+			}
+		}
+		loop;
+	}
+}
 	
 Class PK_FreezeControl : Inventory {
 	int fcounter;
@@ -174,6 +218,10 @@ Class PK_FreezeControl : Inventory {
 		inventory.amount 1;
 		inventory.maxamount 1;
 	}
+	override void ModifyDamage (int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
+		if (inflictor && owner && passive)
+			newdamage = damage*1.25;			
+	}
 	override void AttachToOwner(actor user) {
 		super.AttachToOwner(user);
 		if (!user)
@@ -184,6 +232,7 @@ Class PK_FreezeControl : Inventory {
 		user.painchance = 0;
 		ownertrans = user.translation;
 		user.A_SetTranslation("Ice");
+		user.A_StartSound("weapons/shotgun/freeze");
 	}
 	override void DoEffect() {
 		super.DoEffect();
@@ -197,7 +246,25 @@ Class PK_FreezeControl : Inventory {
 			return;
 		}
 		if (owner.health <= 0) {
-			owner.A_IceGuyDie();
+			int rad = owner.radius;
+			for (int i = random[sfx](24,32); i > 0; i--) {
+				let ice = Spawn("PK_FrozenChunk",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
+				if (ice) {
+					ice.vel = (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](2,6));
+					ice.master = owner;
+				}
+			}
+			owner.A_StartSound("weapons/shotgun/freezedeath");
+			owner.gravity = 0.4;
+			//owner.vel = (frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](3,6));
+			owner.vel *= 0.15;
+			owner.A_SetScale(Clamp(owner.radius*0.04,0.1,1));
+			owner.SetOrigin(owner.pos + (0,0,owner.default.height*0.5),false);
+			owner.bSPRITEFLIP = random[sfx](0,1);
+			owner.sprite = GetSpriteIndex("IGIB");
+			owner.frame = 0;
+			owner.A_SetTics(1000);
+			owner.deathsound = "";
 			DepleteOrDestroy();
 			return;
 		}

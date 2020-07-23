@@ -112,7 +112,7 @@ Class PK_Stake : PK_Projectile {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		basedmg = 100;
+		basedmg = 120;
 		if (target)
 			pitch = target.pitch; //In case it's fired at a floor or ceiling at point-blank range, the Spawn state won't be used and the stake won't receive proper pitch. So, we do this.
 	}
@@ -453,7 +453,7 @@ Class PK_ExplosiveStake : PK_Projectile {
 		gravity 0.45;
 		radius 4;
 		height 4;
-		damage 0;
+		damage 80;
 		decal "Scorch";
 		obituary "%k was impressed by %o's grenade-on-a-stick";
 	}
@@ -471,7 +471,7 @@ Class PK_ExplosiveStake : PK_Projectile {
 			A_SetRoll(random(0,359));
 			A_Quake(1,8,0,256,"");
 			A_StartSound("weapons/stakegun/comboexplosion",CHAN_AUTO);
-			A_Explode(280,200);
+			A_Explode(256,200);
 		}
 		BOM6 ABCDEFGHIJKLMNOPQRST 1 bright;
 		stop;

@@ -24,8 +24,14 @@ $limit weapons/painkiller/hitwall 0
 
 //== Shotgun-Freezer
 
-weapons/shotgun/fire		STGNFIRE
-weapons/shotgun/freezer		STGNFREZ
+weapons/shotgun/fire				STGNFIRE
+weapons/shotgun/freezer				STGNFREZ
+
+$random weapons/shotgun/freeze { sfreeze1 sfreeze2 sfreeze3 }
+sfreeze1	"sounds/ShotgunFreezer/freezer-freeze1.wav"
+sfreeze2	"sounds/ShotgunFreezer/freezer-freeze2.wav"
+sfreeze3	"sounds/ShotgunFreezer/freezer-freeze3.wav"
+weapons/shotgun/freezedeath "sounds/ShotgunFreezer/freezer-unfreeze.wav"
 
 $random weapons/shotgunshells { weapons/shell1 weapons/shell2 weapons/shell3 }
 weapons/shell1			     SHELLS1

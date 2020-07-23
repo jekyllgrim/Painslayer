@@ -95,7 +95,7 @@ Class PK_BaseDebris : PK_BaseActor abstract {
 		A_FaceTarget();
 		
 		double dist = Distance2D(target);							//horizontal distance to target
-		double vdisp = target.pos.z - pos.z + frandom[bdsfx](8,32);		//height difference between gib and target + randomized height
+		double vdisp = target.pos.z - pos.z + frandom[sfx](8,32);		//height difference between gib and target + randomized height
 		double ftime = 20;											//time of flight
 		
 		double vvel = (vdisp + 0.5 * ftime*ftime) / ftime;
@@ -361,10 +361,11 @@ Class PK_RandomDebris : PK_SmallDebris {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		wrot = random[rnd](14,20)*randompick(-1,1);
-		frame = random (0,5);
-		roll = random[rnd](0,359);
-		A_SetScale(frandom[rnd](0.1,0.3)*randompick[rnd](-1,1));
+		wrot = random[sfx](14,20)*randompick(-1,1);
+		frame = random[sfx](0,5);
+		roll = random[sfx](0,359);
+		A_SetScale(frandom[sfx](0.1,0.3)*randompick[sfx](-1,1));
+		bSPRITEFLIP = randompick[sfx](0,1);
 	}
 	states {
 	spawn:
@@ -526,10 +527,10 @@ Class PK_BaseSmoke : PK_SmallDebris abstract {
 			self.destroy();
 			return;
 		}
-		scale.x *= frandom[bdsfx](0.8,1.2);
-		scale.y *= frandom[bdsfx](0.8,1.2);
-		bSPRITEFLIP = randompick(0,1);
-		roll = random[bdsfx](0,359);
+		scale.x *= frandom[sfx](0.8,1.2);
+		scale.y *= frandom[sfx](0.8,1.2);
+		bSPRITEFLIP = randompick[sfx](0,1);
+		roll = random[sfx](0,359);
 	}
 	states	{
 	Spawn:
@@ -554,7 +555,7 @@ class PK_BlackSmoke : PK_BaseSmoke {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		roll += frandom[bdsfx](-40,40);
+		roll += frandom[sfx](-40,40);
 	}
 	states	{
 	Spawn:
@@ -601,80 +602,68 @@ Class PK_DeathSmoke : PK_BaseSmoke {
 	}
 }
 
-Class PK_EnemyDeathControl : Inventory {
+Class PK_EnemyDeathControl : Actor {
 	KillerFlyTarget kft;
 	private int restcounter;
 	private int restlife;
 	private int maxlife;
 	private int age;
-	Default {
-		inventory.maxamount 1;
-	}
-	override void AttachToOwner(actor other) {
-		super.AttachToOwner(other);
-		if (!owner)
-			return;
-		restlife = random[cont](42,60);
-		maxlife = int(35*frandom[cont](6,10));
-		kft = KillerFlyTarget(Spawn("KillerFlyTarget",owner.pos));
-		if (kft) {
-			kft.target = owner;
-			kft.A_SetSize(owner.radius,owner.default.height*0.5);
-			kft.vel = owner.vel;
-		}
-	}	
-	override void Tick () {}
-	override void DoEffect() {
-		super.DoEffect();
-		if (!owner) {
-			if (kft)
-				kft.destroy();
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		if (!master) {
 			destroy();
 			return;
 		}
-		if (!owner.isFrozen())
-			age++;
-		if (GetAge() == 1 && kft)
-			kft.vel = owner.vel;	
-		if  (owner.vel ~== (0,0,0)) {
-			restcounter++;
+		restlife = random[cont](42,60);
+		maxlife = int(35*frandom[cont](6,10));
+		kft = KillerFlyTarget(Spawn("KillerFlyTarget",master.pos));
+		if (kft) {
+			kft.target = master;
+			kft.A_SetSize(master.radius,master.default.height*0.5);
+			kft.vel = master.vel;
 		}
-		else
-			restcounter = 0;
-		if (restcounter >= restlife || age > maxlife) {
+	}	
+	override void Tick () {
+		if (master)
+			SetOrigin(master.pos,true);
+		if (master) {
+			if (!master.isFrozen())
+				age++;
+			if (GetAge() == 1 && kft)
+				kft.vel = master.vel;	
+			if  (master.vel ~== (0,0,0))
+				restcounter++;
+			else
+				restcounter = 0;
+		}
+		if (restcounter >= restlife || age > maxlife || !master) {
 			if (kft)
 				kft.destroy();
-			owner.A_StartSound("world/bodypoof",CHAN_AUTO);
-			int rad = owner.radius;
+			A_StartSound("world/bodypoof",CHAN_AUTO);
+			double rad = 8;
+			double smkz = 20;
+			if (master) {
+				rad = master.radius;
+				smkz = master.height;
+			}
 			for (int i = 26; i > 0; i--) {
-				/*owner.A_SpawnItemEx("PK_DeathSmoke",frandom[part](4,rad),0,frandom[part](0,owner.height),
-					-0.5,0,frandom[part](0.5,1),
-					angle:random(0,359)
-				);*/
-				let smk = Spawn("PK_DeathSmoke",owner.pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,owner.height*1.5)));
+				let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz*1.5)));
 				if (smk)
 					smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
-				/*owner.A_SpawnParticle("404040",SPF_FULLBRIGHT|SPF_RELATIVE, 
-					lifetime:random(20,35),size:10,
-					angle: random(0,359),
-					xoff: frandom[part](-rad,rad), yoff:frandom[part](-rad,rad),zoff:frandom[part](owner.pos.z,owner.height),
-					velx:0.5,velz:frandom[part](0.2,1),
-					//accelx:0.1,accelz:-0.05,
-					startalphaf:0.9,sizestep:-0.4
-				);*/
 			}
 			for (int i = 8; i > 0; i--) {
-				let smk = Spawn("PK_WhiteSmoke",owner.pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](owner.pos.z,owner.height)));
+				let smk = Spawn("PK_WhiteSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](pos.z,smkz)));
 				if (smk) {
 					smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
 					smk.A_SetScale(0.4);
 					smk.alpha = 0.5;
 				}
 			}
-			Class<Inventory> soul = (owner.default.health >= 500) ? "PK_RedSoul" : "PK_Soul";			
-			double pz = (owner.pos.z == floorz) ? frandom[soul](8,14) : 0;
-			Spawn(soul,owner.pos+(0,0,pz));
-			owner.destroy();
+			Class<Inventory> soul = (master && master.default.health >= 500) ? "PK_RedSoul" : "PK_Soul";			
+			double pz = (pos.z ~== floorz) ? frandom[soul](8,14) : 0;
+			Spawn(soul,pos+(0,0,pz));
+			if (master)
+				master.destroy();
 			destroy();
 			return;
 		}

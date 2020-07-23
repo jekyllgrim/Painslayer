@@ -1,8 +1,10 @@
 Class KillerTargetHandler : EventHandler {
 	override void WorldThingDied(worldevent e) {
-		if (!e.thing || !e.thing.bISMONSTER || e.thing.FindInventory("PK_EnemyDeathControl"))
+		if (!e.thing || !e.thing.bISMONSTER)
 			return;
-		e.thing.GiveInventory("PK_EnemyDeathControl",1);
+		actor c = Actor.Spawn("PK_EnemyDeathControl",e.thing.pos);
+		if (c)
+			c.master = e.thing;
 	}
 	override void WorldThingspawned (worldevent e) {
 		if (!e.thing || !(e.thing is "PlayerPawn") || e.thing.FindInventory("PK_DemonMorphControl"))
