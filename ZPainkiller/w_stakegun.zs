@@ -250,7 +250,7 @@ Class PK_StakeFlame : PK_BaseFlare {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		roll = random(0,359);
+		roll = random[sfx](0,359);
 	}
 	states {
 	Spawn:
@@ -430,25 +430,18 @@ Class PK_Grenade : PK_Projectile {
 			}
 			loop;
 		XDeath:
-			TNT1 A 0 { 
+			TNT1 A 1 { 
 				bNOGRAVITY = true;
 				A_RemoveChildren(1,RMVF_EVERYTHING);
 				A_StopSound(4);
-				bFORCEXYBILLBOARD = true;
-				A_SetRenderStyle(0.5,STYLE_Add);
-				double rs = (frandom(0.38,0.42)*randompick(-1,1));
-				A_SetScale(rs,rs);
-				A_SetRoll(random(0,359));
 				A_Quake(1,8,0,256,"");
 				A_StartSound("weapons/grenade/explosion",CHAN_5);
-				//for (int i = 8; i > 0; i--) 
-					//A_SpawnItemEx("SmokingPiece",0,0,0, random(3,6),0,random(5,8),random(0,360),0,48);
 				A_Explode();
+				Spawn("PK_GenericExplosion",pos);
 			}
-			BOM6 ABCDEFGHIJKLMNOPQRST 1 bright;
 			stop;
 	}
-}	
+}
 
 Class PK_ExplosiveStake : PK_Projectile {
 	Default {
@@ -470,18 +463,15 @@ Class PK_ExplosiveStake : PK_Projectile {
 		MODL A 1;
 		loop;
 	Death:
-		TNT1 A 0 { 
+		TNT1 A 1 { 
 			bNOGRAVITY = true;
-			bFORCEXYBILLBOARD = true;
-			A_SetRenderStyle(0.5,STYLE_Add);
-			double rs = (frandom(0.38,0.42)*randompick(-1,1));
-			A_SetScale(rs,rs);
-			A_SetRoll(random(0,359));
 			A_Quake(1,8,0,256,"");
 			A_StartSound("weapons/stakegun/comboexplosion",CHAN_AUTO);
-			A_Explode(256,200);
+			A_Explode(256,200);			
+			let ex = Spawn("PK_GenericExplosion",pos);
+			if (ex)
+				ex.A_SetScale(0.5);
 		}
-		BOM6 ABCDEFGHIJKLMNOPQRST 1 bright;
 		stop;
 	}
 }

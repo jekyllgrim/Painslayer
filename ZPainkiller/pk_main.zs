@@ -358,13 +358,14 @@ Class PK_RandomDebris : PK_SmallDebris {
 		height 8;
 		renderstyle 'shaded';
 		stencilcolor "101010";
+		scale 0.2;
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		wrot = random[sfx](14,20)*randompick(-1,1);
 		frame = random[sfx](0,5);
 		roll = random[sfx](0,359);
-		A_SetScale(frandom[sfx](0.1,0.3)*randompick[sfx](-1,1));
+		scale *= frandom[sfx](0.75,1.2) * randompick[sfx](-1,1);
 		bSPRITEFLIP = randompick[sfx](0,1);
 	}
 	states {

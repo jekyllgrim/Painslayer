@@ -255,6 +255,102 @@ Class PK_RicochetBullet : PK_SmallDebris {
 	}
 }
 
+Class PK_GenericExplosion : PK_SmallDebris {
+	Default {
+		+NOINTERACTION;
+		renderstyle 'add';
+		+BRIGHT;
+		alpha 0.6;
+		scale 0.4;
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		double rs = scale.x * frandom[sfx](0.8,1.1)*randompick[sfx](-1,1);
+		A_SetScale(rs);
+		A_SetRoll(random(0,359));
+		for (int i = random[sfx](10,15); i > 0; i--) {
+			let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
+			if (debris) {
+				double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
+				debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
+				debris.A_SetScale(0.5);
+			}
+		}
+		for (int i = random[sfx](10,15); i > 0; i--) {
+			let debris = Spawn("PK_ExplosiveDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
+			if (debris) {
+				double zvel = (pos.z > floorz) ? frandom[sfx](-5,10) : frandom[sfx](5,15);
+				debris.vel = (frandom[sfx](-10,10),frandom[sfx](-10,10),zvel);
+			}
+		}
+	}
+	states {
+	Spawn:
+		BOM6 ABCDEFGHIJKLMNOPQRST 1;
+		stop;
+	}
+}
+		
+
+Class PK_ExplosiveDebris : PK_RandomDebris {	
+	Default {
+		scale 0.5;
+		gravity 0.25;
+		//PK_SmallDebris.removeonfall true;
+	}
+	override void Tick () {
+		Vector3 oldPos = self.pos;		
+		Super.Tick();	
+		if (isFrozen())
+			return;
+		let smk = Spawn("PK_BlackSmoke",pos+(frandom[smk](-4,4),frandom[smk](-4,4),frandom[smk](-4,4)));
+		if (smk) {
+			smk.A_SetScale(0.25);
+			smk.alpha = alpha*0.18;
+			smk.vel = (frandom[smk](-1,1),frandom[smk](-1,1),frandom[smk](-1,1));
+		}
+		Vector3 path = level.vec3Diff( self.pos, oldPos );
+		double distance = path.length() / 4; //this determines how far apart the particles are
+		Vector3 direction = path / distance;
+		int steps = int( distance );		
+		for( int i = 0; i < steps; i++ )  {
+			let trl = Spawn("PK_DebrisFlame",oldPos);
+			if (trl)
+				trl.alpha = alpha*0.4;
+			oldPos = level.vec3Offset( oldPos, direction );
+		}
+	}
+	states {
+	spawn:
+		PDEB # 1 {			
+			roll+=wrot;
+			wrot *= 0.99;
+			A_FadeOut(0.03);
+		}
+		loop;
+	}
+}
+
+Class PK_DebrisFlame : PK_BaseFlare {
+	Default {
+		scale 0.05;
+		renderstyle 'translucent';
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		roll = random[sfx](0,359);
+		wrot = frandom[sfx](5,10)+randompick[sfx](-1,1);
+	}
+	states {
+	Spawn:
+		BOM6 IJKLMNOP 1 {
+			A_FadeOut(0.05);
+			roll += wrot;
+			scale *= 1.05;
+		}
+		stop;
+	}
+}
 
 //// AMMO
 

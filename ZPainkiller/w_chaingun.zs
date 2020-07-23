@@ -149,22 +149,15 @@ Class PK_Rocket : PK_Projectile {
 		MODL A 1 NoDelay A_FaceMovementDirection(flags:FMDF_INTERPOLATE);
 		loop;
 	Death:
-		TNT1 A 0 { 
+		TNT1 A 1 { 
 			bNOGRAVITY = true;
 			A_RemoveChildren(1,RMVF_EVERYTHING);
 			A_StopSound(4);
-			bFORCEXYBILLBOARD = true;
-			A_SetRenderStyle(0.5,STYLE_Add);
-			double rs = (frandom(0.38,0.42)*randompick(-1,1));
-			A_SetScale(rs,rs);
-			A_SetRoll(random(0,359));
 			A_Quake(1,8,0,256,"");
 			A_StartSound("weapons/grenade/explosion",CHAN_5);
-			//for (int i = 8; i > 0; i--) 
-				//A_SpawnItemEx("SmokingPiece",0,0,0, random(3,6),0,random(5,8),random(0,360),0,48);
 			A_Explode();
+			Spawn("PK_GenericExplosion",pos);
 		}
-		BOM6 ABCDEFGHIJKLMNOPQRST 1 bright;
 		stop;
 	}
 }
