@@ -43,11 +43,11 @@ Class PK_Shotgun : PKWeapon {
 			//A_Eject				
 		}
 		TNT1 A 0 A_ZoomFactor(1,ZOOM_NOSCALETURNING);
-		PSHT CDF 2 A_WeaponOffset(10,2,WOF_ADD);
+		PSHT CDF 1 A_WeaponOffset(10,2,WOF_ADD);
 		PSHT HHHH 1 A_WeaponOffset(0.5,2.5,WOF_ADD);
 		PSHT HHHH 1 A_WeaponOffset(-0.5,2,WOF_ADD);
 		PSHT GGFFEE 1 A_WeaponOffset(-2.5,-3,WOF_ADD);
-		PSHT DDCCBB 1 A_WeaponOffset(-2.5,-1,WOF_ADD);
+		PSHT DDCCBBAAA 1 A_WeaponOffset(-1.66,-0.66,WOF_ADD);
 		PSHT A 8 { //allows immediate primary refire but prevents using altfire immediately
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			A_WeaponReady(WRF_NOSECONDARY|WRF_NOBOB);
@@ -84,6 +84,9 @@ Class PK_Shotgun : PKWeapon {
 }
 
 Class PK_ShotgunPuff : PKPuff {
+	Default {
+		decal "BulletChip";
+	}
 	states {
 	Spawn:
 		TNT1 A 1 NoDelay {

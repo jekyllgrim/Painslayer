@@ -73,30 +73,11 @@ Class PK_Chaingun : PKWeapon {
 			A_StartSound("weapons/chaingun/stop");
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 		}
-		MIGN #### 1 {
-			let psp = player.FindPsprite(PSP_Weapon);
-			if (psp) {
-				psp.frame++;
-				if (psp.frame > 3)
-					psp.frame = 0;
-			}
+		MIGN ABCD 1 {
 			A_WeaponReady();
 			invoker.atkzoom = Clamp(invoker.atkzoom - 0.006,0,0.1);
 			A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
 		}
-		MIGN # 1 {
-			let psp = player.FindPsprite(PSP_Weapon);
-			if (psp && psp.frame < 3) {
-				psp.frame++;
-			}
-			else
-				return ResolveState("AltFireEndDo");
-			A_WeaponReady();
-			invoker.atkzoom = Clamp(invoker.atkzoom - 0.003,0,0.1);
-			A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
-			return ResolveState(null);
-		}
-		wait;
 	AltFireEndDo:
 		MIGN AABBCCDD 1 {
 			A_WeaponReady();
