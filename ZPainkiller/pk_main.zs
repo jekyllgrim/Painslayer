@@ -1,6 +1,7 @@
 Class PK_BaseActor : Actor abstract {
 	protected double pi;
 	protected name bcolor;
+	protected int age;
 	
 	bool CheckLandingSize (double cradius = 0, bool checkceiling = false) {
 		bool ret = false;
@@ -49,7 +50,11 @@ Class PK_BaseActor : Actor abstract {
 		super.BeginPlay();
 		pi = 3.141592653589793;
 	}	
-	
+	override void Tick() {
+		super.Tick();
+		if (!isFrozen())
+			age++;
+	}
 	States {
 	Loadsprites:
 		LENR A 0;

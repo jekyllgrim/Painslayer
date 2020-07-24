@@ -124,8 +124,7 @@ Class PK_WeaponIcon : Actor {
 	}
 }
 
-Class PK_Projectile : Actor abstract {
-	protected int age;
+Class PK_Projectile : PK_BaseActor abstract {
 	protected vector3 spawnpos;
 	protected bool farenough;
 	
@@ -182,9 +181,6 @@ Class PK_Projectile : Actor abstract {
 	override void Tick () {
 		Vector3 oldPos = self.pos;		
 		Super.Tick();	
-		if (isFrozen())
-			return;
-		age++;
 		if (!trailcolor)
 			return;		
 		if (!farenough) {

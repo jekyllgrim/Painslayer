@@ -1,7 +1,7 @@
 void main()
 {
 	vec4 color = vec4(texture(InputTexture, TexCoord));
-	if(color.r > 0.9 && color.g < 0.1 && color.b > 0.9)
+	if(color.r > 0.8 && color.g < 0.1 && color.b > 0.8)
 	{
 		FragColor = vec4(1.0,0.0,0.0,color.a);
 	}
