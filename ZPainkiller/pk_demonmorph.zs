@@ -259,6 +259,8 @@ Class PK_DemonWeapon : PKWeapon {
 			Destroy();
 			return;
 		}
+		owner.player.mo.viewbob = 0.2;
+		//console.printf("bob %f",owner.player.GetMoveBob());
 		if (control) {
 			if (control.pk_souls >= minsouls && control.pk_souls < fullsouls) {
 				if (GetAge() >= 35) {
