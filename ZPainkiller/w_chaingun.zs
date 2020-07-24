@@ -62,7 +62,7 @@ Class PK_Chaingun : PKWeapon {
 			invoker.holddur++;
 			A_StartSound("weapons/chaingun/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
 			A_Overlay(-100,"AltFlash");
-			A_FireBullets(2.5,2.5,-1,7,pufftype:"PK_ShotgunPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-40,spawnofs_xy:8.6);
+			A_FireBullets(2.5,2.5,-1,7,pufftype:"PK_ShotgunPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-40,spawnofs_xy:8.6);
 			
 			A_QuakeEX(1,1,0,2,0,1,sfx:"world/null");
 			return ResolveState(null);

@@ -477,7 +477,7 @@ Class PK_BaseFlare : PK_SmallDebris {
 				SetShade(fcolor);
 			}
 		}
-		frame = style;
+		//frame = style;
 		if (fscale != 0)
 			A_SetScale(fscale);
 		if (falpha != 0)
@@ -485,7 +485,7 @@ Class PK_BaseFlare : PK_SmallDebris {
 	}
 	states {
 	Spawn:
-		FLAR # 1 {
+		FLAR A 1 {
 			if (fade != 0)
 				A_FadeOut(fade);
 			if (shrink != 0) {
@@ -630,9 +630,8 @@ Class PK_EnemyDeathControl : Actor {
 		}
 	}	
 	override void Tick () {
-		if (master)
+		if (master) {	
 			SetOrigin(master.pos,true);
-		if (master) {
 			if (!master.isFrozen())
 				age++;
 			if (GetAge() == 1 && kft)
@@ -641,17 +640,30 @@ Class PK_EnemyDeathControl : Actor {
 				restcounter++;
 			else
 				restcounter = 0;
+		}		
+		double rad = 8;
+		double smkz = 20;
+		if (master) {
+			rad = master.radius;
+			smkz = master.height;
 		}
-		if (restcounter >= restlife || age > maxlife || !master) {
+		if (master && master.bKILLED && master.FindInventory("PK_SlowMoControl")) {
+			for (int i = 40; i > 0; i--) {
+				smkz = master.default.height;
+				let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz)));
+				if (smk) {
+					smk.vel = (frandom[part](-0.4,0.4),frandom[part](-0.4,0.4),frandom[part](0,1));
+					smk.A_SetRenderstyle(1.0,Style_Stencil);
+					smk.SetShade("FF00FF");
+					smk.bBRIGHT = true;
+				}
+			}
+			master.destroy();
+		}	
+		else if (restcounter >= restlife || age > maxlife || !master) {
 			if (kft)
 				kft.destroy();
 			A_StartSound("world/bodypoof",CHAN_AUTO);
-			double rad = 8;
-			double smkz = 20;
-			if (master) {
-				rad = master.radius;
-				smkz = master.height;
-			}
 			for (int i = 26; i > 0; i--) {
 				let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz*1.5)));
 				if (smk)

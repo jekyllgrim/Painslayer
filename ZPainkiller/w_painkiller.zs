@@ -239,6 +239,8 @@ Class PK_KillerFlare : PK_ProjFlare {
 	}
 	override void Tick() {
 		super.Tick();
+		if (isFrozen())
+			return;
 		if (scale.x > 0.05)
 			scale *= 0.96;
 		else

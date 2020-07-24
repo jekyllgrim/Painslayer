@@ -1,0 +1,156 @@
+flickerlight PKROCKET_X1 {
+    color 1.0 0.7 0.0
+    attenuate 1
+    size 64
+    secondarySize 72
+    chance 0.3
+}
+
+flickerlight PKROCKET_X2 {
+    color 0.5 0.1 0.0
+    attenuate 1
+    size 80
+    secondarySize 88
+    chance 0.3
+}
+
+flickerlight PKROCKET_X3 {
+    color 0.3 0.0 0.0
+    attenuate 1
+    size 112
+    secondarySize 128
+    chance 0.3
+}
+
+object PK_GenericExplosion {
+    frame BOM6A { light PKROCKET_X2 }
+    frame BOM6B { light PKROCKET_X2 }
+    frame BOM6C { light PKROCKET_X2 }
+    frame BOM6D { light PKROCKET_X2 }
+    frame BOM6E { light PKROCKET_X2 }
+    frame BOM6F { light PKROCKET_X3 }
+    frame BOM6G { light PKROCKET_X3 }
+    frame BOM6H { light PKROCKET_X3 }
+    frame BOM6I { light PKROCKET_X3 }
+    frame BOM6j { light PKROCKET_X3 }
+    frame BOM6K { light PKROCKET_X3 }
+    frame BOM6L { light PKROCKET_X3 }
+    frame BOM6M { light PKROCKET_X3 }
+    frame BOM6N { light PKROCKET_X3 }
+    frame BOM6O { light PKROCKET_X1 }
+    frame BOM6P { light PKROCKET_X1 }
+    frame BOM6Q { light PKROCKET_X1 }
+    frame BOM6R { light PKROCKET_X1 }
+    frame BOM6S { light PKROCKET_X1 }
+    frame BOM6T { light PKROCKET_X1 }
+}
+
+pulselight PK_ExplosiveDebris {
+    color 1.0 0.7 0.0
+    attenuate 1
+    size 72
+    secondarySize 8
+    interval 1
+}
+
+object PK_ExplosiveDebris {
+	frame BDEB { light PK_ExplosiveDebris }
+}
+
+pointlight PK_Soul {
+	color 0.05 1.0 0.3
+	attenuate 1
+	size 48
+}
+
+object PK_Soul {
+	frame DSOU { light PK_Soul }
+}
+
+pointlight PK_RedSoul {
+	color 1.0 0 0
+	attenuate 1
+	size 48
+}
+
+object PK_RedSoul {
+	frame DSOU { light PK_RedSoul }
+}
+
+pointlight PK_GoldSoul {
+	color 1 0.8 0
+	attenuate 1
+	size 48
+}
+
+object PK_GoldSoul {
+	frame GSOU { light PK_GoldSoul }
+}
+
+pointlight PK_SecondaryRed {
+	color 1.0 0 0
+	attenuate 1
+	size 24
+}
+
+object PK_MegaSoul {
+	frame MSOU { light PK_Soul }
+	frame MSOUA { light PK_SecondaryRed }
+	frame MSOUB { light PK_SecondaryRed }
+	frame MSOUC { light PK_SecondaryRed }
+	frame MSOUD { light PK_SecondaryRed }
+	frame MSOUE { light PK_SecondaryRed }
+	frame MSOUF { light PK_SecondaryRed }
+	frame MSOUG { light PK_SecondaryRed }
+	frame MSOUH { light PK_SecondaryRed }
+	frame MSOUI { light PK_SecondaryRed }
+	frame MSOUJ { light PK_SecondaryRed }
+	frame MSOUK { light PK_SecondaryRed }
+	frame MSOUL { light PK_SecondaryRed }
+	frame MSOUM { light PK_SecondaryRed }
+	frame MSOUN { light PK_SecondaryRed }
+	frame MSOUO { light PK_SecondaryRed }
+	frame MSOUP { light PK_SecondaryRed }
+	frame MSOUQ { light PK_SecondaryRed }
+	frame MSOUR { light PK_SecondaryRed }
+	frame MSOUS { light PK_SecondaryRed }
+	frame MSOUT { light PK_SecondaryRed }
+	frame MSOUU { light PK_SecondaryRed }
+}
+
+pointlight PK_FreezerProjectile {
+	color 0.2 0.4 1.0
+	attenuate 1
+	size 48
+}
+
+object PK_FreezerProjectile {
+	frame BAL7 { light PK_FreezerProjectile }
+}
+
+/*pulselight PK_KillerFlare {
+	color 1 1 0
+	attenuate 1
+	size 0
+	secondarySize 16
+	interval 0.57
+	dontlightself 1
+}
+
+
+object PK_KillerFlare {
+	frame FLAR { light PK_KillerFlare }
+}*/
+
+pulselight PK_DeathSmoke {
+	color 0.5 0 0
+	attenuate 1
+	size 12
+	secondarySize 0
+	interval 3
+	dontlightself 1
+}
+
+object PK_DeathSmoke {
+	frame BSMO { light PK_DeathSmoke }
+}
