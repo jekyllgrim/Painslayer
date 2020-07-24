@@ -15,7 +15,7 @@ Class PK_ElectroDriver : PKWeapon {
 		inventory.pickupsound "pickups/weapons/eldriver";
 		Tag "Electro/Driver";
 	}
-	action vector3 FindElectroTarget(int atkdist = 256) {
+	action vector3 FindElectroTarget(int atkdist = 280) {
 		actor ltarget;			
 		double closestDist = double.infinity;
 		BlockThingsIterator itr = BlockThingsIterator.Create(self,atkdist);
@@ -34,7 +34,7 @@ Class PK_ElectroDriver : PKWeapon {
 				continue;
 			vector3 targetpos = LevelLocals.SphericalCoords(pos + (0,0,player.viewz),next.pos+(0,0,next.default.height*0.5),(angle,pitch));	
 			//Console.Printf("%s: angle %d pitch %d",next.Getclassname(),targetpos.x,targetpos.y);
-			if (abs(targetpos.x) > 18 || abs(targetpos.y) > 18)
+			if (abs(targetpos.x) > 15 || abs(targetpos.y) > 15)
 				continue;
 			ltarget = next;
 		}
@@ -97,8 +97,8 @@ Class PK_ElectroDriver : PKWeapon {
 				invoker.celldepleterate = 0;
 			}
 			vector3 atkpos = FindElectroTarget();
-			PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(30,8.5,10),style:STYLE_ADD);
-			PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(30,8.5,10),style:STYLE_ADD);
+			PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
+			PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
 			A_StartSound("weapons/edriver/electroloop",CHAN_WEAPON,CHANF_LOOPING);
 			A_WeaponOffset(frandom[eld](-0.3,0.3),frandom[eld](32,32.4));
 			return ResolveState(null);

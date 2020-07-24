@@ -671,22 +671,6 @@ Class PK_EnemyDeathControl : Actor {
 	}
 }
 	
-Class PK_DemonMorphControl : Inventory {
-	int pk_souls;
-	Default {
-		inventory.maxamount 1;
-		+INVENTORY.UNDROPPABLE;
-		+INVENTORY.UNTOSSABLE;
-		+INVENTORY.UNCLEARABLE;
-	}
-	override void Tick() {}
-	override void DoEffect() {
-		super.DoEffect();
-		if (pk_souls >= 66) {
-			Console.Printf("Demon mode!");
-			pk_souls = 0;
-		}
-	}
-}
+
 
 //Shader.SetEnabled( players[consoleplayer], "DemonMode", true);

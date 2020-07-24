@@ -479,3 +479,4 @@ Class PK_Battery : Ammo {
 		stop;
 	}
 }
+

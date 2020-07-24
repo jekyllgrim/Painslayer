@@ -17,6 +17,14 @@ brico2	bulletw2
 brico3	bulletw3
 brico4	bulletw4
 
+
+$random demon/fire { demonfire1 demonfire2 }
+demonfire1	pdmfire1
+demonfire2	pdmfire2
+demon/start	pdmstart
+demon/loop	pdmloop
+demon/end	pdmstop
+
 //== Painkiller
 
 weapons/painkiller/start		PKILSTRT
