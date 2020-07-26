@@ -1,5 +1,5 @@
 
-class BD_dColor : object 
+class PK_dColor : object 
 {
 	//The below functions are adapted from the Godot engine source code.
 	
@@ -35,9 +35,9 @@ class BD_dColor : object
 	double a,x,y,z;
 	private int mode;
 	 
-	static BD_dColor InitFromNormalColor(color col)
+	static PK_dColor InitFromNormalColor(color col)
 	{
-		BD_dColor dc = new("BD_dColor");
+		PK_dColor dc = new("PK_dColor");
 		dc.a = double(col.a)/255.0;
 		dc.x = double(col.r)/255.0;
 		dc.y = double(col.g)/255.0;

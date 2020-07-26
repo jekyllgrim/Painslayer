@@ -90,7 +90,7 @@ class PK_TrackingBeam : actor
 			{
 				Vector3 ofs = master.pos+(0,0,master.player.viewz - master.pos.z);
 				Vector3 x, y, z;
-				[x, y, z] = Matrix4.getaxes(master.pitch,master.angle,master.roll);
+				[x, y, z] = PK_Matrix4.getaxes(master.pitch,master.angle,master.roll);
 				vector3 mofs = self.masterOffset;
 				from = level.Vec3Offset(ofs, x*mofs.x + y*mofs.y - z*mofs.z);
 				//from = level.Vec3Offset(ofs+x*17+y*17-z*3,self.masterOffset);
