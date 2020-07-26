@@ -172,9 +172,11 @@ Class PK_FreezerProjectile : PK_Projectile {
 Class PK_FrozenChunk : PK_SmallDebris {
 	Default {
 		PK_SmallDebris.dbrake 0.9;
-		//renderstyle 'normal';
-		renderstyle 'Shaded';
-		stencilcolor "08caed";
+		//renderstyle 'Shaded';
+		//stencilcolor "08caed";
+		renderstyle 'Translucent';
+		Translation "PK_IceChunk";
+		alpha 0.8;
 		scale 0.6;
 		gravity 0.3;
 	}
@@ -215,10 +217,30 @@ Class PK_FrozenChunk : PK_SmallDebris {
 		loop;
 	}
 }
+
+Class PK_FrozenLayer : PK_SmallDebris {
+	Default {
+		+NOINTERACTION
+		renderstyle 'shaded';
+		stencilcolor "08caed";
+	}
+	override void Tick() {
+		if (master && master.FindInventory("PK_FreezeControl")) {
+			SetOrigin(master.pos,true);
+		}
+		else
+			destroy();
+	}
+	states {
+	Spawn:
+		#### # -1;
+		stop;
+	}
+}
 	
 Class PK_FreezeControl : Inventory {
 	int fcounter;
-	color ownertrans;
+	uint ownertrans;
 	bool grav;
 	Default {
 		+INVENTORY.UNDROPPABLE
@@ -231,19 +253,26 @@ Class PK_FreezeControl : Inventory {
 		if (inflictor && owner && passive)
 			newdamage = damage*1.25;			
 	}
-	override void AttachToOwner(actor user) {
-		super.AttachToOwner(user);
-		if (!user)
+	override void AttachToOwner(actor other) {
+		super.AttachToOwner(other);
+		if (!owner)
 			return;
-		grav = user.bNOGRAVITY;
+		grav = owner.bNOGRAVITY;
 		if (grav)
-			user.bNOGRAVITY = false;
-		user.painchance = 0;
-		//ownertrans = user.translation;
-		//user.A_SetTranslation("Ice");
-		user.A_SetRenderstyle(3.0,Style_Shaded);
-		user.SetShade("08caed");
-		user.A_StartSound("weapons/shotgun/freeze");
+			owner.bNOGRAVITY = false;
+		owner.bNOPAIN = true;
+		ownertrans = owner.translation;
+		owner.A_SetTranslation("PK_Ice");
+		owner.A_StartSound("weapons/shotgun/freeze");
+		let layer = Spawn("PK_FrozenLayer",owner.pos);
+		if (layer) {
+			layer.master = owner;
+			layer.sprite = owner.sprite;
+			layer.frame = owner.frame;
+			layer.angle = owner.angle;
+			layer.scale.x = owner.scale.x*1.32;
+			layer.scale.y = owner.scaley*1.07;
+		}
 	}
 	override void DoEffect() {
 		super.DoEffect();
@@ -258,11 +287,22 @@ Class PK_FreezeControl : Inventory {
 		}
 		if (owner.health <= 0) {
 			int rad = owner.radius;
-			for (int i = random[sfx](24,32); i > 0; i--) {
+			for (int i = random[sfx](16,20); i > 0; i--) {
 				let ice = Spawn("PK_FrozenChunk",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
 				if (ice) {
 					ice.vel = (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](2,6));
 					ice.master = owner;
+					ice.scale *= 1.2;
+				}
+			}
+			for (int i = random[sfx](16,20); i > 0; i--) {
+				let ice = Spawn("PK_FrozenChunk",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
+				if (ice) {
+					ice.vel = (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](4,6));
+					ice.master = owner;
+					ice.A_SetRenderstyle(1.0,Style_Shaded);
+					ice.SetShade("08caed");
+					ice.scale *= 0.8;
 				}
 			}
 			owner.A_StartSound("weapons/shotgun/freezedeath");
@@ -274,6 +314,7 @@ Class PK_FreezeControl : Inventory {
 			owner.bSPRITEFLIP = random[sfx](0,1);
 			owner.sprite = GetSpriteIndex("IGIB");
 			owner.frame = 0;
+			owner.A_SetTranslation("PK_IceChunk");
 			owner.A_SetTics(1000);
 			owner.deathsound = "";
 			DepleteOrDestroy();
@@ -283,7 +324,7 @@ Class PK_FreezeControl : Inventory {
 	override void DetachFromOwner() {
 		if (!owner)
 			return;
-		owner.painchance = owner.default.painchance;
+		owner.bNOPAIN = owner.default.bNOPAIN;
 		owner.bNOGRAVITY = grav;
 		if (owner.health > 0)
 			owner.translation = ownertrans;
