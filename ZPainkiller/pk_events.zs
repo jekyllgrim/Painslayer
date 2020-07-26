@@ -7,18 +7,22 @@ Class PK_DeathHandler : EventHandler {
 			c.master = e.thing;
 	}
 	
-	array <Actor> allactors;
+	array <Actor> demontargets;
 	override void WorldThingspawned (worldevent e) {
 		if (!e.thing)
 			return;
-		if (e.thing.bISMONSTER || e.thing.bMISSILE) {
-			allactors.push(e.thing);
+		if (e.thing.bISMONSTER || e.thing.bMISSILE || (e.thing is "PlayerPawn")) {
+			demontargets.push(e.thing);
 		}
 		if ((e.thing is "PlayerPawn") && !e.thing.FindInventory("PK_DemonMorphControl"))
 			e.thing.GiveInventory("PK_DemonMorphControl",1);
 	}
 	
 	override void WorldTick() {
+		if (players[consoleplayer].mo.FindInventory("PK_DemonWeapon"))
+			Shader.SetEnabled( players[consoleplayer], "DemonMorph", true);
+		else
+			Shader.SetEnabled( players[consoleplayer], "DemonMorph", false);
 		PK_DemonWeapon weap;
 		for (int pn = 0; pn < MAXPLAYERS; pn++) {
 			if (!playerInGame[pn])
@@ -28,21 +32,19 @@ Class PK_DeathHandler : EventHandler {
 			if (!player || !mo)
 				continue;
 			weap = PK_DemonWeapon(mo.FindInventory("PK_DemonWeapon"));
-			if (!weap)
-				continue;
+			if (weap)
+				break;
 		}
 		if (weap) {
-			Shader.SetEnabled( players[consoleplayer], "DemonMorph", true);
-			for (int i = 0; i < allactors.Size(); i++) {
-				if (allactors[i] && !(allactors[i].FindInventory("PK_SlowMoControl")))
-					allactors[i].GiveInventory("PK_SlowMoControl",1);
+			for (int i = 0; i < demontargets.Size(); i++) {
+				if (demontargets[i] && !(demontargets[i].FindInventory("PK_SlowMoControl")) && !(demontargets[i].FindInventory("PK_DemonWeapon")))
+					demontargets[i].GiveInventory("PK_SlowMoControl",1);
 			}
 		}
 		else {
-			Shader.SetEnabled( players[consoleplayer], "DemonMorph", false);
-			for (int i = 0; i < allactors.Size(); i++) {
-				if (allactors[i])
-					allactors[i].TakeInventory("PK_SlowMoControl",1);
+			for (int i = 0; i < demontargets.Size(); i++) {
+				if (demontargets[i])
+					demontargets[i].TakeInventory("PK_SlowMoControl",1);
 			}
 		}
 	}
@@ -75,7 +77,9 @@ Class PK_ReplacementHandler : EventHandler {
 		}
 		e.IsFinal = true;
 	}
+	
 	static const Class<Weapon> PK_VanillaWeaponsList[] = { 'Fist', 'Chainsaw', 'Pistol', 'Shotgun', 'SuperShotgun', 'Chaingun', 'RocketLauncher', 'PlasmaRifle', 'BFG9000' };
+	
 	override void WorldTick() {
 		for (int pn = 0; pn < MAXPLAYERS; pn++) {
 			if (!playerInGame[pn])
