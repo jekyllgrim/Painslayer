@@ -12,13 +12,14 @@ Class PKWeapon : Weapon abstract {
 		+WEAPON.ALT_AMMO_OPTIONAL;
 		FloatBobStrength  0.3;
 	}
-	override void DoEffect()
-		{
+	override void DoEffect() {
 		Super.DoEffect();
 		if (!owner)
 			return;
-		if (owner.player.readyweapon)
-			owner.player.WeaponState |= WF_WEAPONBOBBING;
+		let weap = owner.player.readyweapon;
+		if (!weap)
+			return;
+		owner.player.WeaponState |= WF_WEAPONBOBBING;
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -84,6 +85,33 @@ Class PK_NullPuff : Actor {
 		Spawn:
 			TNT1 A 1;
 			stop;
+	}
+}
+
+Class PK_BulletPuff : PKPuff {
+	Default {
+		decal "BulletChip";
+		scale 0.032;
+		renderstyle 'add';
+		alpha 0.6;
+	}
+	states {
+	Spawn:
+		TNT1 A 0 NoDelay {
+			if (random[sfx](0,10) > 7) {
+				//A_StartSound("weapons/bullet/ricochet",attenuation:3);
+				A_SpawnItemEx("PK_RicochetBullet",xvel:30,zvel:frandom[sfx](-10,10),angle:random[sfx](0,359));
+			}
+			A_SpawnItemEx("PK_RandomDebris",xvel:frandom[sfx](-4,4),yvel:frandom[sfx](-4,4),zvel:frandom[sfx](3,5));
+			for (int i = 3; i > 0; i--) {
+				let smk = Spawn("PK_BulletPuffSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
+				if (smk) {
+					smk.vel = (frandom[sfx](-0.4,0.4),frandom[sfx](-0.4,0.4),frandom[sfx](0.1,0.5));
+				}
+			}
+		}
+		FLAR B 1 bright A_FadeOut(0.1);
+		wait;
 	}
 }
 	
@@ -353,7 +381,7 @@ Class PK_DebrisFlame : PK_BaseFlare {
 
 Class PK_Shells : Ammo {
 	Default {
-		inventory.pickupmessage "You picked up shotgun shells.";
+		inventory.pickupmessage "Picked up shotgun shells.";
 		inventory.pickupsound "pickups/ammo/shells";
 		inventory.amount 18;
 		inventory.maxamount 100;
@@ -371,7 +399,7 @@ Class PK_Shells : Ammo {
 
 Class PK_FreezerAmmo : Ammo {
 	Default {
-		inventory.pickupmessage "You picked up freezer ammo.";
+		inventory.pickupmessage "Picked up freezer ammo.";
 		inventory.pickupsound "pickups/ammo/freezerammo";
 		inventory.amount 15;
 		inventory.maxamount 100;
@@ -390,7 +418,7 @@ Class PK_FreezerAmmo : Ammo {
 
 Class PK_Stakes : Ammo {
 	Default {
-		inventory.pickupmessage "You picked up a box of stakes.";
+		inventory.pickupmessage "Picked up a box of stakes.";
 		inventory.pickupsound "pickups/ammo/stakes";
 		inventory.amount 15;
 		inventory.maxamount 100;
@@ -408,7 +436,7 @@ Class PK_Stakes : Ammo {
 
 Class PK_Bombs : Ammo {
 	Default {
-		inventory.pickupmessage "You picked up a box of bombs.";
+		inventory.pickupmessage "Picked up a box of bombs.";
 		inventory.pickupsound "pickups/ammo/bombs";
 		inventory.amount 7;
 		inventory.maxamount 100;
@@ -425,25 +453,26 @@ Class PK_Bombs : Ammo {
 
 Class PK_Bullets : Ammo {
 	Default {
-		inventory.pickupmessage "You picked up a box of bullets.";
+		inventory.pickupmessage "Picked up a box of bullets.";
 		inventory.pickupsound "pickups/ammo/bullets";
 		inventory.icon "BULSA0";
 		inventory.amount 50;
 		inventory.maxamount 500;
 		ammo.backpackamount 100;
 		ammo.backpackmaxamount 666;
+		scale 0.4;
 	}
 	states	{
 	spawn:
-		BULS A -1;
+		AMBE A -1;
 		stop;
 	}
 }
 
 
-Class PK_ShurikenBox : Ammo {
+Class PK_ShurikenAmmo : Ammo {
 	Default {
-		inventory.pickupmessage "You picked up a box of shurikens.";
+		inventory.pickupmessage "Picked up a box of shurikens.";
 		inventory.pickupsound "pickups/ammo/stars";
 		inventory.amount 10;
 		inventory.maxamount 100;
@@ -461,7 +490,7 @@ Class PK_ShurikenBox : Ammo {
 
 Class PK_Battery : Ammo {
 	Default {
-		inventory.pickupmessage "You picked up a cell battery.";
+		inventory.pickupmessage "Picked up a cell battery.";
 		inventory.pickupsound "pickups/ammo/battery";
 		inventory.amount 20;
 		inventory.maxamount 500;

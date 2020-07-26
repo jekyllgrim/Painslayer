@@ -4,7 +4,7 @@ Class PK_ElectroDriver : PKWeapon {
 	Default {
 		PKWeapon.emptysound "weapons/empty/electrodriver";
 		weapon.slotnumber 5;
-		weapon.ammotype1 "PK_ShurikenBox";
+		weapon.ammotype1 "PK_ShurikenAmmo";
 		weapon.ammogive1 20;
 		weapon.ammouse1  1;
 		weapon.ammotype2 "PK_Battery";
@@ -32,11 +32,13 @@ Class PK_ElectroDriver : PKWeapon {
 				closestDist = dist;
 			if (!CheckSight(next,SF_IGNOREWATERBOUNDARY))
 				continue;
-			vector3 targetpos = LevelLocals.SphericalCoords(pos + (0,0,player.viewz),next.pos+(0,0,next.default.height*0.5),(angle,pitch));	
-			//Console.Printf("%s: angle %d pitch %d",next.Getclassname(),targetpos.x,targetpos.y);
-			if (abs(targetpos.x) > 15 || abs(targetpos.y) > 15)
+			vector3 targetpos = LevelLocals.SphericalCoords((pos.x,pos.y,player.viewz),next.pos+(0,0,next.default.height*0.5),(angle,pitch));	
+			if (abs(targetpos.x) > 15 || abs(targetpos.y) > 15) {
+				//console.printf("%s found but out of range",next.Getclassname());
 				continue;
+			}
 			ltarget = next;
+			//console.printf("Target found: %s, (%d, %d, %d)",ltarget.Getclassname(),ltarget.pos.x,ltarget.pos.y,ltarget.pos.z);
 		}
 		if (!ltarget) {
 			FLineTraceData hit;
@@ -89,6 +91,7 @@ Class PK_ElectroDriver : PKWeapon {
 				A_WeaponOffset(0,32);
 				TakeInventory("PK_Battery",40);
 				A_ClearRefire();
+				A_StopSound(12);
 				return ResolveState("DiskFire");
 			}
 			invoker.celldepleterate++;
@@ -99,7 +102,7 @@ Class PK_ElectroDriver : PKWeapon {
 			vector3 atkpos = FindElectroTarget();
 			PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
 			PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
-			A_StartSound("weapons/edriver/electroloop",CHAN_WEAPON,CHANF_LOOPING);
+			A_StartSound("weapons/edriver/electroloop",12,CHANF_LOOPING);
 			A_WeaponOffset(frandom[eld](-0.3,0.3),frandom[eld](32,32.4));
 			return ResolveState(null);
 		}
@@ -108,7 +111,7 @@ Class PK_ElectroDriver : PKWeapon {
 			A_Refire();
 		}
 		TNT1 A 0 {
-			A_StopSound(CHAN_WEAPON);
+			A_StopSound(12);
 			A_StartSound("weapons/edriver/electroloopend");
 		}
 		goto ready;	
@@ -143,9 +146,14 @@ Class PK_ElectroDriver : PKWeapon {
 }
 
 Class PK_ElectricPuff : PKPuff {
+	Default {
+		renderstyle 'add';
+		alpha 0.08;
+		scale 0.1;
+	}
 	states {
 	Spawn:
-		TNT1 A 1 NoDelay {
+		SPRK C 1 NoDelay {
 			for (int i = random[eld](5,8); i > 0; i--) {
 				let part = Spawn("PK_RicochetSpark",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
 				if (part) {
@@ -190,7 +198,6 @@ Class PK_ElectroTargetControl : Inventory {
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner) {
-			owner.A_StopSound(CHAN_6);
 			DepleteOrDestroy();
 			return;
 		}
@@ -338,6 +345,7 @@ Class PK_Shuriken : PK_Projectile {
 
 Class PK_DiskProjectile : PK_Shuriken {
 	private int deadtics;
+	private Array < Actor > disktargets;
 	Default {
 		PK_Projectile.trailcolor "8bb1ff";
 		PK_Projectile.trailscale 0.022;
@@ -374,31 +382,65 @@ Class PK_DiskProjectile : PK_Shuriken {
 			else
 				SetOrigin(tracer.pos+(0,0,tracer.height*0.5),true);
 		}
-		int atkdist = 128;
-		actor ltarget;			
+		int atkdist = 190;
 		double closestDist = double.infinity;
+		int maxcapacity = 10;
+		if (!target)
+			return;
 		BlockThingsIterator itr = BlockThingsIterator.Create(self,atkdist);
 		while (itr.next()) {
 			let next = itr.thing;
-			if (next == target)
+			if (!next || next == target)
 				continue; 
-			if (!next.bShootable || !(next.bIsMonster || (next is "PlayerPawn")))
+			if (!next.bShootable || !(next.bIsMonster || (next is "PlayerPawn")) || !target.IsHostile (next) || target.bKILLED)
 				continue;
-			double dist = Distance3D(next);
-			if (dist > atkdist)
+			double cdist = Distance3D(next);
+			if (cdist > atkdist)
 				continue;
-			if (dist < closestDist)
-				closestDist = dist;
+			if (cdist < closestDist)
+				closestDist = cdist;
 			if (!CheckSight(next,SF_IGNOREWATERBOUNDARY))
 				continue;
-			PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:next.pos+(0,0,next.height*0.5),style:STYLE_ADD);
-			if (random(0,2) == 2)
-				next.DamageMobj(self,self,2,'normal',flags:DMG_THRUSTLESS);
-			else
-				next.DamageMobj(self,self,2,'normal',flags:DMG_THRUSTLESS|DMG_NO_PAIN);
-			if (!next.FindInventory("PK_ElectroTargetControl"))
-				next.GiveInventory("PK_ElectroTargetControl",1);
+			if (next && CheckDisktargetsEntries(next) < 3) {				
+				disktargets.push(next);
+				//console.printf ("%s x %d",next.Getclassname(),CheckDisktargetsEntries(next));
+				if (disktargets.size() > maxcapacity)
+					disktargets.delete(0);
+			}
 		}
+		if (disktargets.size() > 0) {
+			for (int i = 0; i < disktargets.size(); i++) {
+				let trg = disktargets[i];
+				if (trg) {					
+					if (Distance3D(trg) > atkdist)
+						disktargets.delete(i);					
+					else {
+						PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:trg.pos+(0,0,trg.height*0.5),style:STYLE_ADD);
+						if (random(0,2) == 2)
+							trg.DamageMobj(self,self,2,'normal',flags:DMG_THRUSTLESS);
+						else
+							trg.DamageMobj(self,self,2,'normal',flags:DMG_THRUSTLESS|DMG_NO_PAIN);
+						if (!trg.FindInventory("PK_ElectroTargetControl"))
+							trg.GiveInventory("PK_ElectroTargetControl",1);
+						if (!CheckSight(trg,SF_IGNOREWATERBOUNDARY)) {
+							//Console.printf("LOF check failed");
+							trg.TakeInventory("PK_ElectroTargetControl",1);
+							disktargets.delete(i);
+						}
+					}
+				}
+			}
+		}
+	}
+	int CheckDisktargetsEntries(actor trg) {
+		if (disktargets.size() == 0)
+			return 0;
+		int entries;
+		for (int i = 0; i < disktargets.size(); i++) {
+			if (trg == disktargets[i])
+				entries++;
+		}
+		return entries;
 	}
 	states {
 	Spawn:

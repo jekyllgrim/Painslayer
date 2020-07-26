@@ -40,7 +40,7 @@ Class PK_Shotgun : PKWeapon {
 			A_Quake(1,7,0,1,"");
 			A_StartSound("weapons/shotgun/fire",CHAN_VOICE);
 			A_Overlay(-100,"Flash");
-			A_firebullets(5,5,10,9,pufftype:"PK_ShotgunPuff",flags:FBF_NORANDOM|FBF_USEAMMO);
+			A_firebullets(5,5,10,9,pufftype:"PK_BulletPuff",flags:FBF_NORANDOM|FBF_USEAMMO);
 			A_ZoomFactor(0.99,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			//A_Eject				
 		}
@@ -95,30 +95,7 @@ Class PK_Shotgun : PKWeapon {
 	}
 }
 
-Class PK_ShotgunPuff : PKPuff {
-	Default {
-		decal "BulletChip";
-	}
-	states {
-	Spawn:
-		TNT1 A 1 NoDelay {
-			if (random[sfx](0,10) > 7) {
-				//A_StartSound("weapons/bullet/ricochet",attenuation:3);
-				A_SpawnItemEx("PK_RicochetBullet",xvel:30,zvel:frandom[sfx](-10,10),angle:random[sfx](0,359));
-			}
-			A_SpawnItemEx("PK_RandomDebris",xvel:frandom[sfx](-4,4),yvel:frandom[sfx](-4,4),zvel:frandom[sfx](3,5));
-			for (int i = 3; i > 0; i--) {
-				let smk = Spawn("PK_ShotgunPuffSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
-				if (smk) {
-					smk.vel = (frandom[sfx](-0.4,0.4),frandom[sfx](-0.4,0.4),frandom[sfx](0.1,0.5));
-				}
-			}
-		}
-		stop;
-	}
-}
-
-class PK_ShotgunPuffSmoke : PK_BlackSmoke {
+class PK_BulletPuffSmoke : PK_BlackSmoke {
 	Default {
 		alpha 0.3;
 		scale 0.12;
@@ -161,7 +138,8 @@ Class PK_FreezerProjectile : PK_Projectile {
 		BAL7 A 1;
 		loop;
 	Death:
-		TNT1 A 0 { 
+		TNT1 A 0 {
+			A_Stop();
 			roll = random(0,359); 
 			if (tracer && (tracer.bISMONSTER || tracer.player) && !tracer.bBOSS) {
 				tracer.GiveInventory("PK_FreezeControl",1);
@@ -169,8 +147,18 @@ Class PK_FreezerProjectile : PK_Projectile {
 				if (frz)
 					frz.fcounter+=64;
 			}
+			for (int i = random[sfx](10,15); i > 0; i--) {
+				let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
+				if (debris) {
+					double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
+					debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
+					debris.A_SetScale(frandom[sfx](0.12,0.25));
+					debris.A_SetRenderstyle(0.9,Style_AddShaded);
+					debris.SetShade("08caed");
+				}
+			}
 		}
-		BAL7 CCCDDDEEE 1 {
+		BAL7 CCCDDDEEE 2 {
 			roll+=10;
 			A_FadeOut(0.1);
 			scale*=0.9;
@@ -179,10 +167,14 @@ Class PK_FreezerProjectile : PK_Projectile {
 	}
 }
 
+
+
 Class PK_FrozenChunk : PK_SmallDebris {
 	Default {
 		PK_SmallDebris.dbrake 0.9;
-		renderstyle 'normal';
+		//renderstyle 'normal';
+		renderstyle 'Shaded';
+		stencilcolor "08caed";
 		scale 0.6;
 		gravity 0.3;
 	}
@@ -247,8 +239,10 @@ Class PK_FreezeControl : Inventory {
 		if (grav)
 			user.bNOGRAVITY = false;
 		user.painchance = 0;
-		ownertrans = user.translation;
-		user.A_SetTranslation("Ice");
+		//ownertrans = user.translation;
+		//user.A_SetTranslation("Ice");
+		user.A_SetRenderstyle(3.0,Style_Shaded);
+		user.SetShade("08caed");
 		user.A_StartSound("weapons/shotgun/freeze");
 	}
 	override void DoEffect() {

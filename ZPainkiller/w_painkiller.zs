@@ -52,12 +52,12 @@ Class PK_Painkiller : PKWeapon {
 				return ResolveState(null);
 			}
 			PKIR BCDEF 1;
-			TNT1 A 0 A_StartSound("weapons/painkiller/spin",CHAN_BODY,CHANF_LOOPING);
+			TNT1 A 0 A_StartSound("weapons/painkiller/spin",12,CHANF_LOOPING);
 		Hold:
 			TNT1 A 0 A_CustomPunch(12,true,CPF_NOTURN,"PK_PainkillerPuff",80); 
 			PKIL ABCD 1 {
 				if ((player.cmd.buttons & BT_ALTATTACK) && !(player.oldbuttons & BT_ALTATTACK)) {
-					A_StopSound(CHAN_BODY);
+					A_StopSound(12);
 					invoker.combofire = true;
 					A_ClearRefire();
 					return ResolveState("AltFire");
@@ -66,7 +66,10 @@ Class PK_Painkiller : PKWeapon {
 				return ResolveState(null);
 			}
 			TNT1 A 0 A_ReFire();
-			TNT1 A 0 A_StartSound("weapons/painkiller/stop",CHAN_BODY);
+			TNT1 A 0 {
+				A_StopSound(12);
+				A_StartSound("weapons/painkiller/stop",CHAN_BODY);
+			}
 			PKIR DCBA 1 A_WeaponReady();
 			goto ready;
 		AltFire:
@@ -136,8 +139,8 @@ Class PK_Killer : PK_Projectile {
 	bool returning;
 	Default {
 		PK_Projectile.flarecolor "fed101";
-		PK_Projectile.flarescale 0.11;
-		PK_Projectile.flarealpha 0.9;
+		PK_Projectile.flarescale 0.2;
+		PK_Projectile.flarealpha 0.75;
 		PK_Projectile.flareactor "PK_KillerFlare";
 		+SKYEXPLODE
 		+NOEXTREMEDEATH
@@ -235,16 +238,21 @@ Class PK_Killer : PK_Projectile {
 
 Class PK_KillerFlare : PK_ProjFlare {
 	Default {
-		scale 0.11;		
+		renderstyle 'add';
 	}
 	override void Tick() {
 		super.Tick();
 		if (isFrozen())
 			return;
-		if (scale.x > 0.05)
+		if (scale.x > 0.06)
 			scale *= 0.96;
 		else
-			A_SetScale(0.11);
+			A_SetScale(0.18);
+	}
+	states {
+	Spawn:
+		FLAR B -1;
+		stop;
 	}
 }
 
