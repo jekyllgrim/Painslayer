@@ -1,3 +1,17 @@
+HardwareShader PostProcess Scene
+{
+	Name "DemonMorph"
+	Shader "shaders/DemonMorph.fp" 330
+	Uniform float rippleTimer
+	Uniform float amount//25
+	Uniform float waveSpeed//20
+	Uniform float waveAmount//10
+	Uniform float centerX
+	Uniform float centerY
+
+	//Enabled
+}
+
 flickerlight PKROCKET_X1 {
     color 1.0 0.7 0.0
     attenuate 1
@@ -28,21 +42,21 @@ object PK_GenericExplosion {
     frame BOM6C { light PKROCKET_X2 }
     frame BOM6D { light PKROCKET_X2 }
     frame BOM6E { light PKROCKET_X2 }
-    frame BOM6F { light PKROCKET_X3 }
-    frame BOM6G { light PKROCKET_X3 }
-    frame BOM6H { light PKROCKET_X3 }
-    frame BOM6I { light PKROCKET_X3 }
-    frame BOM6j { light PKROCKET_X3 }
-    frame BOM6K { light PKROCKET_X3 }
-    frame BOM6L { light PKROCKET_X3 }
-    frame BOM6M { light PKROCKET_X3 }
+    frame BOM6F { light PKROCKET_X1 }
+    frame BOM6G { light PKROCKET_X1 }
+    frame BOM6H { light PKROCKET_X1 }
+    frame BOM6I { light PKROCKET_X1 }
+    frame BOM6j { light PKROCKET_X1 }
+    frame BOM6K { light PKROCKET_X1 }
+    frame BOM6L { light PKROCKET_X1 }
+    frame BOM6M { light PKROCKET_X1 }
     frame BOM6N { light PKROCKET_X3 }
-    frame BOM6O { light PKROCKET_X1 }
-    frame BOM6P { light PKROCKET_X1 }
-    frame BOM6Q { light PKROCKET_X1 }
-    frame BOM6R { light PKROCKET_X1 }
-    frame BOM6S { light PKROCKET_X1 }
-    frame BOM6T { light PKROCKET_X1 }
+    frame BOM6O { light PKROCKET_X3 }
+    frame BOM6P { light PKROCKET_X3 }
+    frame BOM6Q { light PKROCKET_X3 }
+    frame BOM6R { light PKROCKET_X3 }
+    frame BOM6S { light PKROCKET_X3 }
+    frame BOM6T { light PKROCKET_X3 }
 }
 
 pulselight PK_ExplosiveDebris {
@@ -153,4 +167,62 @@ pulselight PK_DeathSmoke {
 
 object PK_DeathSmoke {
 	frame BSMO { light PK_DeathSmoke }
+}
+
+flickerlight PK_DiskProjectile {
+	color 0.2 0.0 1
+	attenuate 1
+	size 40
+	secondarySize 48
+	chance 0.25
+}
+
+object PK_DiskProjectile {
+	frame MODL { light PK_DiskProjectile }
+	frame BOM2A { light PKDISK_X }
+    frame BOM2B { light PKDISK_X }
+    frame BOM2C { light PKDISK_X }
+    frame BOM2D { light PKDISK_X }
+    frame BOM2E { light PKDISK_X }
+    frame BOM2F { light PKDISK_X }
+    frame BOM2G { light PKDISK_X }
+    frame BOM2H { light PKDISK_X }
+    frame BOM2I { light PKDISK_X }
+    frame BOM2j { light PKDISK_X }
+    frame BOM2K { light PKDISK_X }
+    frame BOM2L { light PKDISK_X }
+    frame BOM2M { light PKDISK_X }
+    frame BOM2N { light PKDISK_X }
+    frame BOM2O { light PKDISK_X }
+    frame BOM2P { light PKDISK_X }
+    frame BOM2Q { light PKDISK_X }
+    frame BOM2R { light PKDISK_X }
+}
+
+flickerlight PKDISK_X {
+    color 0 0 1
+    attenuate 1
+    size 112
+    secondarySize 128
+    chance 0.3
+}
+
+pointlight PK_BulletPuff {
+	color 1.0 0.5 0
+	attenuate 1
+	size 4
+}
+
+object PK_BulletPuff {
+	frame FLAR { light PK_BulletPuff }
+}
+
+pointlight PK_ElectricPuff {
+	color 0 0.2 1
+	attenuate 1
+	size 8
+}
+
+object PK_ElectricPuff {
+	frame SPRK { light PK_ElectricPuff }
 }
