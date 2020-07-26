@@ -45,7 +45,7 @@ Class PK_Chaingun : PKWeapon {
 		goto ready;
 	AltFire:
 		TNT1 A 0 {
-			A_StartSound("weapons/chaingun/loop",CHAN_VOICE,CHANF_LOOPING);
+			A_StartSound("weapons/chaingun/loop",12,CHANF_LOOPING);
 			A_StartSound("weapons/chaingun/spin",CHAN_7,CHANF_LOOPING);
 		}
 		MIGN A 3;
@@ -62,7 +62,7 @@ Class PK_Chaingun : PKWeapon {
 			invoker.holddur++;
 			A_StartSound("weapons/chaingun/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
 			A_Overlay(-100,"AltFlash");
-			A_FireBullets(2.5,2.5,-1,7,pufftype:"PK_ShotgunPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-40,spawnofs_xy:8.6);
+			A_FireBullets(2.5,2.5,-1,9,pufftype:"PK_BulletPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-40,spawnofs_xy:8.6);
 			
 			A_QuakeEX(1,1,0,2,0,1,sfx:"world/null");
 			return ResolveState(null);
@@ -72,7 +72,7 @@ Class PK_Chaingun : PKWeapon {
 		TNT1 A 0 {
 			invoker.holddur = 0;
 			A_ClearOverlays(5,5);
-			A_StopSound(CHAN_VOICE);
+			A_StopSound(12);
 			A_StopSound(CHAN_7);
 			A_StartSound("weapons/chaingun/stop");
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
@@ -131,6 +131,7 @@ Class PK_Rocket : PK_Projectile {
 		height 8;
 		radius 10;
 		decal 'Scorch';
+		damage (30);
 	}
 	override void PostBeginplay() {
 		super.PostBeginplay();
@@ -161,10 +162,9 @@ Class PK_Rocket : PK_Projectile {
 	Death:
 		TNT1 A 1 { 
 			bNOGRAVITY = true;
-			A_RemoveChildren(1,RMVF_EVERYTHING);
 			A_Quake(1,8,0,256,"");
 			A_StartSound("weapons/chaingun/rocketboom",CHAN_5);
-			A_Explode();
+			A_Explode(128,128);
 			Spawn("PK_GenericExplosion",pos);
 		}
 		stop;

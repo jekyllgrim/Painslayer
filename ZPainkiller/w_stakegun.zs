@@ -22,7 +22,7 @@ Class PK_Stakegun : PKWeapon {
 		Cache:
 			PSGT AHIJKLMN 0;
 		Spawn:
-			PSGZ ABCDEFGH 4;
+			PSGZ ABCDEFGHIJKLMNOP 3;
 			loop;
 		Ready:
 			PSGN A 1 {
@@ -397,7 +397,8 @@ Class PK_Grenade : PK_Projectile {
 		bouncesound "weapons/grenade/bounce";
 		height 6;
 		radius 8;
-		speed 13;
+		speed 13;		
+		damage (25);
 	}
 	override void Tick() {
 		super.Tick();
@@ -454,7 +455,7 @@ Class PK_ExplosiveStake : PK_Projectile {
 		gravity 0.45;
 		radius 4;
 		height 4;
-		damage 80;
+		damage (40);
 		decal "Scorch";
 		obituary "%k was impressed by %o's grenade-on-a-stick";
 	}
