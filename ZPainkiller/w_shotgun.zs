@@ -286,6 +286,8 @@ Class PK_FreezeControl : Inventory {
 			return;
 		}
 		if (owner.health <= 0) {
+			for (int i = 7; i >= 0; i--)
+				owner.A_SoundVolume(i,0);
 			int rad = owner.radius;
 			for (int i = random[sfx](16,20); i > 0; i--) {
 				let ice = Spawn("PK_FrozenChunk",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));

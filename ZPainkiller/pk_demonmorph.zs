@@ -65,8 +65,8 @@ Class PK_Soul : Inventory {
 					other.player.SetPSprite(PSP_WEAPON,dew.FindState("Ready"));
 					psp.y = WEAPONTOP;
 				}
-				else
-					Console.printf("something went really wrong");
+				/*else
+					Console.printf("something went really wrong");*/
 			}
 		}
 		other.GiveBody(Amount, MaxAmount);
@@ -103,10 +103,8 @@ Class PK_SlowMoControl : Inventory {
 	private color p_color;
 	private double speedfactor;
 	private double gravityfactor;
-	private double ProjectileSpeedFactor;
 	property speedfactor : speedfactor;
 	property gravityfactor : gravityfactor;
-	property ProjectileSpeedFactor : ProjectileSpeedFactor;
 	Default {
 		PK_SlowMoControl.speedfactor 0.5;
 		PK_SlowMoControl.gravityfactor 0.2;

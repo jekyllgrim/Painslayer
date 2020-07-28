@@ -39,6 +39,7 @@ Class PK_Stakegun : PKWeapon {
 				A_StartSound("weapons/stakegun/fire");
 				A_WeaponOffset(7,5,WOF_ADD);
 				A_FireProjectile("PK_Stake",spawnofs_xy:2,spawnheight:5,flags:FPF_NOAUTOAIM,pitch:-2.5);
+				A_WeaponOffset(4,4,WOF_ADD);
 			}
 			PSGN BBBBB 2 A_WeaponOffset(1.44,1.2,WOF_ADD);
 			PSGN CDEF 3 A_WeaponOffset(-0.8,-0.5,WOF_ADD);
@@ -50,7 +51,7 @@ Class PK_Stakegun : PKWeapon {
 						psp.sprite = GetSpriteIndex("PSGT");
 				}
 			}
-			#### HIJKAA 3 A_WeaponOffset(-1.69,-1.38,WOF_ADD);
+			#### HIJKAA 3 A_WeaponOffset(-2.35,-2.04,WOF_ADD);
 			TNT1 A 0 A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			goto ready;
 		AltFire:
