@@ -268,7 +268,7 @@ Class PK_DemonWeapon : PKWeapon {
 		dur = 25;
 		owner.A_StartSound("demon/start",CHAN_AUTO,flags:CHANF_LOCAL);
 		if(players[consoleplayer] == owner.player)   {
-			owner.A_StartSound("demon/loop",66,CHANF_LOOPING,attenuation:20);
+			owner.A_StartSound("demon/loop",66,CHANF_UI|CHANF_LOOPING);
 			SetMusicVolume(0);
 			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "waveSpeed", 25 );
 			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "waveAmount", 10 );

@@ -40,7 +40,7 @@ Class PK_Shotgun : PKWeapon {
 			A_Quake(1,7,0,1,"");
 			A_StartSound("weapons/shotgun/fire",CHAN_VOICE);
 			A_Overlay(-100,"Flash");
-			A_firebullets(5,5,10,9,pufftype:"PK_BulletPuff",flags:FBF_NORANDOM|FBF_USEAMMO);
+			A_firebullets(5,5,10,9,pufftype:"PK_BulletPuff",flags:FBF_NORANDOM|FBF_USEAMMO,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-44,spawnofs_xy:9);
 			A_ZoomFactor(0.99,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			//A_Eject				
 		}

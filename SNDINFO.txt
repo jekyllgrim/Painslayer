@@ -1,6 +1,16 @@
 world/bodypoof	BODYPOOF
 world/null	DSEMPTY
 
+/// MENU
+
+ui/board/click			"sounds/board/option-accept.wav"
+ui/board/hover 			"sounds/board/option-light-on.wav"
+ui/board/placesilver 	"sounds/board/card-put_off-special_place.wav"
+ui/board/placegold	 	"sounds/board/card-put_off-special_place2.wav"
+ui/board/takecard	 	"sounds/board/card-take.wav"
+ui/board/returncard	 	"sounds/board/card-put_off.wav"
+ui/board/wrongplace	 	"sounds/board/wrong_place.wav"
+
 ///WEAPONS\\\
 
 weapons/select	WSELECT

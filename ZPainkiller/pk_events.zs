@@ -1,21 +1,48 @@
 Class PK_DeathHandler : EventHandler {
-	override void WorldThingDied(worldevent e) {
-		if (!e.thing || !e.thing.bISMONSTER)
-			return;
-		actor c = Actor.Spawn("PK_EnemyDeathControl",e.thing.pos);
-		if (c)
-			c.master = e.thing;
-	}
 	
+	array <Actor> allenemies;
 	array <Actor> demontargets;
+
 	override void WorldThingspawned (worldevent e) {
-		if (!e.thing)
+		let act = e.thing;		
+		if (!act)
 			return;
-		if (e.thing.bISMONSTER || e.thing.bMISSILE || (e.thing is "PlayerPawn")) {
-			demontargets.push(e.thing);
+		if (act.bISMONSTER)
+			allenemies.push(act);
+		if (act.bISMONSTER || act.bMISSILE || (act.player)) {
+			demontargets.push(act);
 		}
-		if ((e.thing is "PlayerPawn") && !e.thing.FindInventory("PK_DemonMorphControl"))
-			e.thing.GiveInventory("PK_DemonMorphControl",1);
+		if (act.player && !act.FindInventory("PK_DemonMorphControl"))
+			act.GiveInventory("PK_DemonMorphControl",1);
+	}
+	override void WorldThingRevived (worldevent e) {
+		let act = e.thing;		
+		if (!act)
+			return;
+		if (act.bISMONSTER)
+			allenemies.push(act);
+		if (act.bISMONSTER || act.bMISSILE || (act.player)) {
+			demontargets.push(act);
+		}
+		if (act.player && !act.FindInventory("PK_DemonMorphControl"))
+			act.GiveInventory("PK_DemonMorphControl",1);
+	}	
+	override void WorldThingDied(worldevent e) {
+		let act = e.thing;
+		if (!act || !act.bISMONSTER)
+			return;		
+		actor c = Actor.Spawn("PK_EnemyDeathControl",act.pos);
+		if (c)
+			c.master = act;		
+
+		allenemies.delete(allenemies.Find(e.thing));
+		demontargets.delete(allenemies.Find(e.thing));
+	}
+	override void WorldThingDestroyed(WorldEvent e) {
+		if (e.thing) {
+			allenemies.delete(allenemies.Find(e.thing));
+			demontargets.delete(allenemies.Find(e.thing));
+		}
 	}
 	
 	override void WorldTick() {
@@ -62,7 +89,6 @@ Class PK_ReplacementHandler : EventHandler {
 			case 'BFG9000' 		: e.Replacement = 'PK_Electrodriver';		break;
 			
 			case 'Shell' 			: e.Replacement = (frandom[ammo](1,10) > 7.5) ? 	'PK_FreezerAmmo' : 'PK_Shells';		break;
-			case 'ShellBox' 		: e.Replacement = (frandom[ammo](1,10) > 7) ? 	'PK_Shells' : 'PK_FreezerAmmo';		break;
 			case 'ShellBox' 		: e.Replacement = (frandom[ammo](1,10) > 7) ? 	'PK_Shells' : 'PK_FreezerAmmo';		break;
 			case 'RocketAmmo' 		: e.Replacement = 'PK_Bombs';		break;
 			case 'RocketBox' 		: e.Replacement = 'PK_Bombs';		break;

@@ -1,0 +1,249 @@
+/// The base menu class for menus to inherit from.
+/// Contains a mainFrame to put items in.
+class PKCGenericMenu : GenericMenu {
+	PKCFrame mainFrame;
+	int mouseX;
+	int mouseY;
+
+	override void init(Menu parent) {
+		Super.init(parent);
+		mainFrame = new("PKCFrame");
+		mainFrame.init((0, 0), (320, 200));
+		mainFrame.setBaseResolution((320, 200));
+	}
+
+	void setBaseResolution(Vector2 size) {
+		mainFrame.setBox((0, 0), size);
+		mainFrame.setBaseResolution(size);
+	}
+
+	override void ticker() {
+		// Trigger a mouse movement UI event to fix things "sticking" sometimes
+		let zfEv = new("PKCUiEvent");
+		zfEv.type = UIEvent.Type_MouseMove;
+		zfEv.mouseX = mouseX;
+		zfEv.mouseY = mouseY;
+		mainFrame.onUIEvent(zfEv);
+
+		Super.ticker();
+		mainFrame.ticker();
+	}
+
+	override void drawer() {
+		Super.drawer();
+		mainFrame.drawer();
+	}
+
+	// "relay" all UI events down to the elements so they can handle them
+	override bool onUIEvent(UIEvent ev) {
+		if (ev.type == UIEvent.Type_MouseMove) {
+			mouseX = ev.mouseX;
+			mouseY = ev.mouseY;
+		}
+
+		let zfEv = new("PKCUiEvent");
+
+		PKCUiEvent.fromGZDUiEvent(ev, zfEv);
+		mainFrame.onUIEvent(zfEv);
+
+		return Super.onUIEvent(ev);
+	}
+}
+
+class PKCEventHandlerMenu ui {
+	PKCFrame mainFrame;
+
+	protected bool useCustomCursor;
+	protected string customCursor;
+
+	virtual void init() {
+		mainFrame = new("PKCFrame");
+		mainFrame.init((0, 0), (320, 200));
+		mainFrame.setBaseResolution((320, 200));
+	}
+
+	void setBaseResolution(Vector2 size) {
+		mainFrame.setBox((0, 0), size);
+		mainFrame.setBaseResolution(size);
+	}
+
+	void doTick() {
+		ticker();
+	}
+
+	protected virtual void ticker() {
+		// Trigger a mouse movement UI event to fix things "sticking" sometimes
+		let zfEv = new("PKCUiEvent");
+		zfEv.type = UIEvent.Type_MouseMove;
+		zfEv.mouseX = inputProc_MouseX;
+		zfEv.mouseY = inputProc_MouseY;
+		mainFrame.onUIEvent(zfEv);
+
+		mainFrame.ticker();
+	}
+
+	void doDraw() {
+		drawer();
+
+		if (useCustomCursor) {
+			Screen.DrawTexture(TexMan.checkForTexture(customCursor, TexMan.Type_Any), true, inputProc_MouseX, inputProc_MouseY);
+		}
+	}
+
+	protected virtual void drawer() {
+		mainFrame.drawer();
+	}
+
+	// "relay" all UI events down to the elements so they can handle them
+	virtual bool onUIEvent(UIEvent ev) {
+		let zfEv = new("PKCUiEvent");
+
+		PKCUiEvent.fromGZDUiEvent(ev, zfEv);
+		mainFrame.onUIEvent(zfEv);
+
+		return false;
+	}
+
+	private bool inputProc_Alt;
+	private bool inputProc_Shift;
+	private bool inputProc_Ctrl;
+	protected int inputProc_MouseX;
+	protected int inputProc_MouseY;
+
+	int, int getCustomMousePosition() {
+		return inputProc_MouseX, inputProc_MouseY;
+	}
+
+	void setCustomMousePosition(int posX, int posY) {
+		inputProc_MouseX = posX;
+		inputProc_MouseY = posY;
+	}
+
+	void copyCustomMousePosition(PKCEventHandlerMenu other) {
+		inputProc_MouseX = other.inputProc_MouseX;
+		inputProc_MouseY = other.inputProc_MouseY;
+	}
+
+	void onInputEvent(InputEvent gzdEv) {
+		let ev = new("PKCUiEvent");
+
+		ev.KeyString = gzdEv.KeyString;
+		ev.KeyChar = gzdEv.KeyChar;
+
+		ev.Type = -1;
+
+		switch (gzdEv.Type) {
+			case InputEvent.Type_None: ev.Type = UiEvent.Type_None; break;
+
+			case InputEvent.Type_KeyDown:
+				switch (gzdEv.KeyScan) {
+					// Mouse events
+					case InputEvent.Key_Mouse1     : ev.Type = UiEvent.Type_LButtonDown   ; break;
+					case InputEvent.Key_Mouse2     : ev.Type = UiEvent.Type_RButtonDown   ; break;
+					case InputEvent.Key_Mouse3     : ev.Type = UiEvent.Type_MButtonDown   ; break;
+					case InputEvent.Key_MWheelUp   : ev.Type = UiEvent.Type_WheelUp       ; break;
+					case InputEvent.Key_MWheelDown : ev.Type = UiEvent.Type_WheelDown     ; break;
+					case InputEvent.Key_MWheelLeft : ev.Type = UiEvent.Type_WheelLeft     ; break;
+					case InputEvent.Key_MWheelRight: ev.Type = UiEvent.Type_WheelRight    ; break;
+					case InputEvent.Key_Mouse4     : ev.Type = UiEvent.Type_BackButtonDown; break;
+					case InputEvent.Key_Mouse5     : ev.Type = UiEvent.Type_FwdButtonDown ; break;
+
+					// Ctrl, shift and alt
+					case InputEvent.Key_LShift: inputProc_Alt   = true; break;
+					case InputEvent.Key_LCtrl : inputProc_Shift = true; break;
+					case InputEvent.Key_LAlt  : inputProc_Ctrl  = true; break;
+
+					// Everything else
+					default: {
+						ev.Type = UiEvent.Type_KeyDown;
+
+						int val = convertDIKToGUIKey(gzdEv.KeyScan);
+
+						if (val != -1) {
+							ev.KeyChar = val;
+						}
+					}
+					break;
+				}
+			break;
+
+			case InputEvent.Type_KeyUp:
+				switch (gzdEv.KeyScan) {
+					// Mouse events
+					case InputEvent.Key_Mouse1     : ev.Type = UiEvent.Type_LButtonUp   ; break;
+					case InputEvent.Key_Mouse2     : ev.Type = UiEvent.Type_RButtonUp   ; break;
+					case InputEvent.Key_Mouse3     : ev.Type = UiEvent.Type_MButtonUp   ; break;
+					case InputEvent.Key_Mouse4     : ev.Type = UiEvent.Type_BackButtonUp; break;
+					case InputEvent.Key_Mouse5     : ev.Type = UiEvent.Type_FwdButtonUp ; break;
+
+					// Ctrl, shift and alt
+					case InputEvent.Key_LShift: inputProc_Alt   = false; break;
+					case InputEvent.Key_LCtrl : inputProc_Shift = false; break;
+					case InputEvent.Key_LAlt  : inputProc_Ctrl  = false; break;
+
+					// Everything else
+					default: {
+						ev.Type = UiEvent.Type_KeyUp;
+
+						int val = convertDIKToGUIKey(gzdEv.KeyScan);
+
+						if (val != -1) {
+							ev.KeyChar = val;
+						}
+					}
+					break;
+				}
+			break;
+
+			case InputEvent.Type_Mouse:
+				inputProc_MouseX = clamp(inputProc_MouseX + gzdEv.MouseX, 0, Screen.GetWidth ());
+				inputProc_MouseY = clamp(inputProc_MouseY - gzdEv.MouseY, 0, Screen.GetHeight());
+
+				ev.Type = UiEvent.Type_MouseMove;
+				ev.MouseX = inputProc_MouseX;
+				ev.MouseY = inputProc_MouseY;
+			break;
+		}
+
+		if (ev.Type == -1) {
+			return;
+		}
+
+		mainFrame.onUIEvent(ev);
+	}
+
+	private int convertDIKToGUIKey(int keyScan) {
+		switch (keyScan) {
+			case InputEvent.Key_PgDn: return UiEvent.Key_PgDn;
+			case InputEvent.Key_PgUp: return UiEvent.Key_PgUp;
+			case InputEvent.Key_Home: return UiEvent.Key_Home;
+			case InputEvent.Key_End : return UiEvent.Key_End ;
+
+			case InputEvent.Key_UpArrow   : return UiEvent.Key_Up   ;
+			case InputEvent.Key_DownArrow : return UiEvent.Key_Down ;
+			case InputEvent.Key_LeftArrow : return UiEvent.Key_Left ;
+			case InputEvent.Key_RightArrow: return UiEvent.Key_Right;
+
+			case InputEvent.Key_Escape   : return UiEvent.Key_Escape   ;
+			case InputEvent.Key_Enter    : return UiEvent.Key_Return   ;
+			case InputEvent.Key_Tab      : return UiEvent.Key_Tab      ;
+			case InputEvent.Key_Del      : return UiEvent.Key_Del      ;
+			case InputEvent.Key_Backspace: return UiEvent.Key_Backspace;
+
+			case InputEvent.Key_F1 : return UiEvent.Key_F1 ;
+			case InputEvent.Key_F2 : return UiEvent.Key_F2 ;
+			case InputEvent.Key_F3 : return UiEvent.Key_F3 ;
+			case InputEvent.Key_F4 : return UiEvent.Key_F4 ;
+			case InputEvent.Key_F5 : return UiEvent.Key_F5 ;
+			case InputEvent.Key_F6 : return UiEvent.Key_F6 ;
+			case InputEvent.Key_F7 : return UiEvent.Key_F7 ;
+			case InputEvent.Key_F8 : return UiEvent.Key_F8 ;
+			case InputEvent.Key_F9 : return UiEvent.Key_F9 ;
+			case InputEvent.Key_F10: return UiEvent.Key_F10;
+			case InputEvent.Key_F11: return UiEvent.Key_F11;
+			case InputEvent.Key_F12: return UiEvent.Key_F12;
+		}
+
+		return -1;
+	}
+}

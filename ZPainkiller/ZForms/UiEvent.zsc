@@ -1,0 +1,25 @@
+class PKCUiEvent ui {
+	// 
+	int Type;
+	//
+	String KeyString;
+	int KeyChar;
+	//
+	int MouseX;
+	int MouseY;
+	//
+	bool IsShift;
+	bool IsCtrl;
+	bool IsAlt;
+
+	static void fromGZDUiEvent(UiEvent gzdEv, PKCUiEvent ev) {
+		ev.Type = gzdEv.Type;
+		ev.KeyString = gzdEv.KeyString;
+		ev.KeyChar = gzdEv.KeyChar;
+		ev.MouseX = gzdEv.MouseX;
+		ev.MouseY = gzdEv.MouseY;
+		ev.IsShift = gzdEv.IsShift;
+		ev.IsCtrl = gzdEv.IsCtrl;
+		ev.IsAlt = gzdEv.IsAlt;
+	}
+}

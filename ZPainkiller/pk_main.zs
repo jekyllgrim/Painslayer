@@ -177,8 +177,14 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 	}
 	//a chad tick override that skips Actor's super.tick!
 	override void Tick() {
-		if (isFrozen())
+		if (alpha < 0) {
+			destroy();
 			return;
+		}
+		//if (self)
+			//console.printf("%s %d alpha %f",GetClassName(),GetAge(),alpha);
+		if (isFrozen())
+			return;		
 		//animation:
 		if (tics != -1) {
 			if (tics > 0) 
@@ -605,7 +611,7 @@ Class PK_DeathSmoke : PK_BaseSmoke {
 			bBRIGHT = true;
 		}
 		else	{	
-			A_SetRenderstyle(default.alpha,Style_Translucent);
+			A_SetRenderstyle(alpha,Style_Translucent);
 			bBRIGHT = false;
 		}
 	}
@@ -699,7 +705,6 @@ Class PK_EnemyDeathControl : Actor {
 		}
 	}
 }
-	
 
 
 //Shader.SetEnabled( players[consoleplayer], "DemonMode", true);

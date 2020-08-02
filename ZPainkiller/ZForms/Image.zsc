@@ -1,0 +1,48 @@
+class PKCImage : PKCElement {
+	string image;
+	AlignType alignment;
+	Vector2 imageScale;
+	bool tiled;
+
+	void config(string image = "", AlignType alignment = AlignType_TopLeft, Vector2 imageScale = (1, 1), bool tiled = false) {
+		self.image = image;
+		self.alignment = alignment;
+		self.imageScale = imageScale;
+		self.tiled = tiled;
+		self.alpha = 1;
+	}
+
+	PKCImage init(Vector2 pos, Vector2 size, string image = "", AlignType alignment = AlignType_TopLeft, Vector2 imageScale = (1, 1), bool tiled = false) {
+		self.config(image, alignment, imageScale, tiled);
+		self.setBox(pos, size);
+
+		return self;
+	}
+
+	override void drawer() {
+		TextureID tex = TexMan.checkForTexture(image, TexMan.Type_Any);
+
+		if (!tex) {
+			return;
+		}
+
+		Vector2 imageSize = TexMan.getScaledSize(tex);
+
+		imageSize.x *= imageScale.x;
+		imageSize.y *= imageScale.y;
+
+		if (tiled) {
+			drawTiledImage((0, 0), box.size, image, true, imageScale);
+		}
+		else {
+			Vector2 pos = getAlignedDrawPos(box.size, imageSize, alignment);
+			drawImage(pos, image, true, imageScale, clipRect: boxToScreen());
+		}
+	}
+
+	override void onUIEvent(PKCUiEvent ev) {
+		if (ev.type == UIEvent.Type_MouseMove) {
+			doHover((ev.mouseX, ev.mouseY));
+		}
+	}
+}

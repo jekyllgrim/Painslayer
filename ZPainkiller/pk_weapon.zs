@@ -249,12 +249,13 @@ Class PK_BulletTracer : FastProjectile {
 		-ACTIVATEIMPACT;
 		-ACTIVATEPCROSS;
 		+BLOODLESSIMPACT;
+		+BRIGHT
 		damage 0;
 		radius 4;
 		height 4;
 		speed 180;
 		renderstyle 'add';
-		alpha 0.85;
+		alpha 2;
 		scale 0.3;
 	}    
 	states {
@@ -385,6 +386,7 @@ Class PK_Shells : Ammo {
 	Default {
 		inventory.pickupmessage "Picked up shotgun shells.";
 		inventory.pickupsound "pickups/ammo/shells";
+		inventory.icon "pkhshell";
 		inventory.amount 18;
 		inventory.maxamount 100;
 		ammo.backpackamount 15;
@@ -403,6 +405,7 @@ Class PK_FreezerAmmo : Ammo {
 	Default {
 		inventory.pickupmessage "Picked up freezer ammo.";
 		inventory.pickupsound "pickups/ammo/freezerammo";
+		inventory.icon "pkhfreez";
 		inventory.amount 15;
 		inventory.maxamount 100;
 		ammo.backpackamount 6;
@@ -422,6 +425,7 @@ Class PK_Stakes : Ammo {
 	Default {
 		inventory.pickupmessage "Picked up a box of stakes.";
 		inventory.pickupsound "pickups/ammo/stakes";
+		inventory.icon "pkhstake";
 		inventory.amount 15;
 		inventory.maxamount 100;
 		ammo.backpackamount 12;
@@ -440,6 +444,7 @@ Class PK_Bombs : Ammo {
 	Default {
 		inventory.pickupmessage "Picked up a box of bombs.";
 		inventory.pickupsound "pickups/ammo/bombs";
+		inventory.icon "pkhrock";
 		inventory.amount 7;
 		inventory.maxamount 100;
 		ammo.backpackamount 12;
@@ -457,7 +462,7 @@ Class PK_Bullets : Ammo {
 	Default {
 		inventory.pickupmessage "Picked up a box of bullets.";
 		inventory.pickupsound "pickups/ammo/bullets";
-		inventory.icon "BULSA0";
+		inventory.icon "pkhbull";
 		inventory.amount 50;
 		inventory.maxamount 500;
 		ammo.backpackamount 100;
@@ -476,6 +481,7 @@ Class PK_ShurikenAmmo : Ammo {
 	Default {
 		inventory.pickupmessage "Picked up a box of shurikens.";
 		inventory.pickupsound "pickups/ammo/stars";
+		inventory.icon "pkhstars";
 		inventory.amount 10;
 		inventory.maxamount 100;
 		ammo.backpackamount 40;
@@ -494,6 +500,7 @@ Class PK_Battery : Ammo {
 	Default {
 		inventory.pickupmessage "Picked up a cell battery.";
 		inventory.pickupsound "pickups/ammo/battery";
+		inventory.icon "pkhshock";
 		inventory.amount 20;
 		inventory.maxamount 500;
 		ammo.backpackamount 80;

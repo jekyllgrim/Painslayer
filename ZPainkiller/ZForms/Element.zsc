@@ -1,0 +1,375 @@
+class PKCElement ui {
+	enum AlignType {
+		AlignType_Left    = 1,
+		AlignType_HCenter = 2,
+		AlignType_Right   = 3,
+
+		AlignType_Top     = 1 << 4,
+		AlignType_VCenter = 2 << 4,
+		AlignType_Bottom  = 3 << 4,
+
+		AlignType_TopLeft   = AlignType_Top | AlignType_Left,
+		AlignType_TopCenter = AlignType_Top | AlignType_HCenter,
+		AlignType_TopRight  = AlignType_Top | AlignType_Right,
+
+		AlignType_CenterLeft  = AlignType_VCenter | AlignType_Left,
+		AlignType_Center      = AlignType_VCenter | AlignType_HCenter,
+		AlignType_CenterRight = AlignType_VCenter | AlignType_Right,
+
+		AlignType_BottomLeft   = AlignType_Bottom | AlignType_Left,
+		AlignType_BottomCenter = AlignType_Bottom | AlignType_HCenter,
+		AlignType_BottomRight  = AlignType_Bottom | AlignType_Right,
+	}
+
+	PKCFrame master;
+
+	PKCHandler cmdHandler;
+	string command;
+
+	Vector2 baseScreenSize;
+	PKCAABB box;
+	double alpha;
+	bool disabled;
+	bool hidden;
+	bool isHovered;
+
+	int round(double roundee) {
+		if (roundee < 0) {
+			return int(roundee - 0.5);
+		}
+		else {
+			return int(roundee + 0.5);
+		}
+	}
+
+	PKCAABB getClipAABB() {
+		PKCAABB curClip = new("PKCAABB");
+		[curClip.pos.x, curClip.pos.y, curClip.size.x, curClip.size.y] = screen.GetClipRect();
+		if (curClip.size.x != -1) {
+			return curClip;
+		}
+		else {
+			curClip.pos = (0, 0);
+			curClip.size = screenSize();
+			return curClip;
+		}
+	}
+
+	Vector2 getAspectRatioOffset() {
+		Vector2 screenSize = screenSize();
+		Vector2 virtualSize = getBaseVirtualSize();
+		if (screenSize.x / baseScreenSize.x == screenSize.y / baseScreenSize.y) {
+			return (0, 0);
+		}
+		else if (screenSize.x / baseScreenSize.x < screenSize.y / baseScreenSize.y) {
+			return (0, (screenSize.y - (screenSize.x * (baseScreenSize.y / baseScreenSize.x)))) / 2;
+		}
+		else {
+			return ((screenSize.x - (screenSize.y * (baseScreenSize.x / baseScreenSize.y))), 0) / 2;
+		}
+	}
+
+	/// Converts relative positioning to screen positioning.
+	virtual Vector2 relToScreen(Vector2 relPos) {
+		return master.relToScreen(box.pos + relPos);
+	}
+
+	Vector2 screenToRel(Vector2 screenPos) {
+		return screenScaledToRel(screenPos / getScale()) - getAspectRatioOffset() / getScale();
+	}
+
+	/// Converts screen positioning to relative positioning.
+	virtual Vector2 screenScaledToRel(Vector2 screenPos) {
+		return master.screenToRel(screenPos - box.pos);
+	}
+
+	/// Return a bounding box which uses absolute coordinates.
+	virtual PKCAABB boxToScreen() {
+		PKCAABB ret = new("PKCAABB");
+		ret.pos = relToScreen((0, 0)) * getScale();
+		ret.size = box.size * getScale();
+
+		if (master != NULL) {
+			ret = ret.rectOfIntersection(master.boxToScreen());
+		}
+
+		return ret;
+	}
+
+	Vector2 screenSize() {
+		return (Screen.getWidth(), Screen.getHeight());
+	}
+
+	double getScale() {
+		Vector2 screenSize = screenSize();
+		return min(screenSize.x / baseScreenSize.x, screenSize.y / baseScreenSize.y);
+	}
+
+	Vector2 getBaseVirtualSize() {
+		return screenSize() / getScale();
+	}
+
+	/// Converts a scale to virtual coordinates for drawing elements at a scale factor.
+	Vector2 scaleToVirtualSize(Vector2 scale) {
+		Vector2 screenSize = getBaseVirtualSize();
+		return (screenSize.x / scale.x, screenSize.y / scale.y);
+	}
+
+	Vector2 texSize(string texture) {
+		return TexMan.getScaledSize(TexMan.checkForTexture(texture, TexMan.Type_Any));
+	}
+
+	/// Gets the correct position to draw aligned content at.
+	Vector2 getAlignedDrawPos(Vector2 boxSize, Vector2 contentSize, AlignType align) {
+		Vector2 pos = (0, 0);
+		int horzAlign = align &  15;
+		int vertAlign = align & (15 << 4);
+
+		if (horzAlign == AlignType_HCenter) {
+			pos.x = (boxSize.x - contentSize.x) / 2.0;
+		}
+		else if (horzAlign == AlignType_Right) {
+			pos.x = boxSize.x - contentSize.x;
+		}
+
+		if (vertAlign == AlignType_VCenter) {
+			pos.y = (boxSize.y - contentSize.y) / 2.0;
+		}
+		else if (vertAlign == AlignType_Bottom) {
+			pos.y = boxSize.y - contentSize.y;
+		}
+
+		return pos;
+	}
+
+	/// Gets the cumulative alpha value for the element.
+	double getAlpha() {
+		double calcAlpha = 1;
+
+		PKCElement elem = self;
+		while (elem) {
+			calcAlpha *= elem.alpha;
+			elem = elem.master;
+		}
+
+		return calcAlpha;
+	}
+
+	/// Draws text, taking into account relative positioning, and scale factor.
+	void drawText(Vector2 relPos, Font fnt, string text, int color = Font.CR_WHITE, double scale = 1, double alpha = 1) {
+		if (scale == 0) return;
+
+		Vector2 drawPos = relToScreen(relPos) / scale;
+		Vector2 virtualSize = scaleToVirtualSize((scale, scale));
+		Screen.drawText(fnt, color, drawPos.x, drawPos.y, text, DTA_VirtualWidthF, virtualSize.x, DTA_VirtualHeightF, virtualSize.y, DTA_KeepRatio, true, DTA_Alpha, alpha * getAlpha());
+	}
+
+	/// Draws an image, taking into account relative positioning, and scale factor.
+	void drawImage(Vector2 relPos, string imageName, bool animate, Vector2 scale = (1, 1), double alpha = 1, PKCAABB clipRect = NULL) {
+		if (scale.x == 0 || scale.y == 0) return;
+
+		if (clipRect == NULL) {
+			clipRect = getClipAABB();
+		}
+		TextureID tex = TexMan.checkForTexture(imageName, TexMan.Type_Any);
+		Vector2 drawPos = relToScreen(relPos);
+		drawPos = (drawPos.x / scale.x, drawPos.y / scale.y);
+		Vector2 virtualSize = scaleToVirtualSize(scale);
+		Screen.DrawTexture(tex, animate, drawPos.x, drawPos.y, DTA_VirtualWidthF, virtualSize.x, DTA_VirtualHeightF, virtualSize.y, DTA_KeepRatio, true, DTA_Alpha, alpha * getAlpha(), DTA_ClipLeft, int(clipRect.pos.x), DTA_ClipTop, int(clipRect.pos.y), DTA_ClipRight, int(clipRect.pos.x + clipRect.size.x), DTA_ClipBottom, int(clipRect.pos.y + clipRect.size.y), DTA_TopOffset, 0, DTA_LeftOffset, 0);
+	}
+
+	Vector2 scaleVec(Vector2 vec, Vector2 scale) {
+		return (vec.x * scale.x, vec.y * scale.y);
+	}
+
+	/// Draws a grid of images according to the size Vector2.
+	/// Scales the image instead of tiling if possible.
+	void drawTiledImage(Vector2 relPos, Vector2 size, string imageName, bool animate, Vector2 scale = (1, 1), double alpha = 1.0) {
+		if (scale.x == 0 || scale.y == 0) {
+			return;
+		}
+
+		Vector2 imageSize = texSize(imageName) * getScale();
+
+		// Abort if the image has an invalid resolution.
+		if (imageSize.x < 0 || imageSize.x ~== 0 || imageSize.y < 0 || imageSize.y ~== 0) {
+			return;
+		}
+
+		PKCAABB beforeClip = getClipAABB();
+		PKCAABB clipRect = boxToScreen().rectOfIntersection(beforeClip);
+		PKCAABB screenClip = new("PKCAABB");
+		screenClip.size = screenSize();
+		clipRect = clipRect.rectOfIntersection(screenClip);
+
+		Vector2 imageScale;
+		imageScale.x = scale.x * imageSize.x;
+		imageScale.y = scale.y * imageSize.y;
+
+		let absPos = relToScreen(relPos) * getScale();
+		let scaledSize = size * getScale();
+		if (scaledSize ~== (0, 0)) {
+			return;
+		}
+
+		let shape = new("Shape2D");
+		shape.clear();
+
+		shape.pushVertex(absPos);
+		shape.pushVertex((absPos.X + scaledSize.X, absPos.Y));
+		shape.pushVertex((absPos.X, absPos.Y + scaledSize.Y));
+		shape.pushVertex((absPos.X + scaledSize.X, absPos.Y + scaledSize.Y));
+
+		shape.pushTriangle(0, 3, 1);
+		shape.pushTriangle(0, 2, 3);
+
+		double xSize = scaledSize.x / imageScale.x;
+		double ySize = scaledSize.y / imageScale.y;
+
+		shape.pushCoord((    0,     0));
+		shape.pushCoord((xSize,     0));
+		shape.pushCoord((    0, ySize));
+		shape.pushCoord((xSize, ySize));
+
+		let texID = TexMan.checkForTexture(imageName, TexMan.Type_Any);
+		Screen.drawShape(texID, false, shape, DTA_Alpha, alpha * getAlpha(), DTA_ClipLeft, int(floor(clipRect.pos.x)), DTA_ClipTop, int(floor(clipRect.pos.y)), DTA_ClipRight, int(ceil(clipRect.pos.x + clipRect.size.x)), DTA_ClipBottom, int (ceil(clipRect.pos.y + clipRect.size.y)));
+
+		Screen.setClipRect(int(beforeClip.pos.x), int(beforeClip.pos.y), int(beforeClip.size.x), int(beforeClip.size.y));
+	}
+
+	/// Draw a box using a PKCBoxTextures struct.
+	void drawBox(Vector2 pos, Vector2 size, PKCBoxTextures textures, bool animate, Vector2 scale = (1, 1)) {
+        // Corner names
+        string tlName = textures.corners[textures.C_TOPLEFT];
+        string trName = textures.corners[textures.C_TOPRIGHT];
+        string blName = textures.corners[textures.C_BOTTOMLEFT];
+        string brName = textures.corners[textures.C_BOTTOMRIGHT];
+        // Side names
+        string tName = textures.sides[textures.S_TOP];
+        string bName = textures.sides[textures.S_BOTTOM];
+        string lName = textures.sides[textures.S_LEFT];
+        string rName = textures.sides[textures.S_RIGHT];
+
+        /* Get the scaled sizes. */
+        Vector2 tileSize = scaleVec(texSize(tlName), scale);
+
+        /* Calculate the positions and sizes. */
+        // Middle
+        Vector2 mPos = pos + tileSize;
+        Vector2 mSize = size - tileSize * 2;
+        // Sides
+        Vector2 tbSize = (size.x - (tileSize.x * 2), tileSize.y); // Top and bottom
+        Vector2 lrSize = (tileSize.x, size.y - (tileSize.y * 2)); // Left and right
+
+        Vector2 tPos = pos + (tileSize.x, 0); // Top
+        Vector2 bPos = mPos + (0, mSize.y); // Bottom
+
+        Vector2 lPos = pos + (0, tileSize.y); // Left
+        Vector2 rPos = (mPos.x, lPos.y) + (mSize.x, 0); // Right
+        // Corners
+        Vector2 tlPos = pos; // Top left
+        Vector2 trPos = tPos + (tbSize.x, 0); // Top right
+        Vector2 blPos = lPos + (0, lrSize.y); // Bottom left
+        Vector2 brPos = bPos + (tbSize.x, 0); // Bottom right
+
+        /* Draw the corners. */
+        drawImage(tlPos, tlName, animate, scale); // Top left
+        drawImage(trPos, trName, animate, scale); // Top right
+        drawImage(blPos, blName, animate, scale); // Bottom left
+        drawImage(brPos, brName, animate, scale); // Bottom right
+
+        /* Draw the sides. */
+        drawTiledImage(tPos, tbSize, tName, animate, scale); // Top
+        drawTiledImage(bPos, tbSize, bName, animate, scale); // Bottom
+        drawTiledImage(lPos, lrSize, lName, animate, scale); // Left
+        drawTiledImage(rPos, lrSize, rName, animate, scale); // Right
+
+        /* Draw the middle. */
+        drawTiledImage(mPos, mSize, textures.midTex, animate);
+	}
+
+	/// Draws a coloured region, taking into account relative positioning, and scale factor.
+	void fill(Vector2 relStartPos, Vector2 size, Color col, double amount) {
+		Vector2 startPos = relToScreen(relStartPos) * getScale();
+		size *= getScale();
+
+		PKCAABB beforeClip = getClipAABB();
+		PKCAABB clipTest = new("PKCAABB");
+		clipTest.pos = startPos;
+		clipTest.size = size * getScale();
+		PKCAABB clipRect = clipTest.rectOfIntersection(beforeClip);
+		Screen.setClipRect(int(clipRect.pos.x), int(clipRect.pos.y), int(clipRect.size.x), int(clipRect.size.y));
+
+		Screen.dim(col, amount * getAlpha(), int(startPos.x), int(startPos.y), int(size.x), int(size.y));
+
+		Screen.setClipRect(int(beforeClip.pos.x), int(beforeClip.pos.y), int(beforeClip.size.x), int(beforeClip.size.y));
+	}
+
+	/// Packs the element into the master frame.
+	void pack(PKCFrame master) {
+		if (master != NULL) {
+			unpack();
+		}
+
+		self.master = master;
+		master.elements.push(self);
+		baseScreenSize = master.baseScreenSize;
+	}
+
+	/// Unpacks the element from its master frame.
+	void unpack() {
+		if (master == NULL) {
+			return;
+		}
+
+		int index = master.elements.find (self);
+		if (index != master.elements.Size ()) {
+			master.elements.delete(index, 1);
+		}
+		master = NULL;
+	}
+
+	void setBox(Vector2 pos, Vector2 size) {
+		if (box == NULL) {
+			box = new("PKCAABB");
+		}
+		box.pos = pos;
+		box.size = size;
+	}
+
+	// methods for overriding in derived elements
+	virtual void ticker() {}
+	virtual void drawer() {}
+	virtual void onUIEvent(PKCUiEvent ev) {}
+
+	// Added by Chronos "phantombeta" Ouroboros
+	bool isEnabled() {
+		PKCElement elem = self;
+		while (elem) {
+			if (elem.disabled) {
+				return false;
+			}
+
+			elem = elem.master;
+		}
+
+		return true;
+	}
+
+	virtual void doHover (Vector2 mousePos) {
+		bool hover = boxToScreen().pointCollides(mousePos);
+
+		if (hover && !isHovered) {
+			if (cmdHandler) {
+				cmdHandler.elementHoverChanged(self, command, false);
+			}
+			isHovered = true;
+		}
+		else if (!hover && isHovered) {
+			if (cmdHandler) {
+				cmdHandler.elementHoverChanged(self, command, true);
+			}
+			isHovered = false;
+		}
+	}
+}

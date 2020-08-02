@@ -78,7 +78,9 @@ Class PK_Painkiller : PKWeapon {
 					if (!(player.oldbuttons & BT_ALTATTACK))
 						invoker.pk_killer.SetStateLabel("XDeath");
 					return ResolveState("Ready");
-				}				
+				}
+				else if (player.oldbuttons & BT_ALTATTACK)
+					return ResolveState("Ready");
 				A_StartSound("weapons/painkiller/killer");
 				if (invoker.combofire) {
 					invoker.pk_killer = PK_ComboKiller(A_FireProjectile("PK_ComboKiller"));

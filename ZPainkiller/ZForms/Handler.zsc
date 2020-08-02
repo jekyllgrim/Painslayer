@@ -1,0 +1,10 @@
+class PKCHandler ui {
+	virtual void buttonClickCommand(PKCButton caller, string command) {
+	}
+	
+	virtual void buttonHeldCommand(PKCButton caller, string command) {
+	}
+
+	virtual void elementHoverChanged(PKCElement caller, string command, bool unhovered) {
+	}
+}

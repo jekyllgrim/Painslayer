@@ -1,0 +1,9 @@
+People Can Fly: Painkiller, Painkiller sounds, HUD graphics
+
+Agent_Ash aka Jekyll Grim Payne: Idea, code, weapon and item sprites
+
+kodi: Beam library
+
+Cherno: Demon Morph shaders
+
+Lewisk3: StatusScreen Base library
