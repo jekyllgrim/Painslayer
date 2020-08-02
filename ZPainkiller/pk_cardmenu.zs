@@ -63,7 +63,7 @@ Class PKCardsMenu : PKCGenericMenu {
 	static const int PKCSilverSlots[] = {	58, 230 };
 	static const int PKCGoldSlots[] 	= { 488, 658, 828 };
 	private void SlotsInit() {
-		vector2 slotsize = (140,227);	
+		vector2 slotsize = (138,227);	
 		for (int i = 0; i < PKCSilverSlots.Size(); i++) {			
 			vector2 slotpos = (PKCSilverSlots[i],179);
 			let cardslot = PKCCardSlot(new("PKCCardSlot"));
@@ -129,13 +129,27 @@ Class PKCardsMenu : PKCGenericMenu {
 		"IronWill",
 		"Haste"
 	};
+	static const int PKCCardXPos[] = { 
+		56, 
+		135, 
+		214, 
+		291, 
+		369, 
+		447, 
+		525, 
+		604, 
+		682, 
+		759, 
+		835, 
+		913 
+	};
 	
 	private void CardsInit() {				
-		vector2 cardsize = (55,90);
+		vector2 cardsize = (55,92);
 		vector2 cardscale = (0.4,0.4);
 		
-		vector2 cardpos = (56,56);
 		for (int i = 0; i < PKCSilverCards.Size(); i++) {
+			vector2 cardpos = (PKCCardXPos[i],56);
 			let card = PKCCardButton(new("PKCCardButton"));
 			card.Init(
 				cardpos,
@@ -151,12 +165,11 @@ Class PKCardsMenu : PKCGenericMenu {
 			card.defaultsize = cardsize;
 			card.slottype = false;
 			card.cardname = PKCSilverCards[i];
-			cardpos += (79,0);
 			card.Pack(mainFrame);
 		}
 		
-		cardpos = (56,617);
 		for (int i = 0; i < PKCGoldCards.Size(); i++) {
+			vector2 cardpos = (PKCCardXPos[i],618);
 			let card = PKCCardButton(new("PKCCardButton"));
 			card.Init(
 				cardpos,
@@ -171,7 +184,6 @@ Class PKCardsMenu : PKCGenericMenu {
 			card.defaultpos = cardpos;
 			card.defaultsize = cardsize;
 			card.slottype = true;
-			cardpos += (79,0);
 			card.Pack(mainFrame);
 		}
 	}
@@ -242,6 +254,12 @@ Class PKCMenuHandler : PKCHandler {
 				card.box.pos = cardslot.slotpos;
 				card.box.size = cardslot.slotsize;
 				card.buttonscale = (1,1);
+				if (cardslot.placedcard) {
+					let placedcard = PKCCardButton(cardslot.placedcard);
+					placedcard.box.size = placedcard.defaultsize;
+					placedcard.box.pos = placedcard.defaultpos;
+					placedcard.buttonscale = placedcard.defaultscale;
+				}
 				cardslot.placedcard = card;
 				sound snd = (cardslot.slottype) ? "ui/board/placegold" : "ui/board/placesilver";
 				S_StartSound(snd,CHAN_AUTO,CHANF_UI);
@@ -252,6 +270,7 @@ Class PKCMenuHandler : PKCHandler {
 				card.box.size = card.defaultsize;
 				card.buttonscale = card.defaultscale;
 				S_StartSound("ui/board/takecard",CHAN_AUTO,CHANF_UI);
+				cardslot.placedcard = null;
 				menu.SelectedCard = card;
 			}
 		}
