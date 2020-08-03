@@ -1,0 +1,7 @@
+PKRedText {
+	#d60017 #d60017
+}
+
+PKBaseText {
+	#ffba7a #ffba7a
+}

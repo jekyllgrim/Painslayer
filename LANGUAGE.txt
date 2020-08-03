@@ -1,0 +1,52 @@
+[enu default]
+ENDURANCE_DESC 		= "Take only half the damage.";
+SPEED_DESC 			= "Move faster.";
+TIMEBONUS_DESC 		= "Golden Cards last 20 seconds longer.";
+REBIRTH_DESC 		= "Gain full Health and Armor on activation.";
+CONFUSION_DESC 		= "Confuse enemies.";
+DEXTERITY_DESC		= "Weapons fire 2x faster.";
+WMODIFIER_DESC		= "Activate Weapon Modifier.";
+SOT_DESC			= "Your every step damages nearby enemies.";
+RAGE_DESC			= "Deliver 4x damage.";
+MAGICGUN_DESC		= "Guns don't consume ammo.";
+IRONWILL_DESC		= "You can't be hurt.";
+HASTE_DESC			= "Enemies move 4x slower.";
+
+SOULKEEPER_DESC		= "Souls stay longer.";
+BLESSING_DESC		= "Increase base health to 150.";
+REPLENISH_DESC		= "Double the ammo in ammo boxes.";
+DARKSOUL_DESC		= "Morph into demon form at 50 souls.";
+SOULCATCHER_DESC	= "Attract souls and gold from a distance.";
+FORGIVENESS_DESC	= "Use Golden Cards 2 times per level.";
+GREED_DESC			= "Receive 2x gold.";
+SOULREDEEMER_DESC	= "Souls provide more health.";
+REGENERATION_DESC	= "Regenerate Health 10 sec after taking the last damage.";
+HEALTHSTEALER_DESC	= "Receive a portion of damage dealt to enemies as health.";
+HELLISHARMOR_DESC	= "Regenerate Armor 10 sec after taking the last damage.";
+666AMMO_DESC		= "Start the map with 666 ammo of every type.";
+
+ENDURANCE_NAME 		= "Endurance";
+SPEED_NAME 			= "Speed";
+TIMEBONUS_NAME 		= "Time Bonus";
+REBIRTH_NAME 		= "Rebirth";
+CONFUSION_NAME 		= "Confusion";
+DEXTERITY_NAME		= "Dexterity";
+WMODIFIER_NAME		= "Weapon Modifier";
+SOT_NAME			= "Steps of Thunder";
+RAGE_NAME			= "Rage";
+MAGICGUN_NAME		= "Magic Gun";
+IRONWILL_NAME		= "Iron Will";
+HASTE_NAME			= "Haste";
+
+SOULKEEPER_NAME		= "Soul Keeper";
+BLESSING_NAME		= "Blessing";
+REPLENISH_NAME		= "Replenish";
+DARKSOUL_NAME		= "Dark Soul";
+SOULCATCHER_NAME	= "Soul Catcher";
+FORGIVENESS_NAME	= "Forgiveness";
+GREED_NAME			= "Greed";
+SOULREDEEMER_NAME	= "Soul Redeemer";
+REGENERATION_NAME	= "Regeneration";
+HEALTHSTEALER_NAME	= "Health Stealer";
+HELLISHARMOR_NAME	= "Hellish Armor";
+666AMMO_NAME		= "666 Ammo";

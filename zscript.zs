@@ -1,5 +1,7 @@
 version "4.4.0"
 
+const font_times = "Times2";
+
 #include "ZPainkiller/pk_main.zs"
 #include "ZPainkiller/pk_events.zs"
 #include "ZPainkiller/pk_weapon.zs"
