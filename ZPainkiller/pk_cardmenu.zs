@@ -19,7 +19,8 @@ Class PKCardsMenu : PKCGenericMenu {
 	void ShowExitPopup() {
 		if (!boardElements)
 			return;
-		
+				
+		S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI);
 		vector2 popupsize = (640,260);
 		vector2 popuppos = (192,160);
 		exitPopup = new("PKCFrame").Init(popuppos,popupsize);
@@ -68,7 +69,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			command:"DoExit",
 			fnt:font_times,
 			textscale:1.5,
-			textColor:Font.FindFontColor('PKRedText')
+			textColor:Font.FindFontColor('PKBaseText')
 		);
 		yesButton.SetTexture("","","","");
 		yesButton.pack(exitPopup);
@@ -81,7 +82,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			command:"CancelExit",
 			fnt:font_times,
 			textscale:1.5,
-			textColor:Font.FindFontColor('PKRedText')
+			textColor:Font.FindFontColor('PKBaseText')
 		);
 		noButton.SetTexture("","","","");
 		noButton.pack(exitPopup);
@@ -358,6 +359,7 @@ Class PKCardsMenu : PKCGenericMenu {
         switch (mkey) {
         case MKEY_Back:
 			if (exitPopup) {
+				S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI);
 				exitPopup.unpack();
 				exitPopup.destroy();
 			}
@@ -375,8 +377,9 @@ Class PKCardsMenu : PKCGenericMenu {
 			boardElements.disabled = true;
 			return;
 		}
-		else
+		else {
 			boardElements.disabled = false;
+		}
 		if (SelectedCard) {			
 			SelectedCard.box.pos = boardelements.screenToRel((mouseX,mouseY)) - SelectedCard.box.size / 2;
 		}
@@ -405,6 +408,7 @@ Class PKCCardSlot : PKCButton {
 
 //same as original Button but also takes an buttonScale argument
 Class PKCCardButton : PKCButton {
+	bool cardbought;	
 	vector2 buttonScale;
 	vector2 defaultpos;
 	vector2 defaultsize;
@@ -413,22 +417,15 @@ Class PKCCardButton : PKCButton {
 	string cardname;
 	string carddesc;
 	override void drawer() {
-		if (disabled)
-			alpha = 0.25;
-		else
-			alpha = 1;
-		if (singleTex) {
-			string texture = btnTextures[curButtonState];
-			TextureID tex = TexMan.checkForTexture(texture, TexMan.Type_Any);
-			Vector2 imageSize = TexMan.getScaledSize(tex);			
-			imageSize.x *= buttonScale.x;
-			imageSize.y *= buttonScale.y;
-			drawTiledImage((0, 0), box.size, texture, true, buttonScale);
-		}
-		else {
-			PKCBoxTextures textures = textures[curButtonState];
-			drawBox((0, 0), box.size, textures, true);
-		}
+		string texture = btnTextures[curButtonState];
+		TextureID tex = TexMan.checkForTexture(texture, TexMan.Type_Any);
+		Vector2 imageSize = TexMan.getScaledSize(tex);			
+		imageSize.x *= buttonScale.x;
+		imageSize.y *= buttonScale.y;
+		drawTiledImage((0, 0), box.size, texture, true, buttonScale);
+		
+		/*if (!cardbought)
+			drawTiledImage((0, 0), box.size, "graphics/Tarot/tooltip_bg.png", true, buttonScale,alpha: 0.75);*/
 
 		// draw the text in the middle of the button
 		Vector2 textSize = (fnt.stringWidth(text), fnt.getHeight()) * textScale;
@@ -444,10 +441,11 @@ Class PKCExitHandler : PKCHandler {
 		if (!menu)
 			return;
 		if (command == "DoExit") {
-			S_StartSound("ui/board/click",CHAN_AUTO,CHANF_UI);
+			S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI);
 			menu.Close();
 		}
 		else if (command == "CancelExit") {
+			S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI);
 			let popup = menu.exitPopup;
 			if (popup) {
 				Popup.Unpack();
@@ -459,8 +457,16 @@ Class PKCExitHandler : PKCHandler {
 		if (!menu)
 			return;
 		if (command == "DoExit" || command == "CancelExit") {
-			if (!unhovered)
-				S_StartSound("ui/board/hover",CHAN_AUTO,CHANF_UI);
+			let btn = PKCButton(caller);			
+			if (!unhovered) {
+				btn.textscale = 1.8;
+				btn.textcolor = Font.FindFontColor('PKRedText');
+				S_StartSound("ui/menu/hover",CHAN_AUTO,CHANF_UI);
+			}
+			else {
+				btn.textscale = 1.5;
+				btn.textcolor = Font.FindFontColor('PKBaseText');
+			}
 		}
 	}
 }
@@ -473,9 +479,7 @@ Class PKCMenuHandler : PKCHandler {
 		if (!menu)
 			return;
 		//exit button - works if you don't have a picked card:
-		if (command == "BoardButton" && !menu.SelectedCard) {			
-			//S_StartSound("ui/board/click",CHAN_AUTO,CHANF_UI);
-			//menu.Close();
+		if (command == "BoardButton" && !menu.SelectedCard) {	
 			menu.ShowExitPopup();	
 			return;
 		}
