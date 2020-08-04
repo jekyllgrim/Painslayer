@@ -5,3 +5,7 @@ PKRedText {
 PKBaseText {
 	#ffba7a #ffba7a
 }
+
+PKWhite {
+	#DDDDDD #DDDDDD
+}

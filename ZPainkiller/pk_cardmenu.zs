@@ -8,14 +8,91 @@ Class PKCardsMenu : PKCGenericMenu {
 	PKCCardButton SelectedCard;
 	PKCCardButton HoveredCard;
 	
-	PKCFrame cardinfo;	
+	PKCFrame cardinfo;
+	PKCFrame boardElements;
+	PKCFrame exitPopup;
+	
+	PKCButton exitbutton;
+	bool ExitHovered;
+	int ExitAlphaDir;
+	
+	void ShowExitPopup() {
+		if (!boardElements)
+			return;
+		
+		vector2 popupsize = (640,260);
+		vector2 popuppos = (192,160);
+		exitPopup = new("PKCFrame").Init(popuppos,popupsize);
+		exitPopup.pack(mainFrame);
+		
+		
+		let outline = new("PKCImage").Init(
+			(0,0),
+			popupsize,
+			"graphics/Tarot/tooltip_bg_outline.png",
+			imagescale:(1.6,1.6),
+			tiled:true
+		);
+		outline.Pack(exitPopup);
+
+		vector2 intofs = (4,4);
+		let bkg = new("PKCImage").Init(
+			intofs,
+			popupsize-(intofs*2),
+			"graphics/Tarot/tooltip_bg.png",
+			imagescale:(1.6,1.6),
+			tiled:true
+		);
+		bkg.Pack(exitPopup);
+
+		vector2 popupTextOfs = intofs+(12,12);
+		let exitPrompt = new("PKCLabel").Init(
+			popupTextOfs,
+			popupsize-popupTextOfs,
+			"Are you sure you want to close the Black Tarot Board?\nYou will only be able to reassign cards at the next map start.",
+			font_times,
+			textscale:0.9,
+			textcolor: Font.FindFontColor('PKWhite')
+		);
+		exitPrompt.Pack(exitPopup);
+		
+		let exitHander = PKCExitHandler(new("PKCExitHandler"));
+		exitHander.menu = self;		
+		
+		vector2 buttonsize = (100,60);
+		let yesButton = new("PKCButton").Init(
+			(100,160),
+			buttonsize,
+			text:"Yes",
+			cmdhandler:exitHander,
+			command:"DoExit",
+			fnt:font_times,
+			textscale:1.5,
+			textColor:Font.FindFontColor('PKRedText')
+		);
+		yesButton.SetTexture("","","","");
+		yesButton.pack(exitPopup);
+		
+		let noButton = new("PKCButton").Init(
+			(440,160),
+			buttonsize,
+			text:"No",
+			cmdhandler:exitHander,
+			command:"CancelExit",
+			fnt:font_times,
+			textscale:1.5,
+			textColor:Font.FindFontColor('PKRedText')
+		);
+		noButton.SetTexture("","","","");
+		noButton.pack(exitPopup);
+	}
 	
 	void ShowCardToolTip(PKCCardButton card) {				
 		vector2 tippos = (62,430);
 		vector2 tipsize = (378,173);
 		
 		cardinfo = new("PKCFrame").Init(tippos,tipsize);
-		cardinfo.pack(mainframe);	
+		cardinfo.pack(boardelements);	
 		
 		let outline = new("PKCImage").Init(
 			(0,0),
@@ -78,12 +155,15 @@ Class PKCardsMenu : PKCGenericMenu {
 			image:"graphics/Tarot/cardsboard.png"/*,
 			imagescale:(1*backgroundRatio,1*backgroundRatio)*/
 		);
-		background.Pack(mainFrame);		
+		background.Pack(mainFrame);
+		
+		boardelements = new("PKCFrame").Init((0,0),backgroundsize);
+		boardelements.pack(mainFrame);
 
 		handler = new("PKCMenuHandler");
 		handler.menu = self;
 		
-		let exitbutton = PKCExitButton(new("PKCExitButton")).Init(
+		exitbutton = new("PKCButton").Init(
 			(511,196),
 			(173,132),
 			cmdhandler:handler,
@@ -92,9 +172,10 @@ Class PKCardsMenu : PKCGenericMenu {
 		exitbutton.SetTexture(
 			"Graphics/Tarot/board_button_highlighted.png",
 			"Graphics/Tarot/board_button_highlighted.png",
-			"",""
+			"Graphics/Tarot/board_button_highlighted.png",
+			"Graphics/Tarot/board_button_highlighted.png"
 		);
-		exitbutton.Pack(mainFrame);
+		exitbutton.Pack(boardelements);
 		
 		SlotsInit();
 		CardsInit();
@@ -119,7 +200,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			cardslot.slotpos = slotpos;
 			cardslot.slotsize = slotsize;
 			cardslot.slottype = false;
-			cardslot.Pack(mainFrame);
+			cardslot.Pack(boardelements);
 		}
 
 		for (int i = 0; i < PKCGoldSlots.Size(); i++) {
@@ -137,7 +218,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			cardslot.slotpos = slotpos;
 			cardslot.slotsize = slotsize;
 			cardslot.slottype = true;
-			cardslot.Pack(mainFrame);
+			cardslot.Pack(boardelements);
 		}
 	}
 	static const string PKCSilverCardNames[] = {
@@ -240,7 +321,7 @@ Class PKCardsMenu : PKCGenericMenu {
 				command:"HandleCard"
 			);
 			string texpath = String.Format("graphics/Tarot/cards/%s.png",PKCSilverCards[i]);
-			card.SetTexture(texpath, texpath, texpath, "");
+			card.SetTexture(texpath, texpath, texpath, texpath);
 			card.buttonScale = cardscale;
 			card.defaultscale = cardscale;
 			card.defaultpos = cardpos;
@@ -248,7 +329,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			card.slottype = false;
 			card.cardname = PKCSilverCardNames[i];
 			card.carddesc = PKCSilverCardDescs[i];
-			card.Pack(mainFrame);
+			card.Pack(boardelements);
 		}
 		
 		for (int i = 0; i < PKCGoldCards.Size(); i++) {
@@ -261,7 +342,7 @@ Class PKCardsMenu : PKCGenericMenu {
 				command:"HandleCard"
 			);
 			string texpath = String.Format("graphics/Tarot/cards/%s.png",PKCGoldCards[i]);
-			card.SetTexture(texpath, texpath, texpath, "");
+			card.SetTexture(texpath, texpath, texpath, texpath);
 			card.buttonScale = cardscale;
 			card.defaultscale = cardscale;
 			card.defaultpos = cardpos;
@@ -269,36 +350,49 @@ Class PKCardsMenu : PKCGenericMenu {
 			card.slottype = true;
 			card.cardname = PKCGoldCardNames[i];
 			card.carddesc = PKCGoldCardDescs[i];
-			card.Pack(mainFrame);
+			card.Pack(boardelements);
 		}
 	}
+
+    override bool MenuEvent (int mkey, bool fromcontroller) {
+        switch (mkey) {
+        case MKEY_Back:
+			if (exitPopup) {
+				exitPopup.unpack();
+				exitPopup.destroy();
+			}
+			else {
+				ShowExitPopup();
+			}
+			return false;
+        }
+		return Super.MenuEvent (mkey, fromcontroller);
+    }
 	
 	override void Ticker() {
 		super.Ticker();
-		if (SelectedCard) {			
-			SelectedCard.box.pos = mainframe.screenToRel((mouseX,mouseY)) - SelectedCard.box.size / 2;
+		if (exitPopup) {
+			boardElements.disabled = true;
+			return;
 		}
-		if (!cardinfo && HoveredCard && !SelectedCard)
+		else
+			boardElements.disabled = false;
+		if (SelectedCard) {			
+			SelectedCard.box.pos = boardelements.screenToRel((mouseX,mouseY)) - SelectedCard.box.size / 2;
+		}
+		if (!cardinfo && HoveredCard && !HoveredCard.disabled && !HoveredCard.hidden && !SelectedCard)
 			ShowCardToolTip(HoveredCard);
-		if (cardinfo && (!HoveredCard || SelectedCard)) {
+		if (cardinfo && (!HoveredCard || HoveredCard.disabled || HoveredCard.hidden || SelectedCard)) {
 			cardinfo.unpack();
 			cardinfo.destroy();
 		}
-	}
-}
-
-Class PKCExitButton : PKCButton {
-	double aalpha;
-	int alphadir;
-	double hovered;
-	override void drawer() {
-		string texture = btnTextures[curButtonState];
-		if (aalpha <= 0.25)
-			alphadir = 1;
-		else if (aalpha >= 1)
-			alphadir = -1;
-		aalpha = Clamp(aalpha+0.05*alphadir,0.25,1.0);
-		drawTiledImage((0, 0), box.size, texture, true, alpha: hovered ? 1.0 : aalpha);
+		if (exitbutton) {
+			if (exitbutton.alpha <= 0.25)
+				ExitAlphaDir = 1;
+			else if (exitbutton.alpha >= 1)
+				ExitAlphaDir = -1;
+			exitbutton.alpha = (exitbutton.isHovered && !SelectedCard) ? 1.0 : Clamp(exitbutton.alpha+0.05*ExitAlphaDir,0.25,1.0);
+		}
 	}
 }
 
@@ -319,6 +413,10 @@ Class PKCCardButton : PKCButton {
 	string cardname;
 	string carddesc;
 	override void drawer() {
+		if (disabled)
+			alpha = 0.25;
+		else
+			alpha = 1;
 		if (singleTex) {
 			string texture = btnTextures[curButtonState];
 			TextureID tex = TexMan.checkForTexture(texture, TexMan.Type_Any);
@@ -339,6 +437,34 @@ Class PKCCardButton : PKCButton {
 	}
 }
 
+Class PKCExitHandler : PKCHandler {
+	PKCardsMenu menu;
+	
+	override void buttonClickCommand(PKCButton caller, string command) {
+		if (!menu)
+			return;
+		if (command == "DoExit") {
+			S_StartSound("ui/board/click",CHAN_AUTO,CHANF_UI);
+			menu.Close();
+		}
+		else if (command == "CancelExit") {
+			let popup = menu.exitPopup;
+			if (popup) {
+				Popup.Unpack();
+				Popup.destroy();
+			}
+		}
+	}
+	override void elementHoverChanged(PKCElement caller, string command, bool unhovered) {
+		if (!menu)
+			return;
+		if (command == "DoExit" || command == "CancelExit") {
+			if (!unhovered)
+				S_StartSound("ui/board/hover",CHAN_AUTO,CHANF_UI);
+		}
+	}
+}
+
 Class PKCMenuHandler : PKCHandler {
 	PKCardsMenu menu;
 	PKCCardSlot hoveredslot;
@@ -348,29 +474,38 @@ Class PKCMenuHandler : PKCHandler {
 			return;
 		//exit button - works if you don't have a picked card:
 		if (command == "BoardButton" && !menu.SelectedCard) {			
-			S_StartSound("ui/board/click",CHAN_AUTO,CHANF_UI);
-			menu.Close();			
+			//S_StartSound("ui/board/click",CHAN_AUTO,CHANF_UI);
+			//menu.Close();
+			menu.ShowExitPopup();	
+			return;
 		}
+		if (menu.exitPopup)
+			return;
 		//card slot: if you have a card picked and click the slot, the card will be placed in it and scaled up to its size:
 		if (command == "CardSlot") {			
 			let cardslot = PKCCardSlot(Caller);
-			//check if there's a selected card AND if the card's type matches the slot's:
-			if (menu.SelectedCard && menu.SelectedCard.slottype == cardslot.slottype) {
-				let card = PKCCardButton(menu.SelectedCard);
-				menu.SelectedCard = null;
-				card.box.pos = cardslot.slotpos;
-				card.box.size = cardslot.slotsize;
-				card.buttonscale = (1,1);
-				//if there's a card place in the slot, move that card back to its default pos first, then place this one
-				if (cardslot.placedcard) {
-					let placedcard = PKCCardButton(cardslot.placedcard);
-					placedcard.box.size = placedcard.defaultsize;
-					placedcard.box.pos = placedcard.defaultpos;
-					placedcard.buttonscale = placedcard.defaultscale;
+			//check if there's a selected card
+			if (menu.SelectedCard) {
+				//if the card's type matches the slot's, place it in the slot:
+				let card = PKCCardButton(menu.SelectedCard);	
+				if (card.slottype == cardslot.slottype) {
+					menu.SelectedCard = null; //detach from cursor
+					card.box.pos = cardslot.slotpos;
+					card.box.size = cardslot.slotsize;
+					card.buttonscale = (1,1);
+					//if there was a card place in the slot, move that card back to its default pos first, then place this one
+					if (cardslot.placedcard) {
+						let placedcard = PKCCardButton(cardslot.placedcard);
+						placedcard.box.size = placedcard.defaultsize;
+						placedcard.box.pos = placedcard.defaultpos;
+						placedcard.buttonscale = placedcard.defaultscale;
+					}
+					cardslot.placedcard = card;
+					sound snd = (cardslot.slottype) ? "ui/board/placegold" : "ui/board/placesilver";
+					S_StartSound(snd,CHAN_AUTO,CHANF_UI);
 				}
-				cardslot.placedcard = card;
-				sound snd = (cardslot.slottype) ? "ui/board/placegold" : "ui/board/placesilver";
-				S_StartSound(snd,CHAN_AUTO,CHANF_UI);
+				else				
+					S_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI);
 			}
 			//otherwise check if there's a card in the slot; if there is, pick it up and attach to mouse pointer
 			else if (cardslot.placedcard) {
@@ -381,8 +516,8 @@ Class PKCMenuHandler : PKCHandler {
 				cardslot.placedcard = null;
 				menu.SelectedCard = card;
 				//move it to the top of the elements array so that it's rendered on the top layer:
-				menu.mainframe.elements.delete(menu.mainframe.elements.find(card));
-				menu.mainframe.elements.push(card);
+				menu.boardelements.elements.delete(menu.boardelements.elements.find(card));
+				menu.boardelements.elements.push(card);
 			}
 		}
 		//clicking the card: attaches card to mouse pointer, or, if you already have one and you click *anywhere* where there's no card slot, the card will jump back to its original slot:
@@ -400,8 +535,8 @@ Class PKCMenuHandler : PKCHandler {
 				S_StartSound("ui/board/takecard",CHAN_AUTO,CHANF_UI);
 				menu.SelectedCard = card;
 				//move it to the top of the elements array so that it's rendered on the top layer:
-				menu.mainframe.elements.delete(menu.mainframe.elements.find(card));
-				menu.mainframe.elements.push(card);
+				menu.boardelements.elements.delete(menu.boardelements.elements.find(card));
+				menu.boardelements.elements.push(card);
 			}
 			//if we already have a card, put it back
 			else {
@@ -415,15 +550,13 @@ Class PKCMenuHandler : PKCHandler {
 	override void elementHoverChanged(PKCElement caller, string command, bool unhovered) {
 		if (!menu)
 			return;
+		if (menu.exitPopup)
+			return;
 		//play sound of hovering over the exit button:
 		if (command == "BoardButton" && !menu.SelectedCard) {
-			let button = PKCExitButton(caller);
 			if (!unhovered) {
-				button.hovered = true;
 				S_StartSound("ui/board/hover",CHAN_AUTO,CHANF_UI);
 			}
-			else
-				button.hovered = false;
 		}
 		//keep track of slots we're hovering over:
 		if (command == "CardSlot") {
