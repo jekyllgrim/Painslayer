@@ -21,8 +21,16 @@ Class PKCardsMenu : PKCGenericMenu {
 			return;
 				
 		S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI);
-		vector2 popupsize = (640,260);
 		vector2 popuppos = (192,160);
+		vector2 popupsize = (640,260);
+		
+		/*exitPopup = New("PKCBoardMessage").Init(
+			popuppos,
+			popupsize,
+			"Are you sure you want to close the Black Tarot Board?\nYou will only be able to reassign cards at the next map start."
+		);
+		exitPopup.pack(mainFrame);*/
+		
 		exitPopup = new("PKCFrame").Init(popuppos,popupsize);
 		exitPopup.pack(mainFrame);
 		
@@ -180,10 +188,35 @@ Class PKCardsMenu : PKCGenericMenu {
 		
 		SlotsInit();
 		CardsInit();
+		
+		if (UnlockedSilverCards.Size() == 0 && UnlockedGoldCards.Size() == 0) {
+			S_StartSound("ui/board/cardunlocked",CHAN_AUTO,CHANF_UI);	
+			while (UnlockedSilverCards.Size() < 2) {
+				let card = silvercards[random(0,silvercards.Size()-1)];
+				if (UnlockedSilverCards.Find(card) == UnlockedSilverCards.Size()) {
+					card.cardbought = true;
+					UnlockedSilverCards.push(card);
+				}
+			}
+			array <PKCCardButton> UnlockedGoldCards;
+			while (UnlockedGoldCards.Size() < 3) {
+				let card = goldcards[random(0,goldcards.Size()-1)];
+				if (UnlockedGoldCards.Find(card) == UnlockedGoldCards.Size()) {
+					card.cardbought = true;
+					UnlockedGoldCards.push(card);
+				}
+			}
+		}
 	}
 	
-	static const int PKCSilverSlots[] = {	58, 230 };
-	static const int PKCGoldSlots[] 	= { 488, 658, 828 };
+	array <PKCCardButton> silvercards;
+	array <PKCCardButton> goldcards;
+	array <PKCCardButton> UnlockedSilverCards;
+	array <PKCCardButton> UnlockedGoldCards;
+	
+	static const int PKCSilverSlots[] = {	58, 231 };
+	static const int PKCGoldSlots[] 	= { 489, 660, 829 };
+	
 	private void SlotsInit() {
 		vector2 slotsize = (138,227);	
 		for (int i = 0; i < PKCSilverSlots.Size(); i++) {			
@@ -222,98 +255,50 @@ Class PKCardsMenu : PKCGenericMenu {
 			cardslot.Pack(boardelements);
 		}
 	}
-	static const string PKCSilverCardNames[] = {
-		"$SOULKEEPER_NAME",
-		"$BLESSING_NAME",
-		"$REPLENISH_NAME",
-		"$DARKSOUL_NAME",
-		"$SOULCATCHER_NAME",
-		"$FORGIVENESS_NAME",
-		"$GREED_NAME",
-		"$SOULREDEEMER_NAME",
-		"$REGENERATION_NAME",
-		"$HEALTHSTEALER_NAME",
-		"$HELLISHARMOR_NAME",
-		"$666AMMO_NAME"
+	static const string PKCCardNames[] = {
+		//silver
+		"$SOULKEEPER_NAME"	,	"$BLESSING_NAME"		,	"$REPLENISH_NAME"		,
+		"$DARKSOUL_NAME"		,	"$SOULCATCHER_NAME"	,	"$FORGIVENESS_NAME"	,
+		"$GREED_NAME"			,	"$SOULREDEEMER_NAME"	,	"$REGENERATION_NAME"	,
+		"$HEALTHSTEALER_NAME"	,	"$HELLISHARMOR_NAME"	,	"$666AMMO_NAME"		,
+		//gold
+		"$ENDURANCE_NAME"		,	"$TIMEBONUS_NAME"		,	"$SPEED_NAME"			,
+		"$REBIRTH_NAME"		,	"$CONFUSION_NAME"		,	"$DEXTERITY_NAME"		,
+		"$WMODIFIER_NAME"		,	"$SOT_NAME"			,	"$RAGE_NAME"			,
+		"$MAGICGUN_NAME"		,	"$IRONWILL_NAME"		,	"$HASTE_NAME"
 	};
-	static const string PKCSilverCardDescs[] = {
-		"$SOULKEEPER_DESC",
-		"$BLESSING_DESC",
-		"$REPLENISH_DESC",
-		"$DARKSOUL_DESC",
-		"$SOULCATCHER_DESC",
-		"$FORGIVENESS_DESC",
-		"$GREED_DESC",
-		"$SOULREDEEMER_DESC",
-		"$REGENERATION_DESC",
-		"$HEALTHSTEALER_DESC",
-		"$HELLISHARMOR_DESC",
-		"$666AMMO_DESC"
+	static const string PKCCardDescs[] = {
+		//silver
+		"$SOULKEEPER_DESC"	,	"$BLESSING_DESC"		,	"$REPLENISH_DESC"		,
+		"$DARKSOUL_DESC"		,	"$SOULCATCHER_DESC"	,	"$FORGIVENESS_DESC"	,
+		"$GREED_DESC"			,	"$SOULREDEEMER_DESC"	,	"$REGENERATION_DESC"	,
+		"$HEALTHSTEALER_DESC"	,	"$HELLISHARMOR_DESC"	,	"$666AMMO_DESC"		,
+		//gold
+		"$ENDURANCE_DESC"		,	"$TIMEBONUS_DESC"		,	"$SPEED_DESC"			,
+		"$REBIRTH_DESC"		,	"$CONFUSION_DESC"		,	"$DEXTERITY_DESC"		,
+		"$WMODIFIER_DESC"		,	"$SOT_DESC"			,	"$RAGE_DESC"			,
+		"$MAGICGUN_DESC"		,	"$IRONWILL_DESC"		,	"$HASTE_DESC"
 	};
-	static const name PKCSilverCards[] = {
-		"SoulKeeper",
-		"Blessing",
-		"Replenish",
-		"DarkSoul",
-		"SoulCatcher",
-		"Forgiveness",
-		"Greed",
-		"SoulRedeemer",
-		"HealthRegeneration",
-		"HealthStealer",
-		"HellishArmor",
-		"666Ammo"
+	static const name PKCCardIDs[] = {
+		//silver
+		"SoulKeeper"			,	"Blessing"				,	"Replenish"			,
+		"DarkSoul"				,	"SoulCatcher"			,	"Forgiveness"			,
+		"Greed"				,	"SoulRedeemer"			,	"HealthRegeneration"	,
+		"HealthStealer"		,	"HellishArmor"			,	"666Ammo"				,
+		//gold
+		"Endurance"			,	"TimeBonus"			,	"Speed"				,
+		"Rebirth"				,	"Confusion"			,	"Dexterity"			,
+		"WeaponModifier"		,	"StepsOfThunder"		,	"Rage"					,
+		"MagicGun"				,	"IronWill"				,	"Haste"
 	};
-	static const string PKCGoldCardNames[] = {
-		"$ENDURANCE_NAME",
-		"$TIMEBONUS_NAME",
-		"$SPEED_NAME",
-		"$REBIRTH_NAME",
-		"$CONFUSION_NAME",
-		"$DEXTERITY_NAME",
-		"$WMODIFIER_NAME",
-		"$SOT_NAME",
-		"$RAGE_NAME",
-		"$MAGICGUN_NAME",
-		"$IRONWILL_NAME",
-		"$HASTE_NAME"
-	};
-	static const string PKCGoldCardDescs[] = {
-		"$ENDURANCE_DESC",
-		"$TIMEBONUS_DESC",
-		"$SPEED_DESC",
-		"$REBIRTH_DESC",
-		"$CONFUSION_DESC",
-		"$DEXTERITY_DESC",
-		"$WMODIFIER_DESC",
-		"$SOT_DESC",
-		"$RAGE_DESC",
-		"$MAGICGUN_DESC",
-		"$IRONWILL_DESC",
-		"$HASTE_DESC"
-	};
-	static const name PKCGoldCards[] = {
-		"Endurance",
-		"TimeBonus",
-		"Speed",
-		"Rebirth",
-		"Confusion",
-		"Dexterity",
-		"WeaponModifier",
-		"StepsOfThunder",
-		"Rage",
-		"MagicGun",
-		"IronWill",
-		"Haste"
-	};
-	static const int PKCCardXPos[] = { 56, 135, 214, 291, 369, 447, 525, 604, 682, 759, 835, 913 };
+	static const int PKCCardXPos[] = { 56, 135, 214, 291, 370, 447, 525, 604, 682, 759, 835, 913 };
 	
 	private void CardsInit() {				
 		vector2 cardsize = (55,92);
 		vector2 cardscale = (0.4,0.407);
 		
-		for (int i = 0; i < PKCSilverCards.Size(); i++) {
-			vector2 cardpos = (PKCCardXPos[i],56);
+		for (int i = 0; i < PKCCardIDs.Size(); i++) {
+			vector2 cardpos = (i < 12) ? (PKCCardXPos[i],56) : (PKCCardXPos[i-12],618);
 			let card = PKCCardButton(new("PKCCardButton"));
 			card.Init(
 				cardpos,
@@ -321,36 +306,23 @@ Class PKCardsMenu : PKCGenericMenu {
 				cmdhandler:handler,
 				command:"HandleCard"
 			);
-			string texpath = String.Format("graphics/Tarot/cards/%s.png",PKCSilverCards[i]);
+			string texpath = String.Format("graphics/Tarot/cards/%s.png",PKCCardIDs[i]);
 			card.SetTexture(texpath, texpath, texpath, texpath);
 			card.buttonScale = cardscale;
 			card.defaultscale = cardscale;
 			card.defaultpos = cardpos;
 			card.defaultsize = cardsize;
-			card.slottype = false;
-			card.cardname = PKCSilverCardNames[i];
-			card.carddesc = PKCSilverCardDescs[i];
-			card.Pack(boardelements);
-		}
-		
-		for (int i = 0; i < PKCGoldCards.Size(); i++) {
-			vector2 cardpos = (PKCCardXPos[i],618);
-			let card = PKCCardButton(new("PKCCardButton"));
-			card.Init(
-				cardpos,
-				cardsize,
-				cmdhandler:handler,
-				command:"HandleCard"
-			);
-			string texpath = String.Format("graphics/Tarot/cards/%s.png",PKCGoldCards[i]);
-			card.SetTexture(texpath, texpath, texpath, texpath);
-			card.buttonScale = cardscale;
-			card.defaultscale = cardscale;
-			card.defaultpos = cardpos;
-			card.defaultsize = cardsize;
-			card.slottype = true;
-			card.cardname = PKCGoldCardNames[i];
-			card.carddesc = PKCGoldCardDescs[i];
+			card.cardname = PKCCardNames[i];
+			card.carddesc = PKCCardDescs[i];
+			card.cardbought = false;//randompick(0,0,1);			
+			if (i < 12) {
+				card.slottype = false;
+				silvercards.push(card);
+			}
+			else {
+				card.slottype = true;
+				goldcards.push(card);
+			}
 			card.Pack(boardelements);
 		}
 	}
@@ -372,7 +344,6 @@ Class PKCardsMenu : PKCGenericMenu {
     }
 	
 	override void Ticker() {
-		super.Ticker();
 		if (exitPopup) {
 			boardElements.disabled = true;
 			return;
@@ -396,8 +367,50 @@ Class PKCardsMenu : PKCGenericMenu {
 				ExitAlphaDir = -1;
 			exitbutton.alpha = (exitbutton.isHovered && !SelectedCard) ? 1.0 : Clamp(exitbutton.alpha+0.05*ExitAlphaDir,0.25,1.0);
 		}
+		super.Ticker();
 	}
 }
+
+Class PKCBoardMessage : PKCFrame {
+	PKCBoardMessage init (vector2 msgpos, vector2 msgsize, string msgtext) {
+		self.setBox(msgpos, msgsize);
+		self.alpha = 1;
+	
+		let outline = new("PKCImage").Init(
+			(0,0),
+			msgsize,
+			"graphics/Tarot/tooltip_bg_outline.png",
+			imagescale:(1.6,1.6),
+			tiled:true
+		);
+		
+		vector2 intofs = (4,4);
+		let bkg = new("PKCImage").Init(
+			intofs,
+			msgsize-(intofs*2),
+			"graphics/Tarot/tooltip_bg.png",
+			imagescale:(1.6,1.6),
+			tiled:true
+		);
+		
+		vector2 msgTextOfs = intofs+(12,12);
+		let msgPrompt = new("PKCLabel").Init(
+			msgTextOfs,
+			msgsize-msgTextOfs*1.5,
+			msgtext,
+			font_times,
+			textscale:0.9,
+			textcolor: Font.FindFontColor('PKWhite')
+		);
+		
+		msgPrompt.Pack(self);
+		bkg.Pack(self);		
+		outline.Pack(self);
+		
+		return self;
+	}
+}
+		
 
 Class PKCCardSlot : PKCButton {
 	vector2 slotpos;
@@ -416,21 +429,23 @@ Class PKCCardButton : PKCButton {
 	bool slottype;
 	string cardname;
 	string carddesc;
+	int purchaseFrame;
 	override void drawer() {
 		string texture = btnTextures[curButtonState];
 		TextureID tex = TexMan.checkForTexture(texture, TexMan.Type_Any);
 		Vector2 imageSize = TexMan.getScaledSize(tex);			
 		imageSize.x *= buttonScale.x;
 		imageSize.y *= buttonScale.y;
-		drawTiledImage((0, 0), box.size, texture, true, buttonScale);
+		drawImage((0,0), texture, true, buttonScale);
 		
-		/*if (!cardbought)
-			drawTiledImage((0, 0), box.size, "graphics/Tarot/tooltip_bg.png", true, buttonScale,alpha: 0.75);*/
+		if (!cardbought)
+			drawTiledImage((0, 0), box.size, "graphics/Tarot/tooltip_bg.png", true, buttonScale,alpha: 0.75);
 
-		// draw the text in the middle of the button
-		Vector2 textSize = (fnt.stringWidth(text), fnt.getHeight()) * textScale;
-		Vector2 textPos = (box.size - textSize) / 2;
-		drawText(textPos, fnt, text, textColor, textScale);
+		else if (purchaseFrame <= 16) {
+			purchaseFrame++;
+			string tex = String.Format("graphics/Tarot/cardburn/pkcburn%d.png",purchaseFrame);
+			drawImage((0,0),tex,true,buttonScale);
+		}		
 	}
 }
 
@@ -484,7 +499,7 @@ Class PKCMenuHandler : PKCHandler {
 			return;
 		}
 		if (menu.exitPopup)
-			return;
+			return;		
 		//card slot: if you have a card picked and click the slot, the card will be placed in it and scaled up to its size:
 		if (command == "CardSlot") {			
 			let cardslot = PKCCardSlot(Caller);
@@ -527,6 +542,11 @@ Class PKCMenuHandler : PKCHandler {
 		//clicking the card: attaches card to mouse pointer, or, if you already have one and you click *anywhere* where there's no card slot, the card will jump back to its original slot:
 		if (command == "HandleCard") {
 			let card = PKCCardButton(Caller);
+			if (!card.cardbought) {
+				S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI);				
+				card.cardbought = true;
+				return;
+			}
 			//don't do anything if you're hovering over a valid slot: we don't want placing into slot and clicking the card to happen at the same time
 			if (hoveredslot) {
 				//if clicking over incorrect slot color, don't jump back but instead play "wrong slot" sound
