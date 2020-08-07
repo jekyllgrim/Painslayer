@@ -1,4 +1,6 @@
 [enu default]
+TAROT_EXIT			= "Are you sure you want to close the Black Tarot Board?\nYou will only be able to reassign cards at the next\nmap start.";
+
 ENDURANCE_DESC 		= "Take only half the damage.";
 SPEED_DESC 			= "Move faster.";
 TIMEBONUS_DESC 		= "Golden Cards last 20 seconds longer.";

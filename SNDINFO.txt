@@ -177,6 +177,21 @@ pickups/soul/gold	SOULGOLD
 pickups/armor/medium	ARMMEDI
 pickups/armor/heavy	ARMHEAVY
 
+// GOLD
+
+$random pickups/gold/small	{ goldsmall1 goldsmall2 }
+$random pickups/gold/med	{ goldmed1 goldmed2 }
+$random pickups/gold/big	{ goldbig1 goldbig2 }
+$random pickups/gold/vbig	{ goldvbig1 goldvbig2 }
+goldsmall1 	"sounds/items/gold/item-coin-take1.wav"
+goldsmall2 	"sounds/items/gold/item-coin-take2.wav"
+goldmed1 	"sounds/items/gold/item-jewelry-stones1.wav"
+goldmed2 	"sounds/items/gold/item-jewelry-stones2.wav"
+goldbig1 	"sounds/items/gold/item-jewelry-rings1.wav"
+goldbig2	"sounds/items/gold/item-jewelry-rings2.wav"
+goldvbig1	"sounds/items/gold/item-jewelry-cups1.wav"
+goldvbig2	"sounds/items/gold/item-jewelry-cups2.wav"
+
 
 ///SPECIAL\\\
 

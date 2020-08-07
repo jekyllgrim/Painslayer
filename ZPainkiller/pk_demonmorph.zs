@@ -1,4 +1,4 @@
-Class PK_Soul : Inventory {
+Class PK_Soul : PK_Inventory {
 	protected int age;
 	Default {
 		inventory.pickupmessage "";
@@ -16,33 +16,6 @@ Class PK_Soul : Inventory {
 		super.Tick();
 		if (!isFrozen())
 			age++;
-	}
-	override void PlayPickupSound (Actor toucher)
-	{
-		double atten;
-		int chan;
-		int flags = 0;
-
-		if (bNoAttenPickupSound)
-		{
-			atten = ATTN_NONE;
-		}
-		else
-		{
-			atten = ATTN_NORM;
-		}
-
-		if (toucher != NULL && toucher.CheckLocalView())
-		{
-			chan = CHAN_ITEM;
-			flags = CHANF_NOPAUSE | CHANF_MAYBE_LOCAL | CHANF_OVERLAP;
-		}
-		else
-		{
-			chan = CHAN_ITEM;
-			flags = CHANF_MAYBE_LOCAL;
-		}
-		toucher.A_StartSound(PickupSound, chan, flags, 1, atten);
 	}
 	override bool TryPickup (in out Actor other) {
 		if (!(other is "PlayerPawn"))

@@ -8,9 +8,9 @@ Class PKCardsMenu : PKCGenericMenu {
 	PKCCardButton SelectedCard;
 	PKCCardButton HoveredCard;
 	
-	PKCFrame cardinfo;
 	PKCFrame boardElements;
-	PKCFrame exitPopup;
+	PKCBoardMessage cardinfo;
+	PKCBoardMessage exitPopup;
 	
 	PKCButton exitbutton;
 	bool ExitHovered;
@@ -24,46 +24,14 @@ Class PKCardsMenu : PKCGenericMenu {
 		vector2 popuppos = (192,160);
 		vector2 popupsize = (640,260);
 		
-		/*exitPopup = New("PKCBoardMessage").Init(
+		exitPopup = New("PKCBoardMessage");
+		exitPopup.pack(mainFrame);
+		exitPopup.Init(
 			popuppos,
 			popupsize,
-			"Are you sure you want to close the Black Tarot Board?\nYou will only be able to reassign cards at the next map start."
+			"$TAROT_EXIT",
+			textscale: 0.9
 		);
-		exitPopup.pack(mainFrame);*/
-		
-		exitPopup = new("PKCFrame").Init(popuppos,popupsize);
-		exitPopup.pack(mainFrame);
-		
-		
-		let outline = new("PKCImage").Init(
-			(0,0),
-			popupsize,
-			"graphics/Tarot/tooltip_bg_outline.png",
-			imagescale:(1.6,1.6),
-			tiled:true
-		);
-		outline.Pack(exitPopup);
-
-		vector2 intofs = (4,4);
-		let bkg = new("PKCImage").Init(
-			intofs,
-			popupsize-(intofs*2),
-			"graphics/Tarot/tooltip_bg.png",
-			imagescale:(1.6,1.6),
-			tiled:true
-		);
-		bkg.Pack(exitPopup);
-
-		vector2 popupTextOfs = intofs+(12,12);
-		let exitPrompt = new("PKCLabel").Init(
-			popupTextOfs,
-			popupsize-popupTextOfs,
-			"Are you sure you want to close the Black Tarot Board?\nYou will only be able to reassign cards at the next map start.",
-			font_times,
-			textscale:0.9,
-			textcolor: Font.FindFontColor('PKWhite')
-		);
-		exitPrompt.Pack(exitPopup);
 		
 		let exitHander = PKCExitHandler(new("PKCExitHandler"));
 		exitHander.menu = self;		
@@ -99,44 +67,23 @@ Class PKCardsMenu : PKCGenericMenu {
 	void ShowCardToolTip(PKCCardButton card) {				
 		vector2 tippos = (62,430);
 		vector2 tipsize = (378,173);
-		
-		cardinfo = new("PKCFrame").Init(tippos,tipsize);
-		cardinfo.pack(boardelements);	
-		
-		let outline = new("PKCImage").Init(
-			(0,0),
-			tipsize,
-			"graphics/Tarot/tooltip_bg_outline.png",
-			imagescale:(1.6,1.6),
-			tiled:true
-		);
-		outline.Pack(cardinfo);
-		
-		vector2 intofs = (4,4);
-		let bkg = new("PKCImage").Init(
-			intofs,
-			tipsize-(intofs*2),
-			"graphics/Tarot/tooltip_bg.png",
-			imagescale:(1.6,1.6),
-			tiled:true
-		);
-		bkg.Pack(cardinfo);
-		
-		vector2 tiptextofs = intofs+(8,5);		
+
 		string title = Stringtable.Localize(card.cardname);
 		string desc = Stringtable.Localize(card.carddesc);
-		let cardname = new("PKCLabel").Init(
-			tiptextofs,
-			tipsize-tiptextofs,
+		
+		cardinfo = New("PKCBoardMessage");
+		cardinfo.pack(mainFrame);
+		cardinfo.Init(
+			tippos,
+			tipsize,
 			String.Format("%s",title),
-			font_times,
 			textscale:1.2,
 			textcolor: Font.FindFontColor('PKRedText')
 		);
-		cardname.Pack(cardinfo);		
 		
+		vector2 tiptextofs = (16,16);	
 		let tiptext = new("PKCLabel").Init(
-			tiptextofs+(0,32),
+			tiptextofs+(0,48),
 			tipsize-tiptextofs,
 			String.Format("%s",desc), 
 			font_times,
@@ -372,20 +319,24 @@ Class PKCardsMenu : PKCGenericMenu {
 }
 
 Class PKCBoardMessage : PKCFrame {
-	PKCBoardMessage init (vector2 msgpos, vector2 msgsize, string msgtext) {
+	PKCBoardMessage init (vector2 msgpos, vector2 msgsize, string msgtext = "", double TextScale = 1.0, int TextColor = 0) {
 		self.setBox(msgpos, msgsize);
 		self.alpha = 1;
 	
-		let outline = new("PKCImage").Init(
+		let outline = new("PKCImage");
+		outline.Pack(self);
+		outline.Init(
 			(0,0),
 			msgsize,
 			"graphics/Tarot/tooltip_bg_outline.png",
 			imagescale:(1.6,1.6),
 			tiled:true
 		);
-		
+				
 		vector2 intofs = (4,4);
-		let bkg = new("PKCImage").Init(
+		let bkg = new("PKCImage");
+		bkg.Pack(self);
+		bkg.Init(
 			intofs,
 			msgsize-(intofs*2),
 			"graphics/Tarot/tooltip_bg.png",
@@ -393,19 +344,23 @@ Class PKCBoardMessage : PKCFrame {
 			tiled:true
 		);
 		
+		if (msgtext == "")
+			return self;
+		
+		if (textColor == 0)
+			textcolor = Font.FindFontColor('PKWhiteText');
+		
 		vector2 msgTextOfs = intofs+(12,12);
-		let msgPrompt = new("PKCLabel").Init(
+		let msgPrompt = new("PKCLabel");
+		msgPrompt.Pack(self);
+		msgPrompt.Init(
 			msgTextOfs,
 			msgsize-msgTextOfs*1.5,
 			msgtext,
 			font_times,
-			textscale:0.9,
-			textcolor: Font.FindFontColor('PKWhite')
+			textscale:TextScale,
+			textcolor: TextColor
 		);
-		
-		msgPrompt.Pack(self);
-		bkg.Pack(self);		
-		outline.Pack(self);
 		
 		return self;
 	}

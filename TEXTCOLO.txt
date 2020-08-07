@@ -6,6 +6,6 @@ PKBaseText {
 	#ffba7a #ffba7a
 }
 
-PKWhite {
+PKWhiteText {
 	#DDDDDD #DDDDDD
 }
