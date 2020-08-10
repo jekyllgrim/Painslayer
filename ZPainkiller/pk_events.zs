@@ -3,6 +3,7 @@ Class PK_MainHandler : EventHandler {
 	array <Actor> allenemies;
 	array <Actor> demontargets;
 	
+	//converted from source code by 3saster:
     bool CheckCheatmode (bool printmsg = true)
     {
         if ((G_SkillPropertyInt(SKILLP_DisableCheats) || netgame || deathmatch) && (!sv_cheats))
@@ -20,6 +21,7 @@ Class PK_MainHandler : EventHandler {
             return false;
         }
     }
+	//PKGOLD cheat:
 	override void NetworkProcess(consoleevent e) {
 		if (e.name != "PK_GiveGold" || !e.isManual)
 			return;
@@ -36,8 +38,24 @@ Class PK_MainHandler : EventHandler {
 			cont.pk_gold = 99990;
 		}
 	}
-	
-	//spawn gold randomly in secret areas
+	Vector2 SectorBounds (Sector sec) {
+		Vector2 posMin = ( double.Infinity,  double.Infinity);
+		Vector2 posMax = (-double.Infinity, -double.Infinity);
+
+		for (int i = 0; i < sec.lines.Size (); i++) {
+			Line l = sec.Lines [i];
+			posMin = (
+				min (min (posMin.X, l.v1.p.X), l.v2.p.X),
+				min (min (posMin.Y, l.v1.p.Y), l.v2.p.Y)
+			);
+			posMax = (
+				max (max (posMax.X, l.v1.p.X), l.v2.p.X),
+				max (max (posMax.Y, l.v1.p.Y), l.v2.p.Y)
+			);
+		}
+		return (posMax - posMin);
+	}
+	//spawn gold randomly in secret areas:
 	override void WorldLoaded(WorldEvent e) {
 		for (int i = 0; i < level.Sectors.Size(); i++) {
 			Sector curSec = level.Sectors[i];
@@ -50,7 +68,14 @@ Class PK_MainHandler : EventHandler {
 			//do nothing if sector height is 0:
 			if (curSec.floorplane.ZAtPoint(curSec.centerspot) == curSec.ceilingplane.ZAtPoint(curSec.centerspot))
 				continue;
-			for (int i = random[gold](3,7); i > 0; i--) {
+			
+			vector2 sectorBB = SectorBounds(curSec); 
+			double secSize = (sectorBB.x + sectorBB.y) / 2;
+			//console.printf("sector %d size %d",curSec.sectornum,secSize);
+			
+			int goldnum = Clamp((secSize / 80),1,6);
+
+			for (int i = goldnum; i > 0; i--) {
 				int chance = random[gold](0,100);
 				Class<Actor> gold;
 				if (chance < 35)
@@ -59,20 +84,17 @@ Class PK_MainHandler : EventHandler {
 					gold = "PK_BigGold";
 				else
 					gold = "PK_VeryBigGold";
-				
-				/*vector3 spawnPos = cCenter+(frandom[gold](-48,48),frandom[gold](-48,48),0);
-				while (!level.IsPointInLevel(spawnPos) || spawnPos.sector != curSec)
-					vector3 spawnPos = cCenter+(frandom[gold](-48,48),frandom[gold](-48,48),0);*/
 				actor goldPickup = actor.Spawn(gold,cCenter);
 				if (!goldpickup)
 					continue;
-				BlockThingsIterator itr = BlockThingsIterator.Create(goldPickup,64,0);
+				/*BlockThingsIterator itr = BlockThingsIterator.Create(goldPickup,64,0);
 				while (itr.Next())	{
 					Actor next = itr.thing;					
 					if (next is "Inventory")	{	
-						goldPickup.VelFromAngle(frandom[gold](5,8),random[gold](0,359));
+						goldPickup.VelFromAngle(frandom[gold](4,8),random[gold](0,359));
 					}
-				}
+				}*/
+				goldPickup.VelFromAngle(frandom[gold](4,8),random[gold](0,359));
 			}
 		}
 	}
@@ -114,7 +136,7 @@ Class PK_MainHandler : EventHandler {
 			c.master = act;		
 
 		allenemies.delete(allenemies.Find(e.thing));
-		demontargets.delete(allenemies.Find(e.thing));
+		//demontargets.delete(allenemies.Find(e.thing));
 	}
 	override void WorldThingDestroyed(WorldEvent e) {
 		if (e.thing) {
