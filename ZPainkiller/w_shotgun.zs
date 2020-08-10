@@ -271,7 +271,7 @@ Class PK_FreezeControl : Inventory {
 			layer.frame = owner.frame;
 			layer.angle = owner.angle;
 			layer.scale.x = owner.scale.x*1.32;
-			layer.scale.y = owner.scaley*1.07;
+			layer.scale.y = owner.scale.y*1.07;
 		}
 	}
 	override void DoEffect() {
