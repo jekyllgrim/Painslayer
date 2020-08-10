@@ -26,7 +26,7 @@ Class PainkillerHUD : BaseStatusBar {
 		let player = CPlayer.mo;
 		if (!player)
 			return;
-		let event = PK_DeathHandler(EventHandler.Find("PK_DeathHandler"));
+		let event = PK_Mainhandler(EventHandler.Find("PK_Mainhandler"));
 		if (!event)
 			return;		
 		int enemies = event.allenemies.size();
@@ -63,9 +63,6 @@ Class PainkillerHUD : BaseStatusBar {
 		DrawImage("pkhlife",(11,-23),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER ,0.8);
 		DrawImage("pkharm0",(11,-11),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER ,0.8);
 		
-		DrawImage("pkhkills",(-31,11),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_CENTER);
-		DrawImage("pkhsouls",(31,11),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_CENTER);
-		
 		DrawImage("pkxtop0",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);
 		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",(960,92),rotation:arrowangle,scale:(2,2),tint:color(256,0,0,0));	//dark outline
 		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",(966,105),rotation:arrowangle,scale:(2,2),alpha:0.45,tint:color(256,48,0,0)); //arrow
@@ -73,20 +70,32 @@ Class PainkillerHUD : BaseStatusBar {
 		
 		DrawImage("pkxtop1",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);	//main top
 		DrawImage("pkxtop2",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP,alpha:0.9);	//glass
+		
+		DrawImage("pkhgold",(-31,11),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_CENTER);
+		DrawImage("pkhsouls",(31,11),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_CENTER);
 	}
 	
 	protected void DrawNumbers() {
 		DrawString(mIndexFont, String.Format("%03d",CPlayer.health), (19, -28),DI_SCREEN_LEFT_BOTTOM,translation:font.CR_UNTRANSLATED);
 		DrawString(mIndexFont, String.Format("%03d",GetArmorAmount()), (19, -16),DI_SCREEN_LEFT_BOTTOM,translation:font.CR_UNTRANSLATED);
 		
-		DrawString(mStatFont, String.Format("%05d",multiplayer? CPlayer.killcount : level.killed_monsters), (-38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_RIGHT,translation:font.CR_UNTRANSLATED);
+		//DrawString(mStatFont, String.Format("%05d",multiplayer? CPlayer.killcount : level.killed_monsters), (-38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_RIGHT,translation:font.CR_UNTRANSLATED);
+		int gold = 0;
+		let gcont = PK_GoldControl(CPlayer.mo.FindInventory("PK_GoldControl"));
+		if (gcont) {
+			gold = gcont.pk_gold;
+		}
+		DrawString(mStatFont, String.Format("%05d",gold), (-38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_RIGHT,translation:font.CR_UNTRANSLATED);
 		
+		
+		int souls = 0;
+		int soulsColor = Font.CR_UNTRANSLATED;
 		let control = PK_DemonMorphControl(CPlayer.mo.FindInventory("PK_DemonMorphControl"));
 		if (control) {
-			int souls = control.pk_souls;
-			int soulsColor = (souls >= 64) ? Font.CR_RED : Font.CR_UNTRANSLATED;			
-			DrawString(mStatFont, String.Format("%05d",souls), (38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_LEFT,translation:soulsColor);
-		}
+			souls = control.pk_souls;
+			soulsColor = (souls >= 64) ? Font.CR_RED : Font.CR_UNTRANSLATED;
+		}	
+		DrawString(mStatFont, String.Format("%05d",souls), (38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_LEFT,translation:soulsColor);
 		
 		let weap = CPlayer.readyweapon;
 		if (weap && weap.GetClassName() == "PK_Painkiller") {

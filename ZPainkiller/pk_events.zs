@@ -1,7 +1,81 @@
-Class PK_DeathHandler : EventHandler {
+Class PK_MainHandler : EventHandler {
 	
 	array <Actor> allenemies;
 	array <Actor> demontargets;
+	
+    bool CheckCheatmode (bool printmsg = true)
+    {
+        if ((G_SkillPropertyInt(SKILLP_DisableCheats) || netgame || deathmatch) && (!sv_cheats))
+        {
+            if (printmsg) console.printf ("sv_cheats must be true to enable this command.");
+            return true;
+        }
+        else if (cl_blockcheats != 0)
+        {
+            if (printmsg && cl_blockcheats == 1) console.printf("cl_blockcheats is turned on and disabled this command.\n");
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+	override void NetworkProcess(consoleevent e) {
+		if (e.name != "PK_GiveGold" || !e.isManual)
+			return;
+		console.printf("trying to give gold");
+		if (CheckCheatMode())
+			return;
+		let plr = players[e.Player].mo;
+		if (!plr)
+			return;
+		if (e.player == consoleplayer)
+			S_StartSound("pickups/gold/vbig",CHAN_AUTO,CHANF_UI);
+		let cont = PK_GoldControl(plr.FindInventory("PK_GoldControl"));
+		if (cont) {
+			cont.pk_gold = 99990;
+		}
+	}
+	
+	//spawn gold randomly in secret areas
+	override void WorldLoaded(WorldEvent e) {
+		for (int i = 0; i < level.Sectors.Size(); i++) {
+			Sector curSec = level.Sectors[i];
+
+			if (!curSec.IsSecret())	//do nothing if not secret
+				continue;
+			vector3 cCenter = (curSec.centerspot.x, curSec.centerspot.y, curSec.floorplane.ZAtPoint(curSec.centerspot));
+			if (!level.IsPointInLevel(cCenter))	//do nothing if out of bounds
+				continue;
+			//do nothing if sector height is 0:
+			if (curSec.floorplane.ZAtPoint(curSec.centerspot) == curSec.ceilingplane.ZAtPoint(curSec.centerspot))
+				continue;
+			for (int i = random[gold](3,7); i > 0; i--) {
+				int chance = random[gold](0,100);
+				Class<Actor> gold;
+				if (chance < 35)
+					gold = "PK_MedGold";
+				else if (chance < 85)
+					gold = "PK_BigGold";
+				else
+					gold = "PK_VeryBigGold";
+				
+				/*vector3 spawnPos = cCenter+(frandom[gold](-48,48),frandom[gold](-48,48),0);
+				while (!level.IsPointInLevel(spawnPos) || spawnPos.sector != curSec)
+					vector3 spawnPos = cCenter+(frandom[gold](-48,48),frandom[gold](-48,48),0);*/
+				actor goldPickup = actor.Spawn(gold,cCenter);
+				if (!goldpickup)
+					continue;
+				BlockThingsIterator itr = BlockThingsIterator.Create(goldPickup,64,0);
+				while (itr.Next())	{
+					Actor next = itr.thing;					
+					if (next is "Inventory")	{	
+						goldPickup.VelFromAngle(frandom[gold](5,8),random[gold](0,359));
+					}
+				}
+			}
+		}
+	}
 
 	override void WorldThingspawned (worldevent e) {
 		let act = e.thing;		
@@ -12,8 +86,10 @@ Class PK_DeathHandler : EventHandler {
 		if (act.bISMONSTER || act.bMISSILE || (act.player)) {
 			demontargets.push(act);
 		}
-		if (act.player && !act.FindInventory("PK_DemonMorphControl"))
+		if (act.player && !act.FindInventory("PK_DemonMorphControl")) {
 			act.GiveInventory("PK_DemonMorphControl",1);
+			act.GiveInventory("PK_GoldControl",1);
+		}
 	}
 	override void WorldThingRevived (worldevent e) {
 		let act = e.thing;		
@@ -24,8 +100,10 @@ Class PK_DeathHandler : EventHandler {
 		if (act.bISMONSTER || act.bMISSILE || (act.player)) {
 			demontargets.push(act);
 		}
-		if (act.player && !act.FindInventory("PK_DemonMorphControl"))
+		if (act.player && !act.FindInventory("PK_DemonMorphControl")) {
 			act.GiveInventory("PK_DemonMorphControl",1);
+			act.GiveInventory("PK_GoldControl",1);
+		}
 	}	
 	override void WorldThingDied(worldevent e) {
 		let act = e.thing;

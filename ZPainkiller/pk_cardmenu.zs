@@ -5,17 +5,20 @@ Class PKCardsMenu : PKCGenericMenu {
 	vector2 boardTopLeft;
 	
 	PKCMenuHandler handler;
-	PKCCardButton SelectedCard;
-	PKCCardButton HoveredCard;
+	PKCCardButton SelectedCard;	//card attached to the pointer
+	PKCCardButton HoveredCard;	//card the pointer is hovering over
 	
-	PKCFrame boardElements;
-	PKCBoardMessage cardinfo;
-	PKCBoardMessage exitPopup;
+	PKCFrame boardElements;		//everything in the board except the background and popups
+	PKCBoardMessage cardinfo;		//card information popup
+	PKCBoardMessage exitPopup;	//exit prompt popup
+	PKCBoardMessage firstUsePopup;	//first use notification
+	int firstUsePopupDur;				//first use notification display duration
 	
-	PKCButton exitbutton;
-	bool ExitHovered;
+	PKCButton exitbutton;			//big round flashing menu close button
+	bool ExitHovered;				//whether it's hovered
 	int ExitAlphaDir;
 	
+	//shows exist popup message
 	void ShowExitPopup() {
 		if (!boardElements)
 			return;
@@ -36,6 +39,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		let exitHander = PKCExitHandler(new("PKCExitHandler"));
 		exitHander.menu = self;		
 		
+		//create Yes button:
 		vector2 buttonsize = (100,60);
 		let yesButton = new("PKCButton").Init(
 			(100,160),
@@ -50,6 +54,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		yesButton.SetTexture("","","","");
 		yesButton.pack(exitPopup);
 		
+		//create No button:
 		let noButton = new("PKCButton").Init(
 			(440,160),
 			buttonsize,
@@ -68,8 +73,8 @@ Class PKCardsMenu : PKCGenericMenu {
 		vector2 tippos = (62,430);
 		vector2 tipsize = (378,173);
 
-		string title = Stringtable.Localize(card.cardname);
-		string desc = Stringtable.Localize(card.carddesc);
+		string title = Stringtable.Localize(card.cardname);	//pulls name from LANGUAGE
+		string desc = Stringtable.Localize(card.carddesc);	//pulls desc from LANGUAGE
 		
 		cardinfo = New("PKCBoardMessage");
 		cardinfo.pack(mainFrame);
@@ -84,7 +89,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		vector2 tiptextofs = (16,16);	
 		let tiptext = new("PKCLabel").Init(
 			tiptextofs+(0,48),
-			tipsize-tiptextofs,
+			tipsize-(tiptextofs*1.2),
 			String.Format("%s",desc), 
 			font_times,
 			textscale:1,
@@ -102,6 +107,8 @@ Class PKCardsMenu : PKCGenericMenu {
 		backgroundRatio = screensize.y / BOARD_HEIGHT;
 		vector2 backgroundsize = (BOARD_WIDTH*backgroundRatio,BOARD_HEIGHT*backgroundRatio);
 		boardTopLeft = */
+		
+		//first create the background (always 4:3, never stretched)
 		vector2 backgroundsize = (BOARD_WIDTH,BOARD_HEIGHT);	
 		SetBaseResolution(backgroundsize);
 		let background = new("PKCImage");
@@ -113,12 +120,14 @@ Class PKCardsMenu : PKCGenericMenu {
 		);
 		background.Pack(mainFrame);
 		
+		//define the frame that will keep everything except text popups:
 		boardelements = new("PKCFrame").Init((0,0),backgroundsize);
 		boardelements.pack(mainFrame);
 
 		handler = new("PKCMenuHandler");
 		handler.menu = self;
 		
+		//create big round exit button:
 		exitbutton = new("PKCButton").Init(
 			(511,196),
 			(173,132),
@@ -133,21 +142,35 @@ Class PKCardsMenu : PKCGenericMenu {
 		);
 		exitbutton.Pack(boardelements);
 		
-		SlotsInit();
-		CardsInit();
+		SlotsInit();	//initialize card slots
+		CardsInit();	//initialize cards
 		
+		//unlock 2 random silver and 3 random gold crads if you have none unlocked ("pistol start"):
 		if (UnlockedSilverCards.Size() == 0 && UnlockedGoldCards.Size() == 0) {
-			S_StartSound("ui/board/cardunlocked",CHAN_AUTO,CHANF_UI);	
+			//S_StartSound("ui/board/cardunlocked",CHAN_AUTO,CHANF_UI);
+			S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI);
+			
+			//show "first use" text popup (doesn't block the board):
+			firstUsePopup = New("PKCBoardMessage");
+			firstUsePopup.pack(mainFrame);
+			firstUsePopup.Init(
+				(192,256),
+				(700,128),
+				"$TAROT_FIRSTUSE",
+				textscale: 1.5
+			);
+			firstUsePopupDur = 120;	//"first use" message is temporary
+			
+			//we use two other arrays to make sure we don't "unlock" the same card more than once:
 			while (UnlockedSilverCards.Size() < 2) {
-				let card = silvercards[random(0,silvercards.Size()-1)];
+				let card = silvercards[random(0,silvercards.Size()-4)];
 				if (UnlockedSilverCards.Find(card) == UnlockedSilverCards.Size()) {
 					card.cardbought = true;
 					UnlockedSilverCards.push(card);
 				}
 			}
-			array <PKCCardButton> UnlockedGoldCards;
 			while (UnlockedGoldCards.Size() < 3) {
-				let card = goldcards[random(0,goldcards.Size()-1)];
+				let card = goldcards[random(0,goldcards.Size()-4)];
 				if (UnlockedGoldCards.Find(card) == UnlockedGoldCards.Size()) {
 					card.cardbought = true;
 					UnlockedGoldCards.push(card);
@@ -156,8 +179,8 @@ Class PKCardsMenu : PKCGenericMenu {
 		}
 	}
 	
-	array <PKCCardButton> silvercards;
-	array <PKCCardButton> goldcards;
+	array <PKCCardButton> silvercards;	//all silver cards
+	array <PKCCardButton> goldcards;		//all gold cards
 	array <PKCCardButton> UnlockedSilverCards;
 	array <PKCCardButton> UnlockedGoldCards;
 	
@@ -202,6 +225,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			cardslot.Pack(boardelements);
 		}
 	}
+	//LANGUAGE references containing card names:
 	static const string PKCCardNames[] = {
 		//silver
 		"$SOULKEEPER_NAME"	,	"$BLESSING_NAME"		,	"$REPLENISH_NAME"		,
@@ -214,6 +238,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		"$WMODIFIER_NAME"		,	"$SOT_NAME"			,	"$RAGE_NAME"			,
 		"$MAGICGUN_NAME"		,	"$IRONWILL_NAME"		,	"$HASTE_NAME"
 	};
+	//LANGUAGE references containing card descriptions:
 	static const string PKCCardDescs[] = {
 		//silver
 		"$SOULKEEPER_DESC"	,	"$BLESSING_DESC"		,	"$REPLENISH_DESC"		,
@@ -226,6 +251,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		"$WMODIFIER_DESC"		,	"$SOT_DESC"			,	"$RAGE_DESC"			,
 		"$MAGICGUN_DESC"		,	"$IRONWILL_DESC"		,	"$HASTE_DESC"
 	};
+	//this is a generic ID also used to find the texture name:
 	static const name PKCCardIDs[] = {
 		//silver
 		"SoulKeeper"			,	"Blessing"				,	"Replenish"			,
@@ -238,6 +264,8 @@ Class PKCardsMenu : PKCGenericMenu {
 		"WeaponModifier"		,	"StepsOfThunder"		,	"Rage"					,
 		"MagicGun"				,	"IronWill"				,	"Haste"
 	};
+	
+	//I have to define slots' X pos manually because the gaps between them are not precisely identical:
 	static const int PKCCardXPos[] = { 56, 135, 214, 291, 370, 447, 525, 604, 682, 759, 835, 913 };
 	
 	private void CardsInit() {				
@@ -298,6 +326,15 @@ Class PKCardsMenu : PKCGenericMenu {
 		else {
 			boardElements.disabled = false;
 		}
+		
+		if (firstUsePopup) {
+			firstUsePopupDur--;			
+			if (firstUsePopupDur <= 0) {
+				firstUsePopup.Unpack();
+				firstUsePopup.Destroy();
+			}
+		}
+		
 		if (SelectedCard) {			
 			SelectedCard.box.pos = boardelements.screenToRel((mouseX,mouseY)) - SelectedCard.box.size / 2;
 		}
@@ -319,6 +356,7 @@ Class PKCardsMenu : PKCGenericMenu {
 }
 
 Class PKCBoardMessage : PKCFrame {
+	private int dur;
 	PKCBoardMessage init (vector2 msgpos, vector2 msgsize, string msgtext = "", double TextScale = 1.0, int TextColor = 0) {
 		self.setBox(msgpos, msgsize);
 		self.alpha = 1;
@@ -355,7 +393,7 @@ Class PKCBoardMessage : PKCFrame {
 		msgPrompt.Pack(self);
 		msgPrompt.Init(
 			msgTextOfs,
-			msgsize-msgTextOfs*1.5,
+			msgsize-(msgTextOfs*2),
 			msgtext,
 			font_times,
 			textscale:TextScale,
@@ -454,7 +492,11 @@ Class PKCMenuHandler : PKCHandler {
 			return;
 		}
 		if (menu.exitPopup)
-			return;		
+			return;
+		if (menu.firstUsePopup) {
+			menu.firstUsePopup.Unpack();
+			menu.firstUsePopup.Destroy();
+		}
 		//card slot: if you have a card picked and click the slot, the card will be placed in it and scaled up to its size:
 		if (command == "CardSlot") {			
 			let cardslot = PKCCardSlot(Caller);
@@ -498,7 +540,7 @@ Class PKCMenuHandler : PKCHandler {
 		if (command == "HandleCard") {
 			let card = PKCCardButton(Caller);
 			if (!card.cardbought) {
-				S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI);				
+				S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI);
 				card.cardbought = true;
 				return;
 			}

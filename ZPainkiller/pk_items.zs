@@ -1,3 +1,13 @@
+Class PK_InventoryToken : Inventory {
+	Default {
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+		+INVENTORY.PERSISTENTPOWER;
+	}
+	override void Tick() {}
+}
+
 Class PK_Inventory : Inventory {
 	override void PlayPickupSound (Actor toucher)
 	{
@@ -27,6 +37,198 @@ Class PK_Inventory : Inventory {
 		toucher.A_StartSound(PickupSound, chan, flags, 1, atten);
 	}
 }
+	
+Class PK_GoldControl : PK_InventoryToken {
+	int pk_gold;	
+}
+
+Class PK_GoldPickup : PK_Inventory abstract {
+	PK_GoldGleam gleam;
+	int goldamount;
+	property goldamount : goldamount;
+	Default {
+		+INVENTORY.NEVERRESPAWN;
+		+BRIGHT
+		xscale 0.5;
+		yscale 0.415;
+		radius 8;
+		height 16;
+		PK_GoldPickup.goldamount 1;
+		inventory.pickupmessage "";
+	}
+	override bool TryPickup (in out Actor other) {
+		if (!(other is "PlayerPawn"))
+			return false;
+		let cont = PK_GoldControl(other.FindInventory("PK_GoldControl"));
+		if (cont)
+			cont.pk_gold = Clamp(cont.pk_gold + goldamount, 0, 99990);
+		GoAwayAndDie();
+		return true;
+	}
+	override void Tick() {
+		super.Tick();
+		if (owner) {
+			return;
+		}
+		if (isFrozen())
+			return;
+		if (level.time % 10 != 0)
+			return;
+		if (frandom[sfx](1,10) > 9 && !gleam) {
+			gleam = PK_GoldGleam(Spawn("PK_GoldGleam",pos+(0,0,frandom(2,height))));
+			if (gleam)
+				gleam.scale *= frandom[sfx](1,1.4);
+		}
+	}
+	states {
+	Spawn:
+		PGLD # -1;
+		stop;
+	}
+}
+
+Class PK_GoldGleam : PK_BaseFlare {
+	private int scaledir;
+	Default {
+		renderstyle 'Translucent';
+		+ROLLCENTER
+		alpha 3;
+		scale 1;
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		scaledir = 1;
+	}
+	states {
+	Spawn:
+		PGLD Z 1 {
+			//roll -= 5;
+			A_SetScale(scale.x+(0.02 * scaledir));
+			if (scale.x > default.scale.x*1.1)
+				scaledir = -1;
+			if (scale.x < default.scale.x*0.1)
+				destroy();
+		}
+		loop;
+	}
+}
+
+Class PK_SmallGold : PK_GoldPickup {
+	Default {
+		PK_GoldPickup.goldamount 1;
+		height 4;
+		inventory.pickupsound "pickups/gold/small";
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		frame = random[gold](0,4);
+	}
+}
+
+Class PK_MedGold : PK_GoldPickup {
+	Default {
+		PK_GoldPickup.goldamount 10;
+		height 8;
+		inventory.pickupsound "pickups/gold/med";
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		frame = random[gold](5,9);
+	}
+}
+
+Class PK_BigGold : PK_GoldPickup {
+	Default {
+		PK_GoldPickup.goldamount 50;
+		height 11;
+		inventory.pickupsound "pickups/gold/big";
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		frame = random[gold](10,13);
+	}
+}
+
+Class PK_VeryBigGold : PK_GoldPickup {
+	Default {
+		PK_GoldPickup.goldamount 100;
+		height 16;
+		inventory.pickupsound "pickups/gold/vbig";
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		frame = random[gold](14,16);
+	}
+}
+
+Class PK_Soul : PK_Inventory {
+	protected int age;
+	Default {
+		inventory.pickupmessage "";
+		inventory.amount 3;
+		inventory.maxamount 100;
+		renderstyle 'Add';
+		+NOGRAVITY;
+		alpha 1;
+		xscale 0.25;
+		yscale 0.2;
+		inventory.pickupsound "pickups/soul";
+		+BRIGHT;
+	}
+	override void Tick() {
+		super.Tick();
+		if (!isFrozen())
+			age++;
+	}
+	override bool TryPickup (in out Actor other) {
+		if (!(other is "PlayerPawn"))
+			return false;
+		let cont = PK_DemonMorphControl(other.FindInventory("PK_DemonMorphControl"));
+		if (cont)
+			cont.pk_souls += 1;
+		if (cont.pk_souls >= cont.pk_minsouls && !other.FindInventory("PK_DemonWeapon")) {
+			let weap = other.player.readyweapon;
+			other.GiveInventory("PK_DemonWeapon",1);			
+			let dew = PK_DemonWeapon(other.FindInventory("PK_DemonWeapon"));
+			if (dew) {
+				if (weap) {
+					//console.printf("prev weapon %s",weap.GetClassName());
+					dew.prevweapon = weap;
+				}
+				other.player.readyweapon = dew;
+				let psp = other.player.GetPSprite(PSP_WEAPON);
+				if (psp) {
+					other.player.SetPSprite(PSP_WEAPON,dew.FindState("Ready"));
+					psp.y = WEAPONTOP;
+				}
+				/*else
+					Console.printf("something went really wrong");*/
+			}
+		}
+		other.GiveBody(Amount, MaxAmount);
+		GoAwayAndDie();
+		return true;
+	}
+	states {
+	Spawn:
+		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
+		DSOU ABCDEFGHIJKLMNOPQRSTU 2 {
+			if (age > 35*10)
+				A_FadeOut(0.05);
+		}
+		goto spawn+1;
+	}
+}
+
+Class PK_RedSoul : PK_Soul {
+	Default {
+		inventory.amount 20;
+		translation "0:255=%[0.00,0.00,0.00]:[2.00,0.00,0.00]";
+		alpha 0.85;
+		inventory.pickupsound "pickups/soul/red";
+	}
+}
+
 
 Class PK_GoldSoul : Health {
 	Default {
@@ -90,112 +292,5 @@ Class PK_MegaSoul : PK_GoldSoul {
 	Spawn:
 		MSOU ABCDEFGHIJKLMNOPQRSTU 2;
 		loop;
-	}
-}
-
-
-Class PK_GoldPickup : PK_Inventory abstract {
-	PK_GoldGleam gleam;
-	Default {
-		inventory.maxamount 99999;
-		inventory.amount 1;
-		+INVENTORY.UNDROPPABLE;
-		+INVENTORY.UNTOSSABLE;
-		+INVENTORY.NEVERRESPAWN;
-		+BRIGHT
-		xscale 0.5;
-		yscale 0.415;
-		radius 8;
-		height 16;
-		inventory.pickupmessage "";
-	}
-	override void Tick() {
-		super.Tick();
-		if (owner)
-			return;
-		if (isFrozen())
-			return;
-		if (level.time % 10 != 0)
-			return;
-		if (frandom[sfx](1,10) > 9 && !gleam) {
-			gleam = PK_GoldGleam(Spawn("PK_GoldGleam",pos+(0,0,frandom(2,height))));
-			if (gleam)
-				gleam.scale *= frandom[sfx](1,1.4);
-		}
-	}
-	states {
-	Spawn:
-		PGLD # -1;
-		stop;
-	}
-}
-
-Class PK_GoldGleam : PK_BaseFlare {
-	private int scaledir;
-	Default {
-		renderstyle 'Translucent';
-		+ROLLCENTER
-		alpha 3;
-		scale 1;
-	}
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		scaledir = 1;
-	}
-	states {
-	Spawn:
-		PGLD Z 1 {
-			//roll -= 5;
-			A_SetScale(scale.x+(0.02 * scaledir));
-			if (scale.x > default.scale.x*1.1)
-				scaledir = -1;
-			if (scale.x < default.scale.x*0.1)
-				destroy();
-		}
-		loop;
-	}
-}
-
-Class PK_SmallGold : PK_GoldPickup {
-	Default {
-		height 4;
-		inventory.pickupsound "pickups/gold/small";
-	}
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		frame = random[gold](0,4);
-	}
-}
-
-Class PK_MedGold : PK_GoldPickup {
-	Default {
-		height 8;
-		inventory.pickupsound "pickups/gold/med";
-	}
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		frame = random[gold](5,9);
-	}
-}
-
-Class PK_BigGold : PK_GoldPickup {
-	Default {
-		height 10;
-		inventory.pickupsound "pickups/gold/big";
-	}
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		frame = random[gold](10,13);
-	}
-}
-
-Class PK_VeryBigGold : PK_GoldPickup {
-	Default {
-		height 14;
-		inventory.pickupsound "pickups/gold/vbig";
-	}
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		frame = random[gold](14,16);
 	}
 }

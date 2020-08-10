@@ -1,9 +1,10 @@
 [enu default]
+TAROT_FIRSTUSE		= "Welcome to Black Tarot.\nThese cards are a one-time gift.";
 TAROT_EXIT			= "Are you sure you want to close the Black Tarot Board?\nYou will only be able to reassign cards at the next\nmap start.";
 
 ENDURANCE_DESC 		= "Take only half the damage.";
 SPEED_DESC 			= "Move faster.";
-TIMEBONUS_DESC 		= "Golden Cards last 20 seconds longer.";
+TIMEBONUS_DESC 		= "Golden Cards last 15 seconds longer.";
 REBIRTH_DESC 		= "Gain full Health and Armor on activation.";
 CONFUSION_DESC 		= "Confuse enemies.";
 DEXTERITY_DESC		= "Weapons fire 2x faster.";
@@ -14,7 +15,7 @@ MAGICGUN_DESC		= "Guns don't consume ammo.";
 IRONWILL_DESC		= "You can't be hurt.";
 HASTE_DESC			= "Enemies move 4x slower.";
 
-SOULKEEPER_DESC		= "Souls stay longer.";
+SOULKEEPER_DESC		= "Souls never disappear.";
 BLESSING_DESC		= "Increase base health to 150.";
 REPLENISH_DESC		= "Double the ammo in ammo boxes.";
 DARKSOUL_DESC		= "Morph into demon form at 50 souls.";

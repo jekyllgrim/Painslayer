@@ -1,4 +1,4 @@
 Gameinfo {
-	AddEventHandlers = "PK_DeathHandler", "PK_ReplacementHandler", "PKCardsMenuHandler"
+	AddEventHandlers = "PK_Mainhandler", "PK_ReplacementHandler", "PKCardsMenuHandler"
 	StatusBarClass = "PainkillerHUD"
 }

@@ -1,71 +1,3 @@
-Class PK_Soul : PK_Inventory {
-	protected int age;
-	Default {
-		inventory.pickupmessage "";
-		inventory.amount 3;
-		inventory.maxamount 200;
-		renderstyle 'Add';
-		+NOGRAVITY;
-		alpha 1;
-		xscale 0.25;
-		yscale 0.2;
-		inventory.pickupsound "pickups/soul";
-		+BRIGHT;
-	}
-	override void Tick() {
-		super.Tick();
-		if (!isFrozen())
-			age++;
-	}
-	override bool TryPickup (in out Actor other) {
-		if (!(other is "PlayerPawn"))
-			return false;
-		let cont = PK_DemonMorphControl(other.FindInventory("PK_DemonMorphControl"));
-		if (cont)
-			cont.pk_souls += 1;
-		if (cont.pk_souls >= cont.pk_minsouls && !other.FindInventory("PK_DemonWeapon")) {
-			let weap = other.player.readyweapon;
-			other.GiveInventory("PK_DemonWeapon",1);			
-			let dew = PK_DemonWeapon(other.FindInventory("PK_DemonWeapon"));
-			if (dew) {
-				if (weap) {
-					//console.printf("prev weapon %s",weap.GetClassName());
-					dew.prevweapon = weap;
-				}
-				other.player.readyweapon = dew;
-				let psp = other.player.GetPSprite(PSP_WEAPON);
-				if (psp) {
-					other.player.SetPSprite(PSP_WEAPON,dew.FindState("Ready"));
-					psp.y = WEAPONTOP;
-				}
-				/*else
-					Console.printf("something went really wrong");*/
-			}
-		}
-		other.GiveBody(Amount, MaxAmount);
-		GoAwayAndDie();
-		return true;
-	}
-	states {
-	Spawn:
-		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
-		DSOU ABCDEFGHIJKLMNOPQRSTU 2 {
-			if (age > 35*10)
-				A_FadeOut(0.05);
-		}
-		goto spawn+1;
-	}
-}
-
-Class PK_RedSoul : PK_Soul {
-	Default {
-		inventory.amount 20;
-		translation "0:255=%[0.00,0.00,0.00]:[2.00,0.00,0.00]";
-		alpha 0.85;
-		inventory.pickupsound "pickups/soul/red";
-	}
-}
-
 Class PK_SlowMoControl : Inventory {
 	private double p_gravity;
 	private double p_speed;
@@ -187,7 +119,7 @@ Class PK_SlowMoAfterImage : PK_SmallDebris {
 	}
 }
 
-Class PK_DemonMorphControl : Inventory {
+Class PK_DemonMorphControl : PK_InventoryToken {
 	int pk_souls;
 	int pk_minsouls;
 	int pk_fullsouls;
