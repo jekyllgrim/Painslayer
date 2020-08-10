@@ -12,29 +12,33 @@ HardwareShader PostProcess Scene
 	//Enabled
 }
 
-/*
+
 pointlight PKSmallGold {
 	color 1.0 0.9 0.0
-	attenuate 1;
-	size 6;
+	attenuate 1
+	size 4
+	dontlightself 1
 }
 
 pointlight PKMedGold {
 	color 1.0 0.9 0.0
-	attenuate 1;
-	size 8;
+	attenuate 1
+	size 7
+	dontlightself 1
 }
 
 pointlight PKBigGold {
 	color 1.0 0.9 0.0
-	attenuate 1;
-	size 12;
+	attenuate 1
+	size 9
+	dontlightself 1
 }
 
 pointlight PKVBigGold {
 	color 1.0 0.9 0.0
-	attenuate 1;
-	size 15;
+	attenuate 1
+	size 12
+	dontlightself 1
 }
 
 object PK_SmallGold {
@@ -51,7 +55,7 @@ object PK_BigGold {
 
 object PK_VeryBigGold {
 	frame PGLD { light PKVBigGold }
-}*/
+}
 
 flickerlight PKROCKET_X1 {
     color 1.0 0.7 0.0

@@ -73,7 +73,9 @@ Class PK_MainHandler : EventHandler {
 			double secSize = (sectorBB.x + sectorBB.y) / 2;
 			//console.printf("sector %d size %d",curSec.sectornum,secSize);
 			
-			int goldnum = Clamp((secSize / 80),1,6);
+			if (secsize < 24)
+				continue;
+			int goldnum = Clamp((secSize / 72),1,7);
 
 			for (int i = goldnum; i > 0; i--) {
 				int chance = random[gold](0,100);
@@ -94,6 +96,10 @@ Class PK_MainHandler : EventHandler {
 						goldPickup.VelFromAngle(frandom[gold](4,8),random[gold](0,359));
 					}
 				}*/
+				goldPickup.VelFromAngle(frandom[gold](1,3),random[gold](0,359));
+			}
+			for (int i = random[moregold](1,4); i > 0; i--) {
+				actor goldPickup = actor.Spawn("PK_SmallGold",cCenter);
 				goldPickup.VelFromAngle(frandom[gold](4,8),random[gold](0,359));
 			}
 		}

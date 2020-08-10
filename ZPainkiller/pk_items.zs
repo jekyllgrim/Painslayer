@@ -115,7 +115,7 @@ Class PK_GoldGleam : PK_BaseFlare {
 
 Class PK_SmallGold : PK_GoldPickup {
 	Default {
-		PK_GoldPickup.goldamount 1;
+		PK_GoldPickup.goldamount 3;
 		height 4;
 		inventory.pickupsound "pickups/gold/small";
 	}
