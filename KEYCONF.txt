@@ -1,1 +1,4 @@
 alias "PKGOLD" "netevent PK_GiveGold"
+
+addkeysection "Painslayer" PainslayerKeys
+addmenukey "Open Black Tarot board" "openmenu PKCardsMenu"

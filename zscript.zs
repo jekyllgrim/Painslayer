@@ -5,7 +5,7 @@ const font_times = "Times2";
 #include "ZPainkiller/pk_main.zs"
 #include "ZPainkiller/pk_events.zs"
 #include "ZPainkiller/pk_weapon.zs"
-#include "ZPainkiller/pk_demonmorph.zs"
+#include "ZPainkiller/pk_systems.zs"
 #include "ZPainkiller/pk_items.zs"
 #include "ZPainkiller/w_painkiller.zs"
 #include "ZPainkiller/w_shotgun.zs"

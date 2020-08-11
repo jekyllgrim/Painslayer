@@ -4,6 +4,10 @@ Class PKCardsMenu : PKCGenericMenu {
 	double backgroundRatio;
 	vector2 boardTopLeft;
 	
+	PlayerPawn plr;
+	
+	PK_CardControl goldcontrol;
+	
 	PKCMenuHandler handler;
 	PKCCardButton SelectedCard;	//card attached to the pointer
 	PKCCardButton HoveredCard;	//card the pointer is hovering over
@@ -18,86 +22,7 @@ Class PKCardsMenu : PKCGenericMenu {
 	bool ExitHovered;				//whether it's hovered
 	int ExitAlphaDir;
 	
-	//shows exist popup message
-	void ShowExitPopup() {
-		if (!boardElements)
-			return;
-				
-		S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI);
-		vector2 popuppos = (192,160);
-		vector2 popupsize = (640,260);
-		
-		exitPopup = New("PKCBoardMessage");
-		exitPopup.pack(mainFrame);
-		exitPopup.Init(
-			popuppos,
-			popupsize,
-			"$TAROT_EXIT",
-			textscale: 0.9
-		);
-		
-		let exitHander = PKCExitHandler(new("PKCExitHandler"));
-		exitHander.menu = self;		
-		
-		//create Yes button:
-		vector2 buttonsize = (100,60);
-		let yesButton = new("PKCButton").Init(
-			(100,160),
-			buttonsize,
-			text:"Yes",
-			cmdhandler:exitHander,
-			command:"DoExit",
-			fnt:font_times,
-			textscale:1.5,
-			textColor:Font.FindFontColor('PKBaseText')
-		);
-		yesButton.SetTexture("","","","");
-		yesButton.pack(exitPopup);
-		
-		//create No button:
-		let noButton = new("PKCButton").Init(
-			(440,160),
-			buttonsize,
-			text:"No",
-			cmdhandler:exitHander,
-			command:"CancelExit",
-			fnt:font_times,
-			textscale:1.5,
-			textColor:Font.FindFontColor('PKBaseText')
-		);
-		noButton.SetTexture("","","","");
-		noButton.pack(exitPopup);
-	}
-	
-	void ShowCardToolTip(PKCCardButton card) {				
-		vector2 tippos = (62,430);
-		vector2 tipsize = (378,173);
-
-		string title = Stringtable.Localize(card.cardname);	//pulls name from LANGUAGE
-		string desc = Stringtable.Localize(card.carddesc);	//pulls desc from LANGUAGE
-		
-		cardinfo = New("PKCBoardMessage");
-		cardinfo.pack(mainFrame);
-		cardinfo.Init(
-			tippos,
-			tipsize,
-			String.Format("%s",title),
-			textscale:1.2,
-			textcolor: Font.FindFontColor('PKRedText')
-		);
-		
-		vector2 tiptextofs = (16,16);	
-		let tiptext = new("PKCLabel").Init(
-			tiptextofs+(0,48),
-			tipsize-(tiptextofs*1.2),
-			String.Format("%s",desc), 
-			font_times,
-			textscale:1,
-			textcolor: Font.FindFontColor('PKBaseText'),
-			linespacing: 0.1
-		);
-		tiptext.Pack(cardinfo);	
-	}
+	bool firstUse;
 	
 	override void Init (Menu parent) {
 		super.Init(parent);
@@ -107,6 +32,20 @@ Class PKCardsMenu : PKCGenericMenu {
 		backgroundRatio = screensize.y / BOARD_HEIGHT;
 		vector2 backgroundsize = (BOARD_WIDTH*backgroundRatio,BOARD_HEIGHT*backgroundRatio);
 		boardTopLeft = */
+		
+		//checks if the board is opened for the first time on the current map:
+		let event = PKCardsMenuHandler(EventHandler.Find("PKCardsMenuHandler"));
+		if (event) {
+			if (!event.boardOpened) {
+				firstUse = true;
+				event.boardOpened = true;
+			}
+			else
+				firstUse = false;
+		}
+		
+		let plr = players[consoleplayer].mo;
+		goldControl = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		
 		//first create the background (always 4:3, never stretched)
 		vector2 backgroundsize = (BOARD_WIDTH,BOARD_HEIGHT);	
@@ -145,8 +84,8 @@ Class PKCardsMenu : PKCGenericMenu {
 		SlotsInit();	//initialize card slots
 		CardsInit();	//initialize cards
 		
-		//unlock 2 random silver and 3 random gold crads if you have none unlocked ("pistol start"):
-		if (UnlockedSilverCards.Size() == 0 && UnlockedGoldCards.Size() == 0) {
+		//unlock 2 random silver and 3 random gold crads if you have none unlocked ("pistol start"):		
+		if (goldcontrol && goldControl.UnlockedTarotCards.Size() == 0) {
 			//S_StartSound("ui/board/cardunlocked",CHAN_AUTO,CHANF_UI);
 			S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI);
 			
@@ -161,12 +100,18 @@ Class PKCardsMenu : PKCGenericMenu {
 			);
 			firstUsePopupDur = 120;	//"first use" message is temporary
 			
-			//we use two other arrays to make sure we don't "unlock" the same card more than once:
+			//these arrays are used to make sure we don't unlock the same card more than once:
+			array <PKCCardButton> UnlockedGoldCards;
+			array <PKCCardButton> UnlockedSilverCards;
+			
+			//unlock the cards and push them into an array on the item token via a netevent:
 			while (UnlockedSilverCards.Size() < 2) {
 				let card = silvercards[random(0,silvercards.Size()-4)];
 				if (UnlockedSilverCards.Find(card) == UnlockedSilverCards.Size()) {
 					card.cardbought = true;
-					UnlockedSilverCards.push(card);
+					UnlockedSilverCards.push(card);					
+					string eventname = String.Format("PKCEquipCard:%s",card.cardID);
+					EventHandler.SendNetworkEvent(eventname);
 				}
 			}
 			while (UnlockedGoldCards.Size() < 3) {
@@ -174,6 +119,8 @@ Class PKCardsMenu : PKCGenericMenu {
 				if (UnlockedGoldCards.Find(card) == UnlockedGoldCards.Size()) {
 					card.cardbought = true;
 					UnlockedGoldCards.push(card);
+					string eventname = String.Format("PKCEquipCard:%s",card.cardID);
+					EventHandler.SendNetworkEvent(eventname);
 				}
 			}
 		}
@@ -181,8 +128,6 @@ Class PKCardsMenu : PKCGenericMenu {
 	
 	array <PKCCardButton> silvercards;	//all silver cards
 	array <PKCCardButton> goldcards;		//all gold cards
-	array <PKCCardButton> UnlockedSilverCards;
-	array <PKCCardButton> UnlockedGoldCards;
 	
 	static const int PKCSilverSlots[] = {	58, 231 };
 	static const int PKCGoldSlots[] 	= { 489, 660, 829 };
@@ -289,7 +234,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			card.defaultsize = cardsize;
 			card.cardname = PKCCardNames[i];
 			card.carddesc = PKCCardDescs[i];
-			card.cardbought = false;//randompick(0,0,1);			
+			card.cardID = PKCCardIDs[i];	
 			if (i < 12) {
 				card.slottype = false;
 				silvercards.push(card);
@@ -299,22 +244,105 @@ Class PKCardsMenu : PKCGenericMenu {
 				goldcards.push(card);
 			}
 			card.Pack(boardelements);
+			//check if the card is already unlocked:
+			if (goldcontrol && goldControl.UnlockedTarotCards.Find(int(name(card.cardID))) != goldControl.UnlockedTarotCards.Size())
+				card.cardbought = true;
 		}
 	}
 
+	//shows exit popup message
+	void ShowExitPopup() {
+		if (!boardElements)
+			return;
+				
+		S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI);
+		vector2 popuppos = (192,160);
+		vector2 popupsize = (640,260);
+		
+		exitPopup = New("PKCBoardMessage");
+		exitPopup.pack(mainFrame);
+		exitPopup.Init(
+			popuppos,
+			popupsize,
+			"$TAROT_EXIT",
+			textscale: 0.9
+		);
+		
+		let exitHander = PKCExitHandler(new("PKCExitHandler"));
+		exitHander.menu = self;		
+		
+		//create Yes button:
+		vector2 buttonsize = (100,60);
+		let yesButton = new("PKCButton").Init(
+			(100,160),
+			buttonsize,
+			text:"Yes",
+			cmdhandler:exitHander,
+			command:"DoExit",
+			fnt:font_times,
+			textscale:1.5,
+			textColor:Font.FindFontColor('PKBaseText')
+		);
+		yesButton.SetTexture("","","","");
+		yesButton.pack(exitPopup);
+		
+		//create No button:
+		let noButton = new("PKCButton").Init(
+			(440,160),
+			buttonsize,
+			text:"No",
+			cmdhandler:exitHander,
+			command:"CancelExit",
+			fnt:font_times,
+			textscale:1.5,
+			textColor:Font.FindFontColor('PKBaseText')
+		);
+		noButton.SetTexture("","","","");
+		noButton.pack(exitPopup);
+	}
+	
+	void ShowCardToolTip(PKCCardButton card) {				
+		vector2 tippos = (62,430);
+		vector2 tipsize = (378,173);
+
+		string title = Stringtable.Localize(card.cardname);	//pulls name from LANGUAGE
+		string desc = Stringtable.Localize(card.carddesc);	//pulls desc from LANGUAGE
+		
+		cardinfo = New("PKCBoardMessage");
+		cardinfo.pack(mainFrame);
+		cardinfo.Init(
+			tippos,
+			tipsize,
+			String.Format("%s",title),
+			textscale:1.2,
+			textcolor: Font.FindFontColor('PKRedText')
+		);
+		
+		vector2 tiptextofs = (16,16);	
+		let tiptext = new("PKCLabel").Init(
+			tiptextofs+(0,48),
+			tipsize-(tiptextofs*1.2),
+			String.Format("%s",desc), 
+			font_times,
+			textscale:1,
+			textcolor: Font.FindFontColor('PKBaseText'),
+			linespacing: 0.1
+		);
+		tiptext.Pack(cardinfo);	
+	}
+
     override bool MenuEvent (int mkey, bool fromcontroller) {
-        switch (mkey) {
-        case MKEY_Back:
+        if (mkey == MKEY_Back && firstUse) {
 			if (exitPopup) {
-				S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI);
-				exitPopup.unpack();
-				exitPopup.destroy();
+					S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI);
+					exitPopup.unpack();
+					exitPopup.destroy();
+				}
+				else {
+					ShowExitPopup();
+				}
+				return false;
 			}
-			else {
-				ShowExitPopup();
-			}
-			return false;
-        }
 		return Super.MenuEvent (mkey, fromcontroller);
     }
 	
@@ -422,6 +450,7 @@ Class PKCCardButton : PKCButton {
 	bool slottype;
 	string cardname;
 	string carddesc;
+	name cardID;
 	int purchaseFrame;
 	override void drawer() {
 		string texture = btnTextures[curButtonState];
@@ -487,8 +516,11 @@ Class PKCMenuHandler : PKCHandler {
 		if (!menu)
 			return;
 		//exit button - works if you don't have a picked card:
-		if (command == "BoardButton" && !menu.SelectedCard) {	
-			menu.ShowExitPopup();	
+		if (command == "BoardButton" && !menu.SelectedCard) {
+			if (menu.firstUse)
+				menu.ShowExitPopup();	
+			else
+				menu.Close();
 			return;
 		}
 		if (menu.exitPopup)
@@ -540,8 +572,7 @@ Class PKCMenuHandler : PKCHandler {
 		if (command == "HandleCard") {
 			let card = PKCCardButton(Caller);
 			if (!card.cardbought) {
-				S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI);
-				card.cardbought = true;
+				S_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI);
 				return;
 			}
 			//don't do anything if you're hovering over a valid slot: we don't want placing into slot and clicking the card to happen at the same time
@@ -597,8 +628,30 @@ Class PKCMenuHandler : PKCHandler {
 }
 
 Class PKCardsMenuHandler : EventHandler {
-	override void WorldThingSpawned(Worldevent e) {
+	/*override void WorldThingSpawned(Worldevent e) {
 		if (e.thing && e.thing == players[consoleplayer].mo)
 			Menu.SetMenu("PKCardsMenu");
+	}*/
+	
+	ui bool boardOpened; //whether the Black Tarot board has been opened on this map
+	
+	override void NetworkProcess(consoleevent e) {
+		if (e.name.IndexOf("PKCEquipCard") < 0)
+			return;
+		if (e.isManual || e.Player < 0)
+			return;
+		let plr = players[e.Player].mo;
+		if (!plr)
+			return;
+		let goldcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		if (!goldcontrol)
+			return;
+		Array <String> cardname;
+		e.name.split(cardname, ":");
+		if (cardname.Size() == 0)
+			return;
+		bool cardtype = Clamp(e.args[0],0,1);
+		//console.printf("pushing %s into the array",cardname[1]);
+		goldcontrol.UnlockedTarotCards.Push(int(name(cardname[1])));
 	}
 }

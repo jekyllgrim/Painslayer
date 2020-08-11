@@ -81,7 +81,7 @@ Class PainkillerHUD : BaseStatusBar {
 		
 		//DrawString(mStatFont, String.Format("%05d",multiplayer? CPlayer.killcount : level.killed_monsters), (-38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_RIGHT,translation:font.CR_UNTRANSLATED);
 		int gold = 0;
-		let gcont = PK_GoldControl(CPlayer.mo.FindInventory("PK_GoldControl"));
+		let gcont = PK_CardControl(CPlayer.mo.FindInventory("PK_CardControl"));
 		if (gcont) {
 			gold = gcont.pk_gold;
 		}

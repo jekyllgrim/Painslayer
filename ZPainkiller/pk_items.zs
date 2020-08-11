@@ -37,10 +37,6 @@ Class PK_Inventory : Inventory {
 		toucher.A_StartSound(PickupSound, chan, flags, 1, atten);
 	}
 }
-	
-Class PK_GoldControl : PK_InventoryToken {
-	int pk_gold;	
-}
 
 Class PK_GoldPickup : PK_Inventory abstract {
 	PK_GoldGleam gleam;
@@ -59,7 +55,7 @@ Class PK_GoldPickup : PK_Inventory abstract {
 	override bool TryPickup (in out Actor other) {
 		if (!(other is "PlayerPawn"))
 			return false;
-		let cont = PK_GoldControl(other.FindInventory("PK_GoldControl"));
+		let cont = PK_CardControl(other.FindInventory("PK_CardControl"));
 		if (cont)
 			cont.pk_gold = Clamp(cont.pk_gold + goldamount, 0, 99990);
 		GoAwayAndDie();

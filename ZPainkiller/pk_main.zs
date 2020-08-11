@@ -69,9 +69,6 @@ Class PK_BaseActor : Actor abstract {
 	}
 }
 
-	
-
-
 Class PK_BaseDebris : PK_BaseActor abstract {
 	protected bool landed;			//true if object landed on the floor (or ceiling, if can stick to ceiling)
 	protected bool moving; 		//marks actor as moving; sets to true automatically if actor spawns with non-zero vel
@@ -623,86 +620,6 @@ Class PK_DeathSmoke : PK_BaseSmoke {
 			scale *= 0.9;
 		}
 		wait;
-	}
-}
-
-Class PK_EnemyDeathControl : Actor {
-	KillerFlyTarget kft;
-	private int restcounter;
-	private int restlife;
-	private int maxlife;
-	private int age;
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		if (!master) {
-			destroy();
-			return;
-		}
-		restlife = random[cont](42,60);
-		maxlife = int(35*frandom[cont](6,10));
-		kft = KillerFlyTarget(Spawn("KillerFlyTarget",master.pos));
-		if (kft) {
-			kft.target = master;
-			kft.A_SetSize(master.radius,master.default.height*0.5);
-			kft.vel = master.vel;
-		}
-	}	
-	override void Tick () {
-		if (master) {	
-			SetOrigin(master.pos,true);
-			if (!master.isFrozen())
-				age++;
-			if (GetAge() == 1 && kft)
-				kft.vel = master.vel;	
-			if  (master.vel ~== (0,0,0))
-				restcounter++;
-			else
-				restcounter = 0;
-		}		
-		double rad = 8;
-		double smkz = 20;
-		if (master) {
-			rad = master.radius;
-			smkz = master.height;
-		}
-		if (master && master.bKILLED && master.FindInventory("PK_SlowMoControl")) {
-			for (int i = 40; i > 0; i--) {
-				smkz = master.default.height;
-				let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz)));
-				if (smk) {
-					smk.vel = (frandom[part](-0.4,0.4),frandom[part](-0.4,0.4),frandom[part](0,1));
-					smk.A_SetRenderstyle(1.0,Style_Stencil);
-					smk.SetShade("FF00FF");
-					smk.bBRIGHT = true;
-				}
-			}
-			master.destroy();
-		}	
-		else if (restcounter >= restlife || age > maxlife || !master) {
-			if (kft)
-				kft.destroy();
-			A_StartSound("world/bodypoof",CHAN_AUTO);
-			for (int i = 26; i > 0; i--) {
-				let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz*1.5)));
-				if (smk)
-					smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
-			}
-			for (int i = 8; i > 0; i--) {
-				let smk = Spawn("PK_WhiteSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](pos.z,smkz)));
-				if (smk) {
-					smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
-					smk.A_SetScale(0.4);
-					smk.alpha = 0.5;
-				}
-			}
-			Class<Inventory> soul = (master && master.default.health >= 500) ? "PK_RedSoul" : "PK_Soul";			
-			double pz = (pos.z ~== floorz) ? frandom[soul](8,14) : 0;
-			Spawn(soul,pos+(0,0,pz));
-			if (master)
-				master.destroy();
-			destroy();
-			return;
-		}
 	}
 }
 

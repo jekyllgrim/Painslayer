@@ -1,6 +1,10 @@
 [enu default]
 TAROT_FIRSTUSE		= "Welcome to Black Tarot.\nThese cards are a one-time gift.";
-TAROT_EXIT			= "Are you sure you want to close the Black Tarot Board?\nYou will only be able to reassign cards at the next\nmap start.";
+TAROT_EXIT			= 	"Are you sure you want to close the Black Tarot Board?"
+						"\n"
+						"To change the equipped cards again you will have to"
+						"\n"
+						"complete this level or pay in gold.";
 
 ENDURANCE_DESC 		= "Take only half the damage.";
 SPEED_DESC 			= "Move faster.";
