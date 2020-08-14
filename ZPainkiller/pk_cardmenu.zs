@@ -6,6 +6,9 @@ Class PKCardsMenu : PKCGenericMenu {
 	
 	PlayerPawn plr;
 	
+	PK_BoardEventHandler menuEHandler;
+	PK_BoardElementsHandler elementsEHandler;
+	
 	PK_CardControl goldcontrol;
 	
 	PKCMenuHandler handler;
@@ -34,15 +37,17 @@ Class PKCardsMenu : PKCGenericMenu {
 		boardTopLeft = */
 		
 		//checks if the board is opened for the first time on the current map:
-		let event = PKCardsMenuHandler(EventHandler.Find("PKCardsMenuHandler"));
-		if (event) {
-			if (!event.boardOpened) {
+		menuEHandler = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
+		if (menuEHandler) {
+			if (!menuEHandler.boardOpened) {
 				firstUse = true;
-				event.boardOpened = true;
+				menuEHandler.boardOpened = true;
 			}
 			else
 				firstUse = false;
 		}
+		
+		elementsEHandler = PK_BoardElementsHandler(EventHandler.Find("PK_BoardElementsHandler"));
 		
 		let plr = players[consoleplayer].mo;
 		goldControl = PK_CardControl(plr.FindInventory("PK_CardControl"));
@@ -110,7 +115,7 @@ Class PKCardsMenu : PKCGenericMenu {
 				if (UnlockedSilverCards.Find(card) == UnlockedSilverCards.Size()) {
 					card.cardbought = true;
 					UnlockedSilverCards.push(card);					
-					string eventname = String.Format("PKCEquipCard:%s",card.cardID);
+					string eventname = String.Format("PKCUnlockCard:%s",card.cardID);
 					EventHandler.SendNetworkEvent(eventname);
 				}
 			}
@@ -119,7 +124,7 @@ Class PKCardsMenu : PKCGenericMenu {
 				if (UnlockedGoldCards.Find(card) == UnlockedGoldCards.Size()) {
 					card.cardbought = true;
 					UnlockedGoldCards.push(card);
-					string eventname = String.Format("PKCEquipCard:%s",card.cardID);
+					string eventname = String.Format("PKCUnlockCard:%s",card.cardID);
 					EventHandler.SendNetworkEvent(eventname);
 				}
 			}
@@ -129,13 +134,20 @@ Class PKCardsMenu : PKCGenericMenu {
 	array <PKCCardButton> silvercards;	//all silver cards
 	array <PKCCardButton> goldcards;		//all gold cards
 	
-	static const int PKCSilverSlots[] = {	58, 231 };
-	static const int PKCGoldSlots[] 	= { 489, 660, 829 };
+	static const int PKCSlotXPos[] = { 58, 231, 489, 660, 829 };
+	static const name PKCSlotIDs[] = {
+		'slotSilver1',
+		'slotSilver2',
+		'slotGold1',
+		'slotGold2',
+		'slotGold3'
+	};
 	
 	private void SlotsInit() {
 		vector2 slotsize = (138,227);	
-		for (int i = 0; i < PKCSilverSlots.Size(); i++) {			
-			vector2 slotpos = (PKCSilverSlots[i],179);
+		for (int i = 0; i < 5; i++) {			
+			double slotY = (i < 2) ? 179 : 364;
+			vector2 slotpos = (PKCSlotXPos[i],slotY);
 			let cardslot = PKCCardSlot(new("PKCCardSlot"));
 			cardslot.Init(
 				slotpos,
@@ -148,25 +160,8 @@ Class PKCardsMenu : PKCGenericMenu {
 			);
 			cardslot.slotpos = slotpos;
 			cardslot.slotsize = slotsize;
-			cardslot.slottype = false;
-			cardslot.Pack(boardelements);
-		}
-
-		for (int i = 0; i < PKCGoldSlots.Size(); i++) {
-			vector2 slotpos = (PKCGoldSlots[i],364);
-			let cardslot = PKCCardSlot(new("PKCCardSlot"));
-			cardslot.Init(
-				slotpos,
-				slotsize,
-				cmdhandler:handler,
-				command:"CardSlot"
-			);
-			cardslot.SetTexture(
-				"","","",""
-			);
-			cardslot.slotpos = slotpos;
-			cardslot.slotsize = slotsize;
-			cardslot.slottype = true;
+			cardslot.slottype = (i < 2) ? false : true;
+			cardslot.slotID = PKCSlotIDs[i];
 			cardslot.Pack(boardelements);
 		}
 	}
@@ -213,11 +208,12 @@ Class PKCardsMenu : PKCGenericMenu {
 	//I have to define slots' X pos manually because the gaps between them are not precisely identical:
 	static const int PKCCardXPos[] = { 56, 135, 214, 291, 370, 447, 525, 604, 682, 759, 835, 913 };
 	
+	//Initialize cards:
 	private void CardsInit() {				
 		vector2 cardsize = (55,92);
-		vector2 cardscale = (0.4,0.407);
-		
+		vector2 cardscale = (0.4,0.407); //slightly stretched vertically to fill the slot
 		for (int i = 0; i < PKCCardIDs.Size(); i++) {
+			//first 12 cards are silver, so we define pos based on where we are in the IDs array:
 			vector2 cardpos = (i < 12) ? (PKCCardXPos[i],56) : (PKCCardXPos[i-12],618);
 			let card = PKCCardButton(new("PKCCardButton"));
 			card.Init(
@@ -438,6 +434,7 @@ Class PKCCardSlot : PKCButton {
 	vector2 slotsize;
 	PKCButton placedcard;
 	bool slottype;
+	name slotID;
 }
 
 //same as original Button but also takes an buttonScale argument
@@ -627,16 +624,19 @@ Class PKCMenuHandler : PKCHandler {
 	}
 }
 
-Class PKCardsMenuHandler : EventHandler {
+Class PK_BoardElementsHandler : StaticEventHandler {
+}
+
+Class PK_BoardEventHandler : EventHandler {
+	ui bool boardOpened; //whether the Black Tarot board has been opened on this map
+	
 	/*override void WorldThingSpawned(Worldevent e) {
 		if (e.thing && e.thing == players[consoleplayer].mo)
 			Menu.SetMenu("PKCardsMenu");
-	}*/
-	
-	ui bool boardOpened; //whether the Black Tarot board has been opened on this map
+	}*/	
 	
 	override void NetworkProcess(consoleevent e) {
-		if (e.name.IndexOf("PKCEquipCard") < 0)
+		if (e.name.IndexOf("PKCUnlockCard") < 0)
 			return;
 		if (e.isManual || e.Player < 0)
 			return;
