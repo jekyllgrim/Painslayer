@@ -397,12 +397,4 @@ Class PK_EnemyDeathControl : Actor {
 	
 Class PK_CardControl : PK_InventoryToken {
 	int pk_gold;
-	bool boardUsed;
-	array <name> UnlockedTarotCards;
-	
-	name slotSilver1;
-	name slotSilver2;
-	name slotGold1;
-	name slotGold2;
-	name slotGold3;
 }

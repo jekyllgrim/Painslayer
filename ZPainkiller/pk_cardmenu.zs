@@ -9,6 +9,9 @@ Class PKCardsMenu : PKCGenericMenu {
 	PK_BoardEventHandler menuEHandler;
 	PK_BoardElementsHandler elementsEHandler;
 	
+	array <PKCCardButton> silvercards;	//all silver cards
+	array <PKCCardButton> goldcards;		//all gold cards
+	
 	PK_CardControl goldcontrol;
 	
 	PKCMenuHandler handler;
@@ -37,6 +40,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		boardTopLeft = */
 		
 		//checks if the board is opened for the first time on the current map:
+		let plr = players[consoleplayer].mo;
 		menuEHandler = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
 		if (menuEHandler) {
 			if (!menuEHandler.boardOpened) {
@@ -45,11 +49,8 @@ Class PKCardsMenu : PKCGenericMenu {
 			}
 			else
 				firstUse = false;
-		}
-		
-		elementsEHandler = PK_BoardElementsHandler(EventHandler.Find("PK_BoardElementsHandler"));
-		
-		let plr = players[consoleplayer].mo;
+		}		
+		elementsEHandler = PK_BoardElementsHandler(StaticEventHandler.Find("PK_BoardElementsHandler"));
 		goldControl = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		
 		//first create the background (always 4:3, never stretched)
@@ -70,6 +71,7 @@ Class PKCardsMenu : PKCGenericMenu {
 
 		handler = new("PKCMenuHandler");
 		handler.menu = self;
+		handler.elementsEHandler = PK_BoardElementsHandler(StaticEventHandler.Find("PK_BoardElementsHandler"));
 		
 		//create big round exit button:
 		exitbutton = new("PKCButton").Init(
@@ -88,64 +90,16 @@ Class PKCardsMenu : PKCGenericMenu {
 		
 		SlotsInit();	//initialize card slots
 		CardsInit();	//initialize cards
-		
-		//unlock 2 random silver and 3 random gold crads if you have none unlocked ("pistol start"):		
-		if (goldcontrol && goldControl.UnlockedTarotCards.Size() == 0) {
-			//S_StartSound("ui/board/cardunlocked",CHAN_AUTO,CHANF_UI);
-			S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI);
-			
-			//show "first use" text popup (doesn't block the board):
-			firstUsePopup = New("PKCBoardMessage");
-			firstUsePopup.pack(mainFrame);
-			firstUsePopup.Init(
-				(192,256),
-				(700,128),
-				"$TAROT_FIRSTUSE",
-				textscale: 1.5
-			);
-			firstUsePopupDur = 120;	//"first use" message is temporary
-			
-			//these arrays are used to make sure we don't unlock the same card more than once:
-			array <PKCCardButton> UnlockedGoldCards;
-			array <PKCCardButton> UnlockedSilverCards;
-			
-			//unlock the cards and push them into an array on the item token via a netevent:
-			while (UnlockedSilverCards.Size() < 2) {
-				let card = silvercards[random(0,silvercards.Size()-4)];
-				if (UnlockedSilverCards.Find(card) == UnlockedSilverCards.Size()) {
-					card.cardbought = true;
-					UnlockedSilverCards.push(card);					
-					string eventname = String.Format("PKCUnlockCard:%s",card.cardID);
-					EventHandler.SendNetworkEvent(eventname);
-				}
-			}
-			while (UnlockedGoldCards.Size() < 3) {
-				let card = goldcards[random(0,goldcards.Size()-4)];
-				if (UnlockedGoldCards.Find(card) == UnlockedGoldCards.Size()) {
-					card.cardbought = true;
-					UnlockedGoldCards.push(card);
-					string eventname = String.Format("PKCUnlockCard:%s",card.cardID);
-					EventHandler.SendNetworkEvent(eventname);
-				}
-			}
-		}
 	}
 	
-	array <PKCCardButton> silvercards;	//all silver cards
-	array <PKCCardButton> goldcards;		//all gold cards
-	
+	//horizontal positions of slots
 	static const int PKCSlotXPos[] = { 58, 231, 489, 660, 829 };
-	static const name PKCSlotIDs[] = {
-		'slotSilver1',
-		'slotSilver2',
-		'slotGold1',
-		'slotGold2',
-		'slotGold3'
-	};
+	//array of slots; filled on slots' initialization
+	array <PKCCardSlot> cardslots;
 	
 	private void SlotsInit() {
 		vector2 slotsize = (138,227);	
-		for (int i = 0; i < 5; i++) {			
+		for (int i = 0; i <= 4; i++) {			
 			double slotY = (i < 2) ? 179 : 364;
 			vector2 slotpos = (PKCSlotXPos[i],slotY);
 			let cardslot = PKCCardSlot(new("PKCCardSlot"));
@@ -155,13 +109,12 @@ Class PKCardsMenu : PKCGenericMenu {
 				cmdhandler:handler,
 				command:"CardSlot"
 			);
-			cardslot.SetTexture(
-				"","","",""
-			);
+			cardslot.SetTexture("","","","");
 			cardslot.slotpos = slotpos;
 			cardslot.slotsize = slotsize;
 			cardslot.slottype = (i < 2) ? false : true;
-			cardslot.slotID = PKCSlotIDs[i];
+			cardslot.slotID = i;
+			cardslots.insert(i,cardslot);
 			cardslot.Pack(boardelements);
 		}
 	}
@@ -224,6 +177,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			);
 			string texpath = String.Format("graphics/Tarot/cards/%s.png",PKCCardIDs[i]);
 			card.SetTexture(texpath, texpath, texpath, texpath);
+			card.menu = PKCardsMenu(self);
 			card.buttonScale = cardscale;
 			card.defaultscale = cardscale;
 			card.defaultpos = cardpos;
@@ -240,9 +194,70 @@ Class PKCardsMenu : PKCGenericMenu {
 				goldcards.push(card);
 			}
 			card.Pack(boardelements);
-			//check if the card is already unlocked:
-			if (goldcontrol && goldControl.UnlockedTarotCards.Find(int(name(card.cardID))) != goldControl.UnlockedTarotCards.Size())
-				card.cardbought = true;
+
+			if (elementsEHandler) {
+				//check if the card is already unlocked:
+				if (elementsEHandler.UnlockedTarotCards.Find(int(name(card.cardID))) != elementsEHandler.UnlockedTarotCards.Size()) {
+					//console.printf("%s is bought",card.cardID);
+					card.cardbought = true;
+				}
+				//check if the card is already equipped, and if so, place it in that slot:
+				if (elementsEHandler.EquippedSlots.Size() > 0 && elementsEHandler.EquippedSlots.Size() <= cardslots.Size()) {
+					for (int i = 0; i < cardslots.Size(); i++) {
+						if (elementsEHandler.EquippedSlots[i] == card.cardID) {
+							let cardslot = cardslots[i];
+							card.box.pos = cardslot.slotpos;
+							card.box.size = cardslot.slotsize;
+							card.buttonscale = (1,1);
+							cardslot.placedcard = card;
+						}
+					}
+				}
+			}
+			
+		}
+		//unlock 2 random silver and 3 random gold crads if you have none unlocked ("pistol start"):	
+		if (elementsEHandler && elementsEHandler.UnlockedTarotCards.Size() == 0) {
+			//S_StartSound("ui/board/cardunlocked",CHAN_AUTO,CHANF_UI);
+			S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI);
+			//console.printf("fist unlock");
+			
+			//show "first use" text popup (doesn't block the board):
+			firstUsePopup = New("PKCBoardMessage");
+			firstUsePopup.pack(mainFrame);
+			firstUsePopup.Init(
+				(192,256),
+				(700,128),
+				"$TAROT_FIRSTUSE",
+				textscale: 1.5
+			);
+			firstUsePopupDur = 120;	//"first use" message is temporary
+			
+			//these arrays are used to make sure we don't unlock the same card more than once:
+			array <PKCCardButton> UnlockedGoldCards;
+			array <PKCCardButton> UnlockedSilverCards;
+			
+			//unlock the cards and push them into an array on the item token via a netevent:
+			while (UnlockedSilverCards.Size() < 2) {
+				let card = PKCCardButton(silvercards[random(0,silvercards.Size()-4)]);
+				if (UnlockedSilverCards.Find(card) == UnlockedSilverCards.Size()) {
+					card.cardbought = true;
+					UnlockedSilverCards.push(card);					
+					elementsEHandler.UnlockedTarotCards.push(int(name(card.cardID)));
+					//string eventname = String.Format("PKCUnlockCard:%s",card.cardID);
+					//EventHandler.SendNetworkEvent(eventname);
+				}
+			}
+			while (UnlockedGoldCards.Size() < 3) {
+				let card = PKCCardButton(goldcards[random(0,goldcards.Size()-4)]);
+				if (UnlockedGoldCards.Find(card) == UnlockedGoldCards.Size()) {
+					card.cardbought = true;
+					UnlockedGoldCards.push(card);
+					elementsEHandler.UnlockedTarotCards.push(int(name(card.cardID)));
+					//string eventname = String.Format("PKCUnlockCard:%s",card.cardID);
+					//EventHandler.SendNetworkEvent(eventname);
+				}
+			}
 		}
 	}
 
@@ -343,6 +358,7 @@ Class PKCardsMenu : PKCGenericMenu {
     }
 	
 	override void Ticker() {
+		//block the board if exit prompt popup appears:
 		if (exitPopup) {
 			boardElements.disabled = true;
 			return;
@@ -351,6 +367,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			boardElements.disabled = false;
 		}
 		
+		//if the first use popup appears, start a counter and remove it when it runs out:
 		if (firstUsePopup) {
 			firstUsePopupDur--;			
 			if (firstUsePopupDur <= 0) {
@@ -359,15 +376,19 @@ Class PKCardsMenu : PKCGenericMenu {
 			}
 		}
 		
+		//if the player  picked a card from a slot, attach it to the mouse pointer:
 		if (SelectedCard) {			
 			SelectedCard.box.pos = boardelements.screenToRel((mouseX,mouseY)) - SelectedCard.box.size / 2;
 		}
+		//show card info if mouse hovers over a card and there's no card selected:
 		if (!cardinfo && HoveredCard && !HoveredCard.disabled && !HoveredCard.hidden && !SelectedCard)
 			ShowCardToolTip(HoveredCard);
+		//as soon as you hover off the card, immediately remove card info:
 		if (cardinfo && (!HoveredCard || HoveredCard.disabled || HoveredCard.hidden || SelectedCard)) {
 			cardinfo.unpack();
 			cardinfo.destroy();
 		}
+		//exit button continuously flashes, like in original:
 		if (exitbutton) {
 			if (exitbutton.alpha <= 0.25)
 				ExitAlphaDir = 1;
@@ -379,6 +400,10 @@ Class PKCardsMenu : PKCGenericMenu {
 	}
 }
 
+/* 
+	A generalized Board message frame that includes a lighter outline,
+	a darker inner image, and a slot for text. Use by popups.
+*/
 Class PKCBoardMessage : PKCFrame {
 	private int dur;
 	PKCBoardMessage init (vector2 msgpos, vector2 msgsize, string msgtext = "", double TextScale = 1.0, int TextColor = 0) {
@@ -428,17 +453,18 @@ Class PKCBoardMessage : PKCFrame {
 	}
 }
 		
-
+// Slots are also buttons, but they can hold cards in them
 Class PKCCardSlot : PKCButton {
 	vector2 slotpos;
 	vector2 slotsize;
 	PKCButton placedcard;
 	bool slottype;
-	name slotID;
+	int slotID;
 }
 
-//same as original Button but also takes an buttonScale argument
+//cards are buttons that hold various data and also become translucent if not purchased
 Class PKCCardButton : PKCButton {
+	PKCardsMenu menu;
 	bool cardbought;	
 	vector2 buttonScale;
 	vector2 defaultpos;
@@ -457,10 +483,12 @@ Class PKCCardButton : PKCButton {
 		imageSize.y *= buttonScale.y;
 		drawImage((0,0), texture, true, buttonScale);
 		
+		//fade the card out if it's not purchased (and thus is inaccessible)
 		if (!cardbought)
 			drawTiledImage((0, 0), box.size, "graphics/Tarot/tooltip_bg.png", true, buttonScale,alpha: 0.75);
-
-		else if (purchaseFrame <= 16) {
+		
+		//otherwise play the burn frame animation
+		else if (purchaseFrame <= 16 && menu && menu.FirstUse) {
 			purchaseFrame++;
 			string tex = String.Format("graphics/Tarot/cardburn/pkcburn%d.png",purchaseFrame);
 			drawImage((0,0),tex,true,buttonScale);
@@ -468,9 +496,11 @@ Class PKCCardButton : PKCButton {
 	}
 }
 
+//a separate handler for the exit popup
 Class PKCExitHandler : PKCHandler {
 	PKCardsMenu menu;
 	
+	//this handles Yes and No buttons in the exit popup:
 	override void buttonClickCommand(PKCButton caller, string command) {
 		if (!menu)
 			return;
@@ -487,6 +517,8 @@ Class PKCExitHandler : PKCHandler {
 			}
 		}
 	}
+	
+	//this makes Yes and No buttons slightly grow and become red when hovered:
 	override void elementHoverChanged(PKCElement caller, string command, bool unhovered) {
 		if (!menu)
 			return;
@@ -505,17 +537,21 @@ Class PKCExitHandler : PKCHandler {
 	}
 }
 
+//the main handler for the board menu
 Class PKCMenuHandler : PKCHandler {
 	PKCardsMenu menu;
 	PKCCardSlot hoveredslot;
+	PK_BoardElementsHandler elementsEHandler;
 	
 	override void buttonClickCommand(PKCButton caller, string command) {
 		if (!menu)
 			return;
 		//exit button - works if you don't have a picked card:
 		if (command == "BoardButton" && !menu.SelectedCard) {
+			//if board opened for the first time in the map, show a yes/no prompt:
 			if (menu.firstUse)
 				menu.ShowExitPopup();	
+			//otherwise just close the board  immediately
 			else
 				menu.Close();
 			return;
@@ -538,16 +574,21 @@ Class PKCMenuHandler : PKCHandler {
 					card.box.pos = cardslot.slotpos;
 					card.box.size = cardslot.slotsize;
 					card.buttonscale = (1,1);
-					//if there was a card place in the slot, move that card back to its default pos first, then place this one
+					//if there was a card placed in the slot, move that card back to its default pos before placing this one
 					if (cardslot.placedcard) {
 						let placedcard = PKCCardButton(cardslot.placedcard);
 						placedcard.box.size = placedcard.defaultsize;
 						placedcard.box.pos = placedcard.defaultpos;
 						placedcard.buttonscale = placedcard.defaultscale;
 					}
+					//attach the card to slot
 					cardslot.placedcard = card;
 					sound snd = (cardslot.slottype) ? "ui/board/placegold" : "ui/board/placesilver";
 					S_StartSound(snd,CHAN_AUTO,CHANF_UI);
+					if (elementsEHandler) {
+						int i = cardslot.slotID;
+						elementsEHandler.EquippedSlots[i] = card.cardID;
+					}					
 				}
 				else				
 					S_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI);
@@ -563,6 +604,10 @@ Class PKCMenuHandler : PKCHandler {
 				//move it to the top of the elements array so that it's rendered on the top layer:
 				menu.boardelements.elements.delete(menu.boardelements.elements.find(card));
 				menu.boardelements.elements.push(card);
+				if (elementsEHandler) {
+					int i = cardslot.slotID;
+					elementsEHandler.EquippedSlots[i] = '';
+				}	
 			}
 		}
 		//clicking the card: attaches card to mouse pointer, or, if you already have one and you click *anywhere* where there's no card slot, the card will jump back to its original slot:
@@ -625,6 +670,8 @@ Class PKCMenuHandler : PKCHandler {
 }
 
 Class PK_BoardElementsHandler : StaticEventHandler {
+	ui array <name> UnlockedTarotCards;
+	ui name EquippedSlots[5];
 }
 
 Class PK_BoardEventHandler : EventHandler {
@@ -634,7 +681,7 @@ Class PK_BoardEventHandler : EventHandler {
 		if (e.thing && e.thing == players[consoleplayer].mo)
 			Menu.SetMenu("PKCardsMenu");
 	}*/	
-	
+	/*
 	override void NetworkProcess(consoleevent e) {
 		if (e.name.IndexOf("PKCUnlockCard") < 0)
 			return;
@@ -653,5 +700,5 @@ Class PK_BoardEventHandler : EventHandler {
 		bool cardtype = Clamp(e.args[0],0,1);
 		//console.printf("pushing %s into the array",cardname[1]);
 		goldcontrol.UnlockedTarotCards.Push(int(name(cardname[1])));
-	}
+	}*/
 }
