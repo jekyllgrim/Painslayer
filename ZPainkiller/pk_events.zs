@@ -25,17 +25,19 @@ Class PK_MainHandler : EventHandler {
 	override void NetworkProcess(consoleevent e) {
 		if (e.name != "PK_GiveGold" || !e.isManual)
 			return;
-		console.printf("trying to give gold");
 		if (CheckCheatMode())
 			return;
 		let plr = players[e.Player].mo;
 		if (!plr)
 			return;
-		if (e.player == consoleplayer)
+		if (e.player == consoleplayer) {
+			console.printf("Glittering gold, trinkets and baubles... paid for in blood.");
 			S_StartSound("pickups/gold/vbig",CHAN_AUTO,CHANF_UI);
+		}
+		int amt = (e.args[0] == 0) ? 99990 : e.args[0];
 		let cont = PK_GoldControl(plr.FindInventory("PK_GoldControl"));
 		if (cont) {
-			cont.pk_gold = 99990;
+			cont.pk_gold = Clamp(cont.pk_gold + amt, 0, 99990);
 		}
 	}
 	Vector2 SectorBounds (Sector sec) {

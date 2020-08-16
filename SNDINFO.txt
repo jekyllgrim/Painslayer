@@ -196,7 +196,7 @@ goldmed1 	"sounds/items/gold/item-jewelry-stones1.wav"
 goldmed2 	"sounds/items/gold/item-jewelry-stones2.wav"
 goldbig1 	"sounds/items/gold/item-jewelry-rings1.wav"
 goldbig2	"sounds/items/gold/item-jewelry-rings2.wav"
-goldvbig1	"sounds/items/gold/item-jewelry-cups1.wav"
+goldvbig1	"sounds/items/gold/item-jewelry-cups.wav"
 goldvbig2	"sounds/items/gold/item-jewelry-cups2.wav"
 
 

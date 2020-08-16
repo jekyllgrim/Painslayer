@@ -12,8 +12,6 @@ Class PKCardsMenu : PKCGenericMenu {
 	array <PKCCardButton> silvercards;	//all silver cards
 	array <PKCCardButton> goldcards;		//all gold cards
 	
-	PK_GoldControl goldcontrol;
-	
 	PKCMenuHandler handler;
 	PKCCardButton SelectedCard;	//card attached to the pointer
 	PKCCardButton HoveredCard;	//card the pointer is hovering over
@@ -39,7 +37,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		vector2 backgroundsize = (BOARD_WIDTH*backgroundRatio,BOARD_HEIGHT*backgroundRatio);
 		boardTopLeft = */
 		
-		S_StartSound("ui/board/open",CHAN_VOICE,CHANF_UI);
+		S_StartSound("ui/board/open",CHAN_VOICE,CHANF_UI,volume:snd_menuvolume);
 		
 		//checks if the board is opened for the first time on the current map:
 		let plr = players[consoleplayer].mo;
@@ -53,7 +51,6 @@ Class PKCardsMenu : PKCGenericMenu {
 				firstUse = false;
 		}		
 		elementsEHandler = PK_BoardElementsHandler(StaticEventHandler.Find("PK_BoardElementsHandler"));
-		goldControl = PK_GoldControl(plr.FindInventory("PK_GoldControl"));
 		
 		//first create the background (always 4:3, never stretched)
 		vector2 backgroundsize = (BOARD_WIDTH,BOARD_HEIGHT);	
@@ -92,6 +89,13 @@ Class PKCardsMenu : PKCGenericMenu {
 		
 		SlotsInit();	//initialize card slots
 		CardsInit();	//initialize cards
+		
+		let goldcounter = PKCGoldCounter(new("PKCGoldCounter"));
+		goldcounter.Pack(boardElements);
+		goldcounter.Init(
+			(728,237),
+			(170,50)
+		);
 	}
 	
 	//horizontal positions of slots
@@ -220,8 +224,8 @@ Class PKCardsMenu : PKCGenericMenu {
 		}
 		//unlock 2 random silver and 3 random gold crads if you have none unlocked ("pistol start"):	
 		if (elementsEHandler && elementsEHandler.UnlockedTarotCards.Size() == 0) {
-			//S_StartSound("ui/board/cardunlocked",CHAN_AUTO,CHANF_UI);
-			S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI);
+			//S_StartSound("ui/board/cardunlocked",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+			S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			//console.printf("fist unlock");
 			
 			//show "first use" text popup (doesn't block the board):
@@ -268,7 +272,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		if (!boardElements)
 			return;
 				
-		S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI);
+		S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 		vector2 popuppos = (192,160);
 		vector2 popupsize = (640,260);
 		
@@ -348,12 +352,19 @@ Class PKCardsMenu : PKCGenericMenu {
         if (mkey == MKEY_Back) {
 			//if used for the first time, don't close immediately
 			if  (firstUse) {
+				//if first use prompt is active, hitting Esc will close the popup, not the menu:
+				if (firstUsePopup) {
+					S_StartSound("ui/menu/open",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+					firstUsePopup.unpack();
+					firstUsePopup.destroy();
+				}		
+				return false;			
 				//if exit prompt is active, hitting Esc will close the popup, not the menu:
 				if (exitPopup) {
-						S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI);
-						exitPopup.unpack();
-						exitPopup.destroy();
-					}
+					S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+					exitPopup.unpack();
+					exitPopup.destroy();
+				}
 				//otherwise draw a Yes/No exit prompt:
 				else
 					ShowExitPopup();
@@ -361,7 +372,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			}
 			//if not first use, just close the board with the right sound
 			else {
-				S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI);
+				S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 				Close();
 				return true;
 			}
@@ -464,6 +475,73 @@ Class PKCBoardMessage : PKCFrame {
 		return self;
 	}
 }
+
+Class PKCGoldCounter : PKCFrame {
+	PK_GoldControl goldcontrol;	//this item holds the amount of gold
+	PKCImage GoldDigits[6]; //there's a total of 6 digits
+	//digits are not spaced totally evently, so we define their X pos explicitly:
+	static const int PKCGoldDigitXPos[] = { -3, 24, 53, 82, 111, 141 };
+	
+	PKCGoldCounter init(Vector2 pos, Vector2 size) {
+		self.setBox(pos, size);
+		self.alpha = 1;
+		
+		//the leftmost digit of the counter is always 0 since max gold is 99990, so we just draw it here and don't modify it further:
+		vector2 digitsize = (27,50);
+		let img = new("PKCImage");
+		img.pack(self);
+		img.Init(
+			(-3,-5),
+			digitsize,
+			"PKCNUMS"
+		);
+		GoldDigits[0] = img;
+		
+		//cast the gold item
+		goldcontrol = PK_GoldControl(players[consoleplayer].mo.FindInventory("PK_GoldControl"));
+		//debug: print every digit of the current gold amount in a sequence when the menu is opened:
+		int gold = goldcontrol.pk_gold;
+		for (int i = 5; i > 0; i--) {
+			//the graphic should be offset by -64 for every digit in the amount of gold, plus -5 to be placed correctly
+			int digitYofs = ((gold % 10) * 64) - 5;
+			console.printf ("digit #%d Yoffset %d",i,digitYofs);
+			gold /= 10;
+		}
+		
+		return self;
+	}
+	
+	override void ticker() {
+		super.ticker();
+		if (!goldcontrol)
+			return;		
+		int gold = goldcontrol.pk_gold; //check how much gold we have
+		vector2 digitsize = (32,640);	//digit size is fixed
+		//iterate through digits, right to left:
+		//we don't modify the leftmost one, so it's > 0, not >= 0:
+		for (int i = 5; i > 0; i--) {
+			//get Y offset based on the rightmost digit in the gold amount number:
+			int digitYofs = ((gold % 10) * -64) - 5;
+			vector2 digitpos = (PKCGoldDigitXPos[i],digitYofs);
+			//if there's already a digit graphic in this position, destroy it first:
+			if (GoldDigits[i]) {
+				GoldDigits[i].unpack();
+				GoldDigits[i].destroy();
+			}			
+			//draw a new digit graphic:
+			let img = new("PKCImage");
+			img.pack(self);
+			img.Init(
+				digitpos,
+				digitsize,
+				"PKCNUMS"
+			);
+			GoldDigits[i] = img;
+			
+			gold /= 10; //with this, the next digitYofs will check the next digit in the number
+		}
+	}
+}
 		
 // Slots are also buttons, but they can hold cards in them
 Class PKCCardSlot : PKCButton {
@@ -517,11 +595,11 @@ Class PKCExitHandler : PKCHandler {
 		if (!menu)
 			return;
 		if (command == "DoExit") {
-			S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI);
+			S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			menu.Close();
 		}
 		else if (command == "CancelExit") {
-			S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI);
+			S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			let popup = menu.exitPopup;
 			if (popup) {
 				Popup.Unpack();
@@ -539,7 +617,7 @@ Class PKCExitHandler : PKCHandler {
 			if (!unhovered) {
 				btn.textscale = 1.8;
 				btn.textcolor = Font.FindFontColor('PKRedText');
-				S_StartSound("ui/menu/hover",CHAN_AUTO,CHANF_UI);
+				S_StartSound("ui/menu/hover",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			}
 			else {
 				btn.textscale = 1.5;
@@ -565,7 +643,7 @@ Class PKCMenuHandler : PKCHandler {
 				menu.ShowExitPopup();	
 			//otherwise just close the board  immediately
 			else {
-				S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI);
+				S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 				menu.Close();
 			}
 			return;
@@ -598,21 +676,21 @@ Class PKCMenuHandler : PKCHandler {
 					//attach the card to slot
 					cardslot.placedcard = card;
 					sound snd = (cardslot.slottype) ? "ui/board/placegold" : "ui/board/placesilver";
-					S_StartSound(snd,CHAN_AUTO,CHANF_UI);
+					S_StartSound(snd,CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 					if (elementsEHandler) {
 						int i = cardslot.slotID;
 						elementsEHandler.EquippedSlots[i] = card.cardID;
 					}					
 				}
 				else				
-					S_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI);
+					S_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			}
 			//otherwise check if there's a card in the slot; if there is, pick it up and attach to mouse pointer
 			else if (cardslot.placedcard) {
 				let card = PKCCardButton(cardslot.placedcard);
 				card.box.size = card.defaultsize;
 				card.buttonscale = card.defaultscale;
-				S_StartSound("ui/board/takecard",CHAN_AUTO,CHANF_UI);
+				S_StartSound("ui/board/takecard",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 				cardslot.placedcard = null;
 				menu.SelectedCard = card;
 				//move it to the top of the elements array so that it's rendered on the top layer:
@@ -628,19 +706,19 @@ Class PKCMenuHandler : PKCHandler {
 		if (command == "HandleCard") {
 			let card = PKCCardButton(Caller);
 			if (!card.cardbought) {
-				S_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI);
+				S_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 				return;
 			}
 			//don't do anything if you're hovering over a valid slot: we don't want placing into slot and clicking the card to happen at the same time
 			if (hoveredslot) {
 				//if clicking over incorrect slot color, don't jump back but instead play "wrong slot" sound
 				if(hoveredslot.slottype != card.slottype)
-					S_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI);
+					S_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 				return;
 			}
 			//if not hovering over slot, take card and attach it to the menu
 			if (!menu.SelectedCard) {
-				S_StartSound("ui/board/takecard",CHAN_AUTO,CHANF_UI);
+				S_StartSound("ui/board/takecard",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 				menu.SelectedCard = card;
 				//move it to the top of the elements array so that it's rendered on the top layer:
 				menu.boardelements.elements.delete(menu.boardelements.elements.find(card));
@@ -648,7 +726,7 @@ Class PKCMenuHandler : PKCHandler {
 			}
 			//if we already have a card, put it back
 			else {
-				S_StartSound("ui/board/returncard",CHAN_AUTO,CHANF_UI);
+				S_StartSound("ui/board/returncard",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 				card.box.pos = card.defaultpos;
 				menu.SelectedCard = null;
 			}
@@ -663,7 +741,7 @@ Class PKCMenuHandler : PKCHandler {
 		//play sound of hovering over the exit button:
 		if (command == "BoardButton" && !menu.SelectedCard) {
 			if (!unhovered) {
-				S_StartSound("ui/menu/hover",CHAN_AUTO,CHANF_UI);
+				S_StartSound("ui/menu/hover",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			}
 		}
 		//keep track of slots we're hovering over:
