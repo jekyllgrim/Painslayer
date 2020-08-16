@@ -12,7 +12,7 @@ Class PKCardsMenu : PKCGenericMenu {
 	array <PKCCardButton> silvercards;	//all silver cards
 	array <PKCCardButton> goldcards;		//all gold cards
 	
-	PK_CardControl goldcontrol;
+	PK_GoldControl goldcontrol;
 	
 	PKCMenuHandler handler;
 	PKCCardButton SelectedCard;	//card attached to the pointer
@@ -39,6 +39,8 @@ Class PKCardsMenu : PKCGenericMenu {
 		vector2 backgroundsize = (BOARD_WIDTH*backgroundRatio,BOARD_HEIGHT*backgroundRatio);
 		boardTopLeft = */
 		
+		S_StartSound("ui/board/open",CHAN_VOICE,CHANF_UI);
+		
 		//checks if the board is opened for the first time on the current map:
 		let plr = players[consoleplayer].mo;
 		menuEHandler = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
@@ -51,7 +53,7 @@ Class PKCardsMenu : PKCGenericMenu {
 				firstUse = false;
 		}		
 		elementsEHandler = PK_BoardElementsHandler(StaticEventHandler.Find("PK_BoardElementsHandler"));
-		goldControl = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		goldControl = PK_GoldControl(plr.FindInventory("PK_GoldControl"));
 		
 		//first create the background (always 4:3, never stretched)
 		vector2 backgroundsize = (BOARD_WIDTH,BOARD_HEIGHT);	
@@ -343,18 +345,28 @@ Class PKCardsMenu : PKCGenericMenu {
 	}
 
     override bool MenuEvent (int mkey, bool fromcontroller) {
-        if (mkey == MKEY_Back && firstUse) {
-			if (exitPopup) {
-					S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI);
-					exitPopup.unpack();
-					exitPopup.destroy();
-				}
-				else {
+        if (mkey == MKEY_Back) {
+			//if used for the first time, don't close immediately
+			if  (firstUse) {
+				//if exit prompt is active, hitting Esc will close the popup, not the menu:
+				if (exitPopup) {
+						S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI);
+						exitPopup.unpack();
+						exitPopup.destroy();
+					}
+				//otherwise draw a Yes/No exit prompt:
+				else
 					ShowExitPopup();
-				}
 				return false;
 			}
-		return Super.MenuEvent (mkey, fromcontroller);
+			//if not first use, just close the board with the right sound
+			else {
+				S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI);
+				Close();
+				return true;
+			}
+		}
+		return false;
     }
 	
 	override void Ticker() {
@@ -552,8 +564,10 @@ Class PKCMenuHandler : PKCHandler {
 			if (menu.firstUse)
 				menu.ShowExitPopup();	
 			//otherwise just close the board  immediately
-			else
+			else {
+				S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI);
 				menu.Close();
+			}
 			return;
 		}
 		if (menu.exitPopup)
@@ -649,7 +663,7 @@ Class PKCMenuHandler : PKCHandler {
 		//play sound of hovering over the exit button:
 		if (command == "BoardButton" && !menu.SelectedCard) {
 			if (!unhovered) {
-				S_StartSound("ui/board/hover",CHAN_AUTO,CHANF_UI);
+				S_StartSound("ui/menu/hover",CHAN_AUTO,CHANF_UI);
 			}
 		}
 		//keep track of slots we're hovering over:
@@ -690,7 +704,7 @@ Class PK_BoardEventHandler : EventHandler {
 		let plr = players[e.Player].mo;
 		if (!plr)
 			return;
-		let goldcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		let goldcontrol = PK_GoldControl(plr.FindInventory("PK_GoldControl"));
 		if (!goldcontrol)
 			return;
 		Array <String> cardname;

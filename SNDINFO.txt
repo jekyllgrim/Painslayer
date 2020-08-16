@@ -3,19 +3,26 @@ world/null	DSEMPTY
 
 /// MENU
 
-ui/board/exit			"sounds/board/option-accept.wav"
-ui/board/hover 			"sounds/board/option-light-on.wav"
-ui/board/placesilver 	"sounds/board/card-put_off-special_place.wav"
-ui/board/placegold	 	"sounds/board/card-put_off-special_place2.wav"
-ui/board/takecard	 	"sounds/board/card-take.wav"
-ui/board/returncard	 	"sounds/board/card-put_off.wav"
-ui/board/wrongplace	 	"sounds/board/wrong_place.wav"
-ui/board/cardburn	 	"sounds/board/option-cardburn.wav"
-ui/board/cardunlocked	"sounds/board/card-unlocked.wav"
+ui/board/open			"sounds/menu/card-accept.wav"
+ui/board/exit			"sounds/menu/board_close.wav"
+ui/board/placesilver 	"sounds/menu/card-put_off-special_place.wav"
+ui/board/placegold	 	"sounds/menu/card-put_off-special_place2.wav"
+ui/board/takecard	 	"sounds/menu/card-take.wav"
+ui/board/returncard	 	"sounds/menu/card-put_off.wav"
+ui/board/wrongplace	 	"sounds/menu/wrong_place.wav"
+ui/board/cardburn	 	"sounds/menu/option-cardburn.wav"
+ui/board/cardunlocked	"sounds/menu/card-unlocked.wav"
 
 ui/menu/accept		"sounds/menu/option-accept.wav"
 ui/menu/back		"sounds/menu/back-accept.wav"
 ui/menu/hover		"sounds/menu/option-light-on.wav"
+ui/menu/open		"sounds/menu/option-light-on_main3.wav"
+
+$alias menu/clear		ui/menu/back		// Close 
+$alias menu/cursor		ui/menu/hover		// Move cursor up/down
+$alias menu/backup		ui/menu/back		// Backup to previous menu
+$alias menu/activate	ui/menu/open		// Activate a new menu
+$alias menu/choose		ui/menu/accept		// Choose a menu item
 
 ///WEAPONS\\\
 
