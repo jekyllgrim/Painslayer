@@ -357,8 +357,8 @@ Class PKCardsMenu : PKCGenericMenu {
 					S_StartSound("ui/menu/open",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 					firstUsePopup.unpack();
 					firstUsePopup.destroy();
-				}		
-				return false;			
+					return false;
+				}			
 				//if exit prompt is active, hitting Esc will close the popup, not the menu:
 				if (exitPopup) {
 					S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
