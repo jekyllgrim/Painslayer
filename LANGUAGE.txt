@@ -1,5 +1,7 @@
 [enu default]
-TAROT_FIRSTUSE		= "Welcome to Black Tarot.\nThese cards are a one-time gift.";
+TAROT_PURCHASE		= "Spend %d gold to buy this card?";
+TAROT_CANTPURCHASE	= "You don't have enough gold to buy this card.";
+TAROT_FIRSTUSE		= "Welcome to Black Tarot. These cards are a one-time gift.";
 TAROT_EXIT			= 	"Are you sure you want to close the Black Tarot Board?"
 						"\n"
 						"To change the equipped cards again you will have to"

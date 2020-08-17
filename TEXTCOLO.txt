@@ -9,3 +9,7 @@ PKBaseText {
 PKWhiteText {
 	#DDDDDD #DDDDDD
 }
+
+PKGreenText {
+	#12e203 #12e203
+}
