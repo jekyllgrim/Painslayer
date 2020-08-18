@@ -74,6 +74,16 @@ Class PKCardsMenu : PKCGenericMenu {
 		handler.menu = self;
 		handler.elementsEHandler = PK_BoardElementsHandler(StaticEventHandler.Find("PK_BoardElementsHandler"));
 		
+		//clicking anywhere on the board is supposed to close the First Use popup:
+		let closeFirstUseBtn = new("PKCButton").Init(
+			(0,0),
+			backgroundsize,
+			cmdhandler:handler,
+			command:"CloseFirstUse"
+		);
+		closeFirstUseBtn.SetTexture( "", "", "", "" );
+		closeFirstUseBtn.Pack(boardElements);
+		
 		//create big round exit button:
 		exitbutton = new("PKCButton").Init(
 			(511,196),
@@ -89,6 +99,27 @@ Class PKCardsMenu : PKCGenericMenu {
 		);
 		exitbutton.Pack(boardelements);
 		
+		//hover over big slots to see information on their use
+		let silverSlotsInfo = new("PKCButton").Init(
+			(77,206),
+			(283,174),
+			cmdhandler:handler,
+			command:"SilverSlotsInfo"
+		);
+		silverSlotsInfo.SetTexture( "", "", "", "" );
+		silverSlotsInfo.Pack(boardElements);
+		let silverSlotsText = new("PKCLabel").Init(
+			
+		//hover over big slots to see information on their use
+		let goldSlotsInfo = new("PKCButton").Init(
+			(514,393),
+			(441,179),
+			cmdhandler:handler,
+			command:"GoldSlotsInfo"
+		);
+		goldSlotsInfo.SetTexture( "", "", "", "" );
+		goldSlotsInfo.Pack(boardElements);
+		
 		SlotsInit();	//initialize card slots
 		CardsInit();	//initialize cards
 		
@@ -97,7 +128,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		goldcounter.Init(
 			(728,237),
 			(170,50)
-		);
+		);		
 	}
 	
 	//horizontal positions of slots
@@ -488,7 +519,7 @@ Class PKCardsMenu : PKCGenericMenu {
 					return false;
 				}			
 				//if exit prompt is active, hitting Esc will close the popup, not the menu:
-				if (promptPopup && !promptPopup.disabled) {
+				if (promptPopup && promptPopup.isEnabled()) {
 					S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 					promptPopup.hidden = true;
 					promptPopup.disabled = true;
@@ -509,14 +540,16 @@ Class PKCardsMenu : PKCGenericMenu {
     }
 	
 	override void Ticker() {
-		/*if (promptPopup)
-			console.printf ("elem %d",boardElements.disabled);*/
-		//block the board if prompt popup is active:
-		if (promptPopup && !promptPopup.disabled) {
+		if (promptPopup && promptPopup.isEnabled()) {
 			boardElements.disabled = true;
 		}
 		else {
 			boardElements.disabled = false;
+		}
+		
+		if (promptPopup && !promptPopup.isEnabled()) {
+			promptPopup.Unpack();
+			promptPopup.Destroy();
 		}
 		
 		//if the first use popup appears, start a counter and remove it when it runs out:
@@ -533,10 +566,10 @@ Class PKCardsMenu : PKCGenericMenu {
 			SelectedCard.box.pos = boardelements.screenToRel((mouseX,mouseY)) - SelectedCard.box.size / 2;
 		}
 		//show card info if mouse hovers over a card and there's no card selected:
-		if (!cardinfo && HoveredCard && !HoveredCard.disabled && !HoveredCard.hidden && !SelectedCard)
+		if (!cardinfo && HoveredCard && HoveredCard.isEnabled() && !HoveredCard.hidden && !SelectedCard)
 			ShowCardToolTip(HoveredCard);
 		//as soon as you hover off the card, immediately remove card info:
-		if (cardinfo && (!HoveredCard || HoveredCard.disabled || HoveredCard.hidden || SelectedCard)) {
+		if (cardinfo && (!HoveredCard || !HoveredCard.isEnabled() || HoveredCard.hidden || SelectedCard)) {
 			cardinfo.unpack();
 			cardinfo.destroy();
 		}
@@ -727,6 +760,8 @@ Class PKCPromptHandler : PKCHandler {
 	override void buttonClickCommand(PKCButton caller, string command) {
 		if (!menu)
 			return;
+		if (!caller || !caller.isEnabled())
+			return;
 		//exit popup Yes: close the board
 		if (command == "DoExit") {
 			S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
@@ -764,6 +799,8 @@ Class PKCPromptHandler : PKCHandler {
 	override void elementHoverChanged(PKCElement caller, string command, bool unhovered) {
 		if (!menu || command == "")
 			return;
+		if (!caller || !caller.isEnabled())
+			return;
 		let btn = PKCButton(caller);			
 		if (!unhovered) {
 			btn.textscale = 1.8;
@@ -783,8 +820,13 @@ Class PKCMenuHandler : PKCHandler {
 	PKCCardSlot hoveredslot;
 	PK_BoardElementsHandler elementsEHandler;
 	
+	PKCLabel silverSlotsInfo;
+	PKCLabel goldSlotsInfo;
+	
 	override void buttonClickCommand(PKCButton caller, string command) {
 		if (!menu)
+			return;
+		if (!caller || !caller.isEnabled())
 			return;
 		//exit button - works if you don't have a picked card:
 		if (command == "BoardButton" && !menu.SelectedCard) {
@@ -798,9 +840,10 @@ Class PKCMenuHandler : PKCHandler {
 			}
 			return;
 		}
-		if (menu.promptPopup && !menu.promptPopup.disabled)
+		if (menu.promptPopup && menu.promptPopup.isEnabled())
 			return;
-		if (menu.firstUsePopup) {
+		if (command == "CloseFirstUse" && menu.firstUsePopup) {
+			S_StartSound("ui/menu/open",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			menu.firstUsePopup.Unpack();
 			menu.firstUsePopup.Destroy();
 		}
@@ -886,7 +929,9 @@ Class PKCMenuHandler : PKCHandler {
 	override void elementHoverChanged(PKCElement caller, string command, bool unhovered) {
 		if (!menu)
 			return;
-		if (menu.promptPopup && !menu.promptPopup.disabled)
+		if (!caller || !caller.isEnabled())
+			return;
+		if (menu.promptPopup)
 			return;
 		//play sound of hovering over the exit button:
 		if (command == "BoardButton" && !menu.SelectedCard) {
