@@ -7,6 +7,8 @@ TAROT_EXIT			= 	"Are you sure you want to close the Black Tarot Board?"
 						"To change the equipped cards again you will have to"
 						"\n"
 						"complete this level or pay in gold.";
+TAROT_SILVERINFO	= 	"The effects of Silver Cards remain active throughout the level.";
+TAROT_GOLDINFO		= 	"Gold Cards have to be activated manually and will remain active for a short time.";
 
 ENDURANCE_DESC 		= "Take only half the damage.";
 SPEED_DESC 			= "Move faster.";

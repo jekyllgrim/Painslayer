@@ -17,6 +17,9 @@ Class PKCardsMenu : PKCGenericMenu {
 	PKCTarotCard SelectedCard;	//card attached to the pointer
 	PKCTarotCard HoveredCard;	//card the pointer is hovering over
 	
+	PKCLabel silverSlotsInfo;
+	PKCLabel goldSlotsInfo;
+	
 	PKCFrame boardElements;		//everything in the board except the background and popups
 	PKCBoardMessage cardinfo;		//card information popup
 	PKCBoardMessage promptPopup;	//an exit or purchase popup that blocks the board
@@ -98,28 +101,37 @@ Class PKCardsMenu : PKCGenericMenu {
 			"Graphics/Tarot/board_button_highlighted.png"
 		);
 		exitbutton.Pack(boardelements);
-		
-		//hover over big slots to see information on their use
-		let silverSlotsInfo = new("PKCButton").Init(
-			(77,206),
-			(283,174),
-			cmdhandler:handler,
-			command:"SilverSlotsInfo"
-		);
-		silverSlotsInfo.SetTexture( "", "", "", "" );
+
+		let silverInfo = Stringtable.Localize("$TAROT_SILVERINFO");
+		silverSlotsInfo = new("PKCLabel");
 		silverSlotsInfo.Pack(boardElements);
-		let silverSlotsText = new("PKCLabel").Init(
-			
-		//hover over big slots to see information on their use
-		let goldSlotsInfo = new("PKCButton").Init(
-			(514,393),
-			(441,179),
-			cmdhandler:handler,
-			command:"GoldSlotsInfo"
+		silverSlotsInfo.Init(
+			(85,250),
+			(270,100),
+			silverInfo,
+			font_times,
+			alignment: PKCElement.AlignType_HCenter,
+			textscale:0.9,
+			textcolor: Font.FindFontColor('PKWhiteText'),
+			linespacing: 0.1
 		);
-		goldSlotsInfo.SetTexture( "", "", "", "" );
-		goldSlotsInfo.Pack(boardElements);
+		silverSlotsInfo.hidden = true;
 		
+		let goldInfo = Stringtable.Localize("$TAROT_GOLDINFO");
+		goldSlotsInfo = new("PKCLabel");
+		goldSlotsInfo.Pack(boardElements);
+		goldSlotsInfo.Init(
+			(570,423),
+			(350,100),
+			goldInfo,
+			font_times,
+			alignment: PKCElement.AlignType_HCenter,
+			textscale:0.9,
+			textcolor: Font.FindFontColor('PKWhiteText'),
+			linespacing: 0.1
+		);
+		goldSlotsInfo.hidden = true;
+			
 		SlotsInit();	//initialize card slots
 		CardsInit();	//initialize cards
 		
@@ -645,6 +657,7 @@ Class PKCGoldCounter : PKCFrame {
 	vector2 DigitPos[6];
 	//digits are not spaced totally evently, so we define their X pos explicitly:
 	static const int PKCGoldDigitXPos[] = { -3, 24, 53, 82, 111, 141 };
+	int PKCGoldDigitYPos[6];
 	
 	PKCGoldCounter init(Vector2 pos, Vector2 size) {
 		self.setBox(pos, size);
@@ -679,7 +692,9 @@ Class PKCGoldCounter : PKCFrame {
 		for (int i = 5; i > 0; i--) {
 			//get Y offset based on the rightmost digit in the gold amount number:
 			int digitYofs = ((gold % 10) * -64) - 5;
-			vector2 digitpos = (PKCGoldDigitXPos[i],digitYofs);
+			if (PKCGoldDigitYPos[i] != digitYofs)
+				PKCGoldDigitYPos[i] = digitYofs;
+			vector2 digitpos = (PKCGoldDigitXPos[i],PKCGoldDigitYPos[i]);
 			//if there's already a digit graphic in this position, destroy it first:
 			if (GoldDigits[i]) {
 				GoldDigits[i].unpack();
@@ -819,10 +834,7 @@ Class PKCMenuHandler : PKCHandler {
 	PKCardsMenu menu;
 	PKCCardSlot hoveredslot;
 	PK_BoardElementsHandler elementsEHandler;
-	
-	PKCLabel silverSlotsInfo;
-	PKCLabel goldSlotsInfo;
-	
+		
 	override void buttonClickCommand(PKCButton caller, string command) {
 		if (!menu)
 			return;
@@ -892,7 +904,7 @@ Class PKCMenuHandler : PKCHandler {
 				if (elementsEHandler) {
 					int i = cardslot.slotID;
 					elementsEHandler.EquippedSlots[i] = '';
-				}	
+				}
 			}
 		}
 		//clicking the card: attaches card to mouse pointer, or, if you already have one and you click *anywhere* where there's no card slot, the card will jump back to its original slot:
@@ -941,10 +953,24 @@ Class PKCMenuHandler : PKCHandler {
 		}
 		//keep track of slots we're hovering over:
 		if (command == "CardSlot") {
-			if (!unhovered)
+			if (!unhovered) {
 				hoveredslot = PKCCardSlot(Caller);
-			else
+				if (hoveredslot.slottype == 1) {
+					menu.goldSlotsInfo.hidden = false;
+					menu.boardelements.elements.delete(menu.boardelements.elements.find(menu.goldSlotsInfo));
+					menu.boardelements.elements.push(menu.goldSlotsInfo);
+				}
+				else {
+					menu.silverSlotsInfo.hidden = false;
+					menu.boardelements.elements.delete(menu.boardelements.elements.find(menu.silverSlotsInfo));
+					menu.boardelements.elements.push(menu.silverSlotsInfo);
+				}
+			}
+			else {
 				hoveredslot = null;
+				menu.goldSlotsInfo.hidden = true;
+				menu.silverSlotsInfo.hidden = true;
+			}
 		}
 		if (command == "HandleCard") {
 			let card = PKCTarotCard(Caller);
