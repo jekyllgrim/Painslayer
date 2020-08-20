@@ -1,6 +1,7 @@
 Class PKCardsMenu : PKCGenericMenu {
 	const BOARD_WIDTH = 1024;
 	const BOARD_HEIGHT = 768;
+	const MENUTEXTSCALE = 1;
 	double backgroundRatio;
 	vector2 boardTopLeft;
 	
@@ -17,8 +18,8 @@ Class PKCardsMenu : PKCGenericMenu {
 	PKCTarotCard SelectedCard;	//card attached to the pointer
 	PKCTarotCard HoveredCard;	//card the pointer is hovering over
 	
-	PKCLabel silverSlotsInfo;
-	PKCLabel goldSlotsInfo;
+	PKCFrame silverSlotsInfo;
+	PKCFrame goldSlotsInfo;
 	
 	PKCFrame boardElements;		//everything in the board except the background and popups
 	PKCBoardMessage cardinfo;		//card information popup
@@ -102,38 +103,9 @@ Class PKCardsMenu : PKCGenericMenu {
 		);
 		exitbutton.Pack(boardelements);
 
-		let silverInfo = Stringtable.Localize("$TAROT_SILVERINFO");
-		silverSlotsInfo = new("PKCLabel");
-		silverSlotsInfo.Pack(boardElements);
-		silverSlotsInfo.Init(
-			(85,250),
-			(270,100),
-			silverInfo,
-			font_times,
-			alignment: PKCElement.AlignType_HCenter,
-			textscale:0.9,
-			textcolor: Font.FindFontColor('PKWhiteText'),
-			linespacing: 0.1
-		);
-		silverSlotsInfo.hidden = true;
-		
-		let goldInfo = Stringtable.Localize("$TAROT_GOLDINFO");
-		goldSlotsInfo = new("PKCLabel");
-		goldSlotsInfo.Pack(boardElements);
-		goldSlotsInfo.Init(
-			(570,423),
-			(350,100),
-			goldInfo,
-			font_times,
-			alignment: PKCElement.AlignType_HCenter,
-			textscale:0.9,
-			textcolor: Font.FindFontColor('PKWhiteText'),
-			linespacing: 0.1
-		);
-		goldSlotsInfo.hidden = true;
-			
 		SlotsInit();	//initialize card slots
 		CardsInit();	//initialize cards
+		SlotInfoInit();
 		
 		let goldcounter = PKCGoldCounter(new("PKCGoldCounter"));
 		goldcounter.Pack(boardElements);
@@ -141,6 +113,59 @@ Class PKCardsMenu : PKCGenericMenu {
 			(728,237),
 			(170,50)
 		);		
+	}
+	
+	private void SlotInfoInit() {
+		double bkgalpha = 0.7;
+		vector2 silverSlotSize = (280,80);
+		silverSlotsInfo = new("PKCFrame").Init((75,255),silverSlotSize);
+		silverSlotsInfo.Pack(boardElements);
+		let silverSlotBkg = new("PKCImage").Init(
+			(0,0),
+			silverSlotSize,
+			"graphics/Tarot/tooltip_bg.png",
+			imagescale:(1.6,1.6),
+			tiled:true
+		);
+		silverSlotBkg.alpha = bkgalpha;
+		silverSlotBkg.Pack(silverSlotsInfo);
+		let silverSlotText = new("PKCLabel").Init(
+			(5,5),
+			(270,70),
+			Stringtable.Localize("$TAROT_SILVERINFO"),
+			font_times,
+			alignment: PKCElement.AlignType_HCenter,
+			textscale:MENUTEXTSCALE*0.9,
+			textcolor: Font.FindFontColor('PKWhiteText'),
+			linespacing: 0.1
+		);
+		silverSlotText.Pack(silverSlotsInfo);
+		silverSlotsInfo.hidden = true;
+
+		vector2 goldSlotSize = (360,80);
+		goldSlotsInfo = new("PKCFrame").Init((560,440),goldSlotSize);
+		goldSlotsInfo.Pack(boardElements);
+		let goldSlotBkg = new("PKCImage").Init(
+			(0,0),
+			goldSlotSize,
+			"graphics/Tarot/tooltip_bg.png",
+			imagescale:(1.6,1.6),
+			tiled:true
+		);
+		goldSlotBkg.alpha = bkgalpha;
+		goldSlotBkg.Pack(goldSlotsInfo);
+		let goldSlotText = new("PKCLabel").Init(
+			(5,5),
+			(350,70),
+			Stringtable.Localize("$TAROT_GOLDINFO"),
+			font_times,
+			alignment: PKCElement.AlignType_HCenter,
+			textscale:MENUTEXTSCALE*0.9,
+			textcolor: Font.FindFontColor('PKWhiteText'),
+			linespacing: 0.1
+		);
+		goldSlotText.Pack(goldSlotsInfo);
+		goldSlotsInfo.hidden = true;
 	}
 	
 	//horizontal positions of slots
@@ -292,7 +317,7 @@ Class PKCardsMenu : PKCGenericMenu {
 				(192,256),
 				(700,128),
 				firstUseLine,
-				textscale: 1.5
+				textscale:MENUTEXTSCALE* 1.5
 			);
 			firstUsePopupDur = 120;	//"first use" message is temporary
 			
@@ -341,8 +366,8 @@ Class PKCardsMenu : PKCGenericMenu {
 		promptPopup.Init(
 			popuppos,
 			popupsize,
-			"$TAROT_EXIT",
-			textscale: 0.9,
+			Stringtable.Localize("$TAROT_EXIT"),
+			textscale:MENUTEXTSCALE* 1,
 			alignment: PKCElement.AlignType_HCenter
 		);
 		
@@ -358,7 +383,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			cmdhandler:promptHandler,
 			command:"DoExit",
 			fnt:font_times,
-			textscale:1.5,
+			textscale:MENUTEXTSCALE*1.5,
 			textColor:Font.FindFontColor('PKBaseText')
 		);
 		yesButton.SetTexture("","","","");
@@ -372,7 +397,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			cmdhandler:promptHandler,
 			command:"CancelPrompt",
 			fnt:font_times,
-			textscale:1.5,
+			textscale:MENUTEXTSCALE*1.5,
 			textColor:Font.FindFontColor('PKBaseText')
 		);
 		noButton.SetTexture("","","","");
@@ -393,7 +418,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			popuppos,
 			popupsize,
 			card.cardname,
-			textscale: 1.4,
+			textscale:MENUTEXTSCALE* 1.4,
 			alignment: PKCElement.AlignType_HCenter
 		);
 		
@@ -409,7 +434,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			String.Format(purchaseLine,card.cardCost), 
 			font_times,
 			alignment: PKCElement.AlignType_HCenter,
-			textscale:1,
+			textscale:MENUTEXTSCALE*1,
 			textcolor: Font.FindFontColor('PKBaseText'),
 			linespacing: 0.1
 		);
@@ -432,7 +457,7 @@ Class PKCardsMenu : PKCGenericMenu {
 				cmdhandler:promptHandler,
 				command:"BuyCard",
 				fnt:font_times,
-				textscale:1.5,
+				textscale:MENUTEXTSCALE*1.5,
 				textColor:Font.FindFontColor('PKBaseText')
 			);
 			yesButton.SetTexture("","","","");		
@@ -448,7 +473,7 @@ Class PKCardsMenu : PKCGenericMenu {
 				cmdhandler:promptHandler,
 				command:"CancelPrompt",
 				fnt:font_times,
-				textscale:1.5,
+				textscale:MENUTEXTSCALE*1.5,
 				textColor:Font.FindFontColor('PKBaseText')
 			);
 			noButton.SetTexture("","","","");
@@ -465,7 +490,7 @@ Class PKCardsMenu : PKCGenericMenu {
 				cmdhandler:promptHandler,
 				command:"CancelPrompt",
 				fnt:font_times,
-				textscale:1.5,
+				textscale:MENUTEXTSCALE*1.5,
 				textColor:Font.FindFontColor('PKBaseText')
 			);
 			okButton.SetTexture("","","","");	
@@ -487,7 +512,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			tippos,
 			tipsize,
 			String.Format("%s",title),
-			textscale:1.2,
+			textscale:MENUTEXTSCALE*1.2,
 			textcolor: Font.FindFontColor('PKRedText')
 		);
 		
@@ -497,7 +522,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			tipsize-(tiptextofs*1.2),
 			String.Format("%s",desc), 
 			font_times,
-			textscale:1,
+			textscale:MENUTEXTSCALE*1,
 			textcolor: Font.FindFontColor('PKBaseText'),
 			linespacing: 0.1
 		);
@@ -659,6 +684,8 @@ Class PKCGoldCounter : PKCFrame {
 	static const int PKCGoldDigitXPos[] = { -3, 24, 53, 82, 111, 141 };
 	int PKCGoldDigitYPos[6];
 	
+	DynamicValueInterpolator GoldInterpolator[6];
+	
 	PKCGoldCounter init(Vector2 pos, Vector2 size) {
 		self.setBox(pos, size);
 		self.alpha = 1;
@@ -674,6 +701,10 @@ Class PKCGoldCounter : PKCFrame {
 		);
 		DigitPos[0] = img.box.pos;
 		GoldDigits[0] = img;
+		
+		for (int i = 5; i > 0; i--) {
+			GoldInterpolator[i] = DynamicValueInterpolator.Create(0,0.1,4,64);
+		}
 		
 		//cast the gold item
 		goldcontrol = PK_GoldControl(players[consoleplayer].mo.FindInventory("PK_GoldControl"));
@@ -692,15 +723,25 @@ Class PKCGoldCounter : PKCFrame {
 		for (int i = 5; i > 0; i--) {
 			//get Y offset based on the rightmost digit in the gold amount number:
 			int digitYofs = ((gold % 10) * -64) - 5;
-			if (PKCGoldDigitYPos[i] != digitYofs)
+			//check if this Y offset is not equal to previously recorded value
+			if (PKCGoldDigitYPos[i] != digitYofs) {			
+				S_StartSound("ui/board/digitchange",CHAN_VOICE,CHANF_UI|CHANF_NOSTOP,volume:snd_menuvolume);
+				//if so, reset interpolator
+				GoldInterpolator[i].Reset(PKCGoldDigitYPos[i]);
+				//and set the calculated value as target Y pos
 				PKCGoldDigitYPos[i] = digitYofs;
-			vector2 digitpos = (PKCGoldDigitXPos[i],PKCGoldDigitYPos[i]);
-			//if there's already a digit graphic in this position, destroy it first:
+			}
+			else //otherwise update the interpolator
+				GoldInterpolator[i].Update(digitYofs);
+			int newY = GoldInterpolator[i].GetValue();			
+			vector2 digitpos = (PKCGoldDigitXPos[i],newY);
+			//if there's already a digit graphic in this position, destroy it first
+			//because the image is limited to the frame size, we can't just move it
 			if (GoldDigits[i]) {
 				GoldDigits[i].unpack();
 				GoldDigits[i].destroy();
 			}			
-			//draw a new digit graphic:
+			//draw a new digit graphic with the required offset
 			let img = new("PKCImage");
 			img.pack(self);
 			img.Init(
@@ -710,7 +751,7 @@ Class PKCGoldCounter : PKCFrame {
 			);
 			GoldDigits[i] = img;
 			
-			gold /= 10; //with this, the next digitYofs will check the next digit in the number
+			gold /= 10; //with this the next digitYofs will check the next digit in the number
 		}
 	}
 }

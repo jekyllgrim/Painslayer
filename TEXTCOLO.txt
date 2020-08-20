@@ -1,15 +1,19 @@
 PKRedText {
-	#d60017 #d60017
+	#000000 #000000	0 1
+	#d60017 #d60017	2 256
 }
 
 PKBaseText {
-	#ffba7a #ffba7a
+	#000000 #000000	0 1
+	#ffba7a #ffba7a	2 256
 }
 
 PKWhiteText {
-	#DDDDDD #DDDDDD
+	#000000 #000000	0 1
+	#DDDDDD #DDDDDD	2 256
 }
 
 PKGreenText {
-	#12e203 #12e203
+	#000000 #000000	0 1
+	#12e203 #12e203	2 256
 }

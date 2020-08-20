@@ -12,6 +12,7 @@ ui/board/returncard	 	"sounds/menu/card-put_off.wav"
 ui/board/wrongplace	 	"sounds/menu/wrong_place.wav"
 ui/board/cardburn	 	"sounds/menu/option-cardburn.wav"
 ui/board/cardunlocked	"sounds/menu/card-unlocked.wav"
+ui/board/digitchange	"sounds/menu/money-rollnumbers-loop.wav"
 
 ui/menu/accept		"sounds/menu/option-accept.wav"
 ui/menu/back		"sounds/menu/back-accept.wav"

@@ -4,11 +4,9 @@ TAROT_CANTPURCHASE	= "You don't have enough gold to buy this card.";
 TAROT_FIRSTUSE		= "Welcome to Black Tarot. These cards are a one-time gift.";
 TAROT_EXIT			= 	"Are you sure you want to close the Black Tarot Board?"
 						"\n"
-						"To change the equipped cards again you will have to"
-						"\n"
-						"complete this level or pay in gold.";
-TAROT_SILVERINFO	= 	"The effects of Silver Cards remain active throughout the level.";
-TAROT_GOLDINFO		= 	"Gold Cards have to be activated manually and will remain active for a short time.";
+						"To change the equipped cards again you will have to complete this level or pay in gold.";
+TAROT_SILVERINFO	=  "The effects of Silver Cards are active throughout the level.";
+TAROT_GOLDINFO		=  "Golden Cards have to be activated manually and will remain active for a short time.";
 
 ENDURANCE_DESC 		= "Take only half the damage.";
 SPEED_DESC 			= "Move faster.";
