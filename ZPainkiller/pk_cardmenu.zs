@@ -721,22 +721,23 @@ Class PKCGoldCounter : PKCFrame {
 		//iterate through digits, right to left:
 		//we don't modify the leftmost one, so it's > 0, not >= 0:
 		for (int i = 5; i > 0; i--) {
-			//get Y offset based on the rightmost digit in the gold amount number:
-			int digitYofs = ((gold % 10) * -64) - 5;
-			//check if this Y offset is not equal to previously recorded value
-			if (PKCGoldDigitYPos[i] != digitYofs) {			
-				S_StartSound("ui/board/digitchange",CHAN_VOICE,CHANF_UI|CHANF_NOSTOP,volume:snd_menuvolume);
+			//get target Y offset based on the rightmost digit in the gold amount number:
+			int targetYofs = ((gold % 10) * -64) - 5;
+			//check if target Y offset is not equal to the previously recorded value
+			if (PKCGoldDigitYPos[i] != targetYofs) {
 				//if so, reset interpolator
 				GoldInterpolator[i].Reset(PKCGoldDigitYPos[i]);
-				//and set the calculated value as target Y pos
-				PKCGoldDigitYPos[i] = digitYofs;
+				//and record the value
+				PKCGoldDigitYPos[i] = targetYofs;
 			}
-			else //otherwise update the interpolator
-				GoldInterpolator[i].Update(digitYofs);
+			else //if the target value is already recorded, just do the interpolation
+				GoldInterpolator[i].Update(targetYofs);
 			int newY = GoldInterpolator[i].GetValue();			
 			vector2 digitpos = (PKCGoldDigitXPos[i],newY);
-			//if there's already a digit graphic in this position, destroy it first
-			//because the image is limited to the frame size, we can't just move it
+			/*	If there's already a digit graphic in this position, destroy it first,
+				because the image is cropped to the frame size, so we can't just move it
+				and show more of it.
+			*/
 			if (GoldDigits[i]) {
 				GoldDigits[i].unpack();
 				GoldDigits[i].destroy();
@@ -749,9 +750,12 @@ Class PKCGoldCounter : PKCFrame {
 				digitsize,
 				"PKCNUMS"
 			);
+			if (newY != targetYofs && abs((newY+5) % 64) <= 4)
+				S_StartSound("ui/board/digitchange",CHAN_VOICE,CHANF_UI|CHANF_NOSTOP,volume:snd_menuvolume);
+		
 			GoldDigits[i] = img;
 			
-			gold /= 10; //with this the next digitYofs will check the next digit in the number
+			gold /= 10; //with this the next targetYofs will check the next digit in the number
 		}
 	}
 }
