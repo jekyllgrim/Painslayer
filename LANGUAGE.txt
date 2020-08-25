@@ -1,4 +1,5 @@
 [enu default]
+TAROT_NEEDMOUSE		= "Currently the Black Tarot Board requires mouse for navigation. To enable mouse in menus, navigate to Options > Mouse Options > Enable mouse in menus and set the value to something other than 'No', then try opening the board again";
 TAROT_PURCHASE		= "Spend %d gold to buy this card?";
 TAROT_CANTPURCHASE	= "You don't have enough gold to buy this card.";
 TAROT_FIRSTUSE		= "Welcome to Black Tarot. These cards are a one-time gift.";
