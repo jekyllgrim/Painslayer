@@ -35,7 +35,7 @@ Class PK_MainHandler : EventHandler {
 			S_StartSound("pickups/gold/vbig",CHAN_AUTO,CHANF_UI);
 		}
 		int amt = (e.args[0] == 0) ? 99990 : e.args[0];
-		let cont = PK_GoldControl(plr.FindInventory("PK_GoldControl"));
+		let cont = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (cont) {
 			cont.pk_gold = Clamp(cont.pk_gold + amt, 0, 99990);
 		}
@@ -119,8 +119,8 @@ Class PK_MainHandler : EventHandler {
 		if (act.player) {
 			if  (!act.FindInventory("PK_DemonMorphControl"))
 				act.GiveInventory("PK_DemonMorphControl",1);
-			if  (!act.FindInventory("PK_GoldControl"))
-				act.GiveInventory("PK_GoldControl",1);
+			if  (!act.FindInventory("PK_CardControl"))
+				act.GiveInventory("PK_CardControl",1);
 		}
 	}
 	override void WorldThingRevived (worldevent e) {
@@ -135,8 +135,8 @@ Class PK_MainHandler : EventHandler {
 		if (act.player) {
 			if  (!act.FindInventory("PK_DemonMorphControl"))
 				act.GiveInventory("PK_DemonMorphControl",1);
-			if  (!act.FindInventory("PK_GoldControl"))
-				act.GiveInventory("PK_GoldControl",1);
+			if  (!act.FindInventory("PK_CardControl"))
+				act.GiveInventory("PK_CardControl",1);
 		}
 	}	
 	override void WorldThingDied(worldevent e) {

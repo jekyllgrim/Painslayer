@@ -55,7 +55,7 @@ Class PK_GoldPickup : PK_Inventory abstract {
 	override bool TryPickup (in out Actor other) {
 		if (!(other is "PlayerPawn"))
 			return false;
-		let cont = PK_GoldControl(other.FindInventory("PK_GoldControl"));
+		let cont = PK_CardControl(other.FindInventory("PK_CardControl"));
 		if (cont)
 			cont.pk_gold = Clamp(cont.pk_gold + goldamount, 0, 99990);
 		GoAwayAndDie();

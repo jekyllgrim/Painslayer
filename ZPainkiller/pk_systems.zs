@@ -395,6 +395,8 @@ Class PK_EnemyDeathControl : Actor {
 	}
 }
 	
-Class PK_GoldControl : PK_InventoryToken {
+Class PK_CardControl : PK_InventoryToken {
 	int pk_gold;
+	array <name> UnlockedTarotCards;
+	name EquippedSlots[5];
 }
