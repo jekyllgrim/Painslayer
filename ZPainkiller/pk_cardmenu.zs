@@ -6,10 +6,9 @@ Class PKCardsMenu : PKCGenericMenu {
 	vector2 boardTopLeft;
 	
 	PlayerPawn plr;
-	PK_GoldControl goldcontrol;
+	PK_CardControl goldcontrol;
 	
 	PK_BoardEventHandler menuEHandler;
-	PK_BoardElementsHandler elementsEHandler;
 	
 	array <PKCTarotCard> silvercards;	//all silver cards
 	array <PKCTarotCard> goldcards;		//all gold cards
@@ -55,8 +54,8 @@ Class PKCardsMenu : PKCGenericMenu {
 			else
 				firstUse = false;
 		}		
-		elementsEHandler = PK_BoardElementsHandler(StaticEventHandler.Find("PK_BoardElementsHandler"));
-		goldcontrol = PK_GoldControl(players[consoleplayer].mo.FindInventory("PK_GoldControl"));
+		//elementsEHandler = PK_BoardElementsHandler(StaticEventHandler.Find("PK_BoardElementsHandler"));
+		goldcontrol = PK_CardControl(players[consoleplayer].mo.FindInventory("PK_CardControl"));
 		
 		//first create the background (always 4:3, never stretched)
 		vector2 backgroundsize = (BOARD_WIDTH,BOARD_HEIGHT);	
@@ -76,7 +75,7 @@ Class PKCardsMenu : PKCGenericMenu {
 
 		handler = new("PKCMenuHandler");
 		handler.menu = self;
-		handler.elementsEHandler = PK_BoardElementsHandler(StaticEventHandler.Find("PK_BoardElementsHandler"));
+		//handler.elementsEHandler = PK_BoardElementsHandler(StaticEventHandler.Find("PK_BoardElementsHandler"));
 		
 		//clicking anywhere on the board is supposed to close the First Use popup:
 		let closeFirstUseBtn = new("PKCButton").Init(
@@ -171,11 +170,11 @@ Class PKCardsMenu : PKCGenericMenu {
 	//horizontal positions of slots
 	static const int PKCSlotXPos[] = { 58, 231, 489, 660, 829 };
 	//array of slots; filled on slots' initialization
-	array <PKCCardSlot> cardslots;
+	PKCCardSlot cardslots[5];
 	
 	private void SlotsInit() {
 		vector2 slotsize = (138,227);	
-		for (int i = 0; i <= 4; i++) {			
+		for (int i = 0; i < 5; i++) {			
 			double slotY = (i < 2) ? 179 : 364;
 			vector2 slotpos = (PKCSlotXPos[i],slotY);
 			let cardslot = PKCCardSlot(new("PKCCardSlot"));
@@ -190,7 +189,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			cardslot.slotsize = slotsize;
 			cardslot.slottype = (i < 2) ? false : true;
 			cardslot.slotID = i;
-			cardslots.insert(i,cardslot);
+			cardslots[i] = cardslot;
 			cardslot.Pack(boardelements);
 		}
 	}
@@ -282,29 +281,27 @@ Class PKCardsMenu : PKCGenericMenu {
 			}
 			card.Pack(boardelements);
 
-			if (elementsEHandler) {
+			if (goldcontrol) {
 				//check if the card is already unlocked:
-				if (elementsEHandler.UnlockedTarotCards.Find(int(name(card.cardID))) != elementsEHandler.UnlockedTarotCards.Size()) {
+				if (goldcontrol.UnlockedTarotCards.Find(int(name(card.cardID))) != goldcontrol.UnlockedTarotCards.Size()) {
 					//console.printf("%s is bought",card.cardID);
 					card.cardbought = true;
 				}
 				//check if the card is already equipped, and if so, place it in that slot:
-				if (elementsEHandler.EquippedSlots.Size() > 0 && elementsEHandler.EquippedSlots.Size() <= cardslots.Size()) {
-					for (int i = 0; i < cardslots.Size(); i++) {
-						if (elementsEHandler.EquippedSlots[i] == card.cardID) {
-							let cardslot = cardslots[i];
-							card.box.pos = cardslot.slotpos;
-							card.box.size = cardslot.slotsize;
-							card.buttonscale = (1,1);
-							cardslot.placedcard = card;
-						}
+				for (int i = 0; i < cardslots.Size(); i++) {
+					if (goldcontrol.EquippedSlots[i] == card.cardID) {
+						let cardslot = cardslots[i];
+						card.box.pos = cardslot.slotpos;
+						card.box.size = cardslot.slotsize;
+						card.buttonscale = (1,1);
+						cardslot.placedcard = card;
 					}
 				}
 			}
 			
 		}
 		//unlock 2 random silver and 3 random gold crads if you have none unlocked ("pistol start"):	
-		if (elementsEHandler && elementsEHandler.UnlockedTarotCards.Size() == 0) {
+		if (goldcontrol && goldcontrol.UnlockedTarotCards.Size() == 0) {
 			//S_StartSound("ui/board/cardunlocked",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			//console.printf("fist unlock");
@@ -332,9 +329,9 @@ Class PKCardsMenu : PKCGenericMenu {
 					card.cardbought = true;
 					card.purchaseAnim = true;
 					UnlockedSilverCards.push(card);					
-					elementsEHandler.UnlockedTarotCards.push(int(name(card.cardID)));
-					//string eventname = String.Format("PKCUnlockCard:%s",card.cardID);
-					//EventHandler.SendNetworkEvent(eventname);
+					//elementsEHandler.UnlockedTarotCards.push(int(name(card.cardID)));
+					string eventname = String.Format("PKCUnlockCard:%s",card.cardID);
+					EventHandler.SendNetworkEvent(eventname);
 				}
 			}
 			while (UnlockedGoldCards.Size() < 3) {
@@ -343,9 +340,9 @@ Class PKCardsMenu : PKCGenericMenu {
 					card.cardbought = true;
 					card.purchaseAnim = true;
 					UnlockedGoldCards.push(card);
-					elementsEHandler.UnlockedTarotCards.push(int(name(card.cardID)));
-					//string eventname = String.Format("PKCUnlockCard:%s",card.cardID);
-					//EventHandler.SendNetworkEvent(eventname);
+					//elementsEHandler.UnlockedTarotCards.push(int(name(card.cardID)));
+					string eventname = String.Format("PKCUnlockCard:%s",card.cardID);
+					EventHandler.SendNetworkEvent(eventname);
 				}
 			}
 		}
@@ -677,7 +674,7 @@ Class PKCBoardMessage : PKCFrame {
 }
 
 Class PKCGoldCounter : PKCFrame {
-	PK_GoldControl goldcontrol;	//this item holds the amount of gold
+	PK_CardControl goldcontrol;	//this item holds the amount of gold
 	PKCImage GoldDigits[6]; //there's a total of 6 digits
 	vector2 DigitPos[6];
 	//digits are not spaced totally evently, so we define their X pos explicitly:
@@ -707,7 +704,7 @@ Class PKCGoldCounter : PKCFrame {
 		}
 		
 		//cast the gold item
-		goldcontrol = PK_GoldControl(players[consoleplayer].mo.FindInventory("PK_GoldControl"));
+		goldcontrol = PK_CardControl(players[consoleplayer].mo.FindInventory("PK_CardControl"));
 
 		return self;
 	}
@@ -830,10 +827,10 @@ Class PKCPromptHandler : PKCHandler {
 		}
 		if (command == "BuyCard" && card) {			
 			S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-			EventHandler.SendNetworkEvent("PKCUnlockCard",card.cardcost);
 			card.cardbought = true;
 			card.purchaseAnim = true;
-			menu.elementsEHandler.UnlockedTarotCards.push(int(name(card.cardID)));
+			//menu.elementsEHandler.UnlockedTarotCards.push(int(name(card.cardID)));
+			EventHandler.SendNetworkEvent("PKCUnlockCard",card.cardcost);
 			let popup = menu.promptPopup;
 			if (popup) {
 				//Popup.Unpack();
@@ -878,7 +875,7 @@ Class PKCPromptHandler : PKCHandler {
 Class PKCMenuHandler : PKCHandler {
 	PKCardsMenu menu;
 	PKCCardSlot hoveredslot;
-	PK_BoardElementsHandler elementsEHandler;
+	//PK_BoardElementsHandler elementsEHandler;
 		
 	override void buttonClickCommand(PKCButton caller, string command) {
 		if (!menu)
@@ -927,10 +924,12 @@ Class PKCMenuHandler : PKCHandler {
 					cardslot.placedcard = card;
 					sound snd = (cardslot.slottype) ? "ui/board/placegold" : "ui/board/placesilver";
 					S_StartSound(snd,CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-					if (elementsEHandler) {
+					/*if (elementsEHandler) {
 						int i = cardslot.slotID;
 						elementsEHandler.EquippedSlots[i] = card.cardID;
-					}					
+					}*/
+					string eventname = String.Format("PKCCardToSlot:%s",card.cardID);
+					EventHandler.SendNetworkEvent(eventname,cardslot.slotID);
 				}
 				else				
 					S_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
@@ -946,10 +945,11 @@ Class PKCMenuHandler : PKCHandler {
 				//move it to the top of the elements array so that it's rendered on the top layer:
 				menu.boardelements.elements.delete(menu.boardelements.elements.find(card));
 				menu.boardelements.elements.push(card);
-				if (elementsEHandler) {
+				/*if (elementsEHandler) {
 					int i = cardslot.slotID;
 					elementsEHandler.EquippedSlots[i] = '';
-				}
+				}*/
+				EventHandler.SendNetworkEvent("PKCClearSlot",cardslot.slotID);
 			}
 		}
 		//clicking the card: attaches card to mouse pointer, or, if you already have one and you click *anywhere* where there's no card slot, the card will jump back to its original slot:
@@ -1027,10 +1027,10 @@ Class PKCMenuHandler : PKCHandler {
 	}
 }
 
-Class PK_BoardElementsHandler : StaticEventHandler {
+/*Class PK_BoardElementsHandler : StaticEventHandler {
 	ui array <name> UnlockedTarotCards;
 	ui name EquippedSlots[5];
-}
+}*/
 
 Class PK_BoardEventHandler : EventHandler {
 	ui bool boardOpened; //whether the Black Tarot board has been opened on this map
@@ -1040,24 +1040,46 @@ Class PK_BoardEventHandler : EventHandler {
 			Menu.SetMenu("PKCardsMenu");
 	}*/	
 	override void NetworkProcess(consoleevent e) {
-		if (e.name != "PKCUnlockCard")
-			return;
+		if (e.name == 'OpenTarotBoard' && e.isManual && e.Player >= 0) {
+			if (CVar.GetCVar('m_use_mouse',players[e.player]).GetInt() <= 0) {
+				string needmouse = Stringtable.Localize("$TAROT_NEEDMOUSE");
+				if (e.player == consoleplayer) {					
+					console.midprint(font_times,needmouse);
+					S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+				}
+			}
+			else
+				Menu.SetMenu("PKCardsMenu");
+		}
 		if (e.isManual || e.Player < 0)
 			return;
 		let plr = players[e.Player].mo;
 		if (!plr)
 			return;
-		let goldcontrol = PK_GoldControl(plr.FindInventory("PK_GoldControl"));
+		let goldcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (!goldcontrol)
 			return;
-		/*Array <String> cardname;
-		e.name.split(cardname, ":");
-		if (cardname.Size() == 0)
-			return;
-		bool cardtype = Clamp(e.args[0],0,1);
-		//console.printf("pushing %s into the array",cardname[1]);
-		goldcontrol.UnlockedTarotCards.Push(int(name(cardname[1])));*/
-		int cost = e.args[0];
-		goldcontrol.pk_gold = Clamp(goldcontrol.pk_gold - cost,0,99990);
+		if (e.name.IndexOf("PKCUnlockCard") >= 0) {
+			Array <String> cardname;
+			e.name.split(cardname, ":");
+			if (cardname.Size() == 0)
+				return;
+			//console.printf("pushing %s into the array",cardname[1]);
+			goldcontrol.UnlockedTarotCards.Push(int(name(cardname[1])));
+			int cost = e.args[0];
+			goldcontrol.pk_gold = Clamp(goldcontrol.pk_gold - cost,0,99990);
+		}
+		if (e.name.IndexOf("PKCCardToSlot") >= 0) {
+			Array <String> cardname;
+			e.name.split(cardname, ":");
+			if (cardname.Size() == 0)
+				return;
+			int slotID = e.args[0];
+			goldcontrol.EquippedSlots[slotID] = cardname[1];
+		}
+		if (e.name == 'PKCClearSlot') {
+			int slotID = e.args[0];
+			goldcontrol.EquippedSlots[slotID] = '';
+		}
 	}
 }
