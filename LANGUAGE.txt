@@ -1,5 +1,5 @@
 [enu default]
-TAROT_NEEDMOUSE		= "Currently the Black Tarot Board requires mouse for navigation. To enable mouse in menus, navigate to Options > Mouse Options > Enable mouse in menus and set the value to something other than 'No', then try opening the board again";
+TAROT_NEEDMOUSE		= "Currently the Black Tarot Board can't be used without the mouse. Navigate to 'Options > Mouse Options > Enable mouse in menus' to enable mouse in menus, then try opening the Board again.\n\n           (Press Esc to close this window)";
 TAROT_PURCHASE		= "Spend %d gold to buy this card?";
 TAROT_CANTPURCHASE	= "You don't have enough gold to buy this card.";
 TAROT_FIRSTUSE		= "Welcome to Black Tarot. These cards are a one-time gift.";
@@ -8,6 +8,8 @@ TAROT_EXIT			= 	"Are you sure you want to close the Black Tarot Board?"
 						"To change the equipped cards again you will have to complete this level or pay in gold.";
 TAROT_SILVERINFO	=  "The effects of Silver Cards are active throughout the level.";
 TAROT_GOLDINFO		=  "Golden Cards have to be activated manually and will remain active for a short time.";
+PK_OPENBOARD		= "Open Black Tarot board";
+PK_USEGOLDCARDS		= "Activate Golden Cards";
 
 ENDURANCE_DESC 		= "Take only half the damage.";
 SPEED_DESC 			= "Move faster.";

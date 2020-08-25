@@ -24,7 +24,9 @@ Class PKCardsMenu : PKCGenericMenu {
 	PKCBoardMessage cardinfo;		//card information popup
 	PKCBoardMessage promptPopup;	//an exit or purchase popup that blocks the board
 	PKCBoardMessage firstUsePopup;	//first use notification
+	PKCBoardMessage needMousePopup;	//need mouse notification
 	int firstUsePopupDur;				//first use notification display duration
+	int needMousePopupDur;			//need mouse notification display duration
 	
 	PKCButton exitbutton;			//big round flashing menu close button
 	bool ExitHovered;				//whether it's hovered
@@ -46,15 +48,14 @@ Class PKCardsMenu : PKCGenericMenu {
 		//checks if the board is opened for the first time on the current map:
 		let plr = players[consoleplayer].mo;
 		menuEHandler = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
-		if (menuEHandler) {
+		if (menuEHandler && CVar.GetCVar('m_use_mouse',players[consoleplayer]).GetInt() > 0) {
 			if (!menuEHandler.boardOpened) {
 				firstUse = true;
 				menuEHandler.boardOpened = true;
 			}
 			else
 				firstUse = false;
-		}		
-		//elementsEHandler = PK_BoardElementsHandler(StaticEventHandler.Find("PK_BoardElementsHandler"));
+		}
 		goldcontrol = PK_CardControl(players[consoleplayer].mo.FindInventory("PK_CardControl"));
 		
 		//first create the background (always 4:3, never stretched)
@@ -74,8 +75,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		boardelements.pack(mainFrame);
 
 		handler = new("PKCMenuHandler");
-		handler.menu = self;
-		//handler.elementsEHandler = PK_BoardElementsHandler(StaticEventHandler.Find("PK_BoardElementsHandler"));
+		handler.menu = self;		
 		
 		//clicking anywhere on the board is supposed to close the First Use popup:
 		let closeFirstUseBtn = new("PKCButton").Init(
@@ -86,6 +86,20 @@ Class PKCardsMenu : PKCGenericMenu {
 		);
 		closeFirstUseBtn.SetTexture( "", "", "", "" );
 		closeFirstUseBtn.Pack(boardElements);
+		
+		if (CVar.GetCVar('m_use_mouse',players[consoleplayer]).GetInt() <= 0) {
+			string str = Stringtable.Localize("$TAROT_NEEDMOUSE");
+			needMousePopup = New("PKCBoardMessage");
+			needMousePopup.pack(mainFrame);
+			needMousePopup.Init(
+				(192,256),
+				(700,256),
+				str,
+				textscale:MENUTEXTSCALE*1.2
+			);
+			needMousePopupDur = 800;
+			return;
+		}
 		
 		//create big round exit button:
 		exitbutton = new("PKCButton").Init(
@@ -544,6 +558,11 @@ Class PKCardsMenu : PKCGenericMenu {
     override bool MenuEvent (int mkey, bool fromcontroller) {
         if (mkey == MKEY_Back) {
 			//if used for the first time, don't close immediately
+			if (needMousePopup) {
+				S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+				Close();
+				return true;
+			}
 			if  (firstUse) {
 				//if first use prompt is active, hitting Esc will close the popup, not the menu:
 				if (firstUsePopup) {
@@ -574,11 +593,18 @@ Class PKCardsMenu : PKCGenericMenu {
     }
 	
 	override void Ticker() {
-		if (promptPopup && promptPopup.isEnabled()) {
+		if ((promptPopup && promptPopup.isEnabled()) || needMousePopup) {
 			boardElements.disabled = true;
 		}
 		else {
 			boardElements.disabled = false;
+		}
+		
+		if (needMousePopup) {
+			needMousePopupDur--;			
+			if (needMousePopupDur <= 0) {
+				Close();
+			}
 		}
 		
 		if (promptPopup && !promptPopup.isEnabled()) {
@@ -1040,7 +1066,7 @@ Class PK_BoardEventHandler : EventHandler {
 			Menu.SetMenu("PKCardsMenu");
 	}*/	
 	override void NetworkProcess(consoleevent e) {
-		if (e.name == 'OpenTarotBoard' && e.isManual && e.Player >= 0) {
+		/*if (e.name == 'OpenTarotBoard' && e.isManual && e.Player >= 0) {
 			if (CVar.GetCVar('m_use_mouse',players[e.player]).GetInt() <= 0) {
 				string needmouse = Stringtable.Localize("$TAROT_NEEDMOUSE");
 				if (e.player == consoleplayer) {					
@@ -1050,7 +1076,7 @@ Class PK_BoardEventHandler : EventHandler {
 			}
 			else
 				Menu.SetMenu("PKCardsMenu");
-		}
+		}*/
 		if (e.isManual || e.Player < 0)
 			return;
 		let plr = players[e.Player].mo;
