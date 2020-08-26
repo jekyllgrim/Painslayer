@@ -34,6 +34,7 @@ Class PK_MainHandler : EventHandler {
 			console.printf("Glittering gold, trinkets and baubles... paid for in blood.");
 			S_StartSound("pickups/gold/vbig",CHAN_AUTO,CHANF_UI);
 		}
+		//gives a specified number of gold, or max gold if no number is specified:
 		int amt = (e.args[0] == 0) ? 99990 : e.args[0];
 		let cont = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (cont) {

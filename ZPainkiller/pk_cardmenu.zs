@@ -210,28 +210,28 @@ Class PKCardsMenu : PKCGenericMenu {
 	//LANGUAGE references containing card names:
 	static const string PKCCardNames[] = {
 		//silver
-		"$SOULKEEPER_NAME"	,	"$BLESSING_NAME"		,	"$REPLENISH_NAME"		,
-		"$DARKSOUL_NAME"		,	"$SOULCATCHER_NAME"	,	"$FORGIVENESS_NAME"	,
-		"$GREED_NAME"			,	"$SOULREDEEMER_NAME"	,	"$REGENERATION_NAME"	,
-		"$HEALTHSTEALER_NAME"	,	"$HELLISHARMOR_NAME"	,	"$666AMMO_NAME"		,
+		"$PK_SOULKEEPER_NAME"		,	"$PK_BLESSING_NAME"		,	"$PK_REPLENISH_NAME",
+		"$PK_DARKSOUL_NAME"		,	"$PK_SOULCATCHER_NAME"	,	"$PK_FORGIVENESS_NAME",
+		"$PK_GREED_NAME"			,	"$PK_SOULREDEEMER_NAME"	,	"$PK_REGENERATION_NAME",
+		"$PK_HEALTHSTEALER_NAME"	,	"$PK_HELLISHARMOR_NAME"	,	"$PK_666AMMO_NAME",
 		//gold
-		"$ENDURANCE_NAME"		,	"$TIMEBONUS_NAME"		,	"$SPEED_NAME"			,
-		"$REBIRTH_NAME"		,	"$CONFUSION_NAME"		,	"$DEXTERITY_NAME"		,
-		"$WMODIFIER_NAME"		,	"$SOT_NAME"			,	"$RAGE_NAME"			,
-		"$MAGICGUN_NAME"		,	"$IRONWILL_NAME"		,	"$HASTE_NAME"
+		"$PK_ENDURANCE_NAME"		,	"$PK_TIMEBONUS_NAME"		,	"$PK_SPEED_NAME",
+		"$PK_REBIRTH_NAME"		,	"$PK_CONFUSION_NAME"		,	"$PK_DEXTERITY_NAME",
+		"$PK_WMODIFIER_NAME"		,	"$PK_SOT_NAME"				,	"$PK_RAGE_NAME",
+		"$PK_MAGICGUN_NAME"		,	"$PK_IRONWILL_NAME"		,	"$PK_HASTE_NAME"
 	};
 	//LANGUAGE references containing card descriptions:
 	static const string PKCCardDescs[] = {
 		//silver
-		"$SOULKEEPER_DESC"	,	"$BLESSING_DESC"		,	"$REPLENISH_DESC"		,
-		"$DARKSOUL_DESC"		,	"$SOULCATCHER_DESC"	,	"$FORGIVENESS_DESC"	,
-		"$GREED_DESC"			,	"$SOULREDEEMER_DESC"	,	"$REGENERATION_DESC"	,
-		"$HEALTHSTEALER_DESC"	,	"$HELLISHARMOR_DESC"	,	"$666AMMO_DESC"		,
+		"$PK_SOULKEEPER_DESC"		,	"$PK_BLESSING_DESC"		,	"$PK_REPLENISH_DESC",
+		"$PK_DARKSOUL_DESC"		,	"$PK_SOULCATCHER_DESC"	,	"$PK_FORGIVENESS_DESC",
+		"$PK_GREED_DESC"			,	"$PK_SOULREDEEMER_DESC"	,	"$PK_REGENERATION_DESC",
+		"$PK_HEALTHSTEALER_DESC"	,	"$PK_HELLISHARMOR_DESC"	,	"$PK_666AMMO_DESC",
 		//gold
-		"$ENDURANCE_DESC"		,	"$TIMEBONUS_DESC"		,	"$SPEED_DESC"			,
-		"$REBIRTH_DESC"		,	"$CONFUSION_DESC"		,	"$DEXTERITY_DESC"		,
-		"$WMODIFIER_DESC"		,	"$SOT_DESC"			,	"$RAGE_DESC"			,
-		"$MAGICGUN_DESC"		,	"$IRONWILL_DESC"		,	"$HASTE_DESC"
+		"$PK_ENDURANCE_DESC"		,	"$PK_TIMEBONUS_DESC"		,	"$PK_SPEED_DESC",
+		"$PK_REBIRTH_DESC"		,	"$PK_CONFUSION_DESC"		,	"$PK_DEXTERITY_DESC",
+		"$PK_WMODIFIER_DESC"		,	"$PK_SOT_DESC"				,	"$PK_RAGE_DESC",
+		"$PK_MAGICGUN_DESC"		,	"$PK_IRONWILL_DESC"		,	"$PK_HASTE_DESC"
 	};
 	//this is a generic ID also used to find the texture name:
 	static const name PKCCardIDs[] = {
@@ -309,6 +309,8 @@ Class PKCardsMenu : PKCGenericMenu {
 						card.box.size = cardslot.slotsize;
 						card.buttonscale = (1,1);
 						cardslot.placedcard = card;
+						if (!firstUse)
+							card.cardlocked = true;
 					}
 				}
 			}
@@ -328,7 +330,8 @@ Class PKCardsMenu : PKCGenericMenu {
 				(192,256),
 				(700,128),
 				firstUseLine,
-				textscale:MENUTEXTSCALE* 1.5
+				textscale:MENUTEXTSCALE* 1.2,
+				alignment: PKCElement.AlignType_HCenter
 			);
 			firstUsePopupDur = 120;	//"first use" message is temporary
 			
@@ -344,7 +347,7 @@ Class PKCardsMenu : PKCGenericMenu {
 					card.purchaseAnim = true;
 					UnlockedSilverCards.push(card);					
 					//elementsEHandler.UnlockedTarotCards.push(int(name(card.cardID)));
-					string eventname = String.Format("PKCUnlockCard:%s",card.cardID);
+					string eventname = String.Format("PKCBuyCard:%s",card.cardID);
 					EventHandler.SendNetworkEvent(eventname);
 				}
 			}
@@ -355,7 +358,7 @@ Class PKCardsMenu : PKCGenericMenu {
 					card.purchaseAnim = true;
 					UnlockedGoldCards.push(card);
 					//elementsEHandler.UnlockedTarotCards.push(int(name(card.cardID)));
-					string eventname = String.Format("PKCUnlockCard:%s",card.cardID);
+					string eventname = String.Format("PKCBuyCard:%s",card.cardID);
 					EventHandler.SendNetworkEvent(eventname);
 				}
 			}
@@ -415,7 +418,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		noButton.pack(promptPopup);
 	}
 
-	void ShowPurchasePopup(PKCTarotCard card) {
+	void ShowPurchasePopup(PKCTarotCard card, bool unequip = false) {
 		if (!boardElements || !card)
 			return;
 				
@@ -437,10 +440,14 @@ Class PKCardsMenu : PKCGenericMenu {
 		if (goldcontrol)
 			gold = goldcontrol.pk_gold;
 		
-		string purchaseLine = (gold >= card.cardcost) ? Stringtable.Localize("$TAROT_PURCHASE") : Stringtable.Localize("$TAROT_CANTPURCHASE");
+		string purchaseLine;
+		if (!unequip)
+			purchaseLine = (gold >= card.cardcost) ? Stringtable.Localize("$TAROT_PURCHASE") : Stringtable.Localize("$TAROT_CANTPURCHASE");
+		else
+			purchaseLine = (gold >= card.cardcost) ? Stringtable.Localize("$TAROT_PAYTOUNEQUIP") : Stringtable.Localize("$TAROT_CANTUNEQUIP");
 		vector2 purchaseTextofs = (16,16);	
 		let purchaseText = new("PKCLabel").Init(
-			purchaseTextofs+(0,64),
+			purchaseTextofs+(0,40),
 			popupsize-(purchaseTextofs*1.2),
 			String.Format(purchaseLine,card.cardCost), 
 			font_times,
@@ -796,6 +803,7 @@ Class PKCCardSlot : PKCButton {
 Class PKCTarotCard : PKCButton {
 	PKCardsMenu menu;
 	bool cardbought;	
+	bool cardlocked;	//is set to true for cards placed in slots once the board has been closed
 	vector2 buttonScale;
 	vector2 defaultpos;
 	vector2 defaultsize;
@@ -818,6 +826,9 @@ Class PKCTarotCard : PKCButton {
 		//fade the card out if it's not purchased (and thus is inaccessible)
 		if (!cardbought)
 			drawTiledImage((0, 0), box.size, "graphics/Tarot/tooltip_bg.png", true, buttonScale,alpha: 0.75);
+		//fade the card out if it's locked (equipped in a slot and the board has already been used in this map)
+		if (cardlocked)
+			drawTiledImage((0, 0), box.size, "graphics/Tarot/tooltip_bg.png", true, buttonScale,alpha: 0.4);
 		
 		//otherwise play the burn frame animation
 		else if (purchaseAnim) {
@@ -851,12 +862,19 @@ Class PKCPromptHandler : PKCHandler {
 			menu.Close();
 			return;
 		}
-		if (command == "BuyCard" && card) {			
-			S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-			card.cardbought = true;
-			card.purchaseAnim = true;
-			//menu.elementsEHandler.UnlockedTarotCards.push(int(name(card.cardID)));
-			EventHandler.SendNetworkEvent("PKCUnlockCard",card.cardcost);
+		if (command == "BuyCard" && card) {
+			if (card.cardlocked) {
+				S_StartSound("ui/menu/open",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+				card.cardlocked = false;
+				EventHandler.SendNetworkEvent("PKCTakeGold",card.cardcost);
+			}
+			else {
+				S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+				card.cardbought = true;
+				card.purchaseAnim = true;
+				string eventname = String.Format("PKCBuyCard:%s",card.cardID);
+				EventHandler.SendNetworkEvent(eventname);
+			}
 			let popup = menu.promptPopup;
 			if (popup) {
 				//Popup.Unpack();
@@ -932,16 +950,18 @@ Class PKCMenuHandler : PKCHandler {
 			let cardslot = PKCCardSlot(Caller);
 			//check if there's a selected card
 			if (menu.SelectedCard) {
-				//if the card's type matches the slot's, place it in the slot:
-				let card = PKCTarotCard(menu.SelectedCard);	
-				if (card.slottype == cardslot.slottype) {
+				//get pointer to selected card:
+				let card = PKCTarotCard(menu.SelectedCard);
+				//get pointer to previously placed card if there is one:
+				PKCTarotCard placedcard = (cardslot.placedcard) ? PKCTarotCard(cardslot.placedcard) : null;
+				//proceed if slot type matches to card type (silver/gold) and there's no placed card OR there is one but it's not locked:
+				if (card.slottype == cardslot.slottype && (!placedcard || !placedcard.cardlocked)) {
 					menu.SelectedCard = null; //detach from cursor
 					card.box.pos = cardslot.slotpos;
 					card.box.size = cardslot.slotsize;
 					card.buttonscale = (1,1);
 					//if there was a card placed in the slot, move that card back to its default pos before placing this one
-					if (cardslot.placedcard) {
-						let placedcard = PKCTarotCard(cardslot.placedcard);
+					if (placedcard) {
 						placedcard.box.size = placedcard.defaultsize;
 						placedcard.box.pos = placedcard.defaultpos;
 						placedcard.buttonscale = placedcard.defaultscale;
@@ -957,31 +977,37 @@ Class PKCMenuHandler : PKCHandler {
 					string eventname = String.Format("PKCCardToSlot:%s",card.cardID);
 					EventHandler.SendNetworkEvent(eventname,cardslot.slotID);
 				}
-				else				
+				//otherwise do nothing:
+				else {
 					S_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+					return;
+				}
 			}
 			//otherwise check if there's a card in the slot; if there is, pick it up and attach to mouse pointer
 			else if (cardslot.placedcard) {
 				let card = PKCTarotCard(cardslot.placedcard);
-				card.box.size = card.defaultsize;
-				card.buttonscale = card.defaultscale;
-				S_StartSound("ui/board/takecard",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-				cardslot.placedcard = null;
-				menu.SelectedCard = card;
-				//move it to the top of the elements array so that it's rendered on the top layer:
-				menu.boardelements.elements.delete(menu.boardelements.elements.find(card));
-				menu.boardelements.elements.push(card);
-				/*if (elementsEHandler) {
-					int i = cardslot.slotID;
-					elementsEHandler.EquippedSlots[i] = '';
-				}*/
-				EventHandler.SendNetworkEvent("PKCClearSlot",cardslot.slotID);
+				//do nothing if the card is locked in the slot
+				if (card.cardlocked) {
+					menu.ShowPurchasePopup(card,true);
+					return;
+				}
+				else {
+					card.box.size = card.defaultsize;
+					card.buttonscale = card.defaultscale;
+					S_StartSound("ui/board/takecard",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+					cardslot.placedcard = null;
+					menu.SelectedCard = card;
+					//move it to the top of the elements array so that it's rendered on the top layer:
+					menu.boardelements.elements.delete(menu.boardelements.elements.find(card));
+					menu.boardelements.elements.push(card);
+					EventHandler.SendNetworkEvent("PKCClearSlot",cardslot.slotID);
+				}
 			}
 		}
 		//clicking the card: attaches card to mouse pointer, or, if you already have one and you click *anywhere* where there's no card slot, the card will jump back to its original slot:
 		if (command == "HandleCard") {
 			let card = PKCTarotCard(Caller);
-			if (!card.cardbought && !menu.SelectedCard) {
+			if (!menu.SelectedCard && !card.cardbought) {
 				menu.ShowPurchasePopup(card);
 				return;
 			}
@@ -992,7 +1018,7 @@ Class PKCMenuHandler : PKCHandler {
 					S_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 				return;
 			}
-			//if not hovering over slot, take card and attach it to the menu
+			//if not hovering over slot, take card and attach it to the mouse pointer
 			if (!menu.SelectedCard) {
 				S_StartSound("ui/board/takecard",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 				menu.SelectedCard = card;
@@ -1053,30 +1079,14 @@ Class PKCMenuHandler : PKCHandler {
 	}
 }
 
-/*Class PK_BoardElementsHandler : StaticEventHandler {
-	ui array <name> UnlockedTarotCards;
-	ui name EquippedSlots[5];
-}*/
-
 Class PK_BoardEventHandler : EventHandler {
 	ui bool boardOpened; //whether the Black Tarot board has been opened on this map
 	
-	/*override void WorldThingSpawned(Worldevent e) {
-		if (e.thing && e.thing == players[consoleplayer].mo)
+	override void WorldThingSpawned(Worldevent e) {
+		if (e.thing && e.thing.player && e.thing.FindInventory("PK_CardControl"))
 			Menu.SetMenu("PKCardsMenu");
-	}*/	
+	}
 	override void NetworkProcess(consoleevent e) {
-		/*if (e.name == 'OpenTarotBoard' && e.isManual && e.Player >= 0) {
-			if (CVar.GetCVar('m_use_mouse',players[e.player]).GetInt() <= 0) {
-				string needmouse = Stringtable.Localize("$TAROT_NEEDMOUSE");
-				if (e.player == consoleplayer) {					
-					console.midprint(font_times,needmouse);
-					S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-				}
-			}
-			else
-				Menu.SetMenu("PKCardsMenu");
-		}*/
 		if (e.isManual || e.Player < 0)
 			return;
 		let plr = players[e.Player].mo;
@@ -1085,16 +1095,22 @@ Class PK_BoardEventHandler : EventHandler {
 		let goldcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (!goldcontrol)
 			return;
-		if (e.name.IndexOf("PKCUnlockCard") >= 0) {
+		//card purchase: push the card into array, reduce current gold
+		if (e.name.IndexOf("PKCBuyCard") >= 0) {
 			Array <String> cardname;
 			e.name.split(cardname, ":");
 			if (cardname.Size() == 0)
 				return;
-			//console.printf("pushing %s into the array",cardname[1]);
+			//apparently, dynamic arrays are iffy, that's why we need int(name
 			goldcontrol.UnlockedTarotCards.Push(int(name(cardname[1])));
 			int cost = e.args[0];
 			goldcontrol.pk_gold = Clamp(goldcontrol.pk_gold - cost,0,99990);
 		}
+		if (e.name == 'PKCTakeGold') {
+			int cost = e.args[0];
+			goldcontrol.pk_gold = Clamp(goldcontrol.pk_gold - cost,0,99990);
+		}
+		//equip card into a slot
 		if (e.name.IndexOf("PKCCardToSlot") >= 0) {
 			Array <String> cardname;
 			e.name.split(cardname, ":");
@@ -1103,6 +1119,7 @@ Class PK_BoardEventHandler : EventHandler {
 			int slotID = e.args[0];
 			goldcontrol.EquippedSlots[slotID] = cardname[1];
 		}
+		//remove card from slot
 		if (e.name == 'PKCClearSlot') {
 			int slotID = e.args[0];
 			goldcontrol.EquippedSlots[slotID] = '';

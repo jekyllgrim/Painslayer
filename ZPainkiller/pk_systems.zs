@@ -239,7 +239,7 @@ Class PK_DemonWeapon : PKWeapon {
 			rippleTimer += 1.0 / 35;
 			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "amount", 35 * (1.0 - rippleTimer) );
 			if(rippleTimer >= 1)	{
-				Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "rippleTimer", 0 );
+				Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "rippleTimer", 0);
 				Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "amount", 0 );
 				rippleTimer = 0;
 				runRipple = false;
@@ -394,7 +394,8 @@ Class PK_EnemyDeathControl : Actor {
 		}
 	}
 }
-	
+
+// holds current gold and equipped cards:
 Class PK_CardControl : PK_InventoryToken {
 	int pk_gold;
 	array <name> UnlockedTarotCards;
