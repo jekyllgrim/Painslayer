@@ -411,42 +411,45 @@ Class PK_CardControl : PK_InventoryToken {
 	override void Tick() {}
 	
 	void PK_EquipCards() {
-		if (EquippedCards.Size() < 5)
+		/*if (EquippedCards.Size() < 5)
 			EquippedCards.Reserve(5);
 		else if (EquippedCards.Size() > 5)
-			EquippedCards.Resize(5);
-			
-		console.printf("initalized card slots (%d)",EquippedCards.Size());
+			EquippedCards.Resize(5);*/
+		EquippedCards.Clear();
+		EquippedCards.Reserve(5);			
+		console.printf("Allocated %d card slots successfully",EquippedCards.Size());		
 		
 		//give the equipped cards:
 		for (int i = 0; i < EquippedCards.Size(); i++) {
-			//constrct card classname based on ui card ID
+			//construct card classname based on card ID from ui
 			name cardClassName = String.Format("PKC_%s",EquippedSlots[i]);
-			//turn that into an actual class name
+			//turn that into a class type
 			Class<Inventory> card = cardClassName;
+			//if the slot card ID is empty, make sure the slot is empty too (and if there was a card in it before, remove it)
 			if (!card) {
-				//console.printf("Tried giving: %s. Not found",cardClassName);
+				console.printf("Slot %d remains empty (\"%s:\" is not a valid class)",i,cardClassName);
 				continue;
 			}
-			//record class as equipped in a specific slot
+			//record new class type in a slot
 			EquippedCards[i] = card;
-			//if player has no card class with that name, give it to them
+			//if player has no card class of that type, give it to them
 			if (!owner.FindInventory(card)) {
 				owner.GiveInventory(card,1);
-				console.printf("Giving card: %s",card.GetClassName());
 			}
+			if (owner.FindInventory(card))
+				console.printf("%s is in slot %d",owner.FindInventory(card).GetClassName(),i);
 		}
 		//take away uneqipped card from the inventory if present:
 		for (int i = 0; i < UnlockedTarotCards.Size(); i++) {
-			//constrct card classname based on ui card ID
+			//construct card classname based on card ID from ui
 			name cardClassName = String.Format("PKC_%s",UnlockedTarotCards[i]);
-			//turn that into an actual class name
+			//turn that into an actual class type
 			Class<Inventory> card = cardClassName;
 			if (!card) {
-				//console.printf("Tried taking: %s. Not found",cardClassName);
+				console.printf("Tried taking \"%s\" but it's not a valid class",cardClassName);
 				continue;
 			}
-			//if player has a card with that name, check if that card is mentioned in the equipped cards array, and if not, remove it from their inventory
+			//if player has a card of that type, check if that class type is in the equipped cards array; if not, remove it from their inventory
 			if (owner.FindInventory(card) && EquippedCards.Find(card) == EquippedCards.Size()) {
 				owner.TakeInventory(card,1);
 				console.printf("Taking card: %s",card.GetClassName());

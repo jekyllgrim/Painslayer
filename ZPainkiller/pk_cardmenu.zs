@@ -574,7 +574,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			//show "mouse needed" message if no mouse detected
 			if (needMousePopup) {
 				S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-				Close();
+				PKCCloseBoard();
 				return true;
 			}
 			if  (firstUse) {
@@ -863,7 +863,8 @@ Class PKCPromptHandler : PKCHandler {
 		if (!caller || !caller.isEnabled())
 			return;
 		//exit popup Yes: close the board
-		if (command == "DoExit") {	menu.PKCCloseBoard();
+		if (command == "DoExit") {	
+			menu.PKCCloseBoard();
 			return;
 		}
 		if (command == "BuyCard" && card) {
@@ -1090,7 +1091,7 @@ Class PK_BoardEventHandler : EventHandler {
 	
 	override void RenderOverlay(RenderEvent e) {
 		string str = String.Format ("soul keeper: %d",soulkeeper);
-		Screen.DrawText(smallfont,Font.CR_GREEN,128,128,str);
+		Screen.DrawText(bigfont,Font.CR_GREEN,128,128,str);
 	}
 	
 	override void NetworkProcess(consoleevent e) {
