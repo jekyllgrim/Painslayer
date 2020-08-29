@@ -5,6 +5,7 @@ Class PainkillerHUD : BaseStatusBar {
 	private int arrowangle;
 	private int checktic;
 	
+	
 	override void Init() {
 		super.Init();
 		Font fnt = "PKHNUMS";
@@ -19,6 +20,7 @@ Class PainkillerHUD : BaseStatusBar {
 		BeginHUD(forcescaled:true);
 		DrawVisualElements();
 		DrawNumbers();
+		DrawEquippedCards();
 		fullscreenOffsets = true;
 	}
 	
@@ -54,6 +56,21 @@ Class PainkillerHUD : BaseStatusBar {
 			arrowangle = -(Actor.DeltaAngle(player.angle, player.AngleTo(closestact)));
 			//console.printf("%s angle %d",closestact.GetClassName(),arrowangle);
 		}
+	}
+	
+	protected void DrawEquippedCards() {
+		let cardcontrol = PK_CardControl(CPlayer.mo.FindInventory("PK_CardControl"));
+		if (!cardcontrol)
+			return;
+		if (cardcontrol.EquippedCards.Size() < 1)
+			return;
+		/*for (int i = 0; i < cardcontrol.EquippedCards.Size(); i++) {
+			if (cardcontrol.EquippedCards[i]) {
+				string cardID = GetDefaultByType (cardcontrol.EquippedCards [i]).GetTag();
+				string texpath = String.Format("graphics/Tarot/cards/%s.png",cardID);
+				DrawImage(texpath,((4 + i*15),-6),DI_SCREEN_LEFT_TOP|DI_ITEM_LEFT_TOP,scale:(0.1,0.1));
+			}
+		}*/
 	}
 	
 	protected void DrawVisualElements() {

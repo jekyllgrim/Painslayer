@@ -397,7 +397,237 @@ Class PK_EnemyDeathControl : Actor {
 
 // holds current gold and equipped cards:
 Class PK_CardControl : PK_InventoryToken {
-	int pk_gold;
-	array <name> UnlockedTarotCards;
-	name EquippedSlots[5];
+	int pk_gold; //current amount of gold
+	array <name> UnlockedTarotCards; //holds names of all purchased cards for the board
+	name EquippedSlots[5]; //holds names of all cards equipped into slots
+	array < Class<Inventory> > EquippedCards; //holds classes of currently equipped cards (reinitialized when closing the board)
+	private bool goldCardsUses;
+	property goldCardsUses : goldCardsUses;
+	
+	Default {
+		PK_CardControl.goldCardsUses 1;
+	}
+	
+	override void Tick() {}
+	
+	void PK_EquipCards() {
+		if (EquippedCards.Size() < 5)
+			EquippedCards.Reserve(5);
+		else if (EquippedCards.Size() > 5)
+			EquippedCards.Resize(5);
+			
+		console.printf("initalized card slots (%d)",EquippedCards.Size());
+		
+		//give the equipped cards:
+		for (int i = 0; i < EquippedCards.Size(); i++) {
+			//constrct card classname based on ui card ID
+			name cardClassName = String.Format("PKC_%s",EquippedSlots[i]);
+			//turn that into an actual class name
+			Class<Inventory> card = cardClassName;
+			if (!card) {
+				//console.printf("Tried giving: %s. Not found",cardClassName);
+				continue;
+			}
+			//record class as equipped in a specific slot
+			EquippedCards[i] = card;
+			//if player has no card class with that name, give it to them
+			if (!owner.FindInventory(card)) {
+				owner.GiveInventory(card,1);
+				console.printf("Giving card: %s",card.GetClassName());
+			}
+		}
+		//take away uneqipped card from the inventory if present:
+		for (int i = 0; i < UnlockedTarotCards.Size(); i++) {
+			//constrct card classname based on ui card ID
+			name cardClassName = String.Format("PKC_%s",UnlockedTarotCards[i]);
+			//turn that into an actual class name
+			Class<Inventory> card = cardClassName;
+			if (!card) {
+				//console.printf("Tried taking: %s. Not found",cardClassName);
+				continue;
+			}
+			//if player has a card with that name, check if that card is mentioned in the equipped cards array, and if not, remove it from their inventory
+			if (owner.FindInventory(card) && EquippedCards.Find(card) == EquippedCards.Size()) {
+				owner.TakeInventory(card,1);
+				console.printf("Taking card: %s",card.GetClassName());
+			}
+		}
+	}
+}
+
+Class PKC_SoulKeeper : PK_InventoryToken {
+	PK_BoardEventHandler event;
+	
+	Default {
+		tag "SoulKeeper";
+	}
+	
+	override void AttachToOwner(actor other) {
+		super.AttachToOwner(other);
+		if (!owner || !owner.player) {
+			DepleteOrDestroy();
+			return;
+		}
+		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
+		if (event)
+			event.SoulKeeper = true;
+	}	
+	override void DetachFromOwner() {
+		if (!owner || !owner.player) {
+			DepleteOrDestroy();
+			return;
+		}
+		PKC_SoulKeeper card;
+		for (int pn = 0; pn < MAXPLAYERS; pn++) {
+			if (!playerInGame[pn])
+				continue;
+			PlayerInfo plr = players[pn];
+			if (!plr || !plr.mo || plr.mo == owner)
+				continue;
+			card = PKC_SoulKeeper(plr.mo.FindInventory("PKC_SoulKeeper"));
+			if (card)
+				break;
+		}
+		if (!card && event)
+			event.SoulKeeper = false;
+		super.DetachFromOwner();
+	}
+}
+
+Class PKC_Blessing : PK_InventoryToken {
+	Default {
+		tag "Blessing";
+	}
+}
+
+Class PKC_Replenish : PK_InventoryToken {
+	Default {
+		tag "Replenish";
+	}
+}
+
+Class PKC_DarkSoul : PK_InventoryToken {
+	Default {
+		tag "DarkSoul";
+	}
+}
+
+Class PKC_SoulCatcher : PK_InventoryToken {
+	Default {
+		tag "SoulCatcher";
+	}
+}
+
+Class PKC_Forgiveness : PK_InventoryToken {
+	Default {
+		tag "Forgiveness";
+	}
+}
+
+Class PKC_Greed : PK_InventoryToken {
+	Default {
+		tag "Greed";
+	}
+}
+
+Class PKC_SoulRedeemer : PK_InventoryToken {
+	Default {
+		tag "SoulRedeemer";
+	}
+}
+
+Class PKC_HealthRegeneration : PK_InventoryToken {
+	Default {
+		tag "HealthRegeneration";
+	}
+}
+
+Class PKC_HealthStealer : PK_InventoryToken {
+	Default {
+		tag "HealthStealer";
+	}
+}
+
+Class PKC_HellishArmor : PK_InventoryToken {
+	Default {
+		tag "HellishArmor";
+	}
+}
+
+Class PKC_666Ammo : PK_InventoryToken {
+	Default {
+		tag "666Ammo";
+	}
+}
+
+Class PKC_Endurance : PK_InventoryToken {
+	Default {
+		tag "Endurance";
+	}
+}
+
+Class PKC_TimeBonus : PK_InventoryToken {
+	Default {
+		tag "TimeBonus";
+	}
+}
+
+Class PKC_Speed : PK_InventoryToken {
+	Default {
+		tag "Speed";
+	}
+}
+
+Class PKC_Rebirth : PK_InventoryToken {
+	Default {
+		tag "Rebirth";
+	}
+}
+
+Class PKC_Confusion : PK_InventoryToken {
+	Default {
+		tag "Confusion";
+	}
+}
+
+Class PKC_Dexterity : PK_InventoryToken {
+	Default {
+		tag "Dexterity";
+	}
+}
+
+Class PKC_WeaponModifier : PK_InventoryToken {
+	Default {
+		tag "WeaponModifier";
+	}
+}
+
+Class PKC_StepsOfThunder : PK_InventoryToken {
+	Default {
+		tag "StepsOfThunder";
+	}
+}
+
+Class PKC_Rage : PK_InventoryToken {
+	Default {
+		tag "Rage";
+	}
+}
+
+Class PKC_MagicGun : PK_InventoryToken {
+	Default {
+		tag "MagicGun";
+	}
+}
+
+Class PKC_IronWill : PK_InventoryToken {
+	Default {
+		tag "IronWill";
+	}
+}
+
+Class PKC_Haste : PK_InventoryToken {
+	Default {
+		tag "Haste";
+	}
 }

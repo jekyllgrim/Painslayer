@@ -364,6 +364,13 @@ Class PKCardsMenu : PKCGenericMenu {
 			}
 		}
 	}
+	
+	//make sound, call netevent to activate equipped cards, close the board
+	void PKCCloseBoard() {
+		S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+		EventHandler.SendNetworkEvent('PKCCloseBoard');
+		Close();
+	}
 
 	//shows exit popup message
 	void ShowExitPopup() {
@@ -564,7 +571,7 @@ Class PKCardsMenu : PKCGenericMenu {
 
     override bool MenuEvent (int mkey, bool fromcontroller) {
         if (mkey == MKEY_Back) {
-			//if used for the first time, don't close immediately
+			//show "mouse needed" message if no mouse detected
 			if (needMousePopup) {
 				S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 				Close();
@@ -591,8 +598,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			}
 			//if not first use, just close the board with the right sound
 			else {
-				S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-				Close();
+				PKCCloseBoard();
 				return true;
 			}
 		}
@@ -857,9 +863,7 @@ Class PKCPromptHandler : PKCHandler {
 		if (!caller || !caller.isEnabled())
 			return;
 		//exit popup Yes: close the board
-		if (command == "DoExit") {
-			S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-			menu.Close();
+		if (command == "DoExit") {	menu.PKCCloseBoard();
 			return;
 		}
 		if (command == "BuyCard" && card) {
@@ -933,8 +937,7 @@ Class PKCMenuHandler : PKCHandler {
 				menu.ShowExitPopup();	
 			//otherwise just close the board  immediately
 			else {
-				S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-				menu.Close();
+				menu.PKCCloseBoard();
 			}
 			return;
 		}
@@ -970,10 +973,6 @@ Class PKCMenuHandler : PKCHandler {
 					cardslot.placedcard = card;
 					sound snd = (cardslot.slottype) ? "ui/board/placegold" : "ui/board/placesilver";
 					S_StartSound(snd,CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-					/*if (elementsEHandler) {
-						int i = cardslot.slotID;
-						elementsEHandler.EquippedSlots[i] = card.cardID;
-					}*/
 					string eventname = String.Format("PKCCardToSlot:%s",card.cardID);
 					EventHandler.SendNetworkEvent(eventname,cardslot.slotID);
 				}
@@ -1082,10 +1081,18 @@ Class PKCMenuHandler : PKCHandler {
 Class PK_BoardEventHandler : EventHandler {
 	ui bool boardOpened; //whether the Black Tarot board has been opened on this map
 	
-	override void WorldThingSpawned(Worldevent e) {
+	bool SoulKeeper;
+	
+	/*override void WorldThingSpawned(Worldevent e) {
 		if (e.thing && e.thing.player && e.thing.FindInventory("PK_CardControl"))
 			Menu.SetMenu("PKCardsMenu");
+	}*/
+	
+	override void RenderOverlay(RenderEvent e) {
+		string str = String.Format ("soul keeper: %d",soulkeeper);
+		Screen.DrawText(smallfont,Font.CR_GREEN,128,128,str);
 	}
+	
 	override void NetworkProcess(consoleevent e) {
 		if (e.isManual || e.Player < 0)
 			return;
@@ -1123,6 +1130,10 @@ Class PK_BoardEventHandler : EventHandler {
 		if (e.name == 'PKCClearSlot') {
 			int slotID = e.args[0];
 			goldcontrol.EquippedSlots[slotID] = '';
+		}
+		if (e.name == 'PKCCloseBoard') {
+			//console.printf("trying to initalize card slots");
+			goldcontrol.PK_EquipCards();
 		}
 	}
 }

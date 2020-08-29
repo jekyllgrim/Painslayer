@@ -158,8 +158,12 @@ Class PK_VeryBigGold : PK_GoldPickup {
 }
 
 Class PK_Soul : PK_Inventory {
+	PK_BoardEventHandler event;
 	protected int age;
+	protected int maxage;
+	property maxage : maxage;
 	Default {
+		PK_Soul.maxage 350;
 		inventory.pickupmessage "";
 		inventory.amount 3;
 		inventory.maxamount 100;
@@ -170,6 +174,10 @@ Class PK_Soul : PK_Inventory {
 		yscale 0.2;
 		inventory.pickupsound "pickups/soul";
 		+BRIGHT;
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
 	}
 	override void Tick() {
 		super.Tick();
@@ -209,7 +217,7 @@ Class PK_Soul : PK_Inventory {
 	Spawn:
 		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
 		DSOU ABCDEFGHIJKLMNOPQRSTU 2 {
-			if (age > 35*10)
+			if (!event.SoulKeeper && age > maxage)
 				A_FadeOut(0.05);
 		}
 		goto spawn+1;
@@ -219,6 +227,7 @@ Class PK_Soul : PK_Inventory {
 Class PK_RedSoul : PK_Soul {
 	Default {
 		inventory.amount 20;
+		PK_Soul.maxage 450;
 		translation "0:255=%[0.00,0.00,0.00]:[2.00,0.00,0.00]";
 		alpha 0.85;
 		inventory.pickupsound "pickups/soul/red";
