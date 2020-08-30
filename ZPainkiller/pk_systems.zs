@@ -1,4 +1,4 @@
-Class PK_SlowMoControl : Inventory {
+Class PK_SlowMoControl : PK_InventoryToken {
 	private double p_gravity;
 	private double p_speed;
 	private vector3 p_vel;
@@ -13,10 +13,6 @@ Class PK_SlowMoControl : Inventory {
 	Default {
 		PK_SlowMoControl.speedfactor 0.5;
 		PK_SlowMoControl.gravityfactor 0.2;
-		inventory.maxamount 1;
-		+INVENTORY.UNDROPPABLE;
-		+INVENTORY.UNTOSSABLE;
-		+INVENTORY.UNCLEARABLE;
 	}
 	override void Tick() {}
 	override void AttachToOwner(actor other) {
@@ -411,13 +407,9 @@ Class PK_CardControl : PK_InventoryToken {
 	override void Tick() {}
 	
 	void PK_EquipCards() {
-		/*if (EquippedCards.Size() < 5)
-			EquippedCards.Reserve(5);
-		else if (EquippedCards.Size() > 5)
-			EquippedCards.Resize(5);*/
 		EquippedCards.Clear();
 		EquippedCards.Reserve(5);			
-		console.printf("Allocated %d card slots successfully",EquippedCards.Size());		
+		console.printf("Allocated %d card slots successfully",EquippedCards.Size());	
 		
 		//give the equipped cards:
 		for (int i = 0; i < EquippedCards.Size(); i++) {
@@ -427,7 +419,7 @@ Class PK_CardControl : PK_InventoryToken {
 			Class<Inventory> card = cardClassName;
 			//if the slot card ID is empty, make sure the slot is empty too (and if there was a card in it before, remove it)
 			if (!card) {
-				console.printf("Slot %d remains empty (\"%s:\" is not a valid class)",i,cardClassName);
+				console.printf("Slot %d is empty (\"%s:\" is not a valid class)",i,cardClassName);
 				continue;
 			}
 			//record new class type in a slot
@@ -439,22 +431,42 @@ Class PK_CardControl : PK_InventoryToken {
 			if (owner.FindInventory(card))
 				console.printf("%s is in slot %d",owner.FindInventory(card).GetClassName(),i);
 		}
-		//take away uneqipped card from the inventory if present:
-		for (int i = 0; i < UnlockedTarotCards.Size(); i++) {
+		//if player has some cards that are NOT equipped, take them away:
+		for (int unC = 0; unC < UnlockedTarotCards.Size(); unC++) {
 			//construct card classname based on card ID from ui
-			name cardClassName = String.Format("PKC_%s",UnlockedTarotCards[i]);
+			name cardClassName = String.Format("PKC_%s",UnlockedTarotCards[unC]);
 			//turn that into an actual class type
 			Class<Inventory> card = cardClassName;
+			//check if it's a valid class type
 			if (!card) {
 				console.printf("Tried taking \"%s\" but it's not a valid class",cardClassName);
 				continue;
 			}
-			//if player has a card of that type, check if that class type is in the equipped cards array; if not, remove it from their inventory
-			if (owner.FindInventory(card) && EquippedCards.Find(card) == EquippedCards.Size()) {
+			//check the player even has it
+			if (!owner.FindInventory(card)) {
+				continue;
+			}
+			//check every unlocked card name against every equipped card name
+			//(for simplicity and speed we're checking names here, not classes)
+			bool isEquipped = false;
+			for (int curC = 0; curC < 5; curC++) {
+				if (EquippedSlots[curC] == UnlockedTarotCards[unC]) {
+					isEquipped = true;
+					break;
+				}
+			}
+			if (!isEquipped) {	
+				console.printf("Taking card %s (not equipped)",owner.FindInventory(card).GetClassName());
 				owner.TakeInventory(card,1);
-				console.printf("Taking card: %s",card.GetClassName());
 			}
 		}
+		/*console.printf("Equipped: [%s] [%s] [%s] [%s] [%s]",
+			(EquippedCards[0] != null) ? "yes" : "x",
+			(EquippedCards[1] != null) ? "yes" : "x",
+			(EquippedCards[2] != null) ? "yes" : "x",
+			(EquippedCards[3] != null) ? "yes" : "x",
+			(EquippedCards[4] != null) ? "yes" : "x"
+		);*/
 	}
 }
 
