@@ -62,15 +62,18 @@ Class PainkillerHUD : BaseStatusBar {
 		let cardcontrol = PK_CardControl(CPlayer.mo.FindInventory("PK_CardControl"));
 		if (!cardcontrol)
 			return;
-		if (cardcontrol.EquippedCards.Size() < 1)
-			return;
-		/*for (int i = 0; i < cardcontrol.EquippedCards.Size(); i++) {
-			if (cardcontrol.EquippedCards[i]) {
-				string cardID = GetDefaultByType (cardcontrol.EquippedCards [i]).GetTag();
-				string texpath = String.Format("graphics/Tarot/cards/%s.png",cardID);
-				DrawImage(texpath,((4 + i*15),-6),DI_SCREEN_LEFT_TOP|DI_ITEM_LEFT_TOP,scale:(0.1,0.1));
+		for (int i = 0; i < 5; i++) {
+			if (cardcontrol.EquippedSlots[i]) {
+				string texpath = String.Format("graphics/Tarot/cards/%s.png",cardcontrol.EquippedSlots[i]);
+				DrawImage(texpath,((4 + i*18),2),DI_SCREEN_LEFT_TOP|DI_ITEM_LEFT_TOP,scale:(0.12,0.12));
 			}
-		}*/
+			string framepath;
+			if (i < 2)
+				framepath = "graphics/Tarot/cards/FrameSilver.png";
+			else
+				framepath = "graphics/Tarot/cards/FrameGold.png";
+			DrawImage(framepath,((4 + i*18),2),DI_SCREEN_LEFT_TOP|DI_ITEM_LEFT_TOP,scale:(0.12,0.12));
+		}
 	}
 	
 	protected void DrawVisualElements() {

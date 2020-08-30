@@ -65,3 +65,11 @@ PK_REGENERATION_NAME	= "Regeneration";
 PK_HEALTHSTEALER_NAME	= "Health Stealer";
 PK_HELLISHARMOR_NAME	= "Hellish Armor";
 PK_666AMMO_NAME			= "666 Ammo";
+
+PKCH_GIVEGOLD1		= "Giving lots and lots of gold.";
+PKCH_GIVEGOLD2		= "Glittering gold, trinkets and baubles... paid for in blood.";
+PKCH_GIVEGOLD3		= "Even with all these coins the old man on the boat won't take you back.";
+PKCH_GIVEGOLD4		= "Avarice! Definitely my favorite sin.";
+PKCH_GIVEGOLD5		= "Don't forget to donate to the foundation for mortally challenged!";
+PKCH_TAKEGOLD1		= "Let's lighten your pockets...";
+PKCH_TAKEGOLD2		= "Don't forget to save some for the ride to the other side.";

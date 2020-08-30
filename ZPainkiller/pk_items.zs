@@ -181,7 +181,7 @@ Class PK_Soul : PK_Inventory {
 	}
 	override void Tick() {
 		super.Tick();
-		if (!isFrozen())
+		if (!isFrozen() && (!event || !event.SoulKeeper))
 			age++;
 	}
 	override bool TryPickup (in out Actor other) {
@@ -217,7 +217,7 @@ Class PK_Soul : PK_Inventory {
 	Spawn:
 		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
 		DSOU ABCDEFGHIJKLMNOPQRSTU 2 {
-			if (!event.SoulKeeper && age > maxage)
+			if (age > maxage)
 				A_FadeOut(0.05);
 		}
 		goto spawn+1;

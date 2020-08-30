@@ -1089,10 +1089,6 @@ Class PK_BoardEventHandler : EventHandler {
 			Menu.SetMenu("PKCardsMenu");
 	}*/
 	
-	override void RenderOverlay(RenderEvent e) {
-		string str = String.Format ("soul keeper: %d",soulkeeper);
-		Screen.DrawText(bigfont,Font.CR_GREEN,128,128,str);
-	}
 	
 	override void NetworkProcess(consoleevent e) {
 		if (e.isManual || e.Player < 0)

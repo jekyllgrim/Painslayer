@@ -21,24 +21,36 @@ Class PK_MainHandler : EventHandler {
             return false;
         }
     }
-	//PKGOLD cheat:
+	//cheats:
+	static const string PKCH_GoldMessage[] = {
+		"$PKCH_GIVEGOLD1",
+		"$PKCH_GIVEGOLD2",
+		"$PKCH_GIVEGOLD3",
+		"$PKCH_GIVEGOLD4",
+		"$PKCH_GIVEGOLD5",
+		"$PKCH_TAKEGOLD1",
+		"$PKCH_TAKEGOLD2"
+	};
 	override void NetworkProcess(consoleevent e) {
-		if (e.name != "PK_GiveGold" || !e.isManual)
+		if (!e.isManual)
 			return;
 		if (CheckCheatMode())
 			return;
-		let plr = players[e.Player].mo;
-		if (!plr)
-			return;
-		if (e.player == consoleplayer) {
-			console.printf("Glittering gold, trinkets and baubles... paid for in blood.");
-			S_StartSound("pickups/gold/vbig",CHAN_AUTO,CHANF_UI);
-		}
-		//gives a specified number of gold, or max gold if no number is specified:
-		int amt = (e.args[0] == 0) ? 99990 : e.args[0];
-		let cont = PK_CardControl(plr.FindInventory("PK_CardControl"));
-		if (cont) {
-			cont.pk_gold = Clamp(cont.pk_gold + amt, 0, 99990);
+		if (e.name == "PK_GiveGold") {
+			let plr = players[e.Player].mo;
+			if (!plr)
+				return;
+			if (e.player == consoleplayer) {				
+				string str = Stringtable.Localize(PKCH_GoldMessage[random(0,3)]);
+				console.printf(str);
+				S_StartSound("pickups/gold/vbig",CHAN_AUTO,CHANF_UI);
+			}
+			//gives a specified number of gold, or max gold if no number is specified:
+			int amt = (e.args[0] == 0) ? 99990 : e.args[0];
+			let cont = PK_CardControl(plr.FindInventory("PK_CardControl"));
+			if (cont) {
+				cont.pk_gold = Clamp(cont.pk_gold + amt, 0, 99990);
+			}
 		}
 	}
 	Vector2 SectorBounds (Sector sec) {

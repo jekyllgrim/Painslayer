@@ -409,7 +409,8 @@ Class PK_CardControl : PK_InventoryToken {
 	void PK_EquipCards() {
 		EquippedCards.Clear();
 		EquippedCards.Reserve(5);			
-		console.printf("Allocated %d card slots successfully",EquippedCards.Size());	
+		if (pk_debugmessages)
+			console.printf("Allocated %d card slots successfully",EquippedCards.Size());	
 		
 		//give the equipped cards:
 		for (int i = 0; i < EquippedCards.Size(); i++) {
@@ -418,8 +419,9 @@ Class PK_CardControl : PK_InventoryToken {
 			//turn that into a class type
 			Class<Inventory> card = cardClassName;
 			//if the slot card ID is empty, make sure the slot is empty too (and if there was a card in it before, remove it)
-			if (!card) {
-				console.printf("Slot %d is empty (\"%s:\" is not a valid class)",i,cardClassName);
+			if (!card) {			
+				if (pk_debugmessages)
+					console.printf("Slot %d is empty (\"%s:\" is not a valid class)",i,cardClassName);
 				continue;
 			}
 			//record new class type in a slot
@@ -428,8 +430,10 @@ Class PK_CardControl : PK_InventoryToken {
 			if (!owner.FindInventory(card)) {
 				owner.GiveInventory(card,1);
 			}
-			if (owner.FindInventory(card))
-				console.printf("%s is in slot %d",owner.FindInventory(card).GetClassName(),i);
+			if (pk_debugmessages) {
+				if (owner.FindInventory(card))
+					console.printf("%s is in slot %d",owner.FindInventory(card).GetClassName(),i);
+			}
 		}
 		//if player has some cards that are NOT equipped, take them away:
 		for (int unC = 0; unC < UnlockedTarotCards.Size(); unC++) {
@@ -439,7 +443,8 @@ Class PK_CardControl : PK_InventoryToken {
 			Class<Inventory> card = cardClassName;
 			//check if it's a valid class type
 			if (!card) {
-				console.printf("Tried taking \"%s\" but it's not a valid class",cardClassName);
+				if (pk_debugmessages)
+					console.printf("Tried taking \"%s\" but it's not a valid class",cardClassName);
 				continue;
 			}
 			//check the player even has it
@@ -447,7 +452,7 @@ Class PK_CardControl : PK_InventoryToken {
 				continue;
 			}
 			//check every unlocked card name against every equipped card name
-			//(for simplicity and speed we're checking names here, not classes)
+			//(for simplicity and speed we check the name arrays against each other instead of class type arrays)
 			bool isEquipped = false;
 			for (int curC = 0; curC < 5; curC++) {
 				if (EquippedSlots[curC] == UnlockedTarotCards[unC]) {
@@ -456,26 +461,17 @@ Class PK_CardControl : PK_InventoryToken {
 				}
 			}
 			if (!isEquipped) {	
-				console.printf("Taking card %s (not equipped)",owner.FindInventory(card).GetClassName());
+				if (pk_debugmessages)
+					console.printf("Taking card %s (not equipped)",owner.FindInventory(card).GetClassName());
 				owner.TakeInventory(card,1);
 			}
 		}
-		/*console.printf("Equipped: [%s] [%s] [%s] [%s] [%s]",
-			(EquippedCards[0] != null) ? "yes" : "x",
-			(EquippedCards[1] != null) ? "yes" : "x",
-			(EquippedCards[2] != null) ? "yes" : "x",
-			(EquippedCards[3] != null) ? "yes" : "x",
-			(EquippedCards[4] != null) ? "yes" : "x"
-		);*/
 	}
 }
 
-Class PKC_SoulKeeper : PK_InventoryToken {
-	PK_BoardEventHandler event;
-	
-	Default {
-		tag "SoulKeeper";
-	}
+Class PK_BaseTarotCard : PK_InventoryToken {
+	protected virtual void GiveCard() {}
+	protected virtual void TakeCard() {}
 	
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);
@@ -483,15 +479,31 @@ Class PKC_SoulKeeper : PK_InventoryToken {
 			DepleteOrDestroy();
 			return;
 		}
-		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
-		if (event)
-			event.SoulKeeper = true;
-	}	
+		GiveCard();
+	}
 	override void DetachFromOwner() {
 		if (!owner || !owner.player) {
 			DepleteOrDestroy();
 			return;
 		}
+		TakeCard();
+		super.DetachFromOwner();
+	}
+}
+
+Class PKC_SoulKeeper : PK_BaseTarotCard {
+	PK_BoardEventHandler event;
+	
+	Default {
+		tag "SoulKeeper";
+	}
+	
+	override void GiveCard() {
+		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
+		if (event)
+			event.SoulKeeper = true;
+	}	
+	override void TakeCard() {
 		PKC_SoulKeeper card;
 		for (int pn = 0; pn < MAXPLAYERS; pn++) {
 			if (!playerInGame[pn])
@@ -505,143 +517,167 @@ Class PKC_SoulKeeper : PK_InventoryToken {
 		}
 		if (!card && event)
 			event.SoulKeeper = false;
-		super.DetachFromOwner();
 	}
 }
 
-Class PKC_Blessing : PK_InventoryToken {
+Class PKC_Blessing : PK_BaseTarotCard {
+	private int curHealth;
 	Default {
 		tag "Blessing";
 	}
+	
+	override void AttachToOwner(actor other) {
+		super.AttachToOwner(other);
+		if (!owner || !owner.player) {
+			DepleteOrDestroy();
+			return;
+		}
+		let plr = owner.player.mo;
+		plr.BonusHealth = 50;
+		plr.GiveBody(150, 150);
+	}
+	
+	override void GiveCard() {
+		curHealth = owner.health;
+		let plr = owner.player.mo;
+		plr.BonusHealth = 50;
+		plr.GiveBody(150, 150);
+	}
+	
+	override void TakeCard() {
+		let plr = owner.player.mo;
+		plr.BonusHealth = 0;
+		//owner.GiveBody(Amount, curHealth);
+	}
 }
 
-Class PKC_Replenish : PK_InventoryToken {
+Class PKC_Replenish : PK_BaseTarotCard {
 	Default {
 		tag "Replenish";
 	}
 }
 
-Class PKC_DarkSoul : PK_InventoryToken {
+Class PKC_DarkSoul : PK_BaseTarotCard {
 	Default {
 		tag "DarkSoul";
 	}
 }
 
-Class PKC_SoulCatcher : PK_InventoryToken {
+Class PKC_SoulCatcher : PK_BaseTarotCard {
 	Default {
 		tag "SoulCatcher";
 	}
 }
 
-Class PKC_Forgiveness : PK_InventoryToken {
+Class PKC_Forgiveness : PK_BaseTarotCard {
 	Default {
 		tag "Forgiveness";
 	}
 }
 
-Class PKC_Greed : PK_InventoryToken {
+Class PKC_Greed : PK_BaseTarotCard {
 	Default {
 		tag "Greed";
 	}
 }
 
-Class PKC_SoulRedeemer : PK_InventoryToken {
+Class PKC_SoulRedeemer : PK_BaseTarotCard {
 	Default {
 		tag "SoulRedeemer";
 	}
 }
 
-Class PKC_HealthRegeneration : PK_InventoryToken {
+Class PKC_HealthRegeneration : PK_BaseTarotCard {
 	Default {
 		tag "HealthRegeneration";
 	}
 }
 
-Class PKC_HealthStealer : PK_InventoryToken {
+Class PKC_HealthStealer : PK_BaseTarotCard {
 	Default {
 		tag "HealthStealer";
 	}
 }
 
-Class PKC_HellishArmor : PK_InventoryToken {
+Class PKC_HellishArmor : PK_BaseTarotCard {
 	Default {
 		tag "HellishArmor";
 	}
 }
 
-Class PKC_666Ammo : PK_InventoryToken {
+Class PKC_666Ammo : PK_BaseTarotCard {
 	Default {
 		tag "666Ammo";
 	}
 }
 
-Class PKC_Endurance : PK_InventoryToken {
+Class PKC_Endurance : PK_BaseTarotCard {
 	Default {
 		tag "Endurance";
 	}
 }
 
-Class PKC_TimeBonus : PK_InventoryToken {
+Class PKC_TimeBonus : PK_BaseTarotCard {
 	Default {
 		tag "TimeBonus";
 	}
 }
 
-Class PKC_Speed : PK_InventoryToken {
+Class PKC_Speed : PK_BaseTarotCard {
 	Default {
 		tag "Speed";
 	}
 }
 
-Class PKC_Rebirth : PK_InventoryToken {
+Class PKC_Rebirth : PK_BaseTarotCard {
 	Default {
 		tag "Rebirth";
 	}
 }
 
-Class PKC_Confusion : PK_InventoryToken {
+Class PKC_Confusion : PK_BaseTarotCard {
 	Default {
 		tag "Confusion";
 	}
 }
 
-Class PKC_Dexterity : PK_InventoryToken {
+Class PKC_Dexterity : PK_BaseTarotCard {
 	Default {
 		tag "Dexterity";
 	}
 }
 
-Class PKC_WeaponModifier : PK_InventoryToken {
+Class PKC_WeaponModifier : PK_BaseTarotCard {
 	Default {
 		tag "WeaponModifier";
 	}
 }
 
-Class PKC_StepsOfThunder : PK_InventoryToken {
+Class PKC_StepsOfThunder : PK_BaseTarotCard {
 	Default {
 		tag "StepsOfThunder";
 	}
 }
 
-Class PKC_Rage : PK_InventoryToken {
+Class PKC_Rage : PK_BaseTarotCard {
 	Default {
 		tag "Rage";
 	}
 }
 
-Class PKC_MagicGun : PK_InventoryToken {
+Class PKC_MagicGun : PK_BaseTarotCard {
 	Default {
 		tag "MagicGun";
 	}
 }
 
-Class PKC_IronWill : PK_InventoryToken {
+Class PKC_IronWill : PK_BaseTarotCard {
 	Default {
 		tag "IronWill";
 	}
 }
 
-Class PKC_Haste : PK_InventoryToken {
+Class PKC_Haste : PK_BaseTarotCard {
 	Default {
 		tag "Haste";
 	}

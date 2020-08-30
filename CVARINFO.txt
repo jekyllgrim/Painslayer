@@ -1,0 +1,1 @@
+server bool pk_debugmessages = false;
