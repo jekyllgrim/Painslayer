@@ -122,8 +122,8 @@ Class PK_DemonMorphControl : PK_InventoryToken {
 	property minsouls : pk_minsouls;
 	property fullsouls : pk_fullsouls;
 	Default {
-		PK_DemonMorphControl.minsouls 10;
-		PK_DemonMorphControl.fullsouls 12;
+		PK_DemonMorphControl.minsouls 64;
+		PK_DemonMorphControl.fullsouls 66;
 		inventory.maxamount 1;
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNTOSSABLE;
@@ -525,14 +525,12 @@ Class PKC_Blessing : PK_BaseTarotCard {
 	Default {
 		tag "Blessing";
 	}	
-	
 	override void GiveCard() {
 		curHealth = owner.health;
 		let plr = owner.player.mo;
 		plr.BonusHealth = 50;
 		plr.GiveBody(150, 100);
-	}
-	
+	}	
 	override void TakeCard() {
 		let plr = owner.player.mo;
 		plr.BonusHealth = 0;

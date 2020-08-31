@@ -29,8 +29,8 @@ PK_HASTE_DESC			= "Enemies move 4x slower.";
 
 PK_SOULKEEPER_DESC		= "Souls never disappear.";
 PK_BLESSING_DESC		= "Increase base health to 150.";
-PK_REPLENISH_DESC		= "Double the ammo in ammo boxes.";
-PK_DARKSOUL_DESC		= "Morph into demon form at 50 souls.";
+PK_REPLENISH_DESC		= "Receive double the ammo from ammo pickups.";
+PK_DARKSOUL_DESC		= "Morph into demon at 50 souls.";
 PK_SOULCATCHER_DESC		= "Attract souls and gold from a distance.";
 PK_FORGIVENESS_DESC		= "Use Golden Cards 2 times per level.";
 PK_GREED_DESC			= "Receive 2x gold.";
