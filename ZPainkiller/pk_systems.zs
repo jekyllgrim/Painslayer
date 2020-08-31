@@ -524,30 +524,19 @@ Class PKC_Blessing : PK_BaseTarotCard {
 	private int curHealth;
 	Default {
 		tag "Blessing";
-	}
-	
-	override void AttachToOwner(actor other) {
-		super.AttachToOwner(other);
-		if (!owner || !owner.player) {
-			DepleteOrDestroy();
-			return;
-		}
-		let plr = owner.player.mo;
-		plr.BonusHealth = 50;
-		plr.GiveBody(150, 150);
-	}
+	}	
 	
 	override void GiveCard() {
 		curHealth = owner.health;
 		let plr = owner.player.mo;
 		plr.BonusHealth = 50;
-		plr.GiveBody(150, 150);
+		plr.GiveBody(150, 100);
 	}
 	
 	override void TakeCard() {
 		let plr = owner.player.mo;
 		plr.BonusHealth = 0;
-		//owner.GiveBody(Amount, curHealth);
+		plr.A_SetHealth(curhealth);
 	}
 }
 
