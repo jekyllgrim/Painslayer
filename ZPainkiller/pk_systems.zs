@@ -523,7 +523,7 @@ Class PKC_SoulKeeper : PK_BaseTarotCard {
 	}	
 	override void TakeCard() {
 		if (event)
-			event.SoulKeeper = CheckPlayersHaveCard("PKC_SoulKeeper");
+			event.SoulKeeper = CheckPlayersHaveCard(self.GetClassName());
 	}
 }
 
@@ -566,7 +566,7 @@ Class PKC_Replenish : PK_BaseTarotCard {
 		}
 	}	
 	override void TakeCard() {
-		if (!CheckPlayersHaveCard("PKC_Replenish") && event) {
+		if (!CheckPlayersHaveCard(self.GetClassName()) && event) {
 			//first remove items that have already been picked up from the array
 			for (int i = 0; i < event.ammopickups.Size(); i++) {
 				if (!event.ammopickups[i] || event.ammopickups[i].owner)

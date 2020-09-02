@@ -39,9 +39,7 @@ Class PK_Inventory : Inventory {
 }
 
 Class PK_GoldPickup : PK_Inventory abstract {
-	PK_GoldGleam gleam;
-	int goldamount;
-	property goldamount : goldamount;
+	protected PK_GoldGleam gleam;
 	Default {
 		+INVENTORY.NEVERRESPAWN;
 		+BRIGHT
@@ -49,15 +47,17 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		yscale 0.415;
 		radius 8;
 		height 16;
-		PK_GoldPickup.goldamount 1;
+		inventory.amount 1;
 		inventory.pickupmessage "";
 	}
 	override bool TryPickup (in out Actor other) {
 		if (!(other is "PlayerPawn"))
 			return false;
 		let cont = PK_CardControl(other.FindInventory("PK_CardControl"));
-		if (cont)
-			cont.pk_gold = Clamp(cont.pk_gold + goldamount, 0, 99990);
+		if (cont) {
+			int goldmul = (other.FindInventory("PKC_Greed")) ? 2 : 1;
+			cont.pk_gold = Clamp(cont.pk_gold + (amount*goldmul), 0, 99990);
+		}
 		GoAwayAndDie();
 		return true;
 	}
@@ -114,7 +114,7 @@ Class PK_GoldGleam : PK_BaseFlare {
 
 Class PK_SmallGold : PK_GoldPickup {
 	Default {
-		PK_GoldPickup.goldamount 3;
+		inventory.amount 3;
 		height 4;
 		inventory.pickupsound "pickups/gold/small";
 	}
@@ -126,7 +126,7 @@ Class PK_SmallGold : PK_GoldPickup {
 
 Class PK_MedGold : PK_GoldPickup {
 	Default {
-		PK_GoldPickup.goldamount 10;
+		inventory.amount 10;
 		height 8;
 		inventory.pickupsound "pickups/gold/med";
 	}
@@ -138,7 +138,7 @@ Class PK_MedGold : PK_GoldPickup {
 
 Class PK_BigGold : PK_GoldPickup {
 	Default {
-		PK_GoldPickup.goldamount 50;
+		inventory.amount 50;
 		height 11;
 		inventory.pickupsound "pickups/gold/big";
 	}
@@ -150,7 +150,7 @@ Class PK_BigGold : PK_GoldPickup {
 
 Class PK_VeryBigGold : PK_GoldPickup {
 	Default {
-		PK_GoldPickup.goldamount 100;
+		inventory.amount 100;
 		height 16;
 		inventory.pickupsound "pickups/gold/vbig";
 	}
