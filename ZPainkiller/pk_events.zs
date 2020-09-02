@@ -267,7 +267,16 @@ Class PK_BoardEventHandler : EventHandler {
 			ammopickups.Push(Ammo(e.thing));
 			//console.printf("pushing %s into the array",e.thing.GetClassName());
 		}
-	}	
+	}
+	
+	override void WorldThingDamaged(worldevent e) {
+		if (e.thing && e.thing.bISMONSTER && e.DamageSource && e.DamageSource.FindInventory("PKC_HealthStealer") && e.thing.isHostile(e.DamageSource)) {
+			if (pk_debugmessages)
+				console.printf("%s dealt %d damage to %s",e.DamageSource.GetClassName(),e.damage,e.thing.GetClassName());
+			int drain = Clamp(e.Damage*0.03,1,8);
+			e.DamageSource.GiveBody(drain,100);
+		}
+	}
 	
 	override void NetworkProcess(consoleevent e) {
 		if (e.isManual || e.Player < 0)
