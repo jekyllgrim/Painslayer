@@ -580,6 +580,20 @@ Class PKC_DarkSoul : PK_BaseTarotCard {
 	Default {
 		tag "DarkSoul";
 	}
+	override void GiveCard() {
+		let control = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
+		if (!control)
+			return;
+		control.pk_minsouls = 48;
+		control.pk_fullsouls = 50;
+	}
+	override void TakeCard() {
+		let control = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
+		if (!control)
+			return;
+		control.pk_minsouls = control.default.pk_minsouls;
+		control.pk_fullsouls = control.default.pk_fullsouls;
+	}
 }
 
 Class PKC_SoulCatcher : PK_BaseTarotCard {
