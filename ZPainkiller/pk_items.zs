@@ -168,7 +168,7 @@ Class PK_Soul : PK_Inventory {
 	Default {
 		PK_Soul.maxage 350;
 		inventory.pickupmessage "";
-		inventory.amount 3;
+		inventory.amount 2;
 		inventory.maxamount 100;
 		renderstyle 'Add';
 		+NOGRAVITY;
@@ -217,6 +217,8 @@ Class PK_Soul : PK_Inventory {
 					Console.printf("something went really wrong");*/
 			}
 		}
+		if (other.FindInventory("PKC_SoulRedeemer"))
+			amount *= 2;
 		other.GiveBody(Amount, MaxAmount);
 		GoAwayAndDie();
 		return true;
@@ -234,7 +236,7 @@ Class PK_Soul : PK_Inventory {
 
 Class PK_RedSoul : PK_Soul {
 	Default {
-		inventory.amount 20;
+		inventory.amount 15;
 		PK_Soul.maxage 450;
 		translation "0:255=%[0.00,0.00,0.00]:[2.00,0.00,0.00]";
 		alpha 0.85;
