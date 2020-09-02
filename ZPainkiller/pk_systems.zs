@@ -640,8 +640,24 @@ Class PKC_SoulRedeemer : PK_BaseTarotCard {
 }
 
 Class PKC_HealthRegeneration : PK_BaseTarotCard {
+	private int dmgCounter;
 	Default {
 		tag "HealthRegeneration";
+	}
+	override void DoEffect() {
+		super.DoEffect();
+		if (!owner || !owner.player)
+			return;
+		if (level.time % 35 == 0) {
+			if (dmgCounter > 0)
+				dmgCounter = Clamp(dmgCounter-1,0,10);
+			else
+				owner.GiveBody(1,100);
+		}
+	}
+	override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
+		dmgCounter = 10;
+		super.ModifyDamage(damage, damageType, newdamage, passive, inflictor, source, flags);
 	}
 }
 
