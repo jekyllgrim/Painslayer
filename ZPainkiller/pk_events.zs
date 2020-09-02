@@ -265,7 +265,7 @@ Class PK_BoardEventHandler : EventHandler {
 			Menu.SetMenu("PKCardsMenu");*/
 		if (e.thing is "Ammo") {
 			ammopickups.Push(Ammo(e.thing));
-			console.printf("pushing %s into the array",e.thing.GetClassName());
+			//console.printf("pushing %s into the array",e.thing.GetClassName());
 		}
 	}	
 	
