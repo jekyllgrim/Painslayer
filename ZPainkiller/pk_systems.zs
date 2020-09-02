@@ -491,6 +491,7 @@ Class PK_BaseTarotCard : PK_InventoryToken {
 		TakeCard();
 		super.DetachFromOwner();
 	}
+	//returns false only if none of the current players have the same card:
 	bool CheckPlayersHaveCard(Class<Inventory> card) {
 		if(!card)
 			return false;
@@ -511,8 +512,8 @@ Class PK_BaseTarotCard : PK_InventoryToken {
 	}
 }
 
-Class PKC_SoulKeeper : PK_BaseTarotCard {
-	
+//flips a global bool. While true, souls don't disappear
+Class PKC_SoulKeeper : PK_BaseTarotCard {	
 	Default {
 		tag "SoulKeeper";
 	}	
@@ -526,6 +527,7 @@ Class PKC_SoulKeeper : PK_BaseTarotCard {
 	}
 }
 
+//sets player's base and current health to 150 (reverts when removed)
 Class PKC_Blessing : PK_BaseTarotCard {
 	private int curHealth;
 	Default {
@@ -544,12 +546,14 @@ Class PKC_Blessing : PK_BaseTarotCard {
 	}
 }
 
+//doubles the amount of all ammo boxes that haven't been picked up
 Class PKC_Replenish : PK_BaseTarotCard {
 	Default {
 		tag "Replenish";
 	}
 	override void GiveCard() {
 		if (event) {
+			//first remove items that have already been picked up from the array
 			for (int i = 0; i < event.ammopickups.Size(); i++) {
 				if (!event.ammopickups[i] || event.ammopickups[i].owner)
 					event.ammopickups.delete(i);
@@ -563,6 +567,7 @@ Class PKC_Replenish : PK_BaseTarotCard {
 	}	
 	override void TakeCard() {
 		if (!CheckPlayersHaveCard("PKC_Replenish") && event) {
+			//first remove items that have already been picked up from the array
 			for (int i = 0; i < event.ammopickups.Size(); i++) {
 				if (!event.ammopickups[i] || event.ammopickups[i].owner)
 					event.ammopickups.delete(i);
@@ -576,6 +581,7 @@ Class PKC_Replenish : PK_BaseTarotCard {
 	}
 }
 
+//demon morph is activated at 50 souls:
 Class PKC_DarkSoul : PK_BaseTarotCard {
 	Default {
 		tag "DarkSoul";
@@ -599,6 +605,19 @@ Class PKC_DarkSoul : PK_BaseTarotCard {
 Class PKC_SoulCatcher : PK_BaseTarotCard {
 	Default {
 		tag "SoulCatcher";
+	}
+	override void DoEffect() {
+		super.DoEffect();
+		if (!owner || !owner.player)
+			return;
+		BlockThingsIterator itr = BlockThingsIterator.Create(owner,144);
+		while (itr.next()) {
+			let next = itr.thing;
+			if (next && (next is "PK_GoldPickup" || next is "PK_Soul") && !next.tracer) {
+				next.tracer = owner;
+				//console.printf("found %s",next.GetClassName());
+			}
+		}
 	}
 }
 

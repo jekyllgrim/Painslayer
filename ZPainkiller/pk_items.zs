@@ -68,6 +68,9 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		}
 		if (isFrozen())
 			return;
+		if (tracer && tracer.player) {
+			vel = Vec3To(tracer).Unit() * 12;
+		}
 		if (level.time % 10 != 0)
 			return;
 		if (frandom[sfx](1,10) > 9 && !gleam) {
@@ -181,8 +184,13 @@ Class PK_Soul : PK_Inventory {
 	}
 	override void Tick() {
 		super.Tick();
-		if (!isFrozen() && (!event || !event.SoulKeeper))
+		if (isFrozen())
+			return;
+		if (!event || !event.SoulKeeper)
 			age++;
+		if (tracer && tracer.player) {
+			vel = Vec3To(tracer).Unit() * 12;
+		}
 	}
 	override bool TryPickup (in out Actor other) {
 		if (!(other is "PlayerPawn"))
