@@ -1,7 +1,7 @@
 Class PK_MainHandler : EventHandler {
 	
-	array <Actor> allenemies;
-	array <Actor> demontargets;
+	array <Actor> allenemies; //holds all monsters
+	array <Actor> demontargets; //holds all monsters and players
 	
 	//converted from source code by 3saster:
     bool CheckCheatmode (bool printmsg = true)
@@ -248,6 +248,68 @@ Class PK_ReplacementHandler : EventHandler {
 					mo.GiveInventory("PK_Painkiller",1);
 				player.pendingweapon = mo.PickWeapon(1,true);
 			}
+		}
+	}
+}
+
+Class PK_BoardEventHandler : EventHandler {
+	ui bool boardOpened; //whether the Black Tarot board has been opened on this map
+	
+	bool SoulKeeper;
+	array <Ammo> ammopickups;
+	
+	override void WorldThingSpawned(Worldevent e) {
+		if (!e.thing)
+			return;		
+		/*if (e.thing && e.thing.player && e.thing.FindInventory("PK_CardControl"))
+			Menu.SetMenu("PKCardsMenu");*/
+		if (e.thing is "Ammo") {
+			ammopickups.Push(Ammo(e.thing));
+			console.printf("pushing %s into the array",e.thing.GetClassName());
+		}
+	}	
+	
+	override void NetworkProcess(consoleevent e) {
+		if (e.isManual || e.Player < 0)
+			return;
+		let plr = players[e.Player].mo;
+		if (!plr)
+			return;
+		let goldcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		if (!goldcontrol)
+			return;
+		//card purchase: push the card into array, reduce current gold
+		if (e.name.IndexOf("PKCBuyCard") >= 0) {
+			Array <String> cardname;
+			e.name.split(cardname, ":");
+			if (cardname.Size() == 0)
+				return;
+			//apparently, dynamic arrays are iffy, that's why we need int(name
+			goldcontrol.UnlockedTarotCards.Push(int(name(cardname[1])));
+			int cost = e.args[0];
+			goldcontrol.pk_gold = Clamp(goldcontrol.pk_gold - cost,0,99990);
+		}
+		if (e.name == 'PKCTakeGold') {
+			int cost = e.args[0];
+			goldcontrol.pk_gold = Clamp(goldcontrol.pk_gold - cost,0,99990);
+		}
+		//equip card into a slot
+		if (e.name.IndexOf("PKCCardToSlot") >= 0) {
+			Array <String> cardname;
+			e.name.split(cardname, ":");
+			if (cardname.Size() == 0)
+				return;
+			int slotID = e.args[0];
+			goldcontrol.EquippedSlots[slotID] = cardname[1];
+		}
+		//remove card from slot
+		if (e.name == 'PKCClearSlot') {
+			int slotID = e.args[0];
+			goldcontrol.EquippedSlots[slotID] = '';
+		}
+		if (e.name == 'PKCCloseBoard') {
+			//console.printf("trying to initalize card slots");
+			goldcontrol.PK_EquipCards();
 		}
 	}
 }

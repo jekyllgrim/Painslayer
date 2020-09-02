@@ -472,6 +472,7 @@ Class PK_CardControl : PK_InventoryToken {
 Class PK_BaseTarotCard : PK_InventoryToken {
 	protected virtual void GiveCard() {}
 	protected virtual void TakeCard() {}
+	PK_BoardEventHandler event;
 	
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);
@@ -479,6 +480,7 @@ Class PK_BaseTarotCard : PK_InventoryToken {
 			DepleteOrDestroy();
 			return;
 		}
+		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
 		GiveCard();
 	}
 	override void DetachFromOwner() {
@@ -489,34 +491,38 @@ Class PK_BaseTarotCard : PK_InventoryToken {
 		TakeCard();
 		super.DetachFromOwner();
 	}
-}
-
-Class PKC_SoulKeeper : PK_BaseTarotCard {
-	PK_BoardEventHandler event;
-	
-	Default {
-		tag "SoulKeeper";
-	}
-	
-	override void GiveCard() {
-		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
-		if (event)
-			event.SoulKeeper = true;
-	}	
-	override void TakeCard() {
-		PKC_SoulKeeper card;
+	bool CheckPlayersHaveCard(Class<Inventory> card) {
+		if(!card)
+			return false;
+		Inventory checkcard;
 		for (int pn = 0; pn < MAXPLAYERS; pn++) {
 			if (!playerInGame[pn])
 				continue;
 			PlayerInfo plr = players[pn];
 			if (!plr || !plr.mo || plr.mo == owner)
 				continue;
-			card = PKC_SoulKeeper(plr.mo.FindInventory("PKC_SoulKeeper"));
-			if (card)
+			checkcard = plr.mo.FindInventory(card);
+			if (checkcard)
 				break;
 		}
-		if (!card && event)
-			event.SoulKeeper = false;
+		if (checkcard)
+			return true;
+		return false;
+	}
+}
+
+Class PKC_SoulKeeper : PK_BaseTarotCard {
+	
+	Default {
+		tag "SoulKeeper";
+	}	
+	override void GiveCard() {
+		if (event)
+			event.SoulKeeper = true;
+	}	
+	override void TakeCard() {
+		if (event)
+			event.SoulKeeper = CheckPlayersHaveCard("PKC_SoulKeeper");
 	}
 }
 
@@ -541,6 +547,32 @@ Class PKC_Blessing : PK_BaseTarotCard {
 Class PKC_Replenish : PK_BaseTarotCard {
 	Default {
 		tag "Replenish";
+	}
+	override void GiveCard() {
+		if (event) {
+			for (int i = 0; i < event.ammopickups.Size(); i++) {
+				if (!event.ammopickups[i] || event.ammopickups[i].owner)
+					event.ammopickups.delete(i);
+			}
+			event.ammopickups.ShrinkToFit();
+			for (int i = 0; i < event.ammopickups.Size(); i++) {
+				if (event.ammopickups[i])
+					event.ammopickups[i].amount *= 2;
+			}
+		}
+	}	
+	override void TakeCard() {
+		if (!CheckPlayersHaveCard("PKC_Replenish") && event) {
+			for (int i = 0; i < event.ammopickups.Size(); i++) {
+				if (!event.ammopickups[i] || event.ammopickups[i].owner)
+					event.ammopickups.delete(i);
+			}
+			event.ammopickups.ShrinkToFit();
+			for (int i = 0; i < event.ammopickups.Size(); i++){
+				if (event.ammopickups[i] && event.ammopickups[i] is "Ammo")
+					event.ammopickups[i].amount =  event.ammopickups[i].default.amount;
+			}				 
+		}
 	}
 }
 
