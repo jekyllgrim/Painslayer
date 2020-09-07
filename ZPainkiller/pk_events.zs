@@ -36,20 +36,29 @@ Class PK_MainHandler : EventHandler {
 			return;
 		if (CheckCheatMode())
 			return;
+		if (e.name == "PK_UseGoldenCards") {
+			let plr = players[e.Player].mo;
+			if (!plr)
+				return;
+			let cont = PK_CardControl(plr.FindInventory("PK_CardControl"));
+			if (cont) {
+				cont.PK_UseGoldenCards();
+			}
+		}
 		if (e.name == "PK_GiveGold") {
 			let plr = players[e.Player].mo;
 			if (!plr)
 				return;
-			if (e.player == consoleplayer) {				
-				string str = Stringtable.Localize(PKCH_GoldMessage[random(0,3)]);
-				console.printf(str);
-				S_StartSound("pickups/gold/vbig",CHAN_AUTO,CHANF_UI);
-			}
 			//gives a specified number of gold, or max gold if no number is specified:
 			int amt = (e.args[0] == 0) ? 99990 : e.args[0];
 			let cont = PK_CardControl(plr.FindInventory("PK_CardControl"));
 			if (cont) {
 				cont.pk_gold = Clamp(cont.pk_gold + amt, 0, 99990);
+			}
+			if (e.player == consoleplayer) {				
+				string str = (amt > 0) ? Stringtable.Localize(PKCH_GoldMessage[random(0,3)]) : Stringtable.Localize(PKCH_GoldMessage[random(4,5)]);
+				console.printf(str);
+				S_StartSound("pickups/gold/vbig",CHAN_AUTO,CHANF_UI);
 			}
 		}
 	}
@@ -273,8 +282,10 @@ Class PK_BoardEventHandler : EventHandler {
 		if (e.thing && e.thing.bISMONSTER && e.DamageSource && e.DamageSource.FindInventory("PKC_HealthStealer") && e.thing.isHostile(e.DamageSource)) {
 			if (pk_debugmessages)
 				console.printf("%s dealt %d damage to %s",e.DamageSource.GetClassName(),e.damage,e.thing.GetClassName());
-			int drain = Clamp(e.Damage*0.03,1,8);
-			e.DamageSource.GiveBody(drain,100);
+			let card = PKC_HealthStealer(e.DamageSource.FindInventory("PKC_HealthStealer"));
+			double drain = e.Damage*0.05;
+			if (card)
+				card.drainedHP += drain;
 		}
 	}
 	

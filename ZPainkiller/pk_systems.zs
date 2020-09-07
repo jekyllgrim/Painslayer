@@ -397,14 +397,59 @@ Class PK_CardControl : PK_InventoryToken {
 	array <name> UnlockedTarotCards; //holds names of all purchased cards for the board
 	name EquippedSlots[5]; //holds names of all cards equipped into slots
 	array < Class<Inventory> > EquippedCards; //holds classes of currently equipped cards (reinitialized when closing the board)
-	private bool goldCardsUses;
-	property goldCardsUses : goldCardsUses;
 	
+	private bool goldActive;
+	int goldUses;
+	property goldUses : goldUses;
+	int goldDuration;
+	property goldDuration : goldDuration;
+		
 	Default {
-		PK_CardControl.goldCardsUses 1;
+		PK_CardControl.goldUses 1;
+		PK_CardControl.goldDuration 30;
 	}
 	
 	override void Tick() {}
+	
+	void PK_UseGoldenCards() {
+		if (EquippedCards.Size() < 5) {
+			if (pk_debugmessages)
+				Console.Printf("The board hasn't been opened this map");
+			return;
+		}
+		if (goldUses < 1) {
+			owner.A_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_LOCAL);
+			return;
+		}
+		goldUses--;
+		if (pk_debugmessages)
+			Console.Printf("Remaining gold card uses: %d",goldUses);
+		for (int i = 2; i < EquippedCards.Size(); i++) {
+			let card = PK_BaseGoldenCard(owner.FindInventory(EquippedCards[i]));
+			if (!card)
+				continue;
+			card.GoldenCardStart();
+			if (pk_debugmessages)
+				Console.Printf("Activating %s golden card",card.GetTag());
+		}
+		goldActive = true;
+	}
+	void PK_StopGoldenCards() {
+		if (EquippedCards.Size() < 5) {
+			if (pk_debugmessages)
+				Console.Printf("Something went wrong: equipped golden cards were changed while they were active!");
+			return;
+		}
+		for (int i = 2; i < EquippedCards.Size(); i++) {
+			let card = PK_BaseGoldenCard(owner.FindInventory(EquippedCards[i]));
+			if (!card)
+				continue;
+			card.GoldenCardEnd();
+			if (pk_debugmessages)
+				Console.Printf("Stopping %s golden card",card.GetTag());
+		}
+		goldActive = false;
+	}
 	
 	void PK_EquipCards() {
 		EquippedCards.Clear();
@@ -467,11 +512,26 @@ Class PK_CardControl : PK_InventoryToken {
 			}
 		}
 	}
+	override void DoEffect() {
+		super.DoEffect();
+		if (!owner || !owner.player) {
+			destroy();
+			return;
+		}
+		if (!goldActive)
+			return;
+		else if (level.time % 35 == 0) {
+			if (goldDuration > 0)
+				goldDuration--;
+			else
+				PK_StopGoldenCards();
+		}
+	}
 }
 
-Class PK_BaseTarotCard : PK_InventoryToken {
-	protected virtual void GiveCard() {}
-	protected virtual void TakeCard() {}
+Class PK_BaseTarotCard : PK_InventoryToken abstract {
+	protected virtual void GetCard() {}
+	protected virtual void RemoveCard() {}
 	PK_BoardEventHandler event;
 	
 	override void AttachToOwner(actor other) {
@@ -481,14 +541,14 @@ Class PK_BaseTarotCard : PK_InventoryToken {
 			return;
 		}
 		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
-		GiveCard();
+		GetCard();
 	}
 	override void DetachFromOwner() {
 		if (!owner || !owner.player) {
 			DepleteOrDestroy();
 			return;
 		}
-		TakeCard();
+		RemoveCard();
 		super.DetachFromOwner();
 	}
 	//returns false only if none of the current players have the same card:
@@ -512,16 +572,16 @@ Class PK_BaseTarotCard : PK_InventoryToken {
 	}
 }
 
-//flips a global bool. While true, souls don't disappear
+//flips a global bool. While true, souls don't disappear (PK_Soul age variable doesn't increase)
 Class PKC_SoulKeeper : PK_BaseTarotCard {	
 	Default {
 		tag "SoulKeeper";
 	}	
-	override void GiveCard() {
+	override void GetCard() {
 		if (event)
 			event.SoulKeeper = true;
 	}	
-	override void TakeCard() {
+	override void RemoveCard() {
 		if (event)
 			event.SoulKeeper = CheckPlayersHaveCard(self.GetClassName());
 	}
@@ -533,25 +593,27 @@ Class PKC_Blessing : PK_BaseTarotCard {
 	Default {
 		tag "Blessing";
 	}	
-	override void GiveCard() {
+	override void GetCard() {
 		curHealth = owner.health;
 		let plr = owner.player.mo;
 		plr.BonusHealth = 50;
-		plr.GiveBody(150, 100);
+		plr.GiveBody(150, 100); //Note that bonushealth gets automatically added to the second argument, so, to limit given health to 150, I actually have to use 100 because bonushealth is already 50 (I know, it's really weird)
 	}	
-	override void TakeCard() {
+	override void RemoveCard() {
 		let plr = owner.player.mo;
 		plr.BonusHealth = 0;
-		plr.A_SetHealth(curhealth);
+		plr.A_SetHealth(curhealth); //revert health, so that the player can't equip/unequip this card for free heals
 	}
 }
 
-//doubles the amount of all ammo boxes that haven't been picked up
+/*Iterates over an array of all Ammo in an event handler and doubles it amount.
+Also removes Ammo that has been picked up from the array.
+(A bit awkward but I want this to work for all ammo, just in case.)*/
 Class PKC_Replenish : PK_BaseTarotCard {
 	Default {
 		tag "Replenish";
 	}
-	override void GiveCard() {
+	override void GetCard() {
 		if (event) {
 			//first remove items that have already been picked up from the array
 			for (int i = 0; i < event.ammopickups.Size(); i++) {
@@ -565,7 +627,7 @@ Class PKC_Replenish : PK_BaseTarotCard {
 			}
 		}
 	}	
-	override void TakeCard() {
+	override void RemoveCard() {
 		if (!CheckPlayersHaveCard(self.GetClassName()) && event) {
 			//first remove items that have already been picked up from the array
 			for (int i = 0; i < event.ammopickups.Size(); i++) {
@@ -581,19 +643,19 @@ Class PKC_Replenish : PK_BaseTarotCard {
 	}
 }
 
-//demon morph is activated at 50 souls:
+//Demon Morph is activated at 50 souls with this:
 Class PKC_DarkSoul : PK_BaseTarotCard {
 	Default {
 		tag "DarkSoul";
 	}
-	override void GiveCard() {
+	override void GetCard() {
 		let control = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
 		if (!control)
 			return;
 		control.pk_minsouls = 48;
 		control.pk_fullsouls = 50;
 	}
-	override void TakeCard() {
+	override void RemoveCard() {
 		let control = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
 		if (!control)
 			return;
@@ -602,6 +664,7 @@ Class PKC_DarkSoul : PK_BaseTarotCard {
 	}
 }
 
+//Makes PK_Soul and PK_GoldPikcup descendants fly towards the player (with NOGRAVITY):
 Class PKC_SoulCatcher : PK_BaseTarotCard {
 	Default {
 		tag "SoulCatcher";
@@ -627,18 +690,21 @@ Class PKC_Forgiveness : PK_BaseTarotCard {
 	}
 }
 
+//PK_GoldPickup descendants will givs the player double the amount with this in inventory:
 Class PKC_Greed : PK_BaseTarotCard {
 	Default {
 		tag "Greed";
 	}
 }
 
+//PK_Soul checks for this in its TryPickup and does amount*=2 if it's found
 Class PKC_SoulRedeemer : PK_BaseTarotCard {
 	Default {
 		tag "SoulRedeemer";
 	}
 }
 
+//Adds 1 HP if player hasn't been damaged for 10 seconds
 Class PKC_HealthRegeneration : PK_BaseTarotCard {
 	private int dmgCounter;
 	Default {
@@ -656,96 +722,209 @@ Class PKC_HealthRegeneration : PK_BaseTarotCard {
 		}
 	}
 	override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
+		if (passive && damage > 0)
+			dmgCounter = 10;
+	}
+}
+
+//WolrdThingDamaged checks if this is in e.DamageSource's inventory and if so, adds e.Damage value to drainedHP:
+Class PKC_HealthStealer : PK_BaseTarotCard {
+	double drainedHP;
+	Default {
+		tag "HealthStealer";
+	}
+	override void DoEffect() {
+		super.DoEffect();
+		if (!owner || !owner.player)
+			return;
+		/* Stagger giving drained HP over 10 tics. This allows to record drained HP in a
+		double rather than int (which is important since you only drain 3% and that would
+		often be rounded down to 0 with an int); plus it helps to make sure stuff like
+		shotgun or minigun don't become too OP since the results of several shots get smashed
+		together and then limited to 8 HP max.
+		*/
+		if (level.time % 10 == 0 && drainedHP > 0) {
+			int drain = Clamp(drainedHP,1,8);
+			owner.GiveBody(drain,100);
+			if (pk_debugmessages)
+				console.printf("Drained %d HP (%f\%)",drainedHP,drain);
+			drainedHP = 0;
+		}
+	}
+}
+
+//Same as Health Regeneration but gives 1 point of armor instead:
+Class PKC_HellishArmor : PK_BaseTarotCard {
+	private int dmgCounter;
+	Default {
+		tag "HellishArmor";
+	}
+	override void DoEffect() {
+		super.DoEffect();
+		if (!owner || !owner.player)
+			return;
+		if (level.time % 35 == 0) {
+			if (dmgCounter > 0)
+				dmgCounter = Clamp(dmgCounter-1,0,10);
+			else
+				owner.GiveInventory("PK_HellishArmorBonus",1);
+		}
+	}
+	override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
 		dmgCounter = 10;
 		super.ModifyDamage(damage, damageType, newdamage, passive, inflictor, source, flags);
 	}
 }
 
-Class PKC_HealthStealer : PK_BaseTarotCard {
+//used by Hellish Armor
+Class PK_HellishArmorBonus : BasicArmorBonus {
 	Default {
-		tag "HealthStealer";
+		armor.saveamount 1;
+		armor.maxsaveamount 100;
+		+INVENTORY.IGNORESKILL;
 	}
 }
 
-Class PKC_HellishArmor : PK_BaseTarotCard {
-	Default {
-		tag "HellishArmor";
-	}
-}
-
+//iterates through player's inventory and sets all Ammo amount to 666 (beyond max)
 Class PKC_666Ammo : PK_BaseTarotCard {
 	Default {
 		tag "666Ammo";
 	}
+	static const Class<Ammo> PKAmmoTypes[] = {
+		'PK_Shells',
+		'PK_FreezerAmmo',
+		'PK_Stakes',
+		'PK_Bombs',
+		'PK_Bullets',
+		'PK_ShurikenAmmo',
+		'PK_Battery'
+	};
+	private array < Class<Ammo> > modifiedAmmo;
+	private array <int> prevAmmoAmount;
+	override void GetCard() {
+		//give painkiller ammo if there is none
+		for (int i = 0; i < PKAmmoTypes.Size(); i++) {
+			let am = PKAmmoTypes[i];
+			if (owner.CountInv(am) < 1)
+				owner.GiveInventory(am,0); //we only need the pointers, no ammount increase
+		}
+		modifiedAmmo.Clear();
+		//iterate through inventory, record every found ammo and its current amount in parallel into two arrays, then set amount to 666
+		for(let item = owner.Inv; item; item = item.Inv) {
+			let am = Ammo(item);
+			if (am) {
+				Class<Ammo> foundammo = am.GetClassName();
+				modifiedAmmo.push(foundammo);
+				prevAmmoAmount.push(owner.CountInv(foundammo));
+				owner.A_SetInventory(item.GetClassName(),666,beyondMax:true);
+			}
+		}		
+	}
+	override void RemoveCard() {
+		//restore original ammo amount using the two arrays
+		if (modifiedAmmo.Size() < 1 || prevAmmoAmount.Size() < 1 || modifiedAmmo.Size() != prevAmmoAmount.Size())
+			return;
+		for (int i = 0; i < modifiedAmmo.Size(); i++)
+			owner.A_SetInventory(modifiedAmmo[i],prevAmmoAmount[i]);
+	}
 }
 
-Class PKC_Endurance : PK_BaseTarotCard {
+//base class for golden cards. They're activated with a netevent that makes PK_CardControl call GoldenCardStart on all equipped cards
+Class PK_BaseGoldenCard : PK_BaseTarotCard {
+	protected bool cardActive; 
+	virtual void GoldenCardStart() {
+		cardActive = true;
+	}
+	virtual void GoldenCardEnd() {
+		cardActive = false;
+	}
+}
+
+//reduces received damage by 50%
+Class PKC_Endurance : PK_BaseGoldenCard {
 	Default {
 		tag "Endurance";
 	}
-}
-
-Class PKC_TimeBonus : PK_BaseTarotCard {
-	Default {
-		tag "TimeBonus";
+	override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags)	{
+		if (cardActive && passive && damage > 0)
+			newdamage = max(0, ApplyDamageFactors(GetClass(), damageType, damage, damage * 0.5));
 	}
 }
 
-Class PKC_Speed : PK_BaseTarotCard {
+
+Class PKC_TimeBonus : PK_BaseGoldenCard {
+	private PK_CardControl control;
+	Default {
+		tag "TimeBonus";
+	}
+	override void GoldenCardStart() {
+		super.GoldenCardStart();
+		control = PK_CardControl(owner.FindInventory("PK_CardControl"));
+		if (!control)
+			return;
+		control.goldDuration = 45;
+	}
+	override void GoldenCardEnd() {
+		if (control)
+			control.goldDuration = control.default.goldDuration;
+	}
+}
+
+Class PKC_Speed : PK_BaseGoldenCard {
 	Default {
 		tag "Speed";
 	}
 }
 
-Class PKC_Rebirth : PK_BaseTarotCard {
+Class PKC_Rebirth : PK_BaseGoldenCard {
 	Default {
 		tag "Rebirth";
 	}
 }
 
-Class PKC_Confusion : PK_BaseTarotCard {
+Class PKC_Confusion : PK_BaseGoldenCard {
 	Default {
 		tag "Confusion";
 	}
 }
 
-Class PKC_Dexterity : PK_BaseTarotCard {
+Class PKC_Dexterity : PK_BaseGoldenCard {
 	Default {
 		tag "Dexterity";
 	}
 }
 
-Class PKC_WeaponModifier : PK_BaseTarotCard {
+Class PKC_WeaponModifier : PK_BaseGoldenCard {
 	Default {
 		tag "WeaponModifier";
 	}
 }
 
-Class PKC_StepsOfThunder : PK_BaseTarotCard {
+Class PKC_StepsOfThunder : PK_BaseGoldenCard {
 	Default {
 		tag "StepsOfThunder";
 	}
 }
 
-Class PKC_Rage : PK_BaseTarotCard {
+Class PKC_Rage : PK_BaseGoldenCard {
 	Default {
 		tag "Rage";
 	}
 }
 
-Class PKC_MagicGun : PK_BaseTarotCard {
+Class PKC_MagicGun : PK_BaseGoldenCard {
 	Default {
 		tag "MagicGun";
 	}
 }
 
-Class PKC_IronWill : PK_BaseTarotCard {
+Class PKC_IronWill : PK_BaseGoldenCard {
 	Default {
 		tag "IronWill";
 	}
 }
 
-Class PKC_Haste : PK_BaseTarotCard {
+Class PKC_Haste : PK_BaseGoldenCard {
 	Default {
 		tag "Haste";
 	}

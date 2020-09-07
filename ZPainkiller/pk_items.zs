@@ -68,9 +68,18 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		}
 		if (isFrozen())
 			return;
+		//Soul Catcher effect:
 		if (tracer && tracer.player) {
-			vel = Vec3To(tracer).Unit() * 12;
+			vel = Vec3To(tracer).Unit() * 10.5;
+			bNOINTERACTION = true;
+			if (Distance3D(tracer) < 32) {
+				CallTryPickup(tracer);
+				PlayPickupSound(tracer);
+				tracer = null;
+			}
 		}
+		else if (bNOINTERACTION)
+			bNOINTERACTION = false;
 		if (level.time % 10 != 0)
 			return;
 		if (frandom[sfx](1,10) > 9 && !gleam) {
@@ -171,7 +180,8 @@ Class PK_Soul : PK_Inventory {
 		inventory.amount 2;
 		inventory.maxamount 100;
 		renderstyle 'Add';
-		+NOGRAVITY;
+		//+NOGRAVITY;
+		gravity 0.025;
 		alpha 1;
 		xscale 0.25;
 		yscale 0.2;
@@ -188,9 +198,18 @@ Class PK_Soul : PK_Inventory {
 			return;
 		if (!event || !event.SoulKeeper)
 			age++;
+		//Soul Catcher effect:
 		if (tracer && tracer.player) {
-			vel = Vec3To(tracer).Unit() * 12;
+			vel = Vec3To(tracer).Unit() * 10.5;
+			bNOINTERACTION = true;
+			if (Distance3D(tracer) < 32) {
+				CallTryPickup(tracer);
+				PlayPickupSound(tracer);
+				tracer = null;
+			}
 		}
+		else if (bNOINTERACTION)
+			bNOINTERACTION = false;
 	}
 	override bool TryPickup (in out Actor other) {
 		if (!(other is "PlayerPawn"))
