@@ -389,8 +389,8 @@ Class PK_Shells : Ammo {
 		inventory.icon "pkhshell";
 		inventory.amount 18;
 		inventory.maxamount 100;
-		ammo.backpackamount 15;
-		ammo.backpackmaxamount 666;
+		ammo.backpackamount 18;
+		ammo.backpackmaxamount 100;
 		xscale 0.3;
 		yscale 0.25;
 	}
@@ -408,8 +408,8 @@ Class PK_FreezerAmmo : Ammo {
 		inventory.icon "pkhfreez";
 		inventory.amount 15;
 		inventory.maxamount 100;
-		ammo.backpackamount 6;
-		ammo.backpackmaxamount 666;
+		ammo.backpackamount 15;
+		ammo.backpackmaxamount 100;
 		xscale 0.3;
 		yscale 0.25;
 	}
@@ -428,8 +428,8 @@ Class PK_Stakes : Ammo {
 		inventory.icon "pkhstake";
 		inventory.amount 15;
 		inventory.maxamount 100;
-		ammo.backpackamount 12;
-		ammo.backpackmaxamount 666;
+		ammo.backpackamount 15;
+		ammo.backpackmaxamount 100;
 		xscale 0.3;
 		yscale 0.25;
 	}
@@ -447,8 +447,8 @@ Class PK_Bombs : Ammo {
 		inventory.icon "pkhrock";
 		inventory.amount 7;
 		inventory.maxamount 100;
-		ammo.backpackamount 12;
-		ammo.backpackmaxamount 666;
+		ammo.backpackamount 7;
+		ammo.backpackmaxamount 100;
 		scale 0.4;
 	}
 	states	{
@@ -465,8 +465,8 @@ Class PK_Bullets : Ammo {
 		inventory.icon "pkhbull";
 		inventory.amount 50;
 		inventory.maxamount 500;
-		ammo.backpackamount 100;
-		ammo.backpackmaxamount 666;
+		ammo.backpackamount 50;
+		ammo.backpackmaxamount 500;
 		scale 0.4;
 	}
 	states	{
@@ -484,8 +484,8 @@ Class PK_ShurikenAmmo : Ammo {
 		inventory.icon "pkhstars";
 		inventory.amount 10;
 		inventory.maxamount 100;
-		ammo.backpackamount 40;
-		ammo.backpackmaxamount 666;
+		ammo.backpackamount 10;
+		ammo.backpackmaxamount 100;
 		xscale 0.3;
 		yscale 0.25;
 	}
@@ -503,8 +503,8 @@ Class PK_Battery : Ammo {
 		inventory.icon "pkhshock";
 		inventory.amount 20;
 		inventory.maxamount 500;
-		ammo.backpackamount 80;
-		ammo.backpackmaxamount 666;
+		ammo.backpackamount 20;
+		ammo.backpackmaxamount 500;
 		scale 0.4;
 	}
 	states	{
