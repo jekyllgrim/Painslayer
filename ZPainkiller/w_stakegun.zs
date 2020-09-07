@@ -1,5 +1,4 @@
 Class PK_Stakegun : PKWeapon {
-	Array <Actor> grenades;
 	Default {
 		PKWeapon.emptysound "weapons/empty/rifle";
 		weapon.slotnumber 3;
@@ -14,10 +13,6 @@ Class PK_Stakegun : PKWeapon {
 		inventory.pickupsound "pickups/weapons/stakegun";
 		Tag "Stakegun/Grenade Launcher";
 	}
-	/*override void DoEffect () {
-		super.DoEffect();
-		Console.Printf("greandes: %d",grenades.size());
-	}*/
 	states {
 		Cache:
 			PSGT AHIJKLMN 0;
@@ -58,9 +53,7 @@ Class PK_Stakegun : PKWeapon {
 			PSGN A 0 {
 				A_StartSound("weapons/stakegun/grenade");
 				A_WeaponOffset(6,2,WOF_ADD);
-				let a = A_FireProjectile("PK_Grenade",spawnofs_xy:1,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
-				if (a) 
-					invoker.grenades.push(a);
+				A_FireProjectile("PK_Grenade",spawnofs_xy:1,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
 				if (CountInv("PK_Stakes") < 1) {
 					let psp = Player.FindPSprite(PSP_WEAPON);
 					if (psp)
@@ -131,7 +124,7 @@ Class PK_Stake : PK_Projectile {
 			victim.DamageMobj (self, target, basedmg, 'normal');
 			A_StartSound("weapons/stakegun/hit",volume:0.7,attenuation:3);
 			hitvictim = victim; //store the victim hit; when this is non-null, stake won't deal damage to anyone else
-			if (!victim.bBOSS && victim.health <= 0 && victim.mass <= 400) { //we do the "pin to the wall" effect only if the victim is dead, not a boss and not huge (mass <= 400)
+			if (!victim.bBOSS && victim.health <= 0 && victim.mass <= 400) { //we do the "pin to the wall" effect only if the victim is dead, not a boss and not huge
 				pinvictim = PK_PinVictim(Spawn("PK_PinVictim",victim.pos)); //spawn fake corpse and give it appearance identical to the monster
 				if (pinvictim) {											
 					pinvictim.target = victim;
@@ -144,12 +137,15 @@ Class PK_Stake : PK_Projectile {
 					pinvictim.scale = victim.scale;
 					pinvictim.A_SetRenderstyle(victim.alpha,victim.GetRenderstyle());
 				}
-				victim.GiveInventory("PK_PinToWall",1);	//the dummy item that makes the ACTUAL killed monster follow the stake (so that the fake and real corpse are synced in position — this is important for item drops, Arch-Vile ressurrect and anything else that may interact with the monster's corpse)
-				let pinned = victim.FindInventory("PK_PinToWall");
-				if (pinned)
-					pinned.master = self;
-				let ct = PK_StakeStuckCounter(victim.FindInventory("PK_StakeStuckCounter"));	// This item contains an array of all visual stakes stuck in the victim;
-				if (ct && ct.stuckstakes.Size() > 0) {											// this is needed because we need to move those stakes to the pinvictim when it spawns
+				//the dummy item that makes the ACTUAL killed monster follow the stake (so that the fake and real corpse are synced in position — this is important for item drops, Arch-Vile ressurrect and anything else that may interact with the monster's corpse):
+				victim.GiveInventory("PK_PinToWall",1);	
+				let pin = victim.FindInventory("PK_PinToWall");
+				if (pin)
+					pin.master = self;
+				// This item contains an array of all visual stakes stuck in the victim:
+				let ct = PK_StakeStuckCounter(victim.FindInventory("PK_StakeStuckCounter"));
+				// this is needed because we need to move those stakes to the pinvictim when it spawns:
+				if (ct && ct.stuckstakes.Size() > 0) {
 					for (int i = ct.stuckstakes.Size()-1; i >= 0; i--)
 						ct.stuckstakes[i].master = pinvictim;
 				}
@@ -186,28 +182,6 @@ Class PK_Stake : PK_Projectile {
 					pinvictim.vel = vel;
 					//pinvictim.SetOrigin(pos - (0,0,pinvictim.height),true);
 				}
-				if (hitvictim)					//and it carries the real corpse (invisible at this stage) with it as well
-					hitvictim.vel = vel;
-				else if (target) {
-					let stakegun = PK_Stakegun(target.FindInventory("PK_Stakegun"));
-					if (stakegun && stakegun.grenades.size() > 0) {
-						for (int i = stakegun.grenades.size()-1; i >= 0; i--) {
-							if (stakegun.grenades[i] && Distance3D(stakegun.grenades[i]) < 32) {
-								let a = Spawn("PK_ExplosiveStake",stakegun.grenades[i].pos);
-								if (a) {
-									a.vel = vel;
-									a.angle = angle;
-									a.pitch = pitch+5;
-									a.target = target;
-									A_StartSound("weapons/stakegun/combo");
-								}
-								stakegun.grenades[i].destroy();
-								destroy();
-								return;
-							}
-						}							
-					}
-				}
 			}
 			loop;
 		Death: 
@@ -219,8 +193,6 @@ Class PK_Stake : PK_Projectile {
 				bNOINTERACTION = true;
 				bNOGRAVITY = true;
 				A_Stop();
-				if (hitvictim)
-					hitvictim.A_Stop();	//stop moving the real corpse, otherwise it can slide pretty far away if we hit a floor, for example
 				if (pinvictim) {
 					pinvictim.A_Stop();
 					pinvictim.SetOrigin((pos.x,pos.y,pinvictim.pos.z),false);	//make sure the fake corpse is at the middle of the stake
@@ -231,7 +203,7 @@ Class PK_Stake : PK_Projectile {
 				}
 				if (pinvictim && hitvictim && !blockingline && pos.z <= floorz+4) { //remove the pinned corpse completely if the stake is basically on the floor
 					pinvictim.destroy();
-					hitvictim.TakeInventory("PK_PinToWall",1);
+					//hitvictim.TakeInventory("PK_PinToWall",1);
 				}		
 			}
 			TNT1 A 0 A_SetRenderStyle(1.0,Style_Translucent);
@@ -330,21 +302,15 @@ Class PK_StakeStuckCounter : Inventory {
 }
 
 // This dummy item handles what happens to the actual monster killed by a stake
-Class PK_PinToWall : Inventory {
-	int PrevRenderstyle;
-	Default {
-		+INVENTORY.UNDROPPABLE
-		+INVENTORY.UNTOSSABLE
-		+INVENTORY.UNCLEARABLE
-		inventory.maxamount 1;
-	}
+Class PK_PinToWall : PK_InventoryToken {
+	private int PrevRenderstyle;
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);
-		if (!other)
+		if (!owner)
 			return;
-		PrevRenderstyle = other.GetRenderstyle();	//save existing renderstyle
-		other.A_SetRenderstyle(alpha,STYLE_None);	//make it invisible
-		other.bNOGRAVITY = true;
+		PrevRenderstyle = owner.GetRenderstyle();	//save existing renderstyle
+		owner.A_SetRenderstyle(alpha,STYLE_None);	//make it invisible
+		owner.bNOGRAVITY = true;
 	}
 	override void DoEffect() {
 		super.DoEffect();
@@ -352,6 +318,8 @@ Class PK_PinToWall : Inventory {
 			DepleteOrDestroy();
 			return;
 		}
+		if (master)
+			owner.SetOrigin(master.pos,true);
 	}
 	override void DetachFromOwner() {
 		if (!owner)
@@ -372,7 +340,17 @@ Class PK_PinVictim : Actor {		//the fake corpse (receives its visuals from the s
 	}
 	override void Tick(){
 		super.Tick();
-		if (!target || !target.bKILLED) {	//if the target is non dead or doesn't exist, remove fake corpse
+		//if the target is alive  or doesn't exist, remove fake corpse
+		if (!target || !target.bKILLED) {
+			destroy();
+			return;
+		}
+		//if the stake disappeared, stop affecting the target and go away
+		if (!master) {
+			if (target) {
+				target.TakeInventory("PK_PinToWall",1);
+				target.A_Stop();
+			}
 			destroy();
 			return;
 		}
@@ -382,6 +360,43 @@ Class PK_PinVictim : Actor {		//the fake corpse (receives its visuals from the s
 		Spawn:
 			#### # 1;
 			loop;
+	}
+}
+
+Class PK_GrenadeHitbox : Actor {
+	private PK_Stake hitstake;
+	PK_Grenade ggrenade;
+	Default {
+		+NOGRAVITY
+		+SOLID
+		radius 32;
+		height 32;
+	}
+	override bool CanCollideWith(Actor other, bool passive) {
+		if (other && other is "PK_Stake" && master && passive) {
+			hitstake = PK_Stake(other);
+			master = null;			
+		}
+		return false;
+	}
+	override void Tick() {
+		super.Tick();
+		if (!master && hitstake) {				
+			let exs = Spawn("PK_ExplosiveStake",hitstake.pos);
+			if (exs) {
+				exs.vel = hitstake.vel;
+				exs.angle = hitstake.angle;
+				exs.pitch = hitstake.pitch+5;
+				exs.target = hitstake.target;
+				A_StartSound("weapons/stakegun/combo");
+			}
+			hitstake.destroy();
+			if (ggrenade)
+				ggrenade.destroy();
+			destroy();
+			return;
+		}
+		Warp(master,true);
 	}
 }
 	
@@ -406,10 +421,12 @@ Class PK_Grenade : PK_Projectile {
 		if (pos.z <= floorz) {
 			vel *= 0.9999;
 		}
-		if (target && target.FindInventory("PK_Stakegun") && vel ~== (0,0,0)) {
-			let stakegun = PK_Stakegun(target.FindInventory("PK_Stakegun"));
-			stakegun.grenades.delete(stakegun.grenades.Find(self));
-		}
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		let trg = PK_GrenadeHitbox(Spawn("PK_GrenadeHitbox",pos));
+		trg.master = self;
+		trg.ggrenade = self;
 	}
 	states {
 		Spawn:
