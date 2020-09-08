@@ -1,6 +1,9 @@
 world/bodypoof	BODYPOOF
 world/null	DSEMPTY
 
+cards/cantuse "sounds/items/card-cannot_use.wav"
+cards/use "sounds/items/card-use.wav"
+
 /// MENU
 
 ui/board/open			"sounds/menu/card-accept.wav"
