@@ -398,7 +398,7 @@ Class PK_CardControl : PK_InventoryToken {
 	name EquippedSlots[5]; //holds names of all cards equipped into slots
 	array < Class<Inventory> > EquippedCards; //holds classes of currently equipped cards (reinitialized when closing the board)
 	
-	private bool goldActive;
+	bool goldActive;
 	int goldUses;
 	property goldUses : goldUses;
 	int goldDuration;
@@ -417,8 +417,9 @@ Class PK_CardControl : PK_InventoryToken {
 				Console.Printf("The board hasn't been opened this map");
 			return;
 		}
-		if (goldUses < 1) {
-			owner.A_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_LOCAL);
+		if (goldUses < 1 || goldActive) {
+			if (!goldActive)
+				owner.A_StartSound("cards/cantuse",CHAN_AUTO,CHANF_LOCAL);
 			return;
 		}
 		goldUses--;
@@ -432,6 +433,7 @@ Class PK_CardControl : PK_InventoryToken {
 			if (pk_debugmessages)
 				Console.Printf("Activating %s golden card",card.GetTag());
 		}
+		owner.A_StartSound("cards/use",CHAN_AUTO,CHANF_LOCAL);
 		goldActive = true;
 	}
 	void PK_StopGoldenCards() {
@@ -440,15 +442,15 @@ Class PK_CardControl : PK_InventoryToken {
 				Console.Printf("Something went wrong: equipped golden cards were changed while they were active!");
 			return;
 		}
+		goldActive = false;
 		for (int i = 2; i < EquippedCards.Size(); i++) {
 			let card = PK_BaseGoldenCard(owner.FindInventory(EquippedCards[i]));
 			if (!card)
 				continue;
-			card.GoldenCardEnd();
 			if (pk_debugmessages)
 				Console.Printf("Stopping %s golden card",card.GetTag());
+			card.GoldenCardEnd();
 		}
-		goldActive = false;
 	}
 	
 	void PK_EquipCards() {
@@ -542,6 +544,8 @@ Class PK_BaseTarotCard : PK_InventoryToken abstract {
 		}
 		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
 		GetCard();
+		if (pk_debugmessages)
+			console.printf("Player %d has %s card now",owner.player.mo.PlayerNumber(),self.GetClassName());
 	}
 	override void DetachFromOwner() {
 		if (!owner || !owner.player) {
@@ -560,14 +564,19 @@ Class PK_BaseTarotCard : PK_InventoryToken abstract {
 			if (!playerInGame[pn])
 				continue;
 			PlayerInfo plr = players[pn];
-			if (!plr || !plr.mo || plr.mo == owner)
+			if (!plr || !plr.mo)
 				continue;
 			checkcard = plr.mo.FindInventory(card);
 			if (checkcard)
 				break;
 		}
-		if (checkcard)
+		if (checkcard) {
+			if (pk_debugmessages)
+				console.printf("Somebody still has %s card",card.GetClassName());
 			return true;
+		}
+		if (pk_debugmessages)
+			console.printf("Nobody has %s card anymore",card.GetClassName());
 		return false;
 	}
 }
@@ -870,21 +879,147 @@ Class PKC_TimeBonus : PK_BaseGoldenCard {
 	}
 }
 
+//changes player's speed
 Class PKC_Speed : PK_BaseGoldenCard {
+	private double prevspeed;
 	Default {
 		tag "Speed";
 	}
+	override void GoldenCardStart() {
+		super.GoldenCardStart();
+		if (owner) {
+			prevspeed = owner.speed;
+			owner.speed *= 1.33;
+		}
+	}
+	override void GoldenCardEnd() {
+		if (owner) {
+			owner.speed  = prevspeed;
+		}
+	}
 }
 
+//essentially, a Megasphere
 Class PKC_Rebirth : PK_BaseGoldenCard {
 	Default {
 		tag "Rebirth";
 	}
+	override void GoldenCardStart() {
+		super.GoldenCardStart();
+		if (owner) {
+			owner.GiveInventory("BlueArmorForMegasphere",1);
+			owner.GiveInventory("MegasphereHealth",1);
+		}
+	}
 }
 
 Class PKC_Confusion : PK_BaseGoldenCard {
+	private PK_MainHandler handler;
 	Default {
 		tag "Confusion";
+	}
+	override void GoldenCardStart() {
+		super.GoldenCardStart();
+		handler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));
+		if (!handler)
+			return;
+		for (int i = 0; i < handler.allenemies.Size(); i++) {
+			if (!handler.allenemies[i])
+				continue;
+			let control = PK_ConfusionControl(handler.allenemies[i].FindInventory("PK_ConfusionControl"));
+			if (control)
+				control.active = true;
+		}
+	}
+	override void GoldenCardEnd() {
+		if (!handler)
+			return;
+		bool endConfusion;
+		for (int pn = 0; pn < MAXPLAYERS; pn++) {
+			if (!playerInGame[pn])
+				continue;
+			PlayerInfo plr = players[pn];
+			if (!plr || !plr.mo)
+				continue;
+			let card = PKC_Confusion(plr.mo.FindInventory("PKC_Confusion"));
+			let control = PK_CardControl(plr.mo.FindInventory("PK_CardControl"));
+			/*if (pk_debugmessages) {
+				string conf = card ? "has Confusion" : "doesn't have Confusion";
+				string cont = control ? "has CardControl" : "doesnt have CardControl";
+				string gact = control.goldActive ? "gold cards are active" : "gold cards are inactive";
+				console.printf("Player %d %s, %s, %s",plr.mo.PlayerNumber(),conf,cont,gact);
+			}*/
+			if (card && control && control.goldActive)
+				continue;
+			endConfusion = true;
+		}
+		if (endConfusion) {
+			if (pk_debugmessages)
+				console.printf("Nobody has active \"Confusion\"; ending effect");
+			for (int i = 0; i < handler.allenemies.Size(); i++) {
+				if (!handler.allenemies[i])
+					continue;
+				let thing = handler.allenemies[i];
+				let control = PK_ConfusionControl(thing.FindInventory("PK_ConfusionControl"));
+				if (control) {
+					control.active = false;
+					thing.target = null;
+				}
+			}
+		}
+	}
+}
+
+Class PK_ConfusionControl : PK_InventoryToken {
+	private int cycle;
+	bool active;
+	override void AttachToOwner(actor other) {
+		super.AttachToOwner(other);
+		if (!owner || !owner.bISMONSTER) {
+			destroy();
+			return;
+		}
+		cycle = 1;
+		for (int pn = 0; pn < MAXPLAYERS; pn++) {
+			if (!playerInGame[pn])
+				continue;
+			PlayerInfo plr = players[pn];
+			if (!plr || !plr.mo)
+				continue;
+			let card = PKC_Confusion(plr.mo.FindInventory("PKC_Confusion"));
+			let control = PK_CardControl(plr.mo.FindInventory("PK_CardControl"));
+			if (card && control && control.goldActive) {
+				active = true;
+				break;
+			}
+		}
+	}
+	override void DoEffect() {
+		super.DoEffect();
+		if (!owner) {
+			destroy();
+			return;
+		}
+		if (!active)
+			return;
+		if (owner.health < 1)
+			return;
+		if (level.time % 35 * cycle == 0) {
+			cycle = random[conf](3,8);
+			BlockThingsIterator itr = BlockThingsIterator.Create(owner,320);
+			while (itr.next()) {
+				let next = itr.thing;
+				if (next == owner)
+					continue;
+				if (!next.bISMONSTER)
+					continue;
+				if (next.bKILLED)
+					continue;
+				owner.target = next;
+				if (pk_debugmessages)
+					console.printf("%s is targeting %s",owner.GetClassName(),owner.target.GetClassName());
+			}
+		}
 	}
 }
 

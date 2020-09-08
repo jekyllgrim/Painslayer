@@ -133,8 +133,10 @@ Class PK_MainHandler : EventHandler {
 		let act = e.thing;		
 		if (!act)
 			return;
-		if (act.bISMONSTER)
+		if (act.bISMONSTER) {
 			allenemies.push(act);
+			act.GiveInventory("PK_ConfusionControl",1);
+		}
 		if (act.bISMONSTER || act.bMISSILE || (act.player)) {
 			demontargets.push(act);
 		}

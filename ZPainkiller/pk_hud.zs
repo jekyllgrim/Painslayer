@@ -5,6 +5,8 @@ Class PainkillerHUD : BaseStatusBar {
 	private int arrowangle;
 	private int checktic;
 	
+	PK_CardControl cardcontrol;
+	
 	
 	override void Init() {
 		super.Init();
@@ -21,6 +23,7 @@ Class PainkillerHUD : BaseStatusBar {
 		DrawVisualElements();
 		DrawNumbers();
 		DrawEquippedCards();
+		DrawActiveGoldenCards();
 		fullscreenOffsets = true;
 	}
 	
@@ -28,6 +31,8 @@ Class PainkillerHUD : BaseStatusBar {
 		let player = CPlayer.mo;
 		if (!player)
 			return;
+		if (!cardcontrol)
+			cardcontrol = PK_CardControl(player.FindInventory("PK_CardControl"));
 		let event = PK_Mainhandler(EventHandler.Find("PK_Mainhandler"));
 		if (!event)
 			return;		
@@ -58,8 +63,18 @@ Class PainkillerHUD : BaseStatusBar {
 		}
 	}
 	
+	protected void DrawActiveGoldenCards() {
+		if (!cardcontrol || !cardcontrol.goldActive)
+			return;
+		for (int i = 2; i < 5; i++) {
+			if (cardcontrol.EquippedSlots[i]) {
+				string texpath = String.Format("graphics/Tarot/cards/%s.png",cardcontrol.EquippedSlots[i]);
+				DrawImage(texpath,((-55 + i*22),195),DI_SCREEN_HCENTER|DI_ITEM_LEFT_TOP,scale:(0.14,0.14));
+			}
+		}
+	}
+	
 	protected void DrawEquippedCards() {
-		let cardcontrol = PK_CardControl(CPlayer.mo.FindInventory("PK_CardControl"));
 		if (!cardcontrol)
 			return;
 		for (int i = 0; i < 5; i++) {
