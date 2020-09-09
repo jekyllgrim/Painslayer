@@ -131,7 +131,7 @@ Class PK_Rocket : PK_Projectile {
 		height 8;
 		radius 10;
 		decal 'Scorch';
-		damage (30);
+		damage (20);
 	}
 	override void PostBeginplay() {
 		super.PostBeginplay();
@@ -164,7 +164,7 @@ Class PK_Rocket : PK_Projectile {
 			bNOGRAVITY = true;
 			A_Quake(1,8,0,256,"");
 			A_StartSound("weapons/chaingun/rocketboom",CHAN_5);
-			A_Explode(128,128);
+			A_Explode(144,128);
 			Spawn("PK_GenericExplosion",pos);
 		}
 		stop;
