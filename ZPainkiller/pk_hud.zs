@@ -64,12 +64,14 @@ Class PainkillerHUD : BaseStatusBar {
 	}
 	
 	protected void DrawActiveGoldenCards() {
-		if (!cardcontrol || !cardcontrol.goldActive)
+		if (!cardcontrol || (!cardcontrol.goldActive && cardcontrol.GetDryUseTimer() == 0))
 			return;
+		if (cardcontrol.GetDryUseTimer() > 0)
+			
 		for (int i = 2; i < 5; i++) {
 			if (cardcontrol.EquippedSlots[i]) {
 				string texpath = String.Format("graphics/Tarot/cards/%s.png",cardcontrol.EquippedSlots[i]);
-				DrawImage(texpath,((-55 + i*22),195),DI_SCREEN_HCENTER|DI_ITEM_LEFT_TOP,scale:(0.14,0.14));
+				DrawImage(texpath,((-77 + i*22),195),DI_SCREEN_HCENTER|DI_ITEM_LEFT_TOP,scale:(0.14,0.14));
 			}
 		}
 	}

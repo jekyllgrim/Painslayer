@@ -399,6 +399,7 @@ Class PK_CardControl : PK_InventoryToken {
 	array < Class<Inventory> > EquippedCards; //holds classes of currently equipped cards (reinitialized when closing the board)
 	
 	bool goldActive;
+	private int dryUseTimer; //> 0 you try to use gold cards when you're out of uses
 	int goldUses;
 	property goldUses : goldUses;
 	int goldDuration;
@@ -406,20 +407,36 @@ Class PK_CardControl : PK_InventoryToken {
 		
 	Default {
 		PK_CardControl.goldUses 1;
-		PK_CardControl.goldDuration 30;
+		PK_CardControl.goldDuration 10;
+	}
+	
+	int GetDryUseTimer() {
+		return dryUseTimer;
 	}
 	
 	override void Tick() {}
 	
 	void PK_UseGoldenCards() {
+		//check that the array has actually been successfully created
 		if (EquippedCards.Size() < 5) {
+			owner.A_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_LOCAL);
 			if (pk_debugmessages)
 				Console.Printf("The board hasn't been opened this map");
 			return;
 		}
+		//do nothing if all 3 golden cards are unequipped (checking slots is easier here, since EquippedCards entries will never be null due to being allocated earlier)
+		if (!EquippedSlots[2] && !EquippedSlots[3] && !EquippedSlots[4]) {
+			owner.A_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_LOCAL);
+			if (pk_debugmessages)
+				Console.Printf("No gold cards equipped");
+			return;
+		}
 		if (goldUses < 1 || goldActive) {
-			if (!goldActive)
+			if (!goldActive && dryUseTimer == 0) {
 				owner.A_StartSound("cards/cantuse",CHAN_AUTO,CHANF_LOCAL);
+				//while this counter is above 0, we won't play the sound again and the hud will briefly show red cards signifying you can't use them anymore
+				dryUseTimer = 45;
+			}
 			return;
 		}
 		goldUses--;
@@ -437,12 +454,14 @@ Class PK_CardControl : PK_InventoryToken {
 		goldActive = true;
 	}
 	void PK_StopGoldenCards() {
+		goldActive = false;
+		goldDuration = default.goldDuration;
+		owner.A_StartSound("cards/end",CHAN_AUTO,CHANF_LOCAL);
 		if (EquippedCards.Size() < 5) {
 			if (pk_debugmessages)
 				Console.Printf("Something went wrong: equipped golden cards were changed while they were active!");
 			return;
 		}
-		goldActive = false;
 		for (int i = 2; i < EquippedCards.Size(); i++) {
 			let card = PK_BaseGoldenCard(owner.FindInventory(EquippedCards[i]));
 			if (!card)
@@ -451,8 +470,7 @@ Class PK_CardControl : PK_InventoryToken {
 				Console.Printf("Stopping %s golden card",card.GetTag());
 			card.GoldenCardEnd();
 		}
-	}
-	
+	}	
 	void PK_EquipCards() {
 		EquippedCards.Clear();
 		EquippedCards.Reserve(5);			
@@ -520,6 +538,8 @@ Class PK_CardControl : PK_InventoryToken {
 			destroy();
 			return;
 		}
+		if (dryUseTimer > 0)
+			dryUseTimer = Clamp(dryUseTimer - 1,0,45);
 		if (!goldActive)
 			return;
 		else if (level.time % 35 == 0) {
@@ -531,7 +551,8 @@ Class PK_CardControl : PK_InventoryToken {
 	}
 }
 
-Class PK_BaseTarotCard : PK_InventoryToken abstract {
+Class PK_BaseSilverCard : PK_InventoryToken abstract {
+	protected PK_CardControl control;
 	protected virtual void GetCard() {}
 	protected virtual void RemoveCard() {}
 	PK_BoardEventHandler event;
@@ -543,6 +564,7 @@ Class PK_BaseTarotCard : PK_InventoryToken abstract {
 			return;
 		}
 		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
+		control = PK_CardControl(owner.FindInventory("PK_CardControl"));
 		GetCard();
 		if (pk_debugmessages)
 			console.printf("Player %d has %s card now",owner.player.mo.PlayerNumber(),self.GetClassName());
@@ -582,7 +604,7 @@ Class PK_BaseTarotCard : PK_InventoryToken abstract {
 }
 
 //flips a global bool. While true, souls don't disappear (PK_Soul age variable doesn't increase)
-Class PKC_SoulKeeper : PK_BaseTarotCard {	
+Class PKC_SoulKeeper : PK_BaseSilverCard {	
 	Default {
 		tag "SoulKeeper";
 	}	
@@ -597,7 +619,7 @@ Class PKC_SoulKeeper : PK_BaseTarotCard {
 }
 
 //sets player's base and current health to 150 (reverts when removed)
-Class PKC_Blessing : PK_BaseTarotCard {
+Class PKC_Blessing : PK_BaseSilverCard {
 	private int curHealth;
 	Default {
 		tag "Blessing";
@@ -618,7 +640,7 @@ Class PKC_Blessing : PK_BaseTarotCard {
 /*Iterates over an array of all Ammo in an event handler and doubles it amount.
 Also removes Ammo that has been picked up from the array.
 (A bit awkward but I want this to work for all ammo, just in case.)*/
-Class PKC_Replenish : PK_BaseTarotCard {
+Class PKC_Replenish : PK_BaseSilverCard {
 	Default {
 		tag "Replenish";
 	}
@@ -653,7 +675,7 @@ Class PKC_Replenish : PK_BaseTarotCard {
 }
 
 //Demon Morph is activated at 50 souls with this:
-Class PKC_DarkSoul : PK_BaseTarotCard {
+Class PKC_DarkSoul : PK_BaseSilverCard {
 	Default {
 		tag "DarkSoul";
 	}
@@ -674,7 +696,7 @@ Class PKC_DarkSoul : PK_BaseTarotCard {
 }
 
 //Makes PK_Soul and PK_GoldPikcup descendants fly towards the player (with NOGRAVITY):
-Class PKC_SoulCatcher : PK_BaseTarotCard {
+Class PKC_SoulCatcher : PK_BaseSilverCard {
 	Default {
 		tag "SoulCatcher";
 	}
@@ -693,28 +715,37 @@ Class PKC_SoulCatcher : PK_BaseTarotCard {
 	}
 }
 
-Class PKC_Forgiveness : PK_BaseTarotCard {
+//changes goldUses variable on card control to allow activating them twice
+Class PKC_Forgiveness : PK_BaseSilverCard {
 	Default {
 		tag "Forgiveness";
+	}
+	override void GetCard() {
+		if (control)
+			control.goldUses = Clamp(control.goldUses + 1,0,2);
+	}
+	override void RemoveCard() {
+		if (control)
+			control.goldUses = Clamp(control.goldUses - 1,0,1);
 	}
 }
 
 //PK_GoldPickup descendants will givs the player double the amount with this in inventory:
-Class PKC_Greed : PK_BaseTarotCard {
+Class PKC_Greed : PK_BaseSilverCard {
 	Default {
 		tag "Greed";
 	}
 }
 
 //PK_Soul checks for this in its TryPickup and does amount*=2 if it's found
-Class PKC_SoulRedeemer : PK_BaseTarotCard {
+Class PKC_SoulRedeemer : PK_BaseSilverCard {
 	Default {
 		tag "SoulRedeemer";
 	}
 }
 
 //Adds 1 HP if player hasn't been damaged for 10 seconds
-Class PKC_HealthRegeneration : PK_BaseTarotCard {
+Class PKC_HealthRegeneration : PK_BaseSilverCard {
 	private int dmgCounter;
 	Default {
 		tag "HealthRegeneration";
@@ -737,7 +768,7 @@ Class PKC_HealthRegeneration : PK_BaseTarotCard {
 }
 
 //WolrdThingDamaged checks if this is in e.DamageSource's inventory and if so, adds e.Damage value to drainedHP:
-Class PKC_HealthStealer : PK_BaseTarotCard {
+Class PKC_HealthStealer : PK_BaseSilverCard {
 	double drainedHP;
 	Default {
 		tag "HealthStealer";
@@ -763,7 +794,7 @@ Class PKC_HealthStealer : PK_BaseTarotCard {
 }
 
 //Same as Health Regeneration but gives 1 point of armor instead:
-Class PKC_HellishArmor : PK_BaseTarotCard {
+Class PKC_HellishArmor : PK_BaseSilverCard {
 	private int dmgCounter;
 	Default {
 		tag "HellishArmor";
@@ -795,7 +826,7 @@ Class PK_HellishArmorBonus : BasicArmorBonus {
 }
 
 //iterates through player's inventory and sets all Ammo amount to 666 (beyond max)
-Class PKC_666Ammo : PK_BaseTarotCard {
+Class PKC_666Ammo : PK_BaseSilverCard {
 	Default {
 		tag "666Ammo";
 	}
@@ -839,7 +870,7 @@ Class PKC_666Ammo : PK_BaseTarotCard {
 }
 
 //base class for golden cards. They're activated with a netevent that makes PK_CardControl call GoldenCardStart on all equipped cards
-Class PK_BaseGoldenCard : PK_BaseTarotCard {
+Class PK_BaseGoldenCard : PK_BaseSilverCard {
 	protected bool cardActive; 
 	virtual void GoldenCardStart() {
 		cardActive = true;
@@ -862,16 +893,13 @@ Class PKC_Endurance : PK_BaseGoldenCard {
 
 
 Class PKC_TimeBonus : PK_BaseGoldenCard {
-	private PK_CardControl control;
 	Default {
 		tag "TimeBonus";
 	}
 	override void GoldenCardStart() {
 		super.GoldenCardStart();
-		control = PK_CardControl(owner.FindInventory("PK_CardControl"));
-		if (!control)
-			return;
-		control.goldDuration = 45;
+		if (control)
+			control.goldDuration = 45;
 	}
 	override void GoldenCardEnd() {
 		if (control)
@@ -942,7 +970,6 @@ Class PKC_Confusion : PK_BaseGoldenCard {
 			if (!plr || !plr.mo)
 				continue;
 			let card = PKC_Confusion(plr.mo.FindInventory("PKC_Confusion"));
-			let control = PK_CardControl(plr.mo.FindInventory("PK_CardControl"));
 			/*if (pk_debugmessages) {
 				string conf = card ? "has Confusion" : "doesn't have Confusion";
 				string cont = control ? "has CardControl" : "doesnt have CardControl";
@@ -1003,7 +1030,7 @@ Class PK_ConfusionControl : PK_InventoryToken {
 		if (!active)
 			return;
 		if (owner.health < 1)
-			return;
+			return;		
 		if (level.time % 35 * cycle == 0) {
 			cycle = random[conf](3,8);
 			BlockThingsIterator itr = BlockThingsIterator.Create(owner,320);
@@ -1026,6 +1053,22 @@ Class PK_ConfusionControl : PK_InventoryToken {
 Class PKC_Dexterity : PK_BaseGoldenCard {
 	Default {
 		tag "Dexterity";
+	}
+	override void GoldenCardStart() {
+		super.GoldenCardStart();
+		owner.GiveInventory("PK_DexterityEffect",1);
+	}
+	override void GoldenCardEnd() {
+		owner.TakeInventory("PK_DexterityEffect",1);
+	}
+}
+
+Class PK_DexterityEffect : PowerDoubleFiringSpeed {
+	Default {
+		powerup.duration 999999;
+		inventory.maxamount 1;
+		+INVENTORY.UNDROPPABLE
+		+INVENTORY.UNTOSSABLE
 	}
 }
 
