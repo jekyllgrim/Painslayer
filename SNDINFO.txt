@@ -3,6 +3,7 @@ world/null	DSEMPTY
 
 cards/cantuse "sounds/items/card-cannot_use.wav"
 cards/use "sounds/items/card-use.wav"
+cards/end "sounds/items/card-end.wav"
 
 /// MENU
 
