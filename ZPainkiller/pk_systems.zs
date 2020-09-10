@@ -410,7 +410,7 @@ Class PK_CardControl : PK_InventoryToken {
 		PK_CardControl.goldDuration 10;
 	}
 	
-	int GetDryUseTimer() {
+	ui int GetDryUseTimer() {
 		return dryUseTimer;
 	}
 	

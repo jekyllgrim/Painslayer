@@ -2,6 +2,7 @@ Class PainkillerHUD : BaseStatusBar {
 	HUDFont mIndexFont;
 	HUDFont mStatFont;
 	
+	
 	private int arrowangle;
 	private int checktic;
 	
@@ -65,13 +66,13 @@ Class PainkillerHUD : BaseStatusBar {
 	
 	protected void DrawActiveGoldenCards() {
 		if (!cardcontrol || (!cardcontrol.goldActive && cardcontrol.GetDryUseTimer() == 0))
-			return;
-		if (cardcontrol.GetDryUseTimer() > 0)
-			
+			return;			
 		for (int i = 2; i < 5; i++) {
 			if (cardcontrol.EquippedSlots[i]) {
 				string texpath = String.Format("graphics/Tarot/cards/%s.png",cardcontrol.EquippedSlots[i]);
 				DrawImage(texpath,((-77 + i*22),195),DI_SCREEN_HCENTER|DI_ITEM_LEFT_TOP,scale:(0.14,0.14));
+				if (cardcontrol.GetDryUseTimer() > 0)
+					DrawImage("graphics/Tarot/cards/UsedCard.png",((-77 + i*22),195),DI_SCREEN_HCENTER|DI_ITEM_LEFT_TOP,alpha:0.75,scale:(0.14,0.14));
 			}
 		}
 	}
