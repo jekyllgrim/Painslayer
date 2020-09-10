@@ -21,7 +21,7 @@ Class PKWeapon : Weapon abstract {
 		if (!weap)
 			return;
 		owner.player.WeaponState |= WF_WEAPONBOBBING;
-		hasDexterity = (owner.CountInv("PK_DexterityEffect") > 0);
+		hasDexterity = (owner.FindInventory("PowerDoubleFiringSpeed",true));
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
