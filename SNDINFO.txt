@@ -5,6 +5,11 @@ cards/cantuse "sounds/items/card-cannot_use.wav"
 cards/use "sounds/items/card-use.wav"
 cards/end "sounds/items/card-end.wav"
 
+$random cards/thunderwalk { thunderwalk1 thunderwalk2 thunderwalk3 }
+thunderwalk1	"sounds/items/stonewalk1.wav"
+thunderwalk2	"sounds/items/stonewalk2.wav"
+thunderwalk3	"sounds/items/stonewalk3.wav"
+
 /// MENU
 
 ui/board/open			"sounds/menu/card-accept.wav"
