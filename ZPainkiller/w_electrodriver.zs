@@ -94,16 +94,18 @@ Class PK_ElectroDriver : PKWeapon {
 				A_StopSound(12);
 				return ResolveState("DiskFire");
 			}
-			invoker.celldepleterate++;
-			int req = invoker.hasDexterity ? 1 : 3;
-			if (invoker.celldepleterate > req) {				
-				invoker.celldepleterate = 0;
-				if (CountInv("PK_Battery") >= 1)
-					TakeInventory("PK_Battery",1);
-				else {
-					A_StopSound(12);
-					A_StartSound("weapons/edriver/electroloopend",12);
-					return ResolveState("Ready");
+			if (!FindInventory("PowerInfiniteAmmo",true)) {
+				invoker.celldepleterate++;
+				int req = invoker.hasDexterity ? 1 : 3;
+				if (invoker.celldepleterate > req) {				
+					invoker.celldepleterate = 0;
+					if (CountInv("PK_Battery") >= 1)
+						TakeInventory("PK_Battery",1);
+					else {
+						A_StopSound(12);
+						A_StartSound("weapons/edriver/electroloopend",12);
+						return ResolveState("Ready");
+					}
 				}
 			}
 			A_StartSound("weapons/edriver/electroloop",12,CHANF_LOOPING);
