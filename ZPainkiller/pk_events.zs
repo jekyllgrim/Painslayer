@@ -31,6 +31,7 @@ Class PK_MainHandler : EventHandler {
 		"$PKCH_TAKEGOLD1",
 		"$PKCH_TAKEGOLD2"
 	};
+	
 	override void NetworkProcess(consoleevent e) {
 		if (!e.isManual)
 			return;
