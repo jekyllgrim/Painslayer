@@ -42,7 +42,9 @@ Class PK_Shotgun : PKWeapon {
 			A_Overlay(-100,"Flash");
 			A_firebullets(5,5,10,9,pufftype:"PK_BulletPuff",flags:FBF_NORANDOM|FBF_USEAMMO,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-44,spawnofs_xy:9);
 			A_ZoomFactor(0.99,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
-			//A_Eject				
+			if (FindInventory("PK_DexterityEffect"))
+				return ResolveState("FireDouble");
+			return ResolveState(null);
 		}
 		TNT1 A 0 A_ZoomFactor(1,ZOOM_NOSCALETURNING);
 		PSHT CDF 1 A_WeaponOffset(10,2,WOF_ADD);
@@ -51,6 +53,18 @@ Class PK_Shotgun : PKWeapon {
 		PSHT GGFFEE 1 A_WeaponOffset(-2.5,-3,WOF_ADD);
 		PSHT DDCCBBAAA 1 A_WeaponOffset(-1.66,-0.66,WOF_ADD);
 		PSHT A 8 { //allows immediate primary refire but prevents using altfire immediately
+			A_WeaponOffset(0,32,WOF_INTERPOLATE);
+			PK_WeaponReady(WRF_NOSECONDARY|WRF_NOBOB);
+		}
+		goto ready;
+	FireDouble:
+		TNT1 A 0 A_ZoomFactor(1,ZOOM_NOSCALETURNING);
+		PSHT CDF 1 A_WeaponOffset(10,2,WOF_ADD);
+		PSHT HH 1 A_WeaponOffset(1,5,WOF_ADD);
+		PSHT HH 1 A_WeaponOffset(-1,4,WOF_ADD);
+		PSHT GFE 1 A_WeaponOffset(-5,-6,WOF_ADD);
+		PSHT DCBAA 1 A_WeaponOffset(-3.2,-1.2,WOF_ADD);
+		PSHT A 6 { //allows immediate primary refire but prevents using altfire immediately
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			PK_WeaponReady(WRF_NOSECONDARY|WRF_NOBOB);
 		}
