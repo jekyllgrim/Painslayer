@@ -401,17 +401,23 @@ Class PK_CardControl : PK_InventoryToken {
 	bool goldActive;
 	private int dryUseTimer; //> 0 you try to use gold cards when you're out of uses
 	int goldUses;
+	private int totalGoldUses;
 	property goldUses : goldUses;
 	int goldDuration;
 	property goldDuration : goldDuration;
 		
 	Default {
 		PK_CardControl.goldUses 1;
-		PK_CardControl.goldDuration 10;
+		PK_CardControl.goldDuration 30;
 	}
 	
 	ui int GetDryUseTimer() {
 		return dryUseTimer;
+	}
+	
+	//used by Forgiveness to make sure you can't reuse golden cards infinitely by unequipping and reequipping Forgiveness
+	int GetTotalGoldUses() {
+		return totalGoldUses;
 	}
 	
 	override void Tick() {}
@@ -440,8 +446,10 @@ Class PK_CardControl : PK_InventoryToken {
 			return;
 		}
 		goldUses--;
-		if (pk_debugmessages)
-			Console.Printf("Remaining gold card uses: %d",goldUses);
+		totalGoldUses++;
+		if (pk_debugmessages) {
+			Console.Printf("Remaining gold activations: %d | Total activations: %d",goldUses,totalGoldUses);
+		}
 		for (int i = 2; i < EquippedCards.Size(); i++) {
 			let card = PK_BaseGoldenCard(owner.FindInventory(EquippedCards[i]));
 			if (!card)
@@ -695,7 +703,7 @@ Class PKC_DarkSoul : PK_BaseSilverCard {
 	}
 }
 
-//Makes PK_Soul and PK_GoldPikcup descendants fly towards the player (with NOGRAVITY):
+//Makes PK_Soul and PK_GoldPikcup descendants fly towards the player (special handling in their Tick when they have a tracer):
 Class PKC_SoulCatcher : PK_BaseSilverCard {
 	Default {
 		tag "SoulCatcher";
@@ -709,7 +717,8 @@ Class PKC_SoulCatcher : PK_BaseSilverCard {
 			let next = itr.thing;
 			if (next && (next is "PK_GoldPickup" || next is "PK_Soul") && !next.tracer) {
 				next.tracer = owner;
-				//console.printf("found %s",next.GetClassName());
+				if (pk_debugmessages)
+					console.printf("found %s",next.GetClassName());
 			}
 		}
 	}
@@ -721,7 +730,8 @@ Class PKC_Forgiveness : PK_BaseSilverCard {
 		tag "Forgiveness";
 	}
 	override void GetCard() {
-		if (control)
+		//only increase gold uses if the cards have been used no more than once in total
+		if (control && control.GetTotalGoldUses() < 2)
 			control.goldUses = Clamp(control.goldUses + 1,0,2);
 	}
 	override void RemoveCard() {
