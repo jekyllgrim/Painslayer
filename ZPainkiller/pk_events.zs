@@ -145,7 +145,7 @@ Class PK_MainHandler : EventHandler {
 			if  (!act.FindInventory("PK_DemonMorphControl"))
 				act.GiveInventory("PK_DemonMorphControl",1);
 			if  (!act.FindInventory("PK_CardControl"))
-				act.GiveInventory("PK_CardControl",1);
+				act.GiveInventory("PK_CardControl",1);			
 		}
 	}
 	override void WorldThingRevived (worldevent e) {
