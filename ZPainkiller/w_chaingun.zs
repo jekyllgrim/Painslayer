@@ -14,6 +14,7 @@ Class PK_Chaingun : PKWeapon {
 		inventory.pickupsound "pickups/weapons/chaingun";
 		Tag "Rocket Launcher/Chaingun";
 	}
+	private bool hideFlash;
 	States {
 	Deselect:
 		TNT1 A 0 {
@@ -45,7 +46,7 @@ Class PK_Chaingun : PKWeapon {
 		goto ready;
 	AltFire:
 		TNT1 A 0 {
-			A_StartSound("weapons/chaingun/loop",12,CHANF_LOOPING);
+			A_StartSound("weapons/chaingun/loop",CHAN_6,CHANF_LOOPING);
 			A_StartSound("weapons/chaingun/spin",CHAN_7,CHANF_LOOPING);
 		}
 		MIGN A 3;
@@ -61,7 +62,13 @@ Class PK_Chaingun : PKWeapon {
 				return ResolveState("AltFireEnd");
 			invoker.holddur++;
 			A_StartSound("weapons/chaingun/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
-			A_Overlay(-100,"AltFlash");
+			if (invoker.hasDexterity) {
+				invoker.hideFlash = !invoker.hideFlash;
+			}
+			else
+				invoker.hideFlash = false;
+			if (!invoker.hideFlash)
+				A_Overlay(-100,"AltFlash");
 			A_FireBullets(2.5,2.5,-1,9,pufftype:"PK_BulletPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-40,spawnofs_xy:8.6);
 			
 			A_QuakeEX(1,1,0,2,0,1,sfx:"world/null");
@@ -72,7 +79,7 @@ Class PK_Chaingun : PKWeapon {
 		TNT1 A 0 {
 			invoker.holddur = 0;
 			A_ClearOverlays(5,5);
-			A_StopSound(12);
+			A_StopSound(CHAN_6);
 			A_StopSound(CHAN_7);
 			A_StartSound("weapons/chaingun/stop");
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
@@ -82,7 +89,6 @@ Class PK_Chaingun : PKWeapon {
 			invoker.atkzoom = Clamp(invoker.atkzoom - 0.006,0,0.1);
 			A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
 		}
-	AltFireEndDo:
 		MIGN AABBCCDD 1 {
 			PK_WeaponReady();
 			invoker.atkzoom = Clamp(invoker.atkzoom - 0.006,0,0.1);
@@ -96,10 +102,22 @@ Class PK_Chaingun : PKWeapon {
 		goto ready;
 	MinigunFire:
 		MIGN ABCD 1 {
-			invoker.holddur++;
+			if (invoker.hasDexterity) {
+				A_SoundPitch(CHAN_6,1.25);
+				A_SoundPitch(CHAN_7,1.25);
+				let psp = player.FindPsprite(OverlayID());
+				if (psp && psp.frame == 0)
+					psp.frame = 2;
+				else
+					psp.frame == 0;
+			}
+			else {
+				A_SoundPitch(CHAN_6,1);
+				A_SoundPitch(CHAN_7,1);
+			}
 			double ofs = Clamp(invoker.holddur * 0.04,0,1.2);
 			A_OverlayOffset(OverlayID(),frandom[mgun](0,ofs),frandom[mgun](0,ofs),WOF_INTERPOLATE);
-			invoker.atkzoom = Clamp(invoker.holddur * 0.0005,0,0.04);
+			invoker.atkzoom = Clamp(invoker.holddur * 0.001,0,0.04);
 			if (invoker.atkzoom < 0.04)
 				A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
 			else

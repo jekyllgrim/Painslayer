@@ -95,14 +95,28 @@ Class PK_ElectroDriver : PKWeapon {
 				return ResolveState("DiskFire");
 			}
 			invoker.celldepleterate++;
-			if (invoker.celldepleterate > 3) {
-				TakeInventory("PK_Battery",1);
+			int req = invoker.hasDexterity ? 1 : 3;
+			if (invoker.celldepleterate > req) {				
 				invoker.celldepleterate = 0;
+				if (CountInv("PK_Battery") >= 1)
+					TakeInventory("PK_Battery",1);
+				else {
+					A_StopSound(12);
+					A_StartSound("weapons/edriver/electroloopend",12);
+					return ResolveState("Ready");
+				}
 			}
+			A_StartSound("weapons/edriver/electroloop",12,CHANF_LOOPING);
 			vector3 atkpos = FindElectroTarget();
 			PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
 			PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
-			A_StartSound("weapons/edriver/electroloop",12,CHANF_LOOPING);
+			if (invoker.hasDexterity) {
+				PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.2,9.5),style:STYLE_ADD);
+				PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.9,10.5),style:STYLE_ADD);
+				A_SoundPitch(12,1.25);
+			}
+			else
+				A_SoundPitch(12,1);
 			A_WeaponOffset(frandom[eld](-0.3,0.3),frandom[eld](32,32.4));
 			return ResolveState(null);
 		}
@@ -112,7 +126,7 @@ Class PK_ElectroDriver : PKWeapon {
 		}
 		TNT1 A 0 {
 			A_StopSound(12);
-			A_StartSound("weapons/edriver/electroloopend");
+			A_StartSound("weapons/edriver/electroloopend",12);
 		}
 		goto ready;	
 	DiskFire:
@@ -121,9 +135,9 @@ Class PK_ElectroDriver : PKWeapon {
 			A_StartSound("weapons/edriver/diskshot",CHAN_WEAPON);
 			A_FireProjectile("PK_DiskProjectile",spawnofs_xy:2,spawnheight:5);
 		}
-		ELDR EEEEEE 1 A_WeaponOffset(1.6,1.2,WOF_ADD);
-		ELDR FFFFEE 1 A_WeaponOffset(frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),WOF_ADD);
-		ELDR EEEE 1 A_WeaponOffset(-1.6,-1.2,WOF_ADD);
+		ELDR EEE 2 A_WeaponOffset(3.2,2.4,WOF_ADD);
+		ELDR FFE 2 A_WeaponOffset(frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),WOF_ADD);
+		ELDR EE 2 A_WeaponOffset(-3.2,-2.4,WOF_ADD);
 		ELDR GGGHHHIIIJJJKKK 1 A_WeaponOffset(-1.2,-1,WOF_ADD);
 		ELDR A 1 A_WeaponOffset(0,32);
 		goto ready;
@@ -277,13 +291,14 @@ Class PK_Lightning : PK_TrackingBeam {
 			TNT1 A 0;
 			MODL A 1 bright {
 				lifetimer--;
-				frame = random(0,9);
+				frame = random[lit](0,9);
 			}
 			#### # 0 A_JumpIf(lifetimer <=0,"death");
 			loop;
 	}
 }
 
+//same but the model attached to it is angled differently
 Class PK_Lightning2 : PK_Lightning {}
 
 Class PK_Shuriken : PK_Projectile {
@@ -332,6 +347,14 @@ Class PK_Shuriken : PK_Projectile {
 			A_SetRenderstyle(0.75,STYLE_Add);
 			roll = random[star](0,359);
 			A_Explode(128,40,fulldamagedistance:64);
+			for (int i = random[sfx](5,10); i > 0; i--) {
+				let debris = Spawn("PK_RandomDebris",pos);
+				if (debris) {
+					debris.vel = (frandom[sfx](-5,5),frandom[sfx](-5,5),frandom[sfx](-2,6));
+					debris.A_SetScale(0.5);
+					debris.gravity = 0.25;
+				}
+			}
 		}
 		BOM3 ABCDEFGHIJKLMNOPQRSTU 1 bright;
 		stop;
@@ -339,6 +362,24 @@ Class PK_Shuriken : PK_Projectile {
 	XDeath:
 		TNT1 A 1;
 		stop;
+	}
+}
+
+//unused
+Class PK_ShurikenDebris : PK_RandomDebris {
+	Default {
+		gravity 0.25;
+	}
+	override void Tick() {
+		super.Tick();
+		if (isFrozen())
+			return;
+		let trl = Spawn("PK_DebrisFlame",pos);
+		if (trl) {
+			trl.alpha = alpha*0.6;
+			trl.scale *= 0.5;
+		}
+		A_FadeOut(0.05);
 	}
 }
 

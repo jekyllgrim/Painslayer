@@ -42,7 +42,7 @@ Class PK_Shotgun : PKWeapon {
 			A_Overlay(-100,"Flash");
 			A_firebullets(5,5,10,9,pufftype:"PK_BulletPuff",flags:FBF_NORANDOM|FBF_USEAMMO,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-44,spawnofs_xy:9);
 			A_ZoomFactor(0.99,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
-			if (FindInventory("PK_DexterityEffect"))
+			if (invoker.hasDexterity)
 				return ResolveState("FireDouble");
 			return ResolveState(null);
 		}
@@ -106,21 +106,6 @@ Class PK_Shotgun : PKWeapon {
 				fl.frame = random[sfx](0,3);
 			}
 		stop;
-	}
-}
-
-class PK_BulletPuffSmoke : PK_BlackSmoke {
-	Default {
-		alpha 0.3;
-		scale 0.12;
-	}
-	states	{
-	Spawn:
-		SMOK ABCDEFGHIJKLMNOPQR 1 NoDelay {
-			A_FadeOut(0.02);
-			scale *= 0.9;
-		}
-		wait;
 	}
 }
 	
