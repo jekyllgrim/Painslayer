@@ -1,6 +1,7 @@
 Class PKWeapon : Weapon abstract {
 	sound emptysound;
 	property emptysound : emptysound;
+	protected bool hasDexterity;
 	Default {
 		weapon.BobRangeX 0.31;
 		weapon.BobRangeY 0.15;
@@ -20,6 +21,7 @@ Class PKWeapon : Weapon abstract {
 		if (!weap)
 			return;
 		owner.player.WeaponState |= WF_WEAPONBOBBING;
+		hasDexterity = (owner.CountInv("PK_DexterityEffect") > 0);
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -113,6 +115,21 @@ Class PK_BulletPuff : PKPuff {
 			}
 		}
 		FLAR B 1 bright A_FadeOut(0.1);
+		wait;
+	}
+}
+
+class PK_BulletPuffSmoke : PK_BlackSmoke {
+	Default {
+		alpha 0.3;
+		scale 0.12;
+	}
+	states	{
+	Spawn:
+		SMOK ABCDEFGHIJKLMNOPQR 1 NoDelay {
+			A_FadeOut(0.02);
+			scale *= 0.9;
+		}
 		wait;
 	}
 }
@@ -343,7 +360,7 @@ Class PK_ExplosiveDebris : PK_RandomDebris {
 		for( int i = 0; i < steps; i++ )  {
 			let trl = Spawn("PK_DebrisFlame",oldPos);
 			if (trl)
-				trl.alpha = alpha*0.4;
+				trl.alpha = alpha*0.5;
 			oldPos = level.vec3Offset( oldPos, direction );
 		}
 	}
@@ -362,7 +379,7 @@ Class PK_DebrisFlame : PK_BaseFlare {
 	Default {
 		scale 0.05;
 		renderstyle 'translucent';
-		alpha 1;
+		alpha 1;		
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
