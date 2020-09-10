@@ -52,10 +52,17 @@ Class PK_Painkiller : PKWeapon {
 				return ResolveState(null);
 			}
 			PKIR BCDEF 1;
-			TNT1 A 0 A_StartSound("weapons/painkiller/spin",12,CHANF_LOOPING);
+			TNT1 A 0 {
+				A_StartSound("weapons/painkiller/spin",12,CHANF_LOOPING);
+				if (invoker.hasDexterity)
+					return ResolveState("FastHold");
+				return ResolveState("Hold");
+			}
+			goto ready;
 		Hold:
 			TNT1 A 0 A_CustomPunch(12,true,CPF_NOTURN,"PK_PainkillerPuff",80); 
 			PKIL ABCD 1 {
+				A_SoundPitch(12,1);
 				if ((player.cmd.buttons & BT_ALTATTACK) && !(player.oldbuttons & BT_ALTATTACK)) {
 					A_StopSound(12);
 					invoker.combofire = true;
@@ -65,8 +72,26 @@ Class PK_Painkiller : PKWeapon {
 				A_WeaponOffset(frandom(-0.15,0.15),frandom(32,32.3));
 				return ResolveState(null);
 			}
-			TNT1 A 0 A_ReFire();
+			TNT1 A 0 A_ReFire("Hold");
+			goto HoldEnd;
+		FastHold:
+			TNT1 A 0 A_CustomPunch(12,true,CPF_NOTURN,"PK_PainkillerPuff",80); 
+			PKIL AC 1 {
+				A_SoundPitch(12,1.2);
+				if ((player.cmd.buttons & BT_ALTATTACK) && !(player.oldbuttons & BT_ALTATTACK)) {
+					A_StopSound(12);
+					invoker.combofire = true;
+					A_ClearRefire();
+					return ResolveState("AltFire");
+				}
+				A_WeaponOffset(frandom(-0.15,0.15),frandom(32,32.3));
+				return ResolveState(null);
+			}
+			TNT1 A 0 A_ReFire("FastHold");
+			goto HoldEnd;
+		HoldEnd:
 			TNT1 A 0 {
+				A_ClearRefire();
 				A_StopSound(12);
 				A_StartSound("weapons/painkiller/stop",CHAN_BODY);
 			}
