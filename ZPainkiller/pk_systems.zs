@@ -754,7 +754,7 @@ Class PKC_SoulRedeemer : PK_BaseSilverCard {
 	}
 }
 
-//Adds 1 HP if player hasn't been damaged for 10 seconds
+//Adds 1 HP per second if player hasn't been damaged for 10 seconds
 Class PKC_HealthRegeneration : PK_BaseSilverCard {
 	private int dmgCounter;
 	Default {
@@ -777,7 +777,7 @@ Class PKC_HealthRegeneration : PK_BaseSilverCard {
 	}
 }
 
-//WolrdThingDamaged checks if this is in e.DamageSource's inventory and if so, adds e.Damage value to drainedHP:
+//Vampirism: WolrdThingDamaged checks if this is in e.DamageSource's inventory and if so, adds e.Damage value to drainedHP:
 Class PKC_HealthStealer : PK_BaseSilverCard {
 	double drainedHP;
 	Default {
@@ -803,7 +803,7 @@ Class PKC_HealthStealer : PK_BaseSilverCard {
 	}
 }
 
-//Same as Health Regeneration but gives 1 point of armor instead:
+//Same as Health Regeneration but gives 1 point of armor per sec instead:
 Class PKC_HellishArmor : PK_BaseSilverCard {
 	private int dmgCounter;
 	Default {
@@ -827,7 +827,7 @@ Class PKC_HellishArmor : PK_BaseSilverCard {
 }
 
 //used by Hellish Armor
-Class PK_HellishArmorBonus : BasicArmorBonus {
+Class PK_HellishArmorBonus : BasicArmorBonus abstract {
 	Default {
 		armor.saveamount 1;
 		armor.maxsaveamount 100;
@@ -852,26 +852,27 @@ Class PKC_666Ammo : PK_BaseSilverCard {
 	private array < Class<Ammo> > modifiedAmmo;
 	private array <int> prevAmmoAmount;
 	override void GetCard() {
-		//give painkiller ammo if there is none
+		//give mod ammo types if there is none
 		for (int i = 0; i < PKAmmoTypes.Size(); i++) {
 			let am = PKAmmoTypes[i];
 			if (owner.CountInv(am) < 1)
 				owner.GiveInventory(am,0); //we only need the pointers, no ammount increase
 		}
 		modifiedAmmo.Clear();
-		//iterate through inventory, record every found ammo and its current amount in parallel into two arrays, then set amount to 666
+		//iterate through inventory, record every found ammo and its current amount in parallel into two arrays
 		for(let item = owner.Inv; item; item = item.Inv) {
 			let am = Ammo(item);
 			if (am) {
 				Class<Ammo> foundammo = am.GetClassName();
 				modifiedAmmo.push(foundammo);
 				prevAmmoAmount.push(owner.CountInv(foundammo));
+				//now set current ammo amount to 666
 				owner.A_SetInventory(item.GetClassName(),666,beyondMax:true);
 			}
 		}		
 	}
 	override void RemoveCard() {
-		//restore original ammo amount using the two arrays
+		//restore original ammo amount using the two arrays we recorded earlier
 		if (modifiedAmmo.Size() < 1 || prevAmmoAmount.Size() < 1 || modifiedAmmo.Size() != prevAmmoAmount.Size())
 			return;
 		for (int i = 0; i < modifiedAmmo.Size(); i++)
@@ -890,7 +891,7 @@ Class PK_BaseGoldenCard : PK_BaseSilverCard {
 	}
 }
 
-//reduces received damage by 50%
+//simply reduces incoming damage by 50%
 Class PKC_Endurance : PK_BaseGoldenCard {
 	Default {
 		tag "Endurance";
@@ -901,7 +902,7 @@ Class PKC_Endurance : PK_BaseGoldenCard {
 	}
 }
 
-
+//simply modifies max duration of gold cards in cardcontrol item
 Class PKC_TimeBonus : PK_BaseGoldenCard {
 	Default {
 		tag "TimeBonus";
@@ -944,13 +945,15 @@ Class PKC_Rebirth : PK_BaseGoldenCard {
 	}
 	override void GoldenCardStart() {
 		super.GoldenCardStart();
-		if (owner) {
+		if (owner && owner.player) {
 			owner.GiveInventory("BlueArmorForMegasphere",1);
-			owner.GiveInventory("MegasphereHealth",1);
+			//make sure we increase health to 200 but not beyond (even with "Blessing" which adds 50 bonushealth)
+			owner.GiveBody(200,200-owner.player.mo.BonusHealth);
 		}
 	}
 }
 
+//works via control item initially given to all monsters
 Class PKC_Confusion : PK_BaseGoldenCard {
 	private PK_MainHandler handler;
 	Default {
@@ -1007,9 +1010,12 @@ Class PKC_Confusion : PK_BaseGoldenCard {
 	}
 }
 
-Class PK_ConfusionControl : PK_InventoryToken {
-	private int cycle;
+
+//Confusion control item: makes monsters select a random target from monsters around them and ignore the player
+Class PK_ConfusionControl : PK_InventoryToken abstract {
+	private int cycle; //this will hold a random interval, after which the monster will switch target
 	bool active;
+	//this part ensures the monster falls under the effect if it somehow gets spawned *during* Confusion being active. Otherwise, under normal circumstances, the item gets activated from an event handler, not on its own
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);
 		if (!owner || !owner.bISMONSTER) {
@@ -1040,9 +1046,10 @@ Class PK_ConfusionControl : PK_InventoryToken {
 		if (!active)
 			return;
 		if (owner.health < 1)
-			return;		
+			return;
 		if (level.time % 35 * cycle == 0) {
-			cycle = random[conf](3,8);
+			cycle = random[conf](3,8); //set random interval
+			//find a target with a blockthingsiterator (Won't affect unalerted monsters since this doesn't call A_Look, so even though a target gets set, they won't start chasing it. This is good since it won't mess with mosnters deep in the map.)
 			BlockThingsIterator itr = BlockThingsIterator.Create(owner,320);
 			while (itr.next()) {
 				let next = itr.thing;
@@ -1060,6 +1067,7 @@ Class PK_ConfusionControl : PK_InventoryToken {
 	}
 }
 
+//Essentially PowerDoubleFiringSpeed but some weapons have special checks and custom behavior changes when it's in inventory:
 Class PKC_Dexterity : PK_BaseGoldenCard {
 	Default {
 		tag "Dexterity";
@@ -1073,7 +1081,7 @@ Class PKC_Dexterity : PK_BaseGoldenCard {
 	}
 }
 
-Class PK_DexterityEffect : PowerDoubleFiringSpeed {
+Class PK_DexterityEffect : PowerDoubleFiringSpeed abstract {
 	Default {
 		powerup.duration 999999;
 		inventory.maxamount 1;
