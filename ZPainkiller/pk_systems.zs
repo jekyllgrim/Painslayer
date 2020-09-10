@@ -882,7 +882,7 @@ Class PKC_666Ammo : PK_BaseSilverCard {
 
 //base class for golden cards. They're activated with a netevent that makes PK_CardControl call GoldenCardStart on all equipped cards
 Class PK_BaseGoldenCard : PK_BaseSilverCard {
-	protected bool cardActive; 
+	protected bool cardActive;
 	virtual void GoldenCardStart() {
 		cardActive = true;
 	}
@@ -913,6 +913,7 @@ Class PKC_TimeBonus : PK_BaseGoldenCard {
 			control.goldDuration = 45;
 	}
 	override void GoldenCardEnd() {
+		super.GoldenCardEnd();
 		if (control)
 			control.goldDuration = control.default.goldDuration;
 	}
@@ -932,6 +933,7 @@ Class PKC_Speed : PK_BaseGoldenCard {
 		}
 	}
 	override void GoldenCardEnd() {
+		super.GoldenCardEnd();
 		if (owner) {
 			owner.speed  = prevspeed;
 		}
@@ -973,6 +975,7 @@ Class PKC_Confusion : PK_BaseGoldenCard {
 		}
 	}
 	override void GoldenCardEnd() {
+		super.GoldenCardEnd();
 		if (!handler)
 			return;
 		bool endConfusion;
@@ -1077,10 +1080,12 @@ Class PKC_Dexterity : PK_BaseGoldenCard {
 		owner.GiveInventory("PK_DexterityEffect",1);
 	}
 	override void GoldenCardEnd() {
+		super.GoldenCardEnd();
 		owner.TakeInventory("PK_DexterityEffect",1);
 	}
 }
 
+//used by Dexterity
 Class PK_DexterityEffect : PowerDoubleFiringSpeed abstract {
 	Default {
 		powerup.duration 999999;
@@ -1096,15 +1101,39 @@ Class PKC_WeaponModifier : PK_BaseGoldenCard {
 	}
 }
 
+//spawns explosions while the player is running around
 Class PKC_StepsOfThunder : PK_BaseGoldenCard {
+	private int cycle; //how often to spawn explosions
 	Default {
 		tag "StepsOfThunder";
 	}
+	override void DoEffect() {
+		super.DoEffect();
+		if (!cardActive)
+			return;
+		if (owner.Vel.Length() > 4) {
+			cycle++;
+			if (cycle % 10 == 0) {
+				owner.A_Explode(20,256,XF_NOTMISSILE,alert:false,fulldamagedistance:128);
+				A_Quake(1,2,0,1,"");
+				owner.A_StartSound("cards/thunderwalk",15);
+			}
+		}
+		else
+			cycle = 0;
+	}
 }
 
+//a plain and simple quad damage
 Class PKC_Rage : PK_BaseGoldenCard {
 	Default {
 		tag "Rage";
+	}
+	override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags)	{
+		if (cardActive && !passive && damage > 0)
+			newdamage = max(0, ApplyDamageFactors(GetClass(), damageType, damage, damage * 4));
+		else
+			super.ModifyDamage(damage, damageType, newdamage, passive, inflictor, source, flags);
 	}
 }
 
@@ -1112,11 +1141,37 @@ Class PKC_MagicGun : PK_BaseGoldenCard {
 	Default {
 		tag "MagicGun";
 	}
+	override void GoldenCardStart() {
+		super.GoldenCardStart();
+		owner.GiveInventory("PK_MagicGunEffect",1);
+	}
+	override void GoldenCardEnd() {
+		super.GoldenCardEnd();
+		owner.TakeInventory("PK_MagicGunEffect",1);
+	}
 }
+
+Class PK_MagicGunEffect : PowerInfiniteAmmo abstract {
+	Default {
+		powerup.duration 999999;
+		inventory.maxamount 1;
+		+INVENTORY.UNDROPPABLE
+		+INVENTORY.UNTOSSABLE
+	}
+}
+
 
 Class PKC_IronWill : PK_BaseGoldenCard {
 	Default {
 		tag "IronWill";
+	}
+	override void GoldenCardStart() {
+		super.GoldenCardStart();
+		owner.bINVULNERABLE = true;
+	}
+	override void GoldenCardEnd() {
+		super.GoldenCardEnd();
+		owner.bINVULNERABLE = owner.default.bINVULNERABLE;
 	}
 }
 
