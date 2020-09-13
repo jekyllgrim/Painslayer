@@ -79,9 +79,11 @@ Class PK_MainHandler : EventHandler {
 			);
 		}
 		return (posMax - posMin);
-	}
-	//spawn gold randomly in secret areas:
+	}	
 	override void WorldLoaded(WorldEvent e) {
+		Shader.SetEnabled(players[consoleplayer], "DemonMorph", false); 
+		//spawn gold randomly in secret areas:
+		//iterate throguh sectors:
 		for (int i = 0; i < level.Sectors.Size(); i++) {
 			Sector curSec = level.Sectors[i];
 
@@ -129,18 +131,37 @@ Class PK_MainHandler : EventHandler {
 			}
 		}
 	}
-
+	//push stuff into arrays:
 	override void WorldThingspawned (worldevent e) {
 		let act = e.thing;		
 		if (!act)
 			return;
+		//save all monsters into a separate array
 		if (act.bISMONSTER) {
 			allenemies.push(act);
-			act.GiveInventory("PK_ConfusionControl",1);
+			act.GiveInventory("PK_ConfusionControl",1); //for Confusion card
 		}
-		if (act.bISMONSTER || act.bMISSILE || (act.player)) {
+		//all monsters, non-player projectiles and plawn pawns can be subjected to the Demon morph effects
+		if (act.bISMONSTER || (act.bMISSILE && act.target && !act.target.player) || (act is "PlayerPawn")) {
 			demontargets.push(act);
+			//console.printf("Pushing %s into the demontargets array",act.GetClassName());
+			//normally DemonWeapon gives the control item to demontargets as soon as it's picked up, but in case for whatever reason new viable demontargets SPAWN out of nowhere WHILE demon morph is running, they need to receive the control item as well:
+			PK_DemonWeapon weap;
+			for (int pn = 0; pn < MAXPLAYERS; pn++) {
+				if (!playerInGame[pn])
+					continue;
+				PlayerInfo plr	= players[pn];
+				PlayerPawn pawn = plr.mo;
+				if (!plr || !pawn)
+					continue;
+				weap = PK_DemonWeapon(pawn.FindInventory("PK_DemonWeapon"));
+				if (weap)
+					break;
+			}
+			if (weap)
+				act.GiveInventory("PK_SlowMoControl",1);
 		}
+		//players also need control items for demon morph and cards
 		if (act.player) {
 			if  (!act.FindInventory("PK_DemonMorphControl"))
 				act.GiveInventory("PK_DemonMorphControl",1);
@@ -154,64 +175,24 @@ Class PK_MainHandler : EventHandler {
 			return;
 		if (act.bISMONSTER)
 			allenemies.push(act);
-		if (act.bISMONSTER || act.bMISSILE || (act.player)) {
-			demontargets.push(act);
-		}
-		if (act.player) {
-			if  (!act.FindInventory("PK_DemonMorphControl"))
-				act.GiveInventory("PK_DemonMorphControl",1);
-			if  (!act.FindInventory("PK_CardControl"))
-				act.GiveInventory("PK_CardControl",1);
-		}
-	}	
+	}
+	//spawn death effects on monster death and also delete them from the monster array
 	override void WorldThingDied(worldevent e) {
 		let act = e.thing;
 		if (!act || !act.bISMONSTER)
 			return;		
 		actor c = Actor.Spawn("PK_EnemyDeathControl",act.pos);
 		if (c)
-			c.master = act;		
-
+			c.master = act;
 		allenemies.delete(allenemies.Find(e.thing));
-		//demontargets.delete(allenemies.Find(e.thing));
 	}
-	override void WorldThingDestroyed(WorldEvent e) {
+	/*override void WorldThingDestroyed(WorldEvent e) {
 		if (e.thing) {
 			allenemies.delete(allenemies.Find(e.thing));
 			demontargets.delete(allenemies.Find(e.thing));
 		}
-	}
+	}*/
 	
-	override void WorldTick() {
-		if (players[consoleplayer].mo.FindInventory("PK_DemonWeapon"))
-			Shader.SetEnabled( players[consoleplayer], "DemonMorph", true);
-		else
-			Shader.SetEnabled( players[consoleplayer], "DemonMorph", false);
-		PK_DemonWeapon weap;
-		for (int pn = 0; pn < MAXPLAYERS; pn++) {
-			if (!playerInGame[pn])
-				continue;
-			PlayerInfo player	= players[pn];
-			PlayerPawn mo		= player.mo;
-			if (!player || !mo)
-				continue;
-			weap = PK_DemonWeapon(mo.FindInventory("PK_DemonWeapon"));
-			if (weap)
-				break;
-		}
-		if (weap) {
-			for (int i = 0; i < demontargets.Size(); i++) {
-				if (demontargets[i] && !(demontargets[i].FindInventory("PK_SlowMoControl")) && !(demontargets[i].FindInventory("PK_DemonWeapon")))
-					demontargets[i].GiveInventory("PK_SlowMoControl",1);
-			}
-		}
-		else {
-			for (int i = 0; i < demontargets.Size(); i++) {
-				if (demontargets[i])
-					demontargets[i].TakeInventory("PK_SlowMoControl",1);
-			}
-		}
-	}
 }
 
 Class PK_ReplacementHandler : EventHandler {
@@ -277,7 +258,6 @@ Class PK_BoardEventHandler : EventHandler {
 			Menu.SetMenu("PKCardsMenu");*/
 		if (e.thing is "Ammo") {
 			ammopickups.Push(Ammo(e.thing));
-			//console.printf("pushing %s into the array",e.thing.GetClassName());
 		}
 	}
 	

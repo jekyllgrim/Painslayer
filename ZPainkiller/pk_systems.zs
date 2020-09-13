@@ -2,28 +2,28 @@ Class PK_SlowMoControl : PK_InventoryToken {
 	private double p_gravity;
 	private double p_speed;
 	private vector3 p_vel;
-	private state slowstate;
 	private int p_renderstyle;
 	private double p_alpha;
 	private color p_color;
+	private state slowstate;
 	private double speedfactor;
 	private double gravityfactor;
+	private PlayerPawn CPlayerPawn;
 	property speedfactor : speedfactor;
 	property gravityfactor : gravityfactor;
 	Default {
-		PK_SlowMoControl.speedfactor 0.5;
-		PK_SlowMoControl.gravityfactor 0.2;
+		PK_SlowMoControl.speedfactor 0.7;
+		PK_SlowMoControl.gravityfactor 0.35;
 	}
 	override void Tick() {}
 	override void AttachToOwner(actor other) {
-		if (!other.bISMONSTER && !other.bMISSILE && !other.player) {
-			destroy();
-			return;
-		}
 		super.AttachToOwner(other);
 		if (!owner) {
 			return;
 		}
+		CPlayerPawn = players[consoleplayer].mo;
+		if (!CPlayerPawn)
+			return;
 		//record the looks of the actor:
 		p_renderstyle = owner.GetRenderstyle();
 		p_alpha = owner.alpha;
@@ -35,28 +35,23 @@ Class PK_SlowMoControl : PK_InventoryToken {
 			owner.gravity *= gravityfactor;
 			owner.speed *= speedfactor;
 			owner.vel *= speedfactor;
-		}/*
-		//monsters spawn a wobbly after-image:
-		if (owner.bISMONSTER) {
-			let img = Spawn("PK_SlowMoAfterImage",owner.pos);
-			if (img) {
-				img.master = owner;
-			}
-		}*/
+		}
 	}
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner) {
-			DepleteOrDestroy();
+			destroy();
 			return;
 		}
-		//monsters and players are colorized so that the demon shader can make them red:
-		if (owner.bISMONSTER || (owner.player && owner.player != players[consoleplayer])) {
-			if (players[consoleplayer].mo.FindInventory("PK_DemonWeapon")) {			
+		//monsters and players are colorized (only for consoleplayer) so that the demon shader can make them red:
+		if (owner.bISMONSTER || (owner is "PlayerPawn")) {
+			//demo shader requires them to be purple, stencil and fullbright
+			if (CPlayerPawn.FindInventory("PK_DemonWeapon")) {
+				//console.printf("Modifying %s's appearance",owner.GetClassName());
 				owner.bBRIGHT = true;
 				owner.A_SetRenderstyle(1.0,Style_Stencil);
 				owner.SetShade("ff00ff");
-			}
+			}			
 			else {
 				owner.bBRIGHT = owner.default.bBRIGHT;
 				owner.A_SetRenderstyle(p_alpha,p_renderstyle);
@@ -66,9 +61,9 @@ Class PK_SlowMoControl : PK_InventoryToken {
 		if (owner.isFrozen())
 			return;
 		//lowers pitch and reduces speed for non-player actors:
-		if (!owner.player) {
-			for (int i = 7; i >= 0; i--)
-				owner.A_SoundPitch(i,0.8);
+		if (owner.bISMONSTER) {
+			for (int i = 7; i > 0; i--)
+				owner.A_SoundPitch(i,0.9);
 			if (owner.CurState != slowstate) {
 				owner.A_SetTics(owner.tics*1.5);
 				slowstate = Owner.CurState;
@@ -76,42 +71,17 @@ Class PK_SlowMoControl : PK_InventoryToken {
 		}
 	}
 	override void DetachFromOwner() {
-		if (!owner) {
+		if (!owner)
 			return;
+		if (owner.bISMONSTER || owner.bMISSILE) {
+			owner.gravity = p_gravity;
+			owner.speed = p_speed;
 		}
+		//the looks need to be reset here as well, in case the item gets removed from somewhere else before the reset in DoEffect can run:
 		owner.bBRIGHT = owner.default.bBRIGHT;
-		owner.gravity = p_gravity;
-		owner.speed = p_speed;
 		owner.A_SetRenderstyle(p_alpha,p_renderstyle);
 		owner.SetShade(p_color);
 		super.DetachFromOwner();
-	}
-}
-
-Class PK_SlowMoAfterImage : PK_SmallDebris {
-	Default {
-		renderstyle 'Stencil';
-		+BRIGHT;
-		stencilcolor 'FF00FF';
-		+NOINTERACTION;
-	}
-	override void Tick() {
-		super.Tick();
-		if (!master || (master&& !master.FindInventory("PK_SlowMoControl"))) {
-			//console.printf("master has no control item");
-			destroy();
-			return;
-		}
-		SetOrigin(master.pos,true);
-		angle = master.angle;
-		sprite = master.sprite;
-		frame = master.frame;
-		scale = master.scale * frandom[sfx](0.9,1.1);
-	}
-	states {
-	Spawn:
-		#### # 1;
-		wait;
 	}
 }
 
@@ -122,12 +92,8 @@ Class PK_DemonMorphControl : PK_InventoryToken {
 	property minsouls : pk_minsouls;
 	property fullsouls : pk_fullsouls;
 	Default {
-		PK_DemonMorphControl.minsouls 64;
-		PK_DemonMorphControl.fullsouls 66;
-		inventory.maxamount 1;
-		+INVENTORY.UNDROPPABLE;
-		+INVENTORY.UNTOSSABLE;
-		+INVENTORY.UNCLEARABLE;
+		PK_DemonMorphControl.minsouls 4;
+		PK_DemonMorphControl.fullsouls 6;
 	}
 	override void Tick() {}
 	/*override void DoEffect() {
@@ -139,16 +105,14 @@ Class PK_DemonMorphControl : PK_InventoryToken {
 }
 
 Class PK_DemonWeapon : PKWeapon {
-	PK_DemonMorphControl control;
+	private PK_DemonMorphControl control;
+	private PK_MainHandler handler;
 	private int minsouls;
 	private int fullsouls;	
-	private int dur;	
+	private int dur;
 	Weapon prevweapon;
 	private double p_speed;
 	private double p_gravity;	
-	private int p_renderstyle;
-	private double p_alpha;
-	private color p_color;
 	Default {
 		+WEAPON.NOAUTOFIRE;
 		+WEAPON.DONTBOB;
@@ -162,38 +126,58 @@ Class PK_DemonWeapon : PKWeapon {
 		super.AttachToOwner(other);
 		if (!owner || !owner.player)
 			return;
-		owner.A_StopSound(12);
+		//stop all sounds on the owner (I use 12 for most looped sounds btw)
+		for (int i = 12; i > 0; i--)
+			owner.A_StopSound(i);
+		//get the "first flash" and "activate demon" numbers of souls (64 and 66 by default)
 		control = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
 		minsouls = control.pk_minsouls;
 		fullsouls = control.pk_fullsouls;
 		dur = 25;
-		owner.A_StartSound("demon/start",CHAN_AUTO,flags:CHANF_LOCAL);
+		owner.A_StartSound("demon/start",CHAN_AUTO,flags:CHANF_LOCAL);		
+		prevweapon = owner.player.readyweapon;
+		let psp = owner.player.GetPSprite(PSP_WEAPON);
+		if (psp) {
+			owner.player.readyweapon = self;
+			owner.player.SetPSprite(PSP_WEAPON,FindState("Ready"));
+			psp.y = WEAPONTOP;
+		}
+		//enable demon shader if given to the consoleplayer
 		if(players[consoleplayer] == owner.player)   {
 			owner.A_StartSound("demon/loop",66,CHANF_UI|CHANF_LOOPING);
 			SetMusicVolume(0);
+			Shader.SetEnabled( players[consoleplayer], "DemonMorph", true);
 			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "waveSpeed", 25 );
 			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "waveAmount", 10 );
 			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "centerX", 0.5 );
 			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "centerY", 0.5 );
 		}
+		handler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));
+		if (handler) {
+			for (int i = 0; i < handler.demontargets.Size(); i++) {
+				let act = handler.demontargets[i];
+				if (act) {
+					//console.printf("Giving SlowMoControl to %s",act.GetClassName());
+					act.GiveInventory("PK_SlowMoControl",1);
+				}
+			}
+		}
+		//make invulnerable:
 		owner.bNODAMAGE = true;
 		owner.bNOBLOOD = true;
 		owner.bNOPAIN = true;
+		//record previous speed and gravity for the slowmo effect
 		p_speed = owner.speed;
 		p_gravity = owner.gravity;
-		p_renderstyle = owner.GetRenderstyle();
-		p_alpha = owner.alpha;
-		p_color = owner.fillcolor;
+		//check if we obtained enough souls
 		if (control.pk_souls >= fullsouls) {
+			//if so, the owner will be slowed down a little
 			owner.speed *= 0.6;
 			owner.gravity *= 0.6;
-			if (!players[consoleplayer].mo.FindInventory(self.GetClassName())) {
-				owner.bBRIGHT = true;
-				owner.A_SetRenderstyle(1.0,Style_AddShaded);
-				owner.SetShade("FF0000");
-			}
 		}
+		//also reduce view bob
 		owner.player.mo.viewbob = 0.4;		
+		//and INSTANTLY switch the current weapon to Demon Weapon
 		owner.player.readyweapon = self;
 		owner.player.readyweapon.crosshair = 99;
 	}
@@ -204,7 +188,9 @@ Class PK_DemonWeapon : PKWeapon {
 			return;
 		}
 		if (control) {
+			//if we have 2 or 1 souls shy of the required number, show a short "demon preview flash" but do nothing after that
 			if (control.pk_souls >= minsouls && control.pk_souls < fullsouls) {
+				//the preview lasts 20 tics, then switches you INSTANTLY back to previous weapon
 				if (GetAge() >= 20) {
 					owner.player.readyweapon = prevweapon;
 					let psp = owner.player.GetPsprite(PSP_WEAPON);
@@ -212,10 +198,11 @@ Class PK_DemonWeapon : PKWeapon {
 						owner.player.SetPSprite(PSP_WEAPON,prevweapon.FindState("Ready"));
 						psp.y = WEAPONTOP;
 					}
-					Destroy();
+					DepleteOrDestroy();
 					return;
 				}
 			}
+			//and this handles the actual removal of the effect once the duration has passed
 			else if (control.pk_souls >= fullsouls && GetAge() >= 35*dur) {
 				control.pk_souls -= fullsouls;
 				if (control.pk_souls < 0)
@@ -226,10 +213,11 @@ Class PK_DemonWeapon : PKWeapon {
 						owner.player.SetPSprite(PSP_WEAPON,prevweapon.FindState("Ready"));
 						psp.y = WEAPONTOP;
 				}
-				Destroy();
+				DepleteOrDestroy();
 				return;
 			}
 		}
+		//do the ripple effect when the player fires
 		if(runRipple) {
 			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "rippleTimer", rippleTimer );
 			rippleTimer += 1.0 / 35;
@@ -244,24 +232,48 @@ Class PK_DemonWeapon : PKWeapon {
 	}	
 	override void DetachFromOwner() {
 		if(players[consoleplayer] == owner.player)   {
+			Shader.SetEnabled( players[consoleplayer], "DemonMorph", false);
 			owner.A_StopSound(66);
 			SetMusicVolume(1);
 		}		
+		PK_DemonWeapon weap;
+		for (int pn = 0; pn < MAXPLAYERS; pn++) {
+			if (!playerInGame[pn])
+				continue;
+			PlayerInfo plr	= players[pn];
+			PlayerPawn pawn = plr.mo;
+			if (!plr || !pawn || plr == owner.player)
+				continue;
+			weap = PK_DemonWeapon(pawn.FindInventory("PK_DemonWeapon"));
+			if (weap) {
+				if (pk_debugmessages)
+					console.printf("player %d has Demonweapon",pawn.PlayerNumber());
+				break;
+			}
+		}
+		if (!weap && handler) {
+			for (int i = 0; i < handler.demontargets.Size(); i++) {
+				let act = handler.demontargets[i];
+				if (handler.demontargets[i]) {
+					act.TakeInventory("PK_SlowMoControl",1);
+					//console.printf("removing SlowMocontrol from %s",act.GetClassName());
+				}
+			}
+		}
 		owner.A_StartSound("demon/end",CHAN_AUTO,CHANF_LOCAL);
+		//restore vulnerability, speed, gravity and viewbob
 		owner.bNODAMAGE = owner.default.bNODAMAGE;
 		owner.bNOBLOOD = owner.default.bNOBLOOD;
 		owner.bNOPAIN = owner.default.bNOPAIN;
 		owner.speed = p_speed;
 		owner.gravity = p_gravity;
 		owner.player.mo.viewbob = owner.player.mo.default.viewbob;
+		//instantly  switch back to previous weapon
 		if (owner.player.readyweapon) {
 			owner.player.readyweapon.crosshair = 0;
 			owner.player.readyweapon.A_ZoomFactor(1.0);
 		}
 		owner.player.SetPsprite(66,null);
-		owner.A_SetRenderstyle(p_alpha,p_renderstyle);
-		owner.SetShade(p_color);
-		owner.bBRIGHT = owner.default.bBRIGHT;
 		super.DetachFromOwner();
 	}
 	private double wzoom;

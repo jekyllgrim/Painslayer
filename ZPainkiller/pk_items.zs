@@ -218,23 +218,7 @@ Class PK_Soul : PK_Inventory {
 		if (cont)
 			cont.pk_souls += 1;
 		if (cont.pk_souls >= cont.pk_minsouls && !other.FindInventory("PK_DemonWeapon")) {
-			let weap = other.player.readyweapon;
-			other.GiveInventory("PK_DemonWeapon",1);			
-			let dew = PK_DemonWeapon(other.FindInventory("PK_DemonWeapon"));
-			if (dew) {
-				if (weap) {
-					//console.printf("prev weapon %s",weap.GetClassName());
-					dew.prevweapon = weap;
-				}
-				other.player.readyweapon = dew;
-				let psp = other.player.GetPSprite(PSP_WEAPON);
-				if (psp) {
-					other.player.SetPSprite(PSP_WEAPON,dew.FindState("Ready"));
-					psp.y = WEAPONTOP;
-				}
-				/*else
-					Console.printf("something went really wrong");*/
-			}
+			other.GiveInventory("PK_DemonWeapon",1);
 		}
 		if (other.FindInventory("PKC_SoulRedeemer"))
 			amount *= 2;
