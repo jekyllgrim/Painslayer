@@ -145,7 +145,7 @@ Class PK_MainHandler : EventHandler {
 		if (act.bISMONSTER || (act.bMISSILE && act.target && !act.target.player) || (act is "PlayerPawn")) {
 			demontargets.push(act);
 			//console.printf("Pushing %s into the demontargets array",act.GetClassName());
-			//normally DemonWeapon gives the control item to demontargets as soon as it's picked up, but in case for whatever reason new viable demontargets SPAWN out of nowhere WHILE demon morph is running, they need to receive the control item as well:
+			//extra handling for cases when a new valid demontarget spawns while demon morph is already active
 			PK_DemonWeapon weap;
 			for (int pn = 0; pn < MAXPLAYERS; pn++) {
 				if (!playerInGame[pn])
@@ -159,7 +159,7 @@ Class PK_MainHandler : EventHandler {
 					break;
 			}
 			if (weap)
-				act.GiveInventory("PK_SlowMoControl",1);
+				act.GiveInventory("PK_DemonTargetControl",1);
 		}
 		//players also need control items for demon morph and cards
 		if (act.player) {

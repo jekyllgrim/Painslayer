@@ -603,7 +603,7 @@ Class PK_DeathSmoke : PK_BaseSmoke {
 	override void Tick() {
 		super.Tick();
 		if (players[consoleplayer].mo.FindInventory("PK_DemonWeapon")) {	
-			A_SetRenderstyle(1.0,Style_Stencil);
+			A_SetRenderstyle(alpha,Style_Stencil);
 			SetShade("FF00FF");
 			bBRIGHT = true;
 		}
@@ -616,7 +616,7 @@ Class PK_DeathSmoke : PK_BaseSmoke {
 	Spawn:		
 		BSMO ABCDEFGHIJKLMNOPQRSTU 2 {
 			vel *= 0.97;
-			A_FadeOut(0.01);
+			A_FadeOut(0.03);
 			scale *= 0.9;
 		}
 		wait;

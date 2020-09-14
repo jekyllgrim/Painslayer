@@ -1,4 +1,4 @@
-Class PK_SlowMoControl : PK_InventoryToken {
+Class PK_DemonTargetControl : PK_InventoryToken {
 	private double p_gravity;
 	private double p_speed;
 	private vector3 p_vel;
@@ -12,8 +12,8 @@ Class PK_SlowMoControl : PK_InventoryToken {
 	property speedfactor : speedfactor;
 	property gravityfactor : gravityfactor;
 	Default {
-		PK_SlowMoControl.speedfactor 0.7;
-		PK_SlowMoControl.gravityfactor 0.35;
+		PK_DemonTargetControl.speedfactor 0.7;
+		PK_DemonTargetControl.gravityfactor 0.35;
 	}
 	override void Tick() {}
 	override void AttachToOwner(actor other) {
@@ -109,10 +109,13 @@ Class PK_DemonWeapon : PKWeapon {
 	private PK_MainHandler handler;
 	private int minsouls;
 	private int fullsouls;	
+	private int cursouls;	
 	private int dur;
 	Weapon prevweapon;
 	private double p_speed;
 	private double p_gravity;	
+	private double rippleTimer;
+	private bool runRipple;
 	Default {
 		+WEAPON.NOAUTOFIRE;
 		+WEAPON.DONTBOB;
@@ -120,8 +123,6 @@ Class PK_DemonWeapon : PKWeapon {
 		+WEAPON.NO_AUTO_SWITCH;
 		weapon.upsound "";
 	}
-	private double rippleTimer;
-	private bool runRipple;
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);
 		if (!owner || !owner.player)
@@ -133,6 +134,7 @@ Class PK_DemonWeapon : PKWeapon {
 		control = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
 		minsouls = control.pk_minsouls;
 		fullsouls = control.pk_fullsouls;
+		cursouls = control.pk_souls;
 		dur = 25;
 		owner.A_StartSound("demon/start",CHAN_AUTO,flags:CHANF_LOCAL);		
 		prevweapon = owner.player.readyweapon;
@@ -158,7 +160,7 @@ Class PK_DemonWeapon : PKWeapon {
 				let act = handler.demontargets[i];
 				if (act) {
 					//console.printf("Giving SlowMoControl to %s",act.GetClassName());
-					act.GiveInventory("PK_SlowMoControl",1);
+					act.GiveInventory("PK_DemonTargetControl",1);
 				}
 			}
 		}
@@ -170,10 +172,12 @@ Class PK_DemonWeapon : PKWeapon {
 		p_speed = owner.speed;
 		p_gravity = owner.gravity;
 		//check if we obtained enough souls
-		if (control.pk_souls >= fullsouls) {
+		if (cursouls >= fullsouls) {
 			//if so, the owner will be slowed down a little
 			owner.speed *= 0.6;
 			owner.gravity *= 0.6;
+			if (pk_debugmessages)
+				console.printf("Changing player %d speed to %f and gravity to %f",owner.player.mo.PlayerNumber(),owner.speed,owner.gravity);
 		}
 		//also reduce view bob
 		owner.player.mo.viewbob = 0.4;		
@@ -183,13 +187,13 @@ Class PK_DemonWeapon : PKWeapon {
 	}
 	override void DoEffect() {
 		super.DoEffect();
-		if (!owner || !owner.player || owner.bKILLED || !control || control.pk_souls < minsouls) {
+		if (!owner || !owner.player || owner.bKILLED || !control || cursouls < minsouls) {
 			Destroy();
 			return;
 		}
 		if (control) {
 			//if we have 2 or 1 souls shy of the required number, show a short "demon preview flash" but do nothing after that
-			if (control.pk_souls >= minsouls && control.pk_souls < fullsouls) {
+			if (cursouls >= minsouls && cursouls < fullsouls) {
 				//the preview lasts 20 tics, then switches you INSTANTLY back to previous weapon
 				if (GetAge() >= 20) {
 					owner.player.readyweapon = prevweapon;
@@ -198,22 +202,20 @@ Class PK_DemonWeapon : PKWeapon {
 						owner.player.SetPSprite(PSP_WEAPON,prevweapon.FindState("Ready"));
 						psp.y = WEAPONTOP;
 					}
-					DepleteOrDestroy();
+					Destroy();
 					return;
 				}
 			}
 			//and this handles the actual removal of the effect once the duration has passed
-			else if (control.pk_souls >= fullsouls && GetAge() >= 35*dur) {
-				control.pk_souls -= fullsouls;
-				if (control.pk_souls < 0)
-					control.pk_souls = 0;
+			else if (cursouls >= fullsouls && GetAge() >= 35*dur) {
+				control.pk_souls = Clamp(control.pk_souls - fullsouls,0,fullsouls);
 				owner.player.readyweapon = prevweapon;
 				let psp = owner.player.GetPsprite(PSP_WEAPON);
 				if (psp) {
 						owner.player.SetPSprite(PSP_WEAPON,prevweapon.FindState("Ready"));
 						psp.y = WEAPONTOP;
 				}
-				DepleteOrDestroy();
+				Destroy();
 				return;
 			}
 		}
@@ -229,6 +231,7 @@ Class PK_DemonWeapon : PKWeapon {
 				runRipple = false;
 			}
 		}
+		//console.printf("owner speed %f | owner gravity %f",owner.speed,owner.gravity);
 	}	
 	override void DetachFromOwner() {
 		if(players[consoleplayer] == owner.player)   {
@@ -255,7 +258,7 @@ Class PK_DemonWeapon : PKWeapon {
 			for (int i = 0; i < handler.demontargets.Size(); i++) {
 				let act = handler.demontargets[i];
 				if (handler.demontargets[i]) {
-					act.TakeInventory("PK_SlowMoControl",1);
+					act.TakeInventory("PK_DemonTargetControl",1);
 					//console.printf("removing SlowMocontrol from %s",act.GetClassName());
 				}
 			}
@@ -267,6 +270,8 @@ Class PK_DemonWeapon : PKWeapon {
 		owner.bNOPAIN = owner.default.bNOPAIN;
 		owner.speed = p_speed;
 		owner.gravity = p_gravity;
+		if (pk_debugmessages)
+			console.printf("Changing player %d speed to %f and gravity to %f",owner.player.mo.PlayerNumber(),owner.speed,owner.gravity);
 		owner.player.mo.viewbob = owner.player.mo.default.viewbob;
 		//instantly  switch back to previous weapon
 		if (owner.player.readyweapon) {
@@ -362,7 +367,7 @@ Class PK_EnemyDeathControl : Actor {
 			rad = master.radius;
 			smkz = master.height;
 		}
-		if (master && master.bKILLED && master.FindInventory("PK_SlowMoControl")) {
+		if (master && master.bKILLED && master.FindInventory("PK_DemonTargetControl")) {
 			for (int i = 40; i > 0; i--) {
 				smkz = master.default.height;
 				let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz)));
@@ -1192,3 +1197,20 @@ Class PKC_Haste : PK_BaseGoldenCard {
 		tag "Haste";
 	}
 }
+/*
+Class PK_HasteControl : PK_InventoryToken {
+	private double p_gravity;
+	private double p_speed;
+	private state slowstate;
+	override void AttachToOwner(actor other) {
+		super.AttachToOwner(other);
+		if (!owner)
+			return;
+		p_gravity = owner.gravity;
+		p_speed = owner.speed;
+	}
+	override void Tick() {
+		super.Tick();
+		if (!owner || owner.player)	
+			return;
+	
