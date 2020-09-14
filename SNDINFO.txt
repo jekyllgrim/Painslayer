@@ -147,17 +147,23 @@ weapons/ricochet4	RICO4
 weapons/edriver/starshot			"sounds/ElectroDriver/driver-shoot.wav"
 weapons/edriver/electroloop			"sounds/ElectroDriver/electro-shoot-loop.wav"
 weapons/edriver/electroloopstart	"sounds/ElectroDriver/electro-shoot-start.wav"
-weapons/edriver/electroloopend		"sounds/ElectroDriver/electro-shoot-stop.wav"
+weapons/edriver/electroloopend		"sounds/ElectroDriver/electro-shoot-spark3.wav"
 weapons/edriver/shockloop			"sounds/ElectroDriver/electro-lock-loop.wav"
 weapons/edriver/diskshot			"sounds/ElectroDriver/electrodisk-shoot.wav"
 weapons/edriver/starfly				"sounds/ElectroDriver/shuricane-onfly-loop.wav"
 weapons/edriver/starboom			"sounds/ElectroDriver/shuricane-explosion.wav"
 $limit weapons/edriver/starboom		0
-$random weapons/edriver/starwall	{ starwall1 starwall2 starwall3 }
+$random weapons/edriver/starwall	{ edstarwall1 edstarwall2 edstarwall3 }
 $limit weapons/edriver/starwall		0
-starwall1	"sounds/ElectroDriver/driver-default1.wav"
-starwall2	"sounds/ElectroDriver/driver-default2.wav"
-starwall3	"sounds/ElectroDriver/driver-default3.wav"
+edstarwall1	"sounds/ElectroDriver/driver-default1.wav"
+edstarwall2	"sounds/ElectroDriver/driver-default2.wav"
+edstarwall3	"sounds/ElectroDriver/driver-default3.wav"
+$random weapons/edriver/spark		{ edspark1 edspark2 edspark3 }
+$limit weapons/edriver/spark		0
+edspark1 "sounds/ElectroDriver/electro-shoot-spark1.wav"
+edspark2 "sounds/ElectroDriver/electro-shoot-spark2.wav"
+edspark3 "sounds/ElectroDriver/electro-shoot-spark3.wav"
+
 
 
 ///PICKUPS\\\

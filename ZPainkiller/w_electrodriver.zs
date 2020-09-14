@@ -48,10 +48,11 @@ Class PK_ElectroDriver : PKWeapon {
 			}
 			return hit.HitLocation;
 		}
-		if (random(0,2) >= 1)
-			ltarget.DamageMobj(self,self,3,'normal',flags:DMG_THRUSTLESS);
+		int dmg = invoker.hasDexterity ? 6 : 3;
+		if (frandom(0,2) > 1.5)
+			ltarget.DamageMobj(self,self,dmg,'normal',flags:DMG_THRUSTLESS);
 		else
-			ltarget.DamageMobj(self,self,3,'normal',flags:DMG_THRUSTLESS|DMG_NO_PAIN);
+			ltarget.DamageMobj(self,self,dmg,'normal',flags:DMG_THRUSTLESS|DMG_NO_PAIN);
 		if (!ltarget.FindInventory("PK_ElectroTargetControl"))
 			ltarget.GiveInventory("PK_ElectroTargetControl",1);
 		return ltarget.pos+(0,0,ltarget.height*0.5);
@@ -84,7 +85,12 @@ Class PK_ElectroDriver : PKWeapon {
 		TNT1 A 0 A_ReFire();
 		goto ready;
 	AltFire:
-		TNT1 A 0 A_StartSound("weapons/edriver/electroloopstart",CHAN_VOICE);
+		TNT1 A 0 {
+			A_StartSound("weapons/edriver/electroloopstart",CHAN_VOICE);
+			if (invoker.hasDexterity) {
+				A_SoundPitch(CHAN_VOICE,1.4);
+			}
+		}
 	AltHold:
 		ELDR A 1 {
 			if (player.cmd.buttons & BT_ATTACK && CountInv("PK_Battery") >= 40) {
@@ -102,7 +108,7 @@ Class PK_ElectroDriver : PKWeapon {
 					if (CountInv("PK_Battery") >= 1)
 						TakeInventory("PK_Battery",1);
 					else {
-						A_StopSound(12);
+						A_ClearRefire();
 						A_StartSound("weapons/edriver/electroloopend",12);
 						return ResolveState("Ready");
 					}
@@ -176,6 +182,8 @@ Class PK_ElectricPuff : PKPuff {
 					part.vel = (frandom[eld](-3,3),frandom[eld](-3,3),frandom[eld](2,5));
 					part.frame = 2;
 				}
+				//if (random[eld](0,4) == 4)
+					//A_StartSound("weapons/edriver/spark",attenuation:5);
 			}
 			for (int i = random[eld](2,4); i > 0; i--) {
 				let part = Spawn("PK_WhiteSmoke",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
