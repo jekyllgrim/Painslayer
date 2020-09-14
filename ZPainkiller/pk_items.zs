@@ -50,6 +50,11 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		inventory.amount 1;
 		inventory.pickupmessage "";
 	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		if (bDROPPED)
+			A_StartSound(pickupsound);
+	}
 	override bool TryPickup (in out Actor other) {
 		if (!(other is "PlayerPawn"))
 			return false;

@@ -229,8 +229,14 @@ Class PK_Killer : PK_Projectile {
 					let kft = KillerFlyTarget(tracer);
 					if (kft) {
 						kft.hitcounter++;
-						if (tracer.target && kft.hitcounter % 3 == 0)
-							tracer.target.A_NoBlocking();
+						if (tracer.target && kft.hitcounter % 3 == 0) {
+							Class<PK_GoldPickup> gold;
+							if (kft.hitcounter > random[gold](6,13))
+								gold = "PK_MedGold";
+							else
+								gold = "PK_SmallGold";
+							tracer.target.A_DropItem(gold);
+						}
 					}
 				}
 				return ResolveState(null);
