@@ -34,6 +34,8 @@ Class PKCardsMenu : PKCGenericMenu {
 	
 	bool firstUse;
 	
+	bool queueForClose;
+	
 	override void Init (Menu parent) {
 		super.Init(parent);
 		
@@ -43,10 +45,18 @@ Class PKCardsMenu : PKCGenericMenu {
 		vector2 backgroundsize = (BOARD_WIDTH*backgroundRatio,BOARD_HEIGHT*backgroundRatio);
 		boardTopLeft = */
 		
-		S_StartSound("ui/board/open",CHAN_VOICE,CHANF_UI,volume:snd_menuvolume);
 		
 		//checks if the board is opened for the first time on the current map:
 		let plr = players[consoleplayer].mo;
+		if (!plr || plr.health < 0) {
+			queueForClose = true;
+			return;
+		}
+		goldcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		if (!goldcontrol || goldcontrol.goldActive) {
+			queueForClose = true;
+			return;
+		}
 		menuEHandler = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
 		if (menuEHandler && CVar.GetCVar('m_use_mouse',players[consoleplayer]).GetInt() > 0) {
 			if (!menuEHandler.boardOpened) {
@@ -56,7 +66,8 @@ Class PKCardsMenu : PKCGenericMenu {
 			else
 				firstUse = false;
 		}
-		goldcontrol = PK_CardControl(players[consoleplayer].mo.FindInventory("PK_CardControl"));
+		
+		S_StartSound("ui/board/open",CHAN_VOICE,CHANF_UI,volume:snd_menuvolume);
 		
 		//first create the background (always 4:3, never stretched)
 		vector2 backgroundsize = (BOARD_WIDTH,BOARD_HEIGHT);	
@@ -118,7 +129,7 @@ Class PKCardsMenu : PKCGenericMenu {
 
 		SlotsInit();	//initialize card slots
 		CardsInit();	//initialize cards
-		SlotInfoInit();
+		SlotInfoInit(); //hover text with info about slots
 		
 		let goldcounter = PKCGoldCounter(new("PKCGoldCounter"));
 		goldcounter.Pack(boardElements);
@@ -605,7 +616,15 @@ Class PKCardsMenu : PKCGenericMenu {
 		return false;
     }
 	
+	void DeselectCard() {
+		selectedCard = null;
+	}
+	
 	override void Ticker() {
+		if (queueForClose) {
+			Close();
+			return;
+		}
 		if ((promptPopup && promptPopup.isEnabled()) || needMousePopup) {
 			boardElements.disabled = true;
 		}
@@ -634,9 +653,22 @@ Class PKCardsMenu : PKCGenericMenu {
 			}
 		}
 		
-		//if the player  picked a card from a slot, attach it to the mouse pointer:
-		if (SelectedCard) {			
-			SelectedCard.box.pos = boardelements.screenToRel((mouseX,mouseY)) - SelectedCard.box.size / 2;
+		//if the player picked a card from a slot, move it with the mouse pointer:
+		if (SelectedCard) {
+			//this is another safeguard to make sure placed cards don't accidentally get attached to the pointer (kept randomly happening for a couple of cards for no obvious reason)
+			for (int i = 0; i < cardslots.Size(); i++) {
+				let cardslot = cardslots[i];
+				if (cardslot && cardslot.placedcard == SelectedCard) {					
+					SelectedCard.box.pos = cardslot.slotpos;
+					SelectedCard.box.size = cardslot.slotsize;
+					SelectedCard.buttonscale = (1,1);
+					selectedCard = null;
+					break;
+				}
+			}
+			if (selectedCard) {
+				SelectedCard.box.pos = boardelements.screenToRel((mouseX,mouseY)) - SelectedCard.box.size / 2;
+			}
 		}
 		//show card info if mouse hovers over a card and there's no card selected:
 		if (!cardinfo && HoveredCard && HoveredCard.isEnabled() && !HoveredCard.hidden && !SelectedCard)
@@ -950,7 +982,7 @@ Class PKCMenuHandler : PKCHandler {
 			menu.firstUsePopup.Destroy();
 		}
 		//card slot: if you have a card picked and click the slot, the card will be placed in it and scaled up to its size:
-		if (command == "CardSlot") {			
+		if (command == "CardSlot") {
 			let cardslot = PKCCardSlot(Caller);
 			//check if there's a selected card
 			if (menu.SelectedCard) {
@@ -960,10 +992,10 @@ Class PKCMenuHandler : PKCHandler {
 				PKCTarotCard placedcard = (cardslot.placedcard) ? PKCTarotCard(cardslot.placedcard) : null;
 				//proceed if slot type matches to card type (silver/gold) and there's no placed card OR there is one but it's not locked:
 				if (card.slottype == cardslot.slottype && (!placedcard || !placedcard.cardlocked)) {
-					menu.SelectedCard = null; //detach from cursor
 					card.box.pos = cardslot.slotpos;
 					card.box.size = cardslot.slotsize;
 					card.buttonscale = (1,1);
+					menu.SelectedCard = null; //detach from cursor
 					//if there was a card placed in the slot, move that card back to its default pos before placing this one
 					if (placedcard) {
 						placedcard.box.size = placedcard.defaultsize;
@@ -980,8 +1012,8 @@ Class PKCMenuHandler : PKCHandler {
 				//otherwise do nothing:
 				else {
 					S_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-					return;
 				}
+				return;
 			}
 			//otherwise check if there's a card in the slot; if there is, pick it up and attach to mouse pointer
 			else if (cardslot.placedcard) {
@@ -1003,6 +1035,7 @@ Class PKCMenuHandler : PKCHandler {
 					EventHandler.SendNetworkEvent("PKCClearSlot",cardslot.slotID);
 				}
 			}
+			return;
 		}
 		//clicking the card: attaches card to mouse pointer, or, if you already have one and you click *anywhere* where there's no card slot, the card will jump back to its original slot:
 		if (command == "HandleCard") {
@@ -1053,20 +1086,24 @@ Class PKCMenuHandler : PKCHandler {
 			if (!unhovered) {
 				hoveredslot = PKCCardSlot(Caller);
 				if (hoveredslot.slottype == 1) {
-					menu.goldSlotsInfo.hidden = false;
+					if (menu.goldSlotsInfo)
+						menu.goldSlotsInfo.hidden = false;
 					menu.boardelements.elements.delete(menu.boardelements.elements.find(menu.goldSlotsInfo));
 					menu.boardelements.elements.push(menu.goldSlotsInfo);
 				}
 				else {
-					menu.silverSlotsInfo.hidden = false;
+					if (menu.silverSlotsInfo)
+						menu.silverSlotsInfo.hidden = false;
 					menu.boardelements.elements.delete(menu.boardelements.elements.find(menu.silverSlotsInfo));
 					menu.boardelements.elements.push(menu.silverSlotsInfo);
 				}
 			}
 			else {
 				hoveredslot = null;
-				menu.goldSlotsInfo.hidden = true;
-				menu.silverSlotsInfo.hidden = true;
+				if (menu.goldSlotsInfo)
+					menu.goldSlotsInfo.hidden = true;
+				if (menu.silverSlotsInfo)
+					menu.silverSlotsInfo.hidden = true;
 			}
 		}
 		if (command == "HandleCard") {
