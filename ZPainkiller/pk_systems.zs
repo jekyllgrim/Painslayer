@@ -1094,7 +1094,8 @@ Class PKC_Dexterity : PK_BaseGoldenCard {
 	}
 	override void GoldenCardStart() {
 		super.GoldenCardStart();
-		owner.GiveInventory("PK_DexterityEffect",1);
+		if (!owner.FindInventory("PK_HasteControl"))
+			owner.GiveInventory("PK_DexterityEffect",1);
 	}
 	override void GoldenCardEnd() {
 		super.GoldenCardEnd();
@@ -1276,7 +1277,7 @@ Class PK_HasteControl : PK_InventoryToken {
 				owner.A_SoundPitch(i,0.75);
 		}
 		//player projectiles and players:
-		else if (!owner.FindInventory("PK_DexterityEffect")) {
+		else if (!owner.FindInventory("PKC_Dexterity")) {
 			if (ownerType >= 2)  {
 				for (int i = 12; i > 0; i--)
 					owner.A_SoundPitch(i,0.75);
