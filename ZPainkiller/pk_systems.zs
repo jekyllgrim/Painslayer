@@ -1110,6 +1110,20 @@ Class PK_DexterityEffect : PowerDoubleFiringSpeed abstract {
 		+INVENTORY.UNDROPPABLE
 		+INVENTORY.UNTOSSABLE
 	}
+	override void DoEffect() {
+		super.DoEffect();
+		if (!owner || !owner.player)
+			return;
+		for (int i = 12; i > 0; i--)
+			owner.A_SoundPitch(i,1.2);
+	}
+	override void DetachFromOwner() {
+		if (!owner || !owner.player)
+			return;
+		for (int i = 12; i > 0; i--)
+			owner.A_SoundPitch(i,1);
+		super.DetachFromOwner();
+	}
 }
 
 Class PKC_WeaponModifier : PK_BaseGoldenCard {
@@ -1196,21 +1210,111 @@ Class PKC_Haste : PK_BaseGoldenCard {
 	Default {
 		tag "Haste";
 	}
+	override void GoldenCardStart() {
+		super.GoldenCardStart();
+		owner.GiveInventory("PK_HasteControl",1);
+	}
+	override void GoldenCardEnd() {
+		super.GoldenCardEnd();
+		owner.TakeInventory("PK_HasteControl",1);
+	}
 }
-/*
+
 Class PK_HasteControl : PK_InventoryToken {
 	private double p_gravity;
 	private double p_speed;
 	private state slowstate;
+	private int ownerType; // 0 - monster; 1 - monster projectile; 2 - player projectile; 3 - player;
+	private state wstate0;
+	private state wstate1;
+	private state wstate2;
+	private state wstate3;
 	override void AttachToOwner(actor other) {
+		if (!other)
+			return;
 		super.AttachToOwner(other);
 		if (!owner)
 			return;
+		if (owner.bISMONSTER)
+			ownerType = 0;
+		else if (owner.bMISSILE) {
+			if (owner.target && owner.target.player)
+				ownerType = 2;
+			else
+				ownerType = 1;
+		}
+		else if (owner.player)
+			ownerType = 3;
+		else {
+			//ownerType = 4;
+			destroy();
+			return;
+		}
 		p_gravity = owner.gravity;
 		p_speed = owner.speed;
+		double slowfactor = (ownerType < 2) ? 0.4 : 0.8;
+		owner.gravity *= slowfactor;
+		owner.vel *= slowfactor;
+		owner.speed *= slowfactor;
 	}
-	override void Tick() {
-		super.Tick();
-		if (!owner || owner.player)	
+	override void DoEffect() {
+		super.DoEffect();
+		if (!owner)
 			return;
-	
+		//monsters:
+		if (ownerType == 0) {
+			for (int i = 7; i > 0; i--)
+				owner.A_SoundPitch(i,0.8);
+			if (owner.CurState != slowstate) {
+				owner.A_SetTics(owner.tics*1.8);
+				slowstate = Owner.CurState;
+			}
+		}
+		//monster projectiles:
+		else if (ownerType == 1) {
+			for (int i = 7; i > 0; i--)
+				owner.A_SoundPitch(i,0.75);
+		}
+		//player projectiles and players:
+		else if (!owner.FindInventory("PK_DexterityEffect")) {
+			if (ownerType >= 2)  {
+				for (int i = 12; i > 0; i--)
+					owner.A_SoundPitch(i,0.75);
+			}
+			if (ownerType == 3) {
+				let weap = owner.player.readyweapon;
+				if (!weap)
+					return;
+				let ps0 = owner.player.FindPSprite(PSP_WEAPON);
+				if (!ps0)
+					return;
+				if (ps0.curstate != wstate0) {					
+					ps0.tics = Clamp(ps0.tics*1.5,2,5);
+					wstate0 = ps0.curstate;
+				}
+				let ps1 = owner.player.FindPSprite(-1);
+				if (ps1 && ps1.curstate != wstate1) {					
+					ps1.tics = Clamp(ps1.tics*1.5,2,5);
+					wstate1 = ps1.curstate;
+				}		
+				let ps2 = owner.player.FindPSprite(2);
+				if (ps2 && ps2.curstate != wstate2) {					
+					ps2.tics = Clamp(ps2.tics*1.5,2,5);
+					wstate2 = ps2.curstate;
+				}		
+				let ps3 = owner.player.FindPSprite(-100);
+				if (ps3 && ps3.curstate != wstate3) {					
+					ps3.tics = Clamp(ps3.tics*1.5,2,5);
+					wstate3 = ps3.curstate;
+				}			
+			}
+		}
+	}
+	override void DetachFromOwner() {
+		if (!owner)
+			return;
+		owner.speed = p_speed;
+		owner.gravity = p_gravity;
+		super.DetachFromOwner();
+	}
+}
