@@ -35,21 +35,36 @@ Class PK_MainHandler : EventHandler {
 	override void NetworkProcess(consoleevent e) {
 		if (!e.isManual)
 			return;
+		let plr = players[e.Player].mo;
+		if (!plr)
+			return;
+		if (e.name == "PKCOpenBoard") {
+			if (pk_debugmessages)
+				console.printf("Trying to open board");
+			let goldcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+			if (!goldcontrol)
+				return;
+			if (!goldcontrol || goldcontrol.goldActive || plr.health <= 0 || plr.FindInventory("PK_DemonWeapon")) {
+				if (e.player == consoleplayer) {
+					plr.A_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI|CHANF_LOCAL);
+					if (pk_debugmessages)
+						console.printf("Can't open the board at this time");
+				}
+				if (pk_debugmessages)
+					console.printf("goldActive %d | health %d | has demon weapon %d",goldcontrol.goldActive,plr.health,plr.FindInventory("PK_DemonWeapon"));
+				return;
+			}
+			Menu.SetMenu("PKCardsMenu");
+		}
 		if (CheckCheatMode())
 			return;
 		if (e.name == "PK_UseGoldenCards") {
-			let plr = players[e.Player].mo;
-			if (!plr)
-				return;
 			let cont = PK_CardControl(plr.FindInventory("PK_CardControl"));
 			if (cont) {
 				cont.PK_UseGoldenCards();
 			}
 		}
 		if (e.name == "PK_GiveGold") {
-			let plr = players[e.Player].mo;
-			if (!plr)
-				return;
 			//gives a specified number of gold, or max gold if no number is specified:
 			int amt = (e.args[0] == 0) ? 99990 : e.args[0];
 			let cont = PK_CardControl(plr.FindInventory("PK_CardControl"));
@@ -247,6 +262,7 @@ Class PK_ReplacementHandler : EventHandler {
 
 Class PK_BoardEventHandler : EventHandler {
 	ui bool boardOpened; //whether the Black Tarot board has been opened on this map
+	ui bool allowOpenBoard; //if false, the board won't open (to block openmenu CCMD, since I only want the menu to be openable with a netevent
 	
 	bool SoulKeeper;
 	array <Ammo> ammopickups;
