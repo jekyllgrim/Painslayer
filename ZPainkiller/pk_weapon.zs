@@ -13,6 +13,11 @@ Class PKWeapon : Weapon abstract {
 		+WEAPON.ALT_AMMO_OPTIONAL;
 		FloatBobStrength  0.3;
 	}
+	enum PK_WeaponLayers {
+		PSP_UNDERGUN 	= -1,
+		PSP_OVERGUN 	= 2,
+		PSP_PFLASH 	= -100
+	}
 	override void DoEffect() {
 		Super.DoEffect();
 		if (!owner)
@@ -21,7 +26,7 @@ Class PKWeapon : Weapon abstract {
 		if (!weap)
 			return;
 		owner.player.WeaponState |= WF_WEAPONBOBBING;
-		hasDexterity = (owner.FindInventory("PowerDoubleFiringSpeed",true));
+		hasDexterity = (owner.FindInventory("PowerDoubleFiringSpeed",true) && !owner.FindInventory("PK_HasteControl"));
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();

@@ -62,9 +62,9 @@ Class PK_ElectroDriver : PKWeapon {
 		ELDR A 1 {
 			PK_WeaponReady();
 			if (CountInv("PK_Battery") > 0) {
-				let psp = player.FindPSprite(-10);
+				let psp = player.FindPSprite(PSP_UNDERGUN);
 				if (!psp)
-					A_Overlay(-10,"ElectricSpark");
+					A_Overlay(PSP_UNDERGUN,"ElectricSpark");
 			}
 		}
 		loop;
@@ -87,9 +87,9 @@ Class PK_ElectroDriver : PKWeapon {
 	AltFire:
 		TNT1 A 0 {
 			A_StartSound("weapons/edriver/electroloopstart",CHAN_VOICE);
-			if (invoker.hasDexterity) {
+			/*if (invoker.hasDexterity) {
 				A_SoundPitch(CHAN_VOICE,1.4);
-			}
+			}*/
 		}
 	AltHold:
 		ELDR A 1 {
@@ -121,10 +121,10 @@ Class PK_ElectroDriver : PKWeapon {
 			if (invoker.hasDexterity) {
 				PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.2,9.5),style:STYLE_ADD);
 				PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.9,10.5),style:STYLE_ADD);
-				A_SoundPitch(12,1.25);
+				//A_SoundPitch(12,1.25);
 			}
-			else
-				A_SoundPitch(12,1);
+			/*else
+				A_SoundPitch(12,1);*/
 			A_WeaponOffset(frandom[eld](-0.3,0.3),frandom[eld](32,32.4));
 			return ResolveState(null);
 		}
@@ -150,20 +150,20 @@ Class PK_ElectroDriver : PKWeapon {
 		ELDR A 1 A_WeaponOffset(0,32);
 		goto ready;
 	ElectricSpark:
-			TNT1 A 0 {
-				A_OverlayFlags(OverlayID(),PSPF_RENDERSTYLE|PSPF_ALPHA|PSPF_FORCEALPHA,true);
-				A_OverlayRenderstyle(OverlayID(),STYLE_Add);
-			}
-			ELDS A 1 bright {
-				if (!player.readyweapon || player.readyweapon != invoker || CountInv("PK_Battery") < 1)	
-					return ResolveState("Null");
-				let psp = player.FindPSprite(overlayID());
-				if (psp)
-					psp.frame = random[eld](0,4);
-				A_OverlayAlpha(OverlayID(),frandom[eld](0.4,1.0));	
-				return ResolveState(null);
-			}
-			wait;
+		TNT1 A 0 {
+			A_OverlayFlags(OverlayID(),PSPF_RENDERSTYLE|PSPF_ALPHA|PSPF_FORCEALPHA,true);
+			A_OverlayRenderstyle(OverlayID(),STYLE_Add);
+		}
+		ELDS A 1 bright {
+			if (!player.readyweapon || player.readyweapon != invoker || CountInv("PK_Battery") < 1)	
+				return ResolveState("Null");
+			let psp = player.FindPSprite(overlayID());
+			if (psp)
+				psp.frame = random[eld](0,4);
+			A_OverlayAlpha(OverlayID(),frandom[eld](0.4,1.0));	
+			return ResolveState(null);
+		}
+		wait;
 	}
 }
 

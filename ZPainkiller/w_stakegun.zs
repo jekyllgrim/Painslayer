@@ -66,9 +66,9 @@ Class PK_Stakegun : PKWeapon {
 					A_StartSound("weapons/grenade/load",CHAN_7);
 			}
 			#### MNN 1 A_WeaponOffset(3.5,2.5,WOF_ADD);
-			#### NNNNMMMMLLLL 1 A_WeaponOffset(-1.6,-1,WOF_ADD);
-			#### AAAA 1 {
-				A_WeaponOffset(-0.32,-0.35,WOF_ADD);
+			#### NNMMLL 2 A_WeaponOffset(-3.2,-2,WOF_ADD);
+			#### AA 2 {
+				A_WeaponOffset(-0.64,-0.7,WOF_ADD);
 				PK_WeaponReady(WRF_NOSECONDARY|WRF_NOSWITCH);
 			}
 			#### A 5 {

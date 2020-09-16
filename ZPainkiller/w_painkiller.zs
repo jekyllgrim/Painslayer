@@ -25,9 +25,9 @@ Class PK_Painkiller : PKWeapon {
 			PKIR A 1 {
 				A_WeaponOffset(0,32);
 				if (invoker.beam)
-					A_Overlay(-5,"BeamFlare");
+					A_Overlay(PSP_UNDERGUN,"BeamFlare");
 				else
-					A_ClearOverlays(-5,-5);
+					A_Overlay(PSP_UNDERGUN,null);
 				if (invoker.pk_killer) {
 					let psp = Player.FindPSprite(PSP_Weapon);
 					if (psp) 
@@ -62,7 +62,7 @@ Class PK_Painkiller : PKWeapon {
 		Hold:
 			TNT1 A 0 A_CustomPunch(12,true,CPF_NOTURN,"PK_PainkillerPuff",80); 
 			PKIL ABCD 1 {
-				A_SoundPitch(12,1);
+				//A_SoundPitch(12,1);
 				if ((player.cmd.buttons & BT_ALTATTACK) && !(player.oldbuttons & BT_ALTATTACK)) {
 					A_StopSound(12);
 					invoker.combofire = true;
@@ -77,7 +77,7 @@ Class PK_Painkiller : PKWeapon {
 		FastHold:
 			TNT1 A 0 A_CustomPunch(12,true,CPF_NOTURN,"PK_PainkillerPuff",80); 
 			PKIL AC 1 {
-				A_SoundPitch(12,1.2);
+				//A_SoundPitch(12,1.2);
 				if ((player.cmd.buttons & BT_ALTATTACK) && !(player.oldbuttons & BT_ALTATTACK)) {
 					A_StopSound(12);
 					invoker.combofire = true;
@@ -121,7 +121,7 @@ Class PK_Painkiller : PKWeapon {
 			PKIM A 1 A_WeaponOffset(8, 7.8,WOF_ADD);
 			PKIM A 1 A_WeaponOffset(8,12  ,WOF_ADD);
 			PKIM B 1 A_WeaponOffset(8,15.6,WOF_ADD);
-			PKIM BCC 1 A_WeaponOffset(-5,-2.6,WOF_ADD);
+			PKIM BCC 1 A_WeaponOffset(PSP_UNDERGUN,-2.6,WOF_ADD);
 			PKIM BBA 1 {
 				A_WeaponOffset(-2,-6  ,WOF_ADD);
 				A_WeaponReady(WRF_NOBOB);
