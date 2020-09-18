@@ -12,11 +12,21 @@ Class PK_DemonTargetControl : PK_InventoryToken {
 	property speedfactor : speedfactor;
 	property gravityfactor : gravityfactor;
 	Default {
-		PK_DemonTargetControl.speedfactor 0.7;
-		PK_DemonTargetControl.gravityfactor 0.35;
+		PK_DemonTargetControl.speedfactor 0.85;
+		PK_DemonTargetControl.gravityfactor 0.5;
 	}
 	override void Tick() {}
 	override void AttachToOwner(actor other) {
+		//only affect missiles, monsters and players:
+		if (!other.bISMONSTER && !other.bMISSILE && !(other is "PlayerPawn")) {
+			destroy();
+			return;
+		}
+		//do not affect player missiles:
+		if (other.bMISSILE && other.target && other.target.player) {
+			destroy();
+			return;
+		}
 		super.AttachToOwner(other);
 		if (!owner) {
 			return;
@@ -74,8 +84,8 @@ Class PK_DemonTargetControl : PK_InventoryToken {
 		if (!owner)
 			return;
 		if (owner.bISMONSTER || owner.bMISSILE) {
-			owner.gravity = p_gravity;
-			owner.speed = p_speed;
+			owner.gravity = owner.default.gravity; //p_gravity;
+			owner.speed = owner.default.speed; //p_speed;
 		}
 		//the looks need to be reset here as well, in case the item gets removed from somewhere else before the reset in DoEffect can run:
 		owner.bBRIGHT = owner.default.bBRIGHT;
@@ -168,12 +178,15 @@ Class PK_DemonWeapon : PKWeapon {
 		owner.bNODAMAGE = true;
 		owner.bNOBLOOD = true;
 		owner.bNOPAIN = true;
-		//record previous speed and gravity for the slowmo effect
-		p_speed = owner.speed;
-		p_gravity = owner.gravity;
-		//check if we obtained enough souls
 		if (cursouls >= fullsouls) {
-			//if so, the owner will be slowed down a little
+			//disable golden cards before changing speed/gravity
+			let cardcontrol = PK_CardControl(owner.FindInventory("PK_CardControl"));
+			if (cardcontrol && cardcontrol.goldActive)
+				cardcontrol.PK_StopGoldenCards();
+			//record previous speed and gravity for the slowmo effect
+			p_speed = owner.speed;
+			p_gravity = owner.gravity;
+			//the owner will be slowed down a little
 			owner.speed *= 0.6;
 			owner.gravity *= 0.6;
 			if (pk_debugmessages)
@@ -238,23 +251,8 @@ Class PK_DemonWeapon : PKWeapon {
 			Shader.SetEnabled( players[consoleplayer], "DemonMorph", false);
 			owner.A_StopSound(66);
 			SetMusicVolume(1);
-		}		
-		PK_DemonWeapon weap;
-		for (int pn = 0; pn < MAXPLAYERS; pn++) {
-			if (!playerInGame[pn])
-				continue;
-			PlayerInfo plr	= players[pn];
-			PlayerPawn pawn = plr.mo;
-			if (!plr || !pawn || plr == owner.player)
-				continue;
-			weap = PK_DemonWeapon(pawn.FindInventory("PK_DemonWeapon"));
-			if (weap) {
-				if (pk_debugmessages)
-					console.printf("player %d has Demonweapon",pawn.PlayerNumber());
-				break;
-			}
 		}
-		if (!weap && handler) {
+		if (!PK_MainHandler.CheckPlayersHave("PK_DemonWeapon") && handler) {
 			for (int i = 0; i < handler.demontargets.Size(); i++) {
 				let act = handler.demontargets[i];
 				if (handler.demontargets[i]) {
@@ -268,8 +266,10 @@ Class PK_DemonWeapon : PKWeapon {
 		owner.bNODAMAGE = owner.default.bNODAMAGE;
 		owner.bNOBLOOD = owner.default.bNOBLOOD;
 		owner.bNOPAIN = owner.default.bNOPAIN;
-		owner.speed = p_speed;
-		owner.gravity = p_gravity;
+		if (cursouls >= fullsouls) {
+			owner.speed = owner.default.speed; //p_speed;
+			owner.gravity = owner.default.gravity; //p_gravity;
+		}
 		if (pk_debugmessages)
 			console.printf("Changing player %d speed to %f and gravity to %f",owner.player.mo.PlayerNumber(),owner.speed,owner.gravity);
 		owner.player.mo.viewbob = owner.player.mo.default.viewbob;
@@ -437,8 +437,6 @@ Class PK_CardControl : PK_InventoryToken {
 		return totalGoldUses;
 	}
 	
-	override void Tick() {}
-	
 	void PK_UseGoldenCards() {
 		//check that the array has actually been successfully created
 		if (EquippedCards.Size() < 5) {
@@ -563,6 +561,7 @@ Class PK_CardControl : PK_InventoryToken {
 			destroy();
 			return;
 		}
+		//console.printf("Speed %f gravity %f",owner.speed,owner.gravity);
 		if (dryUseTimer > 0)
 			dryUseTimer = Clamp(dryUseTimer - 1,0,45);
 		if (!goldActive)
@@ -602,30 +601,6 @@ Class PK_BaseSilverCard : PK_InventoryToken abstract {
 		RemoveCard();
 		super.DetachFromOwner();
 	}
-	//returns false only if none of the current players have the same card:
-	bool CheckPlayersHaveCard(Class<Inventory> card) {
-		if(!card)
-			return false;
-		Inventory checkcard;
-		for (int pn = 0; pn < MAXPLAYERS; pn++) {
-			if (!playerInGame[pn])
-				continue;
-			PlayerInfo plr = players[pn];
-			if (!plr || !plr.mo)
-				continue;
-			checkcard = plr.mo.FindInventory(card);
-			if (checkcard)
-				break;
-		}
-		if (checkcard) {
-			if (pk_debugmessages)
-				console.printf("Somebody still has %s card",card.GetClassName());
-			return true;
-		}
-		if (pk_debugmessages)
-			console.printf("Nobody has %s card anymore",card.GetClassName());
-		return false;
-	}
 }
 
 //flips a global bool. While true, souls don't disappear (PK_Soul age variable doesn't increase)
@@ -634,12 +609,18 @@ Class PKC_SoulKeeper : PK_BaseSilverCard {
 		tag "SoulKeeper";
 	}	
 	override void GetCard() {
-		if (event)
+		if (event) {
 			event.SoulKeeper = true;
+			if (pk_debugmessages)
+				console.printf("Soul Keeper active: %d",event.SoulKeeper);
+		}
 	}	
 	override void RemoveCard() {
-		if (event)
-			event.SoulKeeper = CheckPlayersHaveCard(self.GetClassName());
+		if (event) {
+			event.SoulKeeper = PK_MainHandler.CheckPlayersHave(self.GetClassName());
+			if (pk_debugmessages)
+				console.printf("Soul Keeper active: %d",event.SoulKeeper);
+		}
 	}
 }
 
@@ -684,7 +665,7 @@ Class PKC_Replenish : PK_BaseSilverCard {
 		}
 	}	
 	override void RemoveCard() {
-		if (!CheckPlayersHaveCard(self.GetClassName()) && event) {
+		if (!PK_MainHandler.CheckPlayersHave(self.GetClassName()) && event) {
 			//first remove items that have already been picked up from the array
 			for (int i = 0; i < event.ammopickups.Size(); i++) {
 				if (!event.ammopickups[i] || event.ammopickups[i].owner)
@@ -938,21 +919,21 @@ Class PKC_TimeBonus : PK_BaseGoldenCard {
 
 //changes player's speed
 Class PKC_Speed : PK_BaseGoldenCard {
-	private double prevspeed;
+	private double p_speed;
 	Default {
 		tag "Speed";
 	}
 	override void GoldenCardStart() {
 		super.GoldenCardStart();
 		if (owner) {
-			prevspeed = owner.speed;
+			p_speed = owner.speed;
 			owner.speed *= 1.33;
 		}
 	}
 	override void GoldenCardEnd() {
 		super.GoldenCardEnd();
 		if (owner) {
-			owner.speed  = prevspeed;
+			owner.speed = owner.default.speed; //p_speed;
 		}
 	}
 }
@@ -980,50 +961,29 @@ Class PKC_Confusion : PK_BaseGoldenCard {
 	}
 	override void GoldenCardStart() {
 		super.GoldenCardStart();
+		owner.GiveInventory("PK_ConfusionControl",1);
 		handler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));
 		if (!handler)
 			return;
-		for (int i = 0; i < handler.allenemies.Size(); i++) {
-			if (!handler.allenemies[i])
-				continue;
-			let control = PK_ConfusionControl(handler.allenemies[i].FindInventory("PK_ConfusionControl"));
-			if (control)
-				control.active = true;
+		for (int i = 0; i < handler.demontargets.Size(); i++) {
+			if (handler.demontargets[i]) {
+				handler.demontargets[i].GiveInventory("PK_ConfusionControl",1);				
+				console.printf("Giving ConfusionControl to %s",handler.demontargets[i].GetClassName());
+			}
 		}
 	}
 	override void GoldenCardEnd() {
 		super.GoldenCardEnd();
+		owner.TakeInventory("PK_ConfusionControl",1);
 		if (!handler)
 			return;
-		bool endConfusion;
-		for (int pn = 0; pn < MAXPLAYERS; pn++) {
-			if (!playerInGame[pn])
-				continue;
-			PlayerInfo plr = players[pn];
-			if (!plr || !plr.mo)
-				continue;
-			let card = PKC_Confusion(plr.mo.FindInventory("PKC_Confusion"));
-			/*if (pk_debugmessages) {
-				string conf = card ? "has Confusion" : "doesn't have Confusion";
-				string cont = control ? "has CardControl" : "doesnt have CardControl";
-				string gact = control.goldActive ? "gold cards are active" : "gold cards are inactive";
-				console.printf("Player %d %s, %s, %s",plr.mo.PlayerNumber(),conf,cont,gact);
-			}*/
-			if (card && control && control.goldActive)
-				continue;
-			endConfusion = true;
-		}
-		if (endConfusion) {
+		if (!PK_MainHandler.CheckPlayersHave("PK_ConfusionControl")) {
 			if (pk_debugmessages)
 				console.printf("Nobody has active \"Confusion\"; ending effect");
-			for (int i = 0; i < handler.allenemies.Size(); i++) {
-				if (!handler.allenemies[i])
-					continue;
-				let thing = handler.allenemies[i];
-				let control = PK_ConfusionControl(thing.FindInventory("PK_ConfusionControl"));
-				if (control) {
-					control.active = false;
-					thing.target = null;
+			for (int i = 0; i < handler.demontargets.Size(); i++) {
+				if (handler.demontargets[i]) {
+					handler.demontargets[i].TakeInventory("PK_ConfusionControl",1);
+					handler.demontargets[i].target = null;
 				}
 			}
 		}
@@ -1034,38 +994,19 @@ Class PKC_Confusion : PK_BaseGoldenCard {
 //Confusion control item: makes monsters select a random target from monsters around them and ignore the player
 Class PK_ConfusionControl : PK_InventoryToken abstract {
 	private int cycle; //this will hold a random interval, after which the monster will switch target
-	bool active;
-	//this part ensures the monster falls under the effect if it somehow gets spawned *during* Confusion being active. Otherwise, under normal circumstances, the item gets activated from an event handler, not on its own
 	override void AttachToOwner(actor other) {
-		super.AttachToOwner(other);
-		if (!owner || !owner.bISMONSTER) {
+		//only attach to monsters and players
+		if (!other.bISMONSTER && !other.player) {
 			destroy();
 			return;
 		}
 		cycle = 1;
-		for (int pn = 0; pn < MAXPLAYERS; pn++) {
-			if (!playerInGame[pn])
-				continue;
-			PlayerInfo plr = players[pn];
-			if (!plr || !plr.mo)
-				continue;
-			let card = PKC_Confusion(plr.mo.FindInventory("PKC_Confusion"));
-			let control = PK_CardControl(plr.mo.FindInventory("PK_CardControl"));
-			if (card && control && control.goldActive) {
-				active = true;
-				break;
-			}
-		}
+		super.AttachToOwner(other);			
 	}
 	override void DoEffect() {
 		super.DoEffect();
-		if (!owner) {
-			destroy();
-			return;
-		}
-		if (!active)
-			return;
-		if (owner.health < 1)
+		//do nothing for players but let them have the item, as a token
+		if (!owner || owner.player || owner.health <= 0)
 			return;
 		if (level.time % 35 * cycle == 0) {
 			cycle = random[conf](3,8); //set random interval
@@ -1094,7 +1035,7 @@ Class PKC_Dexterity : PK_BaseGoldenCard {
 	}
 	override void GoldenCardStart() {
 		super.GoldenCardStart();
-		if (!owner.FindInventory("PK_HasteControl"))
+		if (!owner.FindInventory("PKC_Haste"))
 			owner.GiveInventory("PK_DexterityEffect",1);
 	}
 	override void GoldenCardEnd() {
@@ -1208,16 +1149,40 @@ Class PKC_IronWill : PK_BaseGoldenCard {
 }
 
 Class PKC_Haste : PK_BaseGoldenCard {
+	//PK_MainHandler handler;
 	Default {
 		tag "Haste";
 	}
 	override void GoldenCardStart() {
 		super.GoldenCardStart();
 		owner.GiveInventory("PK_HasteControl",1);
+		let handler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));
+		if (!handler)
+			return;
+		for (int i = 0; i < handler.demontargets.Size(); i++) {
+			if (handler.demontargets[i])
+				handler.demontargets[i].GiveInventory("PK_HasteControl",1);
+		}
 	}
 	override void GoldenCardEnd() {
 		super.GoldenCardEnd();
 		owner.TakeInventory("PK_HasteControl",1);
+		let handler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));
+		if (!handler)
+			return;
+		if (!PK_MainHandler.CheckPlayersHave("PK_HasteControl")) {
+			if (pk_debugmessages)
+				console.printf("Nobody has active \"Haste\"; ending effect");
+			console.printf("Demon targets array size: %d",handler.demontargets.Size());
+			for (int i = 0; i < handler.demontargets.Size(); i++) {	
+				let obj = handler.demontargets[i];
+				if (!obj)
+					continue;
+				obj.TakeInventory("PK_HasteControl",1);
+				if (pk_debugmessages)
+					console.printf("Taking PK_HasteControl from %s",obj.GetClassName());
+			}
+		}
 	}
 }
 
@@ -1231,8 +1196,11 @@ Class PK_HasteControl : PK_InventoryToken {
 	private state wstate2;
 	private state wstate3;
 	override void AttachToOwner(actor other) {
-		if (!other)
+		//only affect missiles, monsters and players:
+		if (!other.bISMONSTER && !other.bMISSILE && !(other is "PlayerPawn")) {
+			destroy();
 			return;
+		}
 		super.AttachToOwner(other);
 		if (!owner)
 			return;
@@ -1244,8 +1212,10 @@ Class PK_HasteControl : PK_InventoryToken {
 			else
 				ownerType = 1;
 		}
-		else if (owner.player)
+		else if (owner.player) {
 			ownerType = 3;
+			owner.player.mo.viewbob = 0.5;
+		}
 		else {
 			//ownerType = 4;
 			destroy();
@@ -1265,7 +1235,7 @@ Class PK_HasteControl : PK_InventoryToken {
 		//monsters:
 		if (ownerType == 0) {
 			for (int i = 7; i > 0; i--)
-				owner.A_SoundPitch(i,0.8);
+				owner.A_SoundPitch(i,0.6);
 			if (owner.CurState != slowstate) {
 				owner.A_SetTics(owner.tics*1.8);
 				slowstate = Owner.CurState;
@@ -1274,15 +1244,22 @@ Class PK_HasteControl : PK_InventoryToken {
 		//monster projectiles:
 		else if (ownerType == 1) {
 			for (int i = 7; i > 0; i--)
-				owner.A_SoundPitch(i,0.75);
+				owner.A_SoundPitch(i,0.6);
 		}
-		//player projectiles and players:
-		else if (!owner.FindInventory("PKC_Dexterity")) {
-			if (ownerType >= 2)  {
+		else {
+			//player projectiles and players
+			if (ownerType == 2)  {
 				for (int i = 12; i > 0; i--)
-					owner.A_SoundPitch(i,0.75);
+					owner.A_SoundPitch(i,0.8);
+				if (owner.CurState != slowstate) {
+					owner.A_SetTics(owner.tics*1.5);
+					slowstate = Owner.CurState;
+				}				
 			}
-			if (ownerType == 3) {
+			//players (having Dexterity neutralizes the effect)
+			if (ownerType == 3 && !owner.FindInventory("PKC_Dexterity")) {
+				for (int i = 12; i > 0; i--)
+					owner.A_SoundPitch(i,0.8);
 				let weap = owner.player.readyweapon;
 				if (!weap)
 					return;
@@ -1314,8 +1291,10 @@ Class PK_HasteControl : PK_InventoryToken {
 	override void DetachFromOwner() {
 		if (!owner)
 			return;
-		owner.speed = p_speed;
-		owner.gravity = p_gravity;
+		owner.speed = owner.default.speed; //p_speed;
+		owner.gravity = owner.default.gravity; //p_gravity;
+		if (owner.player)
+			owner.player.mo.viewbob = owner.player.mo.default.viewbob;
 		super.DetachFromOwner();
 	}
 }

@@ -1,25 +1,19 @@
 Class PK_MainHandler : EventHandler {
 	
-	array <Actor> allenemies; //holds all monsters
-	array <Actor> demontargets; //holds all monsters and players
+	array <Actor> demontargets; //holds all monsters, players and enemy projectiles
+	array <Actor> allenemies; //only monsters
 	
 	//converted from source code by 3saster:
-    bool CheckCheatmode (bool printmsg = true)
-    {
-        if ((G_SkillPropertyInt(SKILLP_DisableCheats) || netgame || deathmatch) && (!sv_cheats))
-        {
-            if (printmsg) console.printf ("sv_cheats must be true to enable this command.");
-            return true;
-        }
-        else if (cl_blockcheats != 0)
-        {
-            if (printmsg && cl_blockcheats == 1) console.printf("cl_blockcheats is turned on and disabled this command.\n");
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+	bool CheckCheatmode (bool printmsg = true) {
+		if ((G_SkillPropertyInt(SKILLP_DisableCheats) || netgame || deathmatch) && (!sv_cheats)) {
+			if (printmsg) console.printf ("sv_cheats must be true to enable this command.");
+			return true;
+		}
+		else if (cl_blockcheats != 0) {
+			if (printmsg && cl_blockcheats == 1) console.printf("cl_blockcheats is turned on and disabled this command.\n");
+			return true;
+		}
+		return false;
     }
 	//cheats:
 	static const string PKCH_GoldMessage[] = {
@@ -32,12 +26,34 @@ Class PK_MainHandler : EventHandler {
 		"$PKCH_TAKEGOLD2"
 	};
 	
+	//returns true if ANY of the players has the item:
+	static bool CheckPlayersHave(Class<Inventory> itm) {
+		if(!itm)
+			return false;
+		for (int pn = 0; pn < MAXPLAYERS; pn++) {
+			if (!playerInGame[pn])
+				continue;
+			PlayerInfo plr = players[pn];
+			if (!plr || !plr.mo)
+				continue;
+			if (plr.mo.FindInventory(itm)) {		
+				if (pk_debugmessages)
+					console.printf("Player %d has %s",plr.mo.PlayerNumber(),itm.GetClassName());
+				return true;
+				break;
+			}
+		}
+		return false;
+	}
+	
+	//tarot card-related events:
 	override void NetworkProcess(consoleevent e) {
 		if (!e.isManual)
 			return;
 		let plr = players[e.Player].mo;
 		if (!plr)
 			return;
+		//open black tarot board
 		if (e.name == "PKCOpenBoard") {
 			if (pk_debugmessages)
 				console.printf("Trying to open board");
@@ -56,6 +72,7 @@ Class PK_MainHandler : EventHandler {
 			}
 			Menu.SetMenu("PKCardsMenu");
 		}
+		//PKGOLD cheat (gives or takes gold)
 		if (CheckCheatMode())
 			return;
 		if (e.name == "PK_UseGoldenCards") {
@@ -78,6 +95,7 @@ Class PK_MainHandler : EventHandler {
 			}
 		}
 	}
+	
 	Vector2 SectorBounds (Sector sec) {
 		Vector2 posMin = ( double.Infinity,  double.Infinity);
 		Vector2 posMax = (-double.Infinity, -double.Infinity);
@@ -95,6 +113,7 @@ Class PK_MainHandler : EventHandler {
 		}
 		return (posMax - posMin);
 	}	
+	
 	override void WorldLoaded(WorldEvent e) {
 		Shader.SetEnabled(players[consoleplayer], "DemonMorph", false); 
 		//spawn gold randomly in secret areas:
@@ -131,13 +150,7 @@ Class PK_MainHandler : EventHandler {
 				actor goldPickup = actor.Spawn(gold,cCenter);
 				if (!goldpickup)
 					continue;
-				/*BlockThingsIterator itr = BlockThingsIterator.Create(goldPickup,64,0);
-				while (itr.Next())	{
-					Actor next = itr.thing;					
-					if (next is "Inventory")	{	
-						goldPickup.VelFromAngle(frandom[gold](4,8),random[gold](0,359));
-					}
-				}*/
+				//throw gold around randomly
 				goldPickup.VelFromAngle(frandom[gold](1,3),random[gold](0,359));
 			}
 			for (int i = random[moregold](1,4); i > 0; i--) {
@@ -151,63 +164,52 @@ Class PK_MainHandler : EventHandler {
 		let act = e.thing;		
 		if (!act)
 			return;
-		//save all monsters into a separate array
-		if (act.bISMONSTER) {
-			allenemies.push(act);
-			act.GiveInventory("PK_ConfusionControl",1); //for Confusion card
-		}
-		//all monsters, non-player projectiles and plawn pawns can be subjected to the Demon morph effects
-		if (act.bISMONSTER || (act.bMISSILE && act.target && !act.target.player) || (act is "PlayerPawn")) {
-			demontargets.push(act);
-			//console.printf("Pushing %s into the demontargets array",act.GetClassName());
-			//extra handling for cases when a new valid demontarget spawns while demon morph is already active
-			PK_DemonWeapon weap;
-			for (int pn = 0; pn < MAXPLAYERS; pn++) {
-				if (!playerInGame[pn])
-					continue;
-				PlayerInfo plr	= players[pn];
-				PlayerPawn pawn = plr.mo;
-				if (!plr || !pawn)
-					continue;
-				weap = PK_DemonWeapon(pawn.FindInventory("PK_DemonWeapon"));
-				if (weap)
-					break;
-			}
-			if (weap)
-				act.GiveInventory("PK_DemonTargetControl",1);
-		}
-		//players also need control items for demon morph and cards
+		//players need control items for demon morph and cards
 		if (act.player) {
 			if  (!act.FindInventory("PK_DemonMorphControl"))
 				act.GiveInventory("PK_DemonMorphControl",1);
 			if  (!act.FindInventory("PK_CardControl"))
 				act.GiveInventory("PK_CardControl",1);			
 		}
-	}
-	override void WorldThingRevived (worldevent e) {
-		let act = e.thing;		
-		if (!act)
-			return;
-		if (act.bISMONSTER)
+		//this is only used by the HUD compass:
+		if (act.bISMONSTER && !act.bFRIENDLY)
 			allenemies.push(act);
+		//monsters, projectiles and players can be subjected to various effects, such as Demon Morph or Haste, so put them in an array:
+		if (act.bISMONSTER || act.bMISSILE || (act is "PlayerPawn")) {
+			demontargets.push(act);
+			//console.printf("Pushing %s into the demontargets array",act.GetClassName());
+			if (CheckPlayersHave("PK_DemonWeapon"))
+				act.GiveInventory("PK_DemonTargetControl",1);
+			if (CheckPlayersHave("PK_HasteControl"))
+				act.GiveInventory("PK_HasteControl",1);
+			if (CheckPlayersHave("PK_ConfusionControl"))
+				act.GiveInventory("PK_ConfusionControl",1);
+		}
 	}
+	override void WorldThingrevived(worldevent e) {
+		let act = e.thing;
+		if (!act || !act.bISMONSTER)
+			return;		
+		allenemies.push(act);
+	}		
 	//spawn death effects on monster death and also delete them from the monster array
 	override void WorldThingDied(worldevent e) {
 		let act = e.thing;
 		if (!act || !act.bISMONSTER)
 			return;		
+		allenemies.delete(allenemies.Find(act));
 		actor c = Actor.Spawn("PK_EnemyDeathControl",act.pos);
 		if (c)
 			c.master = act;
-		allenemies.delete(allenemies.Find(e.thing));
 	}
-	/*override void WorldThingDestroyed(WorldEvent e) {
-		if (e.thing) {
-			allenemies.delete(allenemies.Find(e.thing));
-			demontargets.delete(allenemies.Find(e.thing));
+	override void WorldThingDestroyed(WorldEvent e) {
+		let act = e.thing;
+		if (act && demontargets.Find(act)) {
+			demontargets.delete(demontargets.Find(act));
+			allenemies.delete(allenemies.Find(act));
+			//console.printf("Deleting %s from demontargets",act.GetClassName());
 		}
-	}*/
-	
+	}
 }
 
 Class PK_ReplacementHandler : EventHandler {
@@ -239,7 +241,7 @@ Class PK_ReplacementHandler : EventHandler {
 	
 	static const Class<Weapon> PK_VanillaWeaponsList[] = { 'Fist', 'Chainsaw', 'Pistol', 'Shotgun', 'SuperShotgun', 'Chaingun', 'RocketLauncher', 'PlasmaRifle', 'BFG9000' };
 	
-	override void WorldTick() {
+	override void WorldTick() {			
 		for (int pn = 0; pn < MAXPLAYERS; pn++) {
 			if (!playerInGame[pn])
 				continue;			
