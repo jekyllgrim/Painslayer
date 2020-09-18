@@ -567,7 +567,7 @@ Class PK_CardControl : PK_InventoryToken {
 		if (!goldActive)
 			return;
 		else if (level.time % 35 == 0) {
-			if (goldDuration > 0)
+			if (goldDuration > 0 && owner.health > 0)
 				goldDuration--;
 			else
 				PK_StopGoldenCards();
@@ -1195,6 +1195,7 @@ Class PK_HasteControl : PK_InventoryToken {
 	private state wstate1;
 	private state wstate2;
 	private state wstate3;
+	private bool ticvar;
 	override void AttachToOwner(actor other) {
 		//only affect missiles, monsters and players:
 		if (!other.bISMONSTER && !other.bMISSILE && !(other is "PlayerPawn")) {
@@ -1240,6 +1241,14 @@ Class PK_HasteControl : PK_InventoryToken {
 				owner.A_SetTics(owner.tics*1.8);
 				slowstate = Owner.CurState;
 			}
+			/* make sure its speed is not too high, to override stuff like A_SkullAttack
+			Do this only every so often (10 tics) since it involves a square root
+			I use owner's age instead of level.time to not do it at once on every monster
+			*/
+			if (owner.GetAge() % 10 == 0) {
+				if (vel.length() > 6)
+					vel = vel.unit() * 6;
+			}
 		}
 		//monster projectiles:
 		else if (ownerType == 1) {
@@ -1263,26 +1272,29 @@ Class PK_HasteControl : PK_InventoryToken {
 				let weap = owner.player.readyweapon;
 				if (!weap)
 					return;
+				//multiply every OTHER frame by 1.5 (multiplying every frame makes it too slow and using a smaller factor doesn't always work since we can't have fractional tics)
+				double fac = ticvar ? 1.5 : 1;
+				ticvar = !ticvar;
 				let ps0 = owner.player.FindPSprite(PSP_WEAPON);
 				if (!ps0)
 					return;
 				if (ps0.curstate != wstate0) {					
-					ps0.tics = Clamp(ps0.tics*1.5,2,5);
+					ps0.tics = Clamp(double(ps0.tics*fac),2,5);
 					wstate0 = ps0.curstate;
 				}
 				let ps1 = owner.player.FindPSprite(-1);
 				if (ps1 && ps1.curstate != wstate1) {					
-					ps1.tics = Clamp(ps1.tics*1.5,2,5);
+					ps1.tics = Clamp(double(ps1.tics*fac),2,5);
 					wstate1 = ps1.curstate;
 				}		
 				let ps2 = owner.player.FindPSprite(2);
 				if (ps2 && ps2.curstate != wstate2) {					
-					ps2.tics = Clamp(ps2.tics*1.5,2,5);
+					ps2.tics = Clamp(double(ps2.tics*fac),2,5);
 					wstate2 = ps2.curstate;
 				}		
 				let ps3 = owner.player.FindPSprite(-100);
 				if (ps3 && ps3.curstate != wstate3) {					
-					ps3.tics = Clamp(ps3.tics*1.5,2,5);
+					ps3.tics = Clamp(double(ps3.tics*fac),2,5);
 					wstate3 = ps3.curstate;
 				}			
 			}
