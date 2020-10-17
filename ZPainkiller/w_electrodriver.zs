@@ -48,7 +48,7 @@ Class PK_ElectroDriver : PKWeapon {
 			}
 			return hit.HitLocation;
 		}
-		int dmg = invoker.hasDexterity ? 6 : 3;
+		int dmg = invoker.hasDexterity ? 8 : 4;
 		if (frandom(0,2) > 1.5)
 			ltarget.DamageMobj(self,self,dmg,'normal',flags:DMG_THRUSTLESS);
 		else
@@ -85,12 +85,7 @@ Class PK_ElectroDriver : PKWeapon {
 		TNT1 A 0 A_ReFire();
 		goto ready;
 	AltFire:
-		TNT1 A 0 {
-			A_StartSound("weapons/edriver/electroloopstart",CHAN_VOICE);
-			/*if (invoker.hasDexterity) {
-				A_SoundPitch(CHAN_VOICE,1.4);
-			}*/
-		}
+		TNT1 A 0 A_StartSound("weapons/edriver/electroloopstart",CHAN_VOICE);
 	AltHold:
 		ELDR A 1 {
 			if (player.cmd.buttons & BT_ATTACK && CountInv("PK_Battery") >= 40) {
@@ -121,10 +116,7 @@ Class PK_ElectroDriver : PKWeapon {
 			if (invoker.hasDexterity) {
 				PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.2,9.5),style:STYLE_ADD);
 				PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.9,10.5),style:STYLE_ADD);
-				//A_SoundPitch(12,1.25);
 			}
-			/*else
-				A_SoundPitch(12,1);*/
 			A_WeaponOffset(frandom[eld](-0.3,0.3),frandom[eld](32,32.4));
 			return ResolveState(null);
 		}

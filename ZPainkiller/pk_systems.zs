@@ -1224,10 +1224,17 @@ Class PK_HasteControl : PK_InventoryToken {
 		}
 		p_gravity = owner.gravity;
 		p_speed = owner.speed;
-		double slowfactor = (ownerType < 2) ? 0.4 : 0.8;
+		//monsters and monster projectiles are slowed down most:
+		double slowfactor = 0.4;
+		//player projectiles are slowed down moderately
+		if (ownerType == 2) 
+			slowfactor = 0.6;
+		//players are only slowed down a bit
+		else 
+			slowfactor = 0.8;
 		owner.gravity *= slowfactor;
 		owner.vel *= slowfactor;
-		owner.speed *= slowfactor;
+		owner.speed *= slowfactor;	
 	}
 	override void DoEffect() {
 		super.DoEffect();
@@ -1273,12 +1280,12 @@ Class PK_HasteControl : PK_InventoryToken {
 				if (!weap)
 					return;
 				//multiply every OTHER frame by 1.5 (multiplying every frame makes it too slow and using a smaller factor doesn't always work since we can't have fractional tics)
-				double fac = ticvar ? 1.5 : 1;
-				ticvar = !ticvar;
+				double fac = ticvar ? 1.5 : 1;	
 				let ps0 = owner.player.FindPSprite(PSP_WEAPON);
 				if (!ps0)
 					return;
-				if (ps0.curstate != wstate0) {					
+				ticvar = !ticvar;	
+				if (ps0.curstate != wstate0) {		
 					ps0.tics = Clamp(double(ps0.tics*fac),2,5);
 					wstate0 = ps0.curstate;
 				}
@@ -1303,6 +1310,8 @@ Class PK_HasteControl : PK_InventoryToken {
 	override void DetachFromOwner() {
 		if (!owner)
 			return;
+		for (int i = 12; i > 0; i--)
+			owner.A_SoundPitch(i,1);
 		owner.speed = owner.default.speed; //p_speed;
 		owner.gravity = owner.default.gravity; //p_gravity;
 		if (owner.player)
