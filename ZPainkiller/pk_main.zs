@@ -4,22 +4,23 @@ Class PK_BaseActor : Actor abstract {
 	protected int age;
 	
 	bool CheckLandingSize (double cradius = 0, bool checkceiling = false) {
-		bool ret = false;
 		if (checkceiling) {
 			double ceilingHeight = GetZAt (flags: GZF_CEILING);
 			for (int i = 0; i < 360; i += 45) {
 				double curHeight = GetZAt (cradius, 0, i, GZF_ABSOLUTEANG | GZF_CEILING);
-				ret = ret || (curHeight > ceilingHeight);
+				if (curHeight > ceilingz)
+					return true;
 			}
 		}
 		else {
 			double floorHeight = GetZAt ();
 			for (int i = 0; i < 360; i += 45) {
 				double curHeight = GetZAt (cradius, 0, i, GZF_ABSOLUTEANG);
-				ret = ret || (curHeight < floorHeight);
+				if (curHeight < floorz)
+					return true;
 			}
 		}
-		return ret;
+		return false;
 	}
 	
 	int PK_Sign (int i) {
@@ -32,7 +33,44 @@ Class PK_BaseActor : Actor abstract {
 	static const string PK_LiquidFlats[] = { 
 		"BLOOD", "LAVA", "NUKAGE", "SLIME01", "SLIME02", "SLIME03", "SLIME04", "SLIME05", "SLIME06", "SLIME07", "SLIME08", "BDT_"
 	};
-	
+	//water check by Boondorl
+	double GetWaterTop()
+	{
+		if (CurSector.MoreFlags & Sector.SECMF_UNDERWATER)
+			return CurSector.ceilingPlane.ZAtPoint(pos.xy);
+		else
+		{
+			let hsec = CurSector.GetHeightSec();
+			if (hsec)
+			{
+				double top = hsec.floorPlane.ZAtPoint(pos.xy);
+				if ((hsec.MoreFlags & Sector.SECMF_UNDERWATERMASK)
+					&& (pos.z < top
+					|| (!(hsec.MoreFlags & Sector.SECMF_FAKEFLOORONLY) && pos.z > hsec.ceilingPlane.ZAtPoint(pos.xy))))
+				{
+					return top;
+				}
+			}
+			else
+			{
+				for (uint i = 0; i < CurSector.Get3DFloorCount(); ++i)
+				{
+					let ffloor = CurSector.Get3DFloor(i);
+					if (!(ffloor.flags & F3DFloor.FF_EXISTS)
+						|| (ffloor.flags & F3DFloor.FF_SOLID)
+						|| !(ffloor.flags & F3DFloor.FF_SWIMMABLE))
+					{
+						continue;
+					}
+						
+					double top = ffloor.top.ZAtPoint(pos.xy);
+					if (top > pos.z && ffloor.bottom.ZAtPoint(pos.xy) <= pos.z)
+						return top;
+				}
+			}
+		}			
+		return 0;
+	}
 	bool CheckLiquidFlat() {
 		if (!self)
 			return false;
@@ -146,25 +184,29 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 	
 	Default {
 		gravity 0.8;
-		PK_SmalLDebris.liquidsound "";
-		PK_SmalLDebris.removeonfall false;
-		PK_SmalLDebris.removeonliquid true;
-		PK_SmalLDebris.dbrake 0;
-		PK_SmalLDebris.hitceiling false;
+		PK_SmallDebris.liquidsound "";
+		PK_SmallDebris.removeonfall false;
+		PK_SmallDebris.removeonliquid true;
+		PK_SmallDebris.dbrake 0;
+		PK_SmallDebris.hitceiling false;
 		+MOVEWITHSECTOR
+		-NOBLOCKMAP
 	}
 	
 	override void BeginPlay() {
 		super.BeginPlay();		
 		ChangeStatnum(110);
 	}
+	//a cheaper version of SetOrigin that also doesn't update floorz/ceilingz (because they're updated manually in Tick) - thanks phantombeta
+    void PK_SetOrigin (Vector3 newPos) {
+        LinkContext ctx;
+        UnlinkFromWorld (ctx);
+        SetXYZ (newPos);
+        LinkToWorld (ctx);
+    }
 	override void PostBeginPlay() {
-		if (!level.IsPointInLevel(pos)) {
-			destroy();
-			return;
-		}
 		super.PostBeginPlay();
-		if (vel.length() != 0 || gravity != 0) //mark as movable if given any non-zero velocity
+		if (vel.length() != 0 || gravity != 0) //mark as movable if given any non-zero velocity or gravity
 			moving = true;
 		d_spawn = FindState("Spawn");
 		d_death = FindState("Death");
@@ -174,14 +216,12 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 	}
 	//a chad tick override that skips Actor's super.tick!
 	override void Tick() {
-		if (alpha < 0) {
+		if (alpha < 0){
 			destroy();
 			return;
 		}
-		//if (self)
-			//console.printf("%s %d alpha %f",GetClassName(),GetAge(),alpha);
 		if (isFrozen())
-			return;		
+			return;
 		//animation:
 		if (tics != -1) {
 			if (tics > 0) 
@@ -191,8 +231,13 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 					return;
 			}
 		}
-		if (!bNOINTERACTION) {
-			UpdateWaterLevel();
+		/*
+		Perform collision for the objects that don't have NOINTERACTION and are older than 1 tic.
+		The latter helps to avoid collision at the moment of spawning.
+		*/
+		if (!bNOINTERACTION && GetAge() > 1) {
+			UpdateWaterLevel(); //manually update waterlevel
+			FindFloorCeiling(); //manually update floorz/ceilingz
 			if (d_spawn && InStateSequence(curstate,d_spawn)) {
 				//check if hit ceiling: (if hitceiling is true)
 				if (hitceiling && pos.z >= ceilingz - 10 && vel.z > 0) {
@@ -204,14 +249,15 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 				else if (pos.z > floorz+Voffset) {
 					A_FaceMovementDirection(flags:FMDF_NOPITCH);
 					FLineTraceData hit;
-					LineTrace(angle,16,0,flags:TRF_THRUACTORS|TRF_NOSKY,data:hit);
+					LineTrace(angle,radius+16,1,flags:TRF_THRUACTORS|TRF_NOSKY,data:hit);
 					if (hit.HitLine && hit.hittype == TRACE_HITWALL) {
 						wall = hit.HitLine;
 						wallnormal = (-hit.HitLine.delta.y,hit.HitLine.delta.x).unit();
 						wallpos = hit.HitLocation;
 						if (!hit.LineSide)
-							wallnormal *= -1;						
-						if (bBOUNCEONWALLS || pos.z <= floorz+Voffset){		
+							wallnormal *= -1;
+						//if the actor can bounce off walls and isn't too close to the floor, it'll bounce:
+						if (bBOUNCEONWALLS){		
 							if (wallbouncesound)
 								A_StartSound(wallbouncesound);
 							else if (bouncesound)
@@ -224,8 +270,13 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 								vel *= bouncefactor;
 							A_FaceMovementDirection();
 						}
-						else
+						//otherwise stop and call hitwall
+						else if (vel.x != 0 || vel.y != 0) {
+							SetOrigin(wallpos + wallnormal * radius,true);
+							A_Stop();
+							//console.printf("%s sticking to wall at %d:%d:%d",GetClassName(),pos.x,pos.y,pos.z);
 							PK_HitWall();
+						}
 					}
 					if (!self)
 						return;
@@ -233,26 +284,37 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 			}
 			//stick to surface if already landed:
 			if (landed) {
+				//stick to ceiling if on ceiling
 				if (onceiling)
-					SetOrigin((pos.x,pos.y,ceilingz-Voffset),true);
+					SetZ(ceilingz-Voffset);
+				//otherwise stick to floor (and, if necessary, slide on it)
 				else {
-					SetZ(floorz+Voffset);
-					if (dbrake > 0) {
-						if (!(vel.x ~== 0) || !(vel.y ~== 0)) {
-							vel.xy *= dbrake;
-							A_FaceMovementDirection(flags:FMDF_NOPITCH);
-							FLineTraceData hit;
-							LineTrace(angle,12,0,flags:TRF_THRUACTORS|TRF_NOSKY,data:hit);
-							if (hit.HitLine && hit.hittype == TRACE_HITWALL) {
-								wallnormal = (-hit.HitLine.delta.y,hit.HitLine.delta.x).unit();
-								wallpos = hit.HitLocation;
-								if (!hit.LineSide)
-									wallnormal *= -1;
-								vel = vel - (wallnormal,0) * 2 * (vel dot (wallnormal,0));
-								vel *= bouncefactor * 0.5;
+					double i = floorz+Voffset;
+					if (pos.z > i)
+						landed = false;
+					else {
+						SetZ(i);
+						//do the slide if friction allows it (as defined by dbrake property)
+						if (dbrake > 0) {
+							if (!(vel.x ~== 0) || !(vel.y ~== 0)) {
+								vel.xy *= dbrake;
 								A_FaceMovementDirection(flags:FMDF_NOPITCH);
+								FLineTraceData hit;
+								LineTrace(angle,12,0,flags:TRF_THRUACTORS|TRF_NOSKY,offsetz:1,data:hit);
+								if (hit.HitLine && hit.hittype == TRACE_HITWALL /*&& (!hit.HitLine || hit.HitLine.flags & hit.Hitline.ML_BLOCKING || hit.LinePart == Side.Bottom)*/) {
+									//console.printf("%s hit wall at %d:%d:%f | pitch: %f",GetClassName(),hit.HitLocation.x,hit.HitLocation.y,hit.HitLocation.z,pitch);
+									wallnormal = (-hit.HitLine.delta.y,hit.HitLine.delta.x).unit();
+									wallpos = hit.HitLocation;
+									if (!hit.LineSide)
+										wallnormal *= -1;
+									vel = vel - (wallnormal,0) * 2 * (vel dot (wallnormal,0));
+									vel *= bouncefactor * 0.5;
+									A_FaceMovementDirection(flags:FMDF_NOPITCH);
+								}
 							}
 						}
+						else
+							vel.xy = (0,0);
 					}
 				}
 			}
@@ -279,8 +341,10 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 			}
 		}
 		//finally, manually move the object:
-		if (moving)
-			SetOrigin(level.vec3offset(pos, vel),true);
+		if (moving) {
+			//this cheaper version won't automatically update floorz/ceilingz, which is good for objects like smoke that don't interact with geometry
+			PK_SetOrigin(level.vec3offset(pos, vel));
+		}
 	}
 	virtual void PK_HitFloor() {			//hit floor if close enough
 		if (removeonfall) {
@@ -293,6 +357,9 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 		}
 		landed = true;
 		vel.z = 0;
+		if (Voffset < 0)
+			Voffset = 0;
+		//landed on liquid:
 		if (onliquid) {
 			A_Stop();
 			A_StartSound(liquidsound,slot:CHAN_AUTO,flags:CHANF_DEFAULT,1.0,attenuation:3);
@@ -300,16 +367,23 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 				destroy();
 				return;
 			}
-			Voffset = (liquidheight == 0) ? (-(height * 0.5)) : -liquidheight;
+			/*
+			if it's a flat (non-3d-floor) liquid, we'll visually sink the object into it a bit
+			either by 50% of its height or by the value of its liquidheight property
+			*/
+			floorclip = (liquidheight == 0) ? (height * 0.5) : liquidheight;
+			//enter "DeathLiquid" state if present, otherwise enter "Death"
 			if (d_liquid)
 				SetState(d_liquid);
 			else if (d_death)
 				SetState(d_death);
 		}
+		//otherwise enter "Death" state if present
 		else if (d_death)
 			SetState(d_death);
 		SetZ(floorz+Voffset);
 	}
+	//stick to ceiling and enter "HitCeiling" state if present:
 	virtual void PK_Hitceiling() {
 		if (ceilingpic == skyflatnum) {
 			destroy();
@@ -319,6 +393,7 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 		if (d_ceiling)
 			SetState(d_ceiling);
 	}
+	//enter "HitWall" state if present:
 	virtual void PK_HitWall() {
 		if (d_wall)
 			SetState(d_wall);	
