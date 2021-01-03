@@ -32,9 +32,8 @@ Class PK_Stakegun : PKWeapon {
 		Fire:
 			TNT1 A 0 {
 				A_StartSound("weapons/stakegun/fire");
-				A_WeaponOffset(7,5,WOF_ADD);
+				A_WeaponOffset(11,9,WOF_ADD);
 				A_FireProjectile("PK_Stake",spawnofs_xy:2,spawnheight:5,flags:FPF_NOAUTOAIM,pitch:-2.5);
-				A_WeaponOffset(4,4,WOF_ADD);
 			}
 			PSGN BBBBB 2 A_WeaponOffset(1.44,1.2,WOF_ADD);
 			PSGN CDEF 3 A_WeaponOffset(-0.8,-0.5,WOF_ADD);
@@ -59,16 +58,31 @@ Class PK_Stakegun : PKWeapon {
 					if (psp)
 						psp.sprite = GetSpriteIndex("PSGT");
 				}
+				A_OverlayPivot(OverlayID(),0.2,1.0);
 			}
-			#### AL 1 A_WeaponOffset(5,3,WOF_ADD);
+			#### AA 1 {
+				A_WeaponOffset(5,3,WOF_ADD);
+				A_OverlayRotate(OverlayID(),-2.1,WOF_ADD);
+				A_OverlayScale(OverlayID(),0.04,0.04,WOF_ADD);
+			}
 			#### A 0 {
 				if (CountInv("PK_Bombs") > 0)
 					A_StartSound("weapons/grenade/load",CHAN_7);
 			}
-			#### MNN 1 A_WeaponOffset(3.5,2.5,WOF_ADD);
-			#### NNMMLL 2 A_WeaponOffset(-3.2,-2,WOF_ADD);
+			#### AAA 1 {
+				A_WeaponOffset(3.5,2.5,WOF_ADD);
+				A_OverlayRotate(OverlayID(),-2.1,WOF_ADD);
+				A_OverlayScale(OverlayID(),0.04,0.04,WOF_ADD);
+			}
+			#### AAAAAA 2 {
+				A_WeaponOffset(-3.2,-2,WOF_ADD);				
+				A_OverlayRotate(OverlayID(),1.75,WOF_ADD);
+				A_OverlayScale(OverlayID(),-0.03,-0.03,WOF_ADD);
+			}
 			#### AA 2 {
 				A_WeaponOffset(-0.64,-0.7,WOF_ADD);
+				A_OverlayRotate(OverlayID(),0);
+				A_OverlayScale(OverlayID(),1,1);
 				PK_WeaponReady(WRF_NOSECONDARY|WRF_NOSWITCH);
 			}
 			#### A 5 {
@@ -369,11 +383,11 @@ Class PK_GrenadeHitbox : Actor {
 	Default {
 		+NOGRAVITY
 		+SOLID
-		radius 32;
-		height 32;
+		radius 16;
+		height 24;
 	}
 	override bool CanCollideWith(Actor other, bool passive) {
-		if (other && other is "PK_Stake" && master && passive) {
+		if (other && other is "PK_Stake" && (abs(pos.z - other.pos.z) <= height)  && master && passive) {
 			hitstake = PK_Stake(other);
 			master = null;			
 		}
@@ -396,7 +410,7 @@ Class PK_GrenadeHitbox : Actor {
 			destroy();
 			return;
 		}
-		Warp(master,true);
+		SetOrigin(master.pos - (0,0,height * 0.5),false);
 	}
 }
 	
