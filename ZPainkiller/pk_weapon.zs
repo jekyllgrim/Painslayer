@@ -16,7 +16,8 @@ Class PKWeapon : Weapon abstract {
 	enum PK_WeaponLayers {
 		PSP_UNDERGUN 	= -1,
 		PSP_OVERGUN 	= 2,
-		PSP_PFLASH 	= -100
+		PSP_PFLASH 	= -100,
+		PSP_HIGHLIGHTS = 100
 	}
 	override void DoEffect() {
 		Super.DoEffect();
@@ -36,13 +37,13 @@ Class PKWeapon : Weapon abstract {
 		}
 	}
 	action void PK_WeaponReady(int flags = 0) {
-		if (player.cmd.buttons & BT_ATTACK && invoker.ammo1 && invoker.ammo1.amount < 1) {
+		if ((player.cmd.buttons & BT_ATTACK) && (!invoker.ammo1 || invoker.ammo1.amount < 1)) {
 			A_ClearRefire();
 			if (!(player.oldbuttons & BT_ATTACK))
 				A_StartSound(invoker.emptysound);
 			return;
 		}
-		if (player.cmd.buttons & BT_ALTATTACK && invoker.ammo2 && invoker.ammo2.amount < 1) {
+		if ((player.cmd.buttons & BT_ALTATTACK) && (!invoker.ammo2 || invoker.ammo2.amount < 1)) {
 			A_ClearRefire();
 			if (!(player.oldbuttons & BT_ALTATTACK))
 				A_StartSound(invoker.emptysound);
