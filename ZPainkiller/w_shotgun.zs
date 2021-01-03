@@ -83,13 +83,21 @@ Class PK_Shotgun : PKWeapon {
 		goto ready;
 	Flash:
 		SMUZ A 2 bright {
+			A_Overlay(PSP_HIGHLIGHTS,"Hightlights");
 			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
 			A_OverlayRenderstyle(OverlayID(),Style_Add);
 			A_OverlayAlpha(OverlayID(),0.95);
 			let fl = Player.FindPsprite(OverlayID());
 			if (fl)
 				fl.frame = random[sfx](0,3);
-			}
+		}
+		stop;
+	Hightlights:
+		PSHT Z 2 bright {
+			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha,true);
+			A_OverlayRenderstyle(OverlayID(),Style_Add);
+			A_OverlayAlpha(OverlayID(),1);
+		}
 		stop;
 	}
 }
@@ -222,20 +230,13 @@ Class PK_FrozenLayer : PK_SmallDebris {
 	}
 }
 	
-Class PK_FreezeControl : Inventory {
+Class PK_FreezeControl : PK_InventoryToken {
 	int fcounter;
 	uint ownertrans;
 	bool grav;
-	Default {
-		+INVENTORY.UNDROPPABLE
-		+INVENTORY.UNTOSSABLE
-		+INVENTORY.UNCLEARABLE
-		inventory.amount 1;
-		inventory.maxamount 1;
-	}
 	override void ModifyDamage (int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
 		if (inflictor && owner && passive)
-			newdamage = damage*1.25;			
+			newdamage = max(0, ApplyDamageFactors(GetClass(), damageType, damage, damage*1.25));
 	}
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);
