@@ -102,8 +102,8 @@ Class PK_DemonMorphControl : PK_InventoryToken {
 	property minsouls : pk_minsouls;
 	property fullsouls : pk_fullsouls;
 	Default {
-		PK_DemonMorphControl.minsouls 4;
-		PK_DemonMorphControl.fullsouls 6;
+		PK_DemonMorphControl.minsouls 64;
+		PK_DemonMorphControl.fullsouls 66;
 	}
 	override void Tick() {}
 	/*override void DoEffect() {
