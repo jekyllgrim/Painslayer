@@ -35,14 +35,39 @@ Class PK_Chaingun : PKWeapon {
 			A_Quake(1,9,0,32,"");
 			A_FireProjectile("PK_Rocket",spawnofs_xy:6,spawnheight:-2);
 			A_ZoomFactor(0.98,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
+			A_OverlayPivot(OverlayID(),0.1,1.0);
 		}
 		TNT1 A 0 A_ZoomFactor(1,ZOOM_NOSCALETURNING);
-		MIGN EF 1 A_WeaponOffset(12,3,WOF_ADD);
-		MIGN GGG 1 A_WeaponOffset(2,3,WOF_ADD);
-		MIGN FFF 2 A_WeaponOffset(-3,0,WOF_ADD);
-		MIGN EEE 2 A_WeaponOffset(-3,-2,WOF_ADD);
-		MIGN AAA 2 A_WeaponOffset(-4,-3,WOF_ADD);
-		MIGN A 0 A_WeaponOffset(0,32);
+		MIGN AA 1 {
+			A_WeaponOffset(12,3,WOF_ADD);
+			A_OverlayRotate(OverlayID(),-2.5,WOF_ADD);
+			A_OverlayScale(OverlayID(),0.05,0.05,WOF_ADD);
+		}
+		MIGN AAA 1 {
+			A_WeaponOffset(2,3,WOF_ADD);
+			A_OverlayRotate(OverlayID(),-2.5,WOF_ADD);
+			A_OverlayScale(OverlayID(),0.05,0.05,WOF_ADD);
+		}
+		MIGN AAA 2 {
+			A_WeaponOffset(-3,0,WOF_ADD);
+			A_OverlayRotate(OverlayID(),1.38,WOF_ADD);
+			A_OverlayScale(OverlayID(),-0.027,-0.027,WOF_ADD);
+		}
+		MIGN AAA 2 {
+			A_WeaponOffset(-3,-2,WOF_ADD);
+			A_OverlayRotate(OverlayID(),1.38,WOF_ADD);
+			A_OverlayScale(OverlayID(),-0.027,-0.027,WOF_ADD);
+		}
+		MIGN AAA 2 {
+			A_WeaponOffset(-4,-3,WOF_ADD);
+			A_OverlayRotate(OverlayID(),1.38,WOF_ADD);
+			A_OverlayScale(OverlayID(),-0.027,-0.027,WOF_ADD);
+		}
+		MIGN A 0 {
+			A_WeaponOffset(0,32);
+			A_OverlayRotate(OverlayID(),0);
+			A_OverlayScale(OverlayID(),1,1);
+		}
 		goto ready;
 	AltFire:
 		TNT1 A 0 {
