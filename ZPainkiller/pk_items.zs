@@ -1,9 +1,11 @@
-Class PK_InventoryToken : Inventory {
+Class PK_InventoryToken : Inventory abstract {
 	Default {
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNTOSSABLE;
 		+INVENTORY.UNCLEARABLE;
 		+INVENTORY.PERSISTENTPOWER;
+		inventory.amount 1;
+		inventory.maxamount 1;
 	}
 	override void Tick() {}
 }
