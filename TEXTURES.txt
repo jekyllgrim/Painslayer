@@ -132,56 +132,56 @@ Sprite "PSHFF0", 290, 103
 {
 	YScale 1.200
 	Offset -193, -99
-	Patch "PSHFF", 0, 0
+	Patch "PSHF00", 0, 0
 }
 
 Sprite "PSHFG0", 290, 103
 {
 	YScale 1.200
 	Offset -193, -99
-	Patch "PSHFG", 0, 0
+	Patch "PSHF01", 0, 0
 }
 
 Sprite "PSHFH0", 290, 103
 {
 	YScale 1.200
 	Offset -193, -99
-	Patch "PSHFH", 0, 0
+	Patch "PSHF02", 0, 0
 }
 
 Sprite "PSHFI0", 290, 103
 {
 	YScale 1.200
 	Offset -193, -99
-	Patch "PSHFI", 0, 0
+	Patch "PSHF03", 0, 0
 }
 
 Sprite "PSHFJ0", 290, 103
 {
 	YScale 1.200
 	Offset -193, -99
-	Patch "PSHFJ", 0, 0
+	Patch "PSHF04", 0, 0
 }
 
 Sprite "PSHFK0", 290, 103
 {
 	YScale 1.200
 	Offset -193, -99
-	Patch "PSHFK", 0, 0
+	Patch "PSHF05", 0, 0
 }
 
 Sprite "PSHFL0", 290, 103
 {
 	YScale 1.200
 	Offset -193, -99
-	Patch "PSHFL", 0, 0
+	Patch "PSHF06", 0, 0
 }
 
 Sprite "PSHFM0", 290, 103
 {
 	YScale 1.200
 	Offset -193, -99
-	Patch "PSHFM", 0, 0
+	Patch "PSHF07", 0, 0
 }
 
 Sprite "SMUZA0", 223, 144
