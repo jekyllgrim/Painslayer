@@ -439,7 +439,6 @@ Class PK_RandomDebris : PK_SmallDebris {
 		+ROLLCENTER
 		wallbouncefactor 0.5;
 		height 8;
-		renderstyle 'shaded';
 		stencilcolor "101010";
 		scale 0.2;
 	}
