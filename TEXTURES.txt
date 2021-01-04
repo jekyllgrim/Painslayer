@@ -331,6 +331,34 @@ Sprite "MIGND0", 213, 95
 	Patch "MIGN03", 0, 0
 }
 
+Sprite "MIGFA0", 213, 95
+{
+	YScale 1.200
+	Offset -180, -107
+	Patch "MIGF00", 0, 0
+}
+
+Sprite "MIGFB0", 213, 95
+{
+	YScale 1.200
+	Offset -180, -107
+	Patch "MIGF01", 0, 0
+}
+
+Sprite "MIGFC0", 213, 95
+{
+	YScale 1.200
+	Offset -180, -107
+	Patch "MIGF02", 0, 0
+}
+
+Sprite "MIGFD0", 213, 95
+{
+	YScale 1.200
+	Offset -180, -107
+	Patch "MIGF03", 0, 0
+}
+
 Sprite "PSHZA0", 190, 105
 {
 	YScale 1.200
@@ -542,6 +570,20 @@ Sprite "ELDRA0", 158, 106
 	YScale 1.200
 	Offset -180, -96
 	Patch "ELDRA", 0, 0
+}
+
+Sprite "ELDRZ0", 158, 106
+{
+	YScale 1.200
+	Offset -180, -96
+	Patch "ELDRZ", 0, 0
+}
+
+Sprite "ELDRY0", 158, 106
+{
+	YScale 1.200
+	Offset -180, -96
+	Patch "ELDRY", 0, 0
 }
 
 Sprite "ELDRB0", 158, 106

@@ -1,6 +1,7 @@
 Class PK_Chaingun : PKWeapon {
 	private int holddur;
 	private double atkzoom;
+	private bool muzzleFlash;
 	Default {
 		PKWeapon.emptysound "weapons/empty/chaingun";
 		weapon.slotnumber 4;
@@ -92,14 +93,18 @@ Class PK_Chaingun : PKWeapon {
 			}
 			else
 				invoker.hideFlash = false;
-			if (!invoker.hideFlash)
+			if (!invoker.hideFlash) {
 				A_Overlay(PSP_PFLASH,"AltFlash");
+			}
 			A_FireBullets(2.5,2.5,-1,9,pufftype:"PK_BulletPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-40,spawnofs_xy:8.6);
 			
 			A_QuakeEX(1,1,0,2,0,1,sfx:"world/null");
 			return ResolveState(null);
 		}
-		TNT1 A 0 A_ReFire();
+		TNT1 A 0 {
+			A_RemoveLight('PKMGunFlash');
+			A_ReFire();
+		}
 	AltFireEnd:
 		TNT1 A 0 {
 			invoker.holddur = 0;
@@ -127,6 +132,11 @@ Class PK_Chaingun : PKWeapon {
 		goto ready;
 	MinigunFire:
 		MIGN ABCD 1 {
+			A_Overlay(PSP_HIGHLIGHTS,"Hightlights");
+			let psp = Player.FindPsprite(OverlayID());
+			let hl = Player.FindPsprite(PSP_HIGHLIGHTS);
+			if (psp && hl)
+				hl.frame = psp.frame;
 			if (invoker.hasDexterity) {
 				A_SoundPitch(CHAN_6,1.25);
 				A_SoundPitch(CHAN_7,1.25);
@@ -140,8 +150,11 @@ Class PK_Chaingun : PKWeapon {
 				A_SoundPitch(CHAN_6,1);
 				A_SoundPitch(CHAN_7,1);
 			}
+			A_AttachLight('PKMGunFlash', DynamicLight.PointLight, "fcbb53", frandom[sfx](56,70), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight));
+			invoker.muzzleFlash = !invoker.muzzleFlash;
 			double ofs = Clamp(invoker.holddur * 0.04,0,1.2);
-			A_OverlayOffset(OverlayID(),frandom[mgun](0,ofs),frandom[mgun](0,ofs),WOF_INTERPOLATE);
+			A_OverlayOffset(OverlayID(),frandom[mgun](0,ofs),frandom[mgun](0,ofs));
+			A_OverlayOffset(PSP_HIGHLIGHTS,psp.x,psp.y);
 			invoker.atkzoom = Clamp(invoker.holddur * 0.001,0,0.04);
 			if (invoker.atkzoom < 0.04)
 				A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
@@ -158,6 +171,13 @@ Class PK_Chaingun : PKWeapon {
 			if (fl)
 				fl.frame = random[sfx](0,3);
 			}
+		stop;
+	Hightlights:
+		MIGF # 1 bright {			
+			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
+			A_OverlayRenderstyle(OverlayID(),Style_Add);
+			A_OverlayAlpha(OverlayID(),frandom[sfx](0,1.2));
+		}
 		stop;
 	}
 }

@@ -109,6 +109,7 @@ Class PK_ElectroDriver : PKWeapon {
 					}
 				}
 			}
+			A_Overlay(PSP_HIGHLIGHTS,"Hightlights");
 			A_StartSound("weapons/edriver/electroloop",12,CHANF_LOOPING);
 			vector3 atkpos = FindElectroTarget();
 			PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
@@ -118,6 +119,7 @@ Class PK_ElectroDriver : PKWeapon {
 				PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.9,10.5),style:STYLE_ADD);
 			}
 			A_WeaponOffset(frandom[eld](-0.3,0.3),frandom[eld](32,32.4));
+			A_AttachLight('PKElectroFlash', DynamicLight.PointLight, "5464fc", frandom[sfx](48,56), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight));
 			return ResolveState(null);
 		}
 		TNT1 A 0 {
@@ -127,8 +129,16 @@ Class PK_ElectroDriver : PKWeapon {
 		TNT1 A 0 {
 			A_StopSound(12);
 			A_StartSound("weapons/edriver/electroloopend",12);
+			A_RemoveLight('PKElectroFlash');
 		}
 		goto ready;	
+	Hightlights:
+		ELDR Z 1 bright {			
+			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
+			A_OverlayRenderstyle(OverlayID(),Style_Add);
+			A_OverlayAlpha(OverlayID(),frandom[sfx](0,1.2));
+		}
+		stop;
 	DiskFire:
 		ELDR E 1 {
 			A_WeaponOffset(16,12,WOF_ADD);
@@ -145,17 +155,28 @@ Class PK_ElectroDriver : PKWeapon {
 		TNT1 A 0 {
 			A_OverlayFlags(OverlayID(),PSPF_RENDERSTYLE|PSPF_ALPHA|PSPF_FORCEALPHA,true);
 			A_OverlayRenderstyle(OverlayID(),STYLE_Add);
+			A_Overlay(PSP_OVERGUN,'ReadyLight');
 		}
 		ELDS A 1 bright {
-			if (!player.readyweapon || player.readyweapon != invoker || CountInv("PK_Battery") < 1)	
+			if (!player.readyweapon || player.readyweapon != invoker || CountInv("PK_Battery") < 1) {
+				A_ClearOverlays(PSP_OVERGUN,PSP_OVERGUN);
 				return ResolveState("Null");
+			}
 			let psp = player.FindPSprite(overlayID());
 			if (psp)
 				psp.frame = random[eld](0,4);
-			A_OverlayAlpha(OverlayID(),frandom[eld](0.4,1.0));	
+			double alph = frandom[sfx](0.5,1);
+			A_OverlayAlpha(OverlayID(),alph);	
+			A_OverlayAlpha(PSP_OVERGUN,frandom[sfx](0.25,alph));	
 			return ResolveState(null);
 		}
 		wait;
+	ReadyLight:
+		ELDR Y -1 bright {			
+			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
+			A_OverlayRenderstyle(OverlayID(),Style_Add);
+		}
+		stop;
 	}
 }
 

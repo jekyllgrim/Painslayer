@@ -42,9 +42,11 @@ Class PK_Shotgun : PKWeapon {
 			A_Overlay(PSP_PFLASH,"Flash");
 			A_firebullets(5,5,10,9,pufftype:"PK_BulletPuff",flags:FBF_NORANDOM|FBF_USEAMMO,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-44,spawnofs_xy:9);
 			A_ZoomFactor(0.99,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
+			A_AttachLight('PKShotFlash', DynamicLight.PulseLight, "e1b03e", 64, 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight), param: 0.1);
 		}
 		TNT1 A 0 A_ZoomFactor(1,ZOOM_NOSCALETURNING);
 		PSHT CDF 1 A_WeaponOffset(10,2,WOF_ADD);
+		TNT1 A 0 A_RemoveLight('PKShotFlash');
 		PSHT HH 2 A_WeaponOffset(1,5,WOF_ADD);
 		PSHT HH 2 A_WeaponOffset(-1,4,WOF_ADD);
 		PSHT GFE 2 A_WeaponOffset(-5,-6,WOF_ADD);
