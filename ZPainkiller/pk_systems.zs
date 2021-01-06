@@ -825,7 +825,7 @@ Class PKC_HellishArmor : PK_BaseSilverCard {
 }
 
 //used by Hellish Armor
-Class PK_HellishArmorBonus : BasicArmorBonus abstract {
+Class PK_HellishArmorBonus : BasicArmorBonus  {
 	Default {
 		armor.saveamount 1;
 		armor.maxsaveamount 100;
@@ -992,7 +992,7 @@ Class PKC_Confusion : PK_BaseGoldenCard {
 
 
 //Confusion control item: makes monsters select a random target from monsters around them and ignore the player
-Class PK_ConfusionControl : PK_InventoryToken abstract {
+Class PK_ConfusionControl : PK_InventoryToken  {
 	private int cycle; //this will hold a random interval, after which the monster will switch target
 	override void AttachToOwner(actor other) {
 		//only attach to monsters and players
@@ -1045,7 +1045,7 @@ Class PKC_Dexterity : PK_BaseGoldenCard {
 }
 
 //used by Dexterity
-Class PK_DexterityEffect : PowerDoubleFiringSpeed abstract {
+Class PK_DexterityEffect : PowerDoubleFiringSpeed {
 	Default {
 		powerup.duration 999999;
 		inventory.maxamount 1;
@@ -1124,7 +1124,7 @@ Class PKC_MagicGun : PK_BaseGoldenCard {
 	}
 }
 
-Class PK_MagicGunEffect : PowerInfiniteAmmo abstract {
+Class PK_MagicGunEffect : PowerInfiniteAmmo {
 	Default {
 		powerup.duration 999999;
 		inventory.maxamount 1;
