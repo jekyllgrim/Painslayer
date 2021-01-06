@@ -5,7 +5,7 @@ Class PK_Stakegun : PKWeapon {
 		weapon.ammotype1	"PK_Stakes";
 		weapon.ammouse1		1;
 		weapon.ammogive1	10;
-		weapon.ammotype2	"PK_Bombs";
+		weapon.ammotype2	"PK_Grenades";
 		weapon.ammogive2	0;
 		weapon.ammouse2		1;
 		scale 0.23;
@@ -22,7 +22,7 @@ Class PK_Stakegun : PKWeapon {
 		Ready:
 			PSGN A 1 {
 				PK_WeaponReady();
-				if (CountInv("PK_Stakes") < 1) {
+				if (invoker.ammo1.amount < 1) {
 					let psp = player.FindPSprite(PSP_Weapon);
 					if (psp)
 						psp.sprite = GetSpriteIndex("PSGT");
@@ -39,7 +39,7 @@ Class PK_Stakegun : PKWeapon {
 			PSGN CDEF 3 A_WeaponOffset(-0.8,-0.5,WOF_ADD);
 			PSGN GGGGGGG 2 A_WeaponOffset(-0.12,-0.1,WOF_ADD);
 			PSGN A 0 {
-				if (CountInv("PK_Stakes") < 1) {
+				if (invoker.ammo1.amount < 1) {
 					let psp = player.FindPSprite(PSP_Weapon);
 					if (psp)
 						psp.sprite = GetSpriteIndex("PSGT");
@@ -53,7 +53,7 @@ Class PK_Stakegun : PKWeapon {
 				A_StartSound("weapons/stakegun/grenade");
 				A_WeaponOffset(6,2,WOF_ADD);
 				A_FireProjectile("PK_Grenade",spawnofs_xy:1,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
-				if (CountInv("PK_Stakes") < 1) {
+				if (invoker.ammo1.amount < 1) {
 					let psp = Player.FindPSprite(PSP_WEAPON);
 					if (psp)
 						psp.sprite = GetSpriteIndex("PSGT");
@@ -66,7 +66,7 @@ Class PK_Stakegun : PKWeapon {
 				A_OverlayScale(OverlayID(),0.04,0.04,WOF_ADD);
 			}
 			#### A 0 {
-				if (CountInv("PK_Bombs") > 0)
+				if (invoker.ammo2.amount > 0)
 					A_StartSound("weapons/grenade/load",CHAN_7);
 			}
 			#### AAA 1 {

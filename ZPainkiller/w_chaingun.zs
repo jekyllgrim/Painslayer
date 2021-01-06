@@ -132,15 +132,10 @@ Class PK_Chaingun : PKWeapon {
 		goto ready;
 	MinigunFire:
 		MIGN ABCD 1 {
-			A_Overlay(PSP_HIGHLIGHTS,"Hightlights");
 			let psp = Player.FindPsprite(OverlayID());
-			let hl = Player.FindPsprite(PSP_HIGHLIGHTS);
-			if (psp && hl)
-				hl.frame = psp.frame;
 			if (invoker.hasDexterity) {
 				A_SoundPitch(CHAN_6,1.25);
 				A_SoundPitch(CHAN_7,1.25);
-				let psp = player.FindPsprite(OverlayID());
 				if (psp && psp.frame == 0)
 					psp.frame = 2;
 				else
@@ -150,8 +145,18 @@ Class PK_Chaingun : PKWeapon {
 				A_SoundPitch(CHAN_6,1);
 				A_SoundPitch(CHAN_7,1);
 			}
-			A_AttachLight('PKMGunFlash', DynamicLight.PointLight, "fcbb53", frandom[sfx](56,70), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight));
-			invoker.muzzleFlash = !invoker.muzzleFlash;
+			
+			double brt = frandom[sfx](40,70);
+			A_AttachLight('PKMGunFlash', DynamicLight.PointLight, "fcbb53", int(brt), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight));
+			double brt2 = (brt - 40) / 30;
+			A_Overlay(PSP_HIGHLIGHTS,"Hightlights");
+			A_OverlayFlags(PSP_HIGHLIGHTS,PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
+			A_OverlayRenderstyle(PSP_HIGHLIGHTS,Style_Add);
+			A_OverlayAlpha(PSP_HIGHLIGHTS,frandom[sfx](0,1.2));
+			let hl = Player.FindPsprite(PSP_HIGHLIGHTS);
+			if (psp && hl)
+				hl.frame = psp.frame;
+				
 			double ofs = Clamp(invoker.holddur * 0.04,0,1.2);
 			A_OverlayOffset(OverlayID(),frandom[mgun](0,ofs),frandom[mgun](0,ofs));
 			A_OverlayOffset(PSP_HIGHLIGHTS,psp.x,psp.y);
@@ -173,11 +178,7 @@ Class PK_Chaingun : PKWeapon {
 			}
 		stop;
 	Hightlights:
-		MIGF # 1 bright {			
-			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
-			A_OverlayRenderstyle(OverlayID(),Style_Add);
-			A_OverlayAlpha(OverlayID(),frandom[sfx](0,1.2));
-		}
+		MIGF # 1 bright;
 		stop;
 	}
 }

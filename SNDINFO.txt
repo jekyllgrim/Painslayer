@@ -164,6 +164,22 @@ edspark1 "sounds/ElectroDriver/electro-shoot-spark1.wav"
 edspark2 "sounds/ElectroDriver/electro-shoot-spark2.wav"
 edspark3 "sounds/ElectroDriver/electro-shoot-spark3.wav"
 
+//== Boltgun/Heater
+
+weapons/boltgun/fire1		"sounds/boltgun/weapon_bolt-shoot1.wav"
+weapons/boltgun/fire2		"sounds/boltgun/weapon_bolt-shoot2.wav"
+weapons/boltgun/fire3		"sounds/boltgun/weapon_bolt-shoot3.wav"
+weapons/boltgun/heater		"sounds/boltgun/weapon_heater_fire.wav"
+weapons/boltgun/zoom		"sounds/boltgun/zoom-in.wav"
+$random weapons/boltgun/bounce	{ heaterbounce1 heaterbounce2 }
+$limit weapons/boltgun/bounce 32
+heaterbounce1	"sounds/boltgun/weapon_heater-bounce1.wav"
+heaterbounce2	"sounds/boltgun/weapon_heater-bounce2.wav"
+$random weapons/boltgun/explosion	{ heaterBoom1 heaterBoom2 heaterBoom3 }
+$limit weapons/boltgun/bounce 32
+heaterBoom1 "sounds/boltgun/weapon_heater-explosion1.wav"
+heaterBoom2 "sounds/boltgun/weapon_heater-explosion2.wav"
+heaterBoom3 "sounds/boltgun/weapon_heater-explosion3.wav"
 
 
 ///PICKUPS\\\
@@ -171,10 +187,12 @@ edspark3 "sounds/ElectroDriver/electro-shoot-spark3.wav"
 pickups/ammo/shells			SHELPKUP
 pickups/ammo/freezerammo	FREZPKUP
 pickups/ammo/stakes			STKSPKUP
-pickups/ammo/bombs			BOMBPKUP
+pickups/ammo/grenades			BOMBPKUP
 pickups/ammo/bullets		BULLPKUP
 pickups/ammo/battery		ELECPKUP
 pickups/ammo/stars			SHURPKUP
+pickups/ammo/bolts			"sounds/boltgun/pickup_ammo_bolt.wav"
+pickups/ammo/bombs			"sounds/boltgun/pickup_ammo_heaterbomb.wav"
 
 pickups/ammopack	AMMOPACK
 
@@ -182,6 +200,7 @@ pickups/weapons/shotgun		STGNTAKE
 pickups/weapons/stakegun	STAKTAKE
 pickups/weapons/chaingun	MGUNTAKE
 pickups/weapons/eldriver	ELDRPKUP
+pickups/weapons/boltgun	"sounds/boltgun/take-boltgunheather.wav"
 
 pickups/powerups/wmodifier/take	WMODTAKE
 pickups/powerups/wmodifier/loop	WMODLOOP

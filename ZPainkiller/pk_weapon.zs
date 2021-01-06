@@ -463,10 +463,10 @@ Class PK_Stakes : Ammo {
 	}
 }
 
-Class PK_Bombs : Ammo {
+Class PK_Grenades : Ammo {
 	Default {
-		inventory.pickupmessage "Picked up a box of bombs.";
-		inventory.pickupsound "pickups/ammo/bombs";
+		inventory.pickupmessage "Picked up a box of grenades.";
+		inventory.pickupsound "pickups/ammo/grenades";
 		inventory.icon "pkhrock";
 		inventory.amount 7;
 		inventory.maxamount 100;
@@ -476,7 +476,7 @@ Class PK_Bombs : Ammo {
 	}
 	states	{
 	spawn:
-		AMBO A -1;
+		AMRO A -1;
 		stop;
 	}
 }
@@ -537,3 +537,41 @@ Class PK_Battery : Ammo {
 	}
 }
 
+
+Class PK_Bolts : Ammo {
+	Default {
+		inventory.pickupmessage "Picked up a box of steel bolts.";
+		inventory.pickupsound "pickups/ammo/bolts";
+		inventory.icon "pkhbolts";
+		inventory.amount 30;
+		inventory.maxamount 500;
+		ammo.backpackamount 30;
+		ammo.backpackmaxamount 500;
+		xscale 0.3;
+		yscale 0.25;
+	}
+	states	{
+	spawn:
+		AMBL A -1;
+		stop;
+	}
+}
+
+Class PK_Bombs : Ammo {
+	Default {
+		inventory.pickupmessage "Picked up a box of bombs.";
+		inventory.pickupsound "pickups/ammo/bombs";
+		inventory.icon "pkhbombs";
+		inventory.amount 20;
+		inventory.maxamount 250;
+		ammo.backpackamount 20;
+		ammo.backpackmaxamount 250;
+		xscale 0.3;
+		yscale 0.25;
+	}
+	states	{
+	spawn:
+		AMBM A -1;
+		stop;
+	}
+}
