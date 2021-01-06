@@ -16,6 +16,9 @@ Class PKWeapon : Weapon abstract {
 	enum PK_WeaponLayers {
 		PSP_UNDERGUN 	= -1,
 		PSP_OVERGUN 	= 2,
+		PSP_SCOPE1		= 3,
+		PSP_SCOPE2		= 4,
+		PSP_SCOPE3		= 5,
 		PSP_PFLASH 	= -100,
 		PSP_HIGHLIGHTS = 100
 	}

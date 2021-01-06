@@ -171,6 +171,7 @@ weapons/boltgun/fire2		"sounds/boltgun/weapon_bolt-shoot2.wav"
 weapons/boltgun/fire3		"sounds/boltgun/weapon_bolt-shoot3.wav"
 weapons/boltgun/heater		"sounds/boltgun/weapon_heater_fire.wav"
 weapons/boltgun/zoom		"sounds/boltgun/zoom-in.wav"
+weapons/boltgun/reload		"sounds/boltgun/weapon_bolt_reload.wav"
 $random weapons/boltgun/bounce	{ heaterbounce1 heaterbounce2 }
 $limit weapons/boltgun/bounce 32
 heaterbounce1	"sounds/boltgun/weapon_heater-bounce1.wav"

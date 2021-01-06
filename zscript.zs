@@ -17,6 +17,7 @@ const font_times = "TimesS2";
 #include "ZPainkiller/w_stakegun.zs"
 #include "ZPainkiller/w_chaingun.zs"
 #include "ZPainkiller/w_electrodriver.zs"
+#include "ZPainkiller/w_boltgun.zs"
 #include "ZPainkiller/pk_hud.zs"
 #include "ZPainkiller/pk_cardmenu.zs"
 
