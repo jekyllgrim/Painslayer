@@ -459,7 +459,8 @@ Class PK_Grenade : PK_Projectile {
 					let smk = Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
 					if (smk) {
 						smk.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
-						smk.A_SetScale(0.32);
+						smk.A_SetScale(0.15);
+						smk.alpha = 0.35;
 					}
 				}
 				else

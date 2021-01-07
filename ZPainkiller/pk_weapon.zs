@@ -321,7 +321,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 		super.PostBeginPlay();
 		double rs = scale.x * frandom[sfx](0.8,1.1)*randompick[sfx](-1,1);
 		A_SetScale(rs);
-		A_SetRoll(random(0,359));
+		roll = random[sfx](0,359);
 		for (int i = random[sfx](10,15); i > 0; i--) {
 			let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
 			if (debris) {
