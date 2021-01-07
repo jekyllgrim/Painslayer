@@ -127,7 +127,7 @@ Class PK_Stake : PK_Projectile {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		basedmg = 120;
+		basedmg = 140;
 		if (target)
 			pitch = target.pitch; //In case it's fired at a floor or ceiling at point-blank range, the Spawn state won't be used and the stake won't receive proper pitch. So, we do this.
 		sprite = GetSpriteIndex("STAK");
