@@ -251,10 +251,10 @@ Class PK_Bomb : PK_Projectile {
 	states {
 		Spawn:
 			KULK AABBCC 1 {
-				if (vel.length() < 5) {
+				if (vel.length() < 6) {
 					bMISSILE = false;
 				}
-				if (pos.z <= floorz && vel.length() <= 0.05)
+				if (pos.z <= floorz && vel.length() <= 0.02)
 					return ResolveState("XDeath");
 				if (bounces >= 1) {
 					let smk = PK_WhiteSmoke(Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-0.3,0.3),frandom[sfx](-0.3,0.3),frandom[sfx](-0.3,0.3))));
