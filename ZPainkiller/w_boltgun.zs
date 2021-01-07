@@ -184,7 +184,7 @@ Class PK_Boltgun : PKWeapon {
 			double ofs = -2.2;
 			double ang = 5;
 			for (int i = 0; i < 10; i ++) {				
-				A_FireProjectile("PK_Grenade",angle:ang+frandom[bolt](-0.5,0.5),useammo:false,spawnofs_xy:ofs,spawnheight:-4+frandom[bolt](-0.8,0.8),flags:FPF_NOAUTOAIM,pitch:-25+frandom[bolt](-3,3));
+				A_FireProjectile("PK_Bomb",angle:ang+frandom[bolt](-0.5,0.5),useammo:false,spawnofs_xy:ofs,spawnheight:-4+frandom[bolt](-0.8,0.8),flags:FPF_NOAUTOAIM,pitch:-25+frandom[bolt](-3,3));
 				ofs += 2.2;
 				ang -= 1;
 			}
@@ -207,5 +207,108 @@ Class PK_Bolt : PK_Stake {
 		super.PostBeginPlay();
 		sprite = GetSpriteIndex("BOLT");
 		basedmg = 40;
+	}
+}
+
+Class PK_Bomb : PK_Projectile {
+	protected int bounces;
+	Default {
+		PK_Projectile.trailcolor "f4f4f4";
+		PK_Projectile.trailscale 0.035;
+		PK_Projectile.trailfade 0.015;
+		PK_Projectile.trailalpha 0.12;
+		-NOGRAVITY
+		+USEBOUNCESTATE
+		+ROLLSPRITE
+		+FORCEXYBILLBOARD
+		bouncetype 'hexen';
+		bouncefactor 0.65;
+		gravity 0.45;
+		bouncesound "weapons/boltgun/bounce";
+		height 6;
+		radius 8;
+		speed 15;		
+		damage (10);
+		scale 0.17;
+	}
+	override void Tick() {
+		super.Tick();
+		if (pos.z <= floorz) {
+			vel *= 0.9999;
+		}
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		/*let trg = PK_GrenadeHitbox(Spawn("PK_GrenadeHitbox",pos));
+		trg.master = self;
+		trg.ggrenade = self;*/
+		bouncefactor *= frandom[bomb](0.95,1.05);
+		bouncefactor *= frandom[bomb](0.95,1.05);
+		roll = frandom[sfx](-30,30);
+	}
+	states {
+		Spawn:
+			KULK AABBCC 1 {
+				if (vel.length() < 3) {
+					bMISSILE = false;
+				}
+				if (bounces >= 1) {
+					let smk = Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
+					if (smk) {
+						smk.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
+						smk.A_SetScale(0.32);
+					}
+				}
+			}
+			loop;
+		Bounce:
+			TNT1 A 0 {
+				bounces++;
+				if (bounces > 2) 
+					return ResolveState("XDeath");
+				roll = frandom[sfx](-30,30);
+				if (bounces == 1) {
+					/*let red = PK_BaseFlare(Spawn("PK_ProjFlare",pos));
+					if (red) {
+						red.fcolor = "FF0000";
+						red.master = self;
+						red.alpha = 0.15;
+						red.A_SetScale(0.08);
+					}*/
+					let yellow = PK_BaseFlare(Spawn("PK_BombFlare",pos));
+					if (yellow) {
+						yellow.fcolor = "FFBB00";
+						yellow.master = self;
+						yellow.alpha = 0.5;
+						yellow.A_SetScale(0.11);
+					}
+				}
+				return ResolveState(null);
+			}
+			goto spawn;
+		Death:
+		XDeath:
+			TNT1 A 1 {
+				bNOGRAVITY = true;
+				A_RemoveChildren(1,RMVF_EVERYTHING);
+				A_StopSound(4);
+				A_Quake(1,8,0,64,"");
+				A_StartSound("weapons/boltgun/explosion",CHAN_5);
+				A_Explode(32,80);
+				Spawn("PK_GenericExplosion",pos);
+			}
+			stop;
+	}
+}
+
+Class PK_BombFlare : PK_ProjFlare {
+	override void Tick() {
+		super.Tick();
+		if (isFrozen())
+			return;
+		if (scale.x > 0.12)
+			scale *= 0.96;
+		else
+			A_SetScale(0.2);
 	}
 }
