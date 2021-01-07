@@ -654,6 +654,44 @@ class PK_BlackSmoke : PK_BaseSmoke {
 }
 
 class PK_WhiteSmoke : PK_BaseSmoke {
+	double fade;
+	Default {
+		+ROLLCENTER
+		scale 0.25;
+		renderstyle 'Translucent';
+		alpha 0.5;
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		scale *= frandom[sfx](0.9,1.1);
+		wrot = (random[sfx](3,10)*randompick(-1,1));
+		frame = random[sfx](0,5);
+		if (fade == 0)
+			fade = 0.01;
+	}	
+	states {
+	Spawn:
+		SMO2 # 1 NoDelay {
+			if (GetAge() < 26) {
+				wrot *= 0.98;
+				scale *= 1.03;
+				vel*=0.98;
+				roll+=wrot;
+				A_FadeOut(fade);
+			}
+			else {
+				wrot *= 0.92;
+				scale *= 1.01;
+				vel*=0.93;
+				roll+=wrot;
+				A_FadeOut(fade);
+			}
+		}
+		loop;
+	}
+}
+
+class PK_WhiteDeathSmoke : PK_BaseSmoke {
 	Default {
 		alpha 0.5;
 		scale 0.1;

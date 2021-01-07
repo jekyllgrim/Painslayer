@@ -390,7 +390,7 @@ Class PK_EnemyDeathControl : Actor {
 					smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
 			}
 			for (int i = 8; i > 0; i--) {
-				let smk = Spawn("PK_WhiteSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](pos.z,smkz)));
+				let smk = Spawn("PK_WhiteDeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](pos.z,smkz)));
 				if (smk) {
 					smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
 					smk.A_SetScale(0.4);
