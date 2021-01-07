@@ -37,19 +37,35 @@ Model PK_Stake {
 	Scale 1 1 1
 	USEACTORPITCH
 	
-	Frame MODL A 0 0
+	Frame STAK A 0 0
 }
 
-Model PK_StakeStuck {
-	path "Models/Stake"
-	Model 0 "pkstake.obj"
-	Skin 0 "pkstake.png"
+Model PK_Bolt {
+	path "Models/Bolt"
+	Model 0 "Bolt.obj"
+	Skin 0 "pkbolt.png"
 	Scale 1 1 1
 	USEACTORPITCH
 	
-	Frame MODL A 0 0
+	Frame BOLT A 0 0
 }
 
+Model PK_StakeStuck {
+	Scale 1 1 1
+	USEACTORPITCH
+	
+	path "Models/Stake"
+	Model 0 "pkstake.obj"
+	Skin 0 "pkstake.png"
+	
+	Frame STAK A 0 0
+	
+	path "Models/Bolt"
+	Model 0 "Bolt.obj"
+	Skin 0 "pkbolt.png"
+	
+	Frame BOLT A 0 0
+}
 Model PK_Tracer {
 	Path "models"
 	Model 0 "tracer.md3"

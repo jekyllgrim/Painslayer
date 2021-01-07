@@ -120,7 +120,7 @@ Class PK_Stake : PK_Projectile {
 	}
 	override void Tick () {
 		super.Tick();
-		if (age >= 12) {
+		if (self.GetClassName() == "PK_Stake" && age >= 12) {
 			trailactor = "PK_StakeFlame";
 			trailscale = 0.08;
 		}
@@ -130,10 +130,11 @@ Class PK_Stake : PK_Projectile {
 		basedmg = 120;
 		if (target)
 			pitch = target.pitch; //In case it's fired at a floor or ceiling at point-blank range, the Spawn state won't be used and the stake won't receive proper pitch. So, we do this.
+		sprite = GetSpriteIndex("STAK");
 	}
 	override int SpecialMissileHit (Actor victim) {
 		if (victim && (victim.bisMonster || victim.player) && victim != target && !hitvictim) { //We only do the following block if the actor hit by the stake exists, isn't the shooter, and the stake has never hit anyone yet
-			if (age >= 12)
+			if (self.GetClassName() == "PK_Stake" && age >= 12)
 				basedmg *= 1.5;
 			victim.DamageMobj (self, target, basedmg, 'normal');
 			A_StartSound("weapons/stakegun/hit",volume:0.7,attenuation:3);
@@ -173,6 +174,7 @@ Class PK_Stake : PK_Projectile {
 					stuck.angle = angle;
 					stuck.stuckangle = DeltaAngle(angle,victim.angle);
 					stuck.stuckpos = stuck.pos - victim.pos;
+					stuck.sprite = sprite;
 				}
 				if (victim.CountInv("PK_StakeStuckCounter") < 1)
 					victim.GiveInventory("PK_StakeStuckCounter",1);
@@ -188,8 +190,11 @@ Class PK_Stake : PK_Projectile {
 		return 1;
 	}
 	states {
+		Cache:
+			STAK A 0;
+			BOLT A 0;
 		Spawn:
-			MODL A 1 {
+			#### A 1 {
 				A_FaceMovementDirection(flags:FMDF_INTERPOLATE);		//makes it properly adjust its actual pitch and the associated model's pitch
 				if (pinvictim) {
 					pinvictim.angle = angle;			//if we already "grabbed" a fake corpse, the stake carries it with it
@@ -199,7 +204,7 @@ Class PK_Stake : PK_Projectile {
 			}
 			loop;
 		Death: 
-			MODL A 100 { 
+			#### A 160 { 
 				if (blockingline) {
 					A_StartSound("weapons/stakegun/stakewall",attenuation:2);
 					A_SprayDecal("Stakedecal",8);		
@@ -220,8 +225,8 @@ Class PK_Stake : PK_Projectile {
 					//hitvictim.TakeInventory("PK_PinToWall",1);
 				}		
 			}
-			TNT1 A 0 A_SetRenderStyle(1.0,Style_Translucent);
-			MODL A 1 A_FadeOut(0.03);
+			#### A 0 A_SetRenderStyle(1.0,Style_Translucent);
+			#### A 1 A_FadeOut(0.03);
 			wait;
 		Crash:
 		XDeath:
@@ -266,7 +271,7 @@ Class PK_StakeStuck : Actor {
 	}
 	states {
 		Spawn:
-			MODL A 1 NoDelay {
+			#### A 1 NoDelay {
 				if (master) {
 					SetOrigin(master.pos + stuckpos,true);
 					angle = master.angle + stuckangle;
@@ -286,7 +291,7 @@ Class PK_StakeStuck : Actor {
 			}
 			loop;
 		Fall:
-			MODL A 1 {
+			#### A 1 {
 				vel.z -= gravity;
 				if (pos.z <= floorz) {
 					A_Stop();
@@ -300,7 +305,7 @@ Class PK_StakeStuck : Actor {
 			}
 			loop;
 		End:
-			MODL A 1 A_FadeOut(0.03);
+			#### A 1 A_FadeOut(0.03);
 			loop;
 	}
 }
@@ -410,7 +415,8 @@ Class PK_GrenadeHitbox : Actor {
 			destroy();
 			return;
 		}
-		SetOrigin(master.pos - (0,0,height * 0.5),false);
+		if (master)
+			SetOrigin(master.pos - (0,0,height * 0.5),false);
 	}
 }
 	
@@ -450,9 +456,9 @@ Class PK_Grenade : PK_Projectile {
 				}
 				if (pos.z <= floorz+4) {
 					pitch+= 15;
-					let smk = Spawn("PK_WhiteSmoke",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
+					let smk = Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
 					if (smk) {
-						smk.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](0.2,0.5));
+						smk.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
 						smk.A_SetScale(0.32);
 					}
 				}

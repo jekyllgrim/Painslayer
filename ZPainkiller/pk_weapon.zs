@@ -52,6 +52,7 @@ Class PKWeapon : Weapon abstract {
 				A_StartSound(invoker.emptysound);
 			return;
 		}
+		//console.printf("weapon flags: %i",flags);
 		A_WeaponReady(flags);
 	}
 	states {
