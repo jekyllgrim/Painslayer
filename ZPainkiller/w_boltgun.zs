@@ -184,7 +184,9 @@ Class PK_Boltgun : PKWeapon {
 			double ofs = -2.2;
 			double ang = 5;
 			for (int i = 0; i < 10; i ++) {				
-				A_FireProjectile("PK_Bomb",angle:ang+frandom[bolt](-0.5,0.5),useammo:false,spawnofs_xy:ofs,spawnheight:-4+frandom[bolt](-0.8,0.8),flags:FPF_NOAUTOAIM,pitch:-25+frandom[bolt](-3,3));
+				let bomb = A_FireProjectile("PK_Bomb",angle:ang+frandom[bomb](-0.7,0.7),useammo:false,spawnofs_xy:ofs,spawnheight:-4+frandom[bomb](-0.8,0.8),flags:FPF_NOAUTOAIM,pitch:-25+frandom[bomb](-4,4));
+				if (bomb)
+					bomb.speed *= frandom[bomb](0.95,1);
 				ofs += 2.2;
 				ang -= 1;
 			}
@@ -249,16 +251,21 @@ Class PK_Bomb : PK_Projectile {
 	states {
 		Spawn:
 			KULK AABBCC 1 {
-				if (vel.length() < 3) {
+				if (vel.length() < 5) {
 					bMISSILE = false;
 				}
+				if (pos.z <= floorz && vel.length() <= 0.05)
+					return ResolveState("XDeath");
 				if (bounces >= 1) {
-					let smk = Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
+					let smk = PK_WhiteSmoke(Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-0.3,0.3),frandom[sfx](-0.3,0.3),frandom[sfx](-0.3,0.3))));
 					if (smk) {
-						smk.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
-						smk.A_SetScale(0.32);
+						smk.vel = (frandom[sfx](-1.2,1.2),frandom[sfx](-1.2,1.2),frandom[sfx](1.2,1.2));
+						smk.A_SetScale(0.08);
+						smk.alpha = 0.35;
+						smk.fade = 0.02;
 					}
 				}
+				return ResolveState(null);
 			}
 			loop;
 		Bounce:
@@ -268,19 +275,19 @@ Class PK_Bomb : PK_Projectile {
 					return ResolveState("XDeath");
 				roll = frandom[sfx](-30,30);
 				if (bounces == 1) {
-					/*let red = PK_BaseFlare(Spawn("PK_ProjFlare",pos));
+					let red = PK_BaseFlare(Spawn("PK_ProjFlare",pos));
 					if (red) {
 						red.fcolor = "FF0000";
 						red.master = self;
-						red.alpha = 0.15;
-						red.A_SetScale(0.08);
-					}*/
+						red.alpha = 0.4;
+						red.A_SetScale(0.06);
+					}
 					let yellow = PK_BaseFlare(Spawn("PK_BombFlare",pos));
 					if (yellow) {
 						yellow.fcolor = "FFBB00";
 						yellow.master = self;
-						yellow.alpha = 0.5;
-						yellow.A_SetScale(0.11);
+						yellow.alpha = frandom[sfx](0.25,0.65);
+						yellow.A_SetScale(0.17);
 					}
 				}
 				return ResolveState(null);
@@ -288,15 +295,30 @@ Class PK_Bomb : PK_Projectile {
 			goto spawn;
 		Death:
 		XDeath:
-			TNT1 A 1 {
+			TNT1 A 0 {
+				A_Stop();
 				bNOGRAVITY = true;
 				A_RemoveChildren(1,RMVF_EVERYTHING);
 				A_StopSound(4);
 				A_Quake(1,8,0,64,"");
 				A_StartSound("weapons/boltgun/explosion",CHAN_5);
-				A_Explode(32,80);
-				Spawn("PK_GenericExplosion",pos);
+				A_Explode(32,80);				
+				A_SetRenderstyle(alpha,STYLE_Add);
+				A_SetScale(frandom[sfx](0.25,0.3));
+				bSPRITEFLIP = randompick[sfx](0,1);
+				roll = random[sfx](0,359);
+				for (int i = random[sfx](4,12); i > 0; i--) {
+					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
+					if (debris) {
+						double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
+						debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
+						debris.A_SetScale(0.5);
+					}
+				}
+				A_AttachLight('BombExplosion',DynamicLight.PulseLight,24,0,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF,param:0.7);
 			}
+			BOM4 JKLMNOPQ 1 bright;
+			BOM5 ABCDEFGHIJKLMN 1 bright A_FadeOut(0.05);
 			stop;
 	}
 }
@@ -304,11 +326,11 @@ Class PK_Bomb : PK_Projectile {
 Class PK_BombFlare : PK_ProjFlare {
 	override void Tick() {
 		super.Tick();
-		if (isFrozen())
-			return;
-		if (scale.x > 0.12)
-			scale *= 0.96;
+		//if (isFrozen())
+			//return;
+		if (alpha > 0.2)
+			alpha *= 0.8;
 		else
-			A_SetScale(0.2);
+			alpha = 0.65;
 	}
 }
