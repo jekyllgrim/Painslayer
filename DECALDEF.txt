@@ -2,6 +2,7 @@ decal Stakedecal {
 	pic STAKEHOLE
 	RandomFlipX
 	RandomFlipY
-	y-scale 0.1
-	x-scale 0.1
-	}
+	y-scale 0.08
+	x-scale 0.08
+	translucent 0.9
+}
