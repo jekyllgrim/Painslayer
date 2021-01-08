@@ -25,8 +25,18 @@ Class PK_Boltgun : PKWeapon {
 		BGUZ A -1;
 		stop;
 	Deselect:
-		TNT1 A 0 A_ZoomFactor(1.0,ZOOM_NOSCALETURNING|ZOOM_INSTANT);
+		TNT1 A 0 {
+			A_ZoomFactor(1.0,ZOOM_NOSCALETURNING|ZOOM_INSTANT);
+			A_ClearOverlays(PSP_OVERGUN,PSP_SCOPE3);
+		}
 		goto super::Deselect;
+	Select:
+		TNT1 A 0 {		
+			A_Overlay(PSP_OVERGUN,"Bolts");
+			A_Overlay(PSP_SCOPE3,"Scope");
+		}
+		TNT1 A 0 A_Raise();
+		wait;
 	Ready:
 		BGUN A 1 {
 			PK_WeaponReady(WRF_NOBOB);
