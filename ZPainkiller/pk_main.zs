@@ -657,7 +657,7 @@ class PK_WhiteSmoke : PK_BaseSmoke {
 	double fade;
 	Default {
 		+ROLLCENTER
-		scale 0.25;
+		scale 0.1;
 		renderstyle 'Translucent';
 		alpha 0.5;
 	}
