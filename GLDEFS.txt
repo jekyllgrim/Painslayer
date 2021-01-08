@@ -245,7 +245,7 @@ object PK_DiskProjectile {
 }
 
 flickerlight PKDISK_X {
-    color 0 0 1
+    color 0 0 0.75
     attenuate 1
     size 112
     secondarySize 128
