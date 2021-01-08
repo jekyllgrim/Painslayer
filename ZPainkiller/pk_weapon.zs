@@ -14,6 +14,7 @@ Class PKWeapon : Weapon abstract {
 		FloatBobStrength  0.3;
 	}
 	enum PK_WeaponLayers {
+		PSP_BELOWGUN 	= -2,
 		PSP_UNDERGUN 	= -1,
 		PSP_OVERGUN 	= 2,
 		PSP_SCOPE1		= 3,
