@@ -185,8 +185,6 @@ Class PK_Boltgun : PKWeapon {
 			double ang = 5;
 			for (int i = 0; i < 10; i ++) {				
 				let bomb = A_FireProjectile("PK_Bomb",angle:ang+frandom[bomb](-0.7,0.7),useammo:false,spawnofs_xy:ofs,spawnheight:-4+frandom[bomb](-0.8,0.8),flags:FPF_NOAUTOAIM,pitch:-25+frandom[bomb](-4,4));
-				if (bomb)
-					bomb.speed *= frandom[bomb](0.95,1);
 				ofs += 2.2;
 				ang -= 1;
 			}
@@ -214,6 +212,8 @@ Class PK_Bolt : PK_Stake {
 
 Class PK_Bomb : PK_Projectile {
 	protected int bounces;
+	protected double rollChange;
+	protected int rollDir;
 	Default {
 		PK_Projectile.trailcolor "f4f4f4";
 		PK_Projectile.trailscale 0.035;
@@ -234,60 +234,48 @@ Class PK_Bomb : PK_Projectile {
 		scale 0.17;
 	}
 	override void Tick() {
-		super.Tick();
-		if (pos.z <= floorz) {
-			vel *= 0.9999;
+		if (!isFrozen()) {
+			if (bounces >= 1) {
+				let smk = PK_WhiteSmoke(Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-0.3,0.3),frandom[sfx](-0.3,0.3),frandom[sfx](-0.3,0.3))));
+				if (smk) {
+					smk.vel = (frandom[sfx](-1.2,1.2),frandom[sfx](-1.2,1.2),frandom[sfx](1.2,1.2));
+					smk.A_SetScale(0.08);
+					smk.alpha = 0.35;
+					smk.fade = 0.02;
+				}
+			}
+			roll += rollChange * rollDir;
 		}
+		super.Tick();
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		/*let trg = PK_GrenadeHitbox(Spawn("PK_GrenadeHitbox",pos));
 		trg.master = self;
 		trg.ggrenade = self;*/
-		bouncefactor *= frandom[bomb](0.95,1.05);
-		bouncefactor *= frandom[bomb](0.95,1.05);
+		bouncefactor *= frandom[bomb](0.85,1.15);
 		roll = frandom[sfx](-30,30);
+		rollDir = randompick[sfx](-1,1);
+		rollChange = frandom[sfx](2,5);
 	}
 	states {
 		Spawn:
-			KULK AABBCC 1 {
-				if (vel.length() < 6) {
-					bMISSILE = false;
-				}
-				if (pos.z <= floorz && vel.length() <= 0.02)
-					return ResolveState("XDeath");
-				if (bounces >= 1) {
-					let smk = PK_WhiteSmoke(Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-0.3,0.3),frandom[sfx](-0.3,0.3),frandom[sfx](-0.3,0.3))));
-					if (smk) {
-						smk.vel = (frandom[sfx](-1.2,1.2),frandom[sfx](-1.2,1.2),frandom[sfx](1.2,1.2));
-						smk.A_SetScale(0.08);
-						smk.alpha = 0.35;
-						smk.fade = 0.02;
-					}
-				}
-				return ResolveState(null);
-			}
+			KULK ABC 2;
 			loop;
 		Bounce:
-			TNT1 A 0 {
+			#### # 1 {
 				bounces++;
 				if (bounces > 2) 
 					return ResolveState("XDeath");
 				roll = frandom[sfx](-30,30);
 				if (bounces == 1) {
+					A_AttachLight('Bomb',DynamicLight.FlickerLight,"DDBB00",17,12,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF);
 					let red = PK_BaseFlare(Spawn("PK_ProjFlare",pos));
 					if (red) {
 						red.fcolor = "FF0000";
 						red.master = self;
-						red.alpha = 0.4;
+						red.alpha = 0.65;
 						red.A_SetScale(0.06);
-					}
-					let yellow = PK_BaseFlare(Spawn("PK_BombFlare",pos));
-					if (yellow) {
-						yellow.fcolor = "FFBB00";
-						yellow.master = self;
-						yellow.alpha = frandom[sfx](0.25,0.65);
-						yellow.A_SetScale(0.17);
 					}
 				}
 				return ResolveState(null);
@@ -296,18 +284,19 @@ Class PK_Bomb : PK_Projectile {
 		Death:
 		XDeath:
 			TNT1 A 0 {
+				bUSEBOUNCESTATE = false; //without this it'll glitch on sloped 3D floors (those be damned): it'll continuously jump into Bounce state and then into XDeath, in cycle
 				A_Stop();
 				bNOGRAVITY = true;
 				A_RemoveChildren(1,RMVF_EVERYTHING);
 				A_StopSound(4);
-				A_Quake(1,8,0,64,"");
+				A_Quake(1,6,0,160,"");
 				A_StartSound("weapons/boltgun/explosion",CHAN_5);
 				A_Explode(32,80);				
 				A_SetRenderstyle(alpha,STYLE_Add);
 				A_SetScale(frandom[sfx](0.25,0.3));
 				bSPRITEFLIP = randompick[sfx](0,1);
 				roll = random[sfx](0,359);
-				for (int i = random[sfx](4,12); i > 0; i--) {
+				for (int i = random[sfx](3,6); i > 0; i--) {
 					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
 					if (debris) {
 						double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
@@ -315,22 +304,10 @@ Class PK_Bomb : PK_Projectile {
 						debris.A_SetScale(0.5);
 					}
 				}
-				A_AttachLight('BombExplosion',DynamicLight.PulseLight,24,0,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF,param:0.7);
+				A_AttachLight('Bomb',DynamicLight.PulseLight,"FFAA00",0,18,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF,param:0.7);
 			}
 			BOM4 JKLMNOPQ 1 bright;
 			BOM5 ABCDEFGHIJKLMN 1 bright A_FadeOut(0.05);
 			stop;
-	}
-}
-
-Class PK_BombFlare : PK_ProjFlare {
-	override void Tick() {
-		super.Tick();
-		//if (isFrozen())
-			//return;
-		if (alpha > 0.2)
-			alpha *= 0.8;
-		else
-			alpha = 0.65;
 	}
 }
