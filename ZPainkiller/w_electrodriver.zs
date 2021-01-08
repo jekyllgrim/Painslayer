@@ -142,6 +142,7 @@ Class PK_ElectroDriver : PKWeapon {
 		stop;
 	DiskFire:
 		ELDR E 1 {
+			A_RemoveLight('PKElectroFlash');
 			A_WeaponOffset(16,12,WOF_ADD);
 			A_StartSound("weapons/edriver/diskshot",CHAN_WEAPON);
 			A_FireProjectile("PK_DiskProjectile",spawnofs_xy:2,spawnheight:5);
@@ -198,9 +199,11 @@ Class PK_ElectricPuff : PKPuff {
 					//A_StartSound("weapons/edriver/spark",attenuation:5);
 			}
 			for (int i = random[eld](2,4); i > 0; i--) {
-				let part = Spawn("PK_WhiteSmoke",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
+				let part = Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
 				if (part) {
-					part.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](0.2,0.5));
+					part.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
+					part.A_SetScale(0.08);
+					part.alpha = 0.35;
 				}
 			}
 		}
@@ -529,10 +532,11 @@ Class PK_DiskProjectile : PK_Shuriken {
 					part.A_SetScale(0.04);
 				}
 			}
-			for (int i = random[eld](2,4); i > 0; i--) {
-				let smk = Spawn("PK_WhiteSmoke",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
+			for (int i = random[sfx](2,4); i > 0; i--) {
+				let smk = Spawn("PK_WhiteDeathSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
 				if (smk) {
-					smk.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](0.2,0.5));
+					smk.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
+					smk.A_SetScale(0.5);					
 				}
 			}
 			deadtics++;
