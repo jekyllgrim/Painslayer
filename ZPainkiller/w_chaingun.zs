@@ -88,14 +88,12 @@ Class PK_Chaingun : PKWeapon {
 				return ResolveState("AltFireEnd");
 			invoker.holddur++;
 			A_StartSound("weapons/chaingun/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
-			if (invoker.hasDexterity) {
+			if (invoker.hasDexterity)
 				invoker.hideFlash = !invoker.hideFlash;
-			}
 			else
 				invoker.hideFlash = false;
-			if (!invoker.hideFlash) {
+			if (!invoker.hideFlash)
 				A_Overlay(PSP_PFLASH,"AltFlash");
-			}
 			A_FireBullets(2.5,2.5,-1,9,pufftype:"PK_BulletPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-40,spawnofs_xy:8.6);
 			
 			A_QuakeEX(1,1,0,2,0,1,sfx:"world/null");
@@ -147,7 +145,7 @@ Class PK_Chaingun : PKWeapon {
 			}
 			
 			double brt = frandom[sfx](40,70);
-			A_AttachLight('PKMGunFlash', DynamicLight.PointLight, "fcbb53", int(brt), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight));
+			A_AttachLight('PKMGunFlash', DynamicLight.PointLight, "fcbb53", int(brt), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF, ofs: (32,32,player.viewheight));
 			double brt2 = (brt - 40) / 30;
 			A_Overlay(PSP_HIGHLIGHTS,"Hightlights");
 			A_OverlayFlags(PSP_HIGHLIGHTS,PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
