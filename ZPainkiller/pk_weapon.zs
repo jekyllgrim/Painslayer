@@ -14,14 +14,22 @@ Class PKWeapon : Weapon abstract {
 		FloatBobStrength  0.3;
 	}
 	enum PK_WeaponLayers {
-		PSP_BELOWGUN 	= -2,
 		PSP_UNDERGUN 	= -1,
 		PSP_OVERGUN 	= 2,
 		PSP_SCOPE1		= 3,
 		PSP_SCOPE2		= 4,
 		PSP_SCOPE3		= 5,
 		PSP_PFLASH 	= -100,
-		PSP_HIGHLIGHTS = 100
+		PSP_HIGHLIGHTS = 100,
+		
+		RIFLE_STRAP 	= -3,
+		RIFLE_BARREL 	= -2,
+		RLIGHT_BARREL	= -1,
+		RLIGHT_WEAPON	= 2,
+		RIFLE_BOLT		= 3,
+		RLIGHT_BOLT	= 4,
+		RIFLE_STOCK	= 5,
+		RLIGHT_STOCK	= 6
 	}
 	override void DoEffect() {
 		Super.DoEffect();
