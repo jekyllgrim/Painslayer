@@ -42,6 +42,7 @@ weapons/empty/shotgun			drySTG
 weapons/empty/rifle				dryRIFL
 weapons/empty/electrodriver		dryELD
 weapons/empty/chaingun			dryMGUN
+weapons/empty/rifle				"sounds/rifle/weapon_rifle_empty.wav"
 
 $random weapons/bullet/ricochet { brico1 brico2 brico3 brico4 }
 $limit weapons/bullet/ricochet 1
@@ -164,6 +165,16 @@ edspark1 "sounds/ElectroDriver/electro-shoot-spark1.wav"
 edspark2 "sounds/ElectroDriver/electro-shoot-spark2.wav"
 edspark3 "sounds/ElectroDriver/electro-shoot-spark3.wav"
 
+//== Rifle/Flamer
+
+$random weapons/rifle/fire { riflefire1 riflefire2 riflefire3 }
+riflefire1 				"sounds/rifle/weapon_rifle_shoot1-1.wav"
+riflefire2 				"sounds/rifle/weapon_rifle_shoot1-2.wav"
+riflefire3				"sounds/rifle/weapon_rifle_shoot1-3.wav"
+weapons/rifle/flamestart "sounds/rifle/flametrower-start.wav"
+weapons/rifle/flameloop "sounds/rifle/flametrower-loop.wav"
+weapons/rifle/flameend 	"sounds/rifle/flametrower-stop.wav"
+
 //== Boltgun/Heater
 
 weapons/boltgun/fire1		"sounds/boltgun/weapon_bolt-shoot1.wav"
@@ -173,7 +184,8 @@ weapons/boltgun/heater		"sounds/boltgun/weapon_heater_fire.wav"
 weapons/boltgun/zoom		"sounds/boltgun/zoom-in.wav"
 weapons/boltgun/reload		"sounds/boltgun/weapon_bolt_reload.wav"
 $random weapons/boltgun/bounce	{ heaterbounce1 heaterbounce2 }
-$limit weapons/boltgun/bounce 32
+$attenuation weapons/boltgun/bounce	4
+$limit weapons/boltgun/bounce 10
 heaterbounce1	"sounds/boltgun/weapon_heater-bounce1.wav"
 heaterbounce2	"sounds/boltgun/weapon_heater-bounce2.wav"
 $random weapons/boltgun/explosion	{ heaterBoom1 heaterBoom2 heaterBoom3 }
@@ -192,6 +204,8 @@ pickups/ammo/grenades			BOMBPKUP
 pickups/ammo/bullets		BULLPKUP
 pickups/ammo/battery		ELECPKUP
 pickups/ammo/stars			SHURPKUP
+pickups/ammo/riflebullets	"sounds/rifle/pickup_ammo_a_rifle.wav"
+pickups/ammo/fuel			"sounds/rifle/pickup_ammo_flame.wav"
 pickups/ammo/bolts			"sounds/boltgun/pickup_ammo_bolt.wav"
 pickups/ammo/bombs			"sounds/boltgun/pickup_ammo_heaterbomb.wav"
 
@@ -202,6 +216,7 @@ pickups/weapons/stakegun	STAKTAKE
 pickups/weapons/chaingun	MGUNTAKE
 pickups/weapons/eldriver	ELDRPKUP
 pickups/weapons/boltgun	"sounds/boltgun/take-boltgunheather.wav"
+pickups/weapons/rifle	"sounds/rifle/take-a_rifle.wav"
 
 pickups/powerups/wmodifier/take	WMODTAKE
 pickups/powerups/wmodifier/loop	WMODLOOP
