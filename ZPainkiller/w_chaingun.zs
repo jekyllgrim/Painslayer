@@ -5,7 +5,7 @@ Class PK_Chaingun : PKWeapon {
 	Default {
 		PKWeapon.emptysound "weapons/empty/chaingun";
 		weapon.slotnumber 4;
-		weapon.ammotype1	"PK_Bombs";
+		weapon.ammotype1	"PK_Grenades";
 		weapon.ammouse1	1;
 		weapon.ammogive1	5;
 		weapon.ammotype2	"PK_Bullets";
