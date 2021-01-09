@@ -9,6 +9,9 @@ Class PK_Rifle : PKWeapon {
 		weapon.ammotype1	"PK_Bullets";
 		weapon.ammouse1		1;
 		weapon.ammogive1	80;
+		weapon.ammotype2	"PK_Grenades";
+		weapon.ammouse1		1;
+		weapon.ammogive1	100;
 		inventory.pickupmessage "Picked up a Rifle/Flamethrower";
 		inventory.pickupsound "pickups/weapons/chaingun";
 		Tag "Rocket Launcher/Chaingun";
@@ -25,16 +28,14 @@ Class PK_Rifle : PKWeapon {
 		let psp = Player.FindPSprite(OverlayID());
 		if (!psp)
 			return;
-		double sspeed = 1 * rfactor;
-		for (int i = 4; i > 0; i--) {
-			if (random[sfx](0,100) < 50)
-				sspeed *= 0.7;
+		if (psp.rotation == 0 && invoker.rollangVel == 0) {
+			invoker.damping = 0.018;
+			invoker.rollangVel = 0.05 * randompick[sfx](-1,1);
 		}
-		if (psp.rotation ~== 0)
-			invoker.rollangVel = 0.1 * PK_Sign(invoker.rollangVel);
-		else 
-			invoker.rollangVel = 0.1 * PK_Sign(psp.rotation);
-		invoker.rollangVel *= sspeed;
+		else {
+			double pspeed = Clamp(vel.length(),0,15);
+			invoker.damping = 0.018 - (0.0024 * pspeed);
+		}
 	}
 	action void PK_RifleFlash() {		
 		A_Overlay(RLIGHT_WEAPON,"Highlight");
@@ -114,22 +115,15 @@ Class PK_Rifle : PKWeapon {
 		loop;
 	Strap:
 		PKRI E 1 {
-			if (vel.length () > 3 && abs(invoker.rollangVel) < 0.05)
-				StartStrapSwing();
-		}
-		PKRI EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE 1 {
 			double pi = 3.141592653589793;
-			invoker.rollangVel += -(0.018 * invoker.rollang) - invoker.rollangVel*0.018;
+			double pspeed = vel.length();
+			double velTarg = -(0.018 * invoker.rollang) - invoker.rollangVel*invoker.damping;
+			invoker.rollangVel = Clamp(invoker.rollangVel + velTarg,-0.035,0.035);
 			invoker.rollang = Clamp(invoker.rollang + invoker.rollangVel,-0.5,0.5);
+			//console.printf("rollangVel %f player vel %f",invoker.rollangVel, pspeed);
+			if (pspeed > 3)
+				StartStrapSwing();
 			A_OverlayRotate(OverlayID(),invoker.rollang * 180.0 / pi);
-			//console.printf("rollangVel %f",invoker.rollangVel);
-		}
-		loop;
-		PKRI E 20;
-		TNT1 A 0 {
-			if (vel.length() > 5)
-				return ResolveState("StrapWobbleStart");
-			return ResolveState(null);
 		}
 		loop;
 	Stock:
@@ -147,6 +141,7 @@ Class PK_Rifle : PKWeapon {
 			A_FireBullets(1.2,1.2,-1,14,pufftype:"PK_BulletPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-40,spawnofs_xy:8.6);
 			invoker.shots++;
 			A_OverlayPivot(RIFLE_STOCK,-1,-2.1);
+			A_OverlayPivot(RLIGHT_STOCK,-1,-2.1);
 		}
 		PKRI A 1 {
 			A_Overlay(PSP_PFLASH,"Flash");
@@ -165,7 +160,7 @@ Class PK_Rifle : PKWeapon {
 			A_OverlayOffset(RIFLE_BARREL,-1,-1,WOF_ADD);
 		}
 		TNT1 A 0 {
-			if (invoker.shots < 7)
+			if (invoker.shots < 8)
 				A_ReFire();
 			else
 				A_ClearRefire();
@@ -189,6 +184,9 @@ Class PK_Rifle : PKWeapon {
 			PK_RifleScale(1,1,flags:0);
 		}
 		goto ready;
+	AltFire:
+		PKRI A 1 A_FireProjectile("PK_FlameParticle",spawnofs_xy:2,spawnheight:5);
+		goto ready;
 	Flash:
 		RMUZ A 1 bright {
 			A_AttachLight('PKRifleFlash', DynamicLight.PointLight, "ffcd66", frandom[sfx](32,46), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF, ofs: (32,32,player.viewheight));
@@ -198,7 +196,7 @@ Class PK_Rifle : PKWeapon {
 			A_OverlayRenderstyle(OverlayID(),Style_Add);
 			A_OverlayAlpha(OverlayID(),1.0);
 			A_OverlayPivotAlign(OverlayID(),PSPA_CENTER,PSPA_CENTER);
-			A_OverlayRotate(OverlayID(),frandom[sfx](-30,30));
+			A_OverlayRotate(OverlayID(),frandom[sfx](-18,18));
 		}
 		#### # 1 bright A_OverlayScale(OverlayID(),0.8,0.8,WOF_INTERPOLATE);
 		TNT1 A 0 A_RemoveLight('PKRifleFlash');
@@ -214,6 +212,44 @@ Class PK_Rifle : PKWeapon {
 		stop;
 	HighlightBarrel:
 		PRHI B 1 bright;
+		stop;
+	}
+}
+
+Class PK_FlameParticle : Actor {
+	protected int rollOfs;
+	Default {
+		projectile;
+		+BRIGHT
+		+ROLLSPRITE
+		renderstyle 'translucent';
+		alpha 1.2;
+		speed 8;
+		scale 0.12;
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		roll = frandom[sfx](0,360);
+		rollOfs = frandom[sfx](3,5) * randompick[sfx](-1,1);
+		if (target)
+			vel += target.vel;
+	}
+	states {
+	Spawn:
+		TNT1 A 1;
+		PFLA AABBCCDDEEFFGGHH 1 {
+			vel *= 0.98;
+			rollOfs *= 0.98;
+			scale *= 1.06;
+			roll += rollOfs;
+		}
+		PFLA IIJJKKLLMMNNOOPPQQRRSS 1 {
+			vel *= 0.91;
+			rollOfs *= 0.91;
+			scale *= 1.02;
+			roll += rollOfs;
+			A_FadeOut(0.05);
+		}
 		stop;
 	}
 }
