@@ -12,9 +12,9 @@ Class PK_Rifle : PKWeapon {
 		weapon.ammotype2	"PK_Grenades";
 		weapon.ammouse1		1;
 		weapon.ammogive1	100;
-		inventory.pickupmessage "Picked up a Rifle/Flamethrower";
-		inventory.pickupsound "pickups/weapons/chaingun";
-		Tag "Rocket Launcher/Chaingun";
+		inventory.pickupmessage "Picked up an Assault Rifle/Flamethrower";
+		inventory.pickupsound "pickups/weapons/rifle";
+		Tag "Assault Rifle/Flamethrower";
 	}
 	action int PK_Sign (int i) {
 		if (i >= 0)
@@ -185,7 +185,24 @@ Class PK_Rifle : PKWeapon {
 		}
 		goto ready;
 	AltFire:
-		PKRI A 1 A_FireProjectile("PK_FlameParticle",spawnofs_xy:2,spawnheight:5);
+		TNT1 A 0 {
+			A_AttachLight('PKFlameThrower', DynamicLight.RandomFlickerLight, "ffb30f", 80, 68, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF, ofs: (32,32,player.viewheight));
+			A_StartSound("weapons/rifle/flamestart",CHAN_5);
+			invoker.targOfs = (0,32);
+		}
+	AltHold:
+		PKRI A 1 {
+			A_StartSound("weapons/rifle/flameloop",CHAN_6,flags:CHANF_LOOPING);
+			DampedWeaponOffset(6,6,2);
+			A_FireProjectile("PK_FlameParticle",angle:frandom[flt](-3,3),spawnofs_xy:3,spawnheight:5,pitch:frandom[flt](-3,3));
+			//A_WeaponOffset(frandom[eld](-0.3,0.3),frandom[eld](32,32.4));
+		}
+		TNT1 A 0 A_ReFire();
+		TNT1 A 0 {
+			A_RemoveLight('PKFlameThrower');
+			A_StopSound(CHAN_6);
+			A_StartSound("weapons/rifle/flameend",CHAN_7);
+		}
 		goto ready;
 	Flash:
 		RMUZ A 1 bright {
@@ -222,10 +239,11 @@ Class PK_FlameParticle : Actor {
 		projectile;
 		+BRIGHT
 		+ROLLSPRITE
-		renderstyle 'translucent';
-		alpha 1.2;
+		+FORCEXYBILLBOARD
+		renderstyle 'add';
+		alpha 0.3;
 		speed 8;
-		scale 0.12;
+		scale 0.06;
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -234,21 +252,33 @@ Class PK_FlameParticle : Actor {
 		if (target)
 			vel += target.vel;
 	}
+	override void Tick() {
+		super.Tick();
+		if (waterlevel > 1)
+			destroy();
+	}
 	states {
 	Spawn:
-		TNT1 A 1;
-		PFLA AABBCCDDEEFFGGHH 1 {
+		TNT1 A 2;
+		FLT1 ABCDEFGHIJKLMNO 1 {
 			vel *= 0.98;
 			rollOfs *= 0.98;
-			scale *= 1.06;
+			scale *= 1.08;
 			roll += rollOfs;
 		}
-		PFLA IIJJKKLLMMNNOOPPQQRRSS 1 {
+		FLT1 PSTUVWXYZ 1 {
 			vel *= 0.91;
 			rollOfs *= 0.91;
-			scale *= 1.02;
+			scale *= 1.01;
 			roll += rollOfs;
-			A_FadeOut(0.05);
+			alpha *= 0.97;
+		}
+		FLT2 ABCDEFGHI 1 {
+			vel *= 0.91;
+			rollOfs *= 0.91;
+			scale *= 1.01;
+			roll += rollOfs;
+			alpha *= 0.95;
 		}
 		stop;
 	}

@@ -85,7 +85,10 @@ Class PK_ElectroDriver : PKWeapon {
 		TNT1 A 0 A_ReFire();
 		goto ready;
 	AltFire:
-		TNT1 A 0 A_StartSound("weapons/edriver/electroloopstart",CHAN_VOICE);
+		TNT1 A 0 {
+			A_StartSound("weapons/edriver/electroloopstart",CHAN_VOICE);
+			invoker.targOfs = (0,32);
+		}
 	AltHold:
 		ELDR A 1 {
 			if (player.cmd.buttons & BT_ATTACK && CountInv("PK_Battery") >= 40) {
@@ -117,7 +120,7 @@ Class PK_ElectroDriver : PKWeapon {
 				PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.2,9.5),style:STYLE_ADD);
 				PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.9,10.5),style:STYLE_ADD);
 			}
-			A_WeaponOffset(frandom[eld](-0.3,0.3),frandom[eld](32,32.4));
+			DampedWeaponOffset(4,4,1.5);
 			double brt = frandom[sfx](40,56);
 			A_AttachLight('PKElectroFlash', DynamicLight.PointLight, "5464fc", int(brt), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight));
 			double brt2 = (brt - 40) / 16;
@@ -127,10 +130,7 @@ Class PK_ElectroDriver : PKWeapon {
 			A_OverlayAlpha(PSP_HIGHLIGHTS,brt2);
 			return ResolveState(null);
 		}
-		TNT1 A 0 {
-			A_WeaponOffset(0,32);
-			A_Refire();
-		}
+		TNT1 A 0 A_Refire();
 		TNT1 A 0 {
 			A_StopSound(12);
 			A_StartSound("weapons/edriver/electroloopend",12);

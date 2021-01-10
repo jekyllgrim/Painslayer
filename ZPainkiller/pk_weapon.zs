@@ -2,6 +2,9 @@ Class PKWeapon : Weapon abstract {
 	sound emptysound;
 	property emptysound : emptysound;
 	protected bool hasDexterity;
+	protected vector2 targOfs;
+	protected vector2 prevTargOfs;
+	protected vector2 shiftOfs;
 	Default {
 		weapon.BobRangeX 0.31;
 		weapon.BobRangeY 0.15;
@@ -47,6 +50,17 @@ Class PKWeapon : Weapon abstract {
 		if (icon)  {
 			icon.master = self;
 		}
+	}
+	action void DampedWeaponOffset(double rangeX, double rangeY, double rate = 1) {
+		let psp = Player.FindPSprite(PSP_WEAPON);			
+		if (!psp)
+			return;
+		if (abs(psp.x) >= abs(invoker.targOfs.x) || abs(psp.y) >= abs(invoker.targOfs.y)) {
+			invoker.targOfs = (frandom[sfx](0,rangeX),frandom[sfx](0,rangeY)+32);
+			vector2 mod = (rangeX * rate, rangeY * rate);
+			invoker.shiftOfs = ((invoker.targOfs.x - psp.x) / mod.x, (invoker.targOfs.y - psp.y) / mod.y);
+		}
+		A_WeaponOffset(invoker.shiftOfs.x, invoker.shiftOfs.y, WOF_ADD);
 	}
 	action void PK_WeaponReady(int flags = 0) {
 		if ((player.cmd.buttons & BT_ATTACK) && (!invoker.ammo1 || invoker.ammo1.amount < 1)) {
