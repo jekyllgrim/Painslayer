@@ -3,6 +3,7 @@ Class PK_Rifle : PKWeapon {
 	protected double rollangVel;
 	protected double rollang;
 	protected double damping;
+	private int fireFrame;
 	Default {
 		PKWeapon.emptysound "weapons/empty/rifle";
 		weapon.slotnumber 6;
@@ -105,7 +106,8 @@ Class PK_Rifle : PKWeapon {
 		wait;
 	Ready:
 		PKRI A 1 {
-			PK_WeaponReady();
+			int i = waterlevel > 2 ? WRF_NOSECONDARY : 0;
+			PK_WeaponReady(flags:i);
 			A_Overlay(RIFLE_BOLT,"Bolt",nooverride:true);
 			A_Overlay(RIFLE_STOCK,"Stock",nooverride:true);
 			A_Overlay(RIFLE_BARREL,"Barrel",nooverride:true);
@@ -193,11 +195,19 @@ Class PK_Rifle : PKWeapon {
 	AltHold:
 		PKRI A 1 {
 			A_StartSound("weapons/rifle/flameloop",CHAN_6,flags:CHANF_LOOPING);
-			DampedWeaponOffset(6,6,2);
+			DampedRandomOffset(6,6,2);
+			if (invoker.fireFrame >= 8)
+				invoker.fireFrame = 0;
+			invoker.fireFrame++;
+			A_Overlay(-30 + invoker.fireFrame,"FireFlash");
 			A_FireProjectile("PK_FlameParticle",angle:frandom[flt](-3,3),spawnofs_xy:3,spawnheight:5,pitch:frandom[flt](-3,3));
-			//A_WeaponOffset(frandom[eld](-0.3,0.3),frandom[eld](32,32.4));
 		}
-		TNT1 A 0 A_ReFire();
+		TNT1 A 0 {
+			if (waterlevel > 2)
+				A_ClearRefire();
+			else
+				A_ReFire();
+		}
 		TNT1 A 0 {
 			A_RemoveLight('PKFlameThrower');
 			A_StopSound(CHAN_6);
@@ -230,6 +240,31 @@ Class PK_Rifle : PKWeapon {
 	HighlightBarrel:
 		PRHI B 1 bright;
 		stop;
+	FireFlash:
+		TNT1 A 0 {
+			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
+			//A_OverlayFlags(OverlayID(),PSPF_AddWeapon|PSPF_AddBob,false);
+			//A_OverlayOffset(OverlayID(),0,32,WOF_ADD);
+			A_OverlayOffset(OverlayID(),frandom[sfx](-3,3),frandom[sfx](-3,3),WOF_ADD);
+			A_OverlayRenderstyle(OverlayID(),Style_Add);
+			A_OverlayAlpha(OverlayID(),0.9);
+			A_OverlayPivotAlign(OverlayID(),PSPA_CENTER,PSPA_CENTER);
+			A_OverlayRotate(OverlayID(),frandom[sfx](-90,90));
+			A_OverlayScale(OverlayID(),0.7,0.7);
+		}
+	FireFlashDo:
+		PFLA ABCDEFGHIJILKLMNOPQRS 1 bright {	
+			let psp = player.FindPSprite(OverlayID());
+			if (psp) {
+				A_OverlayAlpha(OverlayID(),psp.alpha - 0.1);
+				if (psp.alpha <= 0)
+					return ResolveState("Null");
+			}
+			A_OverlayScale(OverlayID(),0.03,0.03,WOF_ADD);
+			A_OverlayOffset(OverlayID(),-5,-5,WOF_ADD);
+			return ResolveState(null);
+		}
+		loop;
 	}
 }
 
@@ -243,7 +278,7 @@ Class PK_FlameParticle : Actor {
 		renderstyle 'add';
 		alpha 0.3;
 		speed 8;
-		scale 0.06;
+		scale 0.08;
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -263,13 +298,13 @@ Class PK_FlameParticle : Actor {
 		FLT1 ABCDEFGHIJKLMNO 1 {
 			vel *= 0.98;
 			rollOfs *= 0.98;
-			scale *= 1.08;
+			scale *= 1.1;
 			roll += rollOfs;
 		}
 		FLT1 PSTUVWXYZ 1 {
 			vel *= 0.91;
 			rollOfs *= 0.91;
-			scale *= 1.01;
+			scale *= 1.03;
 			roll += rollOfs;
 			alpha *= 0.97;
 		}
