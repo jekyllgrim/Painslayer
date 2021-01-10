@@ -120,7 +120,7 @@ Class PK_ElectroDriver : PKWeapon {
 				PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.2,9.5),style:STYLE_ADD);
 				PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.9,10.5),style:STYLE_ADD);
 			}
-			DampedWeaponOffset(4,4,1.5);
+			DampedRandomOffset(5,5,1.5);
 			double brt = frandom[sfx](40,56);
 			A_AttachLight('PKElectroFlash', DynamicLight.PointLight, "5464fc", int(brt), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight));
 			double brt2 = (brt - 40) / 16;
