@@ -195,12 +195,12 @@ Class PK_Rifle : PKWeapon {
 	AltHold:
 		PKRI A 1 {
 			A_StartSound("weapons/rifle/flameloop",CHAN_6,flags:CHANF_LOOPING);
-			DampedRandomOffset(6,6,2);
+			DampedRandomOffset(3,3,3);
 			if (invoker.fireFrame >= 8)
 				invoker.fireFrame = 0;
 			invoker.fireFrame++;
 			A_Overlay(-30 + invoker.fireFrame,"FireFlash");
-			A_FireProjectile("PK_FlameParticle",angle:frandom[flt](-3,3),spawnofs_xy:3,spawnheight:5,pitch:frandom[flt](-3,3));
+			A_FireProjectile("PK_FlameThrowerFlame",angle:frandom[flt](-3,3),spawnofs_xy:3,spawnheight:5,pitch:frandom[flt](-3,3));
 		}
 		TNT1 A 0 {
 			if (waterlevel > 2)
@@ -268,8 +268,9 @@ Class PK_Rifle : PKWeapon {
 	}
 }
 
-Class PK_FlameParticle : Actor {
-	protected int rollOfs;
+Class PK_FlameThrowerFlame : Actor {
+	protected double rollOfs;
+	protected double scaleMul;
 	Default {
 		projectile;
 		+BRIGHT
@@ -277,7 +278,7 @@ Class PK_FlameParticle : Actor {
 		+FORCEXYBILLBOARD
 		renderstyle 'add';
 		alpha 0.3;
-		speed 8;
+		speed 52;
 		scale 0.08;
 	}
 	override void PostBeginPlay() {
@@ -286,35 +287,87 @@ Class PK_FlameParticle : Actor {
 		rollOfs = frandom[sfx](3,5) * randompick[sfx](-1,1);
 		if (target)
 			vel += target.vel;
+		scaleMul = 1.02;
+		vel = vel.unit() * 7.2;
 	}
 	override void Tick() {
 		super.Tick();
 		if (waterlevel > 1)
 			destroy();
+		if (!isFrozen()) {
+			A_SetScale(Clamp(scale.x * scaleMul, 0.08, 0.7));
+			scaleMul = Clamp(scaleMul * 1.01, 1.02, 1.08);
+		}
+		if (alpha <= 0)
+			destroy();
 	}
 	states {
 	Spawn:
-		TNT1 A 2;
-		FLT1 ABCDEFGHIJKLMNO 1 {
-			vel *= 0.98;
+		FLT1 ABCDEFGHIJKLMNO 2 {
+			vel *= 0.99;
 			rollOfs *= 0.98;
-			scale *= 1.1;
+			//scale *= 1.03;
 			roll += rollOfs;
 		}
-		FLT1 PSTUVWXYZ 1 {
-			vel *= 0.91;
+		FLT1 PSTUVWXYZ 2 {
+			vel *= 0.96;
 			rollOfs *= 0.91;
-			scale *= 1.03;
+			//scale *= 1.2;
 			roll += rollOfs;
-			alpha *= 0.97;
+			alpha *= 0.99;
 		}
-		FLT2 ABCDEFGHI 1 {
-			vel *= 0.91;
+		FLT2 ABCDEFG 1 {
+			vel *= 0.92;
 			rollOfs *= 0.91;
-			scale *= 1.01;
+			//scale *= 1.05;
 			roll += rollOfs;
-			alpha *= 0.95;
+			alpha *= 0.85;
+		}
+		wait;
+	Crash:
+	XDeath:
+		TNT1 A 1;
+		stop;
+	Death:
+		TNT1 A 0 A_Stop();
+		TNT1 AAAAAAAAAAAAAA 5 {
+			A_SpawnItemEx(
+				"PK_FlameParticle",
+				xvel:frandom[sfx](-0.6,0.6),
+				yvel:frandom[sfx](-0.6,0.6),
+				zvel:frandom[sfx](0.4,1.5),
+				failchance: 80
+			);
+			/*let part = Spawn("PK_FlameParticle",pos);
+			if (part)
+				part.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.4,1.5));*/
 		}
 		stop;
+	}
+}
+
+Class PK_FlameParticle : PK_SmallDebris {
+	protected int rollOfs;
+	Default {
+		+NOINTERACTION
+		+BRIGHT
+		renderstyle 'add';
+		scale 0.12;
+		alpha 0.5;
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		roll = frandom[sfx](0,360);
+		rollOfs = frandom[sfx](4,8) * randompick[sfx](-1,1);
+	}
+	States {
+	Spawn:
+		PFLP ABCDEFGHIJILKLMNOPQR 1 {
+			scale *= 1.03;
+			A_FadeOut(0.015);
+			vel *= 0.98;
+			roll += rollOfs;
+		}
+		wait;
 	}
 }
