@@ -3,7 +3,6 @@ Class PKWeapon : Weapon abstract {
 	property emptysound : emptysound;
 	protected bool hasDexterity;
 	protected vector2 targOfs;
-	protected vector2 prevTargOfs;
 	protected vector2 shiftOfs;
 	Default {
 		weapon.BobRangeX 0.31;
@@ -51,14 +50,15 @@ Class PKWeapon : Weapon abstract {
 			icon.master = self;
 		}
 	}
-	action void DampedWeaponOffset(double rangeX, double rangeY, double rate = 1) {
+	action void DampedRandomOffset(double rangeX, double rangeY, double rate = 1) {
 		let psp = Player.FindPSprite(PSP_WEAPON);			
 		if (!psp)
 			return;
 		if (abs(psp.x) >= abs(invoker.targOfs.x) || abs(psp.y) >= abs(invoker.targOfs.y)) {
 			invoker.targOfs = (frandom[sfx](0,rangeX),frandom[sfx](0,rangeY)+32);
-			vector2 mod = (rangeX * rate, rangeY * rate);
-			invoker.shiftOfs = ((invoker.targOfs.x - psp.x) / mod.x, (invoker.targOfs.y - psp.y) / mod.y);
+			vector2 shift = (rangeX * rate, rangeY * rate);
+			shift = (shift.x == 0 ? 1 : shift.x, shift.y == 0 ? 1 : shift.y);
+			invoker.shiftOfs = ((invoker.targOfs.x - psp.x) / shift.x, (invoker.targOfs.y - psp.y) / shift.y);
 		}
 		A_WeaponOffset(invoker.shiftOfs.x, invoker.shiftOfs.y, WOF_ADD);
 	}
@@ -75,7 +75,6 @@ Class PKWeapon : Weapon abstract {
 				A_StartSound(invoker.emptysound);
 			return;
 		}
-		//console.printf("weapon flags: %i",flags);
 		A_WeaponReady(flags);
 	}
 	states {
