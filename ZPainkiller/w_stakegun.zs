@@ -83,7 +83,8 @@ Class PK_Stakegun : PKWeapon {
 				A_WeaponOffset(-0.64,-0.7,WOF_ADD);
 				A_OverlayRotate(OverlayID(),0);
 				A_OverlayScale(OverlayID(),1,1);
-				PK_WeaponReady(WRF_NOSECONDARY|WRF_NOSWITCH);
+				if (invoker.ammo1.amount >= invoker.ammouse1)
+					PK_WeaponReady(WRF_NOSECONDARY|WRF_NOSWITCH);
 			}
 			#### A 0 A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			goto ready;
