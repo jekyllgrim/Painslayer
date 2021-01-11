@@ -63,13 +63,13 @@ Class PKWeapon : Weapon abstract {
 		A_WeaponOffset(invoker.shiftOfs.x, invoker.shiftOfs.y, WOF_ADD);
 	}
 	action void PK_WeaponReady(int flags = 0) {
-		if ((player.cmd.buttons & BT_ATTACK) && (!invoker.ammo1 || invoker.ammo1.amount < invoker.ammouse1)) {
+		if ((player.cmd.buttons & BT_ATTACK) && (!invoker.ammo1 || invoker.ammo1.amount < 1)) {
 			A_ClearRefire();
 			if (!(player.oldbuttons & BT_ATTACK))
 				A_StartSound(invoker.emptysound);
 			return;
 		}
-		if ((player.cmd.buttons & BT_ALTATTACK) && (!invoker.ammo2 || invoker.ammo2.amount < invoker.ammouse2)) {
+		if ((player.cmd.buttons & BT_ALTATTACK) && (!invoker.ammo2 || invoker.ammo2.amount < 1)) {
 			A_ClearRefire();
 			if (!(player.oldbuttons & BT_ALTATTACK))
 				A_StartSound(invoker.emptysound);
