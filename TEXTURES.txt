@@ -1589,11 +1589,18 @@ Sprite "KULKC0", 32, 32
 	Patch "KULKC", 0, 0
 }
 
-Sprite "FMUZA0", 119, 82
+Sprite "PRFMA0", 119, 82
 {
 	YScale 1.200
 	Offset -185, -120
 	Patch "PRFMA", 0, 0
+}
+
+Sprite "PRFMB0", 119, 82
+{
+	YScale 1.200
+	Offset -185, -120
+	Patch "PRFMB", 0, 0
 }
 
 Sprite "PKRIA0", 119, 82

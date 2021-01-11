@@ -522,8 +522,8 @@ Class PK_BaseFlare : PK_SmallDebris {
 	property fcolor : fcolor;
 	bool style;
 	property style : style;
-	double fscale;		//scale; used to when scale needs to be easily set externally from the spawner
-	double falpha;		//alpha; used to when scale needs to be easily set externally from the spawner
+	double fscale;		//scale; used when it's set externally from the spawner
+	double falpha;		//alpha; used when it's set externally from the spawner
 	double fade;
 	property fadefactor : fade;
 	double shrink;

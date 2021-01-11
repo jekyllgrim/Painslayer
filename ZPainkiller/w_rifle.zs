@@ -75,6 +75,7 @@ Class PK_Rifle : PKWeapon {
 		A_OverlayScale(RIFLE_STOCK,wx,wy,flags);
 		A_OverlayScale(RIFLE_BARREL,wx,wy,flags);
 		A_OverlayScale(RIFLE_STRAP,wx,wy,flags);
+		A_OverlayScale(PSP_HIGHLIGHTS,wx,wy,flags);
 		
 		A_OverlayScale(RLIGHT_WEAPON,wx,wy,flags);
 		A_OverlayScale(RLIGHT_BOLT,wx,wy,flags);
@@ -90,6 +91,7 @@ Class PK_Rifle : PKWeapon {
 		let psps = player.FindPSprite(RIFLE_STOCK);
 		let pspu = player.FindPSprite(RIFLE_BARREL);
 		let pspb = player.FindPSprite(RIFLE_STRAP);
+		let psph = player.FindPSprite(PSP_HIGHLIGHTS);
 		
 		if (pspw)			
 			A_OverlayScale(PSP_WEAPON,  Clamp(pspw.scale.x- 0.015,1,99), Clamp(pspw.scale.y- 0.015,1,99),WOF_INTERPOLATE);
@@ -101,6 +103,8 @@ Class PK_Rifle : PKWeapon {
 			A_OverlayScale (RIFLE_BARREL, Clamp(pspu.scale.x- 0.015,1,99), Clamp(pspu.scale.y- 0.015,1,99),WOF_INTERPOLATE);
 		if (pspb)
 			A_OverlayScale (RIFLE_STRAP, Clamp(pspb.scale.x- 0.015,1,99), Clamp(pspb.scale.y- 0.015,1,99),WOF_INTERPOLATE);
+		if (psph)
+			A_OverlayScale (PSP_HIGHLIGHTS, Clamp(pspb.scale.x- 0.015,1,99), Clamp(pspb.scale.y- 0.015,1,99),WOF_INTERPOLATE);
 	}
 	states {
 	Select:
@@ -121,10 +125,8 @@ Class PK_Rifle : PKWeapon {
 			A_Overlay(RIFLE_STOCK,"Stock",nooverride:true);
 			A_Overlay(RIFLE_BARREL,"Barrel",nooverride:true);
 			A_Overlay(RIFLE_STRAP,"Strap",nooverride:true);
-			if (invoker.fireFrame >= 6)
-				invoker.fireFrame = 0;
-			invoker.fireFrame++;
-			A_Overlay(-30 + invoker.fireFrame,"PilotLight");
+			A_Overlay(RIFLE_PILOT,"PilotLightHandle",nooverride:true);
+			A_Overlay(PSP_HIGHLIGHTS,"PilotHighlights",nooverride:true);
 		}
 		loop;
 	Strap:
@@ -156,6 +158,7 @@ Class PK_Rifle : PKWeapon {
 			invoker.shots++;
 			A_OverlayPivot(RIFLE_STOCK,-1,-2.1);
 			A_OverlayPivot(RLIGHT_STOCK,-1,-2.1);
+			//A_ClearOverlays(PSP_HIGHLIGHTS,PSP_HIGHLIGHTS);
 		}
 		PKRI A 1 {
 			A_Overlay(PSP_PFLASH,"Flash");
@@ -203,6 +206,7 @@ Class PK_Rifle : PKWeapon {
 			A_AttachLight('PKFlameThrower', DynamicLight.RandomFlickerLight, "ffb30f", 80, 68, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF, ofs: (32,32,player.viewheight));
 			A_StartSound("weapons/rifle/flamestart",CHAN_5);
 			invoker.targOfs = (0,32);
+			A_ClearOverlays(RIFLE_PILOT,RIFLE_PILOT);
 		}
 	AltHold:
 		PKRI A 1 {
@@ -236,7 +240,7 @@ Class PK_Rifle : PKWeapon {
 			A_OverlayRenderstyle(OverlayID(),Style_Add);
 			A_OverlayAlpha(OverlayID(),1.0);
 			A_OverlayPivotAlign(OverlayID(),PSPA_CENTER,PSPA_CENTER);
-			A_OverlayRotate(OverlayID(),frandom[sfx](-18,18));
+			A_OverlayRotate(OverlayID(),frandom[sfx](-5,5)+randompick[sfx](0,90,-90,180));
 		}
 		#### # 1 bright A_OverlayScale(OverlayID(),0.8,0.8,WOF_INTERPOLATE);
 		TNT1 A 0 A_RemoveLight('PKRifleFlash');
@@ -254,12 +258,35 @@ Class PK_Rifle : PKWeapon {
 		PRHI B 1 bright;
 		stop;
 	FlameHighlights:
-		FMUZ A 2 bright {
+		PRFM A 2 bright {
 			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
 			A_OverlayRenderstyle(OverlayID(),Style_Add);
 			A_OverlayAlpha(OverlayID(),frandom[sfx](0.5,1));
 		}
 		stop;
+	PilotHighlights:
+		TNT1 A 0 {
+			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
+			A_OverlayRenderstyle(OverlayID(),Style_Add);
+			A_OverlayAlpha(OverlayID(),0);
+		}
+		PRFM BBBBB 1 bright {
+			let psp = Player.FindPSprite(OverlayID());
+			if (psp)
+				A_OverlayAlpha(OverlayID(),psp.alpha + 0.15);
+		}			
+		PRFM B 2 bright {
+			A_OverlayAlpha(OverlayID(),frandom[sfx](0.35,0.6));
+		}
+		wait;
+	PilotLightHandle:
+		TNT1 A 2 {
+			if (invoker.fireFrame >= 6)
+				invoker.fireFrame = 0;
+			invoker.fireFrame++;			
+			A_Overlay(-30 + invoker.fireFrame,"PilotLight");
+		}
+		loop;
 	PilotLight:
 		TNT1 A 0 {
 			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
@@ -284,7 +311,7 @@ Class PK_Rifle : PKWeapon {
 			}
 			A_OverlayScale(OverlayID(),-0.015,-0.015,WOF_ADD);
 			int i = OverlayID() + 29;
-			A_OverlayOffset(OverlayID(),-(invoker.prevAngle[i] - angle), -0.7 + (invoker.prevPitch[i] - pitch),WOF_ADD);
+			A_OverlayOffset(OverlayID(),-(invoker.prevAngle[i] - angle), -1 + (invoker.prevPitch[i] - pitch),WOF_ADD);
 			invoker.prevAngle[i] = angle;
 			invoker.prevPitch[i] = pitch;
 			return ResolveState(null);
