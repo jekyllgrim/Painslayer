@@ -194,6 +194,7 @@ Class PK_Rifle : PKWeapon {
 		}
 	AltHold:
 		PKRI A 1 {
+			A_Overlay(PSP_HIGHLIGHTS,"FlameHighlights");
 			A_StartSound("weapons/rifle/flameloop",CHAN_6,flags:CHANF_LOOPING);
 			DampedRandomOffset(3,3,3);
 			if (invoker.fireFrame >= 8)
@@ -240,6 +241,13 @@ Class PK_Rifle : PKWeapon {
 	HighlightBarrel:
 		PRHI B 1 bright;
 		stop;
+	FlameHighlights:
+		FMUZ A 2 bright {
+			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
+			A_OverlayRenderstyle(OverlayID(),Style_Add);
+			A_OverlayAlpha(OverlayID(),frandom[sfx](0.5,1));
+		}
+		stop;
 	FireFlash:
 		TNT1 A 0 {
 			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
@@ -271,6 +279,7 @@ Class PK_Rifle : PKWeapon {
 Class PK_FlameThrowerFlame : Actor {
 	protected double rollOfs;
 	protected double scaleMul;
+	protected double realSpeed;
 	Default {
 		projectile;
 		+BRIGHT
@@ -284,11 +293,14 @@ Class PK_FlameThrowerFlame : Actor {
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		roll = frandom[sfx](0,360);
-		rollOfs = frandom[sfx](3,5) * randompick[sfx](-1,1);
-		if (target)
-			vel += target.vel;
+		rollOfs = frandom[sfx](5,20) * randompick[sfx](-1,1);
 		scaleMul = 1.02;
-		vel = vel.unit() * 7.2;
+		realSpeed = 7.2;
+		vel = vel.unit() * realSpeed;
+		if (target) {
+			vel += target.vel;
+			SetOrigin(pos + target.vel,false);
+		}
 	}
 	override void Tick() {
 		super.Tick();
@@ -305,21 +317,31 @@ Class PK_FlameThrowerFlame : Actor {
 	Spawn:
 		FLT1 ABCDEFGHIJKLMNO 2 {
 			vel *= 0.99;
+			realSpeed *= 0.99;
 			rollOfs *= 0.98;
-			//scale *= 1.03;
 			roll += rollOfs;
 		}
 		FLT1 PSTUVWXYZ 2 {
 			vel *= 0.96;
+			realSpeed *= 0.96;
+			if (vel.length() > realSpeed){
+				vel *= 0.8;
+				realSpeed *= 0.8;
+			}
 			rollOfs *= 0.91;
-			//scale *= 1.2;
 			roll += rollOfs;
 			alpha *= 0.99;
 		}
 		FLT2 ABCDEFG 1 {
 			vel *= 0.92;
+			realSpeed *= 0.92;
+			if (vel.length() > realSpeed){
+				vel *= 0.8;
+				realSpeed *= 0.8;
+			}
 			rollOfs *= 0.91;
-			//scale *= 1.05;
+			vel *= 0.92;
+			rollOfs *= 0.91;
 			roll += rollOfs;
 			alpha *= 0.85;
 		}
@@ -330,7 +352,7 @@ Class PK_FlameThrowerFlame : Actor {
 		stop;
 	Death:
 		TNT1 A 0 A_Stop();
-		TNT1 AAAAAAAAAAAAAA 5 {
+		TNT1 AAAAAAAAAAAAAA random(3,6) {
 			A_SpawnItemEx(
 				"PK_FlameParticle",
 				xvel:frandom[sfx](-0.6,0.6),
@@ -338,9 +360,6 @@ Class PK_FlameThrowerFlame : Actor {
 				zvel:frandom[sfx](0.4,1.5),
 				failchance: 80
 			);
-			/*let part = Spawn("PK_FlameParticle",pos);
-			if (part)
-				part.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.4,1.5));*/
 		}
 		stop;
 	}
