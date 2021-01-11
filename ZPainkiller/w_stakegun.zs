@@ -85,10 +85,7 @@ Class PK_Stakegun : PKWeapon {
 				A_OverlayScale(OverlayID(),1,1);
 				PK_WeaponReady(WRF_NOSECONDARY|WRF_NOSWITCH);
 			}
-			#### A 5 {
-				A_WeaponOffset(0,32,WOF_INTERPOLATE);
-				PK_WeaponReady();
-			}
+			#### A 0 A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			goto ready;
 	}
 }
