@@ -4,6 +4,8 @@ Class PK_Rifle : PKWeapon {
 	protected double rollang;
 	protected double damping;
 	private int fireFrame;
+	private double prevAngle[8];
+	private double prevPitch[8];
 	Default {
 		PKWeapon.emptysound "weapons/empty/rifle";
 		weapon.slotnumber 6;
@@ -17,6 +19,12 @@ Class PK_Rifle : PKWeapon {
 		inventory.pickupsound "pickups/weapons/rifle";
 		Tag "Assault Rifle/Flamethrower";
 	}
+	/*override void DoEffect() {
+		if (owner) {
+			prevAngle = owner.angle;
+			prevPitch = owner.pitch;
+		}
+		super.DoEffect();*/
 	action int PK_Sign (int i) {
 		if (i >= 0)
 			return 1;
@@ -105,14 +113,18 @@ Class PK_Rifle : PKWeapon {
 		TNT1 A 0 A_Raise();
 		wait;
 	Ready:
-		PKRI A 1 {
+		PKRI A 5 {		
 			int i = waterlevel > 2 ? WRF_NOSECONDARY : 0;
 			PK_WeaponReady(flags:i);
+			invoker.shots = 0;
 			A_Overlay(RIFLE_BOLT,"Bolt",nooverride:true);
 			A_Overlay(RIFLE_STOCK,"Stock",nooverride:true);
 			A_Overlay(RIFLE_BARREL,"Barrel",nooverride:true);
 			A_Overlay(RIFLE_STRAP,"Strap",nooverride:true);
-			invoker.shots = 0;
+			if (invoker.fireFrame >= 6)
+				invoker.fireFrame = 0;
+			invoker.fireFrame++;
+			A_Overlay(-30 + invoker.fireFrame,"PilotLight");
 		}
 		loop;
 	Strap:
@@ -248,31 +260,68 @@ Class PK_Rifle : PKWeapon {
 			A_OverlayAlpha(OverlayID(),frandom[sfx](0.5,1));
 		}
 		stop;
+	PilotLight:
+		TNT1 A 0 {
+			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
+			A_OverlayRenderstyle(OverlayID(),Style_Add);
+			A_OverlayAlpha(OverlayID(),0.9);
+			A_OverlayOffset(OverlayID(),-4,5+frandom[sfx](-0.5,0.5),WOF_ADD);
+			A_OverlayPivotAlign(OverlayID(),PSPA_CENTER,PSPA_CENTER);
+			A_OverlayRotate(OverlayID(),frandom[sfx](-90,90));
+			A_OverlayScale(OverlayID(),0.4,0.4);
+			int i = OverlayID() + 29;
+			invoker.prevAngle[i] = angle;
+			invoker.prevPitch[i] = pitch;
+		}
+	PilotLightDo:
+		TNT1 A 0 A_Jump(256,1,5);
+		PFLA ABCDEFGHIJILKLMNOPQRS 1 bright {	
+			let psp = player.FindPSprite(OverlayID());
+			if (psp) {
+				A_OverlayAlpha(OverlayID(),psp.alpha - 0.05);
+				if (psp.alpha <= 0)
+					return ResolveState("Null");
+			}
+			A_OverlayScale(OverlayID(),-0.015,-0.015,WOF_ADD);
+			int i = OverlayID() + 29;
+			A_OverlayOffset(OverlayID(),-(invoker.prevAngle[i] - angle), -0.7 + (invoker.prevPitch[i] - pitch),WOF_ADD);
+			invoker.prevAngle[i] = angle;
+			invoker.prevPitch[i] = pitch;
+			return ResolveState(null);
+		}
+		stop;
 	FireFlash:
 		TNT1 A 0 {
 			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
-			//A_OverlayFlags(OverlayID(),PSPF_AddWeapon|PSPF_AddBob,false);
-			//A_OverlayOffset(OverlayID(),0,32,WOF_ADD);
-			A_OverlayOffset(OverlayID(),frandom[sfx](-3,3),frandom[sfx](-3,3),WOF_ADD);
 			A_OverlayRenderstyle(OverlayID(),Style_Add);
 			A_OverlayAlpha(OverlayID(),0.9);
+			A_OverlayFlags(OverlayID(),PSPF_AddWeapon|PSPF_AddBob,false);
+			A_OverlayOffset(OverlayID(),0,32,WOF_ADD);
+			A_OverlayOffset(OverlayID(),frandom[sfx](-3,3),frandom[sfx](-3,3),WOF_ADD);
 			A_OverlayPivotAlign(OverlayID(),PSPA_CENTER,PSPA_CENTER);
 			A_OverlayRotate(OverlayID(),frandom[sfx](-90,90));
 			A_OverlayScale(OverlayID(),0.7,0.7);
+			int i = OverlayID() + 29;
+			invoker.prevAngle[i] = angle;
+			invoker.prevPitch[i] = pitch;
 		}
 	FireFlashDo:
 		PFLA ABCDEFGHIJILKLMNOPQRS 1 bright {	
 			let psp = player.FindPSprite(OverlayID());
 			if (psp) {
-				A_OverlayAlpha(OverlayID(),psp.alpha - 0.1);
+				A_OverlayAlpha(OverlayID(),psp.alpha - 0.08);
 				if (psp.alpha <= 0)
 					return ResolveState("Null");
 			}
-			A_OverlayScale(OverlayID(),0.03,0.03,WOF_ADD);
-			A_OverlayOffset(OverlayID(),-5,-5,WOF_ADD);
+			A_OverlayScale(OverlayID(),0.05,0.05,WOF_ADD);
+			int i = OverlayID() + 29;
+			//console.printf ("angle %f | pitch %f || prev.angle %f | prev.pitch %f",angle,pitch,invoker.prevAngle,invoker.prevPitch);
+			A_OverlayOffset(OverlayID(),-5 - (invoker.prevAngle[i] - angle),-5 + (invoker.prevPitch[i] - pitch),WOF_ADD);
+			invoker.prevAngle[i] = angle;
+			invoker.prevPitch[i] = pitch;
 			return ResolveState(null);
 		}
-		loop;
+		stop;
 	}
 }
 
