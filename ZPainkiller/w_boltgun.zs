@@ -5,10 +5,10 @@ Class PK_Boltgun : PKWeapon {
 	Default {
 		PKWeapon.emptysound "weapons/empty/rifle";
 		weapon.slotnumber 	7;
-		weapon.ammotype1	"PK_Bolts";
+		weapon.ammotype1	"PK_BoltAmmo";
 		weapon.ammouse1		5;
 		weapon.ammogive1	40;
-		weapon.ammotype2	"PK_Bombs";
+		weapon.ammotype2	"PK_BombAmmo";
 		weapon.ammogive2	0;
 		weapon.ammouse2		10;
 		scale 0.23;

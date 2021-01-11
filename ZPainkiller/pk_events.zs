@@ -225,13 +225,13 @@ Class PK_ReplacementHandler : EventHandler {
 			
 			case 'Shell' 			: e.Replacement = (frandom[ammo](1,10) > 7.5) ? 	'PK_FreezerAmmo' : 'PK_Shells';		break;
 			case 'ShellBox' 		: e.Replacement = (frandom[ammo](1,10) > 7) ? 	'PK_Shells' : 'PK_FreezerAmmo';		break;
-			case 'RocketAmmo' 		: e.Replacement = 'PK_Bombs';		break;
-			case 'RocketBox' 		: e.Replacement = 'PK_Bombs';		break;
-			case 'Clip' 			: e.Replacement = (frandom[ammo](1,10) > 6) ? 	'PK_Shells' : 'PK_Bullets';			break;
-			case 'Cell' 			: e.Replacement = (frandom[ammo](1,10) > 7.5) ? 	'PK_Battery': 'PK_ShurikenAmmo';		break;
-			case 'CellBox' 		: e.Replacement = (frandom[ammo](1,10) > 7) ? 	'PK_ShurikenAmmo' : 'PK_Battery';	break;
-			case 'Stimpack' 		: e.Replacement = 'PK_Stakes';	break;
-			case 'Medikit' 		: e.Replacement = 'PK_Stakes';	break;
+			case 'RocketAmmo' 		: e.Replacement = 'PK_BombAmmo';		break;
+			case 'RocketBox' 		: e.Replacement = 'PK_BombAmmo';		break;
+			case 'Clip' 			: e.Replacement = (frandom[ammo](1,10) > 6) ? 	'PK_Shells' : 'PK_BulletAmmo';			break;
+			case 'Cell' 			: e.Replacement = (frandom[ammo](1,10) > 7.5) ? 	'PK_CellAmmo': 'PK_ShurikenAmmo';		break;
+			case 'CellBox' 		: e.Replacement = (frandom[ammo](1,10) > 7) ? 	'PK_ShurikenAmmo' : 'PK_CellAmmo';	break;
+			case 'Stimpack' 		: e.Replacement = 'PK_StakeAmmo';	break;
+			case 'Medikit' 		: e.Replacement = 'PK_StakeAmmo';	break;
 			
 			case 'SoulSphere' 		: e.Replacement = 'PK_GoldSoul';	break;
 			case 'MegaSphere' 		: e.Replacement = 'PK_MegaSoul';	break;

@@ -7,7 +7,7 @@ Class PK_ElectroDriver : PKWeapon {
 		weapon.ammotype1 "PK_ShurikenAmmo";
 		weapon.ammogive1 20;
 		weapon.ammouse1  1;
-		weapon.ammotype2 "PK_Battery";
+		weapon.ammotype2 "PK_CellAmmo";
 		weapon.ammogive2 40;
 		weapon.ammouse2 1;
 		scale 0.23;
@@ -61,7 +61,7 @@ Class PK_ElectroDriver : PKWeapon {
 	Ready:
 		ELDR A 1 {
 			PK_WeaponReady();
-			if (CountInv("PK_Battery") > 0) {
+			if (CountInv("PK_CellAmmo") > 0) {
 				let psp = player.FindPSprite(PSP_UNDERGUN);
 				if (!psp)
 					A_Overlay(PSP_UNDERGUN,"ElectricSpark");
@@ -91,9 +91,9 @@ Class PK_ElectroDriver : PKWeapon {
 		}
 	AltHold:
 		ELDR A 1 {
-			if (player.cmd.buttons & BT_ATTACK && CountInv("PK_Battery") >= 40) {
+			if (player.cmd.buttons & BT_ATTACK && CountInv("PK_CellAmmo") >= 40) {
 				A_WeaponOffset(0,32);
-				TakeInventory("PK_Battery",40);
+				TakeInventory("PK_CellAmmo",40);
 				A_ClearRefire();
 				A_StopSound(12);
 				return ResolveState("DiskFire");
@@ -103,8 +103,8 @@ Class PK_ElectroDriver : PKWeapon {
 				int req = invoker.hasDexterity ? 1 : 3;
 				if (invoker.celldepleterate > req) {				
 					invoker.celldepleterate = 0;
-					if (CountInv("PK_Battery") >= 1)
-						TakeInventory("PK_Battery",1);
+					if (CountInv("PK_CellAmmo") >= 1)
+						TakeInventory("PK_CellAmmo",1);
 					else {
 						A_ClearRefire();
 						A_StartSound("weapons/edriver/electroloopend",12);
@@ -159,7 +159,7 @@ Class PK_ElectroDriver : PKWeapon {
 			A_OverlayRenderstyle(OverlayID(),STYLE_Add);
 		}
 		ELDS A 1 bright {
-			if (!player.readyweapon || player.readyweapon != invoker || CountInv("PK_Battery") < 1)
+			if (!player.readyweapon || player.readyweapon != invoker || CountInv("PK_CellAmmo") < 1)
 				return ResolveState("Null");
 			A_Overlay(PSP_HIGHLIGHTS,'ReadyLight',nooverride:true);
 			let psp = player.FindPSprite(overlayID());

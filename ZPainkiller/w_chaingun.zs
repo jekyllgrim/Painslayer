@@ -5,10 +5,10 @@ Class PK_Chaingun : PKWeapon {
 	Default {
 		PKWeapon.emptysound "weapons/empty/chaingun";
 		weapon.slotnumber 4;
-		weapon.ammotype1	"PK_Grenades";
+		weapon.ammotype1	"PK_GrenadeAmmo";
 		weapon.ammouse1	1;
 		weapon.ammogive1	5;
-		weapon.ammotype2	"PK_Bullets";
+		weapon.ammotype2	"PK_BulletAmmo";
 		weapon.ammouse2	1;
 		weapon.ammogive2	50;
 		inventory.pickupmessage "Picked up a Chaingun";

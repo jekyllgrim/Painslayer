@@ -470,7 +470,7 @@ Class PK_FreezerAmmo : Ammo {
 }
 
 
-Class PK_Stakes : Ammo {
+Class PK_StakeAmmo : Ammo {
 	Default {
 		inventory.pickupmessage "Picked up a box of stakes.";
 		inventory.pickupsound "pickups/ammo/stakes";
@@ -489,7 +489,7 @@ Class PK_Stakes : Ammo {
 	}
 }
 
-Class PK_Grenades : Ammo {
+Class PK_GrenadeAmmo : Ammo {
 	Default {
 		inventory.pickupmessage "Picked up a box of grenades.";
 		inventory.pickupsound "pickups/ammo/grenades";
@@ -507,7 +507,7 @@ Class PK_Grenades : Ammo {
 	}
 }
 
-Class PK_Bullets : Ammo {
+Class PK_BulletAmmo : Ammo {
 	Default {
 		inventory.pickupmessage "Picked up a box of bullets.";
 		inventory.pickupsound "pickups/ammo/bullets";
@@ -531,10 +531,10 @@ Class PK_ShurikenAmmo : Ammo {
 		inventory.pickupmessage "Picked up a box of shurikens.";
 		inventory.pickupsound "pickups/ammo/stars";
 		inventory.icon "pkhstars";
-		inventory.amount 10;
-		inventory.maxamount 100;
-		ammo.backpackamount 10;
-		ammo.backpackmaxamount 100;
+		inventory.amount 20;
+		inventory.maxamount 250;
+		ammo.backpackamount 50;
+		ammo.backpackmaxamount 250;
 		xscale 0.3;
 		yscale 0.25;
 	}
@@ -545,14 +545,14 @@ Class PK_ShurikenAmmo : Ammo {
 	}
 }
 
-Class PK_Battery : Ammo {
+Class PK_CellAmmo : Ammo {
 	Default {
 		inventory.pickupmessage "Picked up a cell battery.";
 		inventory.pickupsound "pickups/ammo/battery";
 		inventory.icon "pkhshock";
-		inventory.amount 20;
+		inventory.amount 40;
 		inventory.maxamount 500;
-		ammo.backpackamount 20;
+		ammo.backpackamount 80;
 		ammo.backpackmaxamount 500;
 		scale 0.4;
 	}
@@ -564,7 +564,7 @@ Class PK_Battery : Ammo {
 }
 
 
-Class PK_Bolts : Ammo {
+Class PK_BoltAmmo : Ammo {
 	Default {
 		inventory.pickupmessage "Picked up a box of steel bolts.";
 		inventory.pickupsound "pickups/ammo/bolts";
@@ -583,7 +583,7 @@ Class PK_Bolts : Ammo {
 	}
 }
 
-Class PK_Bombs : Ammo {
+Class PK_BombAmmo : Ammo {
 	Default {
 		inventory.pickupmessage "Picked up a box of bombs.";
 		inventory.pickupsound "pickups/ammo/bombs";

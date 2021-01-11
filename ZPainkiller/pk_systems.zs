@@ -841,11 +841,11 @@ Class PKC_666Ammo : PK_BaseSilverCard {
 	static const Class<Ammo> PKAmmoTypes[] = {
 		'PK_Shells',
 		'PK_FreezerAmmo',
-		'PK_Stakes',
-		'PK_Bombs',
-		'PK_Bullets',
+		'PK_StakeAmmo',
+		'PK_BombAmmo',
+		'PK_BulletAmmo',
 		'PK_ShurikenAmmo',
-		'PK_Battery'
+		'PK_CellAmmo'
 	};
 	private array < Class<Ammo> > modifiedAmmo;
 	private array <int> prevAmmoAmount;

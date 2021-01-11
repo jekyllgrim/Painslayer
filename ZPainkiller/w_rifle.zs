@@ -7,10 +7,10 @@ Class PK_Rifle : PKWeapon {
 	Default {
 		PKWeapon.emptysound "weapons/empty/rifle";
 		weapon.slotnumber 6;
-		weapon.ammotype1	"PK_Bullets";
+		weapon.ammotype1	"PK_BulletAmmo";
 		weapon.ammouse1		1;
 		weapon.ammogive1	80;
-		weapon.ammotype2	"PK_Grenades";
+		weapon.ammotype2	"PK_GrenadeAmmo";
 		weapon.ammouse1		1;
 		weapon.ammogive1	100;
 		inventory.pickupmessage "Picked up an Assault Rifle/Flamethrower";

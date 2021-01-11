@@ -2,10 +2,10 @@ Class PK_Stakegun : PKWeapon {
 	Default {
 		PKWeapon.emptysound "weapons/empty/rifle";
 		weapon.slotnumber 3;
-		weapon.ammotype1	"PK_Stakes";
+		weapon.ammotype1	"PK_StakeAmmo";
 		weapon.ammouse1		1;
 		weapon.ammogive1	10;
-		weapon.ammotype2	"PK_Grenades";
+		weapon.ammotype2	"PK_GrenadeAmmo";
 		weapon.ammogive2	0;
 		weapon.ammouse2		1;
 		scale 0.23;
