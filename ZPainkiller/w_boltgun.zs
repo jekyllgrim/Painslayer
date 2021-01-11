@@ -39,7 +39,7 @@ Class PK_Boltgun : PKWeapon {
 		wait;
 	Ready:
 		BGUN A 1 {
-			PK_WeaponReady(WRF_NOBOB);
+			PK_WeaponReady();
 			if (invoker.ammo2.amount < 10) {
 				let psp = player.FindPSprite(OverlayID());
 				if (psp)
