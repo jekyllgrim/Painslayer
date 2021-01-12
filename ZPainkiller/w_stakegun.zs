@@ -33,7 +33,7 @@ Class PK_Stakegun : PKWeapon {
 			TNT1 A 0 {
 				A_StartSound("weapons/stakegun/fire");
 				A_WeaponOffset(11,9,WOF_ADD);
-				A_FireProjectile("PK_Stake",spawnofs_xy:2,spawnheight:5,flags:FPF_NOAUTOAIM,pitch:-2.5);
+				PK_FireArchingProjectile("PK_Stake",spawnofs_xy:2,spawnheight:5,flags:FPF_NOAUTOAIM,pitch:-2.5);
 			}
 			PSGN BBBBB 2 A_WeaponOffset(1.44,1.2,WOF_ADD);
 			PSGN CDEF 3 A_WeaponOffset(-0.8,-0.5,WOF_ADD);
@@ -52,7 +52,7 @@ Class PK_Stakegun : PKWeapon {
 			PSGN A 0 {
 				A_StartSound("weapons/stakegun/grenade");
 				A_WeaponOffset(6,2,WOF_ADD);
-				A_FireProjectile("PK_Grenade",spawnofs_xy:1,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
+				PK_FireArchingProjectile("PK_Grenade",spawnofs_xy:1,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
 				if (invoker.ammo1.amount < 1) {
 					let psp = Player.FindPSprite(PSP_WEAPON);
 					if (psp)
@@ -441,6 +441,7 @@ Class PK_Grenade : PK_Projectile {
 		PK_Projectile.trailscale 0.04;
 		PK_Projectile.trailfade 0.035;
 		PK_Projectile.trailalpha 0.3;
+		projectile;
 		-NOGRAVITY
 		bouncetype 'hexen';
 		bouncefactor 0.35;
@@ -464,37 +465,37 @@ Class PK_Grenade : PK_Projectile {
 		trg.ggrenade = self;
 	}
 	states {
-		Spawn:
-			MODL A 1 {
-				if (vel.length() < 3) {
-					bMISSILE = false;
-				}
-				if (pos.z <= floorz+4) {
-					pitch+= 15;
-					let smk = Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
-					if (smk) {
-						smk.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
-						smk.A_SetScale(0.15);
-						smk.alpha = 0.35;
-					}
-				}
-				else
-					A_FaceMovementDirection(flags:FMDF_INTERPOLATE);
-				if (age > 35*2)
-					SetStateLabel("XDeath");
+	Spawn:
+		MODL A 1 {
+			if (vel.length() < 3) {
+				bMISSILE = false;
 			}
-			loop;
-		XDeath:
-			TNT1 A 1 { 
-				bNOGRAVITY = true;
-				A_RemoveChildren(1,RMVF_EVERYTHING);
-				A_StopSound(4);
-				A_Quake(1,8,0,256,"");
-				A_StartSound("weapons/grenade/explosion",CHAN_5);
-				A_Explode();
-				Spawn("PK_GenericExplosion",pos);
+			if (pos.z <= floorz+4) {
+				pitch+= 15;
+				let smk = Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
+				if (smk) {
+					smk.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
+					smk.A_SetScale(0.15);
+					smk.alpha = 0.35;
+				}
 			}
-			stop;
+			else
+				A_FaceMovementDirection(flags:FMDF_INTERPOLATE);
+			if (Age > 70)
+				SetStateLabel("XDeath");
+		}
+		loop;
+	XDeath:
+		TNT1 A 1 { 
+			bNOGRAVITY = true;
+			A_RemoveChildren(1,RMVF_EVERYTHING);
+			A_StopSound(4);
+			A_Quake(1,8,0,256,"");
+			A_StartSound("weapons/grenade/explosion",CHAN_5);
+			A_Explode();
+			Spawn("PK_GenericExplosion",pos);
+		}
+		stop;
 	}
 }
 
