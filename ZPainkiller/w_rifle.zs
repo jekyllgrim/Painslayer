@@ -125,8 +125,10 @@ Class PK_Rifle : PKWeapon {
 			A_Overlay(RIFLE_STOCK,"Stock",nooverride:true);
 			A_Overlay(RIFLE_BARREL,"Barrel",nooverride:true);
 			A_Overlay(RIFLE_STRAP,"Strap",nooverride:true);
-			A_Overlay(RIFLE_PILOT,"PilotLightHandle",nooverride:true);
-			A_Overlay(PSP_HIGHLIGHTS,"PilotHighlights",nooverride:true);
+			if (waterlevel <= 1) {
+				A_Overlay(PSP_HIGHLIGHTS,"PilotHighlights",nooverride:true);
+				A_Overlay(RIFLE_PILOT,"PilotLightHandle",nooverride:true);
+			}
 		}
 		loop;
 	Strap:
@@ -268,19 +270,20 @@ Class PK_Rifle : PKWeapon {
 		TNT1 A 0 {
 			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
 			A_OverlayRenderstyle(OverlayID(),Style_Add);
-			A_OverlayAlpha(OverlayID(),0);
 		}
-		PRFM BBBBB 1 bright {
-			let psp = Player.FindPSprite(OverlayID());
-			if (psp)
-				A_OverlayAlpha(OverlayID(),psp.alpha + 0.15);
-		}			
 		PRFM B 2 bright {
+			if (waterlevel > 1)
+				return ResolveState("Null");
 			A_OverlayAlpha(OverlayID(),frandom[sfx](0.35,0.6));
+			return ResolveState(null);
 		}
 		wait;
 	PilotLightHandle:
 		PFLF A 2 bright {
+			if (waterlevel > 1) {
+				A_ClearOverlays(-36,-30);
+				return ResolveState("Null");
+			}
 			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
 			A_OverlayRenderstyle(OverlayID(),Style_Add);
 			A_OverlayAlpha(OverlayID(),frandom[sfx](0.25,0.4));
@@ -289,6 +292,7 @@ Class PK_Rifle : PKWeapon {
 				invoker.fireFrame = 0;
 			invoker.fireFrame++;			
 			A_Overlay(-30 + invoker.fireFrame,"PilotLight");
+			return ResolveState(null);
 		}
 		loop;
 	PilotLight:
