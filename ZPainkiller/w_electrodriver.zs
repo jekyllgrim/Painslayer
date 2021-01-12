@@ -369,14 +369,15 @@ Class PK_Shuriken : PK_Projectile {
 			A_StartSound("weapons/edriver/starboom");
 			A_Stop();
 			A_SetScale(0.6);
-			A_SetRenderstyle(0.75,STYLE_Add);
+			A_SetRenderstyle(1,STYLE_Add);
 			roll = random[star](0,359);
+			A_AttachLight('PKExplodingStar', DynamicLight.RandomFlickerLight, "ffAA00", 32, 44, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF);
 			A_Explode(128,40,fulldamagedistance:64);
-			for (int i = random[sfx](5,10); i > 0; i--) {
+			for (int i = random[sfx](2,7); i > 0; i--) {
 				let debris = Spawn("PK_RandomDebris",pos);
 				if (debris) {
 					debris.vel = (frandom[sfx](-5,5),frandom[sfx](-5,5),frandom[sfx](-2,6));
-					debris.A_SetScale(0.5);
+					debris.A_SetScale(0.25);
 					debris.gravity = 0.25;
 				}
 			}
