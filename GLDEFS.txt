@@ -177,30 +177,6 @@ object PK_MegaSoul {
 	frame MSOUU { light PK_SecondaryRed }
 }
 
-pointlight PK_FreezerProjectile {
-	color 0.2 0.4 1.0
-	attenuate 1
-	size 48
-}
-
-object PK_FreezerProjectile {
-	frame BAL7 { light PK_FreezerProjectile }
-}
-
-/*pulselight PK_KillerFlare {
-	color 1 1 0
-	attenuate 1
-	size 0
-	secondarySize 16
-	interval 0.57
-	dontlightself 1
-}
-
-
-object PK_KillerFlare {
-	frame FLAR { light PK_KillerFlare }
-}*/
-
 pulselight PK_DeathSmoke {
 	color 0.5 0 0
 	attenuate 1
