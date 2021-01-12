@@ -1,4 +1,5 @@
 Class PKWeapon : Weapon abstract {
+	mixin PK_Math;
 	sound emptysound;
 	property emptysound : emptysound;
 	protected bool hasDexterity;
@@ -33,7 +34,7 @@ Class PKWeapon : Weapon abstract {
 		RLIGHT_BOLT	= 4,
 		RIFLE_STOCK	= 5,
 		RLIGHT_STOCK	= 6	
-	}
+	}	
 	override void DoEffect() {
 		Super.DoEffect();
 		if (!owner)
@@ -50,6 +51,14 @@ Class PKWeapon : Weapon abstract {
 		if (icon)  {
 			icon.master = self;
 		}
+	}
+	action actor PK_FireArchingProjectile(class<Actor> missiletype, double angle = 0, bool useammo = true, double spawnofs_xy = 0, double spawnheight = 0, int flags = 0, double pitch = 0) {
+		if (!self || !self.player) 
+			return null;
+		double pitchOfs = pitch;
+		if (pitch != 0 && self.pitch < 0)
+			pitchOfs = invoker.LinearMap(self.pitch, 0, -90, pitchOfs, 0);
+		return A_FireProjectile(missiletype, angle, useammo, spawnofs_xy, spawnheight, flags, pitchOfs);
 	}
 	action void DampedRandomOffset(double rangeX, double rangeY, double rate = 1) {
 		let psp = Player.FindPSprite(PSP_WEAPON);			
@@ -243,7 +252,19 @@ Class PK_Projectile : PK_BaseActor abstract {
 		PK_Projectile.flareactor "PK_ProjFlare";
 		PK_Projectile.trailactor "PK_BaseFlare";
 	}
-	
+	/*
+	For whatever reason the complicated pitch offset calculation
+	used in arching projectiles like stakes screws up the projectiles'
+	collision, so that it'll collide with the player if fired directly upwards.
+	I had to add this override to circumvent that.
+	*/
+	override bool CanCollideWith(Actor other, bool passive) {
+		if (!other)
+			return false;
+		if (!passive && target && other == target)
+			return false;
+		return super.CanCollideWith(other, passive);
+	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		if (trailcolor)

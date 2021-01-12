@@ -1,7 +1,20 @@
+Mixin class PK_Math {	
+	int PK_Sign (int i) {
+		if (i >= 0)
+			return 1;
+		else
+			return -1;
+	}
+	double LinearMap(double val, double o_min, double o_max, double n_min, double n_max) {
+		return (val - o_min) * (n_max - n_min) / (o_max - o_min) + n_min;
+	}
+}
+
 Class PK_BaseActor : Actor abstract {
 	protected double pi;
 	protected name bcolor;
 	protected int age;
+	mixin PK_Math;
 	
 	bool CheckLandingSize (double cradius = 0, bool checkceiling = false) {
 		if (checkceiling) {
@@ -21,13 +34,6 @@ Class PK_BaseActor : Actor abstract {
 			}
 		}
 		return false;
-	}
-	
-	int PK_Sign (int i) {
-		if (i >= 0)
-			return 1;
-		else
-			return -1;
 	}
 	
 	static const string PK_LiquidFlats[] = { 
