@@ -280,7 +280,11 @@ Class PK_Rifle : PKWeapon {
 		}
 		wait;
 	PilotLightHandle:
-		TNT1 A 2 {
+		PFLF A 2 bright {
+			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
+			A_OverlayRenderstyle(OverlayID(),Style_Add);
+			A_OverlayAlpha(OverlayID(),frandom[sfx](0.25,0.4));
+			A_OverlayOffset(OverlayID(),-4,2,WOF_INTERPOLATE);
 			if (invoker.fireFrame >= 6)
 				invoker.fireFrame = 0;
 			invoker.fireFrame++;			
