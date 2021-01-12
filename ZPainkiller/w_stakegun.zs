@@ -215,6 +215,17 @@ Class PK_Stake : PK_Projectile {
 				bNOINTERACTION = true;
 				bNOGRAVITY = true;
 				A_Stop();
+				for (int i = random[sfx](5,8); i > 0; i--) {
+					vector3 vvel = (frandom[sfx](-5,-2), frandom[sfx](-2,2), frandom[sfx](0,5));
+					if (pos.z <= floorz)
+						vvel = (frandom[sfx](-4,4), frandom[sfx](-4,4), frandom[sfx](3,6));
+					A_SpawnItemEx(
+						"PK_RandomDebris",
+						xvel:vvel.x,
+						yvel:vvel.y,
+						zvel:vvel.z
+					);
+				}
 				if (pinvictim) {
 					pinvictim.A_Stop();
 					pinvictim.SetOrigin((pos.x,pos.y,pinvictim.pos.z),false);	//make sure the fake corpse is at the middle of the stake
