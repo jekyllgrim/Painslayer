@@ -99,6 +99,7 @@ only one victim and fly through others if they exist. For that we employ a few t
 */
 Class PK_Stake : PK_Projectile {
 	protected int basedmg;
+	protected bool onFire;
 	actor hitvictim; //Stores the first monster hit. Allows us to deal damage only once and to only one victim
 	actor pinvictim; //The fake corpse that will be pinned to a wall
 	Default {
@@ -118,9 +119,11 @@ Class PK_Stake : PK_Projectile {
 	}
 	override void Tick () {
 		super.Tick();
-		if (self.GetClassName() == "PK_Stake" && age >= 12) {
+		if (!onFire && age >= 12) {
 			trailactor = "PK_StakeFlame";
 			trailscale = 0.08;
+			A_AttachLight('PKBurningStake', DynamicLight.RandomFlickerLight, "ffb30f", 40, 44, flags: DYNAMICLIGHT.LF_ATTENUATE);
+			onFire = true;
 		}
 	}
 	override void PostBeginPlay() {
@@ -203,6 +206,8 @@ Class PK_Stake : PK_Projectile {
 			loop;
 		Death: 
 			#### A 160 { 
+				A_RemoveLight('PKBurningStake');
+				onFire = true;
 				if (blockingline) {
 					A_StartSound("weapons/stakegun/stakewall",attenuation:2);
 					A_SprayDecal("Stakedecal",8);		
@@ -227,8 +232,16 @@ Class PK_Stake : PK_Projectile {
 			#### A 1 A_FadeOut(0.03);
 			wait;
 		Crash:
+			TNT1 A 1 {
+				A_RemoveLight('PKBurningStake');
+				onFire = true;
+			}
+			stop;
 		XDeath:
-			TNT1 A 1;
+			TNT1 A 1 {
+				A_RemoveLight('PKBurningStake');
+				onFire = true;
+			}
 			stop;
 	}
 }
@@ -237,6 +250,7 @@ Class PK_StakeFlame : PK_BaseFlare {
 	Default {
 		scale 0.05;
 		renderstyle 'translucent';
+		alpha 0.85;
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -245,7 +259,10 @@ Class PK_StakeFlame : PK_BaseFlare {
 	states {
 	Spawn:
 		BOM4 JKLMNOPQ 1;
-		BOM5 ABCDEFGHIJKLMN 1 A_FadeOut(0.02);
+		BOM5 ABCDEFGHIJKLMN 1 {
+			A_FadeOut(0.02);
+			scale *= 1.06;
+		}
 		wait;
 	}
 }
