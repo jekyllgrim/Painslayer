@@ -58,7 +58,6 @@ Class PK_Shotgun : PKWeapon {
 		goto ready;
 	AltFire:
 		PSHT A 5 {
-			//A_FireProjectile("FreezerProjectile");
 			A_StartSound("weapons/shotgun/freezer",CHAN_7);
 			A_FireProjectile("PK_FreezerProjectile",0,true,-7,spawnheight:6);
 			A_FireProjectile("PK_FreezerProjectile",0,false,7,spawnheight:6);
@@ -127,6 +126,10 @@ Class PK_FreezerProjectile : PK_Projectile {
 		PK_Projectile.trailfade 0.06;
 		PK_Projectile.trailshrink 0.7;
 	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		A_AttachLight('PKFreezerProjectile', DynamicLight.PointLight, "75edff", 40, 0, flags: DYNAMICLIGHT.LF_ATTENUATE);
+	}
 	states 	{
 	Spawn:
 		BAL7 A 1;
@@ -134,6 +137,7 @@ Class PK_FreezerProjectile : PK_Projectile {
 	Death:
 		TNT1 A 0 {
 			A_Stop();
+			A_AttachLight('PKFreezerProjectile', DynamicLight.RandomFlickerLight, "75edff", 32, 52, flags: DYNAMICLIGHT.LF_ATTENUATE);
 			roll = random(0,359); 
 			if (tracer && (tracer.bISMONSTER || tracer.player) && !tracer.bBOSS) {
 				tracer.GiveInventory("PK_FreezeControl",1);
