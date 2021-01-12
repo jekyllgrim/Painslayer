@@ -5,7 +5,10 @@ Class PKWeapon : Weapon abstract {
 	protected bool hasDexterity;
 	protected vector2 targOfs;
 	protected vector2 shiftOfs;
+	protected bool alwaysbob;
+	property alwaysbob : alwaysbob;
 	Default {
+		PKWeapon.alwaysbob true;
 		weapon.BobRangeX 0.31;
 		weapon.BobRangeY 0.15;
 		weapon.BobStyle "InverseSmooth";
@@ -42,7 +45,8 @@ Class PKWeapon : Weapon abstract {
 		let weap = owner.player.readyweapon;
 		if (!weap)
 			return;
-		//owner.player.WeaponState |= WF_WEAPONBOBBING;
+		if (alwaysbob && weap == self)
+			owner.player.WeaponState |= WF_WEAPONBOBBING;
 		hasDexterity = owner.FindInventory("PowerDoubleFiringSpeed",true);
 	}
 	override void PostBeginPlay() {
@@ -73,13 +77,13 @@ Class PKWeapon : Weapon abstract {
 		A_WeaponOffset(invoker.shiftOfs.x, invoker.shiftOfs.y, WOF_ADD);
 	}
 	action void PK_WeaponReady(int flags = 0) {
-		if ((player.cmd.buttons & BT_ATTACK) && (!invoker.ammo1 || invoker.ammo1.amount < 1)) {
+		if ((player.cmd.buttons & BT_ATTACK) && (!invoker.ammo1 || invoker.ammo1.amount < invoker.ammouse1)) {
 			A_ClearRefire();
 			if (!(player.oldbuttons & BT_ATTACK))
 				A_StartSound(invoker.emptysound);
 			return;
 		}
-		if ((player.cmd.buttons & BT_ALTATTACK) && (!invoker.ammo2 || invoker.ammo2.amount < 1)) {
+		if ((player.cmd.buttons & BT_ALTATTACK) && (!invoker.ammo2 || invoker.ammo2.amount < invoker.ammouse2)) {
 			A_ClearRefire();
 			if (!(player.oldbuttons & BT_ALTATTACK))
 				A_StartSound(invoker.emptysound);
