@@ -337,8 +337,8 @@ Class PK_GenericExplosion : PK_SmallDebris {
 		+NOINTERACTION;
 		renderstyle 'add';
 		+BRIGHT;
-		alpha 0.6;
-		scale 0.4;
+		alpha 1;
+		scale 0.52;
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -354,7 +354,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 			}
 		}
 		for (int i = random[sfx](10,15); i > 0; i--) {
-			let debris = Spawn("PK_ExplosiveDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
+			let debris = Spawn("PK_ExplosiveDebris",pos + (frandom[sfx](-12,12),frandom[sfx](-12,12),frandom[sfx](-12,12)));
 			if (debris) {
 				double zvel = (pos.z > floorz) ? frandom[sfx](-5,10) : frandom[sfx](5,15);
 				debris.vel = (frandom[sfx](-10,10),frandom[sfx](-10,10),zvel);
@@ -380,10 +380,10 @@ Class PK_ExplosiveDebris : PK_RandomDebris {
 		Super.Tick();	
 		if (isFrozen())
 			return;
-		let smk = Spawn("PK_BlackSmoke",pos+(frandom[smk](-4,4),frandom[smk](-4,4),frandom[smk](-4,4)));
+		let smk = Spawn("PK_BlackSmoke",pos+(frandom[smk](-9,9),frandom[smk](-9,9),frandom[smk](-9,9)));
 		if (smk) {
 			smk.A_SetScale(0.25);
-			smk.alpha = alpha*0.18;
+			smk.alpha = alpha*0.3;
 			smk.vel = (frandom[smk](-1,1),frandom[smk](-1,1),frandom[smk](-1,1));
 		}
 		Vector3 path = level.vec3Diff( self.pos, oldPos );
@@ -393,7 +393,7 @@ Class PK_ExplosiveDebris : PK_RandomDebris {
 		for( int i = 0; i < steps; i++ )  {
 			let trl = Spawn("PK_DebrisFlame",oldPos);
 			if (trl)
-				trl.alpha = alpha*0.5;
+				trl.alpha = alpha*0.75;
 			oldPos = level.vec3Offset( oldPos, direction );
 		}
 	}
@@ -412,7 +412,7 @@ Class PK_DebrisFlame : PK_BaseFlare {
 	Default {
 		scale 0.05;
 		renderstyle 'translucent';
-		alpha 1;		
+		alpha 1;
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -421,12 +421,13 @@ Class PK_DebrisFlame : PK_BaseFlare {
 	}
 	states {
 	Spawn:
-		BOM4 KLMNOPQ 1 {
+		TNT1 A 0 NoDelay A_Jump(256,1,3);
+		BOM4 IJKLMNOPQ 1 {
 			A_FadeOut(0.05);
 			roll += wrot;
-			scale *= 1.05;
+			scale *= 1.1;
 		}
-		stop;
+		wait;
 	}
 }
 
