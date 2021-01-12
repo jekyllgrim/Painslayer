@@ -193,8 +193,8 @@ Class PK_Boltgun : PKWeapon {
 			TakeInventory(invoker.ammo2.GetClass(),10);
 			double ofs = -2.2;
 			double ang = 5;
-			for (int i = 0; i < 10; i ++) {				
-				let bomb = A_FireProjectile("PK_Bomb",angle:ang+frandom[bomb](-0.7,0.7),useammo:false,spawnofs_xy:ofs,spawnheight:-4+frandom[bomb](-0.8,0.8),flags:FPF_NOAUTOAIM,pitch:-25+frandom[bomb](-4,4));
+			for (int i = 0; i < 10; i++) {				
+				let bomb = PK_FireArchingProjectile("PK_Bomb",angle:ang+frandom[bomb](-0.7,0.7),useammo:false,spawnofs_xy:ofs,spawnheight:-4+frandom[bomb](-0.8,0.8),flags:FPF_NOAUTOAIM,pitch:-25+frandom[bomb](-4,4));
 				ofs += 2.2;
 				ang -= 1;
 			}
