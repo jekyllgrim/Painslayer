@@ -217,6 +217,7 @@ Class PK_Bolt : PK_Stake {
 		super.PostBeginPlay();
 		sprite = GetSpriteIndex("BOLT");
 		basedmg = 40;
+		onFire = true; //this prevents it from spawning the fire trail that the stake would spawn after 12 tics
 	}
 }
 
