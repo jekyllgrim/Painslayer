@@ -2,6 +2,7 @@ Class PK_ElectroDriver : PKWeapon {
 	private bool attackrate;
 	private int celldepleterate;
 	Default {
+		PKWeapon.alwaysbob false;
 		PKWeapon.emptysound "weapons/empty/electrodriver";
 		weapon.slotnumber 5;
 		weapon.ammotype1 "PK_ShurikenAmmo";
@@ -61,11 +62,8 @@ Class PK_ElectroDriver : PKWeapon {
 	Ready:
 		ELDR A 1 {
 			PK_WeaponReady();
-			if (CountInv("PK_CellAmmo") > 0) {
-				let psp = player.FindPSprite(PSP_UNDERGUN);
-				if (!psp)
-					A_Overlay(PSP_UNDERGUN,"ElectricSpark");
-			}
+			if (invoker.ammo2.amount > invoker.ammouse2)
+				A_Overlay(PSP_UNDERGUN,"ElectricSpark",nooverride:true);
 		}
 		loop;
 	Fire:
@@ -91,7 +89,7 @@ Class PK_ElectroDriver : PKWeapon {
 		}
 	AltHold:
 		ELDR A 1 {
-			if (player.cmd.buttons & BT_ATTACK && CountInv("PK_CellAmmo") >= 40) {
+			if (player.cmd.buttons & BT_ATTACK && invoker.ammo2.amount >= 40) {
 				A_WeaponOffset(0,32);
 				TakeInventory("PK_CellAmmo",40);
 				A_ClearRefire();
@@ -103,7 +101,7 @@ Class PK_ElectroDriver : PKWeapon {
 				int req = invoker.hasDexterity ? 1 : 3;
 				if (invoker.celldepleterate > req) {				
 					invoker.celldepleterate = 0;
-					if (CountInv("PK_CellAmmo") >= 1)
+					if (invoker.ammo2.amount >= 1)
 						TakeInventory("PK_CellAmmo",1);
 					else {
 						A_ClearRefire();
@@ -159,8 +157,10 @@ Class PK_ElectroDriver : PKWeapon {
 			A_OverlayRenderstyle(OverlayID(),STYLE_Add);
 		}
 		ELDS A 1 bright {
-			if (!player.readyweapon || player.readyweapon != invoker || CountInv("PK_CellAmmo") < 1)
+			if (!player.readyweapon || player.readyweapon != invoker || invoker.ammo2.amount < invoker.ammouse2) {
+				A_ClearOverlays(PSP_HIGHLIGHTS,PSP_HIGHLIGHTS);
 				return ResolveState("Null");
+			}
 			A_Overlay(PSP_HIGHLIGHTS,'ReadyLight',nooverride:true);
 			let psp = player.FindPSprite(overlayID());
 			if (psp)
@@ -172,7 +172,7 @@ Class PK_ElectroDriver : PKWeapon {
 		}
 		wait;
 	ReadyLight:
-		ELDR Y -1 bright {			
+		ELDR Y -1 bright {
 			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
 			A_OverlayRenderstyle(OverlayID(),Style_Add);
 		}
