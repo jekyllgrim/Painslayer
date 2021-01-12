@@ -39,7 +39,7 @@ Class PK_Boltgun : PKWeapon {
 		wait;
 	Ready:
 		BGUN A 1 {
-			PK_WeaponReady();
+			PK_WeaponReady(WRF_NOBOB);
 			if (invoker.ammo2.amount < 10) {
 				let psp = player.FindPSprite(OverlayID());
 				if (psp)
@@ -150,16 +150,26 @@ Class PK_Boltgun : PKWeapon {
 			A_StartSound("weapons/boltgun/fire3",CHAN_7);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
+		#### # 0 {
+			if (invoker.ammo1.amount < invoker.ammouse1)
+				return ResolveState("FireEndEmpty");
+			return ResolveState(null);
+		}
 		#### D 2 {
 			A_StartSound("weapons/boltgun/reload");
 			A_ClearOverlays(PSP_SCOPE1,PSP_SCOPE3);
 			A_Overlay(PSP_SCOPE1,"ScopeReload");
+			return ResolveState(null);
 		}
 		#### EFGHI 2 A_WeaponOffset(-1,-1,WOF_ADD);
 		#### IJKLM 2 A_WeaponOffset(-0.5,-0.5,WOF_ADD);
 		#### # 0 A_Overlay(PSP_SCOPE1,"ScopeReload");
 		#### NOPQRST 2 A_WeaponOffset(-0.5,-0.5,WOF_ADD);
 		TNT1 A 0 A_WeaponOffset(invoker.prevOfs.x,invoker.prevOfs.y,WOF_INTERPOLATE);
+		goto ready;
+	FireEndEmpty:
+		#### ###### 1 A_WeaponOffset(-2,-2,WOF_ADD);
+		TNT1 A 0 A_WeaponOffset(invoker.prevOfs.x,invoker.prevOfs.y);
 		goto ready;
 	ScopeReload:
 		TNT1 A 0 A_OverlayPivot(OverlayID(),0,1);
@@ -200,6 +210,13 @@ Class PK_Boltgun : PKWeapon {
 			}
 		}
 		BGUB FGHI 3 A_WeaponOffset(-2.5,-2.5,WOF_ADD);
+		TNT1 A 0 {
+			if (invoker.ammo2.amount < invoker.ammouse2) {
+				A_WeaponOffset(invoker.prevOfs.x,invoker.prevOfs.y,WOF_INTERPOLATE);
+				return ResolveState("Ready");
+			}
+			return ResolveState(null);
+		}
 		BGUB JKLMNA 2  A_WeaponOffset(-0.1,-0.1,WOF_ADD);
 		TNT1 A 0 A_WeaponOffset(invoker.prevOfs.x,invoker.prevOfs.y,WOF_INTERPOLATE);
 		goto Ready;
