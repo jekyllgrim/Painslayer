@@ -42,7 +42,7 @@ weapons/empty/shotgun			drySTG
 weapons/empty/rifle				dryRIFL
 weapons/empty/electrodriver		dryELD
 weapons/empty/chaingun			dryMGUN
-weapons/empty/rifle				"sounds/rifle/weapon_rifle_empty.wav"
+weapons/empty/rifle				dryRIFL
 
 $random weapons/bullet/ricochet { brico1 brico2 brico3 brico4 }
 $limit weapons/bullet/ricochet 1
@@ -184,7 +184,7 @@ weapons/boltgun/heater		"sounds/boltgun/weapon_heater_fire.wav"
 weapons/boltgun/zoom		"sounds/boltgun/zoom-in.wav"
 weapons/boltgun/reload		"sounds/boltgun/weapon_bolt_reload.wav"
 $random weapons/boltgun/bounce	{ heaterbounce1 heaterbounce2 }
-$attenuation weapons/boltgun/bounce	4
+$attenuation weapons/boltgun/bounce	2
 $limit weapons/boltgun/bounce 10
 heaterbounce1	"sounds/boltgun/weapon_heater-bounce1.wav"
 heaterbounce2	"sounds/boltgun/weapon_heater-bounce2.wav"
@@ -261,7 +261,3 @@ $random weapons/demonmorph/attack { demonattack1 demonattack2 }
 demonattack1	DMGUN1
 demonattack2	DMGUN2
 
-
-gibs/blooddrop		bloddrop
-gibs/splash		flesh
-gibs/spiderdeath	spiddeth
