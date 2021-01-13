@@ -360,12 +360,60 @@ Class PK_Rifle : PKWeapon {
 	}
 }
 
-Class PK_FlameThrowerFlame : Actor {
-	protected double rollOfs;
+Class PK_BurningControl : PK_InventoryToken {
+	protected int timer;
+	void ResetTimer() {
+		timer = 35*5;
+	}
+	override void AttachToOwner(actor other) {
+		super.AttachToOwner(other);
+		if (!owner)
+			return;
+		ResetTimer();
+	}
+	override void DoEffect() {
+		super.DoEffect();
+		if (!owner || !target) {
+			DepleteOrDestroy();
+			return;
+		}
+		if (owner.isFrozen())
+			return;
+		if (timer <= 0) {
+			DepleteOrDestroy();
+			return;
+		}
+		timer--;
+		if (timer % 35 == 0) {
+			//int fl = (random[burn](1,3) == 1) ? 0 : DMG_NO_PAIN;
+			owner.DamageMobj(self,target,4,"Fire",flags:DMG_THRUSTLESS/*|fl*/);
+		}
+		if (owner.health <= 0) {
+			owner.A_SetTRanslation("Scorched");
+		}
+		double rad = owner.radius*0.75;
+		let part = Spawn("PK_FlameParticle",owner.pos + (frandom[sfx](-rad,rad), frandom[sfx](-rad,rad), frandom[sfx](owner.pos.z,owner.height*0.75)));
+		if (part) {
+			part.vel = (frandom[sfx](-0.7,0.7), frandom[sfx](-0.7,0.7), frandom[sfx](0.8,1.8));
+			part.scale *= 1.8;
+		}
+	}
+}
+
+Class PK_FlameThrowerFlame : PK_Projectile {
+	protected actor hitvictim;
+	protected int ripdepth;
+	protected double rollOfs; //randomized roll
 	protected double scaleMul;
+	/*
+	if fired while moving, it gets some vel from the shooter
+	this bonus vel is then quickly scaled down so that it's brought back in sync
+	with what it vel would be if it were shot while standing still
+	'realspeed' is used both to define its actual base speed, and to keep track of
+	its bonus vel, they're continuously compared against each other 
+	*/
 	protected double realSpeed;
 	Default {
-		projectile;
 		+BRIGHT
 		+ROLLSPRITE
 		+FORCEXYBILLBOARD
@@ -373,9 +421,37 @@ Class PK_FlameThrowerFlame : Actor {
 		alpha 0.3;
 		speed 52;
 		scale 0.08;
+		radius 16;
+		height 14;
+		damage 0;
+	}
+	override int SpecialMissileHit(actor victim) {
+		if (victim && victim.health > 0 && victim.bSHOOTABLE && (victim != target || age > 10)) {
+			if (victim != hitvictim) {
+				hitvictim = victim;
+				ripdepth -= victim.health;
+				int fl = (random[burn](1,3) == 1) ? 0 : DMG_NO_PAIN;
+				victim.DamageMobj(self,target,4,"Fire",flags:DMG_THRUSTLESS|fl);
+				if (!victim.FindInventory("PK_BurningControl")) {
+					victim.GiveInventory("PK_BurningControl",1);
+					let control = PK_BurningControl(victim.FindInventory("PK_BurningControl"));
+					if (control && target)
+						control.target = target;
+				}
+				else {
+					let control = PK_BurningControl(victim.FindInventory("PK_BurningControl"));
+					if (control)
+						control.ResetTimer();
+				}
+			}
+			if (ripdepth <= 0 || victim.bDONTRIP)
+				return 0;
+		}
+		return 1;
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
+		ripdepth = 300;
 		roll = frandom[sfx](0,360);
 		rollOfs = frandom[sfx](5,20) * randompick[sfx](-1,1);
 		scaleMul = 1.02;
@@ -427,7 +503,8 @@ Class PK_FlameThrowerFlame : Actor {
 			vel *= 0.92;
 			rollOfs *= 0.91;
 			roll += rollOfs;
-			alpha *= 0.85;
+			//alpha *= 0.85;
+			A_FadeOut(0.08);
 		}
 		wait;
 	Crash:
