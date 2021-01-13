@@ -212,13 +212,9 @@ Class PK_ElectricPuff : PKPuff {
 }
 			
 
-Class PK_ElectroTargetControl : Inventory {
+Class PK_ElectroTargetControl : PK_InventoryToken {
 	protected int deadtics;
 	protected int age;
-	Default {
-		inventory.maxamount 1;
-	}
-	override void Tick() {}
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);
 		if (!owner)
