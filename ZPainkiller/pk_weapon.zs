@@ -257,9 +257,8 @@ Class PK_Projectile : PK_BaseActor abstract {
 		PK_Projectile.trailactor "PK_BaseFlare";
 	}
 	/*
-	For whatever reason the complicated pitch offset calculation
-	used in arching projectiles like stakes screws up the projectiles'
-	collision, so that it'll collide with the player if fired directly upwards.
+	For whatever reason the fancy pitch offset calculation used in arching projectiles like grenades (see PK_FireArchingProjectile) screws up the projectiles' collision, so that it'll collide with the player if it fell 
+	down on them after being fired directly upwards.
 	I had to add this override to circumvent that.
 	*/
 	override bool CanCollideWith(Actor other, bool passive) {
