@@ -452,7 +452,6 @@ Class PK_Grenade : PK_Projectile {
 		PK_Projectile.trailscale 0.04;
 		PK_Projectile.trailfade 0.035;
 		PK_Projectile.trailalpha 0.3;
-		projectile;
 		-NOGRAVITY
 		bouncetype 'hexen';
 		bouncefactor 0.35;
