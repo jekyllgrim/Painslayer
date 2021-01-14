@@ -360,7 +360,16 @@ Class PK_RicochetBullet : PK_SmallDebris {
 }
 
 Class PK_GenericExplosion : PK_SmallDebris {
+	int randomdebris;
+	int explosivedebris;
+	int smokingdebris;
+	property randomdebris : randomdebris;
+	property explosivedebris : explosivedebris;
+	property smokingdebris : smokingdebris;
 	Default {
+		PK_GenericExplosion.randomdebris 16;
+		PK_GenericExplosion.smokingdebris 12;
+		PK_GenericExplosion.explosivedebris 0;
 		+NOINTERACTION;
 		renderstyle 'add';
 		+BRIGHT;
@@ -372,19 +381,32 @@ Class PK_GenericExplosion : PK_SmallDebris {
 		double rs = scale.x * frandom[sfx](0.8,1.1)*randompick[sfx](-1,1);
 		A_SetScale(rs);
 		roll = random[sfx](0,359);
-		for (int i = random[sfx](10,15); i > 0; i--) {
-			let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
-			if (debris) {
-				double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
-				debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
-				debris.A_SetScale(0.5);
+		if (randomdebris > 0) {
+			for (int i = randomdebris*frandom[sfx](0.7,1.3); i > 0; i--) {
+				let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
+				if (debris) {
+					double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
+					debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
+					debris.A_SetScale(0.5);
+				}
 			}
 		}
-		for (int i = random[sfx](10,15); i > 0; i--) {
-			let debris = Spawn("PK_ExplosiveDebris",pos + (frandom[sfx](-12,12),frandom[sfx](-12,12),frandom[sfx](-12,12)));
-			if (debris) {
-				double zvel = (pos.z > floorz) ? frandom[sfx](-5,10) : frandom[sfx](5,15);
-				debris.vel = (frandom[sfx](-10,10),frandom[sfx](-10,10),zvel);
+		if (smokingdebris > 0) {
+			for (int i = smokingdebris*frandom[sfx](0.7,1.3); i > 0; i--) {
+				let debris = Spawn("PK_SmokingDebris",pos + (frandom[sfx](-12,12),frandom[sfx](-12,12),frandom[sfx](-12,12)));
+				if (debris) {
+					double zvel = (pos.z > floorz) ? frandom[sfx](-5,10) : frandom[sfx](5,15);
+					debris.vel = (frandom[sfx](-10,10),frandom[sfx](-10,10),zvel);
+				}
+			}
+		}
+		if (explosivedebris > 0) {
+			for (int i = explosivedebris*frandom[sfx](0.7,1.3); i > 0; i--) {
+				let debris = Spawn("PK_ExplosiveDebris",pos + (frandom[sfx](-12,12),frandom[sfx](-12,12),frandom[sfx](-12,12)));
+				if (debris) {
+					double zvel = (pos.z > floorz) ? frandom[sfx](-5,10) : frandom[sfx](5,15);
+					debris.vel = (frandom[sfx](-10,10),frandom[sfx](-10,10),zvel);
+				}
 			}
 		}
 	}
@@ -399,8 +421,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 Class PK_ExplosiveDebris : PK_RandomDebris {	
 	Default {
 		scale 0.5;
-		gravity 0.25;
-		//PK_SmallDebris.removeonfall true;
+		gravity 0.3;
 	}
 	override void Tick () {
 		Vector3 oldPos = self.pos;		
@@ -423,15 +444,25 @@ Class PK_ExplosiveDebris : PK_RandomDebris {
 				trl.alpha = alpha*0.75;
 			oldPos = level.vec3Offset( oldPos, direction );
 		}
+		A_FadeOut(0.022);
 	}
-	states {
-	spawn:
-		PDEB # 1 {			
-			roll+=wrot;
-			wrot *= 0.99;
-			A_FadeOut(0.03);
+}
+
+Class PK_SmokingDebris : PK_RandomDebris {	
+	Default {
+		scale 0.5;
+		gravity 0.25;
+	}
+	override void Tick () {
+		super.Tick();	
+		if (isFrozen())
+			return;
+		let smk = Spawn("PK_WhiteSmoke",pos+(frandom[smk](-4,4),frandom[smk](-4,4),frandom[smk](-4,4)));
+		if (smk) {
+			smk.alpha = alpha*0.4;
+			smk.vel = (frandom[smk](-1,1),frandom[smk](-1,1),frandom[smk](-1,1));
 		}
-		loop;
+		A_FadeOut(0.03);
 	}
 }
 
