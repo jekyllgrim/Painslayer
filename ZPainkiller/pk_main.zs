@@ -438,7 +438,10 @@ Class PK_RicochetSpark : PK_SmallDebris {
 }
 
 Class PK_RandomDebris : PK_SmallDebris {
+	name spritename;
+	property spritename : spritename;
 	Default {
+		PK_RandomDebris.spritename 'PDEB';
 		PK_SmallDebris.removeonliquid true;
 		PK_SmallDebris.dbrake 0.8;
 		+BOUNCEONWALLS
@@ -451,24 +454,29 @@ Class PK_RandomDebris : PK_SmallDebris {
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		wrot = random[sfx](14,20)*randompick(-1,1);
-		frame = random[sfx](0,5);
 		roll = random[sfx](0,359);
-		scale *= frandom[sfx](0.75,1.2) * randompick[sfx](-1,1);
+		scale *= frandom[sfx](0.75,1.2);
 		bSPRITEFLIP = randompick[sfx](0,1);
+		sprite = GetSpriteIndex(spritename);
+		if (spritename == 'PDEB')
+			frame = random[sfx](0,5);
 	}
 	states {
 	spawn:
-		PDEB # 1 {			
+		#### # 1 {			
 			roll+=wrot;
 			wrot *= 0.99;
 		}
 		loop;
 	Death:
-		PDEB # 1 {
+		#### # 1 {
 			A_FadeOut(0.03);
 			scale *= 0.95;
 		}
 		loop;
+	cache:
+		PDEB ABCDEF 0;
+		PFLD ABCDEF 0;
 	}
 }
 		
