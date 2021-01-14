@@ -248,6 +248,8 @@ Class PK_FreezeControl : PK_InventoryToken {
 		super.AttachToOwner(other);
 		if (!owner)
 			return;
+		if (owner.FindInventory("PK_BurnControl"))
+			owner.TakeInventory("PK_BurnControl",1);
 		grav = owner.bNOGRAVITY;
 		if (grav)
 			owner.bNOGRAVITY = false;
