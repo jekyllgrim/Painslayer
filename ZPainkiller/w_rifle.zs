@@ -587,7 +587,7 @@ Class PK_FlameParticle : PK_SmallDebris {
 }
 
 Class PK_FlamerTank : PK_BaseActor {
-	actor tankmodel;
+	PK_FlamerTankModel tankmodel;
 	private bool landed;
 	private double pitchMod;
 	private double targetPitch;
@@ -608,7 +608,7 @@ Class PK_FlamerTank : PK_BaseActor {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		tankmodel = Spawn("PK_FlamerTankModel",pos);
+		tankmodel = PK_FlamerTankModel(Spawn("PK_FlamerTankModel",pos));
 		if (tankmodel) {
 			tankmodel.master = self;
 			tankmodel.pitch = pitch;
@@ -649,7 +649,7 @@ Class PK_FlamerTank : PK_BaseActor {
 			double vvel = vel.length();
 			//console.printf("in Spawn; vel: %f", vvel);
 			if (tankmodel)
-				tankmodel.A_SetPitch(Normalize180(tankmodel.pitch + vvel),SPF_INTERPOLATE);
+				tankmodel.A_SetPitch(tankmodel.pitch + vvel,SPF_INTERPOLATE);
 			if (!landed && vvel < 3 && pos.z <= floorz+20) {
 				bMISSILE = false;
 				bUSEBOUNCESTATE = false;
@@ -666,8 +666,11 @@ Class PK_FlamerTank : PK_BaseActor {
 	Death:
 		TNT1 A 175 {
 			tankmodel.pitch = Normalize180(tankmodel.pitch);
-			targetPitch = 90 * Sign(tankmodel.pitch);
-			pitchMod = -6 * Sign(tankmodel.pitch - targetPitch);
+			if (abs(tankmodel.pitch) > 14)
+				targetPitch = 90 * Sign(tankmodel.pitch);
+			else
+				tankmodel.straight = true;
+			pitchMod = -8 * Sign(tankmodel.pitch - targetPitch);
 			landed = true;
 			//console.printf("Landed %d | pitch: %d | targetPitch: %d",landed, tankmodel.pitch, targetPitch);
 			A_SetTics(random[gas](140,180));
@@ -697,16 +700,18 @@ Class PK_FlamerTank : PK_BaseActor {
 }
 
 Class PK_FlamerTankModel : Actor {
+	bool straight;
 	Default {
 		+NOINTERACTION
 	}
 	override void Tick() {
-		super.Tick();
+		//super.Tick();
 		if (!master) {
 			destroy();
 			return;
 		}
-		SetOrigin(master.pos + (0,0,7),true);
+		double pz = straight ? 0 : 7;
+		SetOrigin(master.pos + (0,0,pz),true);
 	}
 	States {
 	Spawn:
@@ -715,7 +720,7 @@ Class PK_FlamerTankModel : Actor {
 	}
 }
 
-Class PK_FlameTankParticle : PK_FlameParticle {
+Class PK_FlameTankParticle : PK_FlameParticle {	
 	Default {
 		scale 0.4;
 		alpha 0.65;
