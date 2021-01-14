@@ -25,12 +25,6 @@ Class PK_Rifle : PKWeapon {
 			prevPitch = owner.pitch;
 		}
 		super.DoEffect();*/
-	action int PK_Sign (int i) {
-		if (i >= 0)
-			return 1;
-		else
-			return -1;
-	}
 	action void StartStrapSwing(double rfactor = 1.0) {
 		if (!player)
 			return;
@@ -153,6 +147,25 @@ Class PK_Rifle : PKWeapon {
 	Barrel:
 		PKRI B -1;
 		stop;
+	ComboFire:
+		TNT1 A 0 {
+			PK_FireArchingProjectile("PK_FlamerTank",spawnofs_xy:1,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
+			A_StartSound("weapons/edriver/diskshot",CHAN_5);
+			A_StartSound("weapons/gastank/fire",CHAN_6);
+		}
+		PKRI AAA 2 {
+			PK_RifleScale(0.1,0.1);
+			A_WeaponOffset(3,3,WOF_ADD);
+		}
+		PKRI AAAAAA 2 {
+			PK_RifleScale(-0.05,-0.05);
+			A_WeaponOffset(-1.5,-1.5,WOF_ADD);			
+		}
+		PKRI A 5 {
+			A_WeaponOffset(0,32,WOF_INTERPOLATE);
+			PK_RifleRestoreScale();
+		}
+		goto ready;
 	Fire:
 		TNT1 A 0 {
 			A_StartSound("weapons/rifle/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
@@ -219,7 +232,17 @@ Class PK_Rifle : PKWeapon {
 				invoker.fireFrame = 0;
 			invoker.fireFrame++;
 			A_Overlay(-30 + invoker.fireFrame,"FireFlash");
-			A_FireProjectile("PK_FlameThrowerFlame",angle:frandom[flt](-3,3),spawnofs_xy:3,spawnheight:5,pitch:frandom[flt](-3,3));
+			A_FireProjectile("PK_FlameThrowerFlame",angle:frandom[flt](-3,3),spawnofs_xy:3,spawnheight:4,pitch:frandom[flt](-3,3));
+			if (player.cmd.buttons & BT_ATTACK && invoker.ammo1.amount >= 50) {
+				A_RemoveLight('PKFlameThrower');
+				A_WeaponOffset(0,32);
+				PK_RifleRestoreScale();
+				TakeInventory(invoker.ammotype1,50);
+				A_ClearRefire();
+				A_StopSound(CHAN_6);
+				return ResolveState("ComboFire");
+			}
+			return ResolveState(null);
 		}
 		TNT1 A 0 {
 			if (waterlevel > 2)
@@ -360,7 +383,7 @@ Class PK_Rifle : PKWeapon {
 	}
 }
 
-Class PK_BurningControl : PK_InventoryToken {
+Class PK_BurnControl : PK_InventoryToken {
 	protected int timer;
 	void ResetTimer() {
 		timer = 35*5;
@@ -370,6 +393,9 @@ Class PK_BurningControl : PK_InventoryToken {
 		if (!owner)
 			return;
 		ResetTimer();
+		if (owner.FindInventory("PK_FreezeControl"))
+			owner.TakeInventory("PK_FreezeControl",1);
+		owner.A_AttachLight('PKBurn', DynamicLight.RandomFlickerLight, "ffb30f", 48, 40, flags: DYNAMICLIGHT.LF_ATTENUATE);
 	}
 	override void DoEffect() {
 		super.DoEffect();
@@ -385,8 +411,8 @@ Class PK_BurningControl : PK_InventoryToken {
 		}
 		timer--;
 		if (timer % 35 == 0) {
-			//int fl = (random[burn](1,3) == 1) ? 0 : DMG_NO_PAIN;
-			owner.DamageMobj(self,target,4,"Fire",flags:DMG_THRUSTLESS/*|fl*/);
+			int fl = (random[burn](1,3) == 1) ? 0 : DMG_NO_PAIN;
+			owner.DamageMobj(self,target,4,"Fire",flags:DMG_THRUSTLESS|fl);
 		}
 		if (owner.health <= 0) {
 			owner.A_SetTRanslation("Scorched");
@@ -395,8 +421,14 @@ Class PK_BurningControl : PK_InventoryToken {
 		let part = Spawn("PK_FlameParticle",owner.pos + (frandom[sfx](-rad,rad), frandom[sfx](-rad,rad), frandom[sfx](owner.pos.z,owner.height*0.75)));
 		if (part) {
 			part.vel = (frandom[sfx](-0.7,0.7), frandom[sfx](-0.7,0.7), frandom[sfx](0.8,1.8));
-			part.scale *= 1.8;
+			part.scale *= 2;
+			part.alpha = 0.5;
 		}
+	}
+	override void DetachFromOwner() {
+		if (owner)
+			owner.A_RemoveLight('PKBurn');
+		super.DetachFromOwner();
 	}
 }
 
@@ -416,13 +448,14 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 	Default {
 		+BRIGHT
 		+ROLLSPRITE
+		+ROLLCENTER
 		+FORCEXYBILLBOARD
 		renderstyle 'add';
 		alpha 0.3;
 		speed 52;
 		scale 0.08;
 		radius 16;
-		height 14;
+		height 22;
 		damage 0;
 	}
 	override int SpecialMissileHit(actor victim) {
@@ -431,15 +464,15 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 				hitvictim = victim;
 				ripdepth -= victim.health;
 				int fl = (random[burn](1,3) == 1) ? 0 : DMG_NO_PAIN;
-				victim.DamageMobj(self,target,4,"Fire",flags:DMG_THRUSTLESS|fl);
-				if (!victim.FindInventory("PK_BurningControl")) {
-					victim.GiveInventory("PK_BurningControl",1);
-					let control = PK_BurningControl(victim.FindInventory("PK_BurningControl"));
+				victim.DamageMobj(self,target,5,"Fire",flags:DMG_THRUSTLESS|fl);
+				if (!victim.FindInventory("PK_BurnControl")) {
+					victim.GiveInventory("PK_BurnControl",1);
+					let control = PK_BurnControl(victim.FindInventory("PK_BurnControl"));
 					if (control && target)
 						control.target = target;
 				}
 				else {
-					let control = PK_BurningControl(victim.FindInventory("PK_BurningControl"));
+					let control = PK_BurnControl(victim.FindInventory("PK_BurnControl"));
 					if (control)
 						control.ResetTimer();
 				}
@@ -549,5 +582,144 @@ Class PK_FlameParticle : PK_SmallDebris {
 			roll += rollOfs;
 		}
 		wait;
+	}
+}
+
+Class PK_FlamerTank : PK_BaseActor {
+	actor tankmodel;
+	private bool landed;
+	private double pitchMod;
+	private double targetPitch;
+	Default {
+		projectile;
+		-NOGRAVITY
+		+ALLOWBOUNCEONACTORS
+		-BOUNCEAUTOOFF
+		//+USEBOUNCESTATE
+		bouncetype 'hexen';
+		wallbouncefactor 0.25;
+		bouncefactor 0.15;
+		gravity 0.5;
+		height 10;
+		radius 16;
+		speed 14;		
+		damage (25);
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		tankmodel = Spawn("PK_FlamerTankModel",pos);
+		if (tankmodel) {
+			tankmodel.master = self;
+			tankmodel.pitch = pitch;
+			tankmodel.angle = angle;
+		}
+	}
+	override void Tick() {
+		super.Tick();
+		if (isFrozen())
+			return;
+		if (!tankmodel)
+			return;
+		let part = Spawn("PK_FlameParticle", tankmodel.pos + (frandom[sfx](-3,3), frandom[sfx](-3,3), frandom[sfx](-2,5)));
+		if (part) {
+			part.vel = (frandom[sfx](-0.7,0.7), frandom[sfx](-0.7,0.7), frandom[sfx](0.8,1.8));
+			part.scale *= 1.2;
+			part.alpha = 0.4;
+		}
+		let smk = Spawn("PK_BlackSmoke", tankmodel.pos + (frandom[sfx](-6,6), frandom[sfx](-6,6), frandom[sfx](10,14)));
+		if (smk) {
+			smk.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](1,1.2));
+			smk.alpha = 0.35;
+			smk.scale *= 0.8;
+		}
+		if (!landed)
+			return;
+		if ( (pitchMod > 0 && tankmodel.pitch < targetPitch) || (pitchMod < 0 && tankmodel.pitch > targetPitch)) {
+			tankmodel.A_SetPitch(Clamp(tankmodel.pitch + pitchMod, -180, 180));
+			//console.printf("targetPitch: %d | pitch: %d",targetPitch,tankmodel.pitch);
+		}
+	}
+	States {
+	Spawn:
+		TNT1 A 1 {
+			double vvel = vel.length();
+			//console.printf("in Spawn; vel: %f", vvel);
+			if (tankmodel)
+				tankmodel.A_SetPitch(Normalize180(tankmodel.pitch + vvel),SPF_INTERPOLATE);
+			if (!landed && vvel < 3 && pos.z <= floorz+20) {
+				bMISSILE = false;
+				bUSEBOUNCESTATE = false;
+				return ResolveState("Death");
+			}
+			if (age > 200)
+				return ResolveState("XDeath");
+			return ResolveState(null);
+		}
+		loop;
+	Bounce:
+		TNT1 A 5 A_StartSound("weapons/gastank/bounce");
+		goto spawn;
+	Death:
+		TNT1 A 175 {
+			tankmodel.pitch = Normalize180(tankmodel.pitch);
+			targetPitch = 90 * Sign(tankmodel.pitch);
+			pitchMod = -6 * Sign(tankmodel.pitch - targetPitch);
+			landed = true;
+			//console.printf("Landed %d | pitch: %d | targetPitch: %d",landed, tankmodel.pitch, targetPitch);
+			A_SetTics(random[gas](140,180));
+		}
+		goto XDeath;
+	XDeath:
+		TNT1 A 1 {
+			A_StartSound("weapons/gastank/explosion");
+			let ex = Spawn("PK_GenericExplosion",pos);
+			if (ex) {
+				ex.scale *= 1.5;
+				ex.alpha = 1.5;
+			}
+			for (int i = 15; i > 0; i--) {
+				let part = Spawn("PK_FlameTankParticle", tankmodel.pos + (frandom[sfx](-6,6), frandom[sfx](-6,6), frandom[sfx](4,12)));
+				if (part) {
+					part.vel = (frandom[sfx](-0.3,0.3), frandom[sfx](-0.3,0.3), frandom[sfx](6,14));
+				}
+			}
+			if (tankmodel)
+				tankmodel.destroy();
+			A_Explode(300,144);
+		}
+		stop;
+	}
+}
+
+Class PK_FlamerTankModel : Actor {
+	Default {
+		+NOINTERACTION
+	}
+	override void Tick() {
+		super.Tick();
+		if (!master) {
+			destroy();
+			return;
+		}
+		SetOrigin(master.pos + (0,0,7),true);
+	}
+	States {
+	Spawn:
+		MODL A -1;
+		stop;
+	}
+}
+
+Class PK_FlameTankParticle : PK_FlameParticle {
+	Default {
+		scale 0.4;
+		alpha 0.65;
+	}
+	override void Tick() {
+		super.Tick();
+		if (isFrozen())
+			return;
+		vel *= 0.92;
+		scale *= 0.94;
 	}
 }
