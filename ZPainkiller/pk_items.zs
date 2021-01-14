@@ -11,31 +11,24 @@ Class PK_InventoryToken : Inventory abstract {
 }
 
 Class PK_Inventory : Inventory {
-	override void PlayPickupSound (Actor toucher)
-	{
+	override void PlayPickupSound (Actor toucher)	{
 		double atten;
 		int chan;
 		int flags = 0;
 
 		if (bNoAttenPickupSound)
-		{
 			atten = ATTN_NONE;
-		}
 		else
-		{
 			atten = ATTN_NORM;
-		}
-
-		if (toucher != NULL && toucher.CheckLocalView())
-		{
+		if (toucher != NULL && toucher.CheckLocalView()) {
 			chan = CHAN_ITEM;
 			flags = CHANF_NOPAUSE | CHANF_MAYBE_LOCAL | CHANF_OVERLAP;
 		}
-		else
-		{
+		else {
 			chan = CHAN_ITEM;
 			flags = CHANF_MAYBE_LOCAL;
 		}
+		
 		toucher.A_StartSound(PickupSound, chan, flags, 1, atten);
 	}
 }
