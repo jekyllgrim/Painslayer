@@ -91,7 +91,7 @@ Class PK_ElectroDriver : PKWeapon {
 		ELDR A 1 {
 			if (player.cmd.buttons & BT_ATTACK && invoker.ammo2.amount >= 40) {
 				A_WeaponOffset(0,32);
-				TakeInventory("PK_CellAmmo",40);
+				TakeInventory(invoker.ammotype2,40);
 				A_ClearRefire();
 				A_StopSound(12);
 				return ResolveState("DiskFire");
