@@ -289,10 +289,14 @@ Class PK_KillerFlare : PK_ProjFlare {
 		super.Tick();
 		if (isFrozen())
 			return;
-		if (scale.x > 0.06)
+		if (scale.x > 0.06) {
 			scale *= 0.96;
-		else
+			alpha *= 0.98;
+		}
+		else {
 			A_SetScale(0.18);
+			alpha = default.alpha;
+		}
 	}
 	states {
 	Spawn:
