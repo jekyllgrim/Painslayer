@@ -614,6 +614,7 @@ Class PK_FlamerTank : PK_BaseActor {
 			tankmodel.pitch = pitch;
 			tankmodel.angle = angle;
 		}
+		roll = frandom[sfx](-20,20);
 	}
 	override void Tick() {
 		super.Tick();
@@ -633,7 +634,8 @@ Class PK_FlamerTank : PK_BaseActor {
 			smk.alpha = 0.35;
 			smk.scale *= 0.8;
 		}
-		if (!landed) {		
+		if (!landed) {
+			A_SetRoll(roll+10, SPF_INTERPOLATE);
 			if (age > 200)
 				SetStateLabel("XDeath");
 			return;
@@ -666,7 +668,7 @@ Class PK_FlamerTank : PK_BaseActor {
 	Death:
 		TNT1 A 175 {
 			tankmodel.pitch = Normalize180(tankmodel.pitch);
-			if (abs(tankmodel.pitch) > 14)
+			if (abs(tankmodel.pitch) < 165)
 				targetPitch = 90 * Sign(tankmodel.pitch);
 			else
 				tankmodel.straight = true;
@@ -680,10 +682,21 @@ Class PK_FlamerTank : PK_BaseActor {
 		TNT1 A 1 {
 			landed = true;
 			A_StartSound("weapons/gastank/explosion");
-			let ex = Spawn("PK_GenericExplosion",pos);
+			let ex = PK_GenericExplosion(Spawn("PK_GenericExplosion",pos));
 			if (ex) {
+				ex.smokingdebris = 0;
+				ex.explosivedebris = 12;
+				ex.randomdebris = 10;
 				ex.scale *= 1.5;
 				ex.alpha = 1.5;
+			}
+			for (int i = 4; i >= 0; i--) {
+				let debris = Spawn("PK_FlamerDebris",pos + (frandom[sfx](-6,6),frandom[sfx](-6,6),frandom[sfx](2,6)));
+				if (debris) {
+					double zvel = (pos.z > floorz) ? frandom[sfx](-2,6) : frandom[sfx](4,8);
+					debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
+					debris.frame = i;
+				}
 			}
 			for (int i = 15; i > 0; i--) {
 				let part = Spawn("PK_FlameTankParticle", tankmodel.pos + (frandom[sfx](-6,6), frandom[sfx](-6,6), frandom[sfx](4,12)));
@@ -702,21 +715,60 @@ Class PK_FlamerTank : PK_BaseActor {
 Class PK_FlamerTankModel : Actor {
 	bool straight;
 	Default {
-		+NOINTERACTION
+		+NOGRAVITY
+		+SHOOTABLE
+		+THRUACTORS
+		+NOBLOOD
+		health 50;
+		radius 24;
+		height 20;
 	}
 	override void Tick() {
-		//super.Tick();
+		super.Tick();
 		if (!master) {
 			destroy();
 			return;
 		}
-		double pz = straight ? 0 : 7;
+		double pz = straight ? 0 : 6;
 		SetOrigin(master.pos + (0,0,pz),true);
+	}
+	override void Die(Actor source, Actor inflictor, int dmgflags, Name MeansOfDeath) {
+		if (master)
+			master.SetStateLabel("XDeath");
+		super.Die(source, inflictor, dmgflags, MeansOfDeath);
 	}
 	States {
 	Spawn:
 		MODL A -1;
 		stop;
+	}
+}
+
+Class PK_FlamerDebris : PK_RandomDebris {
+	Default {
+		PK_RandomDebris.spritename 'PFLD';
+		scale 0.12;
+	}
+	override void Tick () {
+		Super.Tick();	
+		if (isFrozen())
+			return;
+		if (GetAge() % 3 != 0)
+			return;
+		let fir = Spawn("PK_FlameParticle",pos+(frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](0,4)));
+		if (fir) {
+			fir.A_SetScale(0.2);
+			fir.vel = (frandom[sfx](-0.6,0.6),frandom[sfx](-0.6,0.6),frandom[sfx](1,2.2));
+			fir.alpha = alpha * 0.5;
+		}
+	}
+	states {
+	Death:
+		#### # 50;
+		#### # 1 {
+			A_FadeOut(0.02);
+		}
+		wait;
 	}
 }
 
