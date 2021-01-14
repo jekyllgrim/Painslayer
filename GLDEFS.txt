@@ -60,13 +60,13 @@ object PK_VeryBigGold {
 flickerlight PKROCKET_X1 {
     color 1.0 0.7 0.0
     attenuate 1
-    size 64
-    secondarySize 72
+    size 112
+    secondarySize 128
     chance 0.3
 }
 
 flickerlight PKROCKET_X2 {
-    color 0.5 0.1 0.0
+    color 0.7 0.2 0.0
     attenuate 1
     size 80
     secondarySize 88
@@ -74,10 +74,10 @@ flickerlight PKROCKET_X2 {
 }
 
 flickerlight PKROCKET_X3 {
-    color 0.3 0.0 0.0
+    color 0.25 0.1 0.0
     attenuate 1
-    size 112
-    secondarySize 128
+    size 64
+    secondarySize 72
     chance 0.3
 }
 
