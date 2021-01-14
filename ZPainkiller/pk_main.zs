@@ -1,5 +1,5 @@
 Mixin class PK_Math {	
-	int PK_Sign (int i) {
+	int Sign (int i) {
 		if (i >= 0)
 			return 1;
 		else
