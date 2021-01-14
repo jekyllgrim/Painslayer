@@ -240,8 +240,7 @@ Class PK_Bolt : PK_Stake {
 
 Class PK_Bomb : PK_Projectile {
 	protected int bounces;
-	protected double rollChange;
-	protected int rollDir;
+	protected double rollOfs;
 	Default {
 		PK_Projectile.trailcolor "f4f4f4";
 		PK_Projectile.trailscale 0.035;
@@ -272,7 +271,8 @@ Class PK_Bomb : PK_Projectile {
 					smk.fade = 0.02;
 				}
 			}
-			roll += rollChange * rollDir;
+			A_SetRoll(roll += rollOfs,SPF_INTERPOLATE);
+			A_SetPitch(pitch += 20,SPF_INTERPOLATE);
 		}
 		super.Tick();
 	}
@@ -282,14 +282,15 @@ Class PK_Bomb : PK_Projectile {
 		trg.master = self;
 		trg.ggrenade = self;*/
 		bouncefactor *= frandom[bomb](0.85,1.15);
-		roll = frandom[sfx](-30,30);
-		rollDir = randompick[sfx](-1,1);
-		rollChange = frandom[sfx](2,5);
+		roll = frandom[sfx](-20,20);
+		rollOfs = frandom[sfx](2,5) + randompick[sfx](-1,1);
 	}
 	states {
 		Spawn:
-			KULK ABC 2;
-			loop;
+			MODL A -1;
+			stop;
+			//KULK ABC 2;
+			//loop;
 		Bounce:
 			#### # 1 {
 				bounces++;
