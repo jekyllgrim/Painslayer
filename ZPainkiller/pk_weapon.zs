@@ -56,6 +56,9 @@ Class PKWeapon : Weapon abstract {
 			icon.master = self;
 		}
 	}
+	action bool CheckInfiniteAmmo() {
+		return (sv_infiniteammo || FindInventory("PowerInfiniteAmmo",true) );
+	}
 	action actor PK_FireArchingProjectile(class<Actor> missiletype, double angle = 0, bool useammo = true, double spawnofs_xy = 0, double spawnheight = 0, int flags = 0, double pitch = 0) {
 		if (!self || !self.player) 
 			return null;

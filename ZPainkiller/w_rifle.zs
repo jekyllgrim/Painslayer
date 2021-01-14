@@ -237,7 +237,8 @@ Class PK_Rifle : PKWeapon {
 				A_RemoveLight('PKFlameThrower');
 				A_WeaponOffset(0,32);
 				PK_RifleRestoreScale();
-				TakeInventory(invoker.ammotype1,50);
+				if (!CheckInfiniteAmmo())
+					TakeInventory(invoker.ammotype1,50);
 				A_ClearRefire();
 				A_StopSound(CHAN_6);
 				return ResolveState("ComboFire");
@@ -595,7 +596,7 @@ Class PK_FlamerTank : PK_BaseActor {
 		-NOGRAVITY
 		+ALLOWBOUNCEONACTORS
 		-BOUNCEAUTOOFF
-		//+USEBOUNCESTATE
+		+USEBOUNCESTATE
 		bouncetype 'hexen';
 		wallbouncefactor 0.25;
 		bouncefactor 0.15;
@@ -632,8 +633,11 @@ Class PK_FlamerTank : PK_BaseActor {
 			smk.alpha = 0.35;
 			smk.scale *= 0.8;
 		}
-		if (!landed)
+		if (!landed) {		
+			if (age > 200)
+				SetStateLabel("XDeath");
 			return;
+		}
 		if ( (pitchMod > 0 && tankmodel.pitch < targetPitch) || (pitchMod < 0 && tankmodel.pitch > targetPitch)) {
 			tankmodel.A_SetPitch(Clamp(tankmodel.pitch + pitchMod, -180, 180));
 			//console.printf("targetPitch: %d | pitch: %d",targetPitch,tankmodel.pitch);
@@ -651,13 +655,13 @@ Class PK_FlamerTank : PK_BaseActor {
 				bUSEBOUNCESTATE = false;
 				return ResolveState("Death");
 			}
-			if (age > 200)
-				return ResolveState("XDeath");
 			return ResolveState(null);
 		}
 		loop;
 	Bounce:
-		TNT1 A 5 A_StartSound("weapons/gastank/bounce");
+		TNT1 A 5 {
+			A_StartSound("weapons/gastank/bounce");
+		}
 		goto spawn;
 	Death:
 		TNT1 A 175 {
@@ -671,6 +675,7 @@ Class PK_FlamerTank : PK_BaseActor {
 		goto XDeath;
 	XDeath:
 		TNT1 A 1 {
+			landed = true;
 			A_StartSound("weapons/gastank/explosion");
 			let ex = Spawn("PK_GenericExplosion",pos);
 			if (ex) {
