@@ -31,8 +31,9 @@ model "PK_TrackingBeam" {
 }
 
 Model PK_Stake {
-	path "Models/Stake"
-	Model 0 "pkstake.obj"
+	AngleOffset 90
+	path "Models/Stakegun"
+	Model 0 "PKstake.obj"
 	Skin 0 "pkstake.png"
 	Scale 1 1 1
 	USEACTORPITCH
@@ -41,28 +42,31 @@ Model PK_Stake {
 }
 
 Model PK_Bolt {
-	path "Models/Bolt"
-	Model 0 "Bolt.obj"
-	Skin 0 "pkbolt.png"
-	Scale 1 1 1
+	path "Models/Boltgun"
+	Model 0 "bolt_metal.obj"
+	Skin 0 "boltgun_projectiles.png"
+	Scale 0.4 0.4 0.4
+	AngleOffset 90
 	USEACTORPITCH
 	
 	Frame BOLT A 0 0
 }
 
 Model PK_StakeStuck {
+	AngleOffset 90
 	Scale 1 1 1
 	USEACTORPITCH
 	
-	path "Models/Stake"
-	Model 0 "pkstake.obj"
+	path "Models/Stakegun"
+	Model 0 "PKstake.obj"
 	Skin 0 "pkstake.png"
 	
 	Frame STAK A 0 0
 	
-	path "Models/Bolt"
-	Model 0 "Bolt.obj"
-	Skin 0 "pkbolt.png"
+	path "Models/Boltgun"
+	Model 0 "bolt_metal.obj"
+	Skin 0 "boltgun_projectiles.png"
+	Scale 0.4 0.4 0.4
 	
 	Frame BOLT A 0 0
 }
@@ -77,7 +81,7 @@ Model PK_Tracer {
 }
 
 Model PK_Grenade {
-	Path "models/grenade"
+	Path "Models/Stakegun"
 	Model 0 "grenade.obj"
 	Skin 0 "grenade.png"
 	Scale 12 12 14.4
@@ -85,15 +89,45 @@ Model PK_Grenade {
 	FrameIndex MODL A 0 0
 }
 
+Model PK_Bomb {
+	Path "Models/boltgun"
+	Model 0 "heater_bomb.obj"
+	Skin 0 "boltgun_projectiles.png"
+	Scale 2 2 2
+	USEACTORROLL
+	USEACTORPITCH
+	FrameIndex MODL A 0 0
+}
+
+Model PK_FlamerTankModel {
+	Path "Models/rifle"
+	Model 0 "flamer_tank.obj"
+	Skin 0 "flamer_tank.png"
+	Scale 10 10 10
+	USEACTORROLL
+	USEACTORPITCH
+	FrameIndex MODL A 0 0
+}
+
+Model PK_Killer {
+	AngleOffset 180
+	Path "Models/painkiller"
+	Model 0 "killer_projectile.obj"
+	Skin 0 "item_painkiller.png"
+	Scale 1 1 1
+	USEACTORPITCH
+	FrameIndex KILR A 0 0
+}
+
 Model PK_ExplosiveStake {
-	Model 0 "models/stake/grenadestake.md3"
+	Model 0 "Models/Stakegun/grenadestake.md3"
 	Scale 1 1 1	
 	USEACTORPITCH
 	FrameIndex MODL A 0 0
 }
 
 Model PK_Rocket {
-	Path "models/grenade"
+	Path "Models/Stakegun"
 	Model 0 "grenade.obj"
 	Skin 0 "grenade.png"
 	Scale 12 12 14.4
