@@ -6,13 +6,14 @@ Class PK_Rifle : PKWeapon {
 	private int fireFrame;
 	private double prevAngle[8];
 	private double prevPitch[8];
+	private int fuelDepleteRate;
 	Default {
 		PKWeapon.emptysound "weapons/empty/rifle";
 		weapon.slotnumber 6;
-		weapon.ammotype1	"PK_BulletAmmo";
+		weapon.ammotype1	"PK_RifleBullets";
 		weapon.ammouse1		1;
 		weapon.ammogive1	80;
-		weapon.ammotype2	"PK_GrenadeAmmo";
+		weapon.ammotype2	"PK_FuelAmmo";
 		weapon.ammouse1		1;
 		weapon.ammogive1	100;
 		inventory.pickupmessage "Picked up an Assault Rifle/Flamethrower";
@@ -151,7 +152,7 @@ Class PK_Rifle : PKWeapon {
 		TNT1 A 0 {
 			PK_FireArchingProjectile("PK_FlamerTank",spawnofs_xy:1,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
 			A_StartSound("weapons/edriver/diskshot",CHAN_5);
-			A_StartSound("weapons/gastank/fire",CHAN_6);
+			//A_StartSound("weapons/gastank/fire",CHAN_6);
 		}
 		PKRI AAA 2 {
 			PK_RifleScale(0.1,0.1);
@@ -224,7 +225,30 @@ Class PK_Rifle : PKWeapon {
 			A_ClearOverlays(RIFLE_PILOT,RIFLE_PILOT);
 		}
 	AltHold:
-		PKRI A 1 {
+		PKRI A 1 {				
+			bool infin = CheckInfiniteAmmo();
+			if (player.cmd.buttons & BT_ATTACK && (invoker.ammo2.amount >= 50 || infin)) {
+				A_RemoveLight('PKFlameThrower');
+				A_WeaponOffset(0,32);
+				PK_RifleRestoreScale();
+				if (!infin)
+					TakeInventory(invoker.ammotype2,50);
+				A_ClearRefire();
+				A_StopSound(CHAN_6);
+				return ResolveState("ComboFire");
+			}
+			if (!infin) {
+				invoker.fuelDepleteRate++;
+				int req = invoker.hasDexterity ? 1 : 3;
+				if (invoker.fuelDepleteRate > req) {				
+					invoker.fuelDepleteRate = 0;
+					if (invoker.ammo2.amount >= 1 && !infin)
+						TakeInventory(invoker.ammotype2,1);
+					else if (!infin) {
+						return ResolveState("AltHoldEnd");
+					}
+				}
+			}	
 			A_Overlay(PSP_HIGHLIGHTS,"FlameHighlights");
 			A_StartSound("weapons/rifle/flameloop",CHAN_6,flags:CHANF_LOOPING);
 			DampedRandomOffset(3,3,3);
@@ -232,17 +256,7 @@ Class PK_Rifle : PKWeapon {
 				invoker.fireFrame = 0;
 			invoker.fireFrame++;
 			A_Overlay(-30 + invoker.fireFrame,"FireFlash");
-			A_FireProjectile("PK_FlameThrowerFlame",angle:frandom[flt](-3,3),spawnofs_xy:3,spawnheight:4,pitch:frandom[flt](-3,3));
-			if (player.cmd.buttons & BT_ATTACK && invoker.ammo1.amount >= 50) {
-				A_RemoveLight('PKFlameThrower');
-				A_WeaponOffset(0,32);
-				PK_RifleRestoreScale();
-				if (!CheckInfiniteAmmo())
-					TakeInventory(invoker.ammotype1,50);
-				A_ClearRefire();
-				A_StopSound(CHAN_6);
-				return ResolveState("ComboFire");
-			}
+			A_FireProjectile("PK_FlameThrowerFlame",angle:frandom[flt](-3,3),spawnofs_xy:3,spawnheight:4,pitch:frandom[flt](-3,3));	
 			return ResolveState(null);
 		}
 		TNT1 A 0 {
@@ -251,7 +265,9 @@ Class PK_Rifle : PKWeapon {
 			else
 				A_ReFire();
 		}
+	AltHoldEnd:
 		TNT1 A 0 {
+			A_ClearRefire();
 			A_RemoveLight('PKFlameThrower');
 			A_StopSound(CHAN_6);
 			A_StartSound("weapons/rifle/flameend",CHAN_7);
@@ -586,13 +602,13 @@ Class PK_FlameParticle : PK_SmallDebris {
 	}
 }
 
-Class PK_FlamerTank : PK_BaseActor {
-	PK_FlamerTankModel tankmodel;
+Class PK_FlamerTank : PK_Projectile {
+	PK_FlamerTankModel tankmodel;	
 	private bool landed;
 	private double pitchMod;
 	private double targetPitch;
+	private double rollMod;
 	Default {
-		projectile;
 		-NOGRAVITY
 		+ALLOWBOUNCEONACTORS
 		-BOUNCEAUTOOFF
@@ -604,7 +620,7 @@ Class PK_FlamerTank : PK_BaseActor {
 		height 10;
 		radius 16;
 		speed 14;		
-		damage (25);
+		damage (80);
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -614,7 +630,8 @@ Class PK_FlamerTank : PK_BaseActor {
 			tankmodel.pitch = pitch;
 			tankmodel.angle = angle;
 		}
-		roll = frandom[sfx](-20,20);
+		A_StartSound("weapons/gastank/fire",CHAN_6);
+		//tankmodel.roll = randompick[sfx](-10,10);
 	}
 	override void Tick() {
 		super.Tick();
@@ -635,10 +652,14 @@ Class PK_FlamerTank : PK_BaseActor {
 			smk.scale *= 0.8;
 		}
 		if (!landed) {
-			A_SetRoll(roll+10, SPF_INTERPOLATE);
+			//tankmodel.A_SetRoll(tankmodel.roll+10, SPF_INTERPOLATE);
 			if (age > 200)
 				SetStateLabel("XDeath");
 			return;
+		}
+		if (!tankmodel.straight && abs(rollMod) > 0.01) {
+			tankmodel.A_SetRoll(tankmodel.roll+rollMod, SPF_INTERPOLATE);
+			rollMod *= 0.96;
 		}
 		if ( (pitchMod > 0 && tankmodel.pitch < targetPitch) || (pitchMod < 0 && tankmodel.pitch > targetPitch)) {
 			tankmodel.A_SetPitch(Clamp(tankmodel.pitch + pitchMod, -180, 180));
@@ -653,6 +674,7 @@ Class PK_FlamerTank : PK_BaseActor {
 			if (tankmodel)
 				tankmodel.A_SetPitch(tankmodel.pitch + vvel,SPF_INTERPOLATE);
 			if (!landed && vvel < 3 && pos.z <= floorz+20) {
+				rollMod = vvel * frandom[sfx](0.5,1) *randompick[sfx](-1,1);
 				bMISSILE = false;
 				bUSEBOUNCESTATE = false;
 				return ResolveState("Death");
@@ -670,9 +692,11 @@ Class PK_FlamerTank : PK_BaseActor {
 			tankmodel.pitch = Normalize180(tankmodel.pitch);
 			if (abs(tankmodel.pitch) < 165)
 				targetPitch = 90 * Sign(tankmodel.pitch);
-			else
+			else {
 				tankmodel.straight = true;
-			pitchMod = -8 * Sign(tankmodel.pitch - targetPitch);
+				targetPitch = tankmodel.pitch;
+			}
+			pitchMod = -(tankmodel.pitch - targetPitch) / 4;
 			landed = true;
 			//console.printf("Landed %d | pitch: %d | targetPitch: %d",landed, tankmodel.pitch, targetPitch);
 			A_SetTics(random[gas](140,180));
@@ -689,6 +713,9 @@ Class PK_FlamerTank : PK_BaseActor {
 				ex.randomdebris = 10;
 				ex.scale *= 1.5;
 				ex.alpha = 1.5;
+				ex.quakeintensity = 4;
+				ex.quakeduration = 16;
+				ex.quakeradius = 400;
 			}
 			for (int i = 4; i >= 0; i--) {
 				let debris = Spawn("PK_FlamerDebris",pos + (frandom[sfx](-6,6),frandom[sfx](-6,6),frandom[sfx](2,6)));
@@ -706,7 +733,7 @@ Class PK_FlamerTank : PK_BaseActor {
 			}
 			if (tankmodel)
 				tankmodel.destroy();
-			A_Explode(300,144);
+			A_Explode(320,144);
 		}
 		stop;
 	}
@@ -729,7 +756,7 @@ Class PK_FlamerTankModel : Actor {
 			destroy();
 			return;
 		}
-		double pz = straight ? 0 : 6;
+		double pz = straight ? 20 : 6;
 		SetOrigin(master.pos + (0,0,pz),true);
 	}
 	override void Die(Actor source, Actor inflictor, int dmgflags, Name MeansOfDeath) {
