@@ -280,13 +280,22 @@ Class PK_BoardEventHandler : EventHandler {
 	}
 	
 	override void WorldThingDamaged(worldevent e) {
-		if (e.thing && e.thing.bISMONSTER && e.DamageSource && e.DamageSource.FindInventory("PKC_HealthStealer") && e.thing.isHostile(e.DamageSource)) {
+		if (!e.thing)
+			return;
+		let enm = e.thing;
+		if (enm.bISMONSTER && e.DamageSource && e.DamageSource.FindInventory("PKC_HealthStealer") && enm.isHostile(e.DamageSource)) {
 			if (pk_debugmessages)
-				console.printf("%s dealt %d damage to %s",e.DamageSource.GetClassName(),e.damage,e.thing.GetClassName());
+				console.printf("%s dealt %d damage to %s",e.DamageSource.GetClassName(),e.damage,enm.GetClassName());
 			let card = PKC_HealthStealer(e.DamageSource.FindInventory("PKC_HealthStealer"));
 			double drain = e.Damage*0.05;
 			if (card)
 				card.drainedHP += drain;
+		}
+		if ((enm.player || enm.bISMONSTER) && 	e.Inflictor && e.Inflictor is "PK_FlamerTank" && e.DamageSource && !enm.FindInventory("PK_BurnControl")) {
+			enm.GiveInventory("PK_BurnControl",1);
+			let control = enm.FindInventory("PK_BurnControl");
+			if (control)
+				control.target = e.DamageSource;
 		}
 	}
 	
