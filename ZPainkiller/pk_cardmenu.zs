@@ -675,6 +675,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			ShowCardToolTip(HoveredCard);
 		//as soon as you hover off the card, immediately remove card info:
 		if (cardinfo && (!HoveredCard || !HoveredCard.isEnabled() || HoveredCard.hidden || SelectedCard)) {
+		//It's actually not a good idea to continuously create and destroy stuff like that, I simply designed it like this initially and it was too bothersome  to redo.
 			cardinfo.unpack();
 			cardinfo.destroy();
 		}
@@ -758,7 +759,7 @@ Class PKCGoldCounter : PKCFrame {
 		self.setBox(pos, size);
 		self.alpha = 1;
 		
-		//the leftmost digit of the counter is always 0 since there are 6 digits but max gold is 99990, so we just draw it here and don't modify it further:
+		//the rightmost digit of the counter is always 0 since max gold is 99990, so we just draw it here and don't modify it further:
 		vector2 digitsize = (27,50);
 		let img = new("PKCImage");
 		img.pack(self);
@@ -787,7 +788,7 @@ Class PKCGoldCounter : PKCFrame {
 		int gold = goldcontrol.pk_gold; //check how much gold we have
 		vector2 digitsize = (32,640);	//digit size is fixed
 		//iterate through digits, right to left:
-		//we don't modify the leftmost one, so it's > 0, not >= 0:
+		//we don't modify the rightmost one, so it's > 0, not >= 0:
 		for (int i = 5; i > 0; i--) {
 			//get target Y offset based on the rightmost digit in the gold amount number:
 			int targetYofs = ((gold % 10) * -64) - 5;
