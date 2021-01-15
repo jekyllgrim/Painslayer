@@ -89,25 +89,25 @@ Class PK_ElectroDriver : PKWeapon {
 		}
 	AltHold:
 		ELDR A 1 {
-			if (player.cmd.buttons & BT_ATTACK && invoker.ammo2.amount >= 40) {
+			bool infin = CheckInfiniteAmmo();
+			if (player.cmd.buttons & BT_ATTACK && (invoker.ammo2.amount >= 40 || infin)) {
 				A_WeaponOffset(0,32);
-				if (!CheckInfiniteAmmo())
+				if (!infin)
 					TakeInventory(invoker.ammotype2,40);
 				A_ClearRefire();
 				A_StopSound(12);
 				return ResolveState("DiskFire");
 			}
-			if (!CheckInfiniteAmmo()) {
+			if (!infin) {
 				invoker.celldepleterate++;
 				int req = invoker.hasDexterity ? 1 : 3;
 				if (invoker.celldepleterate > req) {				
 					invoker.celldepleterate = 0;
-					if (invoker.ammo2.amount >= 1 && !CheckInfiniteAmmo())
+					if (invoker.ammo2.amount >= 1 && !infin)
 						TakeInventory(invoker.ammotype2,1);
-					else {
+					else if (!infin) {
 						A_ClearRefire();
-						A_StartSound("weapons/edriver/electroloopend",12);
-						return ResolveState("Ready");
+						return ResolveState("AltHoldEnd");
 					}
 				}
 			}
@@ -130,7 +130,9 @@ Class PK_ElectroDriver : PKWeapon {
 			return ResolveState(null);
 		}
 		TNT1 A 0 A_Refire();
+	AltHoldEnd:
 		TNT1 A 0 {
+			A_ClearRefire();
 			A_StopSound(12);
 			A_StartSound("weapons/edriver/electroloopend",12);
 			A_RemoveLight('PKElectroFlash');
