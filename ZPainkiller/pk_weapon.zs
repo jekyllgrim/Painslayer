@@ -363,13 +363,22 @@ Class PK_GenericExplosion : PK_SmallDebris {
 	int randomdebris;
 	int explosivedebris;
 	int smokingdebris;
+	int quakeintensity;
+	int quakeduration;
+	int quakeradius;
 	property randomdebris : randomdebris;
 	property explosivedebris : explosivedebris;
 	property smokingdebris : smokingdebris;
+	property quakeintensity : quakeintensity;
+	property quakeduration : quakeduration;
+	property quakeradius : quakeradius;
 	Default {
 		PK_GenericExplosion.randomdebris 16;
 		PK_GenericExplosion.smokingdebris 12;
 		PK_GenericExplosion.explosivedebris 0;
+		PK_GenericExplosion.quakeintensity 3;
+		PK_GenericExplosion.quakeduration 12;
+		PK_GenericExplosion.quakeradius 220;
 		+NOINTERACTION;
 		renderstyle 'add';
 		+BRIGHT;
@@ -381,6 +390,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 		double rs = scale.x * frandom[sfx](0.8,1.1)*randompick[sfx](-1,1);
 		A_SetScale(rs);
 		roll = random[sfx](0,359);
+		A_Quake(quakeintensity,quakeduration,0,quakeradius,"");
 		if (randomdebris > 0) {
 			for (int i = randomdebris*frandom[sfx](0.7,1.3); i > 0; i--) {
 				let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
@@ -619,6 +629,42 @@ Class PK_CellAmmo : Ammo {
 	states	{
 	spawn:
 		AMEL A -1;
+		stop;
+	}
+}
+
+Class PK_RifleBullets : Ammo {
+	Default {
+		inventory.pickupmessage "Picked up assault rifle ammo.";
+		inventory.pickupsound "pickups/ammo/riflebullets";
+		inventory.icon "pkhmag";
+		inventory.amount 50;
+		inventory.maxamount 250;
+		ammo.backpackamount 50;
+		ammo.backpackmaxamount 250;
+		scale 0.4;
+	}
+	states	{
+	spawn:
+		AMRB A -1;
+		stop;
+	}
+}
+
+Class PK_FuelAmmo : Ammo {
+	Default {
+		inventory.pickupmessage "Picked up flamethrower fuel.";
+		inventory.pickupsound "pickups/ammo/fuel";
+		inventory.icon "pkhfuel";
+		inventory.amount 60;
+		inventory.maxamount 500;
+		ammo.backpackamount 60;
+		ammo.backpackmaxamount 500;
+		scale 0.4;
+	}
+	states	{
+	spawn:
+		AMFU A -1;
 		stop;
 	}
 }
