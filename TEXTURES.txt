@@ -1420,6 +1420,20 @@ Graphic "PKHBOLTS", 35, 39
 	Patch "PKXBOLTS", 0, 0
 }
 
+Graphic "PKHFUEL", 35, 39
+{
+	XScale 2.700
+	YScale 2.700
+	Patch "PKXFUEL", 0, 0
+}
+
+Graphic "PKHMAG", 35, 39
+{
+	XScale 2.700
+	YScale 2.700
+	Patch "PKXMAG", 0, 0
+}
+
 Graphic "PKHINFIN", 59, 34
 {
 	XScale 2.700
