@@ -34,7 +34,7 @@ Model PK_Stake {
 	AngleOffset 90
 	path "Models/Stakegun"
 	Model 0 "PKstake.obj"
-	Skin 0 "pkstake.png"
+	Skin 0 "grenadestake.png"
 	Scale 1 1 1
 	USEACTORPITCH
 	
@@ -59,7 +59,7 @@ Model PK_StakeStuck {
 	
 	path "Models/Stakegun"
 	Model 0 "PKstake.obj"
-	Skin 0 "pkstake.png"
+	Skin 0 "grenadestake.png"
 	
 	Frame STAK A 0 0
 	
@@ -83,8 +83,8 @@ Model PK_Tracer {
 Model PK_Grenade {
 	Path "Models/Stakegun"
 	Model 0 "grenade.obj"
-	Skin 0 "grenade.png"
-	Scale 12 12 14.4
+	Skin 0 "grenadestake.png"
+	Scale 1 1 1
 	USEACTORPITCH
 	FrameIndex MODL A 0 0
 }
@@ -121,11 +121,10 @@ Model PK_Killer {
 
 Model PK_ExplosiveStake {
 	Path "Models/Stakegun"
-	Model 0 "grenadestake.md3"
-	Skin 0 ""
-	//Skin 0 "pkstake.png"
-	//Skin 1 "grenade.png"
+	Model 0 "grenadestake.obj"
+	Skin 0 "grenadestake.png"
 	Scale 1 1 1	
+	AngleOffset 90
 	USEACTORPITCH
 	FrameIndex MODL A 0 0
 }
@@ -133,8 +132,8 @@ Model PK_ExplosiveStake {
 Model PK_Rocket {
 	Path "Models/Stakegun"
 	Model 0 "grenade.obj"
-	Skin 0 "grenade.png"
-	Scale 12 12 14.4
+	Skin 0 "grenadestake.png"
+	Scale 1 1 1
 	USEACTORPITCH
 	FrameIndex MODL A 0 0
 }
