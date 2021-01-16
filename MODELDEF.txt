@@ -120,7 +120,11 @@ Model PK_Killer {
 }
 
 Model PK_ExplosiveStake {
-	Model 0 "Models/Stakegun/grenadestake.md3"
+	Path "Models/Stakegun"
+	Model 0 "grenadestake.md3"
+	Skin 0 ""
+	//Skin 0 "pkstake.png"
+	//Skin 1 "grenade.png"
 	Scale 1 1 1	
 	USEACTORPITCH
 	FrameIndex MODL A 0 0
