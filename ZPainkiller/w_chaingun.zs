@@ -94,7 +94,8 @@ Class PK_Chaingun : PKWeapon {
 				invoker.hideFlash = false;
 			if (!invoker.hideFlash)
 				A_Overlay(PSP_PFLASH,"AltFlash");
-			A_FireBullets(2.5,2.5,-1,9,pufftype:"PK_BulletPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-40,spawnofs_xy:8.6);
+			double spread = Clamp(double(invoker.holddur * 0.2), 2, 8.5);
+			A_FireBullets(spread,spread,-1,11,pufftype:"PK_BulletPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-40,spawnofs_xy:8.6);
 			
 			A_QuakeEX(1,1,0,2,0,1,sfx:"world/null");
 			return ResolveState(null);
