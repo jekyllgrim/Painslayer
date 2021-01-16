@@ -170,7 +170,7 @@ Class PK_Rifle : PKWeapon {
 	Fire:
 		TNT1 A 0 {
 			A_StartSound("weapons/rifle/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
-			A_FireBullets(1.2,1.2,-1,14,pufftype:"PK_BulletPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-40,spawnofs_xy:8.6);
+			A_FireBullets(1,1,1,17,pufftype:"PK_BulletPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-40,spawnofs_xy:8.6);
 			invoker.shots++;
 			A_OverlayPivot(RIFLE_STOCK,-1,-2.1);
 			A_OverlayPivot(RLIGHT_STOCK,-1,-2.1);
