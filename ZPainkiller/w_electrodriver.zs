@@ -106,7 +106,6 @@ Class PK_ElectroDriver : PKWeapon {
 					if (invoker.ammo2.amount >= 1 && !infin)
 						TakeInventory(invoker.ammotype2,1);
 					else if (!infin) {
-						A_ClearRefire();
 						return ResolveState("AltHoldEnd");
 					}
 				}
