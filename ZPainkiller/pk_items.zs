@@ -1,15 +1,3 @@
-Class PK_InventoryToken : Inventory abstract {
-	Default {
-		+INVENTORY.UNDROPPABLE;
-		+INVENTORY.UNTOSSABLE;
-		+INVENTORY.UNCLEARABLE;
-		+INVENTORY.PERSISTENTPOWER;
-		inventory.amount 1;
-		inventory.maxamount 1;
-	}
-	override void Tick() {}
-}
-
 Class PK_Inventory : Inventory {
 	override void PlayPickupSound (Actor toucher)	{
 		double atten;
@@ -250,7 +238,7 @@ Class PK_RedSoul : PK_Soul {
 
 Class PK_GoldSoul : Health {
 	Default {
-		inventory.pickupmessage "Gold Soul!";
+		inventory.pickupmessage "$PKI_GOLDSOUL";
 		inventory.amount 100;
 		inventory.maxamount 100;
 		inventory.pickupsound "";
@@ -298,7 +286,7 @@ Class PK_MegaSoul : PK_GoldSoul {
 		inventory.amount 200;
 		inventory.maxamount 200;
 		inventory.pickupsound "pickups/soul/mega";
-		inventory.pickupmessage "Mega soul!";
+		inventory.pickupmessage "$PKI_MEGASOUL";
 		xscale 0.3;
 		yscale 0.25;
 		alpha 2.5;

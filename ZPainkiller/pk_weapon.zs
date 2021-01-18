@@ -503,7 +503,7 @@ Class PK_DebrisFlame : PK_BaseFlare {
 
 Class PK_Shells : Ammo {
 	Default {
-		inventory.pickupmessage "Picked up shotgun shells.";
+		inventory.pickupmessage "$PKI_SHELLS";
 		inventory.pickupsound "pickups/ammo/shells";
 		inventory.icon "pkhshell";
 		inventory.amount 18;
@@ -522,7 +522,7 @@ Class PK_Shells : Ammo {
 
 Class PK_FreezerAmmo : Ammo {
 	Default {
-		inventory.pickupmessage "Picked up freezer ammo.";
+		inventory.pickupmessage "$PKI_FREEZEAMMO";
 		inventory.pickupsound "pickups/ammo/freezerammo";
 		inventory.icon "pkhfreez";
 		inventory.amount 15;
@@ -542,7 +542,7 @@ Class PK_FreezerAmmo : Ammo {
 
 Class PK_StakeAmmo : Ammo {
 	Default {
-		inventory.pickupmessage "Picked up a box of stakes.";
+		inventory.pickupmessage "$PKI_STAKEAMMO";
 		inventory.pickupsound "pickups/ammo/stakes";
 		inventory.icon "pkhstake";
 		inventory.amount 15;
@@ -561,7 +561,7 @@ Class PK_StakeAmmo : Ammo {
 
 Class PK_GrenadeAmmo : Ammo {
 	Default {
-		inventory.pickupmessage "Picked up a box of grenades.";
+		inventory.pickupmessage "$PKI_GRENADEAMMO";
 		inventory.pickupsound "pickups/ammo/grenades";
 		inventory.icon "pkhrock";
 		inventory.amount 7;
@@ -579,7 +579,7 @@ Class PK_GrenadeAmmo : Ammo {
 
 Class PK_BulletAmmo : Ammo {
 	Default {
-		inventory.pickupmessage "Picked up a box of bullets.";
+		inventory.pickupmessage "$PKI_MINIGUNAMMO";
 		inventory.pickupsound "pickups/ammo/bullets";
 		inventory.icon "pkhbull";
 		inventory.amount 50;
@@ -598,7 +598,7 @@ Class PK_BulletAmmo : Ammo {
 
 Class PK_ShurikenAmmo : Ammo {
 	Default {
-		inventory.pickupmessage "Picked up a box of shurikens.";
+		inventory.pickupmessage "$PKI_STARAMMO";
 		inventory.pickupsound "pickups/ammo/stars";
 		inventory.icon "pkhstars";
 		inventory.amount 20;
@@ -617,7 +617,7 @@ Class PK_ShurikenAmmo : Ammo {
 
 Class PK_CellAmmo : Ammo {
 	Default {
-		inventory.pickupmessage "Picked up a cell battery.";
+		inventory.pickupmessage "$PKI_ELECTROAMMO";
 		inventory.pickupsound "pickups/ammo/battery";
 		inventory.icon "pkhshock";
 		inventory.amount 40;
@@ -635,7 +635,7 @@ Class PK_CellAmmo : Ammo {
 
 Class PK_RifleBullets : Ammo {
 	Default {
-		inventory.pickupmessage "Picked up assault rifle ammo.";
+		inventory.pickupmessage "$PKI_RIFLEAMMO";
 		inventory.pickupsound "pickups/ammo/riflebullets";
 		inventory.icon "pkhmag";
 		inventory.amount 50;
@@ -653,7 +653,7 @@ Class PK_RifleBullets : Ammo {
 
 Class PK_FuelAmmo : Ammo {
 	Default {
-		inventory.pickupmessage "Picked up flamethrower fuel.";
+		inventory.pickupmessage "$PKI_FUELAMMO";
 		inventory.pickupsound "pickups/ammo/fuel";
 		inventory.icon "pkhfuel";
 		inventory.amount 60;
@@ -672,7 +672,7 @@ Class PK_FuelAmmo : Ammo {
 
 Class PK_BoltAmmo : Ammo {
 	Default {
-		inventory.pickupmessage "Picked up a box of steel bolts.";
+		inventory.pickupmessage "$PKI_BOLTAMMO";
 		inventory.pickupsound "pickups/ammo/bolts";
 		inventory.icon "pkhbolts";
 		inventory.amount 30;
@@ -691,7 +691,7 @@ Class PK_BoltAmmo : Ammo {
 
 Class PK_BombAmmo : Ammo {
 	Default {
-		inventory.pickupmessage "Picked up a box of bombs.";
+		inventory.pickupmessage "$PKI_HEATERAMMO";
 		inventory.pickupsound "pickups/ammo/bombs";
 		inventory.icon "pkhbombs";
 		inventory.amount 20;

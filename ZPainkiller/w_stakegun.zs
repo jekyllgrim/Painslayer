@@ -9,9 +9,9 @@ Class PK_Stakegun : PKWeapon {
 		weapon.ammogive2	0;
 		weapon.ammouse2		1;
 		scale 0.23;
-		inventory.pickupmessage "Picked up Stakegun";
+		inventory.pickupmessage "$PKI_STAKEGUN";
 		inventory.pickupsound "pickups/weapons/stakegun";
-		Tag "Stakegun/Grenade Launcher";
+		Tag "$PK_STAKEGUN_TAG";
 	}
 	states {
 		Cache:
@@ -409,7 +409,7 @@ Class PK_PinVictim : Actor {		//the fake corpse (receives its visuals from the s
 }
 
 Class PK_GrenadeHitbox : Actor {
-	private PK_Stake hitstake;
+	protected PK_Stake hitstake;
 	PK_Grenade ggrenade;
 	Default {
 		+NOGRAVITY
@@ -418,7 +418,7 @@ Class PK_GrenadeHitbox : Actor {
 		height 24;
 	}
 	override bool CanCollideWith(Actor other, bool passive) {
-		if (other && other is "PK_Stake" && (abs(pos.z - other.pos.z) <= height)  && master && passive) {
+		if (other && passive && other is "PK_Stake" && master && (abs(pos.z - other.pos.z) <= height)) {
 			hitstake = PK_Stake(other);
 			master = null;			
 		}

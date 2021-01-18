@@ -113,6 +113,18 @@ Class PK_BaseActor : Actor abstract {
 	}
 }
 
+Class PK_InventoryToken : Inventory abstract {
+	Default {
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+		+INVENTORY.PERSISTENTPOWER;
+		inventory.amount 1;
+		inventory.maxamount 1;
+	}
+	override void Tick() {}
+}
+
 Class PK_BaseDebris : PK_BaseActor abstract {
 	protected bool landed;			//true if object landed on the floor (or ceiling, if can stick to ceiling)
 	protected bool moving; 		//marks actor as moving; sets to true automatically if actor spawns with non-zero vel

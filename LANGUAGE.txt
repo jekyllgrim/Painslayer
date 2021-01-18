@@ -1,5 +1,7 @@
 [enu default]
-TAROT_NEEDMOUSE		= "Currently the Black Tarot Board can't be used without the mouse. Navigate to 'Options > Mouse Options > Enable mouse in menus' to enable mouse in menus, then try opening the Board again.\n\n           (Press Esc to close this window)";
+TAROT_NEEDMOUSE		= "Currently the Black Tarot Board can't be used without the mouse. Navigate to '$OPTMNU_TITLE > $OPTMNU_MOUSE > $MOUSEMNU_MOUSEINMENU' to enable mouse in menus, then try opening the Board again."
+					"\n\n"
+					"					(Press Esc to close this window)";
 TAROT_PURCHASE		= "Spend %d gold to buy this card?";
 TAROT_CANTPURCHASE	= "You don't have enough gold to buy this card.";
 TAROT_CANTUNEQUIP	= "This card is already equipped and locked in the slot.\nYou don't have enough gold to unlock this card.";
@@ -10,6 +12,10 @@ TAROT_EXIT			= 	"Are you sure you want to close the Black Tarot Board?"
 						"To change the equipped cards again you will have to complete this level or pay in gold.";
 TAROT_SILVERINFO	=  "The effects of Silver Cards are active throughout the level.";
 TAROT_GOLDINFO		=  "Golden Cards have to be activated manually and will remain active for a short time.";
+TAROT_YES			= "Yes";
+TAROT_NO			= "No";
+TAROT_CLOSE		 	= "Close";
+TAROT_GOLDABR		= "g";
 
 PK_OPENBOARD			= "Open Black Tarot board";
 PK_USEGOLDCARDS			= "Activate Golden Cards";
@@ -73,3 +79,143 @@ PKCH_GIVEGOLD4		= "Avarice! Definitely my favorite sin.";
 PKCH_GIVEGOLD5		= "Don't forget to donate to the foundation for mortally challenged!";
 PKCH_TAKEGOLD1		= "Let's lighten your pockets...";
 PKCH_TAKEGOLD2		= "Don't forget to save some for the ride to the other side.";
+
+//items
+PKI_GOLDSOUL		= "Gold soul!";
+PKI_MEGASOUL		= "Mega soul!";
+//ammo
+PKI_SHELLS			= "Picked up shotgun shells.";
+PKI_FREEZEAMMO		= "Picked up Freezer Ammo.";
+PKI_STAKEAMMO		= "Picked up Stakes.";
+PKI_GRENADEAMMO		= "Picked up Grenades.";
+PKI_MINIGUNAMMO		= "Picked up Chaingun Bullets.";
+PKI_STARAMMO		= "Picked up Shurikens.";
+PKI_ELECTROAMMO		= "Picked up a Cell Battery.";
+PKI_RIFLEAMMO		= "Picked up Assault Rifle Ammo.";
+PKI_FUELAMMO		= "Picked up Flamethrower Fuel.";
+PKI_BOLTAMMO		= "Picked up Steel Bolts.";
+PKI_HEATERAMMO		= "Picked up Heater Bombs.";
+//weapons
+PKI_SHOTGUN			= "Picked up Shotgun/Freezer";
+PKI_STAKEGUN	 	= "Picked up Stakegun/Grenade Launcher";
+PKI_CHAINGUN		= "Picked up Rocket Launcher/Chaingun";
+PKI_ELECTRODRIVER	= "Picked up Electro/Driver";
+PKI_BOLTGUN			= "Picked up Boltgun/Heater";
+PKI_RIFLEAMMO		= "Picked up Assault Rifle/Flamethrower";
+//weapon tags
+PK_SHOTGUN_TAG		= "Shotgun/Freezer";
+PK_STAKEGUN_TAG		= "Stakegun/Grenade Launcher";
+PK_CHAINGUN_TAG		= "Rocket Launcher/Chaingun";
+PK_ELECTRODRIVER_TAG = "Electro/Driver";
+PK_RIFLE_TAG		= "Assault Rifle/Flamethrower";
+PK_BOLTGUN_TAG		= "Boltgun/Heater";
+
+[ru]
+TAROT_NEEDMOUSE		= "Для использования карт Таро необходима мышь. Включите использование мыши в меню с помощью '$OPTMNU_TITLE > $OPTMNU_MOUSE > $MOUSEMNU_MOUSEINMENU'\n\n           (Esc - закрыть это окно)";
+TAROT_PURCHASE		= "Купить эту карту за %d золота?";
+TAROT_CANTPURCHASE	= "Недостаточно золота для покупки карты.";
+TAROT_CANTUNEQUIP	= "Эта карта размещена в ячейке и заблокирована.\nУ вас недостаточно золота, чтобы разблокировать ее.";
+TAROT_PAYTOUNEQUIP	= "Эта карта размещена в ячейке и заблокирована. Разблокировать ее за %d золота?\n(В начале следующего уровня это можно будет сделать бесплатно.)";
+TAROT_FIRSTUSE		= "Черные карты Таро приветствуют вас.\nВ качестве первого и последнего подарка вы сейчас получите несколько карт.";
+TAROT_EXIT			= 	"Вы точно хотите закрыть доску?"
+						"\n"
+						"Закрыв доску, вы сможете изменить выбранные карты только в начале следующего уровня или за золото.";
+TAROT_SILVERINFO	=  "Серебряные карты действуют в течение всего уровня.";
+TAROT_GOLDINFO		=  "Золотые активируются вручную, после чего действуют короткое время.";
+TAROT_YES			= "Да";
+TAROT_NO			= "Нет";
+TAROT_CLOSE		 	= "Закрыть";
+TAROT_GOLDABR		= " з.";
+
+PK_OPENBOARD			= "Открыть Черные карты Таро";
+PK_USEGOLDCARDS			= "Активировать золотые карты";
+
+PK_ENDURANCE_DESC 		= "Вы получаете вдвое меньше урона.";
+PK_SPEED_DESC 			= "Вы двигаетесь быстрее.";
+PK_TIMEBONUS_DESC 		= "Золотые карты действуют на 15 сек. дольше.";
+PK_REBIRTH_DESC 		= "При активации вы получаете полные здоровье и броню.";
+PK_CONFUSION_DESC 		= "Сбивает с толку врагов.";
+PK_DEXTERITY_DESC		= "Ваше оружие стреляет вдвое быстрее.";
+PK_WMODIFIER_DESC		= "Активирует эффект модификатора оружия.";
+PK_SOT_DESC				= "С каждым шагом вы наносите урон врагам вокруг вас.";
+PK_RAGE_DESC			= "Вы наносите в 4 раза больше урона.";
+PK_MAGICGUN_DESC		= "Оружие не расходует патроны.";
+PK_IRONWILL_DESC		= "Вы неуязвимы.";
+PK_HASTE_DESC			= "Замедляет врагов в 4 раза.";
+
+PK_SOULKEEPER_DESC		= "Души врагов никогда не исчезают.";
+PK_BLESSING_DESC		= "Увеличивает базовое здоровье до 150 ед.";
+PK_REPLENISH_DESC		= "В каоробках вдвое больше патронов.";
+PK_DARKSOUL_DESC		= "Для превращения в демона достаточно 50 душ.";
+PK_SOULCATCHER_DESC		= "Вы притягиваете золото и души на расстоянии.";
+PK_FORGIVENESS_DESC		= "Золотые карты можно активировать дважды за уровень.";
+PK_GREED_DESC			= "Вы получаете вдвое больше золота.";
+PK_SOULREDEEMER_DESC	= "Души восстанавливают больше здоровья.";
+PK_REGENERATION_DESC	= "Если вам 10 сек. не наносят урон, здоровье начинает восстанавливаться.";
+PK_HEALTHSTEALER_DESC	= "Часть нанесенного врагам урона восполняет ваше здоровье.";
+PK_HELLISHARMOR_DESC	= "Если вам 10 сек. не наносят урон, броня начинает восстанавливаться.";
+PK_666AMMO_DESC			= "В начале уровня вы получаете 666 боеприпасов для каждого оружия.";
+
+PK_ENDURANCE_NAME 		= "Выносливость";
+PK_SPEED_NAME 			= "Скорость";
+PK_TIMEBONUS_NAME 		= "Больше времени";
+PK_REBIRTH_NAME 		= "Перерождение";
+PK_CONFUSION_NAME 		= "Замешательство";
+PK_DEXTERITY_NAME		= "Ловкость";
+PK_WMODIFIER_NAME		= "Модификатор";
+PK_SOT_NAME				= "Поступь грома";
+PK_RAGE_NAME			= "Гнев";
+PK_MAGICGUN_NAME		= "Волшебное оружие";
+PK_IRONWILL_NAME		= "Железная воля";
+PK_HASTE_NAME			= "Спешка";
+
+PK_SOULKEEPER_NAME		= "Хранитель душ";
+PK_BLESSING_NAME		= "Благословение";
+PK_REPLENISH_NAME		= "Восполнение";
+PK_DARKSOUL_NAME		= "Тёмная душа";
+PK_SOULCATCHER_NAME		= "Ловец душ";
+PK_FORGIVENESS_NAME		= "Прощение";
+PK_GREED_NAME			= "Алчность";
+PK_SOULREDEEMER_NAME	= "Искупление души";
+PK_REGENERATION_NAME	= "Регенерация";
+PK_HEALTHSTEALER_NAME	= "Вампир";
+PK_HELLISHARMOR_NAME	= "Адская броня";
+PK_666AMMO_NAME			= "666 патронов";
+
+PKCH_GIVEGOLD1		= "Вы получаете много-много золота.";
+PKCH_GIVEGOLD2		= "Блестящее золото, безделицы побрякушки... купленные кровью.";
+PKCH_GIVEGOLD3		= "Даже за все это золото старик на лодке не отвезет тебя обратно.";
+PKCH_GIVEGOLD4		= "Алчность! Однозначно, мой любимый грех.";
+PKCH_GIVEGOLD5		= "Не забудьте пожертвовать денег фонду преодолевающих трудности перед смертью!";
+PKCH_TAKEGOLD1		= "Облегчим-ка твои карманы...";
+PKCH_TAKEGOLD2		= "Не забудь оставить немного на обратную дорогу.";
+
+//items
+PKI_GOLDSOUL		= "Золотая душа!";
+PKI_MEGASOUL		= "Огромная душа!";
+//ammo
+PKI_SHELLS			= "Вы подобрали патроны для дробовика.";
+PKI_FREEZEAMMO		= "Вы подобрали боеприпасы для охладителя.";
+PKI_STAKEAMMO		= "Вы подобрали колья.";
+PKI_GRENADEAMMO		= "Вы подобрали гранаты.";
+PKI_MINIGUNAMMO		= "Вы подобрали патроны для пулемёта.";
+PKI_STARAMMO		= "Вы подобрали сюрикэны.";
+PKI_ELECTROAMMO		= "Вы подобрали аккумулятор.";
+PKI_RIFLEAMMO		= "Вы подобрали патроны для винтовки.";
+PKI_FUELAMMO		= "Вы подобрали топливо для огнемёта.";
+PKI_BOLTAMMO		= "Вы подобрали стальные болты.";
+PKI_HEATERAMMO		= "Вы подобрали шаровые бомбы.";
+//weapons
+PKI_SHOTGUN			= "Вы подобрали дробовик/охладитель";
+PKI_STAKEGUN	 	= "Вы подобрали коломёт/гранатомёт";
+PKI_CHAINGUN		= "Вы подобрали ракетницу/пулемёт";
+PKI_ELECTRODRIVER	= "Вы подобрали электро/драйвер";
+PKI_BOLTGUN			= "Вы подобрали болтомёт/шаромёт";
+PKI_RIFLEAMMO		= "Вы подобрали винтовку/огнемёт";
+//weapon tags
+PK_SHOTGUN_TAG		= "Дробовик/охладитель";
+PK_STAKEGUN_TAG		= "Коломёт/гранатомёт";
+PK_CHAINGUN_TAG		= "Ракетница/пулемёт";
+PK_ELECTRODRIVER_TAG = "Электро/драйвер";
+PK_RIFLE_TAG		= "Винтовка/огнемёт";
+PK_BOLTGUN_TAG		= "Болтомёт/шаромёт";

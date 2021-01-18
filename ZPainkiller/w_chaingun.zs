@@ -11,9 +11,9 @@ Class PK_Chaingun : PKWeapon {
 		weapon.ammotype2	"PK_BulletAmmo";
 		weapon.ammouse2	1;
 		weapon.ammogive2	50;
-		inventory.pickupmessage "Picked up a Chaingun";
+		inventory.pickupmessage "$PKI_CHAINGUN";
 		inventory.pickupsound "pickups/weapons/chaingun";
-		Tag "Rocket Launcher/Chaingun";
+		Tag "$PK_CHAINGUN_TAG";
 	}
 	private bool hideFlash;
 	States {

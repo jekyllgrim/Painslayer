@@ -10,9 +10,9 @@ Class PK_Shotgun : PKWeapon {
 		weapon.ammogive2 0;
 		weapon.ammouse2 1;
 		scale 0.23;
-		inventory.pickupmessage "Picked up Shotgun/Freezer";
+		inventory.pickupmessage "$PKI_SHOTGUN";
 		inventory.pickupsound "pickups/weapons/shotgun";
-		Tag "Shotgun/Freezer";
+		Tag "$PK_SHOTGUN_TAG";
 	}
 	override void DoEffect() {
 		super.DoEffect();
@@ -24,6 +24,11 @@ Class PK_Shotgun : PKWeapon {
 	}
 	states {
 	Spawn:
+		MODL A -1 NoDelay A_Jump(128,1);
+		stop;
+		MODL B -1;
+		stop;
+	SpawnSp:
 		PSHZ ABCDEFGH 4;
 		loop;
 	Ready:

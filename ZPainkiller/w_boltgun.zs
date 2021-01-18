@@ -12,9 +12,9 @@ Class PK_Boltgun : PKWeapon {
 		weapon.ammogive2	0;
 		weapon.ammouse2		10;
 		scale 0.23;
-		inventory.pickupmessage "Picked up Boltgun/Heater";
+		inventory.pickupmessage "$PKI_BOLTGUN";
 		inventory.pickupsound "pickups/weapons/Boltgun";
-		Tag "Boltgun/Heater";
+		Tag "$PK_BOLTGUN_TAG";
 	}
 	states {
 	Cache:		

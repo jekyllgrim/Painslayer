@@ -411,7 +411,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		let yesButton = new("PKCButton").Init(
 			(100,160),
 			buttonsize,
-			text:"Yes",
+			text:Stringtable.Localize("$TAROT_YES"),
 			cmdhandler:promptHandler,
 			command:"DoExit",
 			fnt:font_times,
@@ -425,7 +425,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		let noButton = new("PKCButton").Init(
 			(440,160),
 			buttonsize,
-			text:"No",
+			text:Stringtable.Localize("$TAROT_NO"),
 			cmdhandler:promptHandler,
 			command:"CancelPrompt",
 			fnt:font_times,
@@ -489,7 +489,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			yesButton.Init(
 				(100,160),
 				buttonsize,
-				text:"Yes",
+				text:Stringtable.Localize("$TAROT_YES"),
 				cmdhandler:promptHandler,
 				command:"BuyCard",
 				fnt:font_times,
@@ -505,7 +505,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			noButton.Init(
 				(440,160),
 				buttonsize,
-				text:"No",
+				text:Stringtable.Localize("$TAROT_NO"),
 				cmdhandler:promptHandler,
 				command:"CancelPrompt",
 				fnt:font_times,
@@ -522,7 +522,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			okButton.Init(
 				(265,160),
 				buttonsize,
-				text:"Close",
+				text:Stringtable.Localize("$TAROT_CLOSE"),
 				cmdhandler:promptHandler,
 				command:"CancelPrompt",
 				fnt:font_times,
@@ -567,17 +567,17 @@ Class PKCardsMenu : PKCGenericMenu {
 		if (card.cardbought)
 			return;
 			
-		let cardcostt = new("PKCLabel").Init(
+		let cardcost = new("PKCLabel").Init(
 			tiptextofs+(185,0),
 			(160,64),
-			String.Format("%dg",card.cardcost), 
+			String.Format("%d%s",card.cardcost,Stringtable.Localize("$TAROT_GOLDABR")), 
 			font_times,
 			alignment:PKCElement.AlignType_TopRight,
 			textscale:1,
 			textcolor: Font.FindFontColor('PKGreenText'),
 			linespacing: 0.1
 		);
-		cardcostt.Pack(cardinfo);	
+		cardcost.Pack(cardinfo);	
 	}
 
     override bool MenuEvent (int mkey, bool fromcontroller) {

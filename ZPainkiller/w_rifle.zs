@@ -16,9 +16,9 @@ Class PK_Rifle : PKWeapon {
 		weapon.ammotype2	"PK_FuelAmmo";
 		weapon.ammouse1		1;
 		weapon.ammogive1	100;
-		inventory.pickupmessage "Picked up an Assault Rifle/Flamethrower";
+		inventory.pickupmessage "$PKI_RIFLEAMMO";
 		inventory.pickupsound "pickups/weapons/rifle";
-		Tag "Assault Rifle/Flamethrower";
+		Tag "$PK_RIFLE_TAG";
 	}
 	/*override void DoEffect() {
 		if (owner) {

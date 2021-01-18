@@ -12,9 +12,9 @@ Class PK_ElectroDriver : PKWeapon {
 		weapon.ammogive2 40;
 		weapon.ammouse2 1;
 		scale 0.23;
-		inventory.pickupmessage "Picked up Electro/Driver";
+		inventory.pickupmessage "$PKI_ELECTRODRIVER";
 		inventory.pickupsound "pickups/weapons/eldriver";
-		Tag "Electro/Driver";
+		Tag "$PK_ELECTRODRIVER_TAG";
 	}
 	action vector3 FindElectroTarget(int atkdist = 280) {
 		actor ltarget;			
