@@ -336,28 +336,28 @@ Sprite "MIGFA0", 213, 95
 {
 	YScale 1.200
 	Offset -180, -107
-	Patch "MIGF00", 0, 0
+	Patch "MIGF1", 0, 0
 }
 
 Sprite "MIGFB0", 213, 95
 {
 	YScale 1.200
 	Offset -180, -107
-	Patch "MIGF01", 0, 0
+	Patch "MIGF2", 0, 0
 }
 
 Sprite "MIGFC0", 213, 95
 {
 	YScale 1.200
 	Offset -180, -107
-	Patch "MIGF02", 0, 0
+	Patch "MIGF3", 0, 0
 }
 
 Sprite "MIGFD0", 213, 95
 {
 	YScale 1.200
 	Offset -180, -107
-	Patch "MIGF03", 0, 0
+	Patch "MIGF4", 0, 0
 }
 
 Sprite "PSHZA0", 190, 105
