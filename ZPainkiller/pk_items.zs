@@ -163,6 +163,7 @@ Class PK_Soul : PK_Inventory {
 	protected int maxage;
 	property maxage : maxage;
 	Default {
+		+INVENTORY.NEVERRESPAWN
 		PK_Soul.maxage 350;
 		inventory.pickupmessage "";
 		inventory.amount 2;
