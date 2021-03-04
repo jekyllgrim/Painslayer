@@ -51,7 +51,7 @@ Class PKWeapon : Weapon abstract {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		let icon = Spawn("PK_WeaponIcon",pos + (0,0,18));
+		let icon = Spawn("PK_WeaponIcon",pos);
 		if (icon)  {
 			icon.master = self;
 		}
@@ -207,11 +207,11 @@ Class PK_WeaponIcon : Actor {
 			frame = 1;
 	}
 	override void Tick () {
-		super.Tick();
 		if (!master || !master.InStateSequence(master.curstate,mspawn)) {
 			destroy();
 			return;
 		}
+		SetOrigin(master.pos + (0,0,24),true);
 	}
 	states {
 		Spawn:
@@ -625,6 +625,7 @@ Class PK_CellAmmo : Ammo {
 		ammo.backpackamount 80;
 		ammo.backpackmaxamount 500;
 		scale 0.4;
+		yscale 0.34;
 	}
 	states	{
 	spawn:
@@ -656,15 +657,16 @@ Class PK_FuelAmmo : Ammo {
 		inventory.pickupmessage "$PKI_FUELAMMO";
 		inventory.pickupsound "pickups/ammo/fuel";
 		inventory.icon "pkhfuel";
-		inventory.amount 60;
+		inventory.amount 50;
 		inventory.maxamount 500;
-		ammo.backpackamount 60;
+		ammo.backpackamount 50;
 		ammo.backpackmaxamount 500;
-		scale 0.4;
+		xscale 0.3;
+		yscale 0.24;
 	}
 	states	{
 	spawn:
-		AMFU A -1;
+		AMFU B -1;
 		stop;
 	}
 }
@@ -679,12 +681,12 @@ Class PK_BoltAmmo : Ammo {
 		inventory.maxamount 500;
 		ammo.backpackamount 30;
 		ammo.backpackmaxamount 500;
-		xscale 0.3;
-		yscale 0.25;
+		xscale 0.4;
+		yscale 0.3;
 	}
 	states	{
 	spawn:
-		AMBL A -1;
+		AMBO A -1;
 		stop;
 	}
 }
@@ -694,16 +696,16 @@ Class PK_BombAmmo : Ammo {
 		inventory.pickupmessage "$PKI_HEATERAMMO";
 		inventory.pickupsound "pickups/ammo/bombs";
 		inventory.icon "pkhbombs";
-		inventory.amount 20;
+		inventory.amount 50;
 		inventory.maxamount 250;
-		ammo.backpackamount 20;
+		ammo.backpackamount 50;
 		ammo.backpackmaxamount 250;
-		xscale 0.3;
-		yscale 0.25;
+		xscale 0.5;
+		yscale 0.42;
 	}
 	states	{
 	spawn:
-		AMBM A -1;
+		AMBM B -1;
 		stop;
 	}
 }
