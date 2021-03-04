@@ -24,9 +24,7 @@ Class PK_Shotgun : PKWeapon {
 	}
 	states {
 	Spawn:
-		MODL A -1 NoDelay A_Jump(128,1);
-		stop;
-		MODL B -1;
+		MODL A -1;
 		stop;
 	SpawnSp:
 		PSHZ ABCDEFGH 4;
