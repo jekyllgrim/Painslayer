@@ -1,7 +1,6 @@
 [enu default]
-TAROT_NEEDMOUSE		= "Currently the Black Tarot Board can't be used without the mouse. Navigate to '$OPTMNU_TITLE > $OPTMNU_MOUSE > $MOUSEMNU_MOUSEINMENU' to enable mouse in menus, then try opening the Board again."
-					"\n\n"
-					"					(Press Esc to close this window)";
+TAROT_NEEDMOUSE		= "Currently the Black Tarot Board can't be used without the mouse. Navigate to '%s > %s > %s' to enable mouse in menus, then try opening the Board again.\n\n"
+					"						(Press Esc to close this window)";
 TAROT_PURCHASE		= "Spend %d gold to buy this card?";
 TAROT_CANTPURCHASE	= "You don't have enough gold to buy this card.";
 TAROT_CANTUNEQUIP	= "This card is already equipped and locked in the slot.\nYou don't have enough gold to unlock this card.";
@@ -111,7 +110,8 @@ PK_RIFLE_TAG		= "Assault Rifle/Flamethrower";
 PK_BOLTGUN_TAG		= "Boltgun/Heater";
 
 [ru]
-TAROT_NEEDMOUSE		= "Для использования карт Таро необходима мышь. Включите использование мыши в меню с помощью '$OPTMNU_TITLE > $OPTMNU_MOUSE > $MOUSEMNU_MOUSEINMENU'\n\n           (Esc - закрыть это окно)";
+TAROT_NEEDMOUSE		= "Для использования карт Таро необходима мышь. Включите использование мыши в меню с помощью '%s > %s > %s', затем откройте доску повторно.\n\n"
+					  "	           (Esc - закрыть это окно)";
 TAROT_PURCHASE		= "Купить эту карту за %d золота?";
 TAROT_CANTPURCHASE	= "Недостаточно золота для покупки карты.";
 TAROT_CANTUNEQUIP	= "Эта карта размещена в ячейке и заблокирована.\nУ вас недостаточно золота, чтобы разблокировать ее.";
