@@ -189,8 +189,8 @@ Class PK_Killer : PK_Projectile {
 		scale 0.3;
 		damage (15);
 		speed 25;
-		radius 4;
-		height 4;
+		radius 2;
+		height 2;
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
