@@ -99,7 +99,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		closeFirstUseBtn.Pack(boardElements);
 		
 		if (CVar.GetCVar('m_use_mouse',players[consoleplayer]).GetInt() <= 0) {
-			string str = Stringtable.Localize("$TAROT_NEEDMOUSE");
+			string str = String.Format(Stringtable.Localize("$TAROT_NEEDMOUSE"),Stringtable.Localize("$OPTMNU_TITLE"),Stringtable.Localize("$OPTMNU_MOUSE"),Stringtable.Localize("$MOUSEMNU_MOUSEINMENU"));
 			needMousePopup = New("PKCBoardMessage");
 			needMousePopup.pack(mainFrame);
 			needMousePopup.Init(
