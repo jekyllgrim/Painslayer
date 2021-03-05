@@ -101,7 +101,7 @@ Class PK_Chaingun : PKWeapon {
 			return ResolveState(null);
 		}
 		TNT1 A 0 {
-			A_RemoveLight('PKMGunFlash');
+			A_RemoveLight('PKWeaponlight');
 			A_ReFire();
 		}
 	AltFireEnd:
@@ -146,7 +146,7 @@ Class PK_Chaingun : PKWeapon {
 			}
 			
 			double brt = frandom[sfx](40,70);
-			A_AttachLight('PKMGunFlash', DynamicLight.PointLight, "fcbb53", int(brt), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF, ofs: (32,32,player.viewheight));
+			A_AttachLight('PKWeaponlight', DynamicLight.PointLight, "fcbb53", int(brt), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF, ofs: (32,32,player.viewheight));
 			double brt2 = (brt - 40) / 30;
 			A_Overlay(PSP_HIGHLIGHTS,"Hightlights");
 			A_OverlayFlags(PSP_HIGHLIGHTS,PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);

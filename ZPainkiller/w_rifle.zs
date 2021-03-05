@@ -219,7 +219,7 @@ Class PK_Rifle : PKWeapon {
 		goto ready;
 	AltFire:
 		TNT1 A 0 {
-			A_AttachLight('PKFlameThrower', DynamicLight.RandomFlickerLight, "ffb30f", 80, 68, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF, ofs: (32,32,player.viewheight));
+			A_AttachLight('PKWeaponlight', DynamicLight.RandomFlickerLight, "ffb30f", 80, 68, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF, ofs: (32,32,player.viewheight));
 			A_StartSound("weapons/rifle/flamestart",CHAN_5);
 			invoker.targOfs = (0,32);
 			A_ClearOverlays(RIFLE_PILOT,RIFLE_PILOT);
@@ -228,7 +228,7 @@ Class PK_Rifle : PKWeapon {
 		PKRI A 1 {				
 			bool infin = CheckInfiniteAmmo();
 			if (player.cmd.buttons & BT_ATTACK && (invoker.ammo2.amount >= 50 || infin)) {
-				A_RemoveLight('PKFlameThrower');
+				A_RemoveLight('PKWeaponlight');
 				A_WeaponOffset(0,32);
 				PK_RifleRestoreScale();
 				if (!infin)
@@ -268,14 +268,14 @@ Class PK_Rifle : PKWeapon {
 	AltHoldEnd:
 		TNT1 A 0 {
 			A_ClearRefire();
-			A_RemoveLight('PKFlameThrower');
+			A_RemoveLight('PKWeaponlight');
 			A_StopSound(CHAN_6);
 			A_StartSound("weapons/rifle/flameend",CHAN_7);
 		}
 		goto ready;
 	Flash:
 		RMUZ A 1 bright {
-			A_AttachLight('PKRifleFlash', DynamicLight.PointLight, "ffcd66", frandom[sfx](32,46), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF, ofs: (32,32,player.viewheight));
+			A_AttachLight('PKWeaponlight', DynamicLight.PointLight, "ffcd66", frandom[sfx](32,46), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF, ofs: (32,32,player.viewheight));
 			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
 			A_OverlayFlags(OverlayID(),PSPF_ADDWEAPON,false);
 			A_OverlayOffset(OverlayID(),0,32);
@@ -285,7 +285,7 @@ Class PK_Rifle : PKWeapon {
 			A_OverlayRotate(OverlayID(),frandom[sfx](-5,5)+randompick[sfx](0,90,-90,180));
 		}
 		#### # 1 bright A_OverlayScale(OverlayID(),0.8,0.8,WOF_INTERPOLATE);
-		TNT1 A 0 A_RemoveLight('PKRifleFlash');
+		TNT1 A 0 A_RemoveLight('PKWeaponlight');
 		stop;
 	Highlight:
 		PRHI A 1 bright;

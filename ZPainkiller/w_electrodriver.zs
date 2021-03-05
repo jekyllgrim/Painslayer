@@ -120,7 +120,7 @@ Class PK_ElectroDriver : PKWeapon {
 			}
 			DampedRandomOffset(5,5,1.5);
 			double brt = frandom[sfx](40,56);
-			A_AttachLight('PKElectroFlash', DynamicLight.PointLight, "5464fc", int(brt), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight));
+			A_AttachLight('PKWeaponlight', DynamicLight.PointLight, "5464fc", int(brt), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight));
 			double brt2 = (brt - 40) / 16;
 			A_Overlay(PSP_HIGHLIGHTS,"Hightlights");
 			A_OverlayFlags(PSP_HIGHLIGHTS,PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
@@ -134,7 +134,7 @@ Class PK_ElectroDriver : PKWeapon {
 			A_ClearRefire();
 			A_StopSound(12);
 			A_StartSound("weapons/edriver/electroloopend",12);
-			A_RemoveLight('PKElectroFlash');
+			A_RemoveLight('PKWeaponlight');
 		}
 		goto ready;	
 	Hightlights:
@@ -142,7 +142,7 @@ Class PK_ElectroDriver : PKWeapon {
 		stop;
 	DiskFire:
 		ELDR E 1 {
-			A_RemoveLight('PKElectroFlash');
+			A_RemoveLight('PKWeaponlight');
 			A_WeaponOffset(16,12,WOF_ADD);
 			A_StartSound("weapons/edriver/diskshot",CHAN_WEAPON);
 			A_FireProjectile("PK_DiskProjectile",spawnofs_xy:2,spawnheight:5);
