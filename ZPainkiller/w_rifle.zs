@@ -416,7 +416,7 @@ Class PK_BurnControl : PK_InventoryToken {
 	}
 	override void DoEffect() {
 		super.DoEffect();
-		if (!owner || !target) {
+		if (!owner || !target || owner.waterlevel > 1) {
 			DepleteOrDestroy();
 			return;
 		}
@@ -779,6 +779,8 @@ Class PK_FlamerDebris : PK_RandomDebris {
 	override void Tick () {
 		Super.Tick();	
 		if (isFrozen())
+			return;
+		if (waterlevel > 1)
 			return;
 		if (GetAge() % 3 != 0)
 			return;
