@@ -1,6 +1,7 @@
 Class PK_Boltgun : PKWeapon {
 	private bool scoped;
-	const scopeOfs = 12;
+	private int scopedelay;
+	const scopeOfs = 14;
 	private vector2 prevOfs;
 	Default {
 		PKWeapon.emptysound "weapons/empty/rifle";
@@ -16,6 +17,23 @@ Class PK_Boltgun : PKWeapon {
 		inventory.pickupsound "pickups/weapons/Boltgun";
 		Tag "$PK_BOLTGUN_TAG";
 	}
+	/*override void DoEffect() {
+		super.DoEffect();
+		if (!owner || !owner.player)
+			return;
+		if (scopedelay > 0) {
+			scopedelay--;
+			return;
+		}
+		let plr = owner.player;
+		let wpn = owner.player.readyweapon;
+		if (plr.cmd.buttons & BT_ZOOM && !(plr.oldbuttons & BT_ZOOM)) {
+			scopedelay = 5;
+			scoped = !scoped;
+			state scopestate = scoped ? ResolveState("GoScope") : ResolveState("Unscope");
+			plr.SetPSprite(PSP_HIGHLIGHTS,scopestate);
+		}
+	}*/
 	states {
 	Cache:		
 		BGUN ABCD 0;
@@ -27,6 +45,7 @@ Class PK_Boltgun : PKWeapon {
 	Deselect:
 		TNT1 A 0 {
 			A_ZoomFactor(1.0,ZOOM_NOSCALETURNING|ZOOM_INSTANT);
+			invoker.scoped = false;
 			A_ClearOverlays(PSP_OVERGUN,PSP_SCOPE3);
 		}
 		goto super::Deselect;
@@ -51,36 +70,49 @@ Class PK_Boltgun : PKWeapon {
 				if (!invoker.scoped) {
 					A_ZoomFactor(2);
 					A_Overlay(PSP_HIGHLIGHTS,"GoScope",nooverride:true);
+					invoker.scoped = true;
 				}
 				else {
 					A_ZoomFactor(1.0);
 					invoker.scoped = false;
 				}
-				A_OverlayFlags(PSP_HIGHLIGHTS,PSPF_ADDWEAPON|PSPF_ADDBOB,false);
 			}
 		}
 		loop;
 	GoScope:
 		TNT1 A 0 {
-			A_StartSound("weapons/boltgun/zoom");
+			A_ZoomFactor(2);
+			A_OverlayFlags(OverlayID(),PSPF_ADDWEAPON|PSPF_ADDBOB,false);
+			A_OverlayPivotAlign(OverlayID(),PSPA_CENTER,PSPA_CENTER);
+			A_OverlayScale(OverlayID(),1.3,1.3);
+			A_StartSound("weapons/boltgun/zoom",8);
 			A_SetCrosshair(99);
 		}
-		BGUV AAA 1 A_WeaponOffset(scopeOfs,scopeOfs,WOF_ADD);
-		TNT1 A 0 { 
-			//A_WeaponOffset(48,48+32);
-			invoker.scoped = true; 
+		BGUV AAA 1 {
+			A_WeaponOffset(scopeOfs,scopeOfs,WOF_ADD);
+			A_OverlayScale(OverlayID(),-0.1,-0.1,WOF_ADD);
 		}
 		BGUV A 1 {
+			if (!player.readyweapon || player.readyweapon != invoker)
+				return ResolveState("Null");
 			if (!invoker.scoped)
 				return ResolveState("Unscope");
 			return ResolveState(null);
 		}
 		wait;
 	Unscope:
-		TNT1 A 0 A_StartSound("weapons/boltgun/zoom");
-		BGUV AAA 1 A_WeaponOffset(-scopeOfs,-scopeOfs,WOF_ADD);
 		TNT1 A 0 {
-			A_WeaponOffset(0,32,WOF_INTERPOLATE);
+			A_ZoomFactor(1.0);
+			A_StartSound("weapons/boltgun/zoom",8);
+			A_OverlayFlags(OverlayID(),PSPF_ADDWEAPON|PSPF_ADDBOB,false);
+			A_OverlayPivotAlign(OverlayID(),PSPA_CENTER,PSPA_CENTER);
+		}
+		BGUV AAA 1 {
+			A_WeaponOffset(-scopeOfs,-scopeOfs,WOF_ADD);
+			A_OverlayScale(OverlayID(),0.1,0.1,WOF_ADD);
+		}
+		TNT1 A 0 {
+			//A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			A_SetCrosshair(0);
 		}
 		stop;
