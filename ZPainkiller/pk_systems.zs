@@ -772,6 +772,7 @@ Class PKC_HealthRegeneration : PK_BaseSilverCard {
 	override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
 		if (passive && damage > 0)
 			dmgCounter = 10;
+		super.ModifyDamage(damage, damageType, newdamage, passive, inflictor, source, flags);
 	}
 }
 
@@ -819,7 +820,8 @@ Class PKC_HellishArmor : PK_BaseSilverCard {
 		}
 	}
 	override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
-		dmgCounter = 10;
+		if (passive && damage > 0)
+			dmgCounter = 10;
 		super.ModifyDamage(damage, damageType, newdamage, passive, inflictor, source, flags);
 	}
 }
