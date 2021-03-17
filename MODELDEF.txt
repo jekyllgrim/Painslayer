@@ -1,5 +1,5 @@
 Model PK_Shotgun {
-	Path "models"
+	Path "models/shotgun"
 	Model 0 "item_shotgun.obj"
 	Skin 0 "item_shotgun.png"
 	Scale 3 3 3
@@ -7,9 +7,6 @@ Model PK_Shotgun {
 	ROTATING
 	
 	FrameIndex MODL A 0 0
-	
-	Skin 0 "item_shotgun (2).png"	
-	FrameIndex MODL B 0 0
 }
 
 Model PK_RicochetBullet {
