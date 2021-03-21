@@ -217,10 +217,10 @@ Class PK_ReplacementHandler : EventHandler {
 		switch (e.Replacee.GetClassName()) {
 			case 'Chainsaw' 		: e.Replacement = 'PK_MegaSoul'; 			break;
 			case 'Shotgun'			: e.Replacement = 'PK_Shotgun'; 			break;
-			case 'SuperShotgun' 	: e.Replacement = 'PK_StakeGun';			break;
+			case 'SuperShotgun' 	: e.Replacement = 'PK_BoltGun';			break;
 			case 'Chaingun' 		: e.Replacement = 'PK_Chaingun'; 			break;
 			case 'RocketLauncher'	: e.Replacement = 'PK_Chaingun'; 			break;
-			case 'PlasmaRifle' 	: e.Replacement = 'PK_Electrodriver';		break;
+			case 'PlasmaRifle' 	: e.Replacement = 'PK_Rifle';				break;
 			case 'BFG9000' 		: e.Replacement = 'PK_Electrodriver';		break;
 			
 			case 'Shell' 			: e.Replacement = (frandom[ammo](1,10) > 7.5) ? 	'PK_FreezerAmmo' : 'PK_Shells';		break;
