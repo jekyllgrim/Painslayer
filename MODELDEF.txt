@@ -6,7 +6,57 @@ Model PK_Shotgun {
 	ZOffset 64
 	ROTATING
 	
-	FrameIndex MODL A 0 0
+	FrameIndex BAL1 A 0 0
+}
+Model PK_Stakegun {
+	Path "models/stakegun"
+	Model 0 "item_stakegun.obj"
+	Skin 0 "item_stakegun.png"
+	Scale 3 3 3
+	ZOffset 64
+	ROTATING
+	
+	FrameIndex BAL1 A 0 0
+}
+Model PK_Chaingun {
+	Path "models/Chaingun"
+	Model 0 "item_Chaingun_alt.obj"
+	Skin 0 "item_Chaingun.png"
+	Scale 0.85 0.85 0.85
+	ZOffset 16
+	ROTATING
+	
+	FrameIndex BAL1 A 0 0
+}
+Model PK_Electrodriver {
+	Path "models/Electrodriver"
+	Model 0 "item_Electrodriver.obj"
+	Skin 0 "item_Electrodriver.png"
+	Scale 3 3 3
+	ZOffset 64
+	ROTATING
+	
+	FrameIndex BAL1 A 0 0
+}
+Model PK_Rifle {
+	Path "models/Rifle"
+	Model 0 "item_Rifle.obj"
+	Skin 0 "item_Rifle.png"
+	Scale 0.5 0.5 0.5
+	ZOffset 16
+	ROTATING
+	
+	FrameIndex BAL1 A 0 0
+}
+Model PK_Boltgun {
+	Path "models/Boltgun"
+	Model 0 "item_Boltgun.obj"
+	Skin 0 "item_Boltgun.png"
+	Scale 3 3 3
+	ZOffset 64
+	ROTATING
+	
+	FrameIndex BAL1 A 0 0
 }
 
 Model PK_RicochetBullet {
@@ -148,7 +198,7 @@ Model PK_Rocket {
 }
 
 Model PK_Shuriken {
-	Path "models/disk"
+	Path "models/electrodriver"
 	Model 0 "shuriken.obj"
 	Skin 0 "edisk.png"
 	Scale 5.0 5.0 6.02
@@ -161,8 +211,8 @@ Model PK_Shuriken {
 }
 
 Model PK_DiskProjectile {
-	Path "models/disk"
-	Model 0 "edisk.md3"
+	Path "models/electrodriver"
+	Model 0 "edisk.obj"
 	Skin 0 "edisk.png"
 	Scale 3.5 3.5 4.22
 	DONTCULLBACKFACES
