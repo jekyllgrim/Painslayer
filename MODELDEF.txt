@@ -31,8 +31,7 @@ Model PK_Chaingun {
 Model PK_Electrodriver {
 	Path "models/Electrodriver"
 	Model 0 "item_Electrodriver.obj"
-	Skin 0 "item_Electrodriver.png"
-	Scale 3 3 3
+	Scale 2.6 2.6 2.6
 	ZOffset 64
 	ROTATING
 	
@@ -212,7 +211,7 @@ Model PK_Shuriken {
 
 Model PK_DiskProjectile {
 	Path "models/electrodriver"
-	Model 0 "edisk.obj"
+	Model 0 "edisk.md3"
 	Skin 0 "edisk.png"
 	Scale 3.5 3.5 4.22
 	DONTCULLBACKFACES
