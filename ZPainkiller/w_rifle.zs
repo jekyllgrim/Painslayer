@@ -102,6 +102,9 @@ Class PK_Rifle : PKWeapon {
 			A_OverlayScale (PSP_HIGHLIGHTS, Clamp(pspb.scale.x- 0.015,1,99), Clamp(pspb.scale.y- 0.015,1,99),WOF_INTERPOLATE);
 	}
 	states {
+	Spawn:
+		BAL1 A -1;
+		stop;
 	Select:
 		TNT1 A 0 {
 			A_Overlay(RIFLE_BOLT,"Bolt");

@@ -40,7 +40,7 @@ Class PK_Boltgun : PKWeapon {
 		BGU1 ABCDEFGHIIJKLMNOPQRST 0;
 		BGU2 ABCDEFGHIIJKLMNOPQRST 0;		
 	Spawn:
-		BGUZ A -1;
+		BAL1 A -1;
 		stop;
 	Deselect:
 		TNT1 A 0 {
@@ -158,7 +158,7 @@ Class PK_Boltgun : PKWeapon {
 			TakeInventory(invoker.ammo1.GetClass(),1);
 			int xofs = invoker.scoped ? 0 : 3;
 			int yofs = invoker.scoped ? 11 : 5;
-			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs,flags:FPF_NOAUTOAIM);
+			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
 			A_StartSound("weapons/boltgun/fire1",CHAN_5);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
@@ -166,9 +166,9 @@ Class PK_Boltgun : PKWeapon {
 			TakeInventory(invoker.ammo1.GetClass(),2);
 			int xofs = invoker.scoped ? -3 : 0;
 			int yofs = invoker.scoped ? 9 : 3;
-			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs,flags:FPF_NOAUTOAIM);
+			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
 			xofs = invoker.scoped ? 3 : 6;
-			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs,flags:FPF_NOAUTOAIM);
+			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
 			A_StartSound("weapons/boltgun/fire2",CHAN_6);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
@@ -176,9 +176,9 @@ Class PK_Boltgun : PKWeapon {
 			TakeInventory(invoker.ammo1.GetClass(),2);
 			int xofs = invoker.scoped ? -6 : -3;
 			int yofs = invoker.scoped ? 7 : 1;
-			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs,flags:FPF_NOAUTOAIM);
+			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
 			xofs = invoker.scoped ? 6 : 9;
-			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs,flags:FPF_NOAUTOAIM);
+			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
 			A_StartSound("weapons/boltgun/fire3",CHAN_7);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
@@ -236,7 +236,7 @@ Class PK_Boltgun : PKWeapon {
 			double ofs = -2.2;
 			double ang = 5;
 			for (int i = 0; i < 10; i++) {				
-				let bomb = PK_FireArchingProjectile("PK_Bomb",angle:ang+frandom[bomb](-0.7,0.7),useammo:false,spawnofs_xy:ofs,spawnheight:-4+frandom[bomb](-0.8,0.8),flags:FPF_NOAUTOAIM,pitch:-25+frandom[bomb](-4,4));
+				let bomb = PK_FireArchingProjectile("PK_Bomb",angle:ang+frandom[bomb](-0.7,0.7),useammo:false,spawnofs_xy:ofs,spawnheight:-4+frandom[bomb](-0.8,0.8),pitch:-25+frandom[bomb](-4,4));
 				ofs += 2.2;
 				ang -= 1;
 			}

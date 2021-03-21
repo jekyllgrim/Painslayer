@@ -17,6 +17,9 @@ Class PK_Chaingun : PKWeapon {
 	}
 	private bool hideFlash;
 	States {
+	Spawn:
+		BAL1 A -1;
+		stop;
 	Deselect:
 		TNT1 A 0 {
 			invoker.holddur = 0;

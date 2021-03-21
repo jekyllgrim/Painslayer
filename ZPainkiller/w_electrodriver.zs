@@ -59,6 +59,9 @@ Class PK_ElectroDriver : PKWeapon {
 		return ltarget.pos+(0,0,ltarget.height*0.5);
 	}
 	states {
+	Spawn:
+		BAL1 A -1;
+		stop;
 	Ready:
 		ELDR A 1 {
 			PK_WeaponReady();
