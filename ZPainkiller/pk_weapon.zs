@@ -7,6 +7,7 @@ Class PKWeapon : Weapon abstract {
 	protected vector2 shiftOfs;
 	protected bool alwaysbob;
 	property alwaysbob : alwaysbob;
+	protected double spitch;
 	Default {
 		PKWeapon.alwaysbob true;
 		weapon.BobRangeX 0.31;
@@ -38,6 +39,23 @@ Class PKWeapon : Weapon abstract {
 		RIFLE_STOCK	= 5,
 		RLIGHT_STOCK	= 6	
 	}	
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		let icon = Spawn("PK_WeaponIcon",pos);
+		if (icon)  {
+			icon.master = self;
+		}
+		spitch = frandompick[sfx](-0.1,0.1);
+	}
+	override void Tick() {
+		super.Tick();
+		if (owner || isFrozen())
+			return;
+		A_SetAngle(angle+1.5,SPF_INTERPOLATE);
+		A_SetPitch(pitch+spitch,SPF_INTERPOLATE);
+		if (abs(pitch) > 8)
+			spitch *= -1;
+	}
 	override void DoEffect() {
 		Super.DoEffect();
 		if (!owner)
@@ -48,13 +66,6 @@ Class PKWeapon : Weapon abstract {
 		if (alwaysbob && weap == self)
 			owner.player.WeaponState |= WF_WEAPONBOBBING;
 		hasDexterity = owner.FindInventory("PowerDoubleFiringSpeed",true);
-	}
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		let icon = Spawn("PK_WeaponIcon",pos);
-		if (icon)  {
-			icon.master = self;
-		}
 	}
 	action bool CheckInfiniteAmmo() {
 		return (sv_infiniteammo || FindInventory("PowerInfiniteAmmo",true) );
@@ -184,7 +195,8 @@ class PK_BulletPuffSmoke : PK_BlackSmoke {
 }
 	
 Class PK_WeaponIcon : Actor {
-	state mspawn;
+	//state mspawn;
+	PKWeapon weap;
 	Default {
 		+BRIGHT
 		xscale 0.14;
@@ -194,24 +206,25 @@ Class PK_WeaponIcon : Actor {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		if (!master) {
+		if (master)
+			weap = PKWeapon(master);
+		if (!weap) {
 			destroy();
 			return;
 		}
-		mspawn = master.FindState("Spawn");
-		FloatBobStrength = master.FloatBobStrength;
-		FloatBobPhase = master.FloatBobPhase;
-		if (master.GetClassName() == "PK_Shotgun")
+		FloatBobStrength = weap.FloatBobStrength;
+		FloatBobPhase = weap.FloatBobPhase;
+		if (weap.GetClassName() == "PK_Shotgun")
 			frame = 0;
-		else if (master.GetClassName() == "PK_Stakegun")
+		else if (weap.GetClassName() == "PK_Stakegun")
 			frame = 1;
 	}
 	override void Tick () {
-		if (!master || !master.InStateSequence(master.curstate,mspawn)) {
+		if (!weap || weap.owner) {
 			destroy();
 			return;
 		}
-		SetOrigin(master.pos + (0,0,24),true);
+		SetOrigin(weap.pos + (0,0,30),true);
 	}
 	states {
 		Spawn:
