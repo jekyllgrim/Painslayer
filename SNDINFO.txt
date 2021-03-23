@@ -267,3 +267,7 @@ $random weapons/demonmorph/attack { demonattack1 demonattack2 }
 demonattack1	DMGUN1
 demonattack2	DMGUN2
 
+// Weapon modifier
+pickups/wmod/pickup		"sounds/items/item-wm-take.wav"
+pickups/wmod/end		"sounds/items/item-wm-timeout.wav"
+pickups/wmod/use		"sounds/items/item-wm-use.wav"

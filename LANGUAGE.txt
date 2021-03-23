@@ -82,6 +82,7 @@ PKCH_TAKEGOLD2		= "Don't forget to save some for the ride to the other side.";
 //items
 PKI_GOLDSOUL		= "Gold soul!";
 PKI_MEGASOUL		= "Mega soul!";
+PKI_WMODIFIER		= "Weapon Modifier!";
 //ammo
 PKI_SHELLS			= "Picked up shotgun shells.";
 PKI_FREEZEAMMO		= "Picked up Freezer Ammo.";
