@@ -1,4 +1,5 @@
-Class PK_Inventory : Inventory {
+Class PK_Inventory : Inventory abstract {
+	mixin PK_PlayerSightCheck;
 	override void PlayPickupSound (Actor toucher)	{
 		double atten;
 		int chan;
@@ -51,9 +52,8 @@ Class PK_GoldPickup : PK_Inventory abstract {
 	}
 	override void Tick() {
 		super.Tick();
-		if (owner) {
+		if (owner)
 			return;
-		}
 		if (isFrozen())
 			return;
 		//Soul Catcher effect:
@@ -68,12 +68,12 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		}
 		else if (bNOINTERACTION)
 			bNOINTERACTION = false;
-		if (level.time % 10 != 0)
-			return;
-		if (frandom[sfx](1,10) > 9 && !gleam) {
-			gleam = PK_GoldGleam(Spawn("PK_GoldGleam",pos+(0,0,frandom(2,height))));
-			if (gleam)
-				gleam.scale *= frandom[sfx](1,1.4);
+		if (GetAge() % 10 == 0) {
+			if (CheckPlayerSights() && !gleam && frandom[sfx](1,10) > 9) {
+				gleam = PK_GoldGleam(Spawn("PK_GoldGleam",pos+(0,0,frandom(2,height))));
+				if (gleam)
+					gleam.scale *= frandom[sfx](1,1.4);
+			}
 		}
 	}
 	states {
@@ -238,6 +238,7 @@ Class PK_RedSoul : PK_Soul {
 
 
 Class PK_GoldSoul : Health {
+	mixin PK_PlayerSightCheck;
 	Default {
 		inventory.pickupmessage "$PKI_GOLDSOUL";
 		inventory.amount 100;
@@ -257,12 +258,15 @@ Class PK_GoldSoul : Health {
 		super.Tick();
 		if (isFrozen())
 			return;	
-		A_SpawnItemEx(
-			"GoldSoulparticle",
-			xofs: frandom[part](4,10),zofs:frandom[part](16,32),
-			xvel:-0.35,zvel:frandom[part](0.5,2),
-			angle:frandom[part](0,359)
-		);
+		if (GetAge() % 10 == 0)
+			canSeePlayer = CheckPlayerSights();
+		if (canSeePlayer)
+			A_SpawnItemEx(
+				"PK_GoldSoulparticle",
+				xofs: frandom[part](4,10),zofs:frandom[part](16,32),
+				xvel:-0.35,zvel:frandom[part](0.5,2),
+				angle:frandom[part](0,359)
+			);
 	}
 	states {
 	Spawn:
@@ -271,7 +275,7 @@ Class PK_GoldSoul : Health {
 	}
 }
 
-Class GoldSoulparticle : PK_BaseFlare {
+Class PK_GoldSoulparticle : PK_BaseFlare {
 	Default {
 		scale 0.025;
 		renderstyle 'Add';
@@ -299,5 +303,86 @@ Class PK_MegaSoul : PK_GoldSoul {
 	Spawn:
 		MSOU ABCDEFGHIJKLMNOPQRSTU 2;
 		loop;
+	}
+}
+
+////////////////////////////
+////////            ////////
+////////  POWER UPS ////////
+////////            ////////
+////////////////////////////
+
+Class PK_PowerUp : PK_Inventory abstract {
+	protected int effectSeconds;
+	protected int duration;
+	property duration : duration;
+	sound endsound;
+	property endsound : endsound;
+	Default {
+		+INVENTORY.ALWAYSPICKUP
+		PK_PowerUp.duration 40;
+	}
+	override void DoEffect() {
+		super.DoEffect();
+		if (!owner || !owner.player)
+			return;
+		if (GetAge() % 35 == 0) {
+			effectSeconds++;
+			if (pk_debugmessages)
+				console.printf("%s time passed: %d",GetClassName(),effectSeconds);
+		}
+		if (effectSeconds >= duration) {
+			if (endsound)
+				owner.A_StartSound(endsound,CHANF_LOCAL);
+			GoAwayAndDie();
+		}
+	}
+	override bool TryPickup (in out Actor other) {
+		if (!(other is "PlayerPawn"))
+			return false;
+		let pwr = PK_PowerUp(other.FindInventory(GetClassName()));
+		if (pwr && pwr.effectSeconds < duration) {
+			pwr.effectSeconds = 0;
+			GoAwayAndDie();
+			return false;
+		}
+		return super.TryPickup(other);
+	}
+}
+
+Class PK_WeaponModifier : PK_PowerUp {
+	Default {
+		inventory.pickupmessage "$PKI_WMODIFIER";
+		inventory.pickupsound "pickups/wmod/pickup";
+		PK_PowerUp.duration 30;
+		PK_PowerUp.endsound "pickups/wmod/end";
+		xscale 0.43;
+		yscale 0.36;
+		+FLOATBOB
+		FloatBobStrength 0.32;
+	}
+	override void Tick() {
+		super.Tick();
+		if (isFrozen() || owner)
+			return;
+		if (GetAge() % 10 == 0)
+			canSeePlayer = CheckPlayerSights();
+		if (canSeePlayer) {
+			color col = Color(0xff,0x45+random(0,100),0x00);
+			A_SpawnParticle(
+				col,
+				SPF_FULLBRIGHT|SPF_RELVEL|SPF_RELACCEL,
+				lifetime:random(20,60),size:frandom[sfx](1.5,4),
+				angle:frandom[sfx](0,359),
+				xoff:frandom[sfx](-4,4),yoff:frandom[sfx](-4,4),zoff:frandom[sfx](14,24) + GetBobOffset(),
+				velx:frandom[sfx](0.5,1.5),velz:frandom[sfx](-0.2,-1),accelx:frandom[sfx](-0.05,-0.2),accelz:0.02,
+				startalphaf:0.9,sizestep:-0.2
+			);
+		}
+	}
+	states {
+	Spawn:
+		PMOD A -1;
+		stop;
 	}
 }

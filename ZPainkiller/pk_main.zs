@@ -10,6 +10,18 @@ Mixin class PK_Math {
 	}
 }
 
+mixin class PK_PlayerSightCheck {
+	protected bool canSeePlayer;
+	//a simple check that returns true if the actor is in any player's LOS:
+	bool CheckPlayerSights() {
+		for ( int i=0; i<MAXPLAYERS; i++ ) 	{
+			if ( playeringame[i] && players[i].mo && CheckSight(players[i].mo) )
+				return true;
+		}
+		return false;
+	}
+}
+
 Class PK_BaseActor : Actor abstract {
 	protected double pi;
 	protected name bcolor;
