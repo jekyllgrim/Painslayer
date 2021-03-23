@@ -34,7 +34,7 @@ Class PK_Rifle : PKWeapon {
 			return;
 		if (psp.rotation == 0 && invoker.rollangVel == 0) {
 			invoker.damping = 0.018;
-			invoker.rollangVel = 0.05 * randompick[sfx](-1,1);
+			invoker.rollangVel = 0.05 * double(randompick[sfx](-1,1));
 		}
 		else {
 			double pspeed = Clamp(vel.length(),0,15);
