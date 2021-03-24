@@ -352,7 +352,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			
 			//unlock the cards and push them into an array on the item token via a netevent:
 			while (UnlockedSilverCards.Size() < 2) {
-				let card = PKCTarotCard(silvercards[random(0,silvercards.Size()-4)]);
+				let card = PKCTarotCard(silvercards[random[tarot](0,silvercards.Size()-4)]);
 				if (UnlockedSilverCards.Find(card) == UnlockedSilverCards.Size()) {
 					card.cardbought = true;
 					card.purchaseAnim = true;
@@ -363,7 +363,7 @@ Class PKCardsMenu : PKCGenericMenu {
 				}
 			}
 			while (UnlockedGoldCards.Size() < 3) {
-				let card = PKCTarotCard(goldcards[random(0,goldcards.Size()-4)]);
+				let card = PKCTarotCard(goldcards[random[tarot](0,goldcards.Size()-4)]);
 				if (UnlockedGoldCards.Find(card) == UnlockedGoldCards.Size()) {
 					card.cardbought = true;
 					card.purchaseAnim = true;

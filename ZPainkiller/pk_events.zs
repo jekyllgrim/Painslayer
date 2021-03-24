@@ -89,7 +89,7 @@ Class PK_MainHandler : EventHandler {
 				cont.pk_gold = Clamp(cont.pk_gold + amt, 0, 99990);
 			}
 			if (e.player == consoleplayer) {				
-				string str = (amt > 0) ? Stringtable.Localize(PKCH_GoldMessage[random(0,3)]) : Stringtable.Localize(PKCH_GoldMessage[random(4,5)]);
+				string str = (amt > 0) ? Stringtable.Localize(PKCH_GoldMessage[random[goldmsg](0,3)]) : Stringtable.Localize(PKCH_GoldMessage[goldmsg][random(4,5)]);
 				console.printf(str);
 				S_StartSound("pickups/gold/vbig",CHAN_AUTO,CHANF_UI);
 			}
