@@ -1,5 +1,5 @@
-Class PK_Inventory : Inventory abstract {
-	mixin PK_PlayerSightCheck;
+Mixin Class PK_PickupSound {
+	//default PlayPickupSound EXCEPT the sounds can play over each other
 	override void PlayPickupSound (Actor toucher)	{
 		double atten;
 		int chan;
@@ -20,6 +20,11 @@ Class PK_Inventory : Inventory abstract {
 		
 		toucher.A_StartSound(PickupSound, chan, flags, 1, atten);
 	}
+}
+
+Class PK_Inventory : Inventory abstract {
+	mixin PK_PlayerSightCheck;
+	mixin PK_PickupSound;
 }
 
 Class PK_GoldPickup : PK_Inventory abstract {
@@ -239,6 +244,7 @@ Class PK_RedSoul : PK_Soul {
 
 Class PK_GoldSoul : Health {
 	mixin PK_PlayerSightCheck;
+	mixin PK_PickupSound;
 	Default {
 		inventory.pickupmessage "$PKI_GOLDSOUL";
 		inventory.amount 100;
@@ -312,12 +318,11 @@ Class PK_MegaSoul : PK_GoldSoul {
 ////////            ////////
 ////////////////////////////
 
+// A base 'power-up' class that doesn't define any special behavior except being time-limited. It's designed to be used in manual checks.
 Class PK_PowerUp : PK_Inventory abstract {
 	protected int effectSeconds;
 	protected int duration;
 	property duration : duration;
-	sound endsound;
-	property endsound : endsound;
 	Default {
 		+INVENTORY.ALWAYSPICKUP
 		PK_PowerUp.duration 40;
@@ -332,8 +337,8 @@ Class PK_PowerUp : PK_Inventory abstract {
 				console.printf("%s time passed: %d",GetClassName(),effectSeconds);
 		}
 		if (effectSeconds >= duration) {
-			if (endsound)
-				owner.A_StartSound(endsound,CHANF_LOCAL);
+			if (deathsound)
+				owner.A_StartSound(deathsound, CHAN_AUTO, CHANF_LOCAL);
 			GoAwayAndDie();
 		}
 	}
@@ -354,13 +359,19 @@ Class PK_WeaponModifier : PK_PowerUp {
 	Default {
 		inventory.pickupmessage "$PKI_WMODIFIER";
 		inventory.pickupsound "pickups/wmod/pickup";
+		deathsound "pickups/wmod/end";
+		//activesound "pickups/wmod/use";
 		PK_PowerUp.duration 30;
-		PK_PowerUp.endsound "pickups/wmod/end";
 		xscale 0.43;
 		yscale 0.36;
 		+FLOATBOB
 		FloatBobStrength 0.32;
 	}
+	/*override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
+		if (!passive && damage > 0 && owner) {
+			owner.A_StartSound(ActiveSound, CHAN_AUTO, CHANF_LOCAL);
+		}
+	}*/
 	override void Tick() {
 		super.Tick();
 		if (isFrozen() || owner)
