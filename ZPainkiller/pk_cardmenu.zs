@@ -1,3 +1,15 @@
+/*======================================
+
+  Black Tarot Board for GZDoom
+  by Jekyll Grim Payne aka Agent_Ash
+  
+  The following menu is coded based on 
+  ZForms menu library by Gutawer.
+
+======================================*/
+
+
+
 Class PKCardsMenu : PKCGenericMenu {
 	const BOARD_WIDTH = 1024;
 	const BOARD_HEIGHT = 768;
