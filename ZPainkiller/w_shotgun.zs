@@ -12,6 +12,7 @@ Class PK_Shotgun : PKWeapon {
 		scale 0.23;
 		inventory.pickupmessage "$PKI_SHOTGUN";
 		inventory.pickupsound "pickups/weapons/shotgun";
+		inventory.icon "PWICA0";
 		Tag "$PK_SHOTGUN_TAG";
 	}
 	override void DoEffect() {

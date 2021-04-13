@@ -11,6 +11,7 @@ Class PK_Stakegun : PKWeapon {
 		scale 0.23;
 		inventory.pickupmessage "$PKI_STAKEGUN";
 		inventory.pickupsound "pickups/weapons/stakegun";
+		inventory.icon "PWICB0";
 		Tag "$PK_STAKEGUN_TAG";
 	}
 	states {
