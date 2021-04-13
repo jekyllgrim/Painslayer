@@ -60,14 +60,14 @@ Class PK_MainHandler : EventHandler {
 			let goldcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
 			if (!goldcontrol)
 				return;
-			if (!goldcontrol || goldcontrol.goldActive || plr.health <= 0 || plr.FindInventory("PK_DemonWeapon")) {
+			if (goldcontrol.goldActive || plr.health <= 0 || plr.FindInventory("PK_DemonWeapon")) {
 				if (e.player == consoleplayer) {
 					plr.A_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI|CHANF_LOCAL);
 					if (pk_debugmessages)
 						console.printf("Can't open the board at this time");
 				}
 				if (pk_debugmessages)
-					console.printf("goldActive %d | health %d | has demon weapon %d",goldcontrol.goldActive,plr.health,plr.FindInventory("PK_DemonWeapon"));
+					console.printf("health: %d | goldActive: %d | has demon weapon: %d",goldcontrol.goldActive,plr.health,plr.CountInv("PK_DemonWeapon"));
 				return;
 			}
 			Menu.SetMenu("PKCardsMenu");
@@ -89,7 +89,7 @@ Class PK_MainHandler : EventHandler {
 				cont.pk_gold = Clamp(cont.pk_gold + amt, 0, 99990);
 			}
 			if (e.player == consoleplayer) {				
-				string str = (amt > 0) ? Stringtable.Localize(PKCH_GoldMessage[random[goldmsg](0,3)]) : Stringtable.Localize(PKCH_GoldMessage[goldmsg][random(4,5)]);
+				string str = (amt > 0) ? Stringtable.Localize(PKCH_GoldMessage[random(0,3)]) : Stringtable.Localize(PKCH_GoldMessage[random(4,5)]);
 				console.printf(str);
 				S_StartSound("pickups/gold/vbig",CHAN_AUTO,CHANF_UI);
 			}
