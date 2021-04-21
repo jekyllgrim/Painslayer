@@ -312,6 +312,53 @@ Class PK_MegaSoul : PK_GoldSoul {
 	}
 }
 
+///////////////////////////
+////////           ////////
+////////   ARMOR   ////////
+////////           ////////
+///////////////////////////
+
+Class PK_BronzeArmor : GreenArmor  {
+	Default {
+		inventory.pickupsound "pickups/armor/bronze";
+		inventory.pickupmessage "$PKI_ARMOR1";
+		scale 0.65;
+	}
+	states {
+	Spawn:
+		PARM A -1;
+		stop;
+	}
+}
+
+Class PK_SilverArmor : PK_BronzeArmor  {
+	Default {
+		inventory.pickupsound "pickups/armor/silver";
+		inventory.pickupmessage "$PKI_ARMOR2";
+		Armor.SavePercent 60;
+		Armor.SaveAmount 150;
+	}
+	states {
+	Spawn:
+		PARM B -1;
+		stop;
+	}
+}
+
+Class PK_GoldArmor : PK_BronzeArmor  {
+	Default {
+		inventory.pickupsound "pickups/armor/gold";
+		inventory.pickupmessage "$PKI_ARMOR3";
+		Armor.SavePercent 80;
+		Armor.SaveAmount 200;
+	}
+	states {
+	Spawn:
+		PARM C -1;
+		stop;
+	}
+}
+
 ////////////////////////////
 ////////            ////////
 ////////  POWER UPS ////////

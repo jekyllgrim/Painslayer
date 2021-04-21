@@ -238,8 +238,10 @@ pickups/soul/red	SOULRED
 pickups/soul/MEGA	SOULMEGA
 pickups/soul/gold	SOULGOLD
 
-pickups/armor/medium	ARMMEDI
-pickups/armor/heavy	ARMHEAVY
+pickups/armor/bronze		"sounds/items/item-shield-small.wav"
+pickups/armor/silver		"sounds/items/item-shield-medium.wav"	
+pickups/armor/gold			"sounds/items/item-shield-big.wav"	
+
 
 // GOLD
 

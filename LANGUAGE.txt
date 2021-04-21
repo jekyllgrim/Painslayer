@@ -83,6 +83,9 @@ PKCH_TAKEGOLD2		= "Don't forget to save some for the ride to the other side.";
 PKI_GOLDSOUL		= "Gold soul!";
 PKI_MEGASOUL		= "Mega soul!";
 PKI_WMODIFIER		= "Weapon Modifier!";
+PKI_ARMOR1			= "Bronze armor";
+PKI_ARMOR2			= "Silver armor";
+PKI_ARMOR3			= "Gold armor";
 //ammo
 PKI_SHELLS			= "Picked up shotgun shells.";
 PKI_FREEZEAMMO		= "Picked up Freezer Ammo.";
@@ -194,6 +197,10 @@ PKCH_TAKEGOLD2		= "Не забудь оставить немного на обр
 //items
 PKI_GOLDSOUL		= "Золотая душа!";
 PKI_MEGASOUL		= "Огромная душа!";
+PKI_WMODIFIER		= "Модификатор оружия!";
+PKI_ARMOR1			= "Бронзовый доспех";
+PKI_ARMOR2			= "Серебряный доспех";
+PKI_ARMOR3			= "Золотой доспех";
 //ammo
 PKI_SHELLS			= "Вы подобрали патроны для дробовика.";
 PKI_FREEZEAMMO		= "Вы подобрали боеприпасы для охладителя.";

@@ -1707,4 +1707,28 @@ Sprite "PFLFA0", 256, 256
 	Patch "FLARB", 0, 0
 }
 
+Sprite "PARMA0", 80, 64
+{
+	XScale 1.0
+	YScale 1.2
+	Offset 40, 56
+	Patch "PARMA0", 0, 0
+}
+
+Sprite "PARMB0", 80, 64
+{
+	XScale 1.0
+	YScale 1.2
+	Offset 40, 56
+	Patch "PARMB0", 0, 0
+}
+
+Sprite "PARMC0", 80, 64
+{
+	XScale 1.0
+	YScale 1.2
+	Offset 40, 56
+	Patch "PARMC0", 0, 0
+}
+
 // End of texture definitions
