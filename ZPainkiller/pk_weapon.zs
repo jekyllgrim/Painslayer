@@ -215,6 +215,7 @@ Class PK_WeaponIcon : Actor {
 }
 
 Class PK_Projectile : PK_BaseActor abstract {
+	mixin PK_Math;
 	protected vector3 spawnpos;
 	protected bool farenough;
 	

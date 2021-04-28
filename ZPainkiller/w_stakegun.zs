@@ -102,6 +102,9 @@ Class PK_Stake : PK_Projectile {
 	protected int basedmg;
 	protected bool onFire;
 	protected bool hitceiling;
+	protected SecPlane stickplane;
+	protected vector2 sticklocation;
+	protected double stickoffset;
 	actor hitvictim; //Stores the first monster hit. Allows us to deal damage only once and to only one victim
 	actor pinvictim; //The fake corpse that will be pinned to a wall
 	Default {
@@ -132,6 +135,80 @@ Class PK_Stake : PK_Projectile {
 				SetZ(ceilingz);
 			else
 				SetZ(floorz);
+		}
+		else if (stickplane) {
+			SetZ(stickplane.ZAtPoint(sticklocation) - stickoffset);
+		}
+	}
+	/*	this is used when the projectile hits a wall, to make sure it'll move with the next sector's floor/ceiling
+		in case the stake hits a door or a lift, so that it moves up/down with that door/lift
+	*/
+	void StickToWall() { 
+		A_RemoveLight('PKBurningStake');
+		onFire = true;
+		A_StartSound("weapons/stakegun/stakewall",attenuation:2);
+		A_SprayDecal("Stakedecal",8);
+		if (blockingline) {
+			FLineTraceData trac;
+			LineTrace(angle,radius+1,pitch,TRF_NOSKY|TRF_THRUACTORS,data:trac);
+			if (trac.HitLine) {
+				let tline = trac.HitLine;
+				int lside = PointOnLineSide(pos.xy,tline);
+				string sside = (lside == 0) ? "front" : "back";
+				if (!tline.backsector) {
+					if (pk_debugmessages > 1)
+						console.printf("Stake hit one-sided line, not doing anything else");
+				}
+				else {
+					let targetsector = (lside == 0 && tline.backsector) ? tline.backsector : tline.frontsector;
+					sticklocation = trac.HitLocation.xy;
+					let floorHitZ = targetsector.floorplane.ZatPoint (sticklocation);
+					let ceilHitZ = targetsector.ceilingplane.ZatPoint (sticklocation);
+					string secpart = "middle";
+					if (pos.z <= floorHitZ) {
+						secpart = "lower";
+						stickplane = targetsector.floorplane;
+					}
+					else if (pos.z >= ceilHitZ) {
+						secpart = "top";
+						stickplane = targetsector.ceilingplane;
+					}
+					stickoffset = stickplane.ZAtPoint(sticklocation) - pos.z;
+					if (pk_debugmessages > 1)
+						console.printf("Stake hit the %s %s part of the line",secpart,sside);
+				}
+			}
+		}		
+		else {
+			bMOVEWITHSECTOR = true;
+			if (pos.z >= ceilingz)
+				hitceiling = true;
+		}
+		bTHRUACTORS = true;
+		bNOGRAVITY = true;
+		A_Stop();
+		for (int i = random[sfx](5,8); i > 0; i--) {
+			vector3 vvel = (frandom[sfx](-5,-2), frandom[sfx](-2,2), frandom[sfx](0,5));
+			if (pos.z <= floorz)
+				vvel = (frandom[sfx](-4,4), frandom[sfx](-4,4), frandom[sfx](3,6));
+			A_SpawnItemEx(
+				"PK_RandomDebris",
+				xvel:vvel.x,
+				yvel:vvel.y,
+				zvel:vvel.z
+			);
+		}
+		if (pinvictim) {
+			pinvictim.A_Stop();
+			pinvictim.SetOrigin((pos.x,pos.y,pinvictim.pos.z),false);	//make sure the fake corpse is at the middle of the stake
+			if (blockingline)	{		//if we hit an actual wall (not a solid obstacle actor), flatten the fake corpse against the wall
+				pinvictim.bWALLSPRITE = true;
+				pinvictim.angle = atan2(blockingline.delta.y, blockingline.delta.x) - 90;
+			}
+		}
+		if (pinvictim && hitvictim && !blockingline && pos.z <= floorz+4) { //remove the pinned corpse completely if the stake is basically on the floor
+			pinvictim.destroy();
+			//hitvictim.TakeInventory("PK_PinToWall",1);
 		}
 	}
 	override void PostBeginPlay() {
@@ -199,72 +276,36 @@ Class PK_Stake : PK_Projectile {
 		return 1;
 	}
 	states {
-		Cache:
-			STAK A 0;
-			BOLT A 0;
-		Spawn:
-			#### A 1 {
-				A_FaceMovementDirection(flags:FMDF_INTERPOLATE);		//makes it properly adjust its actual pitch and the associated model's pitch
-				if (pinvictim) {
-					pinvictim.angle = angle;			//if we already "grabbed" a fake corpse, the stake carries it with it
-					pinvictim.vel = vel;
-					//pinvictim.SetOrigin(pos - (0,0,pinvictim.height),true);
-				}
+	Cache:
+		STAK A 0;
+		BOLT A 0;
+	Spawn:
+		#### A 1 {
+			A_FaceMovementDirection(flags:FMDF_INTERPOLATE);		//makes it properly adjust its actual pitch and the associated model's pitch
+			if (pinvictim) {
+				pinvictim.angle = angle;			//if we already "grabbed" a fake corpse, the stake carries it with it
+				pinvictim.vel = vel;
+				//pinvictim.SetOrigin(pos - (0,0,pinvictim.height),true);
 			}
-			loop;
-		Death: 
-			#### A 160 { 
-				A_RemoveLight('PKBurningStake');
-				onFire = true;
-				A_StartSound("weapons/stakegun/stakewall",attenuation:2);
-				A_SprayDecal("Stakedecal",8);
-				if (!blockingline) {
-					bMOVEWITHSECTOR = true;
-					if (pos.z >= ceilingz)
-						hitceiling = true;
-				}
-				bNOINTERACTION = true;
-				bNOGRAVITY = true;
-				A_Stop();
-				for (int i = random[sfx](5,8); i > 0; i--) {
-					vector3 vvel = (frandom[sfx](-5,-2), frandom[sfx](-2,2), frandom[sfx](0,5));
-					if (pos.z <= floorz)
-						vvel = (frandom[sfx](-4,4), frandom[sfx](-4,4), frandom[sfx](3,6));
-					A_SpawnItemEx(
-						"PK_RandomDebris",
-						xvel:vvel.x,
-						yvel:vvel.y,
-						zvel:vvel.z
-					);
-				}
-				if (pinvictim) {
-					pinvictim.A_Stop();
-					pinvictim.SetOrigin((pos.x,pos.y,pinvictim.pos.z),false);	//make sure the fake corpse is at the middle of the stake
-					if (blockingline)	{		//if we hit an actual wall (not a solid obstacle actor), flatten the fake corpse against the wall
-						pinvictim.bWALLSPRITE = true;
-						pinvictim.angle = atan2(blockingline.delta.y, blockingline.delta.x) - 90;
-					}
-				}
-				if (pinvictim && hitvictim && !blockingline && pos.z <= floorz+4) { //remove the pinned corpse completely if the stake is basically on the floor
-					pinvictim.destroy();
-					//hitvictim.TakeInventory("PK_PinToWall",1);
-				}		
-			}
-			#### A 0 A_SetRenderStyle(1.0,Style_Translucent);
-			#### A 1 A_FadeOut(0.03);
-			wait;
-		Crash:
-			TNT1 A 1 {
-				A_RemoveLight('PKBurningStake');
-				onFire = true;
-			}
-			stop;
-		XDeath:
-			TNT1 A 1 {
-				A_RemoveLight('PKBurningStake');
-				onFire = true;
-			}
-			stop;
+		}
+		loop;
+	Death: 
+		#### A 160 StickToWall();
+		#### A 0 A_SetRenderStyle(1.0,Style_Translucent);
+		#### A 1 A_FadeOut(0.03);
+		wait;
+	Crash:
+		TNT1 A 1 {
+			A_RemoveLight('PKBurningStake');
+			onFire = true;
+		}
+		stop;
+	XDeath:
+		TNT1 A 1 {
+			A_RemoveLight('PKBurningStake');
+			onFire = true;
+		}
+		stop;
 	}
 }
 

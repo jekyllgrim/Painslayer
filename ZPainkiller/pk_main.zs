@@ -1,3 +1,18 @@
+Mixin class PK_Math {	
+	int Sign (double i) {
+		if (i >= 0)
+			return 1;
+		return -1;
+	}
+	double LinearMap(double val, double o_min, double o_max, double n_min, double n_max) {
+		return (val - o_min) * (n_max - n_min) / (o_max - o_min) + n_min;
+	}
+	static clearscope int PointOnLineSide( Vector2 p, Line l ) {
+		if ( !l ) return 0;
+		return (((p.y-l.v1.p.y)*l.delta.x+(l.v1.p.x-p.x)*l.delta.y) > double.epsilon);
+    }
+}
+
 Class PK_InvReplacementControl : Inventory {
 	Default {
 		+INVENTORY.UNDROPPABLE
@@ -115,17 +130,6 @@ Class PK_InvReplacementControl : Inventory {
 		if (pk_debugmessages) console.printf("Replacing %s with %s (amount: %d)",oldItemClass,replacement.GetClassName(),r_amount);
         return true;
     }
-}
-
-Mixin class PK_Math {	
-	int Sign (double i) {
-		if (i >= 0)
-			return 1;
-		return -1;
-	}
-	double LinearMap(double val, double o_min, double o_max, double n_min, double n_max) {
-		return (val - o_min) * (n_max - n_min) / (o_max - o_min) + n_min;
-	}
 }
 
 mixin class PK_PlayerSightCheck {
