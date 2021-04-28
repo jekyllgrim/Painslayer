@@ -1,1 +1,1 @@
-server bool pk_debugmessages = false;
+server int pk_debugmessages = 0;
