@@ -130,15 +130,13 @@ Class PainkillerHUD : BaseStatusBar {
 		
 		//draw health and armor icons:
 		DrawImage("pkhlife",(11,-23),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER ,0.8);
-		//fix armor icon drawing it doesn't work
-		if (CPlayer.mo.CountInv("PK_BronzeArmor"))
-			DrawImage("pkharm1",(11,-11),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER ,0.8);
-		else if (CPlayer.mo.CountInv("PK_SilverArmor"))
-			DrawImage("pkharm2",(11,-11),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER ,0.8);
-		else if (CPlayer.mo.CountInv("PK_GoldArmor"))
-			DrawImage("pkharm3",(11,-11),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER ,0.8);
+		
+		//draw armor on top:
+		let armor = CPlayer.mo.FindInventory("BasicArmor");
+		if (armor != null && armor.Amount > 0)
+			DrawInventoryIcon(armor, (11, -11),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER);
 		else
-			DrawImage("pkharm0",(11,-11),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER ,0.8);
+			DrawImage("pkharm0",(11,-11),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER,0.8);
 		
 		//draw health and armor amounts:
 		DrawString(mIndexFont, String.Format("%03d",CPlayer.health), (19, -28),DI_SCREEN_LEFT_BOTTOM,translation:font.CR_UNTRANSLATED);

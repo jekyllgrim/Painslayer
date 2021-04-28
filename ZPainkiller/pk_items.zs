@@ -323,6 +323,7 @@ Class PK_BronzeArmor : GreenArmor  {
 		inventory.pickupsound "pickups/armor/bronze";
 		inventory.pickupmessage "$PKI_ARMOR1";
 		scale 0.65;
+		inventory.icon "pkharm1";
 	}
 	states {
 	Spawn:
@@ -337,6 +338,7 @@ Class PK_SilverArmor : PK_BronzeArmor  {
 		inventory.pickupmessage "$PKI_ARMOR2";
 		Armor.SavePercent 60;
 		Armor.SaveAmount 150;
+		inventory.icon "pkharm2";
 	}
 	states {
 	Spawn:
@@ -351,6 +353,7 @@ Class PK_GoldArmor : PK_BronzeArmor  {
 		inventory.pickupmessage "$PKI_ARMOR3";
 		Armor.SavePercent 80;
 		Armor.SaveAmount 200;
+		inventory.icon "pkharm3";
 	}
 	states {
 	Spawn:
@@ -414,11 +417,10 @@ Class PK_WeaponModifier : PK_PowerUp {
 		+FLOATBOB
 		FloatBobStrength 0.32;
 	}
-	/*override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
-		if (!passive && damage > 0 && owner) {
-			owner.A_StartSound(ActiveSound, CHAN_AUTO, CHANF_LOCAL);
-		}
-	}*/
+	override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
+		if (!passive && damage > 0 && owner /*&& owner.player && !owner.player.refire*/)
+			owner.A_StartSound(ActiveSound, CHAN_AUTO);
+	}
 	override void Tick() {
 		super.Tick();
 		if (isFrozen() || owner)
