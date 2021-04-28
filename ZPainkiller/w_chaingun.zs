@@ -37,7 +37,7 @@ Class PK_Chaingun : PKWeapon {
 		MIGN A 2 {
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			A_Quake(1,9,0,32,"");
-			A_FireProjectile("PK_Rocket",spawnofs_xy:6,spawnheight:-2);
+			A_FireProjectile("PK_Rocket",spawnofs_xy:3.2,spawnheight:-2);
 			A_ZoomFactor(0.98,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			A_OverlayPivot(OverlayID(),0.1,1.0);
 		}
@@ -194,8 +194,6 @@ Class PK_Rocket : PK_Projectile {
 		PK_Projectile.trailalpha 0.12;
 		speed 30;
 		seesound "weapons/chaingun/rocketfire";
-		height 8;
-		radius 10;
 		decal 'Scorch';
 		damage (20);
 	}
