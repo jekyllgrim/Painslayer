@@ -328,6 +328,7 @@ Class PK_Lightning : PK_TrackingBeam {
 Class PK_Lightning2 : PK_Lightning {}
 
 Class PK_Shuriken : PK_Projectile {
+	protected bool hitceiling;
 	Default {
 		PK_Projectile.trailcolor "f4f4f4";
 		PK_Projectile.trailscale 0.018;
@@ -347,6 +348,15 @@ Class PK_Shuriken : PK_Projectile {
 		if (target)
 			pitch = target.pitch;
 	}
+	override void Tick () {
+		super.Tick();
+		if (bMOVEWITHSECTOR) {
+			if (hitceiling)
+				SetZ(ceilingz);
+			else
+				SetZ(floorz);
+		}
+	}
 	states {
 	Spawn:
 		MODL A 1 NoDelay {
@@ -359,6 +369,11 @@ Class PK_Shuriken : PK_Projectile {
 	Death:
 		MODL B 100 {
 			bNOINTERACTION = true;
+			if (!blockingline) {
+				bMOVEWITHSECTOR = true;
+				if (pos.z >= ceilingz)
+					hitceiling = true;
+			}
 			A_Stop();
 			A_StartSound("weapons/edriver/starwall",attenuation:2);
 		}
