@@ -101,6 +101,7 @@ only one victim and fly through others if they exist. For that we employ a few t
 Class PK_Stake : PK_Projectile {
 	protected int basedmg;
 	protected bool onFire;
+	protected bool hitceiling;
 	actor hitvictim; //Stores the first monster hit. Allows us to deal damage only once and to only one victim
 	actor pinvictim; //The fake corpse that will be pinned to a wall
 	Default {
@@ -124,7 +125,13 @@ Class PK_Stake : PK_Projectile {
 			trailactor = "PK_StakeFlame";
 			trailscale = 0.08;
 			A_AttachLight('PKBurningStake', DynamicLight.RandomFlickerLight, "ffb30f", 40, 44, flags: DYNAMICLIGHT.LF_ATTENUATE);
-			onFire = true;
+			onFire = true;			
+		}
+		if (bMOVEWITHSECTOR) {
+			if (hitceiling)
+				SetZ(ceilingz);
+			else
+				SetZ(floorz);
 		}
 	}
 	override void PostBeginPlay() {
@@ -209,9 +216,12 @@ Class PK_Stake : PK_Projectile {
 			#### A 160 { 
 				A_RemoveLight('PKBurningStake');
 				onFire = true;
-				if (blockingline) {
-					A_StartSound("weapons/stakegun/stakewall",attenuation:2);
-					A_SprayDecal("Stakedecal",8);		
+				A_StartSound("weapons/stakegun/stakewall",attenuation:2);
+				A_SprayDecal("Stakedecal",8);
+				if (!blockingline) {
+					bMOVEWITHSECTOR = true;
+					if (pos.z >= ceilingz)
+						hitceiling = true;
 				}
 				bNOINTERACTION = true;
 				bNOGRAVITY = true;
