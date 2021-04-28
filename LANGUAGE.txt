@@ -112,6 +112,10 @@ PK_CHAINGUN_TAG		= "Rocket Launcher/Chaingun";
 PK_ELECTRODRIVER_TAG = "Electro/Driver";
 PK_RIFLE_TAG		= "Assault Rifle/Flamethrower";
 PK_BOLTGUN_TAG		= "Boltgun/Heater";
+//obituaries
+PKO_STAKE			= "%k pinned %o to the wall";
+PKO_EXSTAKE		= "%k was impressed by %o's grenade-on-a-stick";
+PKO_GRENADE		= "%o blew %k up";
 
 [ru]
 TAROT_NEEDMOUSE		= "Для использования карт Таро необходима мышь. Включите использование мыши в меню с помощью '%s > %s > %s', затем откройте доску повторно.\n\n"
