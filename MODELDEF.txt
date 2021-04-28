@@ -106,6 +106,17 @@ Model PK_Stake {
 	Frame STAK A 0 0
 }
 
+Model PK_ExplosiveBolt {
+	path "Models/Boltgun"
+	Model 0 "explosive_bolt.obj"
+	Skin 0 "boltgun_projectiles.png"
+	Scale 0.4 0.4 0.4
+	AngleOffset 90
+	USEACTORPITCH
+	
+	Frame BOLT A 0 0
+}
+
 Model PK_Bolt {
 	path "Models/Boltgun"
 	Model 0 "bolt_metal.obj"
@@ -161,6 +172,7 @@ Model PK_Bomb {
 	Scale 2 2 2
 	USEACTORROLL
 	USEACTORPITCH
+	
 	FrameIndex MODL A 0 0
 }
 
