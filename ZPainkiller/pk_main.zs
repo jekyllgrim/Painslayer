@@ -1,3 +1,122 @@
+Class PK_InvReplacementControl : Inventory {
+	Default {
+		+INVENTORY.UNDROPPABLE
+		+INVENTORY.UNTOSSABLE
+		+INVENTORY.PERSISTENTPOWER
+		inventory.maxamount 1;
+	}
+	const ALLWEAPONS = 9;
+	static const Class<Weapon> vanillaWeapons[] = {
+		"Fist",
+		"Chainsaw",
+		"Pistol",
+		"Shotgun",
+		"SuperShotgun",
+		"Chaingun",
+		"RocketLauncher",
+		"PlasmaRifle",
+		"BFG9000"
+	};
+	static const Class<Weapon> pkWeapons[] = {
+		"PK_Painkiller",
+		"PK_Painkiller",
+		"PK_Shotgun",
+		"PK_Stakegun",
+		"PK_Boltgun",
+		"PK_Chaingun",
+		"PK_Chaingun",
+		"PK_Rifle",
+		"PK_Electrodriver"
+	};
+	static const Class<Inventory> vanillaItems[] = {
+		"GreenArmor",
+		"BlueArmor"
+	};
+	static const Class<Inventory> pkItems[] = {
+		"PK_SilverArmor",
+		"PK_GoldArmor"
+	};
+	//here we make sure that the player will never have vanilla weapons in their inventory:
+	override void DoEffect() {
+		super.DoEffect();
+		if (!owner || !owner.player)
+			return;
+		let plr = owner.player;
+		array < int > changeweapons; //stores all weapons that need to be exchanged
+		int selweap = -1; //will store readyweapon
+		//record all weapons that need to be replaced
+		for (int i = 0; i < ALLWEAPONS; i++) {
+			//if a weapon is found, cache its position in the array:
+			Class<Weapon> oldweap = vanillaWeapons[i];
+			if (owner.CountInv(oldweap) >= 1) {
+				if (pk_debugmessages)  console.printf("found %s that shouldn't be here",oldweap.GetClassName());
+				changeweapons.Push(i);
+			}
+			//also, if it was seleted, cache its number separately:
+			if (owner.player.readyweapon && owner.player.readyweapon.GetClass() == oldweap)
+				selweap = i;
+		}
+		//if no old weapons were found, do nothing else:
+		if (changeweapons.Size() <= 0)
+			return;
+		for (int i = 0; i < ALLWEAPONS; i++) {
+			//do nothing if this weapon wasn't cached:
+			if (changeweapons.Find(i) == changeweapons.Size())
+				continue;
+			Class<Weapon> oldweap = vanillaWeapons[i];
+			Class<Weapon> newweap = pkWeapons[i];
+			//remove old weapon
+			owner.A_TakeInventory(oldweap);
+			if (pk_debugmessages) console.printf("Exchanging %s for %s",oldweap.GetClassName(),newweap.GetClassName());
+			if (!owner.CountInv(newweap)) {
+				owner.A_GiveInventory(newweap);
+				/*
+				//create a copy that won't give any ammo and attach it to the player
+				let wp = Weapon(Spawn(newweap));
+				if (wp) {
+					wp.ammogive1 = 0;
+					wp.ammogive2 = 0;
+					wp.AttachToOwner(owner);
+					//console.printf("Giving %s",wp.GetClassName());
+				}*/
+			}
+		}		
+		//select the corresponding new weapon if an old weapon was selected:
+		if (selweap != -1) {
+			Class<Weapon> newsel = pkWeapons[selweap];
+			let wp = Weapon(owner.FindInventory(newsel));
+			if (wp) {
+				if (pk_debugmessages) console.printf("Selecting %s", wp.GetClassName());
+				owner.player.pendingweapon = wp;
+			}
+		}
+		changeweapons.Clear();
+	}
+    override bool HandlePickup (Inventory item) {
+        let oldItemClass = item.GetClassName();
+        Class<Inventory> replacement = null;
+		for (int i = 0; i < ALLWEAPONS; i++) {
+			if (pkWeapons[i] && oldItemClass == vanillaWeapons[i]) {
+				replacement = pkWeapons[i];
+				break;
+			}
+		}
+		for (int i = 0; i < vanillaItems.Size(); i++) {
+			if (pkItems[i] && oldItemClass == vanillaItems[i]) {
+				replacement = pkItems[i];
+				break;
+			}
+		}
+        if (!replacement)
+            return false;
+		int r_amount = GetDefaultByType(replacement).amount;
+        item.bPickupGood = true;
+        owner.A_GiveInventory(replacement,r_amount);
+		if (pk_debugmessages) console.printf("Replacing %s with %s (amount: %d)",oldItemClass,replacement.GetClassName(),r_amount);
+        return true;
+    }
+}
+
 Mixin class PK_Math {	
 	int Sign (double i) {
 		if (i >= 0)

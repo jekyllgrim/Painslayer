@@ -239,25 +239,10 @@ Class PK_ReplacementHandler : EventHandler {
 		e.IsFinal = true;
 	}
 	
-	static const Class<Weapon> PK_VanillaWeaponsList[] = { 'Fist', 'Chainsaw', 'Pistol', 'Shotgun', 'SuperShotgun', 'Chaingun', 'RocketLauncher', 'PlasmaRifle', 'BFG9000' };
-	
-	override void WorldTick() {			
-		for (int pn = 0; pn < MAXPLAYERS; pn++) {
-			if (!playerInGame[pn])
-				continue;			
-			PlayerInfo player	= players[pn];
-			PlayerPawn mo		= player.mo;
-			if (!player || !mo)
-				continue;			
-			for (int i = 0; i < PK_VanillaWeaponsList.Size(); i++) {
-				mo.TakeInventory(PK_VanillaWeaponsList[i],1);
-			}
-			if (!player.readyweapon) {
-				//console.printf("no readyweapon");
-				if (!mo.FindInventory("PK_Painkiller"))
-					mo.GiveInventory("PK_Painkiller",1);
-				player.pendingweapon = mo.PickWeapon(1,true);
-			}
+	override void WorldThingSpawned(WorldEvent e) {
+		if (e.thing && e.thing.player) {
+			if (!e.thing.FindInventory("PK_InvReplacementControl"))
+				e.thing.GiveInventory("PK_InvReplacementControl",1);
 		}
 	}
 }
