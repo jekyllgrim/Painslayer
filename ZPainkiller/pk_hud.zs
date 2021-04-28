@@ -131,7 +131,7 @@ Class PainkillerHUD : BaseStatusBar {
 		//draw health and armor icons:
 		DrawImage("pkhlife",(11,-23),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER ,0.8);
 		
-		//draw armor on top:
+		//draw armor icon:
 		let armor = CPlayer.mo.FindInventory("BasicArmor");
 		if (armor != null && armor.Amount > 0)
 			DrawInventoryIcon(armor, (11, -11),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER);
