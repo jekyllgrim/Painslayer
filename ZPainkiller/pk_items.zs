@@ -322,6 +322,8 @@ Class PK_BronzeArmor : GreenArmor  {
 	Default {
 		inventory.pickupsound "pickups/armor/bronze";
 		inventory.pickupmessage "$PKI_ARMOR1";
+		Armor.SavePercent 33.335;
+		Armor.SaveAmount 100;
 		scale 0.65;
 		inventory.icon "pkharm1";
 	}
@@ -410,7 +412,7 @@ Class PK_WeaponModifier : PK_PowerUp {
 		inventory.pickupmessage "$PKI_WMODIFIER";
 		inventory.pickupsound "pickups/wmod/pickup";
 		deathsound "pickups/wmod/end";
-		//activesound "pickups/wmod/use";
+		activesound "pickups/wmod/use";
 		PK_PowerUp.duration 30;
 		xscale 0.43;
 		yscale 0.36;
@@ -418,8 +420,8 @@ Class PK_WeaponModifier : PK_PowerUp {
 		FloatBobStrength 0.32;
 	}
 	override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
-		if (!passive && damage > 0 && owner /*&& owner.player && !owner.player.refire*/)
-			owner.A_StartSound(ActiveSound, CHAN_AUTO);
+		if (!passive && damage > 0 && owner && owner.player && !owner.player.refire)
+			owner.A_StartSound(ActiveSound, CH_WMOD);
 	}
 	override void Tick() {
 		super.Tick();
