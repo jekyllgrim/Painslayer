@@ -116,7 +116,7 @@ Class PK_Stake : PK_Projectile {
 		height 2;
 		damage 0;
 		decal "";
-		obituary "%k pinned %o to the wall";
+		obituary "$PKO_STAKE";
 	}
 	override void Tick () {
 		super.Tick();
@@ -410,17 +410,26 @@ Class PK_PinVictim : Actor {		//the fake corpse (receives its visuals from the s
 }
 
 Class PK_GrenadeHitbox : Actor {
-	protected PK_Stake hitstake;
-	PK_Grenade ggrenade;
+	Actor hitstake;
+	Actor ggrenade;
+	class<Actor> collider;
+	property collider : collider;
+	class<Actor> newstake;
+	property newstake : newstake;
+	sound combosound;
+	property combosound : combosound;
 	Default {
+		PK_GrenadeHitbox.collider "PK_Stake";
+		PK_GrenadeHitbox.newstake "PK_ExplosiveStake";		
+		PK_GrenadeHitbox.combosound "weapons/stakegun/combo";		
 		+NOGRAVITY
 		+SOLID
 		radius 16;
 		height 24;
 	}
 	override bool CanCollideWith(Actor other, bool passive) {
-		if (other && passive && other is "PK_Stake" && master && (abs(pos.z - other.pos.z) <= height)) {
-			hitstake = PK_Stake(other);
+		if (other && passive && collider && other is collider && master && (abs(pos.z - other.pos.z) <= height)) {
+			hitstake = other;
 			master = null;			
 		}
 		return false;
@@ -428,13 +437,13 @@ Class PK_GrenadeHitbox : Actor {
 	override void Tick() {
 		super.Tick();
 		if (!master && hitstake) {				
-			let exs = Spawn("PK_ExplosiveStake",hitstake.pos);
+			let exs = Spawn(newstake,hitstake.pos);
 			if (exs) {
 				exs.vel = hitstake.vel;
 				exs.angle = hitstake.angle;
 				exs.pitch = hitstake.pitch+5;
 				exs.target = hitstake.target;
-				A_StartSound("weapons/stakegun/combo");
+				A_StartSound(combosound);
 			}
 			hitstake.destroy();
 			if (ggrenade)
@@ -453,6 +462,7 @@ Class PK_Grenade : PK_Projectile {
 		PK_Projectile.trailscale 0.04;
 		PK_Projectile.trailfade 0.035;
 		PK_Projectile.trailalpha 0.3;
+		Obituary "$PKO_GRENADE";
 		-NOGRAVITY
 		bouncetype 'hexen';
 		bouncefactor 0.35;
@@ -523,7 +533,7 @@ Class PK_ExplosiveStake : PK_Projectile {
 		height 4;
 		damage (40);
 		decal "Scorch";
-		obituary "%k was impressed by %o's grenade-on-a-stick";
+		obituary "$PKO_EXSTAKE";
 	}
 	states {
 	Spawn:

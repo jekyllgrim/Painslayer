@@ -270,6 +270,50 @@ Class PK_Bolt : PK_Stake {
 	}
 }
 
+Class PK_ExplosiveBolt : PK_Projectile {
+	Default {
+		PK_Projectile.trailcolor "ff7538";
+		PK_Projectile.trailscale 0.024;
+		PK_Projectile.trailfade 0.04;
+		PK_Projectile.trailalpha 0.35;
+		speed 75;
+		damage (25);
+		decal "Scorch";
+		obituary "$PKO_EXSTAKE";
+	}
+	states {
+	Death:
+		TNT1 A 1 { 
+			A_Quake(1,6,0,160,"");
+			A_StartSound("weapons/boltgun/explosion",attenuation:1);
+			A_Explode(32,80);				
+			A_SetRenderstyle(alpha,STYLE_Add);
+			A_SetScale(frandom[sfx](0.4,0.47));
+			bSPRITEFLIP = randompick[sfx](0,1);
+			roll = random[sfx](0,359);
+			for (int i = random[sfx](5,8); i > 0; i--) {
+				let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
+				if (debris) {
+					double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](6,14);
+					debris.vel = (frandom[sfx](-9,9),frandom[sfx](-9,9),zvel);
+					debris.A_SetScale(0.5);
+				}
+			}
+			A_AttachLight('Bomb',DynamicLight.PulseLight,"FFAA00",0,32,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF,param:1.2);
+		}
+		BOM4 JKLMNOPQ 1 bright;
+		BOM5 ABCDEFGHIJKLMN 2 bright A_FadeOut(0.05);
+		wait;
+	}
+}
+
+Class PK_BombHitbox : PK_GrenadeHitbox {
+	Default {
+		PK_GrenadeHitbox.collider "PK_Bolt";
+		PK_GrenadeHitbox.newstake "PK_ExplosiveBolt";
+	}
+}
+
 Class PK_Bomb : PK_Projectile {
 	protected int bounces;
 	protected double rollOfs;
@@ -283,9 +327,9 @@ Class PK_Bomb : PK_Projectile {
 		bouncetype 'hexen';
 		bouncefactor 0.65;
 		gravity 0.45;
+		height 5;
+		radius 4;
 		bouncesound "weapons/boltgun/bounce";
-		height 6;
-		radius 8;
 		speed 15;		
 		damage (10);
 		scale 0.17;
@@ -308,7 +352,7 @@ Class PK_Bomb : PK_Projectile {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		/*let trg = PK_GrenadeHitbox(Spawn("PK_GrenadeHitbox",pos));
+		/*let trg = PK_GrenadeHitbox(Spawn("PK_BombHitbox",pos));
 		trg.master = self;
 		trg.ggrenade = self;*/
 		bouncefactor *= frandom[bomb](0.85,1.15);
@@ -316,57 +360,57 @@ Class PK_Bomb : PK_Projectile {
 		rollOfs = frandom[sfx](2,5) + randompick[sfx](-1,1);
 	}
 	states {
-		Spawn:
-			MODL A -1;
-			stop;
-			//KULK ABC 2;
-			//loop;
-		Bounce:
-			#### # 1 {
-				bounces++;
-				if (bounces > 2) 
-					return ResolveState("XDeath");
-				roll = frandom[sfx](-30,30);
-				if (bounces == 1) {
-					A_AttachLight('Bomb',DynamicLight.FlickerLight,"DDBB00",17,12,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF);
-					let red = PK_BaseFlare(Spawn("PK_ProjFlare",pos));
-					if (red) {
-						red.fcolor = "FF0000";
-						red.master = self;
-						red.alpha = 0.65;
-						red.A_SetScale(0.06);
-					}
+	Spawn:
+		MODL A -1;
+		stop;
+		//KULK ABC 2;
+		//loop;
+	Bounce:
+		#### # 1 {
+			bounces++;
+			if (bounces > 2) 
+				return ResolveState("XDeath");
+			roll = frandom[sfx](-30,30);
+			if (bounces == 1) {
+				A_AttachLight('Bomb',DynamicLight.FlickerLight,"DDBB00",17,12,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF);
+				let red = PK_BaseFlare(Spawn("PK_ProjFlare",pos));
+				if (red) {
+					red.fcolor = "FF0000";
+					red.master = self;
+					red.alpha = 0.65;
+					red.A_SetScale(0.06);
 				}
-				return ResolveState(null);
 			}
-			goto spawn;
-		Death:
-		XDeath:
-			TNT1 A 0 {
-				bUSEBOUNCESTATE = false; //without this it'll glitch on sloped 3D floors (those be damned): it'll continuously jump into Bounce state and then into XDeath, in cycle
-				A_Stop();
-				bNOGRAVITY = true;
-				A_RemoveChildren(1,RMVF_EVERYTHING);
-				A_StopSound(4);
-				A_Quake(1,6,0,160,"");
-				A_StartSound("weapons/boltgun/explosion",CHAN_5);
-				A_Explode(32,80);				
-				A_SetRenderstyle(alpha,STYLE_Add);
-				A_SetScale(frandom[sfx](0.25,0.3));
-				bSPRITEFLIP = randompick[sfx](0,1);
-				roll = random[sfx](0,359);
-				for (int i = random[sfx](3,6); i > 0; i--) {
-					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
-					if (debris) {
-						double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
-						debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
-						debris.A_SetScale(0.5);
-					}
+			return ResolveState(null);
+		}
+		goto spawn;
+	Death:
+	XDeath:
+		TNT1 A 0 {
+			bUSEBOUNCESTATE = false; //without this it'll glitch on sloped 3D floors (those be damned): it'll continuously jump into Bounce state and then into XDeath, in cycle
+			A_Stop();
+			bNOGRAVITY = true;
+			A_RemoveChildren(1,RMVF_EVERYTHING);
+			A_StopSound(4);
+			A_Quake(1,6,0,160,"");
+			A_StartSound("weapons/boltgun/explosion",CHAN_5);
+			A_Explode(32,80);				
+			A_SetRenderstyle(alpha,STYLE_Add);
+			A_SetScale(frandom[sfx](0.25,0.3));
+			bSPRITEFLIP = randompick[sfx](0,1);
+			roll = random[sfx](0,359);
+			for (int i = random[sfx](3,6); i > 0; i--) {
+				let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
+				if (debris) {
+					double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
+					debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
+					debris.A_SetScale(0.5);
 				}
-				A_AttachLight('Bomb',DynamicLight.PulseLight,"FFAA00",0,18,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF,param:0.7);
 			}
-			BOM4 JKLMNOPQ 1 bright;
-			BOM5 ABCDEFGHIJKLMN 1 bright A_FadeOut(0.05);
-			stop;
+			A_AttachLight('Bomb',DynamicLight.PulseLight,"FFAA00",0,18,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF,param:0.7);
+		}
+		BOM4 JKLMNOPQ 1 bright;
+		BOM5 ABCDEFGHIJKLMN 1 bright A_FadeOut(0.05);
+		stop;
 	}
 }
