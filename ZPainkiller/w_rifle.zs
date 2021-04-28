@@ -7,6 +7,7 @@ Class PK_Rifle : PKWeapon {
 	private double prevAngle[8];
 	private double prevPitch[8];
 	private int fuelDepleteRate;
+	mixin PK_Math;
 	Default {
 		PKWeapon.emptysound "weapons/empty/rifle";
 		weapon.slotnumber 6;
@@ -32,14 +33,15 @@ Class PK_Rifle : PKWeapon {
 		let psp = Player.FindPSprite(OverlayID());
 		if (!psp)
 			return;
-		if (psp.rotation == 0 && invoker.rollangVel == 0) {
+		if (abs(psp.rotation) < 0.05 && abs(invoker.rollangVel) < 0.045) {
 			invoker.damping = 0.018;
-			invoker.rollangVel = 0.05 * double(randompick[sfx](-1,1));
+			invoker.rollangVel = 0.05 * invoker.Sign(invoker.rollangVel);
 		}
 		else {
 			double pspeed = Clamp(vel.length(),0,15);
 			invoker.damping = 0.018 - (0.0024 * pspeed);
 		}
+		//console.printf("rollangvel: %f | damping: %f",invoker.rollangVel,invoker.damping);
 	}
 	action void PK_RifleFlash() {		
 		A_Overlay(RLIGHT_WEAPON,"Highlight");
@@ -692,14 +694,16 @@ Class PK_FlamerTank : PK_Projectile {
 		goto spawn;
 	Death:
 		TNT1 A 175 {
-			tankmodel.pitch = Normalize180(tankmodel.pitch);
-			if (abs(tankmodel.pitch) < 165)
-				targetPitch = 90 * Sign(tankmodel.pitch);
-			else {
-				tankmodel.straight = true;
-				targetPitch = tankmodel.pitch;
+			if (tankmodel) {
+				tankmodel.pitch = Normalize180(tankmodel.pitch);
+				if (abs(tankmodel.pitch) < 165)
+					targetPitch = 90 * Sign(tankmodel.pitch);
+				else {
+					tankmodel.straight = true;
+					targetPitch = tankmodel.pitch;
+				}
+				pitchMod = -(tankmodel.pitch - targetPitch) / 4;
 			}
-			pitchMod = -(tankmodel.pitch - targetPitch) / 4;
 			landed = true;
 			//console.printf("Landed %d | pitch: %d | targetPitch: %d",landed, tankmodel.pitch, targetPitch);
 			A_SetTics(random[gas](140,180));
