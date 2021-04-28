@@ -352,9 +352,9 @@ Class PK_Bomb : PK_Projectile {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		/*let trg = PK_GrenadeHitbox(Spawn("PK_BombHitbox",pos));
+		let trg = PK_GrenadeHitbox(Spawn("PK_BombHitbox",pos));
 		trg.master = self;
-		trg.ggrenade = self;*/
+		trg.ggrenade = self;
 		bouncefactor *= frandom[bomb](0.85,1.15);
 		roll = frandom[sfx](-20,20);
 		rollOfs = frandom[sfx](2,5) + randompick[sfx](-1,1);
