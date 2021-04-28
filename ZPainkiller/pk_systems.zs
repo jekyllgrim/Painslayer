@@ -72,7 +72,7 @@ Class PK_DemonTargetControl : PK_InventoryToken {
 			return;
 		//lowers pitch and reduces speed for non-player actors:
 		if (owner.bISMONSTER) {
-			for (int i = 7; i > 0; i--)
+			for (int i = CH_END; i > 0; i--)
 				owner.A_SoundPitch(i,0.9);
 			if (owner.CurState != slowstate) {
 				owner.A_SetTics(owner.tics*1.5);
@@ -156,7 +156,7 @@ Class PK_DemonWeapon : PKWeapon {
 		}
 		//enable demon shader if given to the consoleplayer
 		if(players[consoleplayer] == owner.player)   {
-			owner.A_StartSound("demon/loop",66,CHANF_UI|CHANF_LOOPING);
+			owner.A_StartSound("demon/loop",CH_HELL,CHANF_UI|CHANF_LOOPING);
 			SetMusicVolume(0);
 			Shader.SetEnabled( players[consoleplayer], "DemonMorph", true);
 			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "waveSpeed", 25 );
@@ -249,7 +249,7 @@ Class PK_DemonWeapon : PKWeapon {
 	override void DetachFromOwner() {
 		if(players[consoleplayer] == owner.player)   {
 			Shader.SetEnabled( players[consoleplayer], "DemonMorph", false);
-			owner.A_StopSound(66);
+			owner.A_StopSound(CH_HELL);
 			SetMusicVolume(1);
 		}
 		if (!PK_MainHandler.CheckPlayersHave("PK_DemonWeapon") && handler) {
@@ -278,14 +278,14 @@ Class PK_DemonWeapon : PKWeapon {
 			owner.player.readyweapon.crosshair = 0;
 			owner.player.readyweapon.A_ZoomFactor(1.0);
 		}
-		owner.player.SetPsprite(66,null);
+		owner.player.SetPsprite(PSP_DEMON,null);
 		super.DetachFromOwner();
 	}
 	private double wzoom;
 	states {
 	Ready:
 		TNT1 A 1 {
-			A_Overlay(66,"DemonCross");
+			A_Overlay(PSP_DEMON,"DemonCross");
 			A_ZoomFactor(0.85,ZOOM_NOSCALETURNING);
 			let psp = player.GetPSprite(PSP_WEAPON);
 			psp.y = WEAPONTOP;
@@ -296,7 +296,7 @@ Class PK_DemonWeapon : PKWeapon {
 		loop;
 	Fire:
 		TNT1 A 20 {
-			A_Overlay(66,"DemonCrossFire");
+			A_Overlay(PSP_DEMON,"DemonCrossFire");
 			A_WeaponOffset(0,0);
 			A_StartSound("demon/fire",CHAN_AUTO);
 			A_FireBullets(5,5,50,50,"PK_NullPuff",FBF_NORANDOM);
@@ -1056,13 +1056,13 @@ Class PK_DexterityEffect : PowerDoubleFiringSpeed {
 		super.DoEffect();
 		if (!owner || !owner.player)
 			return;
-		for (int i = 12; i > 0; i--)
+		for (int i = CH_END; i > 0; i--)
 			owner.A_SoundPitch(i,1.2);
 	}
 	override void DetachFromOwner() {
 		if (!owner || !owner.player)
 			return;
-		for (int i = 12; i > 0; i--)
+		for (int i = CH_END; i > 0; i--)
 			owner.A_SoundPitch(i,1);
 		super.DetachFromOwner();
 	}
@@ -1240,7 +1240,7 @@ Class PK_HasteControl : PK_InventoryToken {
 			return;
 		//monsters:
 		if (ownerType == 0) {
-			for (int i = 7; i > 0; i--)
+			for (int i = CH_END; i > 0; i--)
 				owner.A_SoundPitch(i,0.6);
 			if (owner.CurState != slowstate) {
 				owner.A_SetTics(owner.tics*1.8);
@@ -1257,13 +1257,13 @@ Class PK_HasteControl : PK_InventoryToken {
 		}
 		//monster projectiles:
 		else if (ownerType == 1) {
-			for (int i = 7; i > 0; i--)
+			for (int i = CH_END; i > 0; i--)
 				owner.A_SoundPitch(i,0.6);
 		}
 		else {
 			//player projectiles and players
 			if (ownerType == 2)  {
-				for (int i = 12; i > 0; i--)
+				for (int i = CH_END; i > 0; i--)
 					owner.A_SoundPitch(i,0.8);
 				if (owner.CurState != slowstate) {
 					owner.A_SetTics(owner.tics*1.5);
@@ -1272,7 +1272,7 @@ Class PK_HasteControl : PK_InventoryToken {
 			}
 			//players (having Dexterity neutralizes the effect)
 			if (ownerType == 3 && !owner.FindInventory("PKC_Dexterity")) {
-				for (int i = 12; i > 0; i--)
+				for (int i = CH_END; i > 0; i--)
 					owner.A_SoundPitch(i,0.8);
 				let weap = owner.player.readyweapon;
 				if (!weap)
@@ -1308,7 +1308,7 @@ Class PK_HasteControl : PK_InventoryToken {
 	override void DetachFromOwner() {
 		if (!owner)
 			return;
-		for (int i = 12; i > 0; i--)
+		for (int i = CH_END; i > 0; i--)
 			owner.A_SoundPitch(i,1);
 		owner.speed = owner.default.speed; //p_speed;
 		owner.gravity = owner.default.gravity; //p_gravity;

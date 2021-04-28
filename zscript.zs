@@ -1,12 +1,11 @@
-version "4.4.0"
-
-const font_times = "TimesS2";
+version "4.5.0"
 
 #include "ZPainkiller/klazer/KLAZ_kColor.zsc"
 #include "ZPainkiller/klazer/KLAZ_Beam.zsc"
 #include "ZPainkiller/mk_matrix.zsc"
 #include "ZPainkiller/StatusScreen_base.zsc"
 
+#include "ZPainkiller/pk_constants.zs"
 #include "ZPainkiller/pk_main.zs"
 #include "ZPainkiller/pk_events.zs"
 #include "ZPainkiller/pk_weapon.zs"

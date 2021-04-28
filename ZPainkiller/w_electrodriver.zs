@@ -98,7 +98,7 @@ Class PK_ElectroDriver : PKWeapon {
 				if (!infin)
 					TakeInventory(invoker.ammotype2,40);
 				A_ClearRefire();
-				A_StopSound(12);
+				A_StopSound(CH_LOOP);
 				return ResolveState("DiskFire");
 			}
 			if (!infin) {
@@ -113,7 +113,7 @@ Class PK_ElectroDriver : PKWeapon {
 					}
 				}
 			}
-			A_StartSound("weapons/edriver/electroloop",12,CHANF_LOOPING);
+			A_StartSound("weapons/edriver/electroloop",CH_LOOP,CHANF_LOOPING);
 			vector3 atkpos = FindElectroTarget();
 			PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
 			PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
@@ -135,8 +135,8 @@ Class PK_ElectroDriver : PKWeapon {
 	AltHoldEnd:
 		TNT1 A 0 {
 			A_ClearRefire();
-			A_StopSound(12);
-			A_StartSound("weapons/edriver/electroloopend",12);
+			A_StopSound(CH_LOOP);
+			A_StartSound("weapons/edriver/electroloopend",CH_LOOP);
 			A_RemoveLight('PKWeaponlight');
 		}
 		goto ready;	

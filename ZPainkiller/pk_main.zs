@@ -21,6 +21,7 @@ mixin class PK_PlayerSightCheck {
 	}
 }
 
+
 Class PK_BaseActor : Actor abstract {
 	protected double pi;
 	protected name bcolor;
