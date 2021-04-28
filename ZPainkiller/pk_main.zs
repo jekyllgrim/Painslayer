@@ -1,9 +1,8 @@
 Mixin class PK_Math {	
-	int Sign (int i) {
+	int Sign (double i) {
 		if (i >= 0)
 			return 1;
-		else
-			return -1;
+		return -1;
 	}
 	double LinearMap(double val, double o_min, double o_max, double n_min, double n_max) {
 		return (val - o_min) * (n_max - n_min) / (o_max - o_min) + n_min;
