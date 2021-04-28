@@ -264,6 +264,8 @@ Class PK_Projectile : PK_BaseActor abstract {
 	property trailz : trailz;
 	Default {
 		projectile;
+		height 6;
+		radius 6;
 		PK_Projectile.flarescale 0.065;
 		PK_Projectile.flarealpha 0.7;
 		PK_Projectile.trailscale 0.04;
