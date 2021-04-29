@@ -268,6 +268,23 @@ Class PK_Bolt : PK_Stake {
 		basedmg = 40;
 		onFire = true; //this prevents it from spawning the fire trail that the stake would spawn after 12 tics
 	}
+	override void StakeBreak() {
+		double ofz = botz+1;
+		if (pos.z >= topz)
+			ofz = topz-1;
+		for (int i = random[sfx](3,5); i > 0; i--) {
+			let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,ofz)));
+			if (deb) {
+				deb.A_SetScale(0.5);
+				double vz = frandom[sfx](-1,-4);
+				if (pos.z <= botz)
+					vz = frandom[sfx](3,6);
+				deb.vel = (frandom[sfx](-5,5),frandom[sfx](-5,5),vz);
+			}
+		}
+		A_StartSound("weapons/boltgun/boltbreak",volume:0.8, attenuation:3);
+		PK_StakeProjectile.StakeBreak();
+	}
 }
 
 Class PK_ExplosiveBolt : PK_Projectile {

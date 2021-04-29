@@ -318,6 +318,116 @@ Class PK_Projectile : PK_BaseActor abstract {
 	}
 }
 
+/*	A base projectile class that can stick into walls and planes.
+	It'll move with the floor/ceilign if stuck in one.
+	It'll also detect door/platform sectors and move with them.
+	Base for stakes, bolts and shurikens.
+*/
+Class PK_StakeProjectile : PK_Projectile {
+	protected int hitplane; //0: none, 1: floor, 2: ceiling
+	protected actor stickobject; //a non-monster object that was hit
+	protected SecPlane stickplane; //a plane to stick to
+	protected vector2 sticklocation; //the point at the line the stake collided with
+	protected double stickoffset; //how far the stake is from the nearest ceiling or floor (depending on whether it hit top or bottom part of the line)
+	protected double topz; //ZAtPoint below stake
+	protected double botz; //ZAtPoint above stake
+	actor pinvictim; //The fake corpse that will be pinned to a wall
+	protected double victimofz;
+	
+	Default {
+		+MOVEWITHSECTOR
+	}
+	
+	virtual void StickToWall() {
+		//A_StartSound(deathsound,attenuation:10);
+		A_FaceMovementDirection();
+		if (blockingline) {
+			FLineTraceData trac;
+			LineTrace(angle,radius+64,pitch,TRF_NOSKY|TRF_THRUACTORS,data:trac);
+			string myclass = GetClassName();
+			if (trac.HitLine) {
+				let tline = trac.HitLine;
+				int lside = PointOnLineSide(pos.xy,tline);
+				string sside = (lside == 0) ? "front" : "back";
+				if (!tline.backsector) {
+					if (pk_debugmessages > 1)
+						console.printf("%s hit one-sided line, not doing anything else",myclass);
+				}
+				else {
+					let targetsector = (lside == 0 && tline.backsector) ? tline.backsector : tline.frontsector;
+					sticklocation = trac.HitLocation.xy;
+					let floorHitZ = targetsector.floorplane.ZatPoint (sticklocation);
+					let ceilHitZ = targetsector.ceilingplane.ZatPoint (sticklocation);
+					string secpart = "middle";
+					if (pos.z <= floorHitZ) {
+						secpart = "lower";
+						stickplane = targetsector.floorplane;
+					}
+					else if (pos.z >= ceilHitZ) {
+						secpart = "top";
+						stickplane = targetsector.ceilingplane;
+					}
+					stickoffset = stickplane.ZAtPoint(sticklocation) - pos.z;
+					if (pk_debugmessages > 1)
+						console.printf("%s hit the %s %s part of the line at %d,%d,%d",myclass,secpart,sside,pos.x,pos.y,pos.z);
+				}
+			}
+		}
+		else if (stickobject) {
+			stickoffset = pos.z - stickobject.pos.z;
+		}
+		else {			
+			if (pos.z >= ceilingz)
+				hitplane = 2;
+			else
+				hitplane = 1;
+		}
+		bTHRUACTORS = true;
+		bNOGRAVITY = true;
+		A_Stop();
+	}
+	override int SpecialMissileHit (Actor victim) {
+		if (!victim.bISMONSTER && victim.bSOLID) {
+			stickobject = victim;
+			return -1;
+		}
+		return 1;
+	}
+	virtual void StakeBreak() {
+		if (pk_debugmessages > 1)
+			console.printf("%s destroyed",GetClassName());
+		if (self)
+			destroy();
+	}
+	override void Tick () {
+		super.Tick();
+		if (!isFrozen())
+			A_FaceMovementDirection(flags:FMDF_INTERPOLATE );
+		if (bTHRUACTORS) {
+			if (hitplane > 0) {
+				if (hitplane > 1)
+					SetZ(ceilingz);
+				else
+					SetZ(floorz);
+			}
+			else if (stickplane) {
+				SetZ(stickplane.ZAtPoint(sticklocation) - stickoffset);
+				if (pinvictim)
+					pinvictim.SetZ(pos.z + victimofz);
+				topz = CurSector.ceilingplane.ZAtPoint(pos.xy);
+				botz = CurSector.floorplane.ZAtPoint(pos.xy);
+				if (pos.z >= topz || pos.z <= botz) {
+					stickplane = null;
+					StakeBreak();
+					return;
+				}
+			}
+			else if (stickobject)
+				SetZ(stickobject.pos.z + stickoffset);
+		}
+	}
+}
+
 Class PK_BulletTracer : FastProjectile {
 	Default {
 		-ACTIVATEIMPACT;

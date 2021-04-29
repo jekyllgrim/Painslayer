@@ -111,6 +111,11 @@ stakewall3	"sounds/stakegun/stake-default3.wav"
 stakewall4	"sounds/stakegun/stake-default4.wav"
 stakewall5	"sounds/stakegun/stake-default5.wav"
 
+$random weapons/stakegun/stakebreak { stakebreak1 stakebreak2 stakebreak3 }
+stakebreak1 "sounds/chest-wood-impact1.wav"
+stakebreak2 "sounds/chest-wood-impact2.wav"
+stakebreak3 "sounds/chest-wood-impact3.wav"
+
 weapons/grenade/bounce		GRENBOUN
 weapons/grenade/explosion	GRENEXPL
 weapons/grenade/load		GRENLOAD
@@ -165,6 +170,11 @@ edspark1 "sounds/ElectroDriver/electro-shoot-spark1.wav"
 edspark2 "sounds/ElectroDriver/electro-shoot-spark2.wav"
 edspark3 "sounds/ElectroDriver/electro-shoot-spark3.wav"
 
+$random weapons/edriver/starbreak { shurikenbreak1 shurikenbreak2 shurikenbreak3 }
+shurikenbreak1 "sounds/gasoline_impact1.wav"
+shurikenbreak2 "sounds/gasoline_impact2.wav"
+shurikenbreak3 "sounds/gasoline_impact3.wav"
+
 //== Rifle/Flamer
 
 $random weapons/rifle/fire { riflefire1 riflefire2 riflefire3 }
@@ -199,6 +209,11 @@ $limit weapons/boltgun/bounce 32
 heaterBoom1 "sounds/boltgun/weapon_heater-explosion1.wav"
 heaterBoom2 "sounds/boltgun/weapon_heater-explosion2.wav"
 heaterBoom3 "sounds/boltgun/weapon_heater-explosion3.wav"
+
+$random weapons/boltgun/boltbreak { boltbreak1 boltbreak2 boltbreak3 }
+boltbreak1 "sounds/box-metal-impact1.wav"
+boltbreak2 "sounds/box-metal-impact2.wav"
+boltbreak3 "sounds/box-metal-impact3.wav"
 
 
 ///PICKUPS\\\

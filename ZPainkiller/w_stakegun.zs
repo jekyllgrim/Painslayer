@@ -98,15 +98,10 @@ Class PK_Stakegun : PKWeapon {
 but at the same time it's NOT a piercing projectile, i.e. it should only damage
 only one victim and fly through others if they exist. For that we employ a few tricks.
 */
-Class PK_Stake : PK_Projectile {
+Class PK_Stake : PK_StakeProjectile {
 	protected int basedmg;
 	protected bool onFire;
-	protected bool hitceiling;
-	protected SecPlane stickplane;
-	protected vector2 sticklocation;
-	protected double stickoffset;
 	actor hitvictim; //Stores the first monster hit. Allows us to deal damage only once and to only one victim
-	actor pinvictim; //The fake corpse that will be pinned to a wall
 	Default {
 		PK_Projectile.trailcolor "f4f4f4";
 		PK_Projectile.trailscale 0.012;
@@ -121,6 +116,27 @@ Class PK_Stake : PK_Projectile {
 		damage 0;
 		decal "";
 		obituary "$PKO_STAKE";
+		deathsound "weapons/stakegun/stakewall";
+		decal "Stakedecal";
+	}
+	override void StakeBreak() {
+		double ofz = botz+1;
+		if (pos.z >= topz)
+			ofz = topz-1;
+		for (int i = random[sfx](3,5); i > 0; i--) {
+			let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,ofz)));
+			if (deb) {
+				deb.spritename = "PSDE";
+				deb.frame = i;
+				deb.A_SetScale(0.15);
+				double vz = frandom[sfx](-1,-4);
+				if (pos.z <= botz)
+					vz = frandom[sfx](3,6);
+				deb.vel = (frandom[sfx](-5,5),frandom[sfx](-5,5),vz);
+			}
+		}
+		A_StartSound("weapons/stakegun/stakebreak",volume:0.8, attenuation:3);
+		super.StakeBreak();
 	}
 	override void Tick () {
 		super.Tick();
@@ -128,76 +144,16 @@ Class PK_Stake : PK_Projectile {
 			trailactor = "PK_StakeFlame";
 			trailscale = 0.08;
 			A_AttachLight('PKBurningStake', DynamicLight.RandomFlickerLight, "ffb30f", 40, 44, flags: DYNAMICLIGHT.LF_ATTENUATE);
-			onFire = true;			
-		}
-		if (bMOVEWITHSECTOR) {
-			if (hitceiling)
-				SetZ(ceilingz);
-			else
-				SetZ(floorz);
-		}
-		else if (stickplane) {
-			SetZ(stickplane.ZAtPoint(sticklocation) - stickoffset);
+			onFire = true;
 		}
 	}
 	/*	this is used when the projectile hits a wall, to make sure it'll move with the next sector's floor/ceiling
 		in case the stake hits a door or a lift, so that it moves up/down with that door/lift
 	*/
-	void StickToWall() { 
+	override void StickToWall() { 
+		super.StickToWall();
 		A_RemoveLight('PKBurningStake');
 		onFire = true;
-		A_StartSound("weapons/stakegun/stakewall",attenuation:2);
-		A_SprayDecal("Stakedecal",8);
-		if (blockingline) {
-			FLineTraceData trac;
-			LineTrace(angle,radius+1,pitch,TRF_NOSKY|TRF_THRUACTORS,data:trac);
-			if (trac.HitLine) {
-				let tline = trac.HitLine;
-				int lside = PointOnLineSide(pos.xy,tline);
-				string sside = (lside == 0) ? "front" : "back";
-				if (!tline.backsector) {
-					if (pk_debugmessages > 1)
-						console.printf("Stake hit one-sided line, not doing anything else");
-				}
-				else {
-					let targetsector = (lside == 0 && tline.backsector) ? tline.backsector : tline.frontsector;
-					sticklocation = trac.HitLocation.xy;
-					let floorHitZ = targetsector.floorplane.ZatPoint (sticklocation);
-					let ceilHitZ = targetsector.ceilingplane.ZatPoint (sticklocation);
-					string secpart = "middle";
-					if (pos.z <= floorHitZ) {
-						secpart = "lower";
-						stickplane = targetsector.floorplane;
-					}
-					else if (pos.z >= ceilHitZ) {
-						secpart = "top";
-						stickplane = targetsector.ceilingplane;
-					}
-					stickoffset = stickplane.ZAtPoint(sticklocation) - pos.z;
-					if (pk_debugmessages > 1)
-						console.printf("Stake hit the %s %s part of the line",secpart,sside);
-				}
-			}
-		}		
-		else {
-			bMOVEWITHSECTOR = true;
-			if (pos.z >= ceilingz)
-				hitceiling = true;
-		}
-		bTHRUACTORS = true;
-		bNOGRAVITY = true;
-		A_Stop();
-		for (int i = random[sfx](5,8); i > 0; i--) {
-			vector3 vvel = (frandom[sfx](-5,-2), frandom[sfx](-2,2), frandom[sfx](0,5));
-			if (pos.z <= floorz)
-				vvel = (frandom[sfx](-4,4), frandom[sfx](-4,4), frandom[sfx](3,6));
-			A_SpawnItemEx(
-				"PK_RandomDebris",
-				xvel:vvel.x,
-				yvel:vvel.y,
-				zvel:vvel.z
-			);
-		}
 		if (pinvictim) {
 			pinvictim.A_Stop();
 			pinvictim.SetOrigin((pos.x,pos.y,pinvictim.pos.z),false);	//make sure the fake corpse is at the middle of the stake
@@ -227,7 +183,8 @@ Class PK_Stake : PK_Projectile {
 			hitvictim = victim; //store the victim hit; when this is non-null, stake won't deal damage to anyone else
 			if (!victim.bBOSS && victim.health <= 0 && victim.mass <= 400) { //we do the "pin to the wall" effect only if the victim is dead, not a boss and not huge
 				pinvictim = PK_PinVictim(Spawn("PK_PinVictim",victim.pos)); //spawn fake corpse and give it appearance identical to the monster
-				if (pinvictim) {											
+				if (pinvictim) {
+					victimofz = pinvictim.pos.z - pos.z;
 					pinvictim.target = victim;
 					pinvictim.master = self;
 					pinvictim.angle = victim.angle;
@@ -270,7 +227,8 @@ Class PK_Stake : PK_Projectile {
 				return -1;
 			}
 		}
-		if (!victim.bISMONSTER && victim.bSOLID) {		//Funnily enough, a solid actor like a column is also processed as 'victim' here. So, if that happens, we stop the stake
+		if (!victim.bISMONSTER && victim.bSOLID) {
+			stickobject = victim;
 			return -1;
 		}
 		return 1;
@@ -279,9 +237,9 @@ Class PK_Stake : PK_Projectile {
 	Cache:
 		STAK A 0;
 		BOLT A 0;
+		PSDE A 0;
 	Spawn:
 		#### A 1 {
-			A_FaceMovementDirection(flags:FMDF_INTERPOLATE);		//makes it properly adjust its actual pitch and the associated model's pitch
 			if (pinvictim) {
 				pinvictim.angle = angle;			//if we already "grabbed" a fake corpse, the stake carries it with it
 				pinvictim.vel = vel;
@@ -445,7 +403,7 @@ Class PK_PinVictim : Actor {		//the fake corpse (receives its visuals from the s
 		//if the stake disappeared, stop affecting the target and go away
 		if (!master) {
 			if (target) {
-				target.TakeInventory("PK_PinToWall",1);
+				target.A_TakeInventory("PK_PinToWall");
 				target.A_Stop();
 			}
 			destroy();

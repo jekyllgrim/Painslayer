@@ -616,11 +616,14 @@ Class PK_RandomDebris : PK_SmallDebris {
 		}
 		loop;
 	Death:
+		#### # 0 { 
+			roll = 90 * randompick[sfx](-1,1) + frandom[sfx](-3,3);
+		}
 		#### # 1 {
 			A_FadeOut(0.03);
 			scale *= 0.95;
 		}
-		loop;
+		wait;
 	cache:
 		PDEB ABCDEF 0;
 		PFLD ABCDEF 0;

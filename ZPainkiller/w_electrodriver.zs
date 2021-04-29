@@ -327,8 +327,7 @@ Class PK_Lightning : PK_TrackingBeam {
 //same but the model attached to it is angled differently
 Class PK_Lightning2 : PK_Lightning {}
 
-Class PK_Shuriken : PK_Projectile {
-	protected bool hitceiling;
+Class PK_Shuriken : PK_StakeProjectile {
 	Default {
 		PK_Projectile.trailcolor "f4f4f4";
 		PK_Projectile.trailscale 0.018;
@@ -336,31 +335,39 @@ Class PK_Shuriken : PK_Projectile {
 		PK_Projectile.trailalpha 0.12;
 		obituary "%k showed %o a world full of stars";
 		speed 35;
-		radius 3;
+		radius 5;
 		height 4;
 		damage (5);
 		+FORCEXYBILLBOARD;
 		+ROLLSPRITE;
 	}
+	override void StakeBreak() {
+		double ofz = botz+1;
+		if (pos.z >= topz)
+			ofz = topz-1;
+		for (int i = random[sfx](2,4); i > 0; i--) {
+			let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,ofz)));
+			if (deb) {
+				deb.A_SetScale(0.3);
+				double vz = frandom[sfx](-1,-4);
+				if (pos.z <= botz)
+					vz = frandom[sfx](3,6);
+				deb.vel = (frandom[sfx](-5,5),frandom[sfx](-5,5),vz);
+			}
+		}
+		A_StartSound("weapons/edriver/starbreak",volume:0.8, attenuation:4);
+		super.StakeBreak();
+	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		spriterotation = random(0,359);
-		if (target)
+		if (target) {
 			pitch = target.pitch;
-	}
-	override void Tick () {
-		super.Tick();
-		if (bMOVEWITHSECTOR) {
-			if (hitceiling)
-				SetZ(ceilingz);
-			else
-				SetZ(floorz);
 		}
 	}
 	states {
 	Spawn:
 		MODL A 1 NoDelay {
-			A_FaceMovementDirection(flags:FMDF_INTERPOLATE );
 			spriterotation += 10;
 			if (age > 16)
 				SetStateLabel("Boom");				
@@ -368,13 +375,7 @@ Class PK_Shuriken : PK_Projectile {
 		loop;
 	Death:
 		MODL B 100 {
-			bNOINTERACTION = true;
-			if (!blockingline) {
-				bMOVEWITHSECTOR = true;
-				if (pos.z >= ceilingz)
-					hitceiling = true;
-			}
-			A_Stop();
+			StickToWall();
 			A_StartSound("weapons/edriver/starwall",attenuation:2);
 		}
 		#### # 0 A_SetRenderstyle(alpha,STYLE_Translucent);
