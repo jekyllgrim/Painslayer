@@ -53,12 +53,12 @@ Class PK_Painkiller : PKWeapon {
 					return ResolveState("Ready");
 				}
 				A_WeaponOffset(0,32);
-				A_StartSound("weapons/painkiller/start",CHAN_VOICE);
+				PK_AttackSound("weapons/painkiller/start",CHAN_VOICE);
 				return ResolveState(null);
 			}
 			PKIR BCDEF 1;
 			TNT1 A 0 {
-				A_StartSound("weapons/painkiller/spin",12,CHANF_LOOPING);
+				A_StartSound("weapons/painkiller/spin",CH_LOOP,CHANF_LOOPING);
 				if (invoker.hasDexterity)
 					return ResolveState("FastHold");
 				return ResolveState("Hold");
@@ -67,9 +67,9 @@ Class PK_Painkiller : PKWeapon {
 		Hold:
 			TNT1 A 0 A_CustomPunch(12,true,CPF_NOTURN,"PK_PainkillerPuff",80); 
 			PKIL ABCD 1 {
-				//A_SoundPitch(12,1);
+				//A_SoundPitch(CH_LOOP,1);
 				if ((player.cmd.buttons & BT_ALTATTACK) && !(player.oldbuttons & BT_ALTATTACK)) {
-					A_StopSound(12);
+					A_StopSound(CH_LOOP);
 					invoker.combofire = true;
 					A_ClearRefire();
 					return ResolveState("AltFire");
@@ -82,9 +82,9 @@ Class PK_Painkiller : PKWeapon {
 		FastHold:
 			TNT1 A 0 A_CustomPunch(12,true,CPF_NOTURN,"PK_PainkillerPuff",80); 
 			PKIL AC 1 {
-				//A_SoundPitch(12,1.2);
+				//A_SoundPitch(CH_LOOP,1.2);
 				if ((player.cmd.buttons & BT_ALTATTACK) && !(player.oldbuttons & BT_ALTATTACK)) {
-					A_StopSound(12);
+					A_StopSound(CH_LOOP);
 					invoker.combofire = true;
 					A_ClearRefire();
 					return ResolveState("AltFire");
@@ -97,7 +97,7 @@ Class PK_Painkiller : PKWeapon {
 		HoldEnd:
 			TNT1 A 0 {
 				A_ClearRefire();
-				A_StopSound(12);
+				A_StopSound(CH_LOOP);
 				A_StartSound("weapons/painkiller/stop",CHAN_BODY);
 			}
 			PKIR DCBA 1 A_WeaponReady();
@@ -398,33 +398,30 @@ Class Killer_BeamEmitter : Actor {
 		}
 		SetOrigin(tracer.pos,true);
 		A_FaceMaster(0,0,flags:FAF_MIDDLE);
-		let adiff = DeltaAngle(angle,master.angle);
-		if (adiff < 163 && adiff > -170) {
-			StopBeams();
-			return;
+		if (!master.CountInv("PK_WeaponModifier")) {
+			let adiff = DeltaAngle(angle,master.angle);
+			if (adiff < 163 && adiff > -170) {
+				StopBeams();
+				return;
+			}
+			let pdiff = abs(pitch - -master.pitch);
+			//console.printf("pitch %d | master pitch %d | diff %d",pitch,master.pitch,pdiff);
+			if (pdiff > 10) {
+				StopBeams();
+				return;
+			}
 		}
-		let pdiff = abs(pitch - -master.pitch);
-		//console.printf("pitch %d | master pitch %d | diff %d",pitch,master.pitch,pdiff);
-		if (pdiff > 10) {
-			StopBeams();
-			return;
-		}
-		/*FLineTraceData data;
-		LineTrace(angle,4096,pitch,data:data);
-		if (data.HitType == TRACE_HITWALL) {
-			StopBeams();
-			return;
-		}*/
 		if (!CheckSight(master,SF_IGNOREWATERBOUNDARY)) {
 			StopBeams();
 			return;
 		}
-		StartBeams();		
-		A_CustomRailGun(2,color1:"FFFFFF",flags:RGF_SILENT,pufftype:"KillerBeamPuff",range:Distance3D(master),duration:1,sparsity:1024);
+		StartBeams();
+		//this rail deals the actual damage, it doesn't define any visuals
+		A_CustomRailGun(2,color1:"FFFFFF",flags:RGF_SILENT,pufftype:"PK_KillerBeamPuff",range:Distance3D(master),duration:1,sparsity:1024);
 	}
 }
 
-Class KillerBeamPuff : Actor {
+Class PK_KillerBeamPuff : Actor {
 	Default {
 		+PAINLESS
 		+NOEXTREMEDEATH

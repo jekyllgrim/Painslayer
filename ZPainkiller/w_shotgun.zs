@@ -42,9 +42,10 @@ Class PK_Shotgun : PKWeapon {
 		PSHT A 2 {
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			A_Quake(1,7,0,1,"");
-			A_StartSound("weapons/shotgun/fire",CHAN_VOICE);
+			PK_AttackSound("weapons/shotgun/fire",CHAN_VOICE);
 			A_Overlay(PSP_PFLASH,"Flash");
-			A_firebullets(5,5,10,9,pufftype:"PK_BulletPuff",flags:FBF_NORANDOM|FBF_USEAMMO,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-44,spawnofs_xy:9);
+			vector2 spread = (CountInv("PK_WeaponModifier")) ? (2.8, 2.3) : (7, 5);
+			A_firebullets(spread.x,spread.y,10,9,pufftype:"PK_BulletPuff",flags:FBF_NORANDOM|FBF_USEAMMO,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-44,spawnofs_xy:9);
 			A_ZoomFactor(0.99,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			A_AttachLight('PKWeaponlight', DynamicLight.PulseLight, "e1b03e", 64, 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight), param: 0.1);
 		}
@@ -62,9 +63,9 @@ Class PK_Shotgun : PKWeapon {
 		goto ready;
 	AltFire:
 		PSHT A 5 {
-			A_StartSound("weapons/shotgun/freezer",CHAN_7);
-			A_FireProjectile("PK_FreezerProjectile",0,true,-7,spawnheight:6);
-			A_FireProjectile("PK_FreezerProjectile",0,false,7,spawnheight:6);
+			PK_AttackSound("weapons/shotgun/freezer",CHAN_7);
+			A_FireProjectile("PK_FreezerProjectile",0,true,-4,spawnheight:6);
+			A_FireProjectile("PK_FreezerProjectile",0,false,4,spawnheight:6);
 			invoker.freload = 55;
 		}
 		PSHF BCDE 2 {
@@ -120,7 +121,7 @@ Class PK_FreezerProjectile : PK_Projectile {
 		seesound "";
 		deathsound "";
 		speed 50;
-		damage 0;		
+		damage 0;
 		PK_Projectile.flarecolor "08caed";
 		PK_Projectile.flarescale 0.065;
 		PK_Projectile.flarealpha 0.7;
@@ -146,8 +147,12 @@ Class PK_FreezerProjectile : PK_Projectile {
 			if (tracer && (tracer.bISMONSTER || tracer.player) && !tracer.bBOSS) {
 				tracer.GiveInventory("PK_FreezeControl",1);
 				let frz = PK_FreezeControl(tracer.FindInventory("PK_FreezeControl"));
-				if (frz)
+				if (frz) {
 					frz.fcounter+=64;
+					//double freeze duration if player has Weapon Modifier:
+					if (target && target.CountInv("PK_WeaponModifier"))
+						frz.fcounter+=64;
+				}
 			}
 			for (int i = random[sfx](10,15); i > 0; i--) {
 				let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
@@ -245,8 +250,12 @@ Class PK_FreezeControl : PK_InventoryToken {
 	uint ownertrans;
 	bool grav;
 	override void ModifyDamage (int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
-		if (inflictor && owner && passive)
-			newdamage = max(0, ApplyDamageFactors(GetClass(), damageType, damage, damage*1.25));
+		if (damage > 0 && inflictor && owner && passive) {
+			if (damagetype == 'Fire')
+				newdamage = damage * 0.5;
+			else
+				newdamage = damage*1.25;
+		}
 	}
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);

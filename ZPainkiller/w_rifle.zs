@@ -466,7 +466,7 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 	'realspeed' is used both to define its actual base speed, and to keep track of
 	its bonus vel, they're continuously compared against each other 
 	*/
-	protected double realSpeed;
+	double realSpeed;
 	Default {
 		+BRIGHT
 		+ROLLSPRITE
@@ -510,7 +510,8 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 		roll = frandom[sfx](0,360);
 		rollOfs = frandom[sfx](5,20) * randompick[sfx](-1,1);
 		scaleMul = 1.02;
-		realSpeed = 7.2;
+		if (!realspeed)
+			realSpeed = 7.2;
 		vel = vel.unit() * realSpeed;
 		if (target) {
 			vel += target.vel;
@@ -555,11 +556,9 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 				realSpeed *= 0.8;
 			}
 			rollOfs *= 0.91;
-			vel *= 0.92;
-			rollOfs *= 0.91;
 			roll += rollOfs;
 			//alpha *= 0.85;
-			A_FadeOut(0.08);
+			A_FadeOut(0.02);
 		}
 		wait;
 	Crash:

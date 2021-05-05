@@ -32,9 +32,10 @@ Class PK_Stakegun : PKWeapon {
 			loop;
 		Fire:
 			TNT1 A 0 {
-				A_StartSound("weapons/stakegun/fire");
+				PK_AttackSound("weapons/stakegun/fire");
 				A_WeaponOffset(11,9,WOF_ADD);
-				PK_FireArchingProjectile("PK_Stake",spawnofs_xy:2,spawnheight:5,flags:FPF_NOAUTOAIM,pitch:-2.5);
+				double pofs = (CountInv("PK_WeaponModifier")) ? 0 : -2.5;
+				PK_FireArchingProjectile("PK_Stake",spawnofs_xy:2,spawnheight:5,flags:FPF_NOAUTOAIM,pitch:pofs);
 			}
 			PSGN BBBBB 2 A_WeaponOffset(1.44,1.2,WOF_ADD);
 			PSGN CDEF 3 A_WeaponOffset(-0.8,-0.5,WOF_ADD);
@@ -51,7 +52,7 @@ Class PK_Stakegun : PKWeapon {
 			goto ready;
 		AltFire:
 			PSGN A 0 {
-				A_StartSound("weapons/stakegun/grenade");
+				PK_AttackSound("weapons/stakegun/grenade");
 				A_WeaponOffset(6,2,WOF_ADD);
 				PK_FireArchingProjectile("PK_Grenade",spawnofs_xy:1,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
 				if (invoker.ammo1.amount < 1) {
@@ -101,6 +102,7 @@ only one victim and fly through others if they exist. For that we employ a few t
 Class PK_Stake : PK_StakeProjectile {
 	protected int basedmg;
 	protected bool onFire;
+	protected bool modded;
 	actor hitvictim; //Stores the first monster hit. Allows us to deal damage only once and to only one victim
 	Default {
 		PK_Projectile.trailcolor "f4f4f4";
@@ -138,15 +140,6 @@ Class PK_Stake : PK_StakeProjectile {
 		A_StartSound("weapons/stakegun/stakebreak",volume:0.8, attenuation:3);
 		super.StakeBreak();
 	}
-	override void Tick () {
-		super.Tick();
-		if (!onFire && age >= 12) {
-			trailactor = "PK_StakeFlame";
-			trailscale = 0.08;
-			A_AttachLight('PKBurningStake', DynamicLight.RandomFlickerLight, "ffb30f", 40, 44, flags: DYNAMICLIGHT.LF_ATTENUATE);
-			onFire = true;
-		}
-	}
 	/*	this is used when the projectile hits a wall, to make sure it'll move with the next sector's floor/ceiling
 		in case the stake hits a door or a lift, so that it moves up/down with that door/lift
 	*/
@@ -170,13 +163,28 @@ Class PK_Stake : PK_StakeProjectile {
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		basedmg = 140;
-		if (target)
+		if (target) {
 			pitch = target.pitch; //In case it's fired at a floor or ceiling at point-blank range, the Spawn state won't be used and the stake won't receive proper pitch. So, we do this.
+			if (target.CountInv("PK_WeaponModifier")) {
+				bNOGRAVITY = true;
+				modded = true;
+				vel = vel.unit() * 90;
+			}
+		}
 		sprite = GetSpriteIndex("STAK");
+	}
+	override void Tick () {
+		super.Tick();
+		if (!onFire && (modded || age >= 12)) {
+			trailactor = "PK_StakeFlame";
+			trailscale = 0.08;
+			A_AttachLight('PKBurningStake', DynamicLight.RandomFlickerLight, "ffb30f", 40, 44, flags: DYNAMICLIGHT.LF_ATTENUATE);
+			onFire = true;
+		}
 	}
 	override int SpecialMissileHit (Actor victim) {
 		if (victim && (victim.bisMonster || victim.player) && victim != target && !hitvictim) { //We only do the following block if the actor hit by the stake exists, isn't the shooter, and the stake has never hit anyone yet
-			if (self.GetClassName() == "PK_Stake" && age >= 12)
+			if (modded || (self.GetClassName() == "PK_Stake" && age >= 12))
 				basedmg *= 1.5;
 			victim.DamageMobj (self, target, basedmg, 'normal');
 			A_StartSound("weapons/stakegun/hit",volume:0.7,attenuation:3);
@@ -289,7 +297,7 @@ Class PK_StakeFlame : PK_BaseFlare {
 }
 
 //Decorative stake stuck in a living monster
-Class PK_StakeStuck : Actor {
+Class PK_StakeStuck : PK_BaseActor {
 	state mmissile;
 	state mmelee;
 	double stuckangle;
@@ -305,6 +313,13 @@ Class PK_StakeStuck : Actor {
 		mmissile = master.FindState("Missile");
 		mmelee = master.FindState("Melee");
 	}
+	override void Tick () {
+		super.Tick();
+		if (!isFrozen() && age > 160) {
+			A_SetRenderStyle(alpha,Style_Translucent);
+			A_FadeOut(0.05);
+		}
+	}
 	states {
 		Spawn:
 			#### A 1 NoDelay {
@@ -316,10 +331,10 @@ Class PK_StakeStuck : Actor {
 					if (master.bISMONSTER) {
 						if (master.health <= 0 && (master.bBOSS || master.mass > 400))
 							SetStateLabel("Fall");
-						else if (master.InStateSequence(master.curstate,mmissile) || master.InStateSequence(master.curstate,mmelee)) {
+						/*else if (master.InStateSequence(master.curstate,mmissile) || master.InStateSequence(master.curstate,mmelee)) {
 							angle += frandom(-5,5);
 							SetOrigin(pos + (frandom(-0.4,0.4),frandom(-0.4,0.4),frandom(-0.4,0.4)),true);
-						}
+						}*/
 					}
 				}
 				else
@@ -335,7 +350,6 @@ Class PK_StakeStuck : Actor {
 					pitch = 0;
 					bRELATIVETOFLOOR = true;
 					bMOVEWITHSECTOR = true;
-					A_SetRenderStyle(1.0,Style_Translucent);
 					SetStateLabel("End");
 				}
 			}
@@ -516,14 +530,27 @@ Class PK_Grenade : PK_Projectile {
 		}
 		loop;
 	XDeath:
-		TNT1 A 1 { 
+		TNT1 A 1 {
+			bool mod = (target && target.CountInv("PK_WeaponModifier"));
 			bNOGRAVITY = true;
 			A_RemoveChildren(1,RMVF_EVERYTHING);
-			A_StopSound(4);
-			A_Quake(1,8,0,256,"");
+			A_StopSound(CHAN_BODY);
 			A_StartSound("weapons/grenade/explosion",CHAN_5);
 			A_Explode();
-			Spawn("PK_GenericExplosion",pos);
+			let exp = PK_GenericExplosion(Spawn("PK_GenericExplosion",pos));
+			if (mod && exp) {
+				exp.scale *= 1.5;
+				//exp.explosivedebris = 10;
+				exp.smokingdebris = 4;
+				for (int i = 20; i > 0; i--) {
+					double ppitch = frandom(-45,45);
+					if (pos.z <= floorz)
+						ppitch = frandom(-60,20);
+					let flm = PK_FlameThrowerFlame(A_SpawnProjectile("PK_FlameThrowerFlame",angle:random(0,350),flags:CMF_TRACKOWNER|CMF_AIMDIRECTION,pitch:ppitch));
+					if (flm)
+						flm.realspeed = frandom(0.1,2.5);
+				}
+			}
 		}
 		stop;
 	}
