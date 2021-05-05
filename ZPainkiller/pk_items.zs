@@ -385,8 +385,7 @@ Class PK_PowerUp : PK_Inventory abstract {
 			return;
 		if (GetAge() % 35 == 0) {
 			effectSeconds++;
-			if (pk_debugmessages)
-				console.printf("%s time passed: %d",GetClassName(),effectSeconds);
+			//console.printf("%s time passed: %d",GetClassName(),effectSeconds);
 		}
 		if (effectSeconds >= duration) {
 			if (deathsound)
@@ -412,17 +411,17 @@ Class PK_WeaponModifier : PK_PowerUp {
 		inventory.pickupmessage "$PKI_WMODIFIER";
 		inventory.pickupsound "pickups/wmod/pickup";
 		deathsound "pickups/wmod/end";
-		activesound "pickups/wmod/use";
+		//activesound "pickups/wmod/use";
 		PK_PowerUp.duration 30;
 		xscale 0.43;
 		yscale 0.36;
 		+FLOATBOB
 		FloatBobStrength 0.32;
 	}
-	override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
+	/*override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
 		if (!passive && damage > 0 && owner && owner.player && !owner.player.refire)
 			owner.A_StartSound(ActiveSound, CH_WMOD);
-	}
+	}*/
 	override void Tick() {
 		super.Tick();
 		if (isFrozen() || owner)
