@@ -51,6 +51,13 @@ Class PKWeapon : Weapon abstract {
 	action bool CheckInfiniteAmmo() {
 		return (sv_infiniteammo || FindInventory("PowerInfiniteAmmo",true) );
 	}
+	action void PK_AttackSound(sound snd, int channel = CHAN_AUTO) {
+		A_StartSound(snd,channel);
+		if (CountInv("PK_WeaponModifier") && player && !player.refire) {
+			A_StartSound("pickups/wmod/use",CH_WMOD);
+		}
+		//console.printf("Weapon modifier: %d | Player.Refire: %d",CountInv("PK_WeaponModifier"),player.refire);
+	}
 	action actor PK_FireArchingProjectile(class<Actor> missiletype, double angle = 0, bool useammo = true, double spawnofs_xy = 0, double spawnheight = 0, int flags = 0, double pitch = 0) {
 		if (!self || !self.player) 
 			return null;
@@ -319,8 +326,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 }
 
 /*	A base projectile class that can stick into walls and planes.
-	It'll move with the floor/ceilign if stuck in one.
-	It'll also detect door/platform sectors and move with them.
+	It'll move with the sector if it hit a moving one (e.g. door/platform).
 	Base for stakes, bolts and shurikens.
 */
 Class PK_StakeProjectile : PK_Projectile {
@@ -332,33 +338,52 @@ Class PK_StakeProjectile : PK_Projectile {
 	protected double topz; //ZAtPoint below stake
 	protected double botz; //ZAtPoint above stake
 	actor pinvictim; //The fake corpse that will be pinned to a wall
-	protected double victimofz;
-	
+	protected double victimofz; //the offset from the center of the stake to the victim's corpse center
+	protected state sspawn; //pointer to Spawn label
 	Default {
 		+MOVEWITHSECTOR
 	}
 	
+	//this function is called when the projectile dies and checks if it hit something
 	virtual void StickToWall() {
-		//A_StartSound(deathsound,attenuation:10);
-		A_FaceMovementDirection();
-		if (blockingline) {
-			FLineTraceData trac;
-			LineTrace(angle,radius+64,pitch,TRF_NOSKY|TRF_THRUACTORS,data:trac);
+		//use linetrace to get information about what we hit
+		FLineTraceData trac;
+		LineTrace(angle,radius+64,pitch,TRF_NOSKY|TRF_THRUACTORS,data:trac);
+		sticklocation = trac.HitLocation.xy;
+		topz = CurSector.ceilingplane.ZatPoint(sticklocation);
+		botz = CurSector.floorplane.ZatPoint(sticklocation);
+		//blockingline is non-null if we hit a wall or a solid 3D floor:
+		if (blockingline) {			
 			string myclass = GetClassName();
-			if (trac.HitLine) {
+			//3D floor is easiest, so we start with it:
+			if (trac.Hit3DFloor) {
+				//we simply attach the stake to the 3D floor's top plane, nothing else
+				F3DFloor flr = trac.Hit3DFloor;
+				stickplane = flr.top;
+				stickoffset = stickplane.ZAtPoint(sticklocation) - pos.z;
+				if (pk_debugmessages > 1)
+					console.printf("%s hit a 3D floor at %d,%d,%d",myclass,pos.x,pos.y,pos.z);				
+			}
+			//otherwise see if we hit a line:
+			else if (trac.HitLine) {
+				//check if the line is two-sided first:
 				let tline = trac.HitLine;
-				int lside = PointOnLineSide(pos.xy,tline);
-				string sside = (lside == 0) ? "front" : "back";
+				//if it's one-sided, it can't be a door/lift, so don't do anything else:
 				if (!tline.backsector) {
 					if (pk_debugmessages > 1)
 						console.printf("%s hit one-sided line, not doing anything else",myclass);
 				}
+				//if it's two-sided:
 				else {
-					let targetsector = (lside == 0 && tline.backsector) ? tline.backsector : tline.frontsector;
-					sticklocation = trac.HitLocation.xy;
+					//check which side we're on:
+					int lside = PointOnLineSide(pos.xy,tline);
+					string sside = (lside == 0) ? "front" : "back";
+					//we'll attack the stake to the sector on the other side:
+					let targetsector = (lside == 0) ? tline.backsector : tline.frontsector;
 					let floorHitZ = targetsector.floorplane.ZatPoint (sticklocation);
 					let ceilHitZ = targetsector.ceilingplane.ZatPoint (sticklocation);
 					string secpart = "middle";
+					//check if we hit top or bottom floor (i.e. door or lift):
 					if (pos.z <= floorHitZ) {
 						secpart = "lower";
 						stickplane = targetsector.floorplane;
@@ -373,19 +398,30 @@ Class PK_StakeProjectile : PK_Projectile {
 				}
 			}
 		}
+		//maybe we hit a solid object, like a lamp, etc.:
 		else if (stickobject) {
 			stickoffset = pos.z - stickobject.pos.z;
+			if (pk_debugmessages > 1)
+				console.printf("Stake hit %s at at %d,%d,%d",stickobject.GetClassName(),pos.x,pos.y,pos.z);
 		}
+		//if all else is false, then we hit a floor/ceiling, so we'll attach to them:
 		else {			
-			if (pos.z >= ceilingz)
+			if (trac.HitLocation.z >= topz) {
 				hitplane = 2;
-			else
+				if (pk_debugmessages > 1)
+					console.printf("Stake hit ceiling at at %d,%d,%d",pos.x,pos.y,pos.z);
+			}
+			else if (trac.HitLocation.z <= botz) {
 				hitplane = 1;
+				if (pk_debugmessages > 1)
+					console.printf("Stake hit floor at at %d,%d,%d",pos.x,pos.y,pos.z);
+			}
 		}
 		bTHRUACTORS = true;
 		bNOGRAVITY = true;
 		A_Stop();
 	}
+	//record a non-monster solid object the stake runs into if there is one:
 	override int SpecialMissileHit (Actor victim) {
 		if (!victim.bISMONSTER && victim.bSOLID) {
 			stickobject = victim;
@@ -393,37 +429,49 @@ Class PK_StakeProjectile : PK_Projectile {
 		}
 		return 1;
 	}
+	//virtual for breaking; child actors override it to add debris spawning and such:
 	virtual void StakeBreak() {
 		if (pk_debugmessages > 1)
 			console.printf("%s destroyed",GetClassName());
 		if (self)
 			destroy();
 	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		sspawn = FindState("Spawn");
+	}
 	override void Tick () {
 		super.Tick();
-		if (!isFrozen())
+		//all stake-like projectiles need to face their movement direction while in Spawn sequence:
+		if (!isFrozen() && sspawn && InStateSequence(curstate,sspawn))
 			A_FaceMovementDirection(flags:FMDF_INTERPOLATE );
+		//otherwise stake is dead, so we'll move it alongside the object/plane it's supposed to be attached to:
 		if (bTHRUACTORS) {
+			//attached to floor/ceiling:
 			if (hitplane > 0) {
 				if (hitplane > 1)
 					SetZ(ceilingz);
 				else
 					SetZ(floorz);
 			}
+			//attached to a plane (hit a door/lift earlier)
 			else if (stickplane) {
 				SetZ(stickplane.ZAtPoint(sticklocation) - stickoffset);
-				if (pinvictim)
-					pinvictim.SetZ(pos.z + victimofz);
 				topz = CurSector.ceilingplane.ZAtPoint(pos.xy);
 				botz = CurSector.floorplane.ZAtPoint(pos.xy);
+				//destroy the stake if it's run into ceiling/floor by a moving sector (e.g. a door opened, pulled the stake up and pushed it into the ceiling):
 				if (pos.z >= topz || pos.z <= botz) {
 					stickplane = null;
 					StakeBreak();
 					return;
 				}
 			}
+			//otherwise attach it to the solid object it hit earlier:
 			else if (stickobject)
 				SetZ(stickobject.pos.z + stickoffset);
+			//and if there's a decorative corpse on the stake, move it as well:
+			if (pinvictim)
+				pinvictim.SetZ(pos.z + victimofz);
 		}
 	}
 }
@@ -814,5 +862,128 @@ Class PK_BombAmmo : Ammo {
 	spawn:
 		AMBM B -1;
 		stop;
+	}
+}
+
+/*
+Class PK_StakeProjectile : PK_Projectile {
+	protected int hitplane; //0: none, 1: floor, 2: ceiling
+	protected actor stickobject; //a non-monster object that was hit
+	protected SecPlane stickplane; //a plane to stick to
+	protected Sector sticksector; //sector to stick to
+	protected vector2 sticklocation; //the point at the line the stake collided with
+	protected double stickoffset; //how far the stake is from the nearest ceiling or floor (depending on whether it hit top or bottom part of the line)
+	protected double topz; //ZAtPoint below stake
+	protected double botz; //ZAtPoint above stake
+	actor pinvictim; //The fake corpse that will be pinned to a wall
+	protected double victimofz;
+	protected state sspawn;
+	Default {
+		+MOVEWITHSECTOR
+	}
+	
+	virtual void StickToWall() {
+		FLineTraceData trac;
+		LineTrace(angle,radius+64,pitch,TRF_NOSKY|TRF_THRUACTORS,data:trac);
+		sticklocation = trac.HitLocation.xy;
+		topz = CurSector.ceilingplane.ZatPoint(sticklocation);
+		botz = CurSector.floorplane.ZatPoint(sticklocation);
+		if (blockingline) {
+			string myclass = GetClassName();
+			if (trac.HitLine) {
+				let tline = trac.HitLine;
+				int lside = PointOnLineSide(pos.xy,tline);
+				string sside = (lside == 0) ? "front" : "back";
+				if (!tline.backsector) {
+					if (pk_debugmessages > 1)
+						console.printf("%s hit one-sided line, not doing anything else",myclass);
+				}
+				else {
+					sticksector = (lside == 0 && tline.backsector) ? tline.backsector : tline.frontsector;
+					let floorHitZ = sticksector.floorplane.ZatPoint (sticklocation);
+					let ceilHitZ = sticksector.ceilingplane.ZatPoint (sticklocation);
+					string secpart = "middle";
+					if (pos.z <= floorHitZ) {
+						secpart = "lower";
+						stickoffset = pos.z - floorHitZ;
+						stickplane = sticksector.floorplane;
+					}
+					else if (pos.z >= ceilHitZ) {
+						secpart = "top";
+						stickoffset = pos.z - ceilHitZ;
+						hitplane = 2;
+						stickplane = sticksector.ceilingplane;
+					}
+					//stickoffset = pos.z - stickplane.ZAtPoint(sticklocation);
+					if (pk_debugmessages > 1)
+						console.printf("%s hit the %s %s part of the line at %d,%d,%d",myclass,secpart,sside,pos.x,pos.y,pos.z);
+				}
+			}
+		}
+		else if (stickobject) {
+			stickoffset = pos.z - stickobject.pos.z;
+			if (pk_debugmessages > 1)
+				console.printf("Stake hit %s at at %d,%d,%d",stickobject.GetClassName(),pos.x,pos.y,pos.z);
+		}
+		else {			
+			if (trac.HitLocation.z >= topz) {
+				hitplane = 2;
+				if (pk_debugmessages > 1)
+					console.printf("Stake hit ceiling at at %d,%d,%d",pos.x,pos.y,pos.z);
+			}
+			else if (trac.HitLocation.z <= botz) {
+				hitplane = 1;
+				if (pk_debugmessages > 1)
+					console.printf("Stake hit floor at at %d,%d,%d",pos.x,pos.y,pos.z);
+			}
+		}
+		bTHRUACTORS = true;
+		bNOGRAVITY = true;
+		A_Stop();
+	}
+	override int SpecialMissileHit (Actor victim) {
+		if (!victim.bISMONSTER && victim.bSOLID) {
+			stickobject = victim;
+			return -1;
+		}
+		return 1;
+	}
+	virtual void StakeBreak() {
+		if (pk_debugmessages > 1)
+			console.printf("%s destroyed",GetClassName());
+		if (self)
+			destroy();
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		sspawn = FindState("Spawn");
+	}
+	override void Tick () {
+		super.Tick();
+		if (!isFrozen() && sspawn && InStateSequence(curstate,sspawn))
+			A_FaceMovementDirection(flags:FMDF_INTERPOLATE );
+		if (bTHRUACTORS) {
+			if (stickobject)
+				SetZ(stickobject.pos.z + stickoffset);
+			else if (stickplane) {
+				if (pos.z >= ceilingz || pos.z <= floorz) {
+					stickplane = null;
+					StakeBreak();
+					return;
+				}
+				else if (hitplane > 1)
+					SetZ(sticksector.NextHighestCeilingAt(sticklocation.x, sticklocation.y, pos.z, pos.z) + stickoffset);
+				else
+					SetZ(sticksector.NextLowestFloorAt(sticklocation.x, sticklocation.y, pos.z) + stickoffset);
+			}
+			else if (hitplane > 0) {
+				if (hitplane > 1)
+					SetZ(ceilingz);
+				else
+					SetZ(floorz);
+			}
+			if (pinvictim)
+				pinvictim.SetZ(pos.z + victimofz);
+		}
 	}
 }
