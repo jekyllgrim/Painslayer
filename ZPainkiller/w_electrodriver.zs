@@ -364,6 +364,8 @@ Class PK_Shuriken : PK_StakeProjectile {
 		if (target) {
 			pitch = target.pitch;
 		}
+		if (mod)
+			vel *= 1.35;
 	}
 	states {
 	Spawn:
@@ -375,8 +377,11 @@ Class PK_Shuriken : PK_StakeProjectile {
 		loop;
 	Death:
 		MODL B 100 {
+			if (target && target.CountInv("PK_WeaponModifier"))
+				return ResolveState("Boom");
 			StickToWall();
 			A_StartSound("weapons/edriver/starwall",attenuation:2);
+			return ResolveState(null);
 		}
 		#### # 0 A_SetRenderstyle(alpha,STYLE_Translucent);
 		#### # 1 A_FadeOut(0.03);
@@ -389,7 +394,11 @@ Class PK_Shuriken : PK_StakeProjectile {
 			A_SetRenderstyle(1,STYLE_Add);
 			roll = random[star](0,359);
 			A_AttachLight('PKExplodingStar', DynamicLight.RandomFlickerLight, "ffAA00", 32, 44, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF);
-			A_Explode(128,40,fulldamagedistance:64);
+			//when using weapon modifier, this explosion is way too strong, so we have to tone it down
+			if (mod)
+				A_Explode(32,32);
+			else
+				A_Explode(128,40,fulldamagedistance:64);
 			for (int i = random[sfx](2,7); i > 0; i--) {
 				let debris = Spawn("PK_RandomDebris",pos);
 				if (debris) {
@@ -403,7 +412,11 @@ Class PK_Shuriken : PK_StakeProjectile {
 		stop;
 	Crash:
 	XDeath:
-		TNT1 A 1;
+		TNT1 A 1 {
+			if (target && target.CountInv("PK_WeaponModifier"))
+				return ResolveState("Boom");
+			return ResolveState(null);
+		}
 		stop;
 	}
 }
