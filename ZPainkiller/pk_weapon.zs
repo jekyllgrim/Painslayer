@@ -48,16 +48,44 @@ Class PKWeapon : Weapon abstract {
 			owner.player.WeaponState |= WF_WEAPONBOBBING;
 		hasDexterity = owner.FindInventory("PowerDoubleFiringSpeed",true);
 	}
+	
 	action bool CheckInfiniteAmmo() {
 		return (sv_infiniteammo || FindInventory("PowerInfiniteAmmo",true) );
 	}
-	action void PK_AttackSound(sound snd, int channel = CHAN_AUTO) {
-		A_StartSound(snd,channel);
+	
+	//plays a sound and also a WeaponModifier sound if Weaponmodifier is in inventory:
+	action void PK_AttackSound(sound snd = "", int channel = CHAN_AUTO, int flags = 0) {
+		if (snd)
+			A_StartSound(snd,channel,flags);
+		//will play it only once for repeating weapons (important):
 		if (CountInv("PK_WeaponModifier") && player && !player.refire) {
 			A_StartSound("pickups/wmod/use",CH_WMOD);
 		}
-		//console.printf("Weapon modifier: %d | Player.Refire: %d",CountInv("PK_WeaponModifier"),player.refire);
 	}
+	
+	//a wrapper function that automatically plays either vanilla or enhanced weapon sound, and fires tracers with A_FireProjectile so that they don't break on portals and such:
+	action void PK_FireBullets(double spread_horz = 0, double spread_vert = 0, int numbullets = 1, int damage = 1, sound snd = "", Class<Actor> pufftype = "PK_BulletPuff", double spawnheight = 0, double spawnofs = 0) {
+		if (numbullets == 0) numbullets = 1;
+		let weapon = player.ReadyWeapon;
+		//deplete the appropriate ammo
+		if (!weapon || !weapon.DepleteAmmo(weapon.bAltFire, true))
+			return;
+		//play only if non-null
+		if (snd)
+			A_StartSound(snd,CHAN_WEAPON);
+		//emulate perfect accuracy on first bullet: it'll happen if there's only 1 bullet, player isn't in refire (holding attack button), and numbullets is positive
+		bool held = (numbullets != 1 || player.refire);
+		//make sure numbullets is positive, now that the check is finished
+		numbullets = abs(numbullets);
+		//fire bullets with explicit angle and simply pass the offsets to the projectiles instead of using AimBulletMissile at puffs (because puffs don't always spawn!)
+		for (int i = 0; i < numbullets; i++) {			
+			double hspread = held ? frandom(-spread_horz,spread_horz) : 0;
+			double vspread = held ? frandom(-spread_vert,spread_vert) : 0;	
+			A_FireProjectile("PK_BulletTracer",hspread,useammo:false,spawnofs_xy:spawnofs,spawnheight:spawnheight,pitch:vspread);
+			A_FireBullets (hspread, vspread, -1, damage, pufftype,flags:FBF_NORANDOMPUFFZ|FBF_EXPLICITANGLE|FBF_NORANDOM);
+		}
+	}
+	
 	action actor PK_FireArchingProjectile(class<Actor> missiletype, double angle = 0, bool useammo = true, double spawnofs_xy = 0, double spawnheight = 0, int flags = 0, double pitch = 0) {
 		if (!self || !self.player) 
 			return null;
@@ -117,6 +145,7 @@ Class PKPuff : Actor abstract {
 		+NOBLOCKMAP
 		+NOGRAVITY
 		+FORCEXYBILLBOARD
+		+PUFFGETSOWNER
 		-ALLOWPARTICLES
 		+DONTSPLASH
 		-FLOORCLIP
@@ -141,32 +170,85 @@ Class PK_NullPuff : Actor {
 }
 
 Class PK_BulletPuff : PKPuff {
+	protected Vector3 hitnormal;			//vector normal of the hit 
 	Default {
 		decal "BulletChip";
 		scale 0.032;
 		renderstyle 'add';
 		alpha 0.6;
 	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		if (target) {
+			angle = target.angle;
+			pitch = target.pitch;
+		}
+		SpawnSmoke();
+		bool mod = (target && target.CountInv("PK_WeaponModifier"));
+		name lit = mod ? 'PK_BulletPuffMod' : 'PK_BulletPuff';
+		A_AttachLightDef('puf',lit);
+		if (mod || (random[sfx](0,10) > 7)) {
+			let bull = PK_RicochetBullet(Spawn("PK_RicochetBullet",pos));
+			if (bull) {
+				bull.vel = (hitnormal + (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](-3,3)) * frandom[sfx](2,6));
+				bull.A_FaceMovementDirection();
+				if (mod) {
+					bull.A_SetRenderstyle(bull.alpha,Style_AddShaded);
+					bull.SetShade("FF2000");
+					//bull.scale *= 2;
+				}
+			}
+		}
+	}
+	void SpawnSmoke() {
+		FLineTraceData puffdata;
+		LineTrace(angle,128,pitch,TRF_THRUACTORS|TRF_NOSKY,data:puffdata);
+		double ofz = 0;
+		hitnormal = -puffdata.HitDir;
+		if (puffdata.HitType == TRACE_HitFloor) {
+			ofz = 1;
+			if (puffdata.Hit3DFloor) 
+				hitnormal = -puffdata.Hit3DFloor.top.Normal;
+			else 
+				hitnormal = puffdata.HitSector.floorplane.Normal;
+		}
+		else if (puffdata.HitType == TRACE_HitCeiling)	{
+			ofz = -1;
+			if (puffdata.Hit3DFloor) 
+				hitnormal = -puffdata.Hit3DFloor.bottom.Normal;
+			else 
+				hitnormal = puffdata.HitSector.ceilingplane.Normal;
+		}
+		else if (puffdata.HitType == TRACE_HitWall) {
+			hitnormal = (-puffdata.HitLine.delta.y,puffdata.HitLine.delta.x,0).unit();
+			if (!puffdata.LineSide) 
+				hitnormal *= -1;
+		}
+		let smok = PK_WhiteSmoke(Spawn("PK_WhiteSmoke",puffdata.Hitlocation + (0,0,ofz)));
+		if (smok) {
+			smok.vel = (hitnormal + (frandom[sfx](-0.05,0.05),frandom[sfx](-0.05,0.05),frandom[sfx](-0.05,0.05))) * frandom[sfx](0.8,1.3);
+			smok.A_SetScale(0.085);
+			smok.alpha = 0.85;
+			smok.fade = 0.025;
+		}
+	}
 	states {
 	Spawn:
-		TNT1 A 0 NoDelay {
-			if (random[sfx](0,10) > 7) {
-				//A_StartSound("weapons/bullet/ricochet",attenuation:3);
-				A_SpawnItemEx("PK_RicochetBullet",xvel:30,zvel:frandom[sfx](-10,10),angle:random[sfx](0,359));
-			}
+		TNT1 A 1 NoDelay {
 			A_SpawnItemEx("PK_RandomDebris",xvel:frandom[sfx](-4,4),yvel:frandom[sfx](-4,4),zvel:frandom[sfx](3,5));
-			for (int i = 3; i > 0; i--) {
+			/*for (int i = 3; i > 0; i--) {
 				let smk = Spawn("PK_BulletPuffSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
 				if (smk) {
 					smk.vel = (frandom[sfx](-0.4,0.4),frandom[sfx](-0.4,0.4),frandom[sfx](0.1,0.5));
 				}
-			}
+			}*/
 		}
 		FLAR B 1 bright A_FadeOut(0.1);
 		wait;
 	}
 }
 
+//unused
 class PK_BulletPuffSmoke : PK_BlackSmoke {
 	Default {
 		alpha 0.3;
@@ -222,6 +304,7 @@ Class PK_WeaponIcon : Actor {
 }
 
 Class PK_Projectile : PK_BaseActor abstract {
+	protected bool mod; //affteced by Weapon Modifier
 	mixin PK_Math;
 	protected vector3 spawnpos;
 	protected bool farenough;
@@ -277,6 +360,8 @@ Class PK_Projectile : PK_BaseActor abstract {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
+		if (target && target.CountInv("PK_WeaponModifier"))
+			mod = true;
 		if (trailcolor)
 			spawnpos = pos;
 		if (!flarecolor)
@@ -425,9 +510,8 @@ Class PK_StakeProjectile : PK_Projectile {
 	override int SpecialMissileHit (Actor victim) {
 		if (!victim.bISMONSTER && victim.bSOLID) {
 			stickobject = victim;
-			return -1;
 		}
-		return 1;
+		return -1;
 	}
 	//virtual for breaking; child actors override it to add debris spawning and such:
 	virtual void StakeBreak() {
@@ -489,7 +573,15 @@ Class PK_BulletTracer : FastProjectile {
 		renderstyle 'add';
 		alpha 2;
 		scale 0.3;
-	}    
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		if (target && target.CountInv("PK_WeaponModifier")) {
+			A_SetRenderstyle(5,Style_AddShaded);
+			SetShade("FF2000");
+			scale *= 2;
+		}
+	}
 	states {
 	Spawn:
 		MODL A -1;
@@ -506,11 +598,16 @@ Class PK_RicochetBullet : PK_SmallDebris {
 		alpha 0.8;
 		scale 0.4;
 		+BRIGHT
+		+BOUNCEONWALLS
+		+BOUNCEONFLOORS
+		gravity 0.7;
+		bouncefactor 0.55;
+		bouncecount 1;
 	}
 	states {
 	Spawn:
-		MODL A 3;
-		stop;
+		MODL A 1 A_FadeOut(0.035);
+		loop;
 	}
 }
 
