@@ -3,6 +3,8 @@ Class PK_Painkiller : PKWeapon {
 	bool beam;
 	bool killer_fired;
 	bool combofire;
+	protected double wmodAlpha;
+	private int wmodCounter;
 	Default {
 		+WEAPON.MELEEWEAPON;
 		Obituary "%k ripped %o apart with Painkiller";
@@ -54,20 +56,48 @@ Class PK_Painkiller : PKWeapon {
 				}
 				A_WeaponOffset(0,32);
 				PK_AttackSound("weapons/painkiller/start",CHAN_VOICE);
+				invoker.wmodAlpha = 0;
+				invoker.wmodCounter = 0;
 				return ResolveState(null);
 			}
 			PKIR BCDEF 1;
 			TNT1 A 0 {
 				A_StartSound("weapons/painkiller/spin",CH_LOOP,CHANF_LOOPING);
-				if (invoker.hasDexterity)
-					return ResolveState("FastHold");
 				return ResolveState("Hold");
 			}
 			goto ready;
 		Hold:
-			TNT1 A 0 A_CustomPunch(12,true,CPF_NOTURN,"PK_PainkillerPuff",80); 
+			TNT1 A 0 {
+				A_CustomPunch(12,true,CPF_NOTURN,"PK_PainkillerPuff",80); 
+				if (invoker.hasWmod) {
+					A_Overlay(PSP_OVERGUN,"Hold.Mod");
+					A_OverlayRenderstyle(PSP_OVERGUN,Style_AddShaded);
+					A_OverlayFlags(PSP_OVERGUN,PSPF_ALPHA|PSPF_FORCEALPHA,true);
+					A_OverlayAlpha(PSP_OVERGUN,invoker.wmodAlpha);
+				}
+			}
 			PKIL ABCD 1 {
-				//A_SoundPitch(CH_LOOP,1);
+				double spitch = 1.0;				
+				if (invoker.hasWmod) {
+					spitch += 0.05;
+					if (invoker.wmodAlpha < 1)
+						invoker.wmodAlpha += 0.07;
+					invoker.wmodCounter++;		
+				}
+				if (invoker.hasDexterity) {
+					spitch += 0.1;
+					invoker.wmodCounter++;	
+					if (random[sfx](0,1) == 1) {
+						let psp = Player.FindPSprite(OverlayID());
+						if (psp && psp.frame < 3)
+							psp.frame++;
+					}
+				}
+				if (invoker.wmodCounter >= 3) {
+					invoker.wmodCounter = 0;
+					A_SetTics(0);
+				}				
+				A_SoundPitch(CH_LOOP,spitch);
 				if ((player.cmd.buttons & BT_ALTATTACK) && !(player.oldbuttons & BT_ALTATTACK)) {
 					A_StopSound(CH_LOOP);
 					invoker.combofire = true;
@@ -79,21 +109,15 @@ Class PK_Painkiller : PKWeapon {
 			}
 			TNT1 A 0 A_ReFire("Hold");
 			goto HoldEnd;
-		FastHold:
-			TNT1 A 0 A_CustomPunch(12,true,CPF_NOTURN,"PK_PainkillerPuff",80); 
-			PKIL AC 1 {
-				//A_SoundPitch(CH_LOOP,1.2);
-				if ((player.cmd.buttons & BT_ALTATTACK) && !(player.oldbuttons & BT_ALTATTACK)) {
-					A_StopSound(CH_LOOP);
-					invoker.combofire = true;
-					A_ClearRefire();
-					return ResolveState("AltFire");
-				}
-				A_WeaponOffset(frandom(-0.15,0.15),frandom(32,32.3));
-				return ResolveState(null);
+		Hold.Mod:
+			PKIW #### 1 bright {
+				A_OverlayAlpha(PSP_OVERGUN,invoker.wmodAlpha);
+				let psp = Player.FindPSprite(PSP_Weapon);
+				let fr = Player.FindPSprite(OverlayID());
+				if (psp && fr)
+					fr.frame = psp.frame;
 			}
-			TNT1 A 0 A_ReFire("FastHold");
-			goto HoldEnd;
+			stop;
 		HoldEnd:
 			TNT1 A 0 {
 				A_ClearRefire();
@@ -165,12 +189,41 @@ Class PK_Painkiller : PKWeapon {
 	}
 }
 	
-Class PK_PainkillerPuff : PKPuff {
+Class PK_PainkillerPuff : PK_BulletPuff {
 	Default {
 		Seesound "weapons/painkiller/hit";
 		Attacksound "weapons/painkiller/hitwall";
+		decal "PKIMark";
 		+NODAMAGETHRUST
 		+PUFFONACTORS
+	}
+	override void PostBeginPlay() {
+		PKPuff.PostBeginPlay();
+		if (target) {
+			angle = target.angle;
+			pitch = target.pitch;
+		}
+		FindLineNormal();
+		bool mod = (target && target.CountInv("PK_WeaponModifier"));
+		if (mod || (random[sfx](0,10) > 3)) {
+			let sprk = PK_RicochetBullet(Spawn("PK_RicochetBullet",pos));
+			if (sprk) {
+				sprk.vel = (hitnormal + (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](3,7)));
+				sprk.A_FaceMovementDirection();
+				sprk.scale *= 0.5;
+				sprk.alpha *= 0.5;
+				sprk.bBOUNCEONWALLS = false;
+				if (mod) {
+					sprk.A_SetRenderstyle(sprk.alpha,Style_AddShaded);
+					sprk.SetShade("FF4000");
+				}
+			}
+		}
+	}
+	states {
+	Spawn:
+		TNT1 A 1;
+		stop;
 	}
 }
 	

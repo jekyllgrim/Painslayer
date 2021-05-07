@@ -3,6 +3,7 @@ Class PKWeapon : Weapon abstract {
 	sound emptysound;
 	property emptysound : emptysound;
 	protected bool hasDexterity;
+	protected bool hasWmod;
 	protected vector2 targOfs;
 	protected vector2 shiftOfs;
 	protected bool alwaysbob;
@@ -47,6 +48,7 @@ Class PKWeapon : Weapon abstract {
 		if (alwaysbob && weap == self)
 			owner.player.WeaponState |= WF_WEAPONBOBBING;
 		hasDexterity = owner.FindInventory("PowerDoubleFiringSpeed",true);
+		hasWmod = owner.CountInv("PK_WeaponModifier");
 	}
 	
 	action bool CheckInfiniteAmmo() {
@@ -171,6 +173,8 @@ Class PK_NullPuff : Actor {
 
 Class PK_BulletPuff : PKPuff {
 	protected Vector3 hitnormal;			//vector normal of the hit 
+	protected FLineTraceData puffdata;
+	double debrisOfz;
 	Default {
 		decal "BulletChip";
 		scale 0.032;
@@ -183,7 +187,17 @@ Class PK_BulletPuff : PKPuff {
 			angle = target.angle;
 			pitch = target.pitch;
 		}
-		SpawnSmoke();
+		FindLineNormal();
+		let smok = PK_WhiteSmoke(Spawn("PK_WhiteSmoke",puffdata.Hitlocation + (0,0,debrisOfz)));
+		if (smok) {
+			smok.vel = (hitnormal + (frandom[sfx](-0.05,0.05),frandom[sfx](-0.05,0.05),frandom[sfx](-0.05,0.05))) * frandom[sfx](0.8,1.3);
+			smok.A_SetScale(0.085);
+			smok.alpha = 0.85;
+			smok.fade = 0.025;
+		}
+		let deb = Spawn("PK_RandomDebris",puffdata.Hitlocation + (0,0,debrisOfz));
+		if (deb)
+			deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
 		bool mod = (target && target.CountInv("PK_WeaponModifier"));
 		name lit = mod ? 'PK_BulletPuffMod' : 'PK_BulletPuff';
 		A_AttachLightDef('puf',lit);
@@ -200,20 +214,18 @@ Class PK_BulletPuff : PKPuff {
 			}
 		}
 	}
-	void SpawnSmoke() {
-		FLineTraceData puffdata;
+	void FindLineNormal() {
 		LineTrace(angle,128,pitch,TRF_THRUACTORS|TRF_NOSKY,data:puffdata);
-		double ofz = 0;
 		hitnormal = -puffdata.HitDir;
 		if (puffdata.HitType == TRACE_HitFloor) {
-			ofz = 1;
+			debrisOfz = 1;
 			if (puffdata.Hit3DFloor) 
 				hitnormal = -puffdata.Hit3DFloor.top.Normal;
 			else 
 				hitnormal = puffdata.HitSector.floorplane.Normal;
 		}
 		else if (puffdata.HitType == TRACE_HitCeiling)	{
-			ofz = -1;
+			debrisOfz = -1;
 			if (puffdata.Hit3DFloor) 
 				hitnormal = -puffdata.Hit3DFloor.bottom.Normal;
 			else 
@@ -224,25 +236,9 @@ Class PK_BulletPuff : PKPuff {
 			if (!puffdata.LineSide) 
 				hitnormal *= -1;
 		}
-		let smok = PK_WhiteSmoke(Spawn("PK_WhiteSmoke",puffdata.Hitlocation + (0,0,ofz)));
-		if (smok) {
-			smok.vel = (hitnormal + (frandom[sfx](-0.05,0.05),frandom[sfx](-0.05,0.05),frandom[sfx](-0.05,0.05))) * frandom[sfx](0.8,1.3);
-			smok.A_SetScale(0.085);
-			smok.alpha = 0.85;
-			smok.fade = 0.025;
-		}
 	}
 	states {
 	Spawn:
-		TNT1 A 1 NoDelay {
-			A_SpawnItemEx("PK_RandomDebris",xvel:frandom[sfx](-4,4),yvel:frandom[sfx](-4,4),zvel:frandom[sfx](3,5));
-			/*for (int i = 3; i > 0; i--) {
-				let smk = Spawn("PK_BulletPuffSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
-				if (smk) {
-					smk.vel = (frandom[sfx](-0.4,0.4),frandom[sfx](-0.4,0.4),frandom[sfx](0.1,0.5));
-				}
-			}*/
-		}
 		FLAR B 1 bright A_FadeOut(0.1);
 		wait;
 	}
