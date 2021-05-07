@@ -1,7 +1,6 @@
 Class PK_Chaingun : PKWeapon {
 	private int holddur;
 	private double atkzoom;
-	private bool muzzleFlash;
 	Default {
 		PKWeapon.emptysound "weapons/empty/chaingun";
 		weapon.slotnumber 4;
@@ -16,6 +15,15 @@ Class PK_Chaingun : PKWeapon {
 		Tag "$PK_CHAINGUN_TAG";
 	}
 	private bool hideFlash;
+	action void PK_FireChaingun() {
+		double spread = 1;
+		double dmg = 16;
+		if (!CountInv("PK_WeaponModifier")) {
+			spread = Clamp(double(invoker.holddur * 0.2), 2, 8.5);
+			dmg = 11;
+		}
+		PK_FireBullets(spread,spread,-1,dmg,spawnheight:player.viewz-pos.z-40,spawnofs:8.6);
+	}
 	States {
 	Spawn:
 		BAL1 A -1;
@@ -37,6 +45,7 @@ Class PK_Chaingun : PKWeapon {
 		MIGN A 2 {
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			A_Quake(1,9,0,32,"");
+			PK_AttackSound();
 			A_FireProjectile("PK_Rocket",spawnofs_xy:3.2,spawnheight:-2);
 			A_ZoomFactor(0.98,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			A_OverlayPivot(OverlayID(),0.1,1.0);
@@ -90,16 +99,14 @@ Class PK_Chaingun : PKWeapon {
 			if (invoker.ammo2.amount < 1)
 				return ResolveState("AltFireEnd");
 			invoker.holddur++;
-			A_StartSound("weapons/chaingun/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
+			PK_AttackSound("weapons/chaingun/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
 			if (invoker.hasDexterity)
 				invoker.hideFlash = !invoker.hideFlash;
 			else
 				invoker.hideFlash = false;
 			if (!invoker.hideFlash)
 				A_Overlay(PSP_PFLASH,"AltFlash");
-			double spread = Clamp(double(invoker.holddur * 0.2), 2, 8.5);
-			A_FireBullets(spread,spread,-1,11,pufftype:"PK_BulletPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-40,spawnofs_xy:8.6);
-			
+			PK_FireChaingun();			
 			A_QuakeEX(1,1,0,2,0,1,sfx:"world/null");
 			return ResolveState(null);
 		}
@@ -186,24 +193,25 @@ Class PK_Chaingun : PKWeapon {
 }
 
 
-Class PK_Rocket : PK_Projectile {
+Class PK_Rocket : PK_Grenade {
 	Default {
-		PK_Projectile.trailcolor "f4f4f4";
-		PK_Projectile.trailscale 0.04;
-		PK_Projectile.trailfade 0.035;
-		PK_Projectile.trailalpha 0.12;
 		speed 30;
 		seesound "weapons/chaingun/rocketfire";
 		decal 'Scorch';
 		damage (20);
+		ExplosionDamage 128;
+		+NOGRAVITY
+		bouncetype 'none';
 	}
 	override void PostBeginplay() {
-		super.PostBeginplay();
+		PK_Projectile.PostBeginplay();
 		A_StartSound("weapons/chaingun/rocketfly",CHAN_5,flags:CHANF_LOOPING,volume:0.8,attenuation:4);
+		if (mod)
+			vel *= 1.5;
 	}
 	override void Tick () {
 		Vector3 oldPos = self.pos;		
-		Super.Tick();
+		PK_Projectile.Tick();
 		if (!farenough)
 			return;
 		Vector3 path = level.vec3Diff( self.pos, oldPos );
@@ -223,15 +231,6 @@ Class PK_Rocket : PK_Projectile {
 	Spawn:
 		MODL A 1 NoDelay A_FaceMovementDirection(flags:FMDF_INTERPOLATE);
 		loop;
-	Death:
-		TNT1 A 1 { 
-			bNOGRAVITY = true;
-			A_Quake(1,8,0,256,"");
-			A_StartSound("weapons/chaingun/rocketboom",CHAN_5);
-			A_Explode(144,128);
-			Spawn("PK_GenericExplosion",pos);
-		}
-		stop;
 	}
 }
 

@@ -45,7 +45,7 @@ Class PK_Shotgun : PKWeapon {
 			PK_AttackSound("weapons/shotgun/fire",CHAN_VOICE);
 			A_Overlay(PSP_PFLASH,"Flash");
 			vector2 spread = (CountInv("PK_WeaponModifier")) ? (2.8, 2.3) : (7, 5);
-			A_firebullets(spread.x,spread.y,10,9,pufftype:"PK_BulletPuff",flags:FBF_NORANDOM|FBF_USEAMMO,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-44,spawnofs_xy:9);
+			PK_FireBullets(spread.x,spread.y,10,9,spawnheight:player.viewz-pos.z-44,spawnofs:9);
 			A_ZoomFactor(0.99,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			A_AttachLight('PKWeaponlight', DynamicLight.PulseLight, "e1b03e", 64, 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight), param: 0.1);
 		}
@@ -133,7 +133,9 @@ Class PK_FreezerProjectile : PK_Projectile {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		A_AttachLight('PKFreezerProjectile', DynamicLight.PointLight, "75edff", 40, 0, flags: DYNAMICLIGHT.LF_ATTENUATE);
+		A_AttachLight('frez', DynamicLight.PointLight, "75edff", 40, 0, flags: DYNAMICLIGHT.LF_ATTENUATE);
+		if (mod)
+			vel *= 1.5;
 	}
 	states 	{
 	Spawn:
@@ -142,7 +144,7 @@ Class PK_FreezerProjectile : PK_Projectile {
 	Death:
 		TNT1 A 0 {
 			A_Stop();
-			A_AttachLight('PKFreezerProjectile', DynamicLight.RandomFlickerLight, "75edff", 32, 52, flags: DYNAMICLIGHT.LF_ATTENUATE);
+			A_AttachLight('frez', DynamicLight.RandomFlickerLight, "75edff", 32, 52, flags: DYNAMICLIGHT.LF_ATTENUATE);
 			roll = random(0,359); 
 			if (tracer && (tracer.bISMONSTER || tracer.player) && !tracer.bBOSS) {
 				tracer.GiveInventory("PK_FreezeControl",1);
@@ -150,7 +152,7 @@ Class PK_FreezerProjectile : PK_Projectile {
 				if (frz) {
 					frz.fcounter+=64;
 					//double freeze duration if player has Weapon Modifier:
-					if (target && target.CountInv("PK_WeaponModifier"))
+					if (mod)
 						frz.fcounter+=64;
 				}
 			}
