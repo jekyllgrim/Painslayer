@@ -261,7 +261,11 @@ Class PK_Rifle : PKWeapon {
 				invoker.fireFrame = 0;
 			invoker.fireFrame++;
 			A_Overlay(-30 + invoker.fireFrame,"FireFlash");
-			A_FireProjectile("PK_FlameThrowerFlame",angle:frandom[flt](-3,3),spawnofs_xy:3,spawnheight:4,pitch:frandom[flt](-3,3));	
+			let flm = PK_FlameThrowerFlame(A_FireProjectile("PK_FlameThrowerFlame",angle:frandom[flt](-3,3),spawnofs_xy:3,spawnheight:4,pitch:frandom[flt](-3,3)));	
+			if (flm) {
+				flm.realspeed = 7.2;
+				flm.addvel = true;
+			}
 			return ResolveState(null);
 		}
 		TNT1 A 0 {
@@ -467,6 +471,7 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 	its bonus vel, they're continuously compared against each other 
 	*/
 	double realSpeed;
+	bool addvel;
 	Default {
 		+BRIGHT
 		+ROLLSPRITE
@@ -510,10 +515,9 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 		roll = frandom[sfx](0,360);
 		rollOfs = frandom[sfx](5,20) * randompick[sfx](-1,1);
 		scaleMul = 1.02;
-		if (!realspeed)
-			realSpeed = 7.2;
-		vel = vel.unit() * realSpeed;
-		if (target) {
+		if (realspeed)
+			vel = vel.unit() * realSpeed;
+		if (target && addvel) {
 			vel += target.vel;
 			SetOrigin(pos + target.vel,false);
 		}
