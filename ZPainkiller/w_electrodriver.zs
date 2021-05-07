@@ -397,8 +397,9 @@ Class PK_Shuriken : PK_StakeProjectile {
 			//when using weapon modifier, this explosion is way too strong, so we have to tone it down
 			if (mod)
 				A_Explode(32,32);
+			//otherwise it's so hard to make it useful, it should at least be powerful
 			else
-				A_Explode(128,40,fulldamagedistance:64);
+				A_Explode(40,128,fulldamagedistance:64);
 			for (int i = random[sfx](2,7); i > 0; i--) {
 				let debris = Spawn("PK_RandomDebris",pos);
 				if (debris) {
