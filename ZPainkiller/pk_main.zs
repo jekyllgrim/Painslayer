@@ -309,6 +309,7 @@ Class PK_BaseDebris : PK_BaseActor abstract {
 Class PK_SmallDebris : PK_BaseDebris abstract {
 	protected bool onceiling;		//true if object is stuck on ceiling (must be combined with landed)
 	protected bool onliquid;
+	protected int bounces;
 	protected double Voffset;		//small randomized plane offset to reduce z-fighting for blood pools and such
 	double wrot;					//gets added to roll to imitate rotation during flying
 	double dbrake; 				//how quickly to reduce horizontal speed of "landed" particles to simulate sliding along the floor
@@ -342,6 +343,7 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 		PK_SmallDebris.removeonliquid true;
 		PK_SmallDebris.dbrake 0;
 		PK_SmallDebris.hitceiling false;
+		bouncecount 8;
 		+MOVEWITHSECTOR
 		-NOBLOCKMAP
 	}
@@ -475,7 +477,7 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 			else {
 				if (pos.z <= floorz+Voffset) {
 					bool liquid = CheckLiquidFlat();
-					if (liquid || !bBOUNCEONFLOORS || abs(vel.z) <= 2) {
+					if (bounces >= bouncecount || !bBOUNCEONFLOORS || liquid || abs(vel.z) <= 2) {
 						if (liquid)
 							onliquid = true;
 						PK_HitFloor();	
@@ -483,6 +485,7 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 					else {
 						SetZ(floorz+Voffset);
 						vel.z *= -bouncefactor;
+						bounces++;
 						if (bouncesound)
 							A_StartSound(bouncesound);
 					}
@@ -828,14 +831,14 @@ class PK_WhiteSmoke : PK_BaseSmoke {
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		scale *= frandom[sfx](0.9,1.1);
-		wrot = (random[sfx](3,10)*randompick(-1,1));
+		wrot = (random[sfx](2,5)*randompick[sfx](-1,1));
 		frame = random[sfx](0,5);
 		if (fade == 0)
 			fade = 0.01;
 	}	
 	states {
 	Spawn:
-		SMO2 # 1 NoDelay {
+		SMO2 # 1 {
 			if (GetAge() < 26) {
 				wrot *= 0.98;
 				scale *= 1.03;
