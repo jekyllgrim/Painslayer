@@ -29,6 +29,34 @@ Sprite "PKILD0", 283, 189
 	Patch "PKILD", 0, 0
 }
 
+Sprite "PKIWA0", 283, 189
+{
+	YScale 1.200
+	Offset -54, -13
+	Patch "PKIW00", 0, 0
+}
+
+Sprite "PKIWB0", 283, 189
+{
+	YScale 1.200
+	Offset -54, -13
+	Patch "PKIW01", 0, 0
+}
+
+Sprite "PKIWC0", 283, 189
+{
+	YScale 1.200
+	Offset -54, -13
+	Patch "PKIW02", 0, 0
+}
+
+Sprite "PKIWD0", 283, 189
+{
+	YScale 1.200
+	Offset -54, -13
+	Patch "PKIW03", 0, 0
+}
+
 Sprite "PKIMA0", 283, 189
 {
 	YScale 1.200
