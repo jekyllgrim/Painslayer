@@ -8,6 +8,7 @@ Class PK_Rifle : PKWeapon {
 	private double prevPitch[8];
 	private int fuelDepleteRate;
 	mixin PK_Math;
+	private bool speedup;
 	Default {
 		PKWeapon.emptysound "weapons/empty/rifle";
 		weapon.slotnumber 6;
@@ -21,12 +22,6 @@ Class PK_Rifle : PKWeapon {
 		inventory.pickupsound "pickups/weapons/rifle";
 		Tag "$PK_RIFLE_TAG";
 	}
-	/*override void DoEffect() {
-		if (owner) {
-			prevAngle = owner.angle;
-			prevPitch = owner.pitch;
-		}
-		super.DoEffect();*/
 	action void StartStrapSwing(double rfactor = 1.0) {
 		if (!player)
 			return;
@@ -175,6 +170,8 @@ Class PK_Rifle : PKWeapon {
 	Fire:
 		TNT1 A 0 {
 			A_StartSound("weapons/rifle/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
+			if (invoker.hasDexterity)
+				A_SoundPitch(CHAN_WEAPON,1.1);
 			A_FireBullets(1,1,1,17,pufftype:"PK_BulletPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-40,spawnofs_xy:8.6);
 			invoker.shots++;
 			A_OverlayPivot(RIFLE_STOCK,-1,-2.1);
@@ -182,13 +179,15 @@ Class PK_Rifle : PKWeapon {
 			//A_ClearOverlays(PSP_HIGHLIGHTS,PSP_HIGHLIGHTS);
 		}
 		PKRI A 1 {
+			if (invoker.hasDexterity)
+				A_SetTics(0);
 			A_Overlay(PSP_PFLASH,"Flash");
 			PK_RifleFlash();
 			PK_RifleScale(0.11,0.11);
 			A_WeaponOffset(2,2,WOF_ADD);
 			A_OverlayOffset(RIFLE_BOLT,2.1,1.5,WOF_ADD); //bolt
 			A_OverlayScale(RIFLE_BOLT,0.33,0.33,WOF_ADD); //bolt
-			A_OverlayOffset(RIFLE_BARREL,3,3,WOF_ADD); //barrel
+			A_OverlayOffset(RIFLE_BARREL,3,3,WOF_ADD); //barrel			
 		}
 		PKRI AAA 1 {			
 			PK_RifleScale(-0.033,-0.033);
