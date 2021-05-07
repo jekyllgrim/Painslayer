@@ -18,7 +18,7 @@ Class PK_Chaingun : PKWeapon {
 	action void PK_FireChaingun() {
 		double spread = 1;
 		double dmg = 16;
-		if (!CountInv("PK_WeaponModifier")) {
+		if (!invoker.hasWmod) {
 			spread = Clamp(double(invoker.holddur * 0.2), 2, 8.5);
 			dmg = 11;
 		}

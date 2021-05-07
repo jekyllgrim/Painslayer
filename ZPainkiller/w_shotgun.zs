@@ -44,7 +44,7 @@ Class PK_Shotgun : PKWeapon {
 			A_Quake(1,7,0,1,"");
 			PK_AttackSound("weapons/shotgun/fire",CHAN_VOICE);
 			A_Overlay(PSP_PFLASH,"Flash");
-			vector2 spread = (CountInv("PK_WeaponModifier")) ? (2.8, 2.3) : (7, 5);
+			vector2 spread = (invoker.hasWmod) ? (2.8, 2.3) : (7, 5);
 			PK_FireBullets(spread.x,spread.y,10,9,spawnheight:player.viewz-pos.z-44,spawnofs:9);
 			A_ZoomFactor(0.99,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			A_AttachLight('PKWeaponlight', DynamicLight.PulseLight, "e1b03e", 64, 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight), param: 0.1);

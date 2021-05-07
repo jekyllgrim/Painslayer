@@ -34,7 +34,7 @@ Class PK_Stakegun : PKWeapon {
 			TNT1 A 0 {
 				PK_AttackSound("weapons/stakegun/fire");
 				A_WeaponOffset(11,9,WOF_ADD);
-				double pofs = (CountInv("PK_WeaponModifier")) ? 0 : -2.5;
+				double pofs = (invoker.hasWmod) ? 0 : -2.5;
 				PK_FireArchingProjectile("PK_Stake",spawnofs_xy:2,spawnheight:5,flags:FPF_NOAUTOAIM,pitch:pofs);
 			}
 			PSGN BBBBB 2 A_WeaponOffset(1.44,1.2,WOF_ADD);
