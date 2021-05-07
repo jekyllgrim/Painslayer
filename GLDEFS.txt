@@ -229,14 +229,20 @@ flickerlight PKDISK_X {
 }
 
 pointlight PK_BulletPuff {
-	color 1.0 0.5 0
+	color 1.0 0.7 0
 	attenuate 1
 	size 4
 }
 
-object PK_BulletPuff {
-	frame FLAR { light PK_BulletPuff }
+pointlight PK_BulletPuffMod {
+	color 1.0 0.1 0
+	attenuate 1
+	size 6
 }
+
+/*object PK_BulletPuff {
+	frame FLAR { light PK_BulletPuff }
+}*/
 
 pointlight PK_ElectricPuff {
 	color 0 0.2 1
