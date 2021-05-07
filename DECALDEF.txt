@@ -6,3 +6,55 @@ decal Stakedecal {
 	x-scale 0.08
 	translucent 0.9
 }
+
+decal PKIMark1
+{
+	pic PKIMARK1
+	x-scale 0.04
+	y-scale 0.04
+	randomflipx
+	randomflipy
+	add 0.3
+	shade "00 00 00"
+}
+
+decal PKIMark2
+{
+	pic PKIMARK2
+	x-scale 0.04
+	y-scale 0.04
+	randomflipx
+	randomflipy
+	add 0.3
+	shade "00 00 00"
+}
+
+decal PKIMark3
+{
+	pic PKIMARK3
+	x-scale 0.04
+	y-scale 0.04
+	randomflipx
+	randomflipy
+	add 0.3
+	shade "00 00 00"
+}
+
+decal PKIMark4
+{
+	pic PKIMARK4
+	x-scale 0.04
+	y-scale 0.04
+	randomflipx
+	randomflipy
+	add 0.3
+	shade "00 00 00"
+}
+
+decalgroup PKIMark
+{
+	PKIMark1	1
+	PKIMark2	1
+	PKIMark3	1
+	PKIMark4	1
+}
