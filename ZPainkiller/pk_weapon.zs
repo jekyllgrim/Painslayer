@@ -427,80 +427,82 @@ Class PK_StakeProjectile : PK_Projectile {
 	
 	//this function is called when the projectile dies and checks if it hit something
 	virtual void StickToWall() {
-		//use linetrace to get information about what we hit
-		FLineTraceData trac;
-		LineTrace(angle,radius+64,pitch,TRF_NOSKY|TRF_THRUACTORS,data:trac);
-		sticklocation = trac.HitLocation.xy;
-		topz = CurSector.ceilingplane.ZatPoint(sticklocation);
-		botz = CurSector.floorplane.ZatPoint(sticklocation);
-		//blockingline is non-null if we hit a wall or a solid 3D floor:
-		if (blockingline) {			
-			string myclass = GetClassName();
-			//3D floor is easiest, so we start with it:
-			if (trac.Hit3DFloor) {
-				//we simply attach the stake to the 3D floor's top plane, nothing else
-				F3DFloor flr = trac.Hit3DFloor;
-				stickplane = flr.top;
-				stickoffset = stickplane.ZAtPoint(sticklocation) - pos.z;
-				if (pk_debugmessages > 1)
-					console.printf("%s hit a 3D floor at %d,%d,%d",myclass,pos.x,pos.y,pos.z);				
-			}
-			//otherwise see if we hit a line:
-			else if (trac.HitLine) {
-				//check if the line is two-sided first:
-				let tline = trac.HitLine;
-				//if it's one-sided, it can't be a door/lift, so don't do anything else:
-				if (!tline.backsector) {
-					if (pk_debugmessages > 1)
-						console.printf("%s hit one-sided line, not doing anything else",myclass);
-				}
-				//if it's two-sided:
-				else {
-					//check which side we're on:
-					int lside = PointOnLineSide(pos.xy,tline);
-					string sside = (lside == 0) ? "front" : "back";
-					//we'll attack the stake to the sector on the other side:
-					let targetsector = (lside == 0) ? tline.backsector : tline.frontsector;
-					let floorHitZ = targetsector.floorplane.ZatPoint (sticklocation);
-					let ceilHitZ = targetsector.ceilingplane.ZatPoint (sticklocation);
-					string secpart = "middle";
-					//check if we hit top or bottom floor (i.e. door or lift):
-					if (pos.z <= floorHitZ) {
-						secpart = "lower";
-						stickplane = targetsector.floorplane;
-					}
-					else if (pos.z >= ceilHitZ) {
-						secpart = "top";
-						stickplane = targetsector.ceilingplane;
-					}
-					stickoffset = stickplane.ZAtPoint(sticklocation) - pos.z;
-					if (pk_debugmessages > 1)
-						console.printf("%s hit the %s %s part of the line at %d,%d,%d",myclass,secpart,sside,pos.x,pos.y,pos.z);
-				}
-			}
-		}
-		//maybe we hit a solid object, like a lamp, etc.:
-		else if (stickobject) {
-			stickoffset = pos.z - stickobject.pos.z;
-			if (pk_debugmessages > 1)
-				console.printf("Stake hit %s at at %d,%d,%d",stickobject.GetClassName(),pos.x,pos.y,pos.z);
-		}
-		//if all else is false, then we hit a floor/ceiling, so we'll attach to them:
-		else {			
-			if (trac.HitLocation.z >= topz) {
-				hitplane = 2;
-				if (pk_debugmessages > 1)
-					console.printf("Stake hit ceiling at at %d,%d,%d",pos.x,pos.y,pos.z);
-			}
-			else if (trac.HitLocation.z <= botz) {
-				hitplane = 1;
-				if (pk_debugmessages > 1)
-					console.printf("Stake hit floor at at %d,%d,%d",pos.x,pos.y,pos.z);
-			}
-		}
+		string myclass = GetClassName();
 		bTHRUACTORS = true;
 		bNOGRAVITY = true;
 		A_Stop();
+		
+		if (stickobject) {
+			stickoffset = pos.z - stickobject.pos.z;
+			if (pk_debugmessages > 1)
+				console.printf("%s hit %s at at %d,%d,%d",myclass,stickobject.GetClassName(),pos.x,pos.y,pos.z);
+			return;
+		}
+		
+		//use linetrace to get information about what we hit
+		FLineTraceData trac;
+		LineTrace(angle,radius+64,pitch,TRF_NOSKY|TRF_THRUACTORS|TRF_BLOCKSELF,data:trac);
+		sticklocation = trac.HitLocation.xy;
+		topz = CurSector.ceilingplane.ZatPoint(sticklocation);
+		botz = CurSector.floorplane.ZatPoint(sticklocation);
+		
+		//if hit floor/ceiling, we'll attach to them:
+		if (trac.HitLocation.z >= topz) {
+			hitplane = 2;
+			if (pk_debugmessages > 1)
+				console.printf("%s hit ceiling at at %d,%d,%d",myclass,pos.x,pos.y,pos.z);
+		}
+		else if (trac.HitLocation.z <= botz) {
+			hitplane = 1;
+			if (pk_debugmessages > 1)
+				console.printf("%s hit floor at at %d,%d,%d",myclass,pos.x,pos.y,pos.z);
+		}
+		if (hitplane > 0)
+			return;
+			
+		//3D floor is easiest, so we start with it:
+		if (trac.Hit3DFloor) {
+			//we simply attach the stake to the 3D floor's top plane, nothing else
+			F3DFloor flr = trac.Hit3DFloor;
+			stickplane = flr.top;
+			stickoffset = stickplane.ZAtPoint(sticklocation) - pos.z;
+			if (pk_debugmessages > 1)
+				console.printf("%s hit a 3D floor at %d,%d,%d",myclass,pos.x,pos.y,pos.z);
+			return;
+		}
+		//otherwise see if we hit a line:
+		if (trac.HitLine) {
+			//check if the line is two-sided first:
+			let tline = trac.HitLine;
+			//if it's one-sided, it can't be a door/lift, so don't do anything else:
+			if (!tline.backsector) {
+				if (pk_debugmessages > 1)
+					console.printf("%s hit one-sided line, not doing anything else",myclass);
+				return;
+			}
+			//if it's two-sided:
+			//check which side we're on:
+			int lside = PointOnLineSide(pos.xy,tline);
+			string sside = (lside == 0) ? "front" : "back";
+			//we'll attack the stake to the sector on the other side:
+			let targetsector = (lside == 0 && tline.backsector) ? tline.backsector : tline.frontsector;
+			let floorHitZ = targetsector.floorplane.ZatPoint (sticklocation);
+			let ceilHitZ = targetsector.ceilingplane.ZatPoint (sticklocation);
+			string secpart = "middle";
+			//check if we hit top or bottom floor (i.e. door or lift):
+			if (pos.z <= floorHitZ) {
+				secpart = "lower";
+				stickplane = targetsector.floorplane;
+				stickoffset = floorHitZ - pos.z;
+			}
+			else if (pos.z >= ceilHitZ) {
+				secpart = "top";
+				stickplane = targetsector.ceilingplane;
+				stickoffset = ceilHitZ - pos.z;
+			}
+			if (pk_debugmessages > 1)
+				console.printf("%s hit the %s %s part of the line at %d,%d,%d",myclass,secpart,sside,pos.x,pos.y,pos.z);
+		}
 	}
 	//record a non-monster solid object the stake runs into if there is one:
 	override int SpecialMissileHit (Actor victim) {
