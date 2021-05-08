@@ -17,7 +17,7 @@ Class PK_Chaingun : PKWeapon {
 	private bool hideFlash;
 	action void PK_FireChaingun() {
 		double spread = 1;
-		double dmg = 16;
+		double dmg = 10;
 		if (!invoker.hasWmod) {
 			spread = Clamp(double(invoker.holddur * 0.2), 2, 8.5);
 			dmg = 11;
