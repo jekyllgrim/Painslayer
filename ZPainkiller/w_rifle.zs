@@ -260,6 +260,11 @@ Class PK_Rifle : PKWeapon {
 			if (flm) {
 				flm.realspeed = 7.2;
 				flm.addvel = true;
+				if (invoker.hasWmod) {
+					flm.scale *= 1.5;
+					flm.realspeed *= 1.5;
+					flm.A_SetSize(flm.radius * 1.2, flm.height * 1.2);
+				}
 			}
 			return ResolveState(null);
 		}
