@@ -75,7 +75,7 @@ Class PK_Rifle : PKWeapon {
 		A_OverlayScale(RLIGHT_BARREL,wx,wy,flags);
 	}
 	//gradually scale down all layers
-	action void PK_RifleRestoreScale() {
+	action void PK_RifleRestoreScale(double deduct = 0.25) {
 		if (!player)
 			return;
 		let pspw = player.FindPSprite(PSP_WEAPON);
@@ -85,18 +85,24 @@ Class PK_Rifle : PKWeapon {
 		let pspb = player.FindPSprite(RIFLE_STRAP);
 		let psph = player.FindPSprite(PSP_HIGHLIGHTS);
 		
-		if (pspw)			
-			A_OverlayScale(PSP_WEAPON,  Clamp(pspw.scale.x- 0.015,1,99), Clamp(pspw.scale.y- 0.015,1,99),WOF_INTERPOLATE);
-		if (pspo)
-			A_OverlayScale (RIFLE_BOLT, Clamp(pspo.scale.x- 0.015,1,99), Clamp(pspo.scale.y- 0.015,1,99),WOF_INTERPOLATE);
+		if (pspw) {
+			A_OverlayScale(PSP_WEAPON,  Clamp(pspw.scale.x- deduct,1,99), Clamp(pspw.scale.y- deduct,1,99),WOF_INTERPOLATE);
+			A_WeaponOffset(Clamp(pspw.x - deduct,0,99), Clamp(pspw.y - deduct,32,99), WOF_INTERPOLATE);
+		}
+		if (pspo) {
+			A_OverlayScale (RIFLE_BOLT, Clamp(pspo.scale.x- deduct,1,99), Clamp(pspo.scale.y- deduct,1,99),WOF_INTERPOLATE);
+			A_OverlayOffset(RIFLE_BOLT, Clamp(pspo.x - deduct,0,99), Clamp(pspo.y - deduct,0,99), WOF_INTERPOLATE);
+		}
 		if (psps)
-			A_OverlayScale(RIFLE_STOCK, Clamp(psps.scale.x- 0.015,1,99), Clamp(psps.scale.y- 0.015,1,99),WOF_INTERPOLATE);
-		if (pspu)
-			A_OverlayScale (RIFLE_BARREL, Clamp(pspu.scale.x- 0.015,1,99), Clamp(pspu.scale.y- 0.015,1,99),WOF_INTERPOLATE);
+			A_OverlayScale(RIFLE_STOCK, Clamp(psps.scale.x- deduct,1,99), Clamp(psps.scale.y- deduct,1,99),WOF_INTERPOLATE);
+		if (pspu) {
+			A_OverlayScale (RIFLE_BARREL, Clamp(pspu.scale.x- deduct,1,99), Clamp(pspu.scale.y- deduct,1,99),WOF_INTERPOLATE);
+			A_OverlayOffset(RIFLE_BARREL, Clamp(pspu.x  - deduct,0,99), Clamp(pspu.y - deduct,0,99), WOF_INTERPOLATE);
+		}
 		if (pspb)
-			A_OverlayScale (RIFLE_STRAP, Clamp(pspb.scale.x- 0.015,1,99), Clamp(pspb.scale.y- 0.015,1,99),WOF_INTERPOLATE);
+			A_OverlayScale (RIFLE_STRAP, Clamp(pspb.scale.x- deduct,1,99), Clamp(pspb.scale.y- deduct,1,99),WOF_INTERPOLATE);
 		if (psph)
-			A_OverlayScale (PSP_HIGHLIGHTS, Clamp(pspb.scale.x- 0.015,1,99), Clamp(pspb.scale.y- 0.015,1,99),WOF_INTERPOLATE);
+			A_OverlayScale (PSP_HIGHLIGHTS, Clamp(pspb.scale.x- deduct,1,99), Clamp(pspb.scale.y- deduct,1,99),WOF_INTERPOLATE);
 	}
 	states {
 	Spawn:
@@ -162,18 +168,20 @@ Class PK_Rifle : PKWeapon {
 			PK_RifleScale(-0.05,-0.05);
 			A_WeaponOffset(-1.5,-1.5,WOF_ADD);			
 		}
-		PKRI A 5 {
-			A_WeaponOffset(0,32,WOF_INTERPOLATE);
+		PKRI AAAAA 1 {
 			PK_RifleRestoreScale();
 		}
 		goto ready;
 	Fire:
 		TNT1 A 0 {
-			A_StartSound("weapons/rifle/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
+			PK_AttackSound("weapons/rifle/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
 			if (invoker.hasDexterity)
 				A_SoundPitch(CHAN_WEAPON,1.1);
-			A_FireBullets(1,1,1,17,pufftype:"PK_BulletPuff",flags:FBF_USEAMMO|FBF_NORANDOM,missile:"PK_BulletTracer",spawnheight:player.viewz-pos.z-40,spawnofs_xy:8.6);
-			invoker.shots++;
+			double dmg = 12;
+			if (invoker.hasWmod) dmg *= 1.5;
+			PK_FireBullets(1,1,1,dmg,spawnheight:player.viewz-pos.z-40,spawnofs:8.6);
+			if (!invoker.hasWmod)
+				invoker.shots++;
 			A_OverlayPivot(RIFLE_STOCK,-1,-2.1);
 			A_OverlayPivot(RLIGHT_STOCK,-1,-2.1);
 			//A_ClearOverlays(PSP_HIGHLIGHTS,PSP_HIGHLIGHTS);
@@ -189,7 +197,7 @@ Class PK_Rifle : PKWeapon {
 			A_OverlayScale(RIFLE_BOLT,0.33,0.33,WOF_ADD); //bolt
 			A_OverlayOffset(RIFLE_BARREL,3,3,WOF_ADD); //barrel			
 		}
-		PKRI AAA 1 {			
+		PKRI AAA 1 {
 			PK_RifleScale(-0.033,-0.033);
 			A_WeaponOffset(-0.6,-0.6,WOF_ADD);
 			A_OverlayOffset(RIFLE_BOLT,-0.7,-0.5,WOF_ADD);
@@ -197,6 +205,8 @@ Class PK_Rifle : PKWeapon {
 			A_OverlayOffset(RIFLE_BARREL,-1,-1,WOF_ADD);
 		}
 		TNT1 A 0 {
+			if (invoker.hasWmod)
+				PK_RifleRestoreScale(0.5);
 			if (invoker.shots < 8)
 				A_ReFire();
 			else
@@ -204,21 +214,9 @@ Class PK_Rifle : PKWeapon {
 		}
 		PKRI AAAAAA 1 {
 			PK_RifleRestoreScale();
-			let psp = Player.FindPSprite(PSP_WEAPON);
-			if (psp)
-				A_WeaponOffset(Clamp(psp.x - 0.25,0,99), Clamp(psp.y - 0.25,32,99), WOF_INTERPOLATE);
-			let pspo = Player.FindPSprite(RIFLE_BOLT);
-			if (pspo)
-				A_OverlayOffset(RIFLE_BOLT, Clamp(pspo.x - 0.25,0,99), Clamp(pspo.y - 0.25,0,99), WOF_INTERPOLATE);
-			let pspu = Player.FindPSprite(RIFLE_BARREL);
-			if (pspu)
-				A_OverlayOffset(RIFLE_BARREL, Clamp(pspu.x  - 0.25,0,99), Clamp(pspu.y - 0.25,0,99), WOF_INTERPOLATE);
 		}
 		TNT1 A 0 {
 			A_WeaponOffset(0,32);
-			A_OverlayOffset(RIFLE_BOLT,0,0);
-			A_OverlayOffset(RIFLE_BARREL,0,0);
-			PK_RifleScale(1,1,flags:0);
 		}
 		goto ready;
 	AltFire:
@@ -233,8 +231,6 @@ Class PK_Rifle : PKWeapon {
 			bool infin = CheckInfiniteAmmo();
 			if (player.cmd.buttons & BT_ATTACK && (invoker.ammo2.amount >= 50 || infin)) {
 				A_RemoveLight('PKWeaponlight');
-				A_WeaponOffset(0,32);
-				PK_RifleRestoreScale();
 				if (!infin)
 					TakeInventory(invoker.ammotype2,50);
 				A_ClearRefire();
