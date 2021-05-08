@@ -235,8 +235,9 @@ Class PK_Boltgun : PKWeapon {
 			TakeInventory(invoker.ammo2.GetClass(),10);
 			double ofs = -2.2;
 			double ang = 5;
+			double bpitch = invoker.hasWmod ? -15 : -25;
 			for (int i = 0; i < 10; i++) {				
-				let bomb = PK_FireArchingProjectile("PK_Bomb",angle:ang+frandom[bomb](-0.7,0.7),useammo:false,spawnofs_xy:ofs,spawnheight:-4+frandom[bomb](-0.8,0.8),pitch:-25+frandom[bomb](-4,4));
+				let bomb = PK_FireArchingProjectile("PK_Bomb",angle:ang+frandom[bomb](-0.7,0.7),useammo:false,spawnofs_xy:ofs,spawnheight:-4+frandom[bomb](-0.8,0.8),pitch:bpitch+frandom[bomb](-4,4));
 				ofs += 2.2;
 				ang -= 1;
 			}
@@ -265,8 +266,10 @@ Class PK_Bolt : PK_Stake {
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		sprite = GetSpriteIndex("BOLT");
-		basedmg = 40;
+		basedmg = mod ? 60 : 40;
 		onFire = true; //this prevents it from spawning the fire trail that the stake would spawn after 12 tics
+		if (mod)
+			trailcolor = "F43510";
 	}
 	override void StakeBreak() {
 		double ofz = botz+1;
@@ -375,6 +378,21 @@ Class PK_Bomb : PK_Projectile {
 		bouncefactor *= frandom[bomb](0.85,1.15);
 		roll = frandom[sfx](-20,20);
 		rollOfs = frandom[sfx](2,5) + randompick[sfx](-1,1);
+		if (mod) {
+			bounces = 3;
+			ActivateBomb();
+			gravity *= 0.5;
+		}
+	}
+	void ActivateBomb() {
+		A_AttachLight('Bomb',DynamicLight.FlickerLight,"DDBB00",17,12,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF);
+		let red = PK_BaseFlare(Spawn("PK_ProjFlare",pos));
+		if (red) {
+			red.fcolor = "FF0000";
+			red.master = self;
+			red.alpha = 0.65;
+			red.A_SetScale(0.06);
+		}
 	}
 	states {
 	Spawn:
@@ -388,16 +406,8 @@ Class PK_Bomb : PK_Projectile {
 			if (bounces > 2) 
 				return ResolveState("XDeath");
 			roll = frandom[sfx](-30,30);
-			if (bounces == 1) {
-				A_AttachLight('Bomb',DynamicLight.FlickerLight,"DDBB00",17,12,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF);
-				let red = PK_BaseFlare(Spawn("PK_ProjFlare",pos));
-				if (red) {
-					red.fcolor = "FF0000";
-					red.master = self;
-					red.alpha = 0.65;
-					red.A_SetScale(0.06);
-				}
-			}
+			if (bounces == 1) 
+				ActivateBomb();
 			return ResolveState(null);
 		}
 		goto spawn;
