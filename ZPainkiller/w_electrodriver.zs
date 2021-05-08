@@ -50,10 +50,32 @@ Class PK_ElectroDriver : PKWeapon {
 			return hit.HitLocation;
 		}
 		int dmg = invoker.hasDexterity ? 8 : 4;
-		if (frandom(0,2) > 1.5)
-			ltarget.DamageMobj(self,self,dmg,'normal',flags:DMG_THRUSTLESS);
-		else
-			ltarget.DamageMobj(self,self,dmg,'normal',flags:DMG_THRUSTLESS|DMG_NO_PAIN);
+		int fflags = DMG_THRUSTLESS;
+		if (frandom[eld](1,3) > 2)
+			fflags |= DMG_NO_PAIN;
+		ltarget.DamageMobj(self,self,dmg,'normal',flags:fflags);
+		if (invoker.hasWmod) {
+			double closestDist = double.infinity;
+			BlockThingsIterator itr = BlockThingsIterator.Create(self,atkdist);
+			while (itr.next()) {
+				let next = itr.thing;
+				if (!next || next == self)
+					continue; 
+				if (next == ltarget || !next.bShootable || !(next.bIsMonster || (next is "PlayerPawn")) || !self.IsHostile (next) || self.bKILLED)
+					continue;
+				double cdist = Distance3D(next);
+				if (cdist > 180)
+					continue;
+				if (cdist < closestDist)
+					closestDist = cdist;
+				if (!CheckSight(next,SF_IGNOREWATERBOUNDARY))
+					continue;
+				PK_TrackingBeam.MakeBeam("PK_Lightning",ltarget,radius:32,hitpoint:next.pos+(0,0,next.height*0.5),masterOffset:(0,0,ltarget.height*0.5),style:STYLE_ADD);
+				next.DamageMobj(self,self,dmg * 0.75,'normal',flags:DMG_THRUSTLESS|DMG_NO_PAIN);
+				if (!next.FindInventory("PK_ElectroTargetControl"))
+					next.GiveInventory("PK_ElectroTargetControl",1);
+			}
+		}
 		if (!ltarget.FindInventory("PK_ElectroTargetControl"))
 			ltarget.GiveInventory("PK_ElectroTargetControl",1);
 		return ltarget.pos+(0,0,ltarget.height*0.5);
@@ -552,6 +574,8 @@ Class PK_DiskProjectile : PK_Shuriken {
 	Death:
 		TNT1 A 0 {
 			A_Stop();
+			if (!tracer)
+				StickToWall();
 			A_StartSound("weapons/edriver/starwall",attenuation:2);
 			A_StartSound("weapons/edriver/shockloop",CHAN_VOICE,CHANF_LOOPING);
 		}
