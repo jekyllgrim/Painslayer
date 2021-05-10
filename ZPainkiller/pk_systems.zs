@@ -1072,6 +1072,20 @@ Class PKC_WeaponModifier : PK_BaseGoldenCard {
 	Default {
 		tag "WeaponModifier";
 	}
+	override void GoldenCardStart() {
+		super.GoldenCardStart();
+		owner.GiveInventory("PK_WeaponModifier",1);
+		let wmod = PK_WeaponModifier(owner.FindInventory("PK_WeaponModifier"));
+		if (wmod)
+			wmod.duration += 99;
+	}
+	override void GoldenCardEnd() {
+		super.GoldenCardEnd();
+		let wmod = PK_WeaponModifier(owner.FindInventory("PK_WeaponModifier"));
+		if (wmod && wmod.duration > 0) {
+			wmod.duration -= 99;
+		}
+	}
 }
 
 //spawns explosions while the player is running around
