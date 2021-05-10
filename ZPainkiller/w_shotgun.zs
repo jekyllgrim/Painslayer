@@ -45,7 +45,7 @@ Class PK_Shotgun : PKWeapon {
 			PK_AttackSound("weapons/shotgun/fire",CHAN_VOICE);
 			A_Overlay(PSP_PFLASH,"Flash");
 			vector2 spread = (invoker.hasWmod) ? (2.8, 2.3) : (7, 5);
-			PK_FireBullets(spread.x,spread.y,10,9,spawnheight:player.viewz-pos.z-44,spawnofs:9);
+			PK_FireBullets(spread.x,spread.y,10,9,pufftype:"PK_ShotgunPuff",spawnheight:player.viewz-pos.z-44,spawnofs:9);
 			A_ZoomFactor(0.99,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			A_AttachLight('PKWeaponlight', DynamicLight.PulseLight, "e1b03e", 64, 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight), param: 0.1);
 		}
@@ -327,6 +327,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 			owner.A_SetTranslation("PK_IceChunk");
 			owner.A_SetTics(1000);
 			owner.deathsound = "";
+			owner.bDONTTHRUST = true;
 			DepleteOrDestroy();
 			return;
 		}
@@ -339,5 +340,74 @@ Class PK_FreezeControl : PK_InventoryToken {
 		if (owner.health > 0)
 			owner.translation = ownertrans;
 		super.DetachFromOwner();
+	}
+}
+
+Class PK_ShotgunPuff : PK_BulletPuff {
+	Default {
+		+HITTRACER
+		+PUFFONACTORS
+	}
+	states {
+	Spawn:
+		TNT1 A 1 NoDelay {		
+			if (target && tracer && !tracer.bDONTTHRUST && tracer.bISMONSTER && !tracer.bBOSS && tracer.mass <= 400 && tracer.health <= 0 && !tracer.FindInventory("PK_PushAwayControl") && !tracer.FindInventory("PK_FreezeControl")) {
+				tracer.GiveInventory("PK_PushAwayControl",1);
+				let pac = PK_PushAwayControl(tracer.FindInventory("PK_PushAwayControl"));
+				if (pac) {
+					pac.master = target;
+					//console.printf("giving push control to %s",tracer.GetClassName());
+					double pushspeed = LinearMap(tracer.mass,100,400,20,5);
+					pushspeed = Clamp(pushspeed,5,20) * frandom[sfx](0.85,1.2);
+					double pushz = Clamp(LinearMap(target.pitch,0,-90,0,10), 0, 10);
+					tracer.Vel3DFromAngle(
+						pushspeed,
+						target.angle,
+						Clamp(target.pitch - 5, -15, -45)
+					);
+					tracer.vel.z += pushz;
+					if (!tracer.bFLOAT && tracer.mass < 300) {
+						tracer.gravity *= 0.75;
+						pac.broll = frandom[sfx](2,5) * randompick[sfx](-1,1) * (18 / pushspeed);						
+						tracer.bROLLSPRITE = true;
+						if (random[hiroller](0,100) > 93) {
+							tracer.bROLLCENTER = true;
+							tracer.A_SetTics(500);
+							pac.broll *= 10;
+							tracer.A_Scream();
+							tracer.deathsound = "";
+							tracer.vel *= 2;
+						}
+					}
+					//console.printf("%s was pushed away, speed: %f, vel: %d,%d,%d, roll: %f",tracer.GetClassName(),pushspeed,tracer.vel.x,tracer.vel.y,tracer.vel.z,pac.broll);
+				}
+			}
+		}
+		stop;
+	}
+}
+
+Class PK_PushAwayControl : PK_InventoryToken {
+	double broll;
+	override void DoEffect() {
+		super.DoEffect();
+		if (!owner) {
+			DepleteOrDestroy();
+			return;
+		}
+		if (owner.isFrozen() || !owner.bROLLSPRITE)
+			return;
+		if (owner.pos.z <= owner.floorz || GetAge() > 80) {
+			owner.roll = owner.default.roll;
+			owner.bROLLSPRITE = owner.default.bROLLSPRITE;
+			owner.A_SetTics(1);
+			owner.gravity = owner.default.gravity;
+			DepleteOrDestroy();
+			return;
+		}
+		owner.roll += broll;//= Clamp(owner.roll + broll,-45,45);
+		if (random[sfx](1,3) == 3)
+			owner.SpawnBlood(owner.pos,0,1);
+		broll *= 0.95;
 	}
 }

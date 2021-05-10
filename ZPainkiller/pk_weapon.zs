@@ -143,6 +143,7 @@ Class PKWeapon : Weapon abstract {
 }
 
 Class PKPuff : Actor abstract {
+	mixin PK_Math;
 	Default {
 		+NOBLOCKMAP
 		+NOGRAVITY
@@ -183,36 +184,6 @@ Class PK_BulletPuff : PKPuff {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		if (target) {
-			angle = target.angle;
-			pitch = target.pitch;
-		}
-		FindLineNormal();
-		let smok = PK_WhiteSmoke(Spawn("PK_WhiteSmoke",puffdata.Hitlocation + (0,0,debrisOfz)));
-		if (smok) {
-			smok.vel = (hitnormal + (frandom[sfx](-0.05,0.05),frandom[sfx](-0.05,0.05),frandom[sfx](-0.05,0.05))) * frandom[sfx](0.8,1.3);
-			smok.A_SetScale(0.085);
-			smok.alpha = 0.85;
-			smok.fade = 0.025;
-		}
-		let deb = Spawn("PK_RandomDebris",puffdata.Hitlocation + (0,0,debrisOfz));
-		if (deb)
-			deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
-		bool mod = (target && target.CountInv("PK_WeaponModifier"));
-		name lit = mod ? 'PK_BulletPuffMod' : 'PK_BulletPuff';
-		A_AttachLightDef('puf',lit);
-		if (mod || (random[sfx](0,10) > 7)) {
-			let bull = PK_RicochetBullet(Spawn("PK_RicochetBullet",pos));
-			if (bull) {
-				bull.vel = (hitnormal + (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](-3,3)) * frandom[sfx](2,6));
-				bull.A_FaceMovementDirection();
-				if (mod) {
-					bull.A_SetRenderstyle(bull.alpha,Style_AddShaded);
-					bull.SetShade("FF2000");
-					//bull.scale *= 2;
-				}
-			}
-		}
 	}
 	void FindLineNormal() {
 		LineTrace(angle,128,pitch,TRF_THRUACTORS|TRF_NOSKY,data:puffdata);
@@ -238,7 +209,39 @@ Class PK_BulletPuff : PKPuff {
 		}
 	}
 	states {
-	Spawn:
+	Crash:
+		TNT1 A 0 {
+			if (target) {
+				angle = target.angle;
+				pitch = target.pitch;
+			}
+			FindLineNormal();
+			let smok = PK_WhiteSmoke(Spawn("PK_WhiteSmoke",puffdata.Hitlocation + (0,0,debrisOfz)));
+			if (smok) {
+				smok.vel = (hitnormal + (frandom[sfx](-0.05,0.05),frandom[sfx](-0.05,0.05),frandom[sfx](-0.05,0.05))) * frandom[sfx](0.8,1.3);
+				smok.A_SetScale(0.085);
+				smok.alpha = 0.85;
+				smok.fade = 0.025;
+			}
+			let deb = Spawn("PK_RandomDebris",puffdata.Hitlocation + (0,0,debrisOfz));
+			if (deb)
+				deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
+			bool mod = (target && target.CountInv("PK_WeaponModifier"));
+			name lit = mod ? 'PK_BulletPuffMod' : 'PK_BulletPuff';
+			A_AttachLightDef('puf',lit);
+			if (mod || (random[sfx](0,10) > 7)) {
+				let bull = PK_RicochetBullet(Spawn("PK_RicochetBullet",pos));
+				if (bull) {
+					bull.vel = (hitnormal + (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](-3,3)) * frandom[sfx](2,6));
+					bull.A_FaceMovementDirection();
+					if (mod) {
+						bull.A_SetRenderstyle(bull.alpha,Style_AddShaded);
+						bull.SetShade("FF2000");
+						//bull.scale *= 2;
+					}
+				}
+			}
+		}
 		FLAR B 1 bright A_FadeOut(0.1);
 		wait;
 	}
@@ -423,6 +426,7 @@ Class PK_StakeProjectile : PK_Projectile {
 	protected state sspawn; //pointer to Spawn label
 	Default {
 		+MOVEWITHSECTOR
+		+NOEXTREMEDEATH
 	}
 	
 	//this function is called when the projectile dies and checks if it hit something
@@ -959,6 +963,19 @@ Class PK_BombAmmo : Ammo {
 		stop;
 	}
 }
+
+/*
+/////////////////////////
+// AMMO SPAWN CONTROL
+/////////////////////////
+
+Class PK_BaseAmmoSpawner : Actor abstract {
+	Class<Ammo> ammotype1;
+	Class<Ammo> ammotype2;
+	
+	Default {
+		+NOBLOCKMAP
+	}
 
 /*
 Class PK_StakeProjectile : PK_Projectile {
