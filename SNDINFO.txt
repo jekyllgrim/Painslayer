@@ -239,10 +239,6 @@ pickups/weapons/eldriver	ELDRPKUP
 pickups/weapons/boltgun	"sounds/boltgun/take-boltgunheather.wav"
 pickups/weapons/rifle	"sounds/rifle/take-a_rifle.wav"
 
-pickups/powerups/wmodifier/take	WMODTAKE
-pickups/powerups/wmodifier/loop	WMODLOOP
-pickups/powerups/wmodifier/out	WMODOUT
-
 $random pickups/soul { soul1 soul2 soul3 soul4 soul5 }
 soul1	SOULTAK1
 soul2	SOULTAK2
@@ -288,3 +284,4 @@ demonattack2	DMGUN2
 pickups/wmod/pickup		"sounds/items/item-wm-take.wav"
 pickups/wmod/end		"sounds/items/item-wm-timeout.wav"
 pickups/wmod/use		"sounds/items/item-wm-use.wav"
+pickups/wmod/loop		"sounds/items/item-wm-loop.wav"
