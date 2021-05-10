@@ -250,7 +250,7 @@ Class PK_Rifle : PKWeapon {
 				}
 			}	
 			A_Overlay(PSP_HIGHLIGHTS,"FlameHighlights");
-			A_StartSound("weapons/rifle/flameloop",CHAN_6,flags:CHANF_LOOPING);
+			PK_AttackSound("weapons/rifle/flameloop",CHAN_6,flags:CHANF_LOOPING);
 			DampedRandomOffset(3,3,3);
 			if (invoker.fireFrame >= 8)
 				invoker.fireFrame = 0;
