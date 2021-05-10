@@ -4,7 +4,7 @@ Mixin class PK_Math {
 			return 1;
 		return -1;
 	}
-	double LinearMap(double val, double o_min, double o_max, double n_min, double n_max) {
+	static clearscope double LinearMap(double val, double o_min, double o_max, double n_min, double n_max) {
 		return (val - o_min) * (n_max - n_min) / (o_max - o_min) + n_min;
 	}
 	static clearscope int PointOnLineSide( Vector2 p, Line l ) {
