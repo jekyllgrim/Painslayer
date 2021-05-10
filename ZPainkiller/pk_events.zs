@@ -216,7 +216,7 @@ Class PK_ReplacementHandler : EventHandler {
 	override void CheckReplacement (ReplaceEvent e) {
 		switch (e.Replacee.GetClassName()) {
 			case 'Chainsaw' 		: e.Replacement = 'PK_MegaSoul'; 			break;
-			case 'Shotgun'			: e.Replacement = 'PK_Shotgun'; 			break;
+			case 'Shotgun'			: e.Replacement = 'PK_StakeGun'; 			break;
 			case 'SuperShotgun' 	: e.Replacement = 'PK_BoltGun';			break;
 			case 'Chaingun' 		: e.Replacement = 'PK_Chaingun'; 			break;
 			case 'RocketLauncher'	: e.Replacement = 'PK_Chaingun'; 			break;
@@ -227,7 +227,7 @@ Class PK_ReplacementHandler : EventHandler {
 			case 'ShellBox' 		: e.Replacement = (frandom[ammo](1,10) > 7) ? 	'PK_Shells' : 'PK_FreezerAmmo';		break;
 			case 'RocketAmmo' 		: e.Replacement = 'PK_BombAmmo';		break;
 			case 'RocketBox' 		: e.Replacement = 'PK_BombAmmo';		break;
-			case 'Clip' 			: e.Replacement = (frandom[ammo](1,10) > 6) ? 	'PK_Shells' : 'PK_BulletAmmo';			break;
+			case 'Clip' 			: e.Replacement = (frandom[ammo](1,10) > 6) ? 	'PK_RifleBullets' : 'PK_BulletAmmo';			break;
 			case 'Cell' 			: e.Replacement = (frandom[ammo](1,10) > 7.5) ? 	'PK_CellAmmo': 'PK_ShurikenAmmo';		break;
 			case 'CellBox' 		: e.Replacement = (frandom[ammo](1,10) > 7) ? 	'PK_ShurikenAmmo' : 'PK_CellAmmo';	break;
 			case 'Stimpack' 		: e.Replacement = 'PK_StakeAmmo';	break;
