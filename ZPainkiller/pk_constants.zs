@@ -25,11 +25,12 @@ enum PK_WeaponLayers {
 enum PK_SoundChannels {
 	CH_LOOP	= 12,
 	CH_WMOD 	= 13,
+	CH_PWR		= 14,
 	/*	highest number in the list of channels 
 		that should be affected by A_SoundPitch 
 		call in Haste and simialr effects:
 	*/
-	CH_END		= 13,
+	CH_END		= 14,
 	//	Demon Morph looping sound will play on this channel:
 	CH_HELL	= 66
 }
