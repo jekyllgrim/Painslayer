@@ -372,11 +372,11 @@ Class PK_GoldArmor : PK_BronzeArmor  {
 
 // A base 'power-up' class that doesn't define any special behavior except being time-limited. It's designed to be used in manual checks.
 Class PK_PowerUp : PK_Inventory abstract {
-	protected int effectSeconds;
-	protected int duration;
+	int duration;
 	property duration : duration;
 	Default {
 		+INVENTORY.ALWAYSPICKUP
+		inventory.maxamount 1;
 		PK_PowerUp.duration 40;
 	}
 	override void DoEffect() {
@@ -384,21 +384,21 @@ Class PK_PowerUp : PK_Inventory abstract {
 		if (!owner || !owner.player)
 			return;
 		if (GetAge() % 35 == 0) {
-			effectSeconds++;
-			//console.printf("%s time passed: %d",GetClassName(),effectSeconds);
+			duration--;
+			console.printf("%s remaining time: %d",GetClassName(),duration);
 		}
-		if (effectSeconds >= duration) {
+		if (duration <= 0) {
 			if (deathsound)
 				owner.A_StartSound(deathsound, CHAN_AUTO, CHANF_LOCAL);
-			GoAwayAndDie();
+			DepleteOrDestroy();
 		}
 	}
 	override bool TryPickup (in out Actor other) {
 		if (!(other is "PlayerPawn"))
 			return false;
 		let pwr = PK_PowerUp(other.FindInventory(GetClassName()));
-		if (pwr && pwr.effectSeconds < duration) {
-			pwr.effectSeconds = 0;
+		if (pwr && pwr.duration > 0) {
+			pwr.duration = pwr.default.duration;
 			GoAwayAndDie();
 			return false;
 		}
@@ -418,10 +418,6 @@ Class PK_WeaponModifier : PK_PowerUp {
 		+FLOATBOB
 		FloatBobStrength 0.32;
 	}
-	/*override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
-		if (!passive && damage > 0 && owner && owner.player && !owner.player.refire)
-			owner.A_StartSound(ActiveSound, CH_WMOD);
-	}*/
 	override void Tick() {
 		super.Tick();
 		if (isFrozen() || owner)
@@ -429,7 +425,7 @@ Class PK_WeaponModifier : PK_PowerUp {
 		if (GetAge() % 10 == 0)
 			canSeePlayer = CheckPlayerSights();
 		if (canSeePlayer) {
-			color col = Color(0xff,0x45+random(0,100),0x00);
+			color col = Color(0xff,0x45+random[sfx](0,100),0x00);
 			A_SpawnParticle(
 				col,
 				SPF_FULLBRIGHT|SPF_RELVEL|SPF_RELACCEL,
