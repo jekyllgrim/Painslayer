@@ -328,20 +328,20 @@ Class PK_DemonWeapon : PKWeapon {
 }
 
 
-Class PK_EnemyDeathControl : Actor {
+Class PK_EnemyDeathControl : PK_BaseActor {
 	KillerFlyTarget kft;
 	private int restcounter;
 	private int restlife;
 	private int maxlife;
-	private int age;
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		if (!master) {
-			destroy();
+			//destroy();
 			return;
 		}
 		restlife = random[cont](42,60);
 		maxlife = int(35*frandom[cont](6,10));
+		//spawn a hitbox for the Killer projectile to let the player juggle the corpse:
 		kft = KillerFlyTarget(Spawn("KillerFlyTarget",master.pos));
 		if (kft) {
 			kft.target = master;
@@ -356,7 +356,7 @@ Class PK_EnemyDeathControl : Actor {
 				age++;
 			if (GetAge() == 1 && kft)
 				kft.vel = master.vel;	
-			if  (master.vel ~== (0,0,0))
+			if  (master.vel.length() < 0.02)
 				restcounter++;
 			else
 				restcounter = 0;
@@ -367,6 +367,7 @@ Class PK_EnemyDeathControl : Actor {
 			rad = master.radius;
 			smkz = master.height;
 		}
+		//this handles death if killed in Demon Mode:
 		if (master && master.bKILLED && master.FindInventory("PK_DemonTargetControl")) {
 			for (int i = 40; i > 0; i--) {
 				smkz = master.default.height;
@@ -379,8 +380,11 @@ Class PK_EnemyDeathControl : Actor {
 				}
 			}
 			master.destroy();
+			destroy();
+			return;
 		}	
-		else if (restcounter >= restlife || age > maxlife || !master) {
+		//this handles regular death:
+		else if (restcounter >= restlife || age > maxlife) {
 			if (kft)
 				kft.destroy();
 			A_StartSound("world/bodypoof",CHAN_AUTO);
@@ -397,9 +401,29 @@ Class PK_EnemyDeathControl : Actor {
 					smk.alpha = 0.5;
 				}
 			}
-			Class<Inventory> soul = (master && master.default.health >= 500) ? "PK_RedSoul" : "PK_Soul";			
+			//Class<Inventory> soul = (master && master.default.health >= 500) ? "PK_RedSoul" : "PK_Soul";			
 			double pz = (pos.z ~== floorz) ? frandom[soul](8,14) : 0;
-			Spawn(soul,pos+(0,0,pz));
+			//Spawn(soul,pos+(0,0,pz));
+			
+			// Spawn soul. In contrast to Painkiller, here soul healing amount is based on the monster's health:
+			let soul = PK_Soul(Spawn("PK_Soul",pos+(0,0,pz)));
+			if (soul && master) {
+				soul.bearer = master.GetClass();
+				/*//define an amount between 1-20 based on monster's health (linearly mapped between 20-500):
+				double am = Clamp(LinearMap(double(master.SpawnHealth()), 20, 500, 1, 20), 1, 20);
+				soul.amount = am;
+				//slightly change soul's alpha and scale based on the resulting number:
+				soul.alpha = Clamp(LinearMap(am, 1, 20, 0.5, 1.5), 0.5 , 1.5);
+				soul.scale *= Clamp(LinearMap(am, 1, 20, 0.6, 1.15), 0.7, 1.15);
+				//if the amount is over 15, make the soul red:
+				if (am >= 15) {
+					soul.A_SetTranslation("PK_RedSoul");
+					//soul.A_SetRenderstyle(soul.alpha,Style_Shaded);
+					//soul.SetShade("FF0000");
+					soul.pickupsound = "pickups/soul/red";
+				}
+				console.printf("Spawned soul, master: %s, amount: %d",master.GetClassName(),soul.amount);*/
+			}
 			if (master)
 				master.destroy();
 			destroy();
