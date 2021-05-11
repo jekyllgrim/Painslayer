@@ -351,11 +351,10 @@ Class PK_ShotgunPuff : PK_BulletPuff {
 	states {
 	Spawn:
 		TNT1 A 1 NoDelay {		
-			if (target && tracer && !tracer.bDONTTHRUST && tracer.bISMONSTER && !tracer.bBOSS && tracer.mass <= 400 && tracer.health <= 0 && !tracer.FindInventory("PK_PushAwayControl") && !tracer.FindInventory("PK_FreezeControl")) {
+			if (target && tracer && tracer.bISMONSTER && !tracer.bDONTTHRUST && !tracer.bBOSS && tracer.mass <= 400 && tracer.health <= 0 && !tracer.FindInventory("PK_PushAwayControl") && !tracer.FindInventory("PK_FreezeControl")) {
 				tracer.GiveInventory("PK_PushAwayControl",1);
 				let pac = PK_PushAwayControl(tracer.FindInventory("PK_PushAwayControl"));
 				if (pac) {
-					pac.master = target;
 					//console.printf("giving push control to %s",tracer.GetClassName());
 					double pushspeed = LinearMap(tracer.mass,100,400,20,5);
 					pushspeed = Clamp(pushspeed,5,20) * frandom[sfx](0.85,1.2);
@@ -370,7 +369,7 @@ Class PK_ShotgunPuff : PK_BulletPuff {
 						tracer.gravity *= 0.75;
 						pac.broll = frandom[sfx](2,5) * randompick[sfx](-1,1) * (18 / pushspeed);						
 						tracer.bROLLSPRITE = true;
-						if (random[hiroller](0,100) > 93) {
+						if (random[hiroller](0,100) > 90) {
 							tracer.bROLLCENTER = true;
 							tracer.A_SetTics(500);
 							pac.broll *= 10;
@@ -392,21 +391,22 @@ Class PK_PushAwayControl : PK_InventoryToken {
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner) {
-			DepleteOrDestroy();
+			destroy();
 			return;
 		}
 		if (owner.isFrozen() || !owner.bROLLSPRITE)
 			return;
-		if (owner.pos.z <= owner.floorz || GetAge() > 80) {
+		if (owner.pos.z <= owner.floorz || age > 80) {
 			owner.roll = owner.default.roll;
 			owner.bROLLSPRITE = owner.default.bROLLSPRITE;
-			owner.A_SetTics(1);
+			if (owner.bROLLCENTER)
+				owner.A_SetTics(1);
 			owner.gravity = owner.default.gravity;
-			DepleteOrDestroy();
+			destroy();
 			return;
 		}
 		owner.roll += broll;//= Clamp(owner.roll + broll,-45,45);
-		if (random[sfx](1,3) == 3)
+		if (!owner.bNOBLOOD && random[sfx](1,3) == 3)
 			owner.SpawnBlood(owner.pos,0,1);
 		broll *= 0.95;
 	}
