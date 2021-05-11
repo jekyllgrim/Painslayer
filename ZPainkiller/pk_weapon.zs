@@ -998,7 +998,7 @@ Class PK_BaseAmmoSpawner : Actor {
 		PK_BaseAmmoSpawner.altSetChance 50;
 		PK_BaseAmmoSpawner.secondaryChance 35;
 		PK_BaseAmmoSpawner.twoPickupsChance 25;
-		PK_BaseAmmoSpawner.dropChance 25;
+		PK_BaseAmmoSpawner.dropChance 50;
 	}
 	
 	void SpawnAmmoPickup(vector3 spawnpos, Class<Ammo> ammopickup) {
@@ -1129,6 +1129,7 @@ Class PK_BaseAmmoSpawner_RocketAmmo : PK_BaseAmmoSpawner {
 		PK_BaseAmmoSpawner.secondaryChance 30; //rocket ammo spawns should provide rockets more commonly thab bullets
 		PK_BaseAmmoSpawner.secondaryChance2 50;
 		PK_BaseAmmoSpawner.altSetChance 25;
+		PK_BaseAmmoSpawner.twoPickupsChance 60;
 	}
 }
 
