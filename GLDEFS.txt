@@ -122,20 +122,6 @@ pointlight PK_Soul {
 	size 48
 }
 
-object PK_Soul {
-	frame DSOU { light PK_Soul }
-}
-
-pointlight PK_RedSoul {
-	color 1.0 0 0
-	attenuate 1
-	size 48
-}
-
-object PK_RedSoul {
-	frame DSOU { light PK_RedSoul }
-}
-
 pointlight PK_GoldSoul {
 	color 1 0.8 0
 	attenuate 1
