@@ -237,8 +237,12 @@ Class PK_ReplacementHandler : EventHandler {
 			
 			case 'SoulSphere' 		: e.Replacement = 'PK_GoldSoul';	break;
 			case 'MegaSphere' 		: e.Replacement = 'PK_MegaSoul';	break;
+			case 'GreenArmor' 		: e.Replacement = (random[repl](1,100) > 60) ? 'PK_SilverArmor' : 'PK_BronzeArmor';	break;
+			Case 'BlueArmor'		: e.Replacement = 'PK_GoldArmor'; break;
+			
+			case 'Berserk'			: e.Replacement = 'PK_WeaponModifier';  break;
 		}
-		e.IsFinal = true;
+		//e.IsFinal = true;
 	}
 	
 	override void WorldThingSpawned(WorldEvent e) {
