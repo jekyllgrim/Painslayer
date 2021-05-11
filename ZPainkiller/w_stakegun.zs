@@ -203,12 +203,16 @@ Class PK_Stake : PK_StakeProjectile {
 				let pin = victim.FindInventory("PK_PinToWall");
 				if (pin)
 					pin.master = self;
-				// This item contains an array of all visual stakes stuck in the victim:
-				let ct = PK_StakeStuckCounter(victim.FindInventory("PK_StakeStuckCounter"));
-				// this is needed because we need to move those stakes to the pinvictim when it spawns:
-				if (ct && ct.stuckstakes.Size() > 0) {
-					for (int i = ct.stuckstakes.Size()-1; i >= 0; i--)
-						ct.stuckstakes[i].master = pinvictim;
+				if (pinvictim) {
+					// This item contains an array of all visual stakes stuck in the victim:
+					let ct = PK_StakeStuckCounter(victim.FindInventory("PK_StakeStuckCounter"));
+					// this is needed because we need to move those stakes to the pinvictim when it spawns:
+					if (ct && ct.stuckstakes.Size() > 0) {
+						for (int i = ct.stuckstakes.Size()-1; i >= 0; i--) {
+							if (ct.stuckstakes[i])
+								ct.stuckstakes[i].master = pinvictim;
+						}
+					}
 				}
 			}
 			else { // If the victim is not dead and hit by a stake, spawn fake stake that gets "stuck" in it while it's alive
