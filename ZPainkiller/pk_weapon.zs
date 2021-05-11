@@ -438,7 +438,7 @@ Class PK_StakeProjectile : PK_Projectile {
 		
 		if (stickobject) {
 			stickoffset = pos.z - stickobject.pos.z;
-			if (pk_debugmessages > 1)
+			if (pk_debugmessages > 2)
 				console.printf("%s hit %s at at %d,%d,%d",myclass,stickobject.GetClassName(),pos.x,pos.y,pos.z);
 			return;
 		}
@@ -453,12 +453,12 @@ Class PK_StakeProjectile : PK_Projectile {
 		//if hit floor/ceiling, we'll attach to them:
 		if (trac.HitLocation.z >= topz) {
 			hitplane = 2;
-			if (pk_debugmessages > 1)
+			if (pk_debugmessages > 2)
 				console.printf("%s hit ceiling at at %d,%d,%d",myclass,pos.x,pos.y,pos.z);
 		}
 		else if (trac.HitLocation.z <= botz) {
 			hitplane = 1;
-			if (pk_debugmessages > 1)
+			if (pk_debugmessages > 2)
 				console.printf("%s hit floor at at %d,%d,%d",myclass,pos.x,pos.y,pos.z);
 		}
 		if (hitplane > 0)
@@ -470,7 +470,7 @@ Class PK_StakeProjectile : PK_Projectile {
 			F3DFloor flr = trac.Hit3DFloor;
 			stickplane = flr.top;
 			stickoffset = stickplane.ZAtPoint(sticklocation) - pos.z;
-			if (pk_debugmessages > 1)
+			if (pk_debugmessages > 2)
 				console.printf("%s hit a 3D floor at %d,%d,%d",myclass,pos.x,pos.y,pos.z);
 			return;
 		}
@@ -480,7 +480,7 @@ Class PK_StakeProjectile : PK_Projectile {
 			let tline = trac.HitLine;
 			//if it's one-sided, it can't be a door/lift, so don't do anything else:
 			if (!tline.backsector) {
-				if (pk_debugmessages > 1)
+				if (pk_debugmessages > 2)
 					console.printf("%s hit one-sided line, not doing anything else",myclass);
 				return;
 			}
@@ -504,7 +504,7 @@ Class PK_StakeProjectile : PK_Projectile {
 				stickplane = targetsector.ceilingplane;
 				stickoffset = ceilHitZ - pos.z;
 			}
-			if (pk_debugmessages > 1)
+			if (pk_debugmessages > 2)
 				console.printf("%s hit the %s %s part of the line at %d,%d,%d",myclass,secpart,sside,pos.x,pos.y,pos.z);
 		}
 	}
@@ -517,7 +517,7 @@ Class PK_StakeProjectile : PK_Projectile {
 	}
 	//virtual for breaking; child actors override it to add debris spawning and such:
 	virtual void StakeBreak() {
-		if (pk_debugmessages > 1)
+		if (pk_debugmessages > 2)
 			console.printf("%s destroyed",GetClassName());
 		if (self)
 			destroy();
@@ -533,6 +533,13 @@ Class PK_StakeProjectile : PK_Projectile {
 			A_FaceMovementDirection(flags:FMDF_INTERPOLATE );
 		//otherwise stake is dead, so we'll move it alongside the object/plane it's supposed to be attached to:
 		if (bTHRUACTORS) {
+			//topz = CurSector.ceilingplane.ZAtPoint(pos.xy);
+			//botz = CurSector.floorplane.ZAtPoint(pos.xy);
+			//destroy the stake if it's run into ceiling/floor by a moving sector (e.g. a door opened, pulled the stake up and pushed it into the ceiling):
+			if (pos.z >= ceilingz-height || pos.z <= floorz) {
+				StakeBreak();
+				return;
+			}
 			//attached to floor/ceiling:
 			if (hitplane > 0) {
 				if (hitplane > 1)
@@ -543,14 +550,6 @@ Class PK_StakeProjectile : PK_Projectile {
 			//attached to a plane (hit a door/lift earlier)
 			else if (stickplane) {
 				SetZ(stickplane.ZAtPoint(sticklocation) - stickoffset);
-				topz = CurSector.ceilingplane.ZAtPoint(pos.xy);
-				botz = CurSector.floorplane.ZAtPoint(pos.xy);
-				//destroy the stake if it's run into ceiling/floor by a moving sector (e.g. a door opened, pulled the stake up and pushed it into the ceiling):
-				if (pos.z >= topz || pos.z <= botz) {
-					stickplane = null;
-					StakeBreak();
-					return;
-				}
 			}
 			//otherwise attach it to the solid object it hit earlier:
 			else if (stickobject)
@@ -964,138 +963,221 @@ Class PK_BombAmmo : Ammo {
 	}
 }
 
-/*
 /////////////////////////
 // AMMO SPAWN CONTROL
 /////////////////////////
 
-Class PK_BaseAmmoSpawner : Actor abstract {
-	Class<Ammo> ammotype1;
-	Class<Ammo> ammotype2;
-	
+/*	This object is designed to replace each ammo pickupmessage
+	and spawn either primary or alternative ammo for 2 weapons.
+	With a small chance it'll also spawn alternative ammo
+	next to the primary.
+*/
+
+Class PK_BaseAmmoSpawner : Actor {
+	Class<Ammo> primary1; //primary ammo type for the 1st weapon
+	Class<Ammo> secondary1; //secondary ammo type for the 1st weapon
+	Class<Ammo> primary2; //primary ammo type for the 2nd weapon
+	Class<Ammo> secondary2; //secondary ammo type for the 2nd weapon
+	Class<Weapon> weapon1; //1st weapon class to spawn ammo for
+	property weapon1 : weapon1;
+	Class<Weapon> weapon2; //2nd weapon class to spawn ammo for
+	property weapon2 : weapon2;
+	double altSetChance; //chance of spawning ammo for weapon2 instead of weapon1
+	double secondaryChance; //chance of spawning ammotype2 instead of ammotype1
+	double secondaryChance2; //chance of spawning ammotype2 instead of ammotype1 for weapon2 (optional)
+	double twoPickupsChance;	//chance of spawning the second ammotype next to the one chosen to be spawned
+	double dropChance; //chance that this will be obtainable if dropped by an enemy
+	property altSetChance : altSetChance;
+	property secondaryChance : secondaryChance;
+	property secondaryChance2 : secondaryChance2;
+	property twoPickupsChance : twoPickupsChance;
+	property dropChance : dropChance;
 	Default {
 		+NOBLOCKMAP
-	}
-
-/*
-Class PK_StakeProjectile : PK_Projectile {
-	protected int hitplane; //0: none, 1: floor, 2: ceiling
-	protected actor stickobject; //a non-monster object that was hit
-	protected SecPlane stickplane; //a plane to stick to
-	protected Sector sticksector; //sector to stick to
-	protected vector2 sticklocation; //the point at the line the stake collided with
-	protected double stickoffset; //how far the stake is from the nearest ceiling or floor (depending on whether it hit top or bottom part of the line)
-	protected double topz; //ZAtPoint below stake
-	protected double botz; //ZAtPoint above stake
-	actor pinvictim; //The fake corpse that will be pinned to a wall
-	protected double victimofz;
-	protected state sspawn;
-	Default {
-		+MOVEWITHSECTOR
+		//+INVENTORY.NEVERRESPAWN
+		PK_BaseAmmoSpawner.altSetChance 50;
+		PK_BaseAmmoSpawner.secondaryChance 35;
+		PK_BaseAmmoSpawner.twoPickupsChance 25;
+		PK_BaseAmmoSpawner.dropChance 25;
 	}
 	
-	virtual void StickToWall() {
-		FLineTraceData trac;
-		LineTrace(angle,radius+64,pitch,TRF_NOSKY|TRF_THRUACTORS,data:trac);
-		sticklocation = trac.HitLocation.xy;
-		topz = CurSector.ceilingplane.ZatPoint(sticklocation);
-		botz = CurSector.floorplane.ZatPoint(sticklocation);
-		if (blockingline) {
-			string myclass = GetClassName();
-			if (trac.HitLine) {
-				let tline = trac.HitLine;
-				int lside = PointOnLineSide(pos.xy,tline);
-				string sside = (lside == 0) ? "front" : "back";
-				if (!tline.backsector) {
-					if (pk_debugmessages > 1)
-						console.printf("%s hit one-sided line, not doing anything else",myclass);
-				}
-				else {
-					sticksector = (lside == 0 && tline.backsector) ? tline.backsector : tline.frontsector;
-					let floorHitZ = sticksector.floorplane.ZatPoint (sticklocation);
-					let ceilHitZ = sticksector.ceilingplane.ZatPoint (sticklocation);
-					string secpart = "middle";
-					if (pos.z <= floorHitZ) {
-						secpart = "lower";
-						stickoffset = pos.z - floorHitZ;
-						stickplane = sticksector.floorplane;
-					}
-					else if (pos.z >= ceilHitZ) {
-						secpart = "top";
-						stickoffset = pos.z - ceilHitZ;
-						hitplane = 2;
-						stickplane = sticksector.ceilingplane;
-					}
-					//stickoffset = pos.z - stickplane.ZAtPoint(sticklocation);
-					if (pk_debugmessages > 1)
-						console.printf("%s hit the %s %s part of the line at %d,%d,%d",myclass,secpart,sside,pos.x,pos.y,pos.z);
-				}
+	void SpawnAmmoPickup(vector3 spawnpos, Class<Ammo> ammopickup) {
+		let am = Ammo(Spawn(ammopickup,spawnpos));
+		if (am) {
+			am.vel = vel;
+			if (bDROPPED) {
+				am.bDROPPED = true;
+				am.amount /= 2;
+				//console.printf("Spawner bDROPPED: %d | ammo bDROPPED: %d",bDROPPED,am.bDROPPED);
+			}
+		}		
+	}
+	
+	const ammoSpawnOfs = 16;
+	static const double AmmoSpawnPos[] = {
+		ammoSpawnOfs,
+		-ammoSpawnOfs,
+		-ammoSpawnOfs,
+		ammoSpawnOfs,
+		ammoSpawnOfs
+	};	
+	vector3 FindSpawnPosition() {
+		vector3 spawnpos = (0,0,0);
+		for (int i = 0; i < AmmoSpawnPos.Size()-1; i++) {
+			let ppos = pos + (AmmoSpawnPos[i],AmmoSpawnPos[i+1],pos.z);
+			//Spawn("AmmoPosTest",ppos);
+			if (!Level.IsPointInLevel(ppos))
+				continue;
+			sector psector = Level.PointInSector(ppos.xy);
+			if (curSector && curSector == psector) {
+				spawnpos = ppos;
+				break;
+			}
+			double ofsFloor = psector.NextLowestFloorAt(ppos.x,ppos.y,ppos.z);
+			if (abs(floorz - ofsFloor) <= 16) {
+				spawnpos = (ppos.xy,ofsFloor);
+				break;
 			}
 		}
-		else if (stickobject) {
-			stickoffset = pos.z - stickobject.pos.z;
-			if (pk_debugmessages > 1)
-				console.printf("Stake hit %s at at %d,%d,%d",stickobject.GetClassName(),pos.x,pos.y,pos.z);
-		}
-		else {			
-			if (trac.HitLocation.z >= topz) {
-				hitplane = 2;
-				if (pk_debugmessages > 1)
-					console.printf("Stake hit ceiling at at %d,%d,%d",pos.x,pos.y,pos.z);
-			}
-			else if (trac.HitLocation.z <= botz) {
-				hitplane = 1;
-				if (pk_debugmessages > 1)
-					console.printf("Stake hit floor at at %d,%d,%d",pos.x,pos.y,pos.z);
-			}
-		}
-		bTHRUACTORS = true;
-		bNOGRAVITY = true;
-		A_Stop();
+		return spawnpos;
 	}
-	override int SpecialMissileHit (Actor victim) {
-		if (!victim.bISMONSTER && victim.bSOLID) {
-			stickobject = victim;
-			return -1;
-		}
-		return 1;
-	}
-	virtual void StakeBreak() {
-		if (pk_debugmessages > 1)
-			console.printf("%s destroyed",GetClassName());
-		if (self)
-			destroy();
-	}
+	
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		sspawn = FindState("Spawn");
-	}
-	override void Tick () {
-		super.Tick();
-		if (!isFrozen() && sspawn && InStateSequence(curstate,sspawn))
-			A_FaceMovementDirection(flags:FMDF_INTERPOLATE );
-		if (bTHRUACTORS) {
-			if (stickobject)
-				SetZ(stickobject.pos.z + stickoffset);
-			else if (stickplane) {
-				if (pos.z >= ceilingz || pos.z <= floorz) {
-					stickplane = null;
-					StakeBreak();
-					return;
-				}
-				else if (hitplane > 1)
-					SetZ(sticksector.NextHighestCeilingAt(sticklocation.x, sticklocation.y, pos.z, pos.z) + stickoffset);
-				else
-					SetZ(sticksector.NextLowestFloorAt(sticklocation.x, sticklocation.y, pos.z) + stickoffset);
-			}
-			else if (hitplane > 0) {
-				if (hitplane > 1)
-					SetZ(ceilingz);
-				else
-					SetZ(floorz);
-			}
-			if (pinvictim)
-				pinvictim.SetZ(pos.z + victimofz);
+		//weapon1 is obligatory; if for whatever reason it's empty, destroy it:
+		if (!weapon1) {
+			destroy();
+			return;
+		}
+		if (bDROPPED && dropChance < frandom[ammoSpawn](1,100)) {
+			destroy();
+			return;
+		}
+		//get ammo classes for weapon1 and weapon2:
+		primary1 = GetDefaultByType(weapon1).ammotype1;
+		secondary1 = GetDefaultByType(weapon1).ammotype2;			
+		if (weapon2) {
+			primary2 = GetDefaultByType(weapon2).ammotype1;
+			secondary2 = GetDefaultByType(weapon2).ammotype2;	
+			//if none of the players have weapon1, increase the chance of spawning ammo for weapon2:
+			if (!PK_MainHandler.CheckPlayersHave(weapon1))
+				altSetChance *= 1.5;
+			//if none of the players have weapon2, decreate the chance of spawning ammo for weapon2:
+			if (!PK_MainHandler.CheckPlayersHave(weapon2))
+				altSetChance /= 1.5;
+			//if players have neither, both calculations will happen, ultimately leaving the chance unchanged!
+		}
+		//define two possible ammo pickups to spawn:
+		class<Ammo> ammo1toSpawn = primary1;
+		class<Ammo> ammo2toSpawn = secondary1;
+		//with a chance they'll be replaced with ammo for weapon2:
+		if (weapon2 && altSetChance >= frandom[ammoSpawn](1,100)) {
+			ammo1toSpawn = primary2;
+			ammo2toSpawn = secondary2;
+			if (secondaryChance2)
+				secondaryChance = secondaryChance2;
+		}
+		//finally, decide whether we need to spawn primary or secondary ammo:
+		class<Ammo> tospawn = (secondaryChance >= frandom[ammoSpawn](1,100)) ? ammo2toSpawn : ammo1toSpawn;
+		SpawnAmmoPickup(pos,tospawn);
+		//console.printf("Spawning %s at %d,%d,%d",tospawn.GetClassName(),pos.x,pos.y,pos.z);
+		//if the chance for two pickups is high enough, spawn the other type of ammo:
+		if (twoPickupsChance >= frandom[ammoSpawn](1,100)) {
+			class<Ammo> tospawn2 = (tospawn == ammo1toSpawn) ? ammo2toSpawn : ammo1toSpawn;
+			let spawnpos = FindSpawnPosition();
+			//console.printf("Spawning %s at %d,%d,%d",tospawn2.GetClassName(),spawnpos.x	,spawnpos.y,spawnpos.z);
+			if (spawnpos != (0,0,0))
+				SpawnAmmoPickup(spawnpos,tospawn2);
 		}
 	}
 }
+
+Class PK_BaseAmmoSpawner_Shell : PK_BaseAmmoSpawner {
+	Default {
+		PK_BaseAmmoSpawner.weapon1 "PK_Stakegun";
+		PK_BaseAmmoSpawner.secondaryChance 25;
+		PK_BaseAmmoSpawner.weapon2 "PK_Boltgun";
+		PK_BaseAmmoSpawner.secondaryChance2 45;
+	}
+}
+
+Class PK_BaseAmmoSpawner_ShellBox : PK_BaseAmmoSpawner_Shell {
+	Default {
+		PK_BaseAmmoSpawner.twoPickupsChance 40;
+	}
+}
+
+Class PK_BaseAmmoSpawner_Clip : PK_BaseAmmoSpawner {
+	Default {
+		PK_BaseAmmoSpawner.weapon1 "PK_Shotgun";
+		PK_BaseAmmoSpawner.weapon2 "PK_Chaingun";
+		PK_BaseAmmoSpawner.secondaryChance2 80; //chaingun bullets should be much more common than rockets
+	}
+}
+
+Class PK_BaseAmmoSpawner_ClipBox : PK_BaseAmmoSpawner_Clip {
+	Default {
+		PK_BaseAmmoSpawner.twoPickupsChance 40;
+		PK_BaseAmmoSpawner.altSetChance 60; //since clip boxes are more often placed on the maps, chance for chaingun ammo should be higher for them
+	}
+}
+
+Class PK_BaseAmmoSpawner_RocketAmmo : PK_BaseAmmoSpawner {
+	Default {
+		PK_BaseAmmoSpawner.weapon1 "PK_Chaingun";
+		PK_BaseAmmoSpawner.weapon2 "PK_Rifle";
+		PK_BaseAmmoSpawner.secondaryChance 30; //rocket ammo spawns should provide rockets more commonly thab bullets
+		PK_BaseAmmoSpawner.secondaryChance2 50;
+		PK_BaseAmmoSpawner.altSetChance 25;
+	}
+}
+
+Class PK_BaseAmmoSpawner_Cell : PK_BaseAmmoSpawner {
+	Default {
+		PK_BaseAmmoSpawner.weapon1 "PK_ElectroDriver";
+		PK_BaseAmmoSpawner.weapon2 "PK_Rifle";
+		PK_BaseAmmoSpawner.altSetChance 50;
+	}
+}
+
+Class PK_BaseAmmoSpawner_CellPack : PK_BaseAmmoSpawner {
+	Default {
+		PK_BaseAmmoSpawner.weapon1 "PK_ElectroDriver";
+		PK_BaseAmmoSpawner.weapon2 "PK_Rifle";
+		PK_BaseAmmoSpawner.altSetChance 30; //cell packs are usually placed next to BFG, so it should provide Electrodriver more commonly
+	}
+}
+
+/*	This special spawner is meant to replace Stimpack/Medikit
+	(since the player is supposed to heal with enemy souls)
+	and will randomly spawn any ammo for any weapon the player has.
+*/
+
+Class PK_AmmoSpawner_Stimpack : PK_BaseAmmoSpawner {
+	override void PostBeginPlay() {
+		array < Class<Weapon> > wweapons; //this will hold all weapons that at least one player has
+		//iterate over a static array of all weapon classes in the mod (see pk_items.zs):
+		for (int i = 0; i < PK_InvReplacementControl.pkWeapons.Size(); i++) {
+			Class<Weapon> weap = PK_InvReplacementControl.pkWeapons[i];
+			//if at least one player has that weapon class and that weapon uses ammo, push it in the wweapons array:
+			if (GetDefaultByType(weap).ammotype1 && GetDefaultByType(weap).ammotype2 && PK_MainHandler.CheckPlayersHave(weap))
+				wweapons.Push(weap);
+		}
+		//randomly choose a weapon to spawn ammo for:
+		int toSpawn = random[ammoSpawn](0,wweapons.Size() - 1);
+		weapon1 = wweapons[tospawn];
+		super.PostBeginPlay();
+	}
+}
+
+/*Class AmmoPosTest : Actor {
+	Default {
+		+BRIGHT
+		+NOINTERACTION
+	}
+	states {
+	Spawn:
+		BAL1 A 35;
+		stop;
+	}
+}*/
