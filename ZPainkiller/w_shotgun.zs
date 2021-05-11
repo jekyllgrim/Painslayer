@@ -355,21 +355,28 @@ Class PK_ShotgunPuff : PK_BulletPuff {
 				tracer.GiveInventory("PK_PushAwayControl",1);
 				let pac = PK_PushAwayControl(tracer.FindInventory("PK_PushAwayControl"));
 				if (pac) {
-					//console.printf("giving push control to %s",tracer.GetClassName());
+					//initial push away speed is based on mosnter's mass:
 					double pushspeed = LinearMap(tracer.mass,100,400,20,5);
-					pushspeed = Clamp(pushspeed,5,20) * frandom[sfx](0.85,1.2);
-					double pushz = Clamp(LinearMap(target.pitch,0,-90,0,10), 0, 10);
+					//a modifier is added based on how far away the player is
+					double pushmod = Clamp(LinearMap(Distance3D(target),32,256,1.2,0), 0, 1);
+					if (pushmod <= 0)
+						return ResolveState(null);
+					pushspeed = Clamp(pushspeed,5,20) * frandom[sfx](0.85,1.2) * pushmod;
+					//bonus Z velocity is based on the players view pitch (so that you can knock monsters further by looking up):
+					double pushz = Clamp(LinearMap(target.pitch,0,-90,0,10), 0, 10) * pushmod;
 					tracer.Vel3DFromAngle(
 						pushspeed,
 						target.angle,
 						Clamp(target.pitch - 5, -15, -45)
 					);
 					tracer.vel.z += pushz;
-					if (!tracer.bFLOAT && tracer.mass < 300) {
+					//if the push is strong enough and the monster is light enough, we'll also rotate it while it's flying:
+					if (pushmod > 0.7 && !tracer.bFLOAT && tracer.mass < 300) {
 						tracer.gravity *= 0.75;
 						pac.broll = frandom[sfx](2,5) * randompick[sfx](-1,1) * (18 / pushspeed);						
 						tracer.bROLLSPRITE = true;
-						if (random[hiroller](0,100) > 90) {
+						//with a 15% chance we'll yeet the monster with high force just for lulz:
+						if (random[hiroller](0,100) >= 85) {
 							tracer.bROLLCENTER = true;
 							tracer.A_SetTics(500);
 							pac.broll *= 10;
@@ -381,6 +388,7 @@ Class PK_ShotgunPuff : PK_BulletPuff {
 					//console.printf("%s was pushed away, speed: %f, vel: %d,%d,%d, roll: %f",tracer.GetClassName(),pushspeed,tracer.vel.x,tracer.vel.y,tracer.vel.z,pac.broll);
 				}
 			}
+			return ResolveState(null);
 		}
 		stop;
 	}
