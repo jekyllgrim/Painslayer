@@ -241,7 +241,7 @@ Class PK_ElectricPuff : PKPuff {
 
 Class PK_ElectroTargetControl : PK_InventoryToken {
 	protected int deadtics;
-	protected int age;
+	protected int deadage;
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);
 		if (!owner)
@@ -272,8 +272,8 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 		if (owner.health <= 0) {
 			owner.A_SetTRanslation("Scorched");
 			owner.SetOrigin(owner.pos + (frandom[eld](-1,1),frandom[eld](-1,1),frandom[eld](0.5,1.5)),false);
-			age++;
-			if (age > deadtics){
+			deadage++;
+			if (deadage > deadtics){
 				owner.A_StopSound(CHAN_6);
 				DepleteOrDestroy();
 				return;
