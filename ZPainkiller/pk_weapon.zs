@@ -1,3 +1,8 @@
+/*
+	Painkiller weapons
+	for ammo and weapon/ammo spawners see pk_ammo.zs
+*/
+
 Class PKWeapon : Weapon abstract {
 	mixin PK_Math;
 	sound emptysound;
@@ -20,6 +25,8 @@ Class PKWeapon : Weapon abstract {
 		+WEAPON.AMMO_OPTIONAL;
 		+WEAPON.ALT_AMMO_OPTIONAL;
 		FloatBobStrength  0.3;
+		inventory.amount 1;
+		inventory.maxamount 1;
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -278,7 +285,7 @@ Class PK_WeaponIcon : Actor {
 		if (master)
 			weap = PKWeapon(master);
 		if (!weap) {
-			destroy();
+			Destroy();
 			return;
 		}
 		FloatBobStrength = weap.FloatBobStrength;
@@ -290,7 +297,7 @@ Class PK_WeaponIcon : Actor {
 	}
 	override void Tick () {
 		if (!weap || weap.owner) {
-			destroy();
+			Destroy();
 			return;
 		}
 		SetOrigin(weap.pos + (0,0,30),true);
@@ -518,9 +525,9 @@ Class PK_StakeProjectile : PK_Projectile {
 	//virtual for breaking; child actors override it to add debris spawning and such:
 	virtual void StakeBreak() {
 		if (pk_debugmessages > 2)
-			console.printf("%s destroyed",GetClassName());
+			console.printf("%s Destroyed",GetClassName());
 		if (self)
-			destroy();
+			Destroy();
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -535,7 +542,7 @@ Class PK_StakeProjectile : PK_Projectile {
 		if (bTHRUACTORS) {
 			//topz = CurSector.ceilingplane.ZAtPoint(pos.xy);
 			//botz = CurSector.floorplane.ZAtPoint(pos.xy);
-			//destroy the stake if it's run into ceiling/floor by a moving sector (e.g. a door opened, pulled the stake up and pushed it into the ceiling):
+			//Destroy the stake if it's run into ceiling/floor by a moving sector (e.g. a door opened, pulled the stake up and pushed it into the ceiling):
 			if (pos.z >= ceilingz-height || pos.z <= floorz) {
 				StakeBreak();
 				return;
@@ -751,434 +758,3 @@ Class PK_DebrisFlame : PK_BaseFlare {
 		wait;
 	}
 }
-
-//// AMMO
-
-Class PK_Shells : Ammo {
-	Default {
-		inventory.pickupmessage "$PKI_SHELLS";
-		inventory.pickupsound "pickups/ammo/shells";
-		inventory.icon "pkhshell";
-		inventory.amount 18;
-		inventory.maxamount 100;
-		ammo.backpackamount 18;
-		ammo.backpackmaxamount 100;
-		xscale 0.3;
-		yscale 0.25;
-	}
-	states {
-	spawn:
-		AMSH A -1;
-		stop;
-	}
-}
-
-Class PK_FreezerAmmo : Ammo {
-	Default {
-		inventory.pickupmessage "$PKI_FREEZEAMMO";
-		inventory.pickupsound "pickups/ammo/freezerammo";
-		inventory.icon "pkhfreez";
-		inventory.amount 15;
-		inventory.maxamount 100;
-		ammo.backpackamount 15;
-		ammo.backpackmaxamount 100;
-		xscale 0.3;
-		yscale 0.25;
-	}
-	states	{
-	spawn:
-		AMFR A -1;
-		stop;
-	}
-}
-
-
-Class PK_StakeAmmo : Ammo {
-	Default {
-		inventory.pickupmessage "$PKI_STAKEAMMO";
-		inventory.pickupsound "pickups/ammo/stakes";
-		inventory.icon "pkhstake";
-		inventory.amount 15;
-		inventory.maxamount 100;
-		ammo.backpackamount 15;
-		ammo.backpackmaxamount 100;
-		xscale 0.3;
-		yscale 0.25;
-	}
-	states	{
-	spawn:
-		AMST A -1;
-		stop;
-	}
-}
-
-Class PK_GrenadeAmmo : Ammo {
-	Default {
-		inventory.pickupmessage "$PKI_GRENADEAMMO";
-		inventory.pickupsound "pickups/ammo/grenades";
-		inventory.icon "pkhrock";
-		inventory.amount 7;
-		inventory.maxamount 100;
-		ammo.backpackamount 7;
-		ammo.backpackmaxamount 100;
-		scale 0.4;
-	}
-	states	{
-	spawn:
-		AMRO A -1;
-		stop;
-	}
-}
-
-Class PK_BulletAmmo : Ammo {
-	Default {
-		inventory.pickupmessage "$PKI_MINIGUNAMMO";
-		inventory.pickupsound "pickups/ammo/bullets";
-		inventory.icon "pkhbull";
-		inventory.amount 50;
-		inventory.maxamount 500;
-		ammo.backpackamount 50;
-		ammo.backpackmaxamount 500;
-		scale 0.4;
-	}
-	states	{
-	spawn:
-		AMBE A -1;
-		stop;
-	}
-}
-
-
-Class PK_ShurikenAmmo : Ammo {
-	Default {
-		inventory.pickupmessage "$PKI_STARAMMO";
-		inventory.pickupsound "pickups/ammo/stars";
-		inventory.icon "pkhstars";
-		inventory.amount 20;
-		inventory.maxamount 250;
-		ammo.backpackamount 50;
-		ammo.backpackmaxamount 250;
-		xscale 0.3;
-		yscale 0.25;
-	}
-	states {
-	spawn:
-		AMSU A -1;
-		stop;
-	}
-}
-
-Class PK_CellAmmo : Ammo {
-	Default {
-		inventory.pickupmessage "$PKI_ELECTROAMMO";
-		inventory.pickupsound "pickups/ammo/battery";
-		inventory.icon "pkhshock";
-		inventory.amount 40;
-		inventory.maxamount 500;
-		ammo.backpackamount 80;
-		ammo.backpackmaxamount 500;
-		scale 0.4;
-		yscale 0.34;
-	}
-	states	{
-	spawn:
-		AMEL A -1;
-		stop;
-	}
-}
-
-Class PK_RifleBullets : Ammo {
-	Default {
-		inventory.pickupmessage "$PKI_RIFLEAMMO";
-		inventory.pickupsound "pickups/ammo/riflebullets";
-		inventory.icon "pkhmag";
-		inventory.amount 50;
-		inventory.maxamount 250;
-		ammo.backpackamount 50;
-		ammo.backpackmaxamount 250;
-		scale 0.4;
-	}
-	states	{
-	spawn:
-		AMRB A -1;
-		stop;
-	}
-}
-
-Class PK_FuelAmmo : Ammo {
-	Default {
-		inventory.pickupmessage "$PKI_FUELAMMO";
-		inventory.pickupsound "pickups/ammo/fuel";
-		inventory.icon "pkhfuel";
-		inventory.amount 50;
-		inventory.maxamount 500;
-		ammo.backpackamount 50;
-		ammo.backpackmaxamount 500;
-		xscale 0.3;
-		yscale 0.24;
-	}
-	states	{
-	spawn:
-		AMFU B -1;
-		stop;
-	}
-}
-
-
-Class PK_BoltAmmo : Ammo {
-	Default {
-		inventory.pickupmessage "$PKI_BOLTAMMO";
-		inventory.pickupsound "pickups/ammo/bolts";
-		inventory.icon "pkhbolts";
-		inventory.amount 30;
-		inventory.maxamount 500;
-		ammo.backpackamount 30;
-		ammo.backpackmaxamount 500;
-		xscale 0.4;
-		yscale 0.3;
-	}
-	states	{
-	spawn:
-		AMBO A -1;
-		stop;
-	}
-}
-
-Class PK_BombAmmo : Ammo {
-	Default {
-		inventory.pickupmessage "$PKI_HEATERAMMO";
-		inventory.pickupsound "pickups/ammo/bombs";
-		inventory.icon "pkhbombs";
-		inventory.amount 50;
-		inventory.maxamount 250;
-		ammo.backpackamount 50;
-		ammo.backpackmaxamount 250;
-		xscale 0.5;
-		yscale 0.42;
-	}
-	states	{
-	spawn:
-		AMBM B -1;
-		stop;
-	}
-}
-
-/////////////////////////
-// AMMO SPAWN CONTROL
-/////////////////////////
-
-/*	This object is designed to replace each ammo pickupmessage
-	and spawn either primary or alternative ammo for 2 weapons.
-	With a small chance it'll also spawn alternative ammo
-	next to the primary.
-*/
-
-Class PK_BaseAmmoSpawner : Actor {
-	Class<Ammo> primary1; //primary ammo type for the 1st weapon
-	Class<Ammo> secondary1; //secondary ammo type for the 1st weapon
-	Class<Ammo> primary2; //primary ammo type for the 2nd weapon
-	Class<Ammo> secondary2; //secondary ammo type for the 2nd weapon
-	Class<Weapon> weapon1; //1st weapon class to spawn ammo for
-	property weapon1 : weapon1;
-	Class<Weapon> weapon2; //2nd weapon class to spawn ammo for
-	property weapon2 : weapon2;
-	double altSetChance; //chance of spawning ammo for weapon2 instead of weapon1
-	double secondaryChance; //chance of spawning ammotype2 instead of ammotype1
-	double secondaryChance2; //chance of spawning ammotype2 instead of ammotype1 for weapon2 (optional)
-	double twoPickupsChance;	//chance of spawning the second ammotype next to the one chosen to be spawned
-	double dropChance; //chance that this will be obtainable if dropped by an enemy
-	property altSetChance : altSetChance;
-	property secondaryChance : secondaryChance;
-	property secondaryChance2 : secondaryChance2;
-	property twoPickupsChance : twoPickupsChance;
-	property dropChance : dropChance;
-	Default {
-		+NOBLOCKMAP
-		//+INVENTORY.NEVERRESPAWN
-		PK_BaseAmmoSpawner.altSetChance 50;
-		PK_BaseAmmoSpawner.secondaryChance 35;
-		PK_BaseAmmoSpawner.twoPickupsChance 25;
-		PK_BaseAmmoSpawner.dropChance 50;
-	}
-	
-	void SpawnAmmoPickup(vector3 spawnpos, Class<Ammo> ammopickup) {
-		let am = Ammo(Spawn(ammopickup,spawnpos));
-		if (am) {
-			am.vel = vel;
-			if (bDROPPED) {
-				am.bDROPPED = true;
-				am.amount /= 2;
-				//console.printf("Spawner bDROPPED: %d | ammo bDROPPED: %d",bDROPPED,am.bDROPPED);
-			}
-		}		
-	}
-	
-	const ammoSpawnOfs = 16;
-	static const double AmmoSpawnPos[] = {
-		ammoSpawnOfs,
-		-ammoSpawnOfs,
-		-ammoSpawnOfs,
-		ammoSpawnOfs,
-		ammoSpawnOfs
-	};	
-	vector3 FindSpawnPosition() {
-		vector3 spawnpos = (0,0,0);
-		for (int i = 0; i < AmmoSpawnPos.Size()-1; i++) {
-			let ppos = pos + (AmmoSpawnPos[i],AmmoSpawnPos[i+1],pos.z);
-			//Spawn("AmmoPosTest",ppos);
-			if (!Level.IsPointInLevel(ppos))
-				continue;
-			sector psector = Level.PointInSector(ppos.xy);
-			if (curSector && curSector == psector) {
-				spawnpos = ppos;
-				break;
-			}
-			double ofsFloor = psector.NextLowestFloorAt(ppos.x,ppos.y,ppos.z);
-			if (abs(floorz - ofsFloor) <= 16) {
-				spawnpos = (ppos.xy,ofsFloor);
-				break;
-			}
-		}
-		return spawnpos;
-	}
-	
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		//weapon1 is obligatory; if for whatever reason it's empty, destroy it:
-		if (!weapon1) {
-			destroy();
-			return;
-		}
-		if (bDROPPED && dropChance < frandom[ammoSpawn](1,100)) {
-			destroy();
-			return;
-		}
-		//get ammo classes for weapon1 and weapon2:
-		primary1 = GetDefaultByType(weapon1).ammotype1;
-		secondary1 = GetDefaultByType(weapon1).ammotype2;			
-		if (weapon2) {
-			primary2 = GetDefaultByType(weapon2).ammotype1;
-			secondary2 = GetDefaultByType(weapon2).ammotype2;	
-			//if none of the players have weapon1, increase the chance of spawning ammo for weapon2:
-			if (!PK_MainHandler.CheckPlayersHave(weapon1))
-				altSetChance *= 1.5;
-			//if none of the players have weapon2, decreate the chance of spawning ammo for weapon2:
-			if (!PK_MainHandler.CheckPlayersHave(weapon2))
-				altSetChance /= 1.5;
-			//if players have neither, both calculations will happen, ultimately leaving the chance unchanged!
-		}
-		//define two possible ammo pickups to spawn:
-		class<Ammo> ammo1toSpawn = primary1;
-		class<Ammo> ammo2toSpawn = secondary1;
-		//with a chance they'll be replaced with ammo for weapon2:
-		if (weapon2 && altSetChance >= frandom[ammoSpawn](1,100)) {
-			ammo1toSpawn = primary2;
-			ammo2toSpawn = secondary2;
-			if (secondaryChance2)
-				secondaryChance = secondaryChance2;
-		}
-		//finally, decide whether we need to spawn primary or secondary ammo:
-		class<Ammo> tospawn = (secondaryChance >= frandom[ammoSpawn](1,100)) ? ammo2toSpawn : ammo1toSpawn;
-		SpawnAmmoPickup(pos,tospawn);
-		//console.printf("Spawning %s at %d,%d,%d",tospawn.GetClassName(),pos.x,pos.y,pos.z);
-		//if the chance for two pickups is high enough, spawn the other type of ammo:
-		if (twoPickupsChance >= frandom[ammoSpawn](1,100)) {
-			class<Ammo> tospawn2 = (tospawn == ammo1toSpawn) ? ammo2toSpawn : ammo1toSpawn;
-			let spawnpos = FindSpawnPosition();
-			//console.printf("Spawning %s at %d,%d,%d",tospawn2.GetClassName(),spawnpos.x	,spawnpos.y,spawnpos.z);
-			if (spawnpos != (0,0,0))
-				SpawnAmmoPickup(spawnpos,tospawn2);
-		}
-	}
-}
-
-Class PK_BaseAmmoSpawner_Shell : PK_BaseAmmoSpawner {
-	Default {
-		PK_BaseAmmoSpawner.weapon1 "PK_Stakegun";
-		PK_BaseAmmoSpawner.secondaryChance 25;
-		PK_BaseAmmoSpawner.weapon2 "PK_Boltgun";
-		PK_BaseAmmoSpawner.secondaryChance2 45;
-	}
-}
-
-Class PK_BaseAmmoSpawner_ShellBox : PK_BaseAmmoSpawner_Shell {
-	Default {
-		PK_BaseAmmoSpawner.twoPickupsChance 40;
-	}
-}
-
-Class PK_BaseAmmoSpawner_Clip : PK_BaseAmmoSpawner {
-	Default {
-		PK_BaseAmmoSpawner.weapon1 "PK_Shotgun";
-		PK_BaseAmmoSpawner.weapon2 "PK_Chaingun";
-		PK_BaseAmmoSpawner.secondaryChance2 80; //chaingun bullets should be much more common than rockets
-	}
-}
-
-Class PK_BaseAmmoSpawner_ClipBox : PK_BaseAmmoSpawner_Clip {
-	Default {
-		PK_BaseAmmoSpawner.twoPickupsChance 40;
-		PK_BaseAmmoSpawner.altSetChance 60; //since clip boxes are more often placed on the maps, chance for chaingun ammo should be higher for them
-	}
-}
-
-Class PK_BaseAmmoSpawner_RocketAmmo : PK_BaseAmmoSpawner {
-	Default {
-		PK_BaseAmmoSpawner.weapon1 "PK_Chaingun";
-		PK_BaseAmmoSpawner.weapon2 "PK_Rifle";
-		PK_BaseAmmoSpawner.secondaryChance 30; //rocket ammo spawns should provide rockets more commonly thab bullets
-		PK_BaseAmmoSpawner.secondaryChance2 50;
-		PK_BaseAmmoSpawner.altSetChance 25;
-		PK_BaseAmmoSpawner.twoPickupsChance 60;
-	}
-}
-
-Class PK_BaseAmmoSpawner_Cell : PK_BaseAmmoSpawner {
-	Default {
-		PK_BaseAmmoSpawner.weapon1 "PK_ElectroDriver";
-		PK_BaseAmmoSpawner.weapon2 "PK_Rifle";
-		PK_BaseAmmoSpawner.altSetChance 50;
-	}
-}
-
-Class PK_BaseAmmoSpawner_CellPack : PK_BaseAmmoSpawner {
-	Default {
-		PK_BaseAmmoSpawner.weapon1 "PK_ElectroDriver";
-		PK_BaseAmmoSpawner.weapon2 "PK_Rifle";
-		PK_BaseAmmoSpawner.altSetChance 30; //cell packs are usually placed next to BFG, so it should provide Electrodriver more commonly
-	}
-}
-
-/*	This special spawner is meant to replace Stimpack/Medikit
-	(since the player is supposed to heal with enemy souls)
-	and will randomly spawn any ammo for any weapon the player has.
-*/
-
-Class PK_AmmoSpawner_Stimpack : PK_BaseAmmoSpawner {
-	override void PostBeginPlay() {
-		array < Class<Weapon> > wweapons; //this will hold all weapons that at least one player has
-		//iterate over a static array of all weapon classes in the mod (see pk_items.zs):
-		for (int i = 0; i < PK_InvReplacementControl.pkWeapons.Size(); i++) {
-			Class<Weapon> weap = PK_InvReplacementControl.pkWeapons[i];
-			//if at least one player has that weapon class and that weapon uses ammo, push it in the wweapons array:
-			if (GetDefaultByType(weap).ammotype1 && GetDefaultByType(weap).ammotype2 && PK_MainHandler.CheckPlayersHave(weap))
-				wweapons.Push(weap);
-		}
-		//randomly choose a weapon to spawn ammo for:
-		int toSpawn = random[ammoSpawn](0,wweapons.Size() - 1);
-		weapon1 = wweapons[tospawn];
-		super.PostBeginPlay();
-	}
-}
-
-/*Class AmmoPosTest : Actor {
-	Default {
-		+BRIGHT
-		+NOINTERACTION
-	}
-	states {
-	Spawn:
-		BAL1 A 35;
-		stop;
-	}
-}*/
