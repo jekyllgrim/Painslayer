@@ -1,4 +1,5 @@
 alias "PKGOLD" "netevent PK_GiveGold %1"
+alias "PKREFRESH" "netevent PK_RefreshCards"
 
 addkeysection "Painslayer" PainslayerKeys
 addmenukey "$PK_OPENBOARD" 		"netevent PKCOpenBoard"
