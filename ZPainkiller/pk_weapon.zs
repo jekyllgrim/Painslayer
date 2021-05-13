@@ -22,8 +22,8 @@ Class PKWeapon : Weapon abstract {
 		weapon.BobSpeed 1.7;
 		weapon.upsound "weapons/select";
 		+FLOATBOB;
-		+WEAPON.AMMO_OPTIONAL;
-		+WEAPON.ALT_AMMO_OPTIONAL;
+		//+WEAPON.AMMO_OPTIONAL;
+		//+WEAPON.ALT_AMMO_OPTIONAL;
 		FloatBobStrength  0.3;
 		inventory.amount 1;
 		inventory.maxamount 1;
@@ -95,6 +95,10 @@ Class PKWeapon : Weapon abstract {
 		}
 	}
 	
+	/*	if a gravity-affected projectile is fired via the regular A_FireProjectile directly upwards,
+		it won't actually fly upwards, it'll get a curve out of nowhere
+		this function sets the pitch correctly to circumvent that
+	*/
 	action actor PK_FireArchingProjectile(class<Actor> missiletype, double angle = 0, bool useammo = true, double spawnofs_xy = 0, double spawnheight = 0, int flags = 0, double pitch = 0) {
 		if (!self || !self.player) 
 			return null;
@@ -118,12 +122,14 @@ Class PKWeapon : Weapon abstract {
 	action void PK_WeaponReady(int flags = 0) {
 		if ((player.cmd.buttons & BT_ATTACK) && (!invoker.ammo1 || invoker.ammo1.amount < invoker.ammouse1)) {
 			A_ClearRefire();
+			//console.printf("%s out of %s: have %d, needed %d",invoker.GetClassName(),invoker.ammo1.GetClassName(),invoker.ammo1.amount,invoker.ammouse1);
 			if (!(player.oldbuttons & BT_ATTACK))
 				A_StartSound(invoker.emptysound);
 			return;
 		}
 		if ((player.cmd.buttons & BT_ALTATTACK) && (!invoker.ammo2 || invoker.ammo2.amount < invoker.ammouse2)) {
 			A_ClearRefire();
+			//console.printf("%s out of %s: have %d, needed %d",invoker.GetClassName(),invoker.ammo2.GetClassName(),invoker.ammo2.amount,invoker.ammouse2);
 			if (!(player.oldbuttons & BT_ALTATTACK))
 				A_StartSound(invoker.emptysound);
 			return;

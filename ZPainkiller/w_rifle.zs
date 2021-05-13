@@ -21,6 +21,7 @@ Class PK_Rifle : PKWeapon {
 		inventory.pickupmessage "$PKI_RIFLEAMMO";
 		inventory.pickupsound "pickups/weapons/rifle";
 		Tag "$PK_RIFLE_TAG";
+		+WEAPON.NOAUTOFIRE
 	}
 	action void StartStrapSwing(double rfactor = 1.0) {
 		if (!player)
@@ -110,26 +111,30 @@ Class PK_Rifle : PKWeapon {
 		stop;
 	Select:
 		TNT1 A 0 {
-			A_Overlay(RIFLE_BOLT,"Bolt");
+			/*A_Overlay(RIFLE_BOLT,"Bolt");
 			A_Overlay(RIFLE_STOCK,"Stock");
 			A_Overlay(RIFLE_BARREL,"Barrel");
-			A_Overlay(RIFLE_STRAP,"Strap");
+			A_Overlay(RIFLE_STRAP,"Strap");*/
 		}
 		TNT1 A 0 A_Raise();
 		wait;
 	Ready:
-		PKRI A 5 {		
-			int i = waterlevel > 2 ? WRF_NOSECONDARY : 0;
+		PKRI A 5 {
+			A_WeaponReady();
+			console.printf("ammo optional (main: %d alt: %d) | refire: %d",invoker.bAMMO_OPTIONAL,invoker.bALT_AMMO_OPTIONAL,player.refire);
+			/*int i = 0;
+			if (waterlevel > 2)
+				i = WRF_NOSECONDARY;
+			else {
+				A_Overlay(PSP_HIGHLIGHTS,"PilotHighlights",nooverride:true);
+				A_Overlay(RIFLE_PILOT,"PilotLightHandle",nooverride:true);
+			}
 			PK_WeaponReady(flags:i);
 			invoker.shots = 0;
 			A_Overlay(RIFLE_BOLT,"Bolt",nooverride:true);
 			A_Overlay(RIFLE_STOCK,"Stock",nooverride:true);
 			A_Overlay(RIFLE_BARREL,"Barrel",nooverride:true);
-			A_Overlay(RIFLE_STRAP,"Strap",nooverride:true);
-			if (waterlevel <= 1) {
-				A_Overlay(PSP_HIGHLIGHTS,"PilotHighlights",nooverride:true);
-				A_Overlay(RIFLE_PILOT,"PilotLightHandle",nooverride:true);
-			}
+			A_Overlay(RIFLE_STRAP,"Strap",nooverride:true);*/
 		}
 		loop;
 	Strap:
@@ -212,7 +217,7 @@ Class PK_Rifle : PKWeapon {
 			else
 				A_ClearRefire();
 		}
-		PKRI AAAAAA 1 {
+		PKRI AAAAA 1 {
 			PK_RifleRestoreScale();
 		}
 		TNT1 A 0 {
