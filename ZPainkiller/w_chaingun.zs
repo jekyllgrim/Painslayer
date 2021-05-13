@@ -2,6 +2,7 @@ Class PK_Chaingun : PKWeapon {
 	private int holddur;
 	private double atkzoom;
 	Default {
+		+WEAPON.NOAUTOFIRE
 		PKWeapon.emptysound "weapons/empty/chaingun";
 		weapon.slotnumber 4;
 		weapon.ammotype1	"PK_GrenadeAmmo";
@@ -9,7 +10,7 @@ Class PK_Chaingun : PKWeapon {
 		weapon.ammogive1	5;
 		weapon.ammotype2	"PK_BulletAmmo";
 		weapon.ammouse2	1;
-		weapon.ammogive2	50;
+		weapon.ammogive2	100;		
 		inventory.pickupmessage "$PKI_CHAINGUN";
 		inventory.pickupsound "pickups/weapons/chaingun";
 		Tag "$PK_CHAINGUN_TAG";
@@ -81,6 +82,7 @@ Class PK_Chaingun : PKWeapon {
 			A_OverlayRotate(OverlayID(),0);
 			A_OverlayScale(OverlayID(),1,1);
 		}
+		TNT1 A 0 A_ReFire;
 		goto ready;
 	AltFire:
 		TNT1 A 0 {
