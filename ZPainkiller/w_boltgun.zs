@@ -196,7 +196,7 @@ Class PK_Boltgun : PKWeapon {
 		#### EFGHI 2 A_WeaponOffset(-1,-1,WOF_ADD);
 		#### IJKLM 2 A_WeaponOffset(-0.5,-0.5,WOF_ADD);
 		#### # 0 A_Overlay(PSP_SCOPE1,"ScopeReload");
-		#### NOPQRST 2 A_WeaponOffset(-0.5,-0.5,WOF_ADD);
+		#### NNOOPPQQRRSSTT 1 A_WeaponOffset(-0.25,-0.25,WOF_ADD);
 		TNT1 A 0 A_WeaponOffset(invoker.prevOfs.x,invoker.prevOfs.y,WOF_INTERPOLATE);
 		goto ready;
 	FireEndEmpty:
