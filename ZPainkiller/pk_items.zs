@@ -239,9 +239,43 @@ Class PK_GoldGleam : PK_BaseFlare {
 	}
 }
 
+Class PK_GoldCoin : PK_GoldPickup {
+	double broll;
+	Default {
+		inventory.amount 5;
+		height 2;
+		inventory.pickupsound "pickups/gold/small";
+		bouncetype 'Doom';
+		+MISSILE
+		+ROLLSPRITE
+		+ROLLCENTER
+		xscale 0.4;
+		yscale 0.44;
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		roll = frandom[sfx](0,359);
+		broll = frandom[sfx](2,6) * randompick[sfx](-1,1);
+	}
+	States {
+	Spawn:
+		PGLC ABCDEFGH 1 A_SetRoll(roll+broll);
+		loop;
+	Death:
+		TNT1 A 0 { roll = randompick[sfx](-90,90); }
+		PGLC ABCD 1;
+		PGLC EFGH 2;
+		PGLC ABC 2;
+		PGLC DEF 3;
+		PGLC GGGGG 1 { roll *= 0.5; }
+		PGLC G -1 { roll = 0; }
+		stop;
+	}
+}
+
 Class PK_SmallGold : PK_GoldPickup {
 	Default {
-		inventory.amount 3;
+		inventory.amount 10;
 		height 4;
 		inventory.pickupsound "pickups/gold/small";
 	}
@@ -253,7 +287,7 @@ Class PK_SmallGold : PK_GoldPickup {
 
 Class PK_MedGold : PK_GoldPickup {
 	Default {
-		inventory.amount 10;
+		inventory.amount 25;
 		height 8;
 		inventory.pickupsound "pickups/gold/med";
 	}
@@ -265,7 +299,7 @@ Class PK_MedGold : PK_GoldPickup {
 
 Class PK_BigGold : PK_GoldPickup {
 	Default {
-		inventory.amount 50;
+		inventory.amount 100;
 		height 11;
 		inventory.pickupsound "pickups/gold/big";
 	}
@@ -277,7 +311,7 @@ Class PK_BigGold : PK_GoldPickup {
 
 Class PK_VeryBigGold : PK_GoldPickup {
 	Default {
-		inventory.amount 100;
+		inventory.amount 500;
 		height 16;
 		inventory.pickupsound "pickups/gold/vbig";
 	}

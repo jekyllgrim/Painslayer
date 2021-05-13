@@ -90,7 +90,7 @@ Class PK_MainHandler : EventHandler {
 		}
 		return false;
 	}
-	
+		
 	//tarot card-related events:
 	override void NetworkProcess(consoleevent e) {
 		if (!e.isManual)
@@ -157,10 +157,14 @@ Class PK_MainHandler : EventHandler {
 			);
 		}
 		return (posMax - posMin);
-	}	
+	}
+	
 	
 	override void WorldLoaded(WorldEvent e) {
 		Shader.SetEnabled(players[consoleplayer], "DemonMorph", false); 
+		if (e.IsSaveGame || e.isReopen)
+			return;
+		//S_StartSound("world/mapstart",CHAN_AUTO);
 		//spawn gold randomly in secret areas:
 		//iterate throguh sectors:
 		for (int i = 0; i < level.Sectors.Size(); i++) {
@@ -182,7 +186,8 @@ Class PK_MainHandler : EventHandler {
 			if (secsize < 24)
 				continue;
 			int goldnum = Clamp((secSize / 72.),1,10);
-
+			
+			//spawn big gold:
 			for (int i = goldnum; i > 0; i--) {
 				int chance = random[gold](0,100);
 				Class<Actor> gold;
@@ -199,9 +204,17 @@ Class PK_MainHandler : EventHandler {
 				goldPickup.VelFromAngle(frandom[gold](1,3),random[gold](0,359));
 				//console.printf("goldpickup bDROPPED: %d",goldpickup.bDROPPED);
 			}
+			//spawn some extra small gold:
 			for (int i = random[moregold](1,4); i > 0; i--) {
 				actor goldPickup = actor.Spawn("PK_SmallGold",cCenter);
 				goldPickup.VelFromAngle(frandom[gold](4,8),random[gold](0,359));
+			}
+			//throw in some coins too:
+			for (int i = random[moregold](5,20); i > 0; i--) {
+				actor goldPickup = actor.Spawn("PK_GoldCoin",cCenter+(0,0,4));
+				goldpickup.bMISSILE = false;
+				goldPickup.VelFromAngle(frandom[gold](1,5),random[gold](0,359));
+				goldpickup.SetStateLabel("Death");
 			}
 		}
 	}
@@ -247,6 +260,16 @@ Class PK_MainHandler : EventHandler {
 		let edc = PK_EnemyDeathControl(Actor.Spawn("PK_EnemyDeathControl",act.pos));
 		if (edc)
 			edc.master = act;
+		int goldchance = random[gold](0,3);
+		int mh = abs(act.health);
+		//console.printf("%s health: -%d",act.GetClassName(),mh);
+		if (mh >= act.SpawnHealth() || mh >= act.gibhealth)
+			goldchance = Clamp(goldchance * 3,3,10);
+		for (int i = goldchance; i > 0; i--) {
+			let gg = Actor.Spawn("PK_GoldCoin",act.pos + (0,0,frandom[sfx](16,48)));
+			if (gg)
+				gg.vel = (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](2,6));
+		}
 	}
 	override void WorldThingDestroyed(WorldEvent e) {
 		let act = e.thing;
