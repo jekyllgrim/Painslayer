@@ -339,7 +339,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			}
 			
 		}
-		//unlock 2 random silver and 3 random gold crads if you have none unlocked ("pistol start"):	
+		//unlock 2 random silver and 3 random gold cards if you have none unlocked ("pistol start"):	
 		if (goldcontrol && goldcontrol.UnlockedTarotCards.Size() == 0) {
 			//S_StartSound("ui/board/cardunlocked",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
@@ -923,7 +923,8 @@ Class PKCPromptHandler : PKCHandler {
 				card.cardbought = true;
 				card.purchaseAnim = true;
 				string eventname = String.Format("PKCBuyCard:%s",card.cardID);
-				EventHandler.SendNetworkEvent(eventname);
+				EventHandler.SendNetworkEvent(eventname,card.cardcost);
+				//console.printf("buying card %s at %d",card.cardID,card.cardcost);
 			}
 			let popup = menu.promptPopup;
 			if (popup) {
