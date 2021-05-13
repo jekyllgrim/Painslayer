@@ -182,7 +182,7 @@ Class PK_DemonWeapon : PKWeapon {
 			//disable golden cards before changing speed/gravity
 			let cardcontrol = PK_CardControl(owner.FindInventory("PK_CardControl"));
 			if (cardcontrol && cardcontrol.goldActive)
-				cardcontrol.PK_StopGoldenCards();
+				cardcontrol.StopGoldenCards();
 			//record previous speed and gravity for the slowmo effect
 			p_speed = owner.speed;
 			p_gravity = owner.gravity;
@@ -437,8 +437,7 @@ Class PK_CardControl : PK_InventoryToken {
 	int pk_gold; //current amount of gold
 	array <name> UnlockedTarotCards; //holds names of all purchased cards for the board
 	name EquippedSlots[5]; //holds names of all cards equipped into slots
-	array < Class<Inventory> > EquippedCards; //holds classes of currently equipped cards (reinitialized when closing the board)
-	
+	Class<Inventory> EquippedCards[5]; //holds classes of currently equipped cards (reinitialized when closing the board)	
 	bool goldActive;
 	private int dryUseTimer; //> 0 you try to use gold cards when you're out of uses
 	int goldUses;
@@ -452,16 +451,26 @@ Class PK_CardControl : PK_InventoryToken {
 		PK_CardControl.goldDuration 30;
 	}
 	
-	ui int GetDryUseTimer() {
+	clearscope int GetDryUseTimer() {
 		return dryUseTimer;
 	}
 	
 	//used by Forgiveness to make sure you can't reuse golden cards infinitely by unequipping and reequipping Forgiveness
-	int GetTotalGoldUses() {
+	clearscope int GetTotalGoldUses() {
 		return totalGoldUses;
 	}
 	
-	void PK_UseGoldenCards() {
+	//called to reset everything that needs resetting when starting a new map:
+	void RefreshCards() {
+		totalGoldUses = 0;
+		goldUses = 1;
+		if (FindInventory("PKC_Forgiveness"))
+			goldUses++;
+		if (pk_debugmessages)
+			console.printf("Gold activations refreshed (remaining: %d)",goldUses);
+	}
+	
+	void UseGoldenCards() {
 		//check that the array has actually been successfully created
 		if (EquippedCards.Size() < 5) {
 			owner.A_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_LOCAL);
@@ -476,8 +485,12 @@ Class PK_CardControl : PK_InventoryToken {
 				Console.Printf("No gold cards equipped");
 			return;
 		}
-		if (goldUses < 1 || goldActive) {
-			if (!goldActive && dryUseTimer == 0) {
+		if (goldActive)
+			return;
+		if (goldUses < 1) {
+			if (pk_debugmessages)
+				console.printf("Can't use cards. Remaining uses: %d | Total uses: %d",goldUses,totalGoldUses);
+			if (dryUseTimer == 0) {
 				owner.A_StartSound("cards/cantuse",CHAN_AUTO,CHANF_LOCAL);
 				//while this counter is above 0, we won't play the sound again and the hud will briefly show red cards signifying you can't use them anymore
 				dryUseTimer = 45;
@@ -500,10 +513,11 @@ Class PK_CardControl : PK_InventoryToken {
 		owner.A_StartSound("cards/use",CHAN_AUTO,CHANF_LOCAL);
 		goldActive = true;
 	}
-	void PK_StopGoldenCards() {
+	void StopGoldenCards(bool silent = false) {
 		goldActive = false;
 		goldDuration = default.goldDuration;
-		owner.A_StartSound("cards/end",CHAN_AUTO,CHANF_LOCAL);
+		if (!silent)
+			owner.A_StartSound("cards/end",CHAN_AUTO,CHANF_LOCAL);
 		if (EquippedCards.Size() < 5) {
 			if (pk_debugmessages)
 				Console.Printf("Something went wrong: equipped golden cards were changed while they were active!");
@@ -519,11 +533,13 @@ Class PK_CardControl : PK_InventoryToken {
 		}
 	}	
 	void PK_EquipCards() {
-		EquippedCards.Clear();
-		EquippedCards.Reserve(5);			
+		for (int i = 0; i < EquippedCards.Size(); i++) {
+			EquippedCards[i] = null;
+		}
+		/*EquippedCards.Clear();
+		EquippedCards.Reserve(5);		
 		if (pk_debugmessages)
-			console.printf("Allocated %d card slots successfully",EquippedCards.Size());	
-		
+			console.printf("Allocated %d card slots successfully",EquippedCards.Size());*/
 		//give the equipped cards:
 		for (int i = 0; i < EquippedCards.Size(); i++) {
 			//construct card classname based on card ID from ui
@@ -582,10 +598,8 @@ Class PK_CardControl : PK_InventoryToken {
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner || !owner.player) {
-			destroy();
 			return;
 		}
-		//console.printf("Speed %f gravity %f",owner.speed,owner.gravity);
 		if (dryUseTimer > 0)
 			dryUseTimer = Clamp(dryUseTimer - 1,0,45);
 		if (!goldActive)
@@ -594,7 +608,7 @@ Class PK_CardControl : PK_InventoryToken {
 			if (goldDuration > 0 && owner.health > 0)
 				goldDuration--;
 			else
-				PK_StopGoldenCards();
+				StopGoldenCards();
 		}
 	}
 }
@@ -613,6 +627,8 @@ Class PK_BaseSilverCard : PK_InventoryToken abstract {
 		}
 		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
 		control = PK_CardControl(owner.FindInventory("PK_CardControl"));
+		if (!event || !control)
+			return;
 		GetCard();
 		if (pk_debugmessages)
 			console.printf("Player %d has %s card now",owner.player.mo.PlayerNumber(),self.GetClassName());
@@ -667,40 +683,15 @@ Class PKC_Blessing : PK_BaseSilverCard {
 	}
 }
 
-/*Iterates over an array of all Ammo in an event handler and doubles it amount.
-Also removes Ammo that has been picked up from the array.
-(A bit awkward but I want this to work for all ammo, just in case.)*/
+// doubles the amount of picked up ammo
 Class PKC_Replenish : PK_BaseSilverCard {
 	Default {
 		tag "Replenish";
 	}
-	override void GetCard() {
-		if (event) {
-			//first remove items that have already been picked up from the array
-			for (int i = 0; i < event.ammopickups.Size(); i++) {
-				if (!event.ammopickups[i] || event.ammopickups[i].owner)
-					event.ammopickups.delete(i);
-			}
-			event.ammopickups.ShrinkToFit();
-			for (int i = 0; i < event.ammopickups.Size(); i++) {
-				if (event.ammopickups[i])
-					event.ammopickups[i].amount *= 2;
-			}
-		}
-	}	
-	override void RemoveCard() {
-		if (!PK_MainHandler.CheckPlayersHave(self.GetClassName()) && event) {
-			//first remove items that have already been picked up from the array
-			for (int i = 0; i < event.ammopickups.Size(); i++) {
-				if (!event.ammopickups[i] || event.ammopickups[i].owner)
-					event.ammopickups.delete(i);
-			}
-			event.ammopickups.ShrinkToFit();
-			for (int i = 0; i < event.ammopickups.Size(); i++){
-				if (event.ammopickups[i] && event.ammopickups[i] is "Ammo")
-					event.ammopickups[i].amount =  event.ammopickups[i].default.amount;
-			}				 
-		}
+	override bool HandlePickup (Inventory item) {
+		if (item is "Ammo")
+			item.amount *= 2;
+		return super.HandlePickup(item);
 	}
 }
 
@@ -755,10 +746,14 @@ Class PKC_Forgiveness : PK_BaseSilverCard {
 		//only increase gold uses if the cards have been used no more than once in total
 		if (control && control.GetTotalGoldUses() < 2)
 			control.goldUses = Clamp(control.goldUses + 1,0,2);
+		if (pk_debugmessages)
+			console.printf("Giving Forgiveness");
 	}
 	override void RemoveCard() {
 		if (control)
 			control.goldUses = Clamp(control.goldUses - 1,0,1);
+		if (pk_debugmessages)
+			console.printf("Removing Forgiveness");
 	}
 }
 
@@ -1126,7 +1121,7 @@ Class PKC_StepsOfThunder : PK_BaseGoldenCard {
 			cycle++;
 			if (cycle % 10 == 0) {
 				owner.A_Explode(20,256,XF_NOTMISSILE,alert:false,fulldamagedistance:128);
-				A_Quake(1,2,0,1,"");
+				owner.A_Quake(2,5,0,32,"");
 				owner.A_StartSound("cards/thunderwalk",15);
 			}
 		}
