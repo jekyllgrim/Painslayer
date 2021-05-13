@@ -16,8 +16,8 @@ Class PK_Rifle : PKWeapon {
 		weapon.ammouse1		1;
 		weapon.ammogive1	80;
 		weapon.ammotype2	"PK_FuelAmmo";
-		weapon.ammouse1		1;
-		weapon.ammogive1	100;
+		weapon.ammouse2		1;
+		weapon.ammogive2	100;
 		inventory.pickupmessage "$PKI_RIFLEAMMO";
 		inventory.pickupsound "pickups/weapons/rifle";
 		Tag "$PK_RIFLE_TAG";
@@ -120,21 +120,20 @@ Class PK_Rifle : PKWeapon {
 		wait;
 	Ready:
 		PKRI A 5 {
-			A_WeaponReady();
 			console.printf("ammo optional (main: %d alt: %d) | refire: %d",invoker.bAMMO_OPTIONAL,invoker.bALT_AMMO_OPTIONAL,player.refire);
-			/*int i = 0;
+			int fflags = 0;			
 			if (waterlevel > 2)
-				i = WRF_NOSECONDARY;
+				fflags |= WRF_NOSECONDARY;
 			else {
 				A_Overlay(PSP_HIGHLIGHTS,"PilotHighlights",nooverride:true);
 				A_Overlay(RIFLE_PILOT,"PilotLightHandle",nooverride:true);
 			}
-			PK_WeaponReady(flags:i);
+			PK_WeaponReady(flags:fflags);
 			invoker.shots = 0;
 			A_Overlay(RIFLE_BOLT,"Bolt",nooverride:true);
 			A_Overlay(RIFLE_STOCK,"Stock",nooverride:true);
 			A_Overlay(RIFLE_BARREL,"Barrel",nooverride:true);
-			A_Overlay(RIFLE_STRAP,"Strap",nooverride:true);*/
+			A_Overlay(RIFLE_STRAP,"Strap",nooverride:true);
 		}
 		loop;
 	Strap:
