@@ -37,7 +37,7 @@ Class PK_Stakegun : PKWeapon {
 				double pofs = (invoker.hasWmod) ? 0 : -2.5;
 				PK_FireArchingProjectile("PK_Stake",spawnofs_xy:2,spawnheight:5,flags:FPF_NOAUTOAIM,pitch:pofs);
 			}
-			PSGN BBBBB 2 A_WeaponOffset(1.44,1.2,WOF_ADD);
+			PSGN BBBBB 1 A_WeaponOffset(1.44,1.2,WOF_ADD);
 			PSGN CDEF 3 A_WeaponOffset(-0.8,-0.5,WOF_ADD);
 			PSGN GGGGGGG 2 A_WeaponOffset(-0.12,-0.1,WOF_ADD);
 			PSGN A 0 {
@@ -108,6 +108,7 @@ Class PK_Stake : PK_StakeProjectile {
 		PK_Projectile.trailscale 0.012;
 		PK_Projectile.trailfade 0.02;
 		PK_Projectile.trailalpha 0.2;
+		ProjectileKickBack 50;
 		-NOGRAVITY
 		+NOEXTREMEDEATH
 		speed 60;
@@ -158,7 +159,7 @@ Class PK_Stake : PK_StakeProjectile {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		basedmg = 140;
+		basedmg = 160;
 		if (target) {
 			pitch = target.pitch; //In case it's fired at a floor or ceiling at point-blank range, the Spawn state won't be used and the stake won't receive proper pitch. So, we do this.
 		}
