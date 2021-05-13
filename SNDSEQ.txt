@@ -1,0 +1,30 @@
+:DoorOpenNormal
+	play		doors/slow/open
+	playrepeat	doors/slow/loop
+	stopsound	doors/slow/stop
+end
+
+:DoorCloseNormal
+	play		doors/slow/open
+	playrepeat	doors/slow/loop
+	stopsound	doors/slow/stop
+end
+
+:DoorOpenBlazing
+	play		doors/fast/open
+	playrepeat	doors/fast/loop
+	stopsound	doors/fast/stop
+end
+
+:DoorCloseBlazing
+	play		doors/fast/open
+	playrepeat	doors/fast/loop
+	stopsound	doors/fast/stop
+end
+
+[DoorNormal
+	0		DoorOpenNormal
+	1		DoorCloseNormal
+	2		DoorOpenBlazing
+	3		DoorCloseBlazing
+]

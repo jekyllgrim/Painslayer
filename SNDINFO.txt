@@ -1,6 +1,65 @@
+// sound replacements:
+
+misc/secret "sounds/world/light_from_hole.wav"
+misc/teleport "sounds/world/teleport.wav"
+
+//platforms:
+plats/pt1_strt			"sounds/world/elevators/elevator2-middle-loop.wav"//"sounds/world/elevators/elevator2-start.wav"
+plats/pt1_stop			"sounds/world/elevators/elevator2-stop.wav"
+plats/pt1_mid			"sounds/world/elevators/elevator2-middle-loop.wav"
+//doors:
+doors/dr1_open			dsdoropn
+doors/dr1_clos			dsdorcls
+doors/dr2_open			dsbdopn
+doors/dr2_clos			dsbdcls
+
+doors/slow/open		"sounds/world/elevators/elevator3-start.wav"
+doors/slow/loop		"sounds/world/elevators/elevator3-middle-loop.wav"
+doors/slow/stop		"sounds/world/elevators/elevator3-stop.wav"
+doors/fast/open		"sounds/world/elevators/elevator5-start.wav"
+doors/fast/loop		"sounds/world/elevators/elevator5-middle-loop.wav"
+doors/fast/stop		"sounds/world/elevators/elevator5-stop.wav"
+
+// player:
+
+$random pkplayer/death { pkpdeath1 pkpdeath2 }
+$random pkplayer/xdeath { pkpgib1 pkpgib2 pkpgib3 }
+$random pkplayer/pain1 { pkppain1 pkppain2 }
+$random pkplayer/pain2 { pkppain3 pkppain4 }
+$random pkplayer/jump { pkpjump1 pkpjump2 }
+$random pkplayer/land { pkpland1 pkpland2 }
+pkpdeath1 "sounds/player/hero_death1.wav"
+pkpdeath2 "sounds/player/hero_death2.wav"
+pkpgib1 "sounds/player/hero_gib1.wav"
+pkpgib2 "sounds/player/hero_gib2.wav"
+pkpgib3 "sounds/player/hero_gib3.wav"
+pkppain1 "sounds/player/hero_hurt_1.wav"
+pkppain2 "sounds/player/hero_hurt_2.wav"
+pkppain3 "sounds/player/hero_hurt_3.wav"
+pkppain4 "sounds/player/hero_hurt_4.wav"
+pkpjump1 "sounds/player/hero_jump_1.wav"
+pkpjump2 "sounds/player/hero_jump_2.wav"
+pkpland1 "sounds/player/hero-jump_end1.wav"
+pkpland2 "sounds/player/hero-jump_end2.wav"
+
+$playeralias		player	male	*death		pkplayer/death
+$playeralias		player	male	*xdeath	pkplayer/xdeath
+$playeralias		player	male	*gibbed	pkplayer/xdeath
+$playeralias		player	male	*pain100	pkplayer/pain1
+$playeralias		player	male	*pain75	pkplayer/pain1
+$playeralias		player	male	*pain50	pkplayer/pain2
+$playeralias		player	male	*pain25	pkplayer/pain2
+$playeralias		player	male	*land		pkplayer/land
+$playeralias		player	male	*jump		pkplayer/jump
+
+
+// world:
 world/bodypoof	BODYPOOF
 world/null	DSEMPTY
+world/mapstart "sounds/world/startlevel.wav"
+world/mapend "sounds/world/area_cleared.wav"
 
+//cards:
 cards/cantuse "sounds/items/card-cannot_use.wav"
 cards/use "sounds/items/card-use.wav"
 cards/end "sounds/items/card-end.wav"
