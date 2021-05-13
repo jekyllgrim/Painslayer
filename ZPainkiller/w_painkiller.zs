@@ -279,28 +279,33 @@ Class PK_Killer : PK_Projectile {
 				returning = true;
 				if (!target || !tracer || GetClassName() != "PK_Killer")
 					return ResolveState(null);
-				name tracername = tracer.GetClassName();
-				if (tracer.bKILLED || tracername == "KillerFlyTarget") {
+				if (tracer && (tracer.bKILLED || tracer.GetClassName() == "KillerFlyTarget")) {
 					if (!tracer.target)
 						tracer.target = target;
+					//first, throw the enemy corpse towards the player:
 					tracer.A_FaceTarget();
 					double dist = tracer.Distance2D(target);			//horizontal distance to target
-					double vdisp = target.pos.z - tracer.pos.z;		//height difference between gib and target + randomized height
-					double ftime = 20;									//time of flight					
-					double vvel = (vdisp + 0.5 * ftime*ftime) / ftime;
-					double hvel = (dist / ftime) * -0.8;		
-					tracer.VelFromAngle(hvel,angle);
+					//make some room:
+					if (dist > 32)
+						dist -= 32;
+					double vdisp = target.pos.z - tracer.pos.z;		//height difference between corpse and target
+					double ftime = 20;									//desired time of flight
+					double vvel = (vdisp + 0.5 * ftime*ftime) / ftime; //calculate horizontal vel
+					double hvel = (dist / ftime) * -0.8; //calculate vertical vel
+					tracer.VelFromAngle(hvel,angle); //throw the body towards the player
 					tracer.vel.z = vvel;
+					//if we hit a body with a Killer projectile, spawn gold every 3 times Killer hits it:
 					let kft = KillerFlyTarget(tracer);
 					if (kft) {
 						kft.hitcounter++;
 						if (tracer.target && kft.hitcounter % 3 == 0) {
-							Class<PK_GoldPickup> gold;
+							Class<PK_GoldPickup> gold = "PK_SmallGold";
+							//add a chance to spawn medium gold piece after a few hits:
 							if (kft.hitcounter > random[gold](6,13))
 								gold = "PK_MedGold";
-							else
-								gold = "PK_SmallGold";
-							tracer.target.A_DropItem(gold);
+							let goldspawn = PK_GoldPickup(Spawn(gold,tracer.target.pos));
+							if (goldspawn)
+								goldspawn.A_StartSound(goldspawn.pickupsound);
 						}
 					}
 				}
