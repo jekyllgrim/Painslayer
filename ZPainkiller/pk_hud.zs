@@ -44,13 +44,12 @@ Class PainkillerHUD : BaseStatusBar {
 		if (!player)
 			return;
 		//check if player is demon (cheaper to do it here than in Draw, fewer calls)
-		isDemon = player.FindInventory("PK_DemonWeapon");
+		isDemon = player.CountInv("PK_DemonWeapon");
+		//get gold amount:
 		if (!cardcontrol)
 			cardcontrol = PK_CardControl(player.FindInventory("PK_CardControl"));
-		if (!cardcontrol)
-			return;
-		//get gold amount:
-		goldnum = cardcontrol.pk_gold;
+		else
+			goldnum = cardcontrol.pk_gold;
 		//get souls amount:
 		let dmcont = PK_DemonMorphControl(CPlayer.mo.FindInventory("PK_DemonMorphControl"));
 		if (dmcont) {
