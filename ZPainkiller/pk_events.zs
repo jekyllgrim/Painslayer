@@ -1,9 +1,9 @@
 Class PK_MainHandler : EventHandler {
-
+	//debug function
 	/*ui void Test_CheckWeaponInInventory(Class<Weapon> weap, double x, double y) {
 		if (!weap)
 			return;
-		let plr = players[0].mo;
+		let plr = players[consoleplayer].mo;
 		if (!plr)
 			return;
 		let wweap = plr.FindInventory(weap);
@@ -25,6 +25,10 @@ Class PK_MainHandler : EventHandler {
 	override void RenderOverlay(renderEvent e) {
 		if (!pk_debugmessages)	
 			return;
+		let plr = players[consoleplayer].mo;
+		let goldcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		string str = String.Format("Remaining card uses: %d | Total uses: %d",goldcontrol.goldUses,goldcontrol.GetTotalGoldUses());
+		Screen.DrawText(bigfont,Font.CR_Green,1800,800,str);
 		double tx = 2000;
 		double ty = 200;
 		double parag = 16;
@@ -39,29 +43,6 @@ Class PK_MainHandler : EventHandler {
 	
 	array <Actor> demontargets; //holds all monsters, players and enemy projectiles
 	array <Actor> allenemies; //only monsters
-	
-	//converted from source code by 3saster:
-	bool CheckCheatmode (bool printmsg = true) {
-		if ((G_SkillPropertyInt(SKILLP_DisableCheats) || netgame || deathmatch) && (!sv_cheats)) {
-			if (printmsg) console.printf ("sv_cheats must be true to enable this command.");
-			return true;
-		}
-		else if (cl_blockcheats != 0) {
-			if (printmsg && cl_blockcheats == 1) console.printf("cl_blockcheats is turned on and disabled this command.\n");
-			return true;
-		}
-		return false;
-    }
-	//cheats:
-	static const string PKCH_GoldMessage[] = {
-		"$PKCH_GIVEGOLD1",
-		"$PKCH_GIVEGOLD2",
-		"$PKCH_GIVEGOLD3",
-		"$PKCH_GIVEGOLD4",
-		"$PKCH_GIVEGOLD5",
-		"$PKCH_TAKEGOLD1",
-		"$PKCH_TAKEGOLD2"
-	};
 	
 	//returns true if ANY of the players has the item
 	//(unless checkall is true, then it returns true if ALL have it)
@@ -90,7 +71,29 @@ Class PK_MainHandler : EventHandler {
 		}
 		return false;
 	}
-		
+	
+	//converted from source code by 3saster:
+	bool CheckCheatmode (bool printmsg = true) {
+		if ((G_SkillPropertyInt(SKILLP_DisableCheats) || netgame || deathmatch) && (!sv_cheats)) {
+			if (printmsg) console.printf ("sv_cheats must be true to enable this command.");
+			return true;
+		}
+		else if (cl_blockcheats != 0) {
+			if (printmsg && cl_blockcheats == 1) console.printf("cl_blockcheats is turned on and disabled this command.\n");
+			return true;
+		}
+		return false;
+    }
+	//different messages for PKGOLD cheat:
+	static const string PKCH_GoldMessage[] = {
+		"$PKCH_GIVEGOLD1",
+		"$PKCH_GIVEGOLD2",
+		"$PKCH_GIVEGOLD3",
+		"$PKCH_GIVEGOLD4",
+		"$PKCH_GIVEGOLD5",
+		"$PKCH_TAKEGOLD1",
+		"$PKCH_TAKEGOLD2"
+	};
 	//tarot card-related events:
 	override void NetworkProcess(consoleevent e) {
 		if (!e.isManual)
@@ -98,49 +101,49 @@ Class PK_MainHandler : EventHandler {
 		let plr = players[e.Player].mo;
 		if (!plr)
 			return;
+		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		if (!cardcontrol)
+			return;
 		//open black tarot board
 		if (e.name == "PKCOpenBoard") {
 			if (pk_debugmessages)
 				console.printf("Trying to open board");
-			let goldcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
-			if (!goldcontrol)
-				return;
-			if (goldcontrol.goldActive || plr.health <= 0 || plr.FindInventory("PK_DemonWeapon")) {
+			if (cardcontrol.goldActive || plr.health <= 0 || plr.FindInventory("PK_DemonWeapon")) {
 				if (e.player == consoleplayer) {
 					plr.A_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI|CHANF_LOCAL);
 					if (pk_debugmessages)
 						console.printf("Can't open the board at this time");
 				}
 				if (pk_debugmessages)
-					console.printf("health: %d | goldActive: %d | has demon weapon: %d",goldcontrol.goldActive,plr.health,plr.CountInv("PK_DemonWeapon"));
+					console.printf("health: %d | goldActive: %d | has demon weapon: %d",cardcontrol.goldActive,plr.health,plr.CountInv("PK_DemonWeapon"));
 				return;
 			}
 			Menu.SetMenu("PKCardsMenu");
 		}
-		//PKGOLD cheat (gives or takes gold)
+		if (e.name == "PK_UseGoldenCards") {
+			cardcontrol.UseGoldenCards();
+		}
+		//CHEATS:
 		if (CheckCheatMode())
 			return;
-		if (e.name == "PK_UseGoldenCards") {
-			let cont = PK_CardControl(plr.FindInventory("PK_CardControl"));
-			if (cont) {
-				cont.PK_UseGoldenCards();
-			}
-		}
+		//PKGOLD cheat (gives or takes gold)
 		if (e.name == "PK_GiveGold") {
 			//gives a specified number of gold, or max gold if no number is specified:
 			int amt = (e.args[0] == 0) ? 99990 : e.args[0];
-			let cont = PK_CardControl(plr.FindInventory("PK_CardControl"));
-			if (cont) {
-				cont.pk_gold = Clamp(cont.pk_gold + amt, 0, 99990);
-			}
+			cardcontrol.pk_gold = Clamp(cardcontrol.pk_gold + amt, 0, 99990);
 			if (e.player == consoleplayer) {				
 				string str = (amt > 0) ? Stringtable.Localize(PKCH_GoldMessage[random(0,3)]) : Stringtable.Localize(PKCH_GoldMessage[random(4,5)]);
 				console.printf(str);
 				S_StartSound("pickups/gold/vbig",CHAN_AUTO,CHANF_UI);
 			}
 		}
+		//PKREFRESH cheat (reset golden card uses)
+		if (e.name == "PK_RefreshCards") {		
+			cardcontrol.RefreshCards();
+		}
 	}
 	
+	//returns the size of a sector:
 	Vector2 SectorBounds (Sector sec) {
 		Vector2 posMin = ( double.Infinity,  double.Infinity);
 		Vector2 posMax = (-double.Infinity, -double.Infinity);
@@ -164,6 +167,19 @@ Class PK_MainHandler : EventHandler {
 		Shader.SetEnabled(players[consoleplayer], "DemonMorph", false); 
 		if (e.IsSaveGame || e.isReopen)
 			return;
+		for (int pn = 0; pn < MAXPLAYERS; pn++) {
+			if (!playerInGame[pn])
+				continue;
+			PlayerInfo plr = players[pn];
+			if (!plr || !plr.mo)
+				continue;
+			let cardcontrol = PK_CardControl(plr.mo.FindInventory("PK_CardControl"));
+			if (cardcontrol) {
+				cardcontrol.RefreshCards();
+				if (pk_debugmessages)
+					console.printf("New map start: Refreshing cards for player %d. Gold Uses left: %d",pn,cardcontrol.goldUses);
+			}
+		}
 		//S_StartSound("world/mapstart",CHAN_AUTO);
 		//spawn gold randomly in secret areas:
 		//iterate throguh sectors:
@@ -218,18 +234,12 @@ Class PK_MainHandler : EventHandler {
 			}
 		}
 	}
-	//push stuff into arrays:
+	
+	//add controllers for Demon Mode, Haste and Confusion effects:
 	override void WorldThingspawned (worldevent e) {
 		let act = e.thing;		
 		if (!act)
 			return;
-		//players need control items for demon morph and cards
-		if (act.player) {
-			if  (!act.FindInventory("PK_DemonMorphControl"))
-				act.GiveInventory("PK_DemonMorphControl",1);
-			if  (!act.FindInventory("PK_CardControl"))
-				act.GiveInventory("PK_CardControl",1);			
-		}
 		//this is only used by the HUD compass:
 		if (act.bISMONSTER && !act.bFRIENDLY)
 			allenemies.push(act);
@@ -250,7 +260,7 @@ Class PK_MainHandler : EventHandler {
 		if (!act || !act.bISMONSTER)
 			return;		
 		allenemies.push(act);
-	}		
+	}
 	//spawn death effects on monster death and also delete them from the monster array
 	override void WorldThingDied(worldevent e) {
 		let act = e.thing;
@@ -260,15 +270,24 @@ Class PK_MainHandler : EventHandler {
 		let edc = PK_EnemyDeathControl(Actor.Spawn("PK_EnemyDeathControl",act.pos));
 		if (edc)
 			edc.master = act;
+		//spawn some gold from the corpse:
 		int goldchance = random[gold](0,3);
 		int mh = abs(act.health);
-		//console.printf("%s health: -%d",act.GetClassName(),mh);
-		if (mh >= act.SpawnHealth() || mh >= act.gibhealth)
+		//increase chance of gold if the monster was gibbed:
+		bool gibbed = (mh >= act.SpawnHealth() || (act.gibhealth > 0 && mh >= act.gibhealth));
+		if (gibbed)
 			goldchance = Clamp(goldchance * 3,3,10);
+		//console.printf("%s health: -%d | spawn health: %d | gibhealth: %d | goldchance: %d",act.GetClassName(),mh,act.SpawnHealth(),act.gibhealth,goldchance);
+		double zofs = act.default.health;
 		for (int i = goldchance; i > 0; i--) {
-			let gg = Actor.Spawn("PK_GoldCoin",act.pos + (0,0,frandom[sfx](16,48)));
+			let gg = Actor.Spawn("PK_GoldCoin",act.pos + (0,0,zofs*frandom[gold](0.8,1.2)));
 			if (gg)
-				gg.vel = (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](2,6));
+				gg.vel = (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](2,5));
+		}
+		if (gibbed) {
+			let gg = Actor.Spawn("PK_MedGold",act.pos + (0,0,zofs*frandom[gold](0.8,1.2)));
+			if (gg)
+				gg.vel = (frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](1,4));
 		}
 	}
 	override void WorldThingDestroyed(WorldEvent e) {
@@ -277,6 +296,60 @@ Class PK_MainHandler : EventHandler {
 			demontargets.delete(demontargets.Find(act));
 			allenemies.delete(allenemies.Find(act));
 			//console.printf("Deleting %s from demontargets",act.GetClassName());
+		}
+	}
+	
+	//players need control items for demon morph, cards and item replacement handling:
+	override void PlayerSpawned(PlayerEvent e) {
+		if (!PlayerInGame[e.PlayerNumber])
+			return;
+		let plr = players[e.PlayerNumber].mo;
+		if (!plr)
+			return;
+		if  (!plr.FindInventory("PK_DemonMorphControl"))
+			plr.GiveInventory("PK_DemonMorphControl",1);
+		if  (!plr.FindInventory("PK_CardControl"))
+			plr.GiveInventory("PK_CardControl",1);
+		if (!plr.FindInventory("PK_InvReplacementControl"))
+			plr.GiveInventory("PK_InvReplacementControl",1);
+		/*let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		if (cardcontrol) {
+			cardcontrol.RefreshCards();
+			if (pk_debugmessages)
+				console.printf("New map start: Refreshing cards for player %d. Gold Uses left: %d",plr.PlayerNumber(),cardcontrol.goldUses);
+		}
+		else if (pk_debugmessages)
+			console.printf("Player %d doesn't have PK_CardControl",plr.PlayerNumber());*/
+	}
+	void StopPlayerGoldenCards(PlayerInfo player) {
+		if (!player || !player.mo)
+			return;
+		let plr = player.mo;		
+		if (plr && plr.FindInventory("PK_CardControl")) {
+			let control = PK_CardControl(plr.FindInventory("PK_CardControl"));
+			if (control)
+				control.StopGoldenCards();
+		}
+	}
+	override void PlayerDied (PlayerEvent e) {
+		StopPlayerGoldenCards(players[e.PlayerNumber]);
+	}
+	override void PlayerDisconnected (PlayerEvent e) {
+		StopPlayerGoldenCards(players[e.PlayerNumber]);
+	}
+	override void WorldUnloaded (WorldEvent e) {
+		for (int pn = 0; pn < MAXPLAYERS; pn++) {
+			if (!playerInGame[pn])
+				continue;
+			PlayerInfo plr = players[pn];
+			if (!plr || !plr.mo)
+				continue;
+			let control = PK_CardControl(plr.mo.FindInventory("PK_CardControl"));
+			if (control) {
+				control.StopGoldenCards();
+				if (pk_debugmessages)
+					console.printf("Stopping golden cards for player %d",pn);
+			}
 		}
 	}
 }
@@ -316,13 +389,7 @@ Class PK_ReplacementHandler : EventHandler {
 	}
 	
 	override void WorldThingSpawned(WorldEvent e) {
-		if (!e.thing)
-			return;
-		if (e.thing.player) {
-			if (!e.thing.FindInventory("PK_InvReplacementControl"))
-				e.thing.GiveInventory("PK_InvReplacementControl",1);
-		}
-		if (e.thing is "Weapon") {
+		if (e.thing && e.thing is "Weapon") {
 			Class<Weapon> weap = (Class<Weapon>)(e.thing.GetClass());
 			if (weap && mapweapons.Find(weap) != mapweapons.Size())
 				mapweapons.Push(e.thing);
@@ -335,17 +402,6 @@ Class PK_BoardEventHandler : EventHandler {
 	ui bool allowOpenBoard; //if false, the board won't open (to block openmenu CCMD, since I only want the menu to be openable with a netevent
 	
 	bool SoulKeeper;
-	array <Ammo> ammopickups;
-	
-	override void WorldThingSpawned(Worldevent e) {
-		if (!e.thing)
-			return;		
-		/*if (e.thing && e.thing.player && e.thing.FindInventory("PK_CardControl"))
-			Menu.SetMenu("PKCardsMenu");*/
-		if (e.thing is "Ammo") {
-			ammopickups.Push(Ammo(e.thing));
-		}
-	}
 	
 	override void WorldThingDamaged(worldevent e) {
 		if (!e.thing)
@@ -373,8 +429,8 @@ Class PK_BoardEventHandler : EventHandler {
 		let plr = players[e.Player].mo;
 		if (!plr)
 			return;
-		let goldcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
-		if (!goldcontrol)
+		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		if (!cardcontrol)
 			return;
 		//card purchase: push the card into array, reduce current gold
 		if (e.name.IndexOf("PKCBuyCard") >= 0) {
@@ -383,13 +439,15 @@ Class PK_BoardEventHandler : EventHandler {
 			if (cardname.Size() == 0)
 				return;
 			//apparently, dynamic arrays are iffy, that's why we need int(name
-			goldcontrol.UnlockedTarotCards.Push(int(name(cardname[1])));
+			cardcontrol.UnlockedTarotCards.Push(int(name(cardname[1])));
 			int cost = e.args[0];
-			goldcontrol.pk_gold = Clamp(goldcontrol.pk_gold - cost,0,99990);
+			cardcontrol.pk_gold = Clamp(cardcontrol.pk_gold - cost,0,99990);
+			if (pk_debugmessages)
+				console.printf("buying card %s at %d",name(cardname[1]),cost);
 		}
 		if (e.name == 'PKCTakeGold') {
 			int cost = e.args[0];
-			goldcontrol.pk_gold = Clamp(goldcontrol.pk_gold - cost,0,99990);
+			cardcontrol.pk_gold = Clamp(cardcontrol.pk_gold - cost,0,99990);
 		}
 		//equip card into a slot
 		if (e.name.IndexOf("PKCCardToSlot") >= 0) {
@@ -398,16 +456,16 @@ Class PK_BoardEventHandler : EventHandler {
 			if (cardname.Size() == 0)
 				return;
 			int slotID = e.args[0];
-			goldcontrol.EquippedSlots[slotID] = cardname[1];
+			cardcontrol.EquippedSlots[slotID] = cardname[1];
 		}
 		//remove card from slot
 		if (e.name == 'PKCClearSlot') {
 			int slotID = e.args[0];
-			goldcontrol.EquippedSlots[slotID] = '';
+			cardcontrol.EquippedSlots[slotID] = '';
 		}
 		if (e.name == 'PKCCloseBoard') {
 			//console.printf("trying to initalize card slots");
-			goldcontrol.PK_EquipCards();
+			cardcontrol.PK_EquipCards();
 		}
 	}
 }
