@@ -6,7 +6,7 @@ Class PK_Stakegun : PKWeapon {
 		weapon.ammouse1		1;
 		weapon.ammogive1	10;
 		weapon.ammotype2	"PK_GrenadeAmmo";
-		weapon.ammogive2	0;
+		weapon.ammogive2	2;
 		weapon.ammouse2		1;
 		scale 0.23;
 		inventory.pickupmessage "$PKI_STAKEGUN";

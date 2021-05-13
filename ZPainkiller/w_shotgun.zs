@@ -7,7 +7,7 @@ Class PK_Shotgun : PKWeapon {
 		weapon.ammogive1 20;
 		weapon.ammouse1  1;
 		weapon.ammotype2 "PK_FreezerAmmo";
-		weapon.ammogive2 0;
+		weapon.ammogive2 5;
 		weapon.ammouse2 1;
 		scale 0.23;
 		inventory.pickupmessage "$PKI_SHOTGUN";

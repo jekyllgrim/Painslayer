@@ -10,7 +10,7 @@ Class PK_Boltgun : PKWeapon {
 		weapon.ammouse1		5;
 		weapon.ammogive1	40;
 		weapon.ammotype2	"PK_BombAmmo";
-		weapon.ammogive2	0;
+		weapon.ammogive2	10;
 		weapon.ammouse2		10;
 		scale 0.23;
 		inventory.pickupmessage "$PKI_BOLTGUN";
