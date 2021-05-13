@@ -1,3 +1,21 @@
+Class PK_InventoryToken : Inventory abstract {
+	protected int age;
+	Default {
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+		+INVENTORY.PERSISTENTPOWER;
+		inventory.amount 1;
+		inventory.maxamount 1;
+	}
+	override void DoEffect() {
+		super.DoEffect();
+		if (owner && !owner.isFrozen())
+			age++;
+	}
+	override void Tick() {}
+}
+
 Class PK_InvReplacementControl : Inventory {
 	Default {
 		+INVENTORY.UNDROPPABLE
@@ -201,8 +219,10 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		if (GetAge() % 10 == 0) {
 			if (CheckPlayerSights() && !gleam && frandom[sfx](1,10) > 9) {
 				gleam = PK_GoldGleam(Spawn("PK_GoldGleam",pos+(0,0,frandom(2,height))));
-				if (gleam)
+				if (gleam) {
 					gleam.scale *= frandom[sfx](1,1.4);
+					gleam.master = self;
+				}
 			}
 		}
 	}
@@ -214,6 +234,7 @@ Class PK_GoldPickup : PK_Inventory abstract {
 }
 
 Class PK_GoldGleam : PK_BaseFlare {
+	vector3 masterofs;
 	private int scaledir;
 	Default {
 		renderstyle 'Translucent';
@@ -223,7 +244,17 @@ Class PK_GoldGleam : PK_BaseFlare {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
+		if (!master) {
+			Destroy();
+			return;
+		}
+		masterOfs = master.pos - pos;
 		scaledir = 1;
+	}
+	override void Tick() {
+		super.Tick();
+		if (master)
+			SetOrigin(master.pos - masterOfs,false);
 	}
 	states {
 	Spawn:
@@ -243,9 +274,12 @@ Class PK_GoldCoin : PK_GoldPickup {
 	double broll;
 	Default {
 		inventory.amount 5;
-		height 2;
-		inventory.pickupsound "pickups/gold/small";
+		+INVENTORY.NOSCREENFLASH
+		height 4;
+		inventory.pickupsound "pickups/gold/coin";
+		bouncesound "pickups/gold/coindrop";
 		bouncetype 'Doom';
+		bouncecount 4;
 		+MISSILE
 		+ROLLSPRITE
 		+ROLLCENTER
@@ -256,6 +290,7 @@ Class PK_GoldCoin : PK_GoldPickup {
 		super.PostBeginPlay();
 		roll = frandom[sfx](0,359);
 		broll = frandom[sfx](2,6) * randompick[sfx](-1,1);
+		bouncefactor *= frandom[gold](0.7,1);
 	}
 	States {
 	Spawn:
@@ -263,11 +298,9 @@ Class PK_GoldCoin : PK_GoldPickup {
 		loop;
 	Death:
 		TNT1 A 0 { roll = randompick[sfx](-90,90); }
-		PGLC ABCD 1;
-		PGLC EFGH 2;
-		PGLC ABC 2;
-		PGLC DEF 3;
-		PGLC GGGGG 1 { roll *= 0.5; }
+		PGLC ABC 1;
+		PGLC DEF 2;
+		PGLC GGGG 1 { roll *= 0.5; }
 		PGLC G -1 { roll = 0; }
 		stop;
 	}
@@ -321,9 +354,9 @@ Class PK_VeryBigGold : PK_GoldPickup {
 	}
 }
 
-//////////////////////////
-// ENEMY SOULS (healing //
-//////////////////////////
+///////////////////////////
+// ENEMY SOULS (healing) //
+///////////////////////////
 
 /*	Enemies spawn souls that will heal the player.
 	The amount healed is based on the monster's spawnhealth
