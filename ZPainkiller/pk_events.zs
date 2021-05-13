@@ -1,4 +1,41 @@
 Class PK_MainHandler : EventHandler {
+
+	/*ui void Test_CheckWeaponInInventory(Class<Weapon> weap, double x, double y) {
+		if (!weap)
+			return;
+		let plr = players[0].mo;
+		if (!plr)
+			return;
+		let wweap = plr.FindInventory(weap);
+		bool has = wweap ? true : false;
+		int amt = wweap ? wweap.amount : -1;
+		string wname = weap.GetClassName();
+		if (wweap && wweap.GetTag()) wname = wweap.GetTag();
+		double xofs = x;
+		Screen.DrawText(bigfont,Font.CR_Red,xofs,y,wname);
+		xofs += 240;
+		if (has) {
+			Screen.DrawText(bigfont,Font.CR_Green,xofs,y," in inventory"); xofs += 144;
+			Screen.DrawText(bigfont,Font.CR_White,xofs,y," | amount: "); xofs += 128;
+			Screen.DrawText(bigfont,Font.CR_Green,xofs,y,String.Format("%d",amt));
+		}
+		else
+			Screen.DrawText(bigfont,Font.CR_White,xofs,y," none");
+	}
+	override void RenderOverlay(renderEvent e) {
+		if (!pk_debugmessages)	
+			return;
+		double tx = 2000;
+		double ty = 200;
+		double parag = 16;
+		Test_CheckWeaponInInventory("PK_Painkiller",tx,ty); ty += parag;
+		Test_CheckWeaponInInventory("PK_Shotgun",tx,ty); ty += parag;
+		Test_CheckWeaponInInventory("PK_Stakegun",tx,ty); ty += parag;
+		Test_CheckWeaponInInventory("PK_Boltgun",tx,ty); ty += parag;
+		Test_CheckWeaponInInventory("PK_Chaingun",tx,ty); ty += parag;
+		Test_CheckWeaponInInventory("PK_Rifle",tx,ty); ty += parag;
+		Test_CheckWeaponInInventory("PK_Electrodriver",tx,ty); ty += parag;
+	}*/
 	
 	array <Actor> demontargets; //holds all monsters, players and enemy projectiles
 	array <Actor> allenemies; //only monsters
@@ -26,8 +63,9 @@ Class PK_MainHandler : EventHandler {
 		"$PKCH_TAKEGOLD2"
 	};
 	
-	//returns true if ANY of the players has the item:
-	static bool CheckPlayersHave(Class<Inventory> itm) {
+	//returns true if ANY of the players has the item
+	//(unless checkall is true, then it returns true if ALL have it)
+	static bool CheckPlayersHave(Class<Inventory> itm, bool checkall = false) {
 		if(!itm)
 			return false;
 		for (int pn = 0; pn < MAXPLAYERS; pn++) {
@@ -36,7 +74,14 @@ Class PK_MainHandler : EventHandler {
 			PlayerInfo plr = players[pn];
 			if (!plr || !plr.mo)
 				continue;
-			if (plr.mo.FindInventory(itm)) {		
+			bool found = plr.mo.CountInv(itm);
+			if (checkall && !found) {
+				if (pk_debugmessages > 1)
+					console.printf("Player %d doesn't have %s",plr.mo.PlayerNumber(),itm.GetClassName());
+				return false;
+				break;
+			}
+			else if (found) {
 				if (pk_debugmessages > 1)
 					console.printf("Player %d has %s",plr.mo.PlayerNumber(),itm.GetClassName());
 				return true;
@@ -136,7 +181,7 @@ Class PK_MainHandler : EventHandler {
 			
 			if (secsize < 24)
 				continue;
-			int goldnum = Clamp((secSize / 72),1,7);
+			int goldnum = Clamp((secSize / 72.),1,10);
 
 			for (int i = goldnum; i > 0; i--) {
 				int chance = random[gold](0,100);
@@ -152,6 +197,7 @@ Class PK_MainHandler : EventHandler {
 					continue;
 				//throw gold around randomly
 				goldPickup.VelFromAngle(frandom[gold](1,3),random[gold](0,359));
+				//console.printf("goldpickup bDROPPED: %d",goldpickup.bDROPPED);
 			}
 			for (int i = random[moregold](1,4); i > 0; i--) {
 				actor goldPickup = actor.Spawn("PK_SmallGold",cCenter);
@@ -213,24 +259,25 @@ Class PK_MainHandler : EventHandler {
 }
 
 Class PK_ReplacementHandler : EventHandler {
+	array < Class<Weapon> > mapweapons;
 	override void CheckReplacement (ReplaceEvent e) {
 		switch (e.Replacee.GetClassName()) {
-			case 'Chainsaw' 		: e.Replacement = 'PK_MegaSoul'; 			break;
-			case 'Shotgun'			: e.Replacement = 'PK_StakeGun'; 			break;
-			case 'SuperShotgun' 	: e.Replacement = 'PK_BoltGun';			break;
-			case 'Chaingun' 		: e.Replacement = 'PK_Chaingun'; 			break;
-			case 'RocketLauncher'	: e.Replacement = 'PK_Chaingun'; 			break;
-			case 'PlasmaRifle' 	: e.Replacement = 'PK_Rifle';				break;
-			case 'BFG9000' 		: e.Replacement = 'PK_Electrodriver';		break;
+			case 'Chainsaw' 		: e.Replacement = 'PK_BaseWeaponSpawner_Chainsaw'; 			break;
+			case 'Shotgun'			: e.Replacement = 'PK_BaseWeaponSpawner_Shotgun'; 			break;
+			case 'SuperShotgun' 	: e.Replacement = 'PK_BaseWeaponSpawner_SuperShotgun';			break;
+			case 'Chaingun' 		: e.Replacement = 'PK_BaseWeaponSpawner_Chaingun'; 			break;
+			case 'RocketLauncher'	: e.Replacement = 'PK_BaseWeaponSpawner_RocketLauncher'; 			break;
+			case 'PlasmaRifle' 	: e.Replacement = 'PK_BaseWeaponSpawner_PlasmaRifle';				break;
+			case 'BFG9000' 		: e.Replacement = 'PK_BaseWeaponSpawner_BFG9000';		break;
 			
-			case 'Clip' 			: e.Replacement = 'PK_BaseAmmoSpawner_Clip';			break;
-			case 'ClipBox' 		: e.Replacement = 'PK_BaseAmmoSpawner_ClipBox';		break;
-			case 'Shell' 			: e.Replacement = 'PK_BaseAmmoSpawner_Shell';		break;
-			case 'ShellBox' 		: e.Replacement = 'PK_BaseAmmoSpawner_ShellBox';		break;
-			case 'RocketAmmo' 		: e.Replacement = 'PK_BaseAmmoSpawner_RocketAmmo';		break;
-			case 'RocketBox' 		: e.Replacement = 'PK_BaseAmmoSpawner_RocketAmmo';		break;
-			case 'Cell' 			: e.Replacement = 'PK_BaseAmmoSpawner_Cell';		break;
-			case 'CellPack' 		: e.Replacement = 'PK_BaseAmmoSpawner_CellPack';	break;
+			case 'Clip' 			: e.Replacement = 'PK_EquipmentSpawner_Clip';			break;
+			case 'ClipBox' 		: e.Replacement = 'PK_EquipmentSpawner_ClipBox';		break;
+			case 'Shell' 			: e.Replacement = 'PK_EquipmentSpawner_Shell';		break;
+			case 'ShellBox' 		: e.Replacement = 'PK_EquipmentSpawner_ShellBox';		break;
+			case 'RocketAmmo' 		: e.Replacement = 'PK_EquipmentSpawner_RocketAmmo';		break;
+			case 'RocketBox' 		: e.Replacement = 'PK_EquipmentSpawner_RocketBox';		break;
+			case 'Cell' 			: e.Replacement = 'PK_EquipmentSpawner_Cell';		break;
+			case 'CellPack' 		: e.Replacement = 'PK_EquipmentSpawner_CellPack';	break;
 
 			case 'Stimpack' 		: e.Replacement = 'PK_AmmoSpawner_Stimpack';	break;
 			case 'Medikit' 		: e.Replacement = 'PK_AmmoSpawner_Stimpack';	break;
@@ -246,9 +293,16 @@ Class PK_ReplacementHandler : EventHandler {
 	}
 	
 	override void WorldThingSpawned(WorldEvent e) {
-		if (e.thing && e.thing.player) {
+		if (!e.thing)
+			return;
+		if (e.thing.player) {
 			if (!e.thing.FindInventory("PK_InvReplacementControl"))
 				e.thing.GiveInventory("PK_InvReplacementControl",1);
+		}
+		if (e.thing is "Weapon") {
+			Class<Weapon> weap = (Class<Weapon>)(e.thing.GetClass());
+			if (weap && mapweapons.Find(weap) != mapweapons.Size())
+				mapweapons.Push(e.thing);
 		}
 	}
 }
