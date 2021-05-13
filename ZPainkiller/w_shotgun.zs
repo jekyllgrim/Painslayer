@@ -74,15 +74,15 @@ Class PK_Shotgun : PKWeapon {
 		}
 		PSHF FGHI 4 {
 			A_WeaponOffset(-0.4, 0.4,WOF_ADD);
-			PK_WeaponReady(WRF_NOSECONDARY|WRF_DISABLESWITCH|WRF_NOBOB);
+			PK_WeaponReady(WRF_NOSECONDARY|WRF_NOBOB);
 		}
 		PSHF JKLM 4 {
 			A_WeaponOffset( 0.4,-0.4,WOF_ADD);
-			PK_WeaponReady(WRF_NOSECONDARY|WRF_DISABLESWITCH|WRF_NOBOB);
+			PK_WeaponReady(WRF_NOSECONDARY|WRF_NOBOB);
 		}
 		PSHF EDCB 2 {
 			A_WeaponOffset( 1,  -1.2,WOF_ADD);
-			PK_WeaponReady(WRF_NOSECONDARY|WRF_DISABLESWITCH|WRF_NOBOB);
+			PK_WeaponReady(WRF_NOSECONDARY|WRF_NOBOB);
 		}
 		PSHT A 1 A_WeaponOffset(0,32,WOF_INTERPOLATE);
 		TNT1 A 0 A_ReFire();			
@@ -253,8 +253,13 @@ Class PK_FreezeControl : PK_InventoryToken {
 	bool grav;
 	override void ModifyDamage (int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
 		if (damage > 0 && inflictor && owner && passive) {
+			//reduces fire damage:
 			if (damagetype == 'Fire')
 				newdamage = damage * 0.5;
+			//x1.5 damage if hitting with a shotgun blast:
+			else if (source && source.player && source.player.readyweapon && source.player.readyweapon is "PK_Shotgun")
+				newdamage = damage * 1.5;
+			//for all other weapons x1.25 damage:
 			else
 				newdamage = damage*1.25;
 		}
