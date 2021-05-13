@@ -21,7 +21,6 @@ Class PK_Rifle : PKWeapon {
 		inventory.pickupmessage "$PKI_RIFLEAMMO";
 		inventory.pickupsound "pickups/weapons/rifle";
 		Tag "$PK_RIFLE_TAG";
-		+WEAPON.NOAUTOFIRE
 	}
 	action void StartStrapSwing(double rfactor = 1.0) {
 		if (!player)
