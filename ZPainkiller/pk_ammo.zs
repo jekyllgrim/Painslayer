@@ -371,7 +371,7 @@ Class PK_EquipmentSpawner_ClipBox : PK_EquipmentSpawner_Clip {
 Class PK_EquipmentSpawner_Shell : PK_EquipmentSpawner {
 	Default {
 		PK_EquipmentSpawner.weapon1 "PK_Shotgun";
-		PK_EquipmentSpawner.secondaryChance 40;
+		PK_EquipmentSpawner.secondaryChance 25;
 		PK_EquipmentSpawner.weapon2 "PK_Stakegun";
 		PK_EquipmentSpawner.secondaryChance2 25;
 	}
