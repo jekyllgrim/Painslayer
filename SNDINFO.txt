@@ -315,6 +315,14 @@ pickups/armor/gold			"sounds/items/item-shield-big.wav"
 
 // GOLD
 
+$random pickups/gold/coindrop { coindrop1 coindrop2 coindrop3 coindrop4 }
+$attenuation pickups/gold/coindrop 5
+$volume pickups/gold/coindrop 0.8
+coindrop1 "sounds/items/gold/coindrop1.mp3"
+coindrop2 "sounds/items/gold/coindrop2.mp3"
+coindrop3 "sounds/items/gold/coindrop3.mp3"
+coindrop4 "sounds/items/gold/coindrop4.mp3"
+$alias pickups/gold/coin pickups/gold/coindrop
 $random pickups/gold/small	{ goldsmall1 goldsmall2 }
 $random pickups/gold/med	{ goldmed1 goldmed2 }
 $random pickups/gold/big	{ goldbig1 goldbig2 }
