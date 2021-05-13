@@ -20,11 +20,11 @@ Class PK_InvReplacementControl : Inventory {
 	static const Class<Weapon> pkWeapons[] = {
 		"PK_Painkiller",
 		"PK_Painkiller",
+		"PK_Painkiller",
 		"PK_Shotgun",
 		"PK_Stakegun",
+		"PK_Chaingun",
 		"PK_Boltgun",
-		"PK_Chaingun",
-		"PK_Chaingun",
 		"PK_Rifle",
 		"PK_Electrodriver"
 	};
@@ -69,7 +69,7 @@ Class PK_InvReplacementControl : Inventory {
 			owner.A_TakeInventory(oldweap);
 			if (pk_debugmessages) console.printf("Exchanging %s for %s",oldweap.GetClassName(),newweap.GetClassName());
 			if (!owner.CountInv(newweap)) {
-				owner.A_GiveInventory(newweap);
+				owner.A_GiveInventory(newweap,1);
 				/*
 				//create a copy that won't give any ammo and attach it to the player
 				let wp = Weapon(Spawn(newweap));
@@ -94,7 +94,7 @@ Class PK_InvReplacementControl : Inventory {
 	}
     override bool HandlePickup (Inventory item) {
         let oldItemClass = item.GetClassName();
-        Class<Inventory> replacement = null;
+        Class<Inventory> replacement =  null;
 		for (int i = 0; i < ALLWEAPONS; i++) {
 			if (pkWeapons[i] && oldItemClass == vanillaWeapons[i]) {
 				replacement = pkWeapons[i];
@@ -107,12 +107,17 @@ Class PK_InvReplacementControl : Inventory {
 				break;
 			}
 		}
-        if (!replacement)
-            return false;
+        if (!replacement) {
+			if (pk_debugmessages > 1)
+				console.printf("%s doesn't need replacing, giving as is",oldItemClass);
+			return super.HandlePickup(item);
+		}
 		int r_amount = GetDefaultByType(replacement).amount;
         item.bPickupGood = true;
         owner.A_GiveInventory(replacement,r_amount);
-		if (pk_debugmessages) console.printf("Replacing %s with %s (amount: %d)",oldItemClass,replacement.GetClassName(),r_amount);
+		if (pk_debugmessages) {
+			console.printf("Replacing %s with %s (amount: %d)",oldItemClass,replacement.GetClassName(),r_amount);
+		}
         return true;
     }
 }
@@ -159,11 +164,11 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		inventory.amount 1;
 		inventory.pickupmessage "";
 	}
-	override void PostBeginPlay() {
+	/*override void PostBeginPlay() {
 		super.PostBeginPlay();
 		if (bDROPPED)
 			A_StartSound(pickupsound);
-	}
+	}*/
 	override bool TryPickup (in out Actor other) {
 		if (!(other is "PlayerPawn"))
 			return false;
@@ -592,6 +597,11 @@ Class PK_WeaponModifier : PK_PowerUp {
 				startalphaf:0.9,sizestep:-0.2
 			);
 		}
+	}
+	override bool TryPickup (in out Actor other) {
+		if (other is "PlayerPawn")
+			other.GiveBody(100,100);
+		return super.TryPickup(other);
 	}
 	states {
 	Spawn:
