@@ -7,9 +7,9 @@ Class PK_Shells : Ammo {
 		inventory.pickupmessage "$PKI_SHELLS";
 		inventory.pickupsound "pickups/ammo/shells";
 		inventory.icon "pkhshell";
-		inventory.amount 8;
+		inventory.amount 12;
 		inventory.maxamount 100;
-		ammo.backpackamount 8;
+		ammo.backpackamount 12;
 		ammo.backpackmaxamount 100;
 		xscale 0.3;
 		yscale 0.25;
@@ -140,9 +140,9 @@ Class PK_RifleBullets : Ammo {
 		inventory.pickupmessage "$PKI_RIFLEAMMO";
 		inventory.pickupsound "pickups/ammo/riflebullets";
 		inventory.icon "pkhmag";
-		inventory.amount 30;
+		inventory.amount 25;
 		inventory.maxamount 250;
-		ammo.backpackamount 30;
+		ammo.backpackamount 25;
 		ammo.backpackmaxamount 250;
 		scale 0.4;
 	}
