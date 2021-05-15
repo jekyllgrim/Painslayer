@@ -22,6 +22,18 @@ Class PK_Rifle : PKWeapon {
 		inventory.pickupsound "pickups/weapons/rifle";
 		Tag "$PK_RIFLE_TAG";
 	}
+	action void FireFlameThrower() {		
+		let flm = PK_FlameThrowerFlame(A_FireProjectile("PK_FlameThrowerFlame",angle:frandom[flt](-3,3),useammo:false, spawnofs_xy:3,spawnheight:4,pitch:frandom[flt](-3,3)));	
+		if (flm) {
+			flm.realspeed = 7.2;
+			flm.addvel = true;
+			if (invoker.hasWmod) {
+				flm.scale *= 1.5;
+				flm.realspeed *= 1.5;
+				flm.A_SetSize(flm.radius * 1.2, flm.height * 1.2);
+			}
+		}
+	}
 	action void StartStrapSwing(double rfactor = 1.0) {
 		if (!player)
 			return;
@@ -118,12 +130,11 @@ Class PK_Rifle : PKWeapon {
 		TNT1 A 0 A_Raise();
 		wait;
 	Ready:
-		PKRI A 5 {
-			console.printf("ammo optional (main: %d alt: %d) | refire: %d",invoker.bAMMO_OPTIONAL,invoker.bALT_AMMO_OPTIONAL,player.refire);
+		PKRI A 1 {
 			int fflags = 0;			
 			if (waterlevel > 2)
 				fflags |= WRF_NOSECONDARY;
-			else {
+			else if (invoker.ammo2.amount > 0) {
 				A_Overlay(PSP_HIGHLIGHTS,"PilotHighlights",nooverride:true);
 				A_Overlay(RIFLE_PILOT,"PilotLightHandle",nooverride:true);
 			}
@@ -161,7 +172,7 @@ Class PK_Rifle : PKWeapon {
 		TNT1 A 0 {
 			PK_FireArchingProjectile("PK_FlamerTank",spawnofs_xy:1,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
 			A_StartSound("weapons/edriver/diskshot",CHAN_5);
-			//A_StartSound("weapons/gastank/fire",CHAN_6);
+			//A_StartSound("weapons/gastank/fire",CH_LOOP);
 		}
 		PKRI AAA 2 {
 			PK_RifleScale(0.1,0.1);
@@ -237,13 +248,13 @@ Class PK_Rifle : PKWeapon {
 				if (!infin)
 					TakeInventory(invoker.ammotype2,50);
 				A_ClearRefire();
-				A_StopSound(CHAN_6);
+				A_StopSound(CH_LOOP);
 				return ResolveState("ComboFire");
 			}
 			if (!infin) {
 				invoker.fuelDepleteRate++;
 				int req = invoker.hasDexterity ? 1 : 3;
-				if (invoker.fuelDepleteRate > req) {				
+				if (invoker.fuelDepleteRate > req) {
 					invoker.fuelDepleteRate = 0;
 					if (invoker.ammo2.amount >= 1 && !infin)
 						TakeInventory(invoker.ammotype2,1);
@@ -253,35 +264,29 @@ Class PK_Rifle : PKWeapon {
 				}
 			}	
 			A_Overlay(PSP_HIGHLIGHTS,"FlameHighlights");
-			PK_AttackSound("weapons/rifle/flameloop",CHAN_6,flags:CHANF_LOOPING);
+			PK_AttackSound("weapons/rifle/flameloop",CH_LOOP,flags:CHANF_LOOPING);
 			DampedRandomOffset(3,3,3);
 			if (invoker.fireFrame >= 8)
 				invoker.fireFrame = 0;
 			invoker.fireFrame++;
 			A_Overlay(-30 + invoker.fireFrame,"FireFlash");
-			let flm = PK_FlameThrowerFlame(A_FireProjectile("PK_FlameThrowerFlame",angle:frandom[flt](-3,3),spawnofs_xy:3,spawnheight:4,pitch:frandom[flt](-3,3)));	
-			if (flm) {
-				flm.realspeed = 7.2;
-				flm.addvel = true;
-				if (invoker.hasWmod) {
-					flm.scale *= 1.5;
-					flm.realspeed *= 1.5;
-					flm.A_SetSize(flm.radius * 1.2, flm.height * 1.2);
-				}
-			}
+			FireFlameThrower();
 			return ResolveState(null);
 		}
 		TNT1 A 0 {
+			if (CountInv(invoker.ammotype2) <= 0)
+				return ResolveState("AltHoldEnd");
 			if (waterlevel > 2)
 				A_ClearRefire();
 			else
 				A_ReFire();
+			return ResolveState(null);
 		}
 	AltHoldEnd:
 		TNT1 A 0 {
 			A_ClearRefire();
 			A_RemoveLight('PKWeaponlight');
-			A_StopSound(CHAN_6);
+			A_StopSound(CH_LOOP);
 			A_StartSound("weapons/rifle/flameend",CHAN_7);
 		}
 		goto ready;
@@ -331,8 +336,8 @@ Class PK_Rifle : PKWeapon {
 		}
 		wait;
 	PilotLightHandle:
-		PFLF A 2 bright {
-			if (waterlevel > 1) {
+		PFLF A 2 bright {			
+			if (waterlevel > 1 || invoker.ammo2.amount <= 0) {
 				A_ClearOverlays(-36,-30);
 				return ResolveState("Null");
 			}
