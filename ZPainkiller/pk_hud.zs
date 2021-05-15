@@ -39,7 +39,15 @@ Class PainkillerHUD : BaseStatusBar {
 		fullscreenOffsets = true;
 	}
 	
+	void DrawMonsterArrow(double ascale = 2., vector2 apos = (960,92), vector2 shadowofs = (0,0)) {
+		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos,rotation:arrowangle,scale:(ascale,ascale),tint:color(256,0,0,0));	//dark arrow outline
+		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos,rotation:arrowangle,scale:(ascale,ascale)*0.8);	//arrow
+		if (shadowofs != (0,0))
+			PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos + shadowofs,rotation:arrowangle,scale:(ascale,ascale),alpha:0.45,tint:color(256,48,0,0));
+	}
+	
 	override void Tick() {
+		super.Tick();
 		let player = CPlayer.mo;
 		if (!player)
 			return;
@@ -151,8 +159,7 @@ Class PainkillerHUD : BaseStatusBar {
 			//draw compass at bottom center
 			DrawImage("pkxtop0",(0,4),DI_SCREEN_BOTTOM|DI_SCREEN_HCENTER|DI_ITEM_BOTTOM);
 			//draw arrow and outline (shadow and glass are skipped in this version for simplicity)
-			PK_StatusBarScreen.DrawRotatedImage("pkxarrow",(960,988),rotation:arrowangle,scale:(1.8,1.8),tint:color(256,0,0,0));	//dark arrow outline
-			PK_StatusBarScreen.DrawRotatedImage("pkxarrow",(960,988),rotation:arrowangle,scale:(1.4,1.4));	//arrow		
+			DrawMonsterArrow(1.4,(960,988));	
 		
 			//gold counter above health:
 			DrawImage("pkhgold",(5,-38),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER);
@@ -189,9 +196,7 @@ Class PainkillerHUD : BaseStatusBar {
 		//draw the compass background:
 		DrawImage("pkxtop0",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);
 		//draw the compass arrow (in 3 layers):
-		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",(960,92),rotation:arrowangle,scale:(2,2),tint:color(256,0,0,0));	//dark arrow outline
-		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",(966,105),rotation:arrowangle,scale:(2,2),alpha:0.45,tint:color(256,48,0,0)); //arrow shadow
-		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",(960,92),rotation:arrowangle,scale:(1.6,1.6));	//arrow
+		DrawMonsterArrow(ascale: 1.75, shadowofs: (5,10));
 		
 		//draw the top bar and the compass outline:
 		DrawImage("pkxtop1",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);	//main top
