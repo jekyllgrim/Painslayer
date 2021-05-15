@@ -324,6 +324,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 			owner.gravity = 0.4;
 			//owner.vel = (frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](3,6));
 			owner.vel *= 0.15;
+			owner.A_NoBlocking();
 			owner.A_SetScale(Clamp(owner.radius*0.04,0.1,1));
 			owner.SetOrigin(owner.pos + (0,0,owner.default.height*0.5),false);
 			owner.bSPRITEFLIP = random[sfx](0,1);
