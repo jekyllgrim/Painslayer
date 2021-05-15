@@ -22,8 +22,8 @@ Class PKWeapon : Weapon abstract {
 		weapon.BobSpeed 1.7;
 		weapon.upsound "weapons/select";
 		+FLOATBOB;
-		//+WEAPON.AMMO_OPTIONAL;
-		//+WEAPON.ALT_AMMO_OPTIONAL;
+		+WEAPON.AMMO_OPTIONAL;
+		+WEAPON.ALT_AMMO_OPTIONAL;
 		FloatBobStrength  0.3;
 		inventory.amount 1;
 		inventory.maxamount 1;
@@ -125,14 +125,14 @@ Class PKWeapon : Weapon abstract {
 			//console.printf("%s out of %s: have %d, needed %d",invoker.GetClassName(),invoker.ammo1.GetClassName(),invoker.ammo1.amount,invoker.ammouse1);
 			if (!(player.oldbuttons & BT_ATTACK))
 				A_StartSound(invoker.emptysound);
-			return;
+			flags |= WRF_NOPRIMARY;
 		}
 		if ((player.cmd.buttons & BT_ALTATTACK) && (!invoker.ammo2 || invoker.ammo2.amount < invoker.ammouse2)) {
 			A_ClearRefire();
 			//console.printf("%s out of %s: have %d, needed %d",invoker.GetClassName(),invoker.ammo2.GetClassName(),invoker.ammo2.amount,invoker.ammouse2);
 			if (!(player.oldbuttons & BT_ALTATTACK))
 				A_StartSound(invoker.emptysound);
-			return;
+			flags |= WRF_NOSECONDARY;
 		}
 		A_WeaponReady(flags);
 	}
@@ -144,6 +144,10 @@ Class PKWeapon : Weapon abstract {
 			TNT1 A 1;
 			loop;
 		Deselect:
+			TNT1 A 0 {
+				A_StopSound(CH_LOOP);
+				A_RemoveLight('PKWeaponlight');
+			}
 			TNT1 A 0 A_Lower();
 			wait;
 		Select:
@@ -548,8 +552,8 @@ Class PK_StakeProjectile : PK_Projectile {
 		if (bTHRUACTORS) {
 			//topz = CurSector.ceilingplane.ZAtPoint(pos.xy);
 			//botz = CurSector.floorplane.ZAtPoint(pos.xy);
-			//Destroy the stake if it's run into ceiling/floor by a moving sector (e.g. a door opened, pulled the stake up and pushed it into the ceiling):
-			if (pos.z >= ceilingz-height || pos.z <= floorz) {
+			//Destroy the stake if it's run into ceiling/floor by a moving sector (e.g. a door opened, pulled the stake up and pushed it into the ceiling). Only do this if the stake didn't actually hit a plane before that:
+			if (!hitplane && (pos.z >= ceilingz-height || pos.z <= floorz)) {
 				StakeBreak();
 				return;
 			}
