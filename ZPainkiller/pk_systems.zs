@@ -683,7 +683,8 @@ Class PKC_Blessing : PK_BaseSilverCard {
 		curHealth = owner.health;
 		let plr = owner.player.mo;
 		plr.BonusHealth = 50;
-		plr.GiveBody(150, 100); //Note that bonushealth gets automatically added to the second argument, so, to limit given health to 150, I actually have to use 100 because bonushealth is already 50 (I know, it's really weird)
+		if (plr.health >= 100)
+			plr.GiveBody(150, 100); //Note that bonushealth gets automatically added to the second argument, so, to limit given health to 150, I actually have to use 100 because bonushealth is already 50 (I know, it's really weird)
 	}	
 	override void RemoveCard() {
 		let plr = owner.player.mo;
