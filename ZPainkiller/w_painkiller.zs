@@ -197,31 +197,34 @@ Class PK_PainkillerPuff : PK_BulletPuff {
 		+NODAMAGETHRUST
 		+PUFFONACTORS
 	}
-	override void PostBeginPlay() {
-		PKPuff.PostBeginPlay();
-		if (target) {
-			angle = target.angle;
-			pitch = target.pitch;
-		}
-		FindLineNormal();
-		bool mod = (target && target.CountInv("PK_WeaponModifier"));
-		if (mod || (random[sfx](0,10) > 3)) {
-			let sprk = PK_RicochetBullet(Spawn("PK_RicochetBullet",pos));
-			if (sprk) {
-				sprk.vel = (hitnormal + (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](3,7)));
-				sprk.A_FaceMovementDirection();
-				sprk.scale *= 0.5;
-				sprk.alpha *= 0.5;
-				sprk.bBOUNCEONWALLS = false;
-				if (mod) {
-					sprk.A_SetRenderstyle(sprk.alpha,Style_AddShaded);
-					sprk.SetShade("FF4000");
+	states {
+	Crash:
+		TNT1 A 0 {
+			if (target) {
+				angle = target.angle;
+				pitch = target.pitch;
+			}
+			FindLineNormal();
+			let deb = Spawn("PK_RandomDebris",puffdata.Hitlocation + (0,0,debrisOfz));
+			if (deb)
+				deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
+			bool mod = (target && target.CountInv("PK_WeaponModifier"));
+			if (mod || (random[sfx](0,10) > 7)) {
+				let bull = PK_RicochetBullet(Spawn("PK_RicochetBullet",pos));
+				if (bull) {
+					bull.vel = (hitnormal + (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](-3,3)) * frandom[sfx](2,6));
+					bull.A_FaceMovementDirection();
+					if (mod) {
+						bull.A_SetRenderstyle(bull.alpha,Style_AddShaded);
+						bull.SetShade("FF2000");
+						//bull.scale *= 2;
+					}
 				}
 			}
 		}
-	}
-	states {
-	Spawn:
+		FLAR B 1 bright A_FadeOut(0.1);
+		wait;
+	Melee:
 		TNT1 A 1;
 		stop;
 	}
