@@ -339,6 +339,9 @@ Class PK_EquipmentSpawner : Actor {
 			if (secondaryChance2)
 				secondaryChance = secondaryChance2;
 		}
+		//ammo dropped by enemies should almost always be primary:
+		if (bDROPPED)
+			secondaryChance *= 0.25;
 		//finally, decide whether we need to spawn primary or secondary ammo:
 		class<Ammo> tospawn = (secondaryChance >= frandom[ammoSpawn](1,100)) ? ammo2toSpawn : ammo1toSpawn;
 		SpawnInvPickup(pos,tospawn);
