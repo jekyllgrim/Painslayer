@@ -437,10 +437,7 @@ Class PK_Soul : PK_Inventory {
 			return false;
 		let cont = PK_DemonMorphControl(other.FindInventory("PK_DemonMorphControl"));
 		if (cont)
-			cont.pk_souls += 1;
-		if (cont.pk_souls >= cont.pk_minsouls && !other.FindInventory("PK_DemonWeapon")) {
-			other.GiveInventory("PK_DemonWeapon",1);
-		}
+			cont.GiveSoul();
 		if (other.FindInventory("PKC_SoulRedeemer"))
 			amount *= 2;
 		other.GiveBody(Amount, MaxAmount);

@@ -141,6 +141,17 @@ Class PK_MainHandler : EventHandler {
 		if (e.name == "PK_RefreshCards") {		
 			cardcontrol.RefreshCards();
 		}
+		if (e.name == "PK_GiveSouls") {
+			int amt = (e.args[0] == 0) ? 1 : e.args[0];
+			let dmc = PK_DemonMorphControl(plr.FindInventory("PK_DemonMorphControl"));
+			if (dmc)
+				dmc.pk_souls += amt;
+		}
+		if (e.name == "PK_DemonMorph") {
+			let dmc = PK_DemonMorphControl(plr.FindInventory("PK_DemonMorphControl"));
+			if (dmc)
+				dmc.pk_souls = Clamp(dmc.pk_souls + 66,0,66);
+		}
 	}
 	
 	//returns the size of a sector:
@@ -180,7 +191,6 @@ Class PK_MainHandler : EventHandler {
 					console.printf("New map start: Refreshing cards for player %d. Gold Uses left: %d",pn,cardcontrol.goldUses);
 			}
 		}
-		//S_StartSound("world/mapstart",CHAN_AUTO);
 		//spawn gold randomly in secret areas:
 		//iterate throguh sectors:
 		for (int i = 0; i < level.Sectors.Size(); i++) {
@@ -306,6 +316,7 @@ Class PK_MainHandler : EventHandler {
 		let plr = players[e.PlayerNumber].mo;
 		if (!plr)
 			return;
+		//S_StartSound("world/mapstart",CHAN_AUTO);
 		if  (!plr.FindInventory("PK_DemonMorphControl"))
 			plr.GiveInventory("PK_DemonMorphControl",1);
 		if  (!plr.FindInventory("PK_CardControl"))

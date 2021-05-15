@@ -106,12 +106,17 @@ Class PK_DemonMorphControl : PK_InventoryToken {
 		PK_DemonMorphControl.fullsouls 66;
 	}
 	override void Tick() {}
-	/*override void DoEffect() {
+	void GiveSoul() {
+		pk_souls += 1;
+	}
+	override void DoEffect() {
 		super.DoEffect();
 		if (!owner || !owner.player || !owner.player.readyweapon)
 			return;
-		console.printf("souls: %d | Demon Weapon: %d",pk_souls,owner.CountInv("PK_DemonWeapon"));
-	}*/
+		if (pk_souls >= pk_minsouls && !owner.FindInventory("PK_DemonWeapon")) {
+			owner.GiveInventory("PK_DemonWeapon",1);
+		}
+	}
 }
 
 Class PK_DemonWeapon : PKWeapon {
@@ -133,6 +138,7 @@ Class PK_DemonWeapon : PKWeapon {
 		+WEAPON.NO_AUTO_SWITCH;
 		weapon.upsound "";
 	}
+	
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);
 		if (!owner || !owner.player)
@@ -144,7 +150,8 @@ Class PK_DemonWeapon : PKWeapon {
 		control = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
 		minsouls = control.pk_minsouls;
 		fullsouls = control.pk_fullsouls;
-		cursouls = control.pk_souls;
+		if (!cursouls)
+			cursouls = control.pk_souls;
 		dur = 25;
 		owner.A_StartSound("demon/start",CHAN_AUTO,flags:CHANF_LOCAL);		
 		prevweapon = owner.player.readyweapon;
@@ -225,8 +232,8 @@ Class PK_DemonWeapon : PKWeapon {
 				owner.player.readyweapon = prevweapon;
 				let psp = owner.player.GetPsprite(PSP_WEAPON);
 				if (psp) {
-						owner.player.SetPSprite(PSP_WEAPON,prevweapon.FindState("Ready"));
-						psp.y = WEAPONTOP;
+					owner.player.SetPSprite(PSP_WEAPON,prevweapon.FindState("Ready"));
+					psp.y = WEAPONTOP;
 				}
 				Destroy();
 				return;
@@ -290,6 +297,7 @@ Class PK_DemonWeapon : PKWeapon {
 			let psp = player.GetPSprite(PSP_WEAPON);
 			psp.y = WEAPONTOP;
 			A_WeaponOffset(0,0);
+			//don't make the weapon ready for firing if this is just a "demon morph preview":
 			if (invoker.control && invoker.control.pk_souls >= invoker.fullsouls)
 				A_WeaponReady(WRF_NOSWITCH|WRF_NOBOB);
 		}
@@ -379,6 +387,7 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 					smk.bBRIGHT = true;
 				}
 			}
+			master.A_NoBlocking();
 			master.destroy();
 			destroy();
 			return;
