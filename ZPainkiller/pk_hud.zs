@@ -14,6 +14,13 @@ Class PainkillerHUD : BaseStatusBar {
 	PK_CardControl cardcontrol;
 	
 	
+	void DrawMonsterArrow(double ascale = 2., vector2 apos = (960,92), vector2 shadowofs = (0,0)) {
+		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos,rotation:arrowangle,scale:(ascale,ascale),tint:color(256,0,0,0));	//dark arrow outline
+		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos,rotation:arrowangle,scale:(ascale,ascale)*0.8);	//arrow
+		if (shadowofs != (0,0))
+			PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos + shadowofs,rotation:arrowangle,scale:(ascale,ascale),alpha:0.45,tint:color(256,48,0,0));
+	}
+	
 	override void Init() {
 		super.Init();
 		Font fnt = "PKHNUMS";
@@ -36,14 +43,13 @@ Class PainkillerHUD : BaseStatusBar {
 			DrawBottomElements();
 		//DrawEquippedCards();
 		DrawActiveGoldenCards();
+		if (state != HUD_AltHud) {
+			vector2 keyofs = (1920,920);
+			if (state == HUD_StatusBar)
+				keyofs.y -= 40;
+			DrawKeys(keyofs.x,keyofs.y);
+		}
 		fullscreenOffsets = true;
-	}
-	
-	void DrawMonsterArrow(double ascale = 2., vector2 apos = (960,92), vector2 shadowofs = (0,0)) {
-		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos,rotation:arrowangle,scale:(ascale,ascale),tint:color(256,0,0,0));	//dark arrow outline
-		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos,rotation:arrowangle,scale:(ascale,ascale)*0.8);	//arrow
-		if (shadowofs != (0,0))
-			PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos + shadowofs,rotation:arrowangle,scale:(ascale,ascale),alpha:0.45,tint:color(256,48,0,0));
 	}
 	
 	override void Tick() {
@@ -216,5 +222,90 @@ Class PainkillerHUD : BaseStatusBar {
 		else
 			ammoColor = FONT.CR_RED;			
 		return ammoColor;
+	}
+
+	virtual bool DrawOneKey(int xo, int x, int y, in out int c, Key inv)
+	{
+		TextureID icon;
+		
+		if (!inv) return false;
+		
+		TextureID AltIcon = inv.AltHUDIcon;
+		if (!AltIcon.Exists()) return false;	// Setting a non-existent AltIcon hides this key.
+
+		if (AltIcon.isValid()) 
+		{
+			icon = AltIcon;
+		}
+		else if (inv.SpawnState && inv.SpawnState.sprite!=0)
+		{
+			let state = inv.SpawnState;
+			if (state != null) icon = state.GetSpriteTexture(0);
+			else icon.SetNull();
+		}
+		// missing sprites map to TNT1A0. So if that gets encountered, use the default icon instead.
+		if (icon.isNull() || TexMan.GetName(icon) == 'tnt1a0') icon = inv.Icon; 
+
+		if (icon.isValid())
+		{
+			DrawImageToBox(icon, x, y, 20, 26);
+			return true;
+		}
+		return false;
+	}
+
+	//functions copied from AltHud:
+	
+	void DrawKeys(int x, int y)
+	{
+		int yo = y;
+		int xo = x;
+		int i;
+		int c = 0;
+		Key inv;
+		
+		if (deathmatch)
+			return;
+		int count = Key.GetKeyTypeCount();			
+		// Go through the key in reverse order of definition, because we start at the right.
+		for(int i = count-1; i >= 0; i--)	{
+			if ((inv = Key(CPlayer.mo.FindInventory(Key.GetKeyType(i)))) && DrawOneKey(xo, x - 22, y, c, inv)) {
+				x -= 22;
+				if (++c >= 10)	{
+					x = xo;
+					y -= 11;
+					c = 0;
+				}
+			}
+		}
+		if (x == xo && y != yo) 
+			y += 11;
+	}
+	
+	void DrawImageToBox(TextureID tex, int x, int y, int w, int h, double trans = 0.75, bool animate = false)	{
+		double scale1, scale2;
+		if (!tex)
+			return;
+		let texsize = TexMan.GetScaledSize(tex);
+		scale1 = w / texsize.X;
+		scale2 = h / texsize.Y;
+
+		/*if (w < texsize.X) scale1 = w / texsize.X;
+		else scale1 = 1.;
+		if (h < texsize.Y) scale2 = h / texsize.Y;
+		else scale2 = 1.;
+		scale1 = min(scale1, scale2);
+		if (scale2 < scale1) scale1=scale2;*/
+
+		x += w >> 1;
+		y += h;
+
+		w = (int)(texsize.X * scale1);
+		h = (int)(texsize.Y * scale1);
+
+		screen.DrawTexture(tex, animate, x, y,
+			DTA_KeepRatio, true,
+			DTA_VirtualWidth, 1920, DTA_VirtualHeight, 1080, DTA_Alpha, trans, 
+			DTA_DestWidth, w, DTA_DestHeight, h, DTA_CenterBottomOffset, 1);
 	}
 }
