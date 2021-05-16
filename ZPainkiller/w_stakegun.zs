@@ -183,6 +183,7 @@ Class PK_Stake : PK_StakeProjectile {
 			if (mod || (self.GetClassName() == "PK_Stake" && age >= 12))
 				basedmg *= 1.5;
 			victim.DamageMobj (self, target, basedmg, 'normal');
+			deathsound = "";
 			A_StartSound("weapons/stakegun/hit",volume:0.7,attenuation:3);
 			hitvictim = victim; //store the victim hit; when this is non-null, stake won't deal damage to anyone else
 			if (!victim.bBOSS && victim.health <= 0 && victim.mass <= 400) { //we do the "pin to the wall" effect only if the victim is dead, not a boss and not huge
