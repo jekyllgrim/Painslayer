@@ -155,7 +155,8 @@ Class PK_Boltgun : PKWeapon {
 			}
 		}
 		#### A 4 {
-			TakeInventory(invoker.ammo1.GetClass(),1);
+			if (!CheckInfiniteAmmo())
+				TakeInventory(invoker.ammo1.GetClass(),1);
 			int xofs = invoker.scoped ? 0 : 3;
 			int yofs = invoker.scoped ? 11 : 5;
 			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
@@ -163,7 +164,8 @@ Class PK_Boltgun : PKWeapon {
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
 		#### B 4 {
-			TakeInventory(invoker.ammo1.GetClass(),2);
+			if (!CheckInfiniteAmmo())
+				TakeInventory(invoker.ammo1.GetClass(),2);
 			int xofs = invoker.scoped ? -3 : 0;
 			int yofs = invoker.scoped ? 9 : 3;
 			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
@@ -173,7 +175,8 @@ Class PK_Boltgun : PKWeapon {
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
 		#### C 2 {
-			TakeInventory(invoker.ammo1.GetClass(),2);
+			if (!CheckInfiniteAmmo())
+				TakeInventory(invoker.ammo1.GetClass(),2);
 			int xofs = invoker.scoped ? -6 : -3;
 			int yofs = invoker.scoped ? 7 : 1;
 			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
@@ -232,7 +235,8 @@ Class PK_Boltgun : PKWeapon {
 		BGUB ABCD 1 A_WeaponOffset(1.2,1.2,WOF_ADD);
 		BGUB E 2 {
 			A_WeaponOffset(6,6,WOF_ADD);
-			TakeInventory(invoker.ammo2.GetClass(),10);
+			if (!CheckInfiniteAmmo())
+				TakeInventory(invoker.ammo2.GetClass(),10);
 			double ofs = -2.2;
 			double ang = 5;
 			double bpitch = invoker.hasWmod ? -15 : -25;
