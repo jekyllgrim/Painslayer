@@ -145,12 +145,12 @@ Class PK_MainHandler : EventHandler {
 			int amt = (e.args[0] == 0) ? 1 : e.args[0];
 			let dmc = PK_DemonMorphControl(plr.FindInventory("PK_DemonMorphControl"));
 			if (dmc)
-				dmc.pk_souls += amt;
+				dmc.GiveSoul(amt);
 		}
 		if (e.name == "PK_DemonMorph") {
 			let dmc = PK_DemonMorphControl(plr.FindInventory("PK_DemonMorphControl"));
 			if (dmc)
-				dmc.pk_souls = Clamp(dmc.pk_souls + 66,0,66);
+				dmc.GiveSoul(Clamp(dmc.pk_souls + 66,0,66));
 		}
 	}
 	
