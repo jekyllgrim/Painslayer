@@ -150,8 +150,7 @@ Class PK_DemonWeapon : PKWeapon {
 		control = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
 		minsouls = control.pk_minsouls;
 		fullsouls = control.pk_fullsouls;
-		if (!cursouls)
-			cursouls = control.pk_souls;
+		cursouls = control.pk_souls;
 		dur = 25;
 		owner.A_StartSound("demon/start",CHAN_AUTO,flags:CHANF_LOCAL);		
 		prevweapon = owner.player.readyweapon;
@@ -975,7 +974,7 @@ Class PKC_Rebirth : PK_BaseGoldenCard {
 	override void GoldenCardStart() {
 		super.GoldenCardStart();
 		if (owner && owner.player) {
-			owner.GiveInventory("BlueArmorForMegasphere",1);
+			owner.GiveInventory("PK_GoldArmor",1);
 			//make sure we increase health to 200 but not beyond (even with "Blessing" which adds 50 bonushealth)
 			owner.GiveBody(200,200-owner.player.mo.BonusHealth);
 		}

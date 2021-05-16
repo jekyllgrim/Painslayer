@@ -366,6 +366,7 @@ Class PK_MainHandler : EventHandler {
 }
 
 Class PK_ReplacementHandler : EventHandler {
+	//array <Weapon> mapweapons;
 	array < Class<Weapon> > mapweapons;
 	override void CheckReplacement (ReplaceEvent e) {
 		switch (e.Replacee.GetClassName()) {
@@ -399,13 +400,13 @@ Class PK_ReplacementHandler : EventHandler {
 		//e.IsFinal = true;
 	}
 	
-	override void WorldThingSpawned(WorldEvent e) {
+	/*override void WorldThingSpawned(WorldEvent e) {
 		if (e.thing && e.thing is "Weapon") {
 			Class<Weapon> weap = (Class<Weapon>)(e.thing.GetClass());
-			if (weap && mapweapons.Find(weap) != mapweapons.Size())
-				mapweapons.Push(e.thing);
+			if (weap && mapWeaponClasses.Find(weap) != mapWeaponClasses.Size())
+				mapWeaponClasses.Push(e.thing);
 		}
-	}
+	}*/
 }
 
 Class PK_BoardEventHandler : EventHandler {

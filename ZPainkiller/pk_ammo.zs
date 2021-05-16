@@ -447,6 +447,9 @@ Class PK_AmmoSpawner_Stimpack : PK_EquipmentSpawner {
 }
 
 Class PK_BaseWeaponSpawner : PK_EquipmentSpawner {
+	Class<Inventory> toSpawn;
+	PK_ReplacementHandler rhandler;
+	bool stagger; //if true, delay spawning by 1 tic to first check how many weapons of the same class are on the map
 	Default {
 		PK_EquipmentSpawner.secondaryChance 50;
 		PK_EquipmentSpawner.dropChance 100;
@@ -454,13 +457,13 @@ Class PK_BaseWeaponSpawner : PK_EquipmentSpawner {
 	override void PostBeginPlay() {
 		Actor.PostBeginPlay();
 		if (!weapon1) {
-			Destroy();
 			return;
 		}
-		Class<Inventory> tospawn = weapon1;
-		//check if players have weapon1 and weapon2:
-		bool have1 = PK_MainHandler.CheckPlayersHave(weapon1);
-		bool have2 = weapon2 && PK_MainHandler.CheckPlayersHave(weapon2);
+		tospawn = weapon1;
+		//check if players have weapon1 and weapon2 or those exist on the map:
+		//let rhandler = PK_ReplacementHandler(EventHandler.Find("PK_ReplacementHandler"));
+		bool have1 = (PK_MainHandler.CheckPlayersHave(weapon1));
+		bool have2 = weapon2 && (PK_MainHandler.CheckPlayersHave(weapon2));
 		if (weapon2) {
 			//if none of the players have weapon1, it should always spawn:
 			if (!have1)
@@ -472,6 +475,10 @@ Class PK_BaseWeaponSpawner : PK_EquipmentSpawner {
 			//set to spawn weapon2 if check passed:
 			if (secondaryChance >= frandom[ammoSpawn](1,100))
 				tospawn = weapon2;
+		}
+		//if weapon2 is true and the item was NOT dropped, stagger spawning:
+		if (weapon2 && !bDROPPED) {
+			stagger = true;
 		}
 		if (pk_debugmessages > 1) {
 			string phave1 = have1 ? "have" : "don't have";
@@ -495,8 +502,48 @@ Class PK_BaseWeaponSpawner : PK_EquipmentSpawner {
 				amToSpawn = (random[ammoSpawn](0,1) == 1) ? GetDefaultByType(weap).ammotype1 :GetDefaultByType(weap).ammotype2;
 			if (amToSpawn)
 				tospawn = amToSpawn;
+		}		
+		if (!stagger) {
+			SpawnInvPickup(pos,tospawn);
+			Destroy();
+			return;
 		}
-		SpawnInvPickup(pos,tospawn);
+		//if we stagger spawning, push the desired weapon into array of all weapons on the map instead of spawning directly:
+		else {
+			rhandler = PK_ReplacementHandler(EventHandler.Find("PK_ReplacementHandler"));	
+			rhandler.mapweapons.Push(toSpawn);
+		}
+	}
+	States {
+	Spawn:
+		TNT1 A 1;
+		TNT1 A 0 {
+			/*	Iterate through the array of the weapon classes that
+				have been spawned on the map. If there are at least 2
+				weapons of the chosen class in the array, simply spawn
+				the other weapon instead:
+			*/
+			Class<Inventory> toSpawnFinal = (toSpawn == weapon2) ? weapon1 : weapon2;
+			int wcount;
+			for (int i = 0; i < rhandler.mapweapons.Size(); i++) {
+				if (rhandler.mapweapons[i] && rhandler.mapweapons[i] == toSpawn) {
+					wcount++;
+					if (wcount >= 3) {
+						break;
+					}
+				}
+			}
+			//if there are 3 or more weapons of this class, spawn primary or secondary randomly:
+			if (wcount >= 3 && random[ammoSpawn](0,1) == 1)
+				toSpawnFinal = toSpawn;
+			//if there's only current weapon, spawn it:
+			else if (wcount <= 1)
+				toSpawnFinal = toSpawn;
+			if (pk_debugmessages > 1)
+				Console.PrintF("There are at least %d instaces of %s on this map. Spawning %s instead",wcount,toSpawn.GetClassName(),toSpawnFinal.GetClassName());
+			SpawnInvPickup(pos,toSpawnFinal);
+		}
+		stop;
 	}
 }
 
