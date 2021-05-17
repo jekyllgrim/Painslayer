@@ -265,7 +265,7 @@ Class PK_Bolt : PK_Stake {
 		PK_Projectile.trailscale 0.01;
 		+NOGRAVITY
 		scale 0.86;
-		speed 75;
+		speed 95;
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
