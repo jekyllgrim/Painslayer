@@ -347,13 +347,13 @@ Class PK_EquipmentSpawner : Actor {
 		SpawnInvPickup(pos,tospawn);
 		//console.printf("Spawning %s at %d,%d,%d",tospawn.GetClassName(),pos.x,pos.y,pos.z);
 		//if the chance for two pickups is high enough, spawn the other type of ammo:
-		if (twoPickupsChance >= frandom[ammoSpawn](1,100)) {
+		/*if (twoPickupsChance >= frandom[ammoSpawn](1,100)) {
 			class<Ammo> tospawn2 = (tospawn == ammo1toSpawn) ? ammo2toSpawn : ammo1toSpawn;
 			let spawnpos = FindSpawnPosition();
 			//console.printf("Spawning %s at %d,%d,%d",tospawn2.GetClassName(),spawnpos.x	,spawnpos.y,spawnpos.z);
 			if (spawnpos != (0,0,0))
 				SpawnInvPickup(spawnpos,tospawn2);
-		}
+		}*/
 	}
 }
 
@@ -427,7 +427,7 @@ Class PK_AmmoSpawner_Stimpack : PK_EquipmentSpawner {
 		for (int i = 0; i < PK_InvReplacementControl.pkWeapons.Size(); i++) {
 			Class<Weapon> weap = PK_InvReplacementControl.pkWeapons[i];
 			//if at least one player has that weapon class or it exists on a map, and that weapon uses ammo, push it in the wweapons array:
-			if (weap && GetDefaultByType(weap).ammotype1 && GetDefaultByType(weap).ammotype2 && (PK_MainHandler.CheckPlayersHave(weap) || CheckExistingWeapons(weap)) && wweapons.Find(weap) == wweapons.Size())
+			if (weap && GetDefaultByType(weap).ammotype1 && GetDefaultByType(weap).ammotype2 && (CheckExistingWeapons(weap)) && wweapons.Find(weap) == wweapons.Size())
 				wweapons.Push(weap);
 		}
 		//if the array size is zero (no ammo-using weapons in the inventory OR on the map), destroy this:
