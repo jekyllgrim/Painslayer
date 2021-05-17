@@ -1,8 +1,12 @@
 Class PK_Chaingun : PKWeapon {
 	private int holddur;
 	private double atkzoom;
+	private bool hideFlash;
+	private int atkframe;
+	private int atkframeDelay;
+	private bool holdFireOnSelect; //a version of NOAUTOFIRE but for primary attack only
 	Default {
-		+WEAPON.NOAUTOFIRE
+		//+WEAPON.NOAUTOFIRE
 		PKWeapon.emptysound "weapons/empty/chaingun";
 		weapon.slotnumber 4;
 		weapon.ammotype1	"PK_GrenadeAmmo";
@@ -15,7 +19,20 @@ Class PK_Chaingun : PKWeapon {
 		inventory.pickupsound "pickups/weapons/chaingun";
 		Tag "$PK_CHAINGUN_TAG";
 	}
-	private bool hideFlash;
+	action void SetMinigunFrame(int delay = 0) {
+		let psp = player.FindPsprite(OverlayID());
+		if (!psp)
+			return;
+		if (delay > 0 && invoker.atkframeDelay <= delay)
+			invoker.atkframeDelay++;
+		else {
+			invoker.atkframeDelay = 0;
+			invoker.atkframe++;
+			if (invoker.atkframe >= 3)
+				invoker.atkframe = 0;
+		}
+		psp.frame = invoker.atkframe;
+	}
 	action void PK_FireChaingun() {
 		double spread = 1;
 		double dmg = 10;
@@ -24,6 +41,12 @@ Class PK_Chaingun : PKWeapon {
 			dmg = 11;
 		}
 		PK_FireBullets(spread,spread,-1,dmg,spawnheight:player.viewz-pos.z-40,spawnofs:8.6);
+		if (invoker.hasDexterity)
+			invoker.hideFlash = !invoker.hideFlash;
+		else
+			invoker.hideFlash = false;
+		if (!invoker.hideFlash)
+			A_Overlay(PSP_PFLASH,"AltFlash");
 	}
 	States {
 	Spawn:
@@ -36,10 +59,24 @@ Class PK_Chaingun : PKWeapon {
 			A_ZoomFactor(1,ZOOM_NOSCALETURNING);
 		}
 		goto super::deselect;
+	Select:
+		//record if player picks up the weapon while holding Fire:
+		TNT1 A 0 {
+			if (player.cmd.buttons & BT_ATTACK && player.oldbuttons & BT_ATTACK)
+				invoker.holdFireOnSelect = true;
+		}
+		TNT1 A 0 A_Raise();
+		wait;
 	Ready:
 		MIGN A 1 {
 			invoker.holddur = 0;
-			PK_WeaponReady();
+			//don't let the player fire primary if they're holding Fire since the moment of selection:
+			if (!(player.oldbuttons & BT_ATTACK))
+				invoker.holdFireOnSelect = false;
+			int fflags;
+			if (invoker.holdFireOnSelect)
+				fflags |= WRF_NOPRIMARY;
+			PK_WeaponReady(fflags);
 		}
 		loop;
 	Fire:
@@ -82,16 +119,16 @@ Class PK_Chaingun : PKWeapon {
 			A_OverlayRotate(OverlayID(),0);
 			A_OverlayScale(OverlayID(),1,1);
 		}
-		TNT1 A 0 A_ReFire;
+		TNT1 A 0 PK_WeaponReady();
 		goto ready;
 	AltFire:
 		TNT1 A 0 {
 			A_StartSound("weapons/chaingun/loop",CHAN_6,CHANF_LOOPING);
 			A_StartSound("weapons/chaingun/spin",CHAN_7,CHANF_LOOPING);
 		}
-		MIGN A 3;
-		MIGN B 2;
-		MIGN CD 1;
+		MIGN BCD 2 SetMinigunFrame(1);
+		MIGN AB 2 SetMinigunFrame(1);
+		MIGN CD 1 SetMinigunFrame();
 		TNT1 A 0 {
 			A_Overlay(PSP_OVERGUN,"MinigunFire");
 		}
@@ -102,12 +139,6 @@ Class PK_Chaingun : PKWeapon {
 				return ResolveState("AltFireEnd");
 			invoker.holddur++;
 			PK_AttackSound("weapons/chaingun/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
-			if (invoker.hasDexterity)
-				invoker.hideFlash = !invoker.hideFlash;
-			else
-				invoker.hideFlash = false;
-			if (!invoker.hideFlash)
-				A_Overlay(PSP_PFLASH,"AltFlash");
 			PK_FireChaingun();			
 			A_QuakeEX(1,1,0,2,0,1,sfx:"world/null");
 			return ResolveState(null);
@@ -126,21 +157,37 @@ Class PK_Chaingun : PKWeapon {
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 		}
 		MIGN ABCD 1 {
+			SetMinigunFrame();
 			PK_WeaponReady();
 			invoker.atkzoom = Clamp(invoker.atkzoom - 0.006,0,0.1);
 			A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
 		}
 		MIGN AABBCCDD 1 {
+			SetMinigunFrame(1);
 			PK_WeaponReady();
 			invoker.atkzoom = Clamp(invoker.atkzoom - 0.006,0,0.1);
 			A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
 		}
-		MIGN AAABBBCCCCDDDD 1 {
+		MIGN AAABBB 1 {
+			SetMinigunFrame(2);
 			PK_WeaponReady();
 			invoker.atkzoom = Clamp(invoker.atkzoom - 0.006,0,0.1);
 			A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
 		}
-		goto ready;
+		MIGN CCCCDDDD 1 {
+			SetMinigunFrame(3);
+			PK_WeaponReady();
+			invoker.atkzoom = Clamp(invoker.atkzoom - 0.006,0,0.1);
+			A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
+		}
+		MIGN # 1 {
+			SetMinigunFrame(3);
+			PK_WeaponReady();
+			if (invoker.atkframe == 0)
+				return ResolveState("Ready");
+			return ResolveState(null);
+		}
+		wait;
 	MinigunFire:
 		MIGN ABCD 1 {
 			let psp = Player.FindPsprite(OverlayID());
@@ -153,6 +200,7 @@ Class PK_Chaingun : PKWeapon {
 					psp.frame == 0;
 			}
 			else {
+				SetMinigunFrame();
 				A_SoundPitch(CHAN_6,1);
 				A_SoundPitch(CHAN_7,1);
 			}
