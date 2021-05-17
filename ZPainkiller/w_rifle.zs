@@ -191,7 +191,7 @@ Class PK_Rifle : PKWeapon {
 			PK_AttackSound("weapons/rifle/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
 			if (invoker.hasDexterity)
 				A_SoundPitch(CHAN_WEAPON,1.1);
-			double dmg = 12;
+			double dmg = 14;
 			if (invoker.hasWmod) dmg *= 1.5;
 			PK_FireBullets(1,1,1,dmg,spawnheight:player.viewz-pos.z-40,spawnofs:8.6);
 			if (!invoker.hasWmod)
@@ -226,7 +226,7 @@ Class PK_Rifle : PKWeapon {
 			else
 				A_ClearRefire();
 		}
-		PKRI AAAAA 1 {
+		PKRI AAAA 1 {
 			PK_RifleRestoreScale();
 		}
 		TNT1 A 0 {
