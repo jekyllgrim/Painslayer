@@ -165,7 +165,7 @@ Class PK_Stake : PK_StakeProjectile {
 		}
 		if (mod) {
 			bNOGRAVITY = true;
-			vel = vel.unit() * 90;
+			vel = vel.unit() * speed * 1.3;
 		}
 		sprite = GetSpriteIndex("STAK");
 	}
