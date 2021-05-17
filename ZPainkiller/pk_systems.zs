@@ -678,13 +678,16 @@ Class PKC_Blessing : PK_BaseSilverCard {
 	override void GetCard() {
 		curHealth = owner.health;
 		let plr = owner.player.mo;
-		plr.BonusHealth = 50;
+		//plr.BonusHealth = 50;
+		plr.maxhealth = 150;
+		//if player was at full health, we'll also increase their healt to 150 immediately:
 		if (plr.health >= 100)
-			plr.GiveBody(150, 100); //Note that bonushealth gets automatically added to the second argument, so, to limit given health to 150, I actually have to use 100 because bonushealth is already 50 (I know, it's really weird)
+			plr.GiveBody(150, 150); //Note that bonushealth gets automatically added to the second argument, so, to limit given health to 150, I actually have to use 100 because bonushealth is already 50 (I know, it's really weird)
 	}	
 	override void RemoveCard() {
 		let plr = owner.player.mo;
-		plr.BonusHealth = 0;
+		//plr.BonusHealth = 0;
+		plr.maxhealth = plr.default.maxhealth;
 		plr.A_SetHealth(curhealth); //revert health, so that the player can't equip/unequip this card for free heals
 	}
 }
@@ -1142,8 +1145,9 @@ Class PKC_Rage : PK_BaseGoldenCard {
 		tag "Rage";
 	}
 	override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags)	{
-		if (cardActive && !passive && damage > 0)
+		if (cardActive && !passive && damage > 0) {
 			newdamage = max(0, ApplyDamageFactors(GetClass(), damageType, damage, damage * 4));
+		}
 	}
 }
 
