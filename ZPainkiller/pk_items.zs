@@ -597,6 +597,7 @@ Class PK_GoldArmor : PK_BronzeArmor  {
 
 // A base 'power-up' class that doesn't define any special behavior except being time-limited. It's designed to be used in manual checks.
 Class PK_PowerUp : PK_Inventory abstract {
+	mixin PK_SpawnPickupRing;
 	int duration;
 	property duration : duration;
 	Default {
@@ -631,6 +632,21 @@ Class PK_PowerUp : PK_Inventory abstract {
 	}
 }
 
+Mixin Class PK_SpawnPickupRing {
+	color ringcolor;
+	property ringcolor : ringcolor;
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		if (!ringcolor)
+			return;
+		let ring = Spawn("PK_PickupRing",(pos.x,pos.y,floorz));
+		if (ring) {
+			ring.master = self;
+			ring.SetShade(color(ringcolor));
+		}
+	}
+}
+
 Class PK_WeaponModifier : PK_PowerUp {
 	Default {
 		inventory.pickupmessage "$PKI_WMODIFIER";
@@ -642,6 +658,7 @@ Class PK_WeaponModifier : PK_PowerUp {
 		yscale 0.36;
 		+FLOATBOB
 		FloatBobStrength 0.32;
+		PK_PowerUp.ringcolor "ff3e03";
 	}
 	override void Tick() {
 		super.Tick();
@@ -671,5 +688,49 @@ Class PK_WeaponModifier : PK_PowerUp {
 	Spawn:
 		PMOD A -1;
 		stop;
+	}
+}
+
+Class PK_PickupRing : Actor {
+	Default {
+		+NOINTERACTION
+		+BRIGHT
+		renderstyle 'AddShaded';
+		alpha 0.75;
+	}
+	override void Tick() {
+		if (!master) {
+			Destroy();
+			return;
+		}
+		let mmaster = Inventory(master);
+		if (!mmaster || mmaster.owner) {
+			Destroy();
+			return;
+		}
+		if (!isFrozen())
+			SetOrigin(master.pos,true);
+	}
+	States {
+	Spawn:
+		BAL1 A -1;
+		stop;
+	}
+}
+
+Class PK_DemonEyes : Infrared replaces Infrared {
+	mixin PK_SpawnPickupRing;
+	Default {
+		scale 0.5;
+		+FLOATBOB
+		FloatBobStrength 0.3;
+		PK_DemonEyes.ringcolor "ffa703";
+	}
+	States {
+	Spawn:
+		PDEY H 80 A_SetTics(random[sfx](8,80));
+		PDEY FDB 1;
+		PDEY ABCDEFG 2;
+		loop;
 	}
 }
