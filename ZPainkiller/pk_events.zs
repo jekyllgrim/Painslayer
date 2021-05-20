@@ -343,7 +343,14 @@ Class PK_MainHandler : EventHandler {
 		}
 	}
 	override void PlayerDied (PlayerEvent e) {
-		StopPlayerGoldenCards(players[e.PlayerNumber]);
+		PlayerInfo player = players[e.PlayerNumber];
+		StopPlayerGoldenCards(player);
+		if (player) {
+			for (int i = 1000; i > 0; i--)
+				player.SetPSprite(i,null);
+			for (int i = -1000; i < 0; i++)
+				player.SetPSprite(i,null);
+		}
 	}
 	override void PlayerDisconnected (PlayerEvent e) {
 		StopPlayerGoldenCards(players[e.PlayerNumber]);
