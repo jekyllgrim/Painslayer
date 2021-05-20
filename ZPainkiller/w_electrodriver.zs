@@ -463,7 +463,7 @@ Class PK_ShurikenDebris : PK_RandomDebris {
 }
 
 
-Class PK_DiskProjectile : PK_Shuriken {
+Class PK_DiskProjectile : PK_StakeProjectile {
 	private int deadtics;
 	private Array < Actor > disktargets;
 	Default {
@@ -608,7 +608,7 @@ Class PK_DiskProjectile : PK_Shuriken {
 			A_SetRenderstyle(0.75,Style_AddShaded);
 			roll = random[eld](0,359);
 			SetShade("8bb1ff");
-			A_Explode(128,160);
+			A_Explode(128,160,flags:0);
 			for (int i = 32; i > 0; i--) {
 				let part = Spawn("PK_RicochetSpark",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
 				if (part) {
