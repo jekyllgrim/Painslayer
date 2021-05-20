@@ -981,7 +981,7 @@ Class PKC_Rebirth : PK_BaseGoldenCard {
 	}
 }
 
-//works via control item initially given to all monsters
+//works via control item given to all monsters
 Class PKC_Confusion : PK_BaseGoldenCard {
 	private PK_MainHandler handler;
 	Default {
@@ -1139,14 +1139,24 @@ Class PKC_StepsOfThunder : PK_BaseGoldenCard {
 	}
 }
 
-//a plain and simple quad damage
+//A simple quad damage, but it won't boost damage the player deals to themselves
 Class PKC_Rage : PK_BaseGoldenCard {
 	Default {
 		tag "Rage";
 	}
 	override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags)	{
-		if (cardActive && !passive && damage > 0) {
-			newdamage = max(0, ApplyDamageFactors(GetClass(), damageType, damage, damage * 4));
+		if (cardActive && damage > 0) {
+			if (!passive) {
+				newdamage = damage * 4;
+				//if (pk_debugmessages > 1)
+					//console.printf("You dealt %d damage to %s with %s",newdamage,source.GetClassName(),inflictor.GetClassName());
+			}
+			//don't increase damage you deal to yourself (no reason to punish the player for firing a rocket in close quarters)
+			else if (source == owner) {
+				newdamage = damage;
+				//if (pk_debugmessages > 1)
+					//console.printf("You received %d damage from %s",newdamage,source.GetClassName());
+			}
 		}
 	}
 }
