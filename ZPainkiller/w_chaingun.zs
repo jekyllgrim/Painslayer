@@ -28,7 +28,7 @@ Class PK_Chaingun : PKWeapon {
 		else {
 			invoker.atkframeDelay = 0;
 			invoker.atkframe++;
-			if (invoker.atkframe >= 3)
+			if (invoker.atkframe > 3)
 				invoker.atkframe = 0;
 		}
 		psp.frame = invoker.atkframe;
@@ -126,8 +126,8 @@ Class PK_Chaingun : PKWeapon {
 			A_StartSound("weapons/chaingun/loop",CHAN_6,CHANF_LOOPING);
 			A_StartSound("weapons/chaingun/spin",CHAN_7,CHANF_LOOPING);
 		}
-		MIGN BCD 2 SetMinigunFrame(1);
-		MIGN AB 2 SetMinigunFrame(1);
+		MIGN BCD 2 SetMinigunFrame();
+		MIGN AB 2 SetMinigunFrame();
 		MIGN CD 1 SetMinigunFrame();
 		TNT1 A 0 {
 			A_Overlay(PSP_OVERGUN,"MinigunFire");
