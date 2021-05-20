@@ -72,7 +72,7 @@ Class PKWeapon : Weapon abstract {
 		}
 	}
 	
-	//a wrapper function that automatically plays either vanilla or enhanced weapon sound, and fires tracers with A_FireProjectile so that they don't break on portals and such:
+	//a wrapper function that fires tracers with A_FireProjectile so that they don't break on portals and such:
 	action void PK_FireBullets(double spread_horz = 0, double spread_vert = 0, int numbullets = 1, int damage = 1, sound snd = "", Class<Actor> pufftype = "PK_BulletPuff", double spawnheight = 0, double spawnofs = 0) {
 		if (numbullets == 0) numbullets = 1;
 		let weapon = player.ReadyWeapon;
@@ -107,6 +107,7 @@ Class PKWeapon : Weapon abstract {
 			pitchOfs = invoker.LinearMap(self.pitch, 0, -90, pitchOfs, 0);
 		return A_FireProjectile(missiletype, angle, useammo, spawnofs_xy, spawnheight, flags, pitchOfs);
 	}
+	
 	action void DampedRandomOffset(double rangeX, double rangeY, double rate = 1) {
 		let psp = Player.FindPSprite(PSP_WEAPON);			
 		if (!psp)
@@ -119,6 +120,7 @@ Class PKWeapon : Weapon abstract {
 		}
 		A_WeaponOffset(invoker.shiftOfs.x, invoker.shiftOfs.y, WOF_ADD);
 	}
+	
 	action void PK_WeaponReady(int flags = 0) {
 		if ((player.cmd.buttons & BT_ATTACK) && (!invoker.ammo1 || invoker.ammo1.amount < invoker.ammouse1)) {
 			A_ClearRefire();
@@ -136,26 +138,27 @@ Class PKWeapon : Weapon abstract {
 		}
 		A_WeaponReady(flags);
 	}
+	
 	states {
-		Ready:
-			TNT1 A 1;
-			loop;
-		Fire:
-			TNT1 A 1;
-			loop;
-		Deselect:
-			TNT1 A 0 {
-				A_StopSound(CH_LOOP);
-				A_RemoveLight('PKWeaponlight');
-			}
-			TNT1 A 0 A_Lower();
-			wait;
-		Select:
-			TNT1 A 0 A_Raise();
-			wait;
-		LoadSprites:
-			PSGT AHIJK 0;
-			stop;
+	Ready:
+		TNT1 A 1;
+		loop;
+	Fire:
+		TNT1 A 1;
+		loop;
+	Deselect:
+		TNT1 A 0 {
+			A_StopSound(CH_LOOP);
+			A_RemoveLight('PKWeaponlight');
+		}
+		TNT1 A 0 A_Lower();
+		wait;
+	Select:
+		TNT1 A 0 A_Raise();
+		wait;
+	LoadSprites:
+		PSGT AHIJK 0;
+		stop;
 	}
 }
 
@@ -621,6 +624,11 @@ Class PK_RicochetBullet : PK_SmallDebris {
 		gravity 0.7;
 		bouncefactor 0.55;
 		bouncecount 1;
+	}
+	override void Tick() {
+		super.Tick();
+		if (!isFrozen())
+			scale.x = default.scale.x * 0.1 * vel.length(); //faster trails will be longer
 	}
 	states {
 	Spawn:
