@@ -77,26 +77,29 @@ Class PK_Painkiller : PKWeapon {
 				}
 			}
 			PKIL ABCD 1 {
-				double spitch = 1.0;				
+				double spitch = 1.0;	
+				let psp = Player.FindPSprite(OverlayID());			
 				if (invoker.hasWmod) {
+					if (invoker.wmodCounter >= 3) {
+						invoker.wmodCounter = 0;
+						A_SetTics(0);
+					}		
 					spitch += 0.05;
 					if (invoker.wmodAlpha < 1)
 						invoker.wmodAlpha += 0.07;
 					invoker.wmodCounter++;		
+					let fr = Player.FindPSprite(PSP_OVERGUN);
+					if (psp && fr)
+						fr.frame = psp.frame;
 				}
 				if (invoker.hasDexterity) {
 					spitch += 0.1;
 					invoker.wmodCounter++;	
 					if (random[sfx](0,1) == 1) {
-						let psp = Player.FindPSprite(OverlayID());
 						if (psp && psp.frame < 3)
 							psp.frame++;
 					}
-				}
-				if (invoker.wmodCounter >= 3) {
-					invoker.wmodCounter = 0;
-					A_SetTics(0);
-				}				
+				}		
 				A_SoundPitch(CH_LOOP,spitch);
 				if ((player.cmd.buttons & BT_ALTATTACK) && !(player.oldbuttons & BT_ALTATTACK)) {
 					A_StopSound(CH_LOOP);
@@ -110,12 +113,8 @@ Class PK_Painkiller : PKWeapon {
 			TNT1 A 0 A_ReFire("Hold");
 			goto HoldEnd;
 		Hold.Mod:
-			PKIW #### 1 bright {
+			PKIW ### 1 bright {
 				A_OverlayAlpha(PSP_OVERGUN,invoker.wmodAlpha);
-				let psp = Player.FindPSprite(PSP_Weapon);
-				let fr = Player.FindPSprite(OverlayID());
-				if (psp && fr)
-					fr.frame = psp.frame;
 			}
 			stop;
 		HoldEnd:
@@ -199,31 +198,32 @@ Class PK_PainkillerPuff : PK_BulletPuff {
 	}
 	states {
 	Crash:
-		TNT1 A 0 {
+		TNT1 A 1 {
 			if (target) {
 				angle = target.angle;
 				pitch = target.pitch;
 			}
 			FindLineNormal();
-			let deb = Spawn("PK_RandomDebris",puffdata.Hitlocation + (0,0,debrisOfz));
-			if (deb)
-				deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
+			if (random[sfx](0,10) > 5) {
+				let deb = Spawn("PK_RandomDebris",puffdata.Hitlocation + (0,0,debrisOfz));
+				if (deb)
+					deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
+			}
 			bool mod = (target && target.CountInv("PK_WeaponModifier"));
-			if (mod || (random[sfx](0,10) > 7)) {
+			if (mod || (random[sfx](0,10) > 2)) {
 				let bull = PK_RicochetBullet(Spawn("PK_RicochetBullet",pos));
 				if (bull) {
 					bull.vel = (hitnormal + (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](-3,3)) * frandom[sfx](2,6));
 					bull.A_FaceMovementDirection();
 					if (mod) {
 						bull.A_SetRenderstyle(bull.alpha,Style_AddShaded);
-						bull.SetShade("FF2000");
+						bull.SetShade("FF6000");
 						//bull.scale *= 2;
 					}
 				}
 			}
 		}
-		FLAR B 1 bright A_FadeOut(0.1);
-		wait;
+		stop;
 	Melee:
 		TNT1 A 1;
 		stop;
