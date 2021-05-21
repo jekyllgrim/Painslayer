@@ -259,7 +259,7 @@ Class PK_DemonWeapon : PKWeapon {
 			for (int i = 0; i < handler.demontargets.Size(); i++) {
 				let act = handler.demontargets[i];
 				if (handler.demontargets[i]) {
-					act.TakeInventory("PK_DemonTargetControl",1);
+					act.A_TakeInventory("PK_DemonTargetControl");
 					//console.printf("removing SlowMocontrol from %s",act.GetClassName());
 				}
 			}
@@ -596,7 +596,7 @@ Class PK_CardControl : PK_InventoryToken {
 			if (!isEquipped) {	
 				if (pk_debugmessages)
 					console.printf("Taking card %s (not equipped)",owner.FindInventory(card).GetClassName());
-				owner.TakeInventory(card,1);
+				owner.A_TakeInventory(card);
 			}
 		}
 	}
@@ -1002,7 +1002,7 @@ Class PKC_Confusion : PK_BaseGoldenCard {
 	}
 	override void GoldenCardEnd() {
 		super.GoldenCardEnd();
-		owner.TakeInventory("PK_ConfusionControl",1);
+		owner.A_TakeInventory("PK_ConfusionControl");
 		if (!handler)
 			return;
 		if (!PK_MainHandler.CheckPlayersHave("PK_ConfusionControl")) {
@@ -1010,7 +1010,7 @@ Class PKC_Confusion : PK_BaseGoldenCard {
 				console.printf("Nobody has active \"Confusion\"; ending effect");
 			for (int i = 0; i < handler.demontargets.Size(); i++) {
 				if (handler.demontargets[i]) {
-					handler.demontargets[i].TakeInventory("PK_ConfusionControl",1);
+					handler.demontargets[i].A_TakeInventory("PK_ConfusionControl");
 					handler.demontargets[i].target = null;
 				}
 			}
@@ -1049,7 +1049,7 @@ Class PK_ConfusionControl : PK_InventoryToken  {
 				if (next.bKILLED)
 					continue;
 				owner.target = next;
-				if (pk_debugmessages)
+				if (pk_debugmessages > 1)
 					console.printf("%s is targeting %s",owner.GetClassName(),owner.target.GetClassName());
 			}
 		}
@@ -1068,7 +1068,7 @@ Class PKC_Dexterity : PK_BaseGoldenCard {
 	}
 	override void GoldenCardEnd() {
 		super.GoldenCardEnd();
-		owner.TakeInventory("PK_DexterityEffect",1);
+		owner.A_TakeInventory("PK_DexterityEffect");
 	}
 }
 
@@ -1171,7 +1171,7 @@ Class PKC_MagicGun : PK_BaseGoldenCard {
 	}
 	override void GoldenCardEnd() {
 		super.GoldenCardEnd();
-		owner.TakeInventory("PK_MagicGunEffect",1);
+		owner.A_TakeInventory("PK_MagicGunEffect");
 	}
 }
 
@@ -1217,7 +1217,7 @@ Class PKC_Haste : PK_BaseGoldenCard {
 	}
 	override void GoldenCardEnd() {
 		super.GoldenCardEnd();
-		owner.TakeInventory("PK_HasteControl",1);
+		owner.A_TakeInventory("PK_HasteControl");
 		let handler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));
 		if (!handler)
 			return;
@@ -1229,7 +1229,7 @@ Class PKC_Haste : PK_BaseGoldenCard {
 				let obj = handler.demontargets[i];
 				if (!obj)
 					continue;
-				obj.TakeInventory("PK_HasteControl",1);
+				obj.A_TakeInventory("PK_HasteControl");
 				if (pk_debugmessages)
 					console.printf("Taking PK_HasteControl from %s",obj.GetClassName());
 			}
