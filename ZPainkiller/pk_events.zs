@@ -72,6 +72,10 @@ Class PK_MainHandler : EventHandler {
 		return false;
 	}
 	
+	static bool IsVoodooDoll(PlayerPawn mo) {
+		return !mo.player || !mo.player.mo || mo.player.mo != mo;
+	}
+	
 	//converted from source code by 3saster:
 	bool CheckCheatmode (bool printmsg = true) {
 		if ((G_SkillPropertyInt(SKILLP_DisableCheats) || netgame || deathmatch) && (!sv_cheats)) {
@@ -254,7 +258,7 @@ Class PK_MainHandler : EventHandler {
 		if (act.bISMONSTER && !act.bFRIENDLY)
 			allenemies.push(act);
 		//monsters, projectiles and players can be subjected to various effects, such as Demon Morph or Haste, so put them in an array:
-		if (act.bISMONSTER || act.bMISSILE || (act is "PlayerPawn")) {
+		if (act.bISMONSTER || act.bMISSILE || (act.player && !IsVoodooDoll(PlayerPawn(act)))) {
 			demontargets.push(act);
 			//console.printf("Pushing %s into the demontargets array",act.GetClassName());
 			if (CheckPlayersHave("PK_DemonWeapon"))
@@ -281,13 +285,12 @@ Class PK_MainHandler : EventHandler {
 		if (edc)
 			edc.master = act;
 		//spawn some gold from the corpse:
-		int goldchance = random[gold](0,3);
+		int goldchance = 0;//random[gold](0,3);
 		int mh = abs(act.health);
 		//increase chance of gold if the monster was gibbed:
 		bool gibbed = (mh >= act.SpawnHealth() || (act.gibhealth > 0 && mh >= act.gibhealth));
 		if (gibbed)
 			goldchance = Clamp(goldchance * 3,3,10);
-		//console.printf("%s health: -%d | spawn health: %d | gibhealth: %d | goldchance: %d",act.GetClassName(),mh,act.SpawnHealth(),act.gibhealth,goldchance);
 		double zofs = act.default.health;
 		for (int i = goldchance; i > 0; i--) {
 			let gg = Actor.Spawn("PK_GoldCoin",act.pos + (0,0,zofs*frandom[gold](0.8,1.2)));
@@ -396,6 +399,8 @@ Class PK_ReplacementHandler : EventHandler {
 
 			case 'Stimpack' 		: e.Replacement = 'PK_AmmoSpawner_Stimpack';	break;
 			case 'Medikit' 		: e.Replacement = 'PK_AmmoSpawner_Stimpack';	break;
+			case 'HealthBonus' 	: e.Replacement = 'PK_GoldCoin';	break;
+			case 'ArmorBonus' 		: e.Replacement = 'PK_GoldCoin';	break;
 			
 			case 'SoulSphere' 		: e.Replacement = 'PK_GoldSoul';	break;
 			case 'MegaSphere' 		: e.Replacement = 'PK_MegaSoul';	break;
@@ -403,6 +408,7 @@ Class PK_ReplacementHandler : EventHandler {
 			Case 'BlueArmor'		: e.Replacement = 'PK_GoldArmor'; break;
 			
 			case 'Berserk'			: e.Replacement = 'PK_WeaponModifier';  break;
+			case 'Infrared'		: e.Replacement = 'PK_DemonEyes';  break;
 		}
 		//e.IsFinal = true;
 	}
