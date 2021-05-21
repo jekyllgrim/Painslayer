@@ -650,8 +650,8 @@ Class PK_PowerUp : PK_Inventory abstract {
 Mixin Class PK_SpawnPickupRing {
 	color ringcolor;
 	property ringcolor : ringcolor;
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
+	override void BeginPlay() {
+		super.BeginPlay();
 		if (!ringcolor)
 			return;
 		let ring = Spawn("PK_PickupRing",(pos.x,pos.y,floorz));
@@ -758,13 +758,11 @@ Class PK_Pentagram : InvulnerabilitySphere {
 	mixin PK_PlayerSightCheck;
 	mixin PK_SpawnPickupRing;
 	Default {
-		scale 0.19;
 		//yscale 0.172;
 		+FLOATBOB
 		+BRIGHT
+		renderstyle 'Add';
 		+INVENTORY.BIGPOWERUP
-		+ROLLSPRITE
-		+ROLLCENTER
 		FloatBobStrength 0.35;
 		PK_Pentagram.ringcolor "FF1904";
 		inventory.pickupsound "pickups/powerups/invulnerability";
@@ -781,14 +779,14 @@ Class PK_Pentagram : InvulnerabilitySphere {
 				SPF_FULLBRIGHT|SPF_RELVEL|SPF_RELACCEL,
 				lifetime:random(20,60),size:frandom[sfx](2,4.2),
 				angle:frandom[sfx](0,359),
-				xoff:frandom[sfx](-12,12),yoff:frandom[sfx](-12,12),zoff:frandom[sfx](22,48) + GetBobOffset(),
+				xoff:frandom[sfx](-12,12),yoff:frandom[sfx](-12,12),zoff:frandom[sfx](32,56) + GetBobOffset(),
 				velx:frandom[sfx](0.5,1.5),velz:frandom[sfx](0.2,1),accelx:frandom[sfx](-0.1,-0.3),accelz:-0.01,
 				startalphaf:0.9,sizestep:-0.1
 			);
 	}
 	States {
 	Spawn:
-		PPEN A 1 A_SetRoll(roll+3,SPF_INTERPOLATE);
+		BAL1 ABCDEFGHIJKLMNOP 5;
 		loop;
 	}
 }
