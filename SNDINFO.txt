@@ -310,7 +310,10 @@ pickups/soul/gold	SOULGOLD
 
 pickups/armor/bronze		"sounds/items/item-shield-small.wav"
 pickups/armor/silver		"sounds/items/item-shield-medium.wav"	
-pickups/armor/gold			"sounds/items/item-shield-big.wav"	
+pickups/armor/gold			"sounds/items/item-shield-big.wav"
+
+pickups/powerups/invulnerability "sounds/items/item-pentakl-take.wav"
+pickups/powerups/lightamp "sounds/items/item-pentagram-take.wav"
 
 
 // GOLD
