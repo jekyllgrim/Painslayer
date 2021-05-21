@@ -3,13 +3,16 @@ Class PK_InventoryToken : Inventory abstract {
 	Default {
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNTOSSABLE;
-		+INVENTORY.UNCLEARABLE;
 		+INVENTORY.PERSISTENTPOWER;
 		inventory.amount 1;
 		inventory.maxamount 1;
 	}
 	override void DoEffect() {
 		super.DoEffect();
+		if (!owner || (owner.player && PK_Mainhandler.IsVoodooDoll(PlayerPawn(owner)))) {
+			Destroy();
+			return;
+		}
 		if (owner && !owner.isFrozen())
 			age++;
 	}
@@ -288,6 +291,12 @@ Class PK_GoldCoin : PK_GoldPickup {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
+		if (vel ~== (0,0,0)) {
+			bMISSILE = false;
+			roll = 0;
+			SetStateLabel("DeathEnd");
+			return;
+		}
 		roll = frandom[sfx](0,359);
 		broll = frandom[sfx](2,6) * randompick[sfx](-1,1);
 		bouncefactor *= frandom[gold](0.7,1);
@@ -301,6 +310,7 @@ Class PK_GoldCoin : PK_GoldPickup {
 		PGLC ABC 1;
 		PGLC DEF 2;
 		PGLC GGGG 1 { roll *= 0.5; }
+	DeathEnd:
 		PGLC G -1 { roll = 0; }
 		stop;
 	}
@@ -601,6 +611,8 @@ Class PK_PowerUp : PK_Inventory abstract {
 	int duration;
 	property duration : duration;
 	Default {
+		+COUNTITEM
+		+INVENTORY.AUTOACTIVATE
 		+INVENTORY.ALWAYSPICKUP
 		inventory.maxamount 1;
 		PK_PowerUp.duration 40;
@@ -609,9 +621,10 @@ Class PK_PowerUp : PK_Inventory abstract {
 		super.DoEffect();
 		if (!owner || !owner.player)
 			return;
-		if (GetAge() % 35 == 0) {
+		if (GetAge() % 35 == 0 && !owner.CountInv("PK_DemonWeapon")) {
 			duration--;
-			console.printf("%s remaining time: %d",GetClassName(),duration);
+			if (pk_debugmessages)
+				console.printf("%s remaining time: %d",GetClassName(),duration);
 		}
 		if (duration <= 0) {
 			if (deathsound)
@@ -621,6 +634,8 @@ Class PK_PowerUp : PK_Inventory abstract {
 	}
 	override bool TryPickup (in out Actor other) {
 		if (!(other is "PlayerPawn"))
+			return false;
+		if (other.CountInv("PK_DemonWeapon"))
 			return false;
 		let pwr = PK_PowerUp(other.FindInventory(GetClassName()));
 		if (pwr && pwr.duration > 0) {
@@ -680,9 +695,10 @@ Class PK_WeaponModifier : PK_PowerUp {
 		}
 	}
 	override bool TryPickup (in out Actor other) {
-		if (other is "PlayerPawn")
+		bool ret = super.TryPickup(other);
+		if (ret && other is "PlayerPawn")
 			other.GiveBody(100,100);
-		return super.TryPickup(other);
+		return ret;
 	}
 	states {
 	Spawn:
@@ -718,19 +734,61 @@ Class PK_PickupRing : Actor {
 	}
 }
 
-Class PK_DemonEyes : Infrared replaces Infrared {
+Class PK_DemonEyes : Infrared {
 	mixin PK_SpawnPickupRing;
 	Default {
 		scale 0.5;
 		+FLOATBOB
 		FloatBobStrength 0.3;
 		PK_DemonEyes.ringcolor "ffa703";
+		Powerup.Type "PowerTorch";
+		inventory.pickupmessage "$PKI_DEMONEYES";
+		inventory.pickupsound "pickups/powerups/lightamp";
 	}
 	States {
 	Spawn:
 		PDEY H 80 A_SetTics(random[sfx](8,80));
 		PDEY FDB 1;
 		PDEY ABCDEFG 2;
+		loop;
+	}
+}
+
+Class PK_Pentagram : InvulnerabilitySphere {
+	mixin PK_PlayerSightCheck;
+	mixin PK_SpawnPickupRing;
+	Default {
+		scale 0.19;
+		//yscale 0.172;
+		+FLOATBOB
+		+BRIGHT
+		+INVENTORY.BIGPOWERUP
+		+ROLLSPRITE
+		+ROLLCENTER
+		FloatBobStrength 0.35;
+		PK_Pentagram.ringcolor "FF1904";
+		inventory.pickupsound "pickups/powerups/invulnerability";
+	}
+	override void Tick() {
+		super.Tick();
+		if (isFrozen())
+			return;	
+		if (GetAge() % 10 == 0)
+			canSeePlayer = CheckPlayerSights();
+		if (canSeePlayer)
+			A_SpawnParticle(
+				"d11904",
+				SPF_FULLBRIGHT|SPF_RELVEL|SPF_RELACCEL,
+				lifetime:random(20,60),size:frandom[sfx](2,4.2),
+				angle:frandom[sfx](0,359),
+				xoff:frandom[sfx](-12,12),yoff:frandom[sfx](-12,12),zoff:frandom[sfx](22,48) + GetBobOffset(),
+				velx:frandom[sfx](0.5,1.5),velz:frandom[sfx](0.2,1),accelx:frandom[sfx](-0.1,-0.3),accelz:-0.01,
+				startalphaf:0.9,sizestep:-0.1
+			);
+	}
+	States {
+	Spawn:
+		PPEN A 1 A_SetRoll(roll+3,SPF_INTERPOLATE);
 		loop;
 	}
 }
