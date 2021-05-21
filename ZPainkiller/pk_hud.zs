@@ -224,6 +224,7 @@ Class PainkillerHUD : BaseStatusBar {
 		return ammoColor;
 	}
 
+	//functions copied from AltHud (with some tweaks):
 	virtual bool DrawOneKey(int xo, int x, int y, in out int c, Key inv)
 	{
 		TextureID icon;
@@ -253,8 +254,6 @@ Class PainkillerHUD : BaseStatusBar {
 		}
 		return false;
 	}
-
-	//functions copied from AltHud:
 	
 	void DrawKeys(int x, int y)
 	{
