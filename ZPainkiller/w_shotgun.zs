@@ -162,7 +162,7 @@ Class PK_FreezerProjectile : PK_Projectile {
 					double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
 					debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
 					debris.A_SetScale(frandom[sfx](0.12,0.25));
-					debris.A_SetRenderstyle(0.9,Style_AddShaded);
+					debris.A_SetRenderstyle(0.65,Style_AddShaded);
 					debris.SetShade("08caed");
 				}
 			}
@@ -184,16 +184,16 @@ Class PK_FrozenChunk : PK_SmallDebris {
 		//renderstyle 'Shaded';
 		//stencilcolor "08caed";
 		renderstyle 'Translucent';
-		Translation "PK_IceChunk";
+		//Translation "PK_IceChunk";
 		alpha 0.8;
-		scale 0.6;
+		scale 0.5;
 		gravity 0.3;
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		wrot = frandom[sfx](4,8)*randompick[sfx](-1,1);
 		scale *= frandom[sfx](0.7,1.1);
-		frame = random[sfx](1,4);
+		frame = random[sfx](1,5);
 	}
 	override void Tick() {
 		super.Tick();
@@ -209,7 +209,7 @@ Class PK_FrozenChunk : PK_SmallDebris {
 	}
 	states {
 	Cache:
-		IGIB ABCDE 0;
+		IGIB ABCDEF 0;
 	Spawn:
 		IGIB # 1 {
 			roll += wrot;
@@ -302,22 +302,23 @@ Class PK_FreezeControl : PK_InventoryToken {
 			for (int i = 7; i >= 0; i--)
 				owner.A_SoundVolume(i,0);
 			int rad = owner.radius;
-			for (int i = random[sfx](16,20); i > 0; i--) {
+			for (int i = random[sfx](5,8); i > 0; i--) {
 				let ice = Spawn("PK_FrozenChunk",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
 				if (ice) {
 					ice.vel = (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](2,6));
 					ice.master = owner;
-					ice.scale *= 1.2;
+					ice.gravity = 0.7;
 				}
 			}
-			for (int i = random[sfx](16,20); i > 0; i--) {
-				let ice = Spawn("PK_FrozenChunk",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
+			for (int i = random[sfx](12,16); i > 0; i--) {
+				let ice = Spawn("PK_RandomDebris",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
 				if (ice) {
-					ice.vel = (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](4,6));
+					ice.vel = (frandom[sfx](-3.5,3.5),frandom[sfx](-3.5,3.5),frandom[sfx](3,7));
 					ice.master = owner;
-					ice.A_SetRenderstyle(1.0,Style_Shaded);
+					ice.gravity = 0.5;
+					ice.A_SetRenderstyle(1.0,Style_AddShaded);
 					ice.SetShade("08caed");
-					ice.scale *= 0.8;
+					ice.A_SetScale(frandom[sfx](0.4,0.75));
 				}
 			}
 			owner.A_StartSound("weapons/shotgun/freezedeath");
