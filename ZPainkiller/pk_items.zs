@@ -603,6 +603,20 @@ Class PK_GoldArmor : PK_BronzeArmor  {
 ////////            ////////
 ////////////////////////////
 
+Class PK_AmmoPack : Backpack {
+	Default {
+		inventory.pickupsound "pickups/ammopack";
+		inventory.pickupmessage "$PKI_AMMOPACK";
+		xscale 0.42;
+		yscale 0.38;
+	}
+	states {
+	Spawn:
+		AMPK A -1;
+		stop;
+	}
+}
+
 // A base 'power-up' class that doesn't define any special behavior except being time-limited. It's designed to be used in manual checks.
 Class PK_PowerUp : PK_Inventory abstract {
 	mixin PK_SpawnPickupRing;

@@ -315,6 +315,8 @@ pickups/armor/gold			"sounds/items/item-shield-big.wav"
 pickups/powerups/invulnerability "sounds/items/item-pentakl-take.wav"
 pickups/powerups/lightamp "sounds/items/item-pentagram-take.wav"
 
+pickups/ammopack	"sounds/items/pickup_ammo_megapack.wav"
+
 
 // GOLD
 

@@ -409,6 +409,8 @@ Class PK_ReplacementHandler : EventHandler {
 			
 			case 'Berserk'			: e.Replacement = 'PK_WeaponModifier';  break;
 			case 'Infrared'		: e.Replacement = 'PK_DemonEyes';  break;
+			case 'InvulnerabilitySphere'		: e.Replacement = 'PK_Pentagram';  break;
+			case 'Backpack'		: e.Replacement = 'PK_AmmoPack';  break;
 		}
 		//e.IsFinal = true;
 	}
