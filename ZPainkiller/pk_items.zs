@@ -180,8 +180,6 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		+BRIGHT
 		xscale 0.5;
 		yscale 0.415;
-		radius 8;
-		height 16;
 		inventory.amount 1;
 		inventory.pickupmessage "";
 	}
