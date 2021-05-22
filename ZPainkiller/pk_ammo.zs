@@ -9,7 +9,7 @@ Class PK_Shells : Ammo {
 		inventory.icon "pkhshell";
 		inventory.amount 12;
 		inventory.maxamount 100;
-		ammo.backpackamount 12;
+		ammo.backpackamount 24;
 		ammo.backpackmaxamount 100;
 		xscale 0.3;
 		yscale 0.25;
@@ -28,7 +28,7 @@ Class PK_FreezerAmmo : Ammo {
 		inventory.icon "pkhfreez";
 		inventory.amount 8;
 		inventory.maxamount 100;
-		ammo.backpackamount 8;
+		ammo.backpackamount 16;
 		ammo.backpackmaxamount 100;
 		xscale 0.3;
 		yscale 0.25;
@@ -46,9 +46,9 @@ Class PK_StakeAmmo : Ammo {
 		inventory.pickupmessage "$PKI_STAKEAMMO";
 		inventory.pickupsound "pickups/ammo/stakes";
 		inventory.icon "pkhstake";
-		inventory.amount 10;
+		inventory.amount 8;
 		inventory.maxamount 100;
-		ammo.backpackamount 10;
+		ammo.backpackamount 16;
 		ammo.backpackmaxamount 100;
 		xscale 0.3;
 		yscale 0.25;
@@ -67,7 +67,7 @@ Class PK_GrenadeAmmo : Ammo {
 		inventory.icon "pkhrock";
 		inventory.amount 5;
 		inventory.maxamount 100;
-		ammo.backpackamount 5;
+		ammo.backpackamount 10;
 		ammo.backpackmaxamount 100;
 		scale 0.4;
 	}
@@ -85,7 +85,7 @@ Class PK_BulletAmmo : Ammo {
 		inventory.icon "pkhbull";
 		inventory.amount 40;
 		inventory.maxamount 500;
-		ammo.backpackamount 40;
+		ammo.backpackamount 100;
 		ammo.backpackmaxamount 500;
 		scale 0.4;
 	}
@@ -123,7 +123,7 @@ Class PK_CellAmmo : Ammo {
 		inventory.icon "pkhshock";
 		inventory.amount 40;
 		inventory.maxamount 500;
-		ammo.backpackamount 80;
+		ammo.backpackamount 100;
 		ammo.backpackmaxamount 500;
 		scale 0.4;
 		yscale 0.34;
@@ -140,9 +140,9 @@ Class PK_RifleBullets : Ammo {
 		inventory.pickupmessage "$PKI_RIFLEAMMO";
 		inventory.pickupsound "pickups/ammo/riflebullets";
 		inventory.icon "pkhmag";
-		inventory.amount 25;
+		inventory.amount 30;
 		inventory.maxamount 250;
-		ammo.backpackamount 25;
+		ammo.backpackamount 90;
 		ammo.backpackmaxamount 250;
 		scale 0.4;
 	}
@@ -160,7 +160,7 @@ Class PK_FuelAmmo : Ammo {
 		inventory.icon "pkhfuel";
 		inventory.amount 50;
 		inventory.maxamount 500;
-		ammo.backpackamount 50;
+		ammo.backpackamount 200;
 		ammo.backpackmaxamount 500;
 		xscale 0.3;
 		yscale 0.24;
@@ -180,7 +180,7 @@ Class PK_BoltAmmo : Ammo {
 		inventory.icon "pkhbolts";
 		inventory.amount 25;
 		inventory.maxamount 500;
-		ammo.backpackamount 25;
+		ammo.backpackamount 50;
 		ammo.backpackmaxamount 500;
 		xscale 0.4;
 		yscale 0.3;
@@ -199,7 +199,7 @@ Class PK_BombAmmo : Ammo {
 		inventory.icon "pkhbombs";
 		inventory.amount 40;
 		inventory.maxamount 250;
-		ammo.backpackamount 40;
+		ammo.backpackamount 80;
 		ammo.backpackmaxamount 250;
 		xscale 0.5;
 		yscale 0.42;
@@ -215,10 +215,10 @@ Class PK_BombAmmo : Ammo {
 // AMMO SPAWN CONTROL
 /////////////////////////
 
-/*	This object is designed to replace each ammo pickupmessage
-	and spawn either primary or alternative ammo for 2 weapons.
+/*	This object is designed to replace each ammo pickup and spawn 
+	either primary or alternative ammo for one of 2 weapons.
 	With a small chance it'll also spawn alternative ammo
-	next to the primary.
+	next to the primary (that is currently disabled)
 */
 
 Class PK_EquipmentSpawner : Actor {
@@ -315,10 +315,21 @@ Class PK_EquipmentSpawner : Actor {
 		}
 		//get ammo classes for weapon1 and weapon2:
 		primary1 = GetDefaultByType(weapon1).ammotype1;
-		secondary1 = GetDefaultByType(weapon1).ammotype2;			
+		secondary1 = GetDefaultByType(weapon1).ammotype2;
 		if (weapon2) {
 			primary2 = GetDefaultByType(weapon2).ammotype1;
 			secondary2 = GetDefaultByType(weapon2).ammotype2;	
+			/*	Chaingun is a special case: rockets are used for its primary ammo,
+				but, unless the controller will replace RocketAmmo, it shouldn't spawn
+				rockets nearly as commonly as bullets.
+				So, we use Chaingun as weapon2 for Clip/Clipbox replacements, etc.,
+				which will spawn bullets more commonly, but we'll use it as weapon1
+				for RocketAmmo replacements which will spawn rockets more commonly.
+			*/
+			if (weapon2.GetClassName() == "PK_Chaingun") {
+				primary2 = GetDefaultByType(weapon2).ammotype2;
+				secondary2 = GetDefaultByType(weapon2).ammotype1;
+			}
 			//if none of the players have weapon1 and it doesn't exist on the map, increase the chance of spawning ammo for weapon2:
 			if (!CheckExistingWeapons(weapon1))
 				altSetChance *= 1.5;
@@ -410,7 +421,7 @@ Class PK_EquipmentSpawner_Cell : PK_EquipmentSpawner {
 
 Class PK_EquipmentSpawner_CellPack : PK_EquipmentSpawner_Cell {
 	Default {
-		PK_EquipmentSpawner.altSetChance 30; //cell packs are usually placed next to BFG, so it should provide Electrodriver more commonly
+		PK_EquipmentSpawner.altSetChance 30; //cell packs are usually placed next to BFG, so it should provide Electrodriver ammo more commonly
 		PK_EquipmentSpawner.twoPickupsChance 60;
 	}
 }
@@ -446,6 +457,18 @@ Class PK_AmmoSpawner_Stimpack : PK_EquipmentSpawner {
 	}
 }
 
+/*	This is a weapon spawner. Even though the total number of weapons in Painkiller
+	is the same as in Doom, their power tiers are rather different, and some weapons
+	are more similar to each other (e.g. Chaingun and Rifle).
+	As such, each of Doom's weapons can be replaced with 1 of 2 possible Painkiller 
+	weapons. The spawner checks which weapons are present in players' inventories AND 
+	on the map, then decides which weapon to spawn.
+	The spawning is staggered by 1 tic, so that it can first push the desired weapon
+	into a global array, and then check if that weapon is already present in the array
+	and spawn the other one, if necessary (so that we can get different PK weapons
+	in case there are multiple identical Doom pickups).
+*/
+
 Class PK_BaseWeaponSpawner : PK_EquipmentSpawner {
 	Class<Inventory> toSpawn;
 	PK_ReplacementHandler rhandler;
@@ -459,9 +482,10 @@ Class PK_BaseWeaponSpawner : PK_EquipmentSpawner {
 		if (!weapon1) {
 			return;
 		}
+		// First round only checks the players' inventories to determine what to spawn
+		
 		tospawn = weapon1;
 		//check if players have weapon1 and weapon2 or those exist on the map:
-		//let rhandler = PK_ReplacementHandler(EventHandler.Find("PK_ReplacementHandler"));
 		bool have1 = (PK_MainHandler.CheckPlayersHave(weapon1));
 		bool have2 = weapon2 && (PK_MainHandler.CheckPlayersHave(weapon2));
 		if (weapon2) {
@@ -508,7 +532,9 @@ Class PK_BaseWeaponSpawner : PK_EquipmentSpawner {
 			Destroy();
 			return;
 		}
-		//if we stagger spawning, push the desired weapon into array of all weapons on the map instead of spawning directly:
+		/*if we stagger spawning, push the desired weapon into array
+		  of all weapons on the map instead of spawning directly:
+		*/
 		else {
 			rhandler = PK_ReplacementHandler(EventHandler.Find("PK_ReplacementHandler"));	
 			rhandler.mapweapons.Push(toSpawn);
