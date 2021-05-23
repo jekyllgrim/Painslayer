@@ -770,7 +770,6 @@ Class PK_Pentagram : InvulnerabilitySphere {
 	mixin PK_PlayerSightCheck;
 	mixin PK_SpawnPickupRing;
 	Default {
-		//yscale 0.172;
 		+FLOATBOB
 		+BRIGHT
 		renderstyle 'Add';
@@ -778,6 +777,7 @@ Class PK_Pentagram : InvulnerabilitySphere {
 		FloatBobStrength 0.35;
 		PK_Pentagram.ringcolor "FF1904";
 		inventory.pickupsound "pickups/powerups/invulnerability";
+		scale 1.5;
 	}
 	override void Tick() {
 		super.Tick();
@@ -787,18 +787,19 @@ Class PK_Pentagram : InvulnerabilitySphere {
 			canSeePlayer = CheckPlayerSights();
 		if (canSeePlayer)
 			A_SpawnParticle(
-				"d11904",
+				"fc5a2d",
 				SPF_FULLBRIGHT|SPF_RELVEL|SPF_RELACCEL,
 				lifetime:random(20,60),size:frandom[sfx](2,4.2),
 				angle:frandom[sfx](0,359),
 				xoff:frandom[sfx](-12,12),yoff:frandom[sfx](-12,12),zoff:frandom[sfx](32,56) + GetBobOffset(),
-				velx:frandom[sfx](0.5,1.5),velz:frandom[sfx](0.2,1),accelx:frandom[sfx](-0.1,-0.3),accelz:-0.01,
+				velx:frandom[sfx](0.5,1.5),velz:frandom[sfx](0.3,1.5),accelx:frandom[sfx](-0.05,-0.12),accelz:-0.01,
 				startalphaf:0.9,sizestep:-0.1
 			);
 	}
 	States {
 	Spawn:
-		BAL1 ABCDEFGHIJKLMNOP 5;
+		BAL1 ABCDEFGHIJKLMNOPQRSTUVWXYZ 5;
+		BAL2 ABCDEFGHIJKLMNOPQRSTUV 5;
 		loop;
 	}
 }
