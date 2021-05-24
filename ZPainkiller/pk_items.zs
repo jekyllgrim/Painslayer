@@ -378,7 +378,8 @@ Class PK_Soul : PK_Inventory {
 	Class<Actor> bearer;
 	Default {
 		+INVENTORY.NEVERRESPAWN
-		+BRIGHT;
+		+BRIGHT
+		+DONTGIB
 		PK_Soul.maxage 350;
 		inventory.pickupmessage "";
 		inventory.amount 2;
@@ -390,6 +391,8 @@ Class PK_Soul : PK_Inventory {
 		alpha 1;
 		xscale 0.3;
 		yscale 0.26;
+		radius 16;
+		height 20;
 		inventory.pickupsound "pickups/soul";
 	}
 	override void PostBeginPlay() {
@@ -685,7 +688,7 @@ Class PK_WeaponModifier : PK_PowerUp {
 		yscale 0.36;
 		+FLOATBOB
 		FloatBobStrength 0.32;
-		PK_PowerUp.ringcolor "ff3e03";
+		PK_PowerUp.ringcolor "f77300";
 	}
 	override void Tick() {
 		super.Tick();
