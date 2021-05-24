@@ -15,10 +15,13 @@ Class PainkillerHUD : BaseStatusBar {
 	
 	
 	void DrawMonsterArrow(double ascale = 2., vector2 apos = (960,92), vector2 shadowofs = (0,0)) {
-		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos,rotation:arrowangle,scale:(ascale,ascale),tint:color(256,0,0,0));	//dark arrow outline
-		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos,rotation:arrowangle,scale:(ascale,ascale)*0.8);	//arrow
+		vector2 hscale = GetHUDScale();
+        hscale = ( int(hscale.x), int(hscale.x) );
+        vector2 rscale = ascale * hscale / 5;
+		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos,rotation:arrowangle,scale:rscale,tint:color(256,0,0,0));	//dark arrow outline
+		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos,rotation:arrowangle,scale:rscale*0.8);	//arrow
 		if (shadowofs != (0,0))
-			PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos + shadowofs,rotation:arrowangle,scale:(ascale,ascale),alpha:0.45,tint:color(256,48,0,0));
+			PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos + shadowofs,rotation:arrowangle,scale:rscale,alpha:0.45,tint:color(256,48,0,0));
 	}
 	
 	override void Init() {
@@ -32,7 +35,7 @@ Class PainkillerHUD : BaseStatusBar {
 		Super.Draw (state, TicFrac);
 		hudstate = state;
 		//the hud is completely skipped if automap is active or the player is in a demon mode
-		if (state == HUD_none || automapactive || isDemon)
+		if (state == HUD_none || automapactive || (isDemon && !pk_debugmessages))
 			return;
 		BeginHUD(forcescaled:true);
 		//DrawVisualElements();
