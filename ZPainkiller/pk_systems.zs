@@ -166,6 +166,10 @@ Class PK_DemonWeapon : PKWeapon {
 			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "waveAmount", 10 );
 			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "centerX", 0.5 );
 			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "centerY", 0.5 );
+			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "rippleTimer", 0);
+			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "amount", 0 );
+			rippleTimer = 0;
+			runRipple = false;
 		}
 		handler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));
 		if (handler) {
