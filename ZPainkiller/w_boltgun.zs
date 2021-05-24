@@ -4,6 +4,7 @@ Class PK_Boltgun : PKWeapon {
 	const scopeOfs = 14;
 	private vector2 prevOfs;
 	Default {
+		+PKWeapon.NOAUTOSECONDARY
 		PKWeapon.emptysound "weapons/empty/rifle";
 		weapon.slotnumber 	7;
 		weapon.ammotype1	"PK_BoltAmmo";

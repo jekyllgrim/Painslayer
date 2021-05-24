@@ -5,6 +5,9 @@
 
 Class PKWeapon : Weapon abstract {
 	mixin PK_Math;
+	protected int PKWflags;
+	FlagDef NOAUTOPRIMARY : PKWflags, 0;
+	FlagDef NOAUTOSECONDARY : PKWflags, 1;
 	sound emptysound;
 	property emptysound : emptysound;
 	protected bool hasDexterity;
@@ -14,6 +17,7 @@ Class PKWeapon : Weapon abstract {
 	protected bool alwaysbob;
 	property alwaysbob : alwaysbob;
 	protected double spitch;
+	protected bool holdFireOnSelect; //a version of NOAUTOFIRE but for one attack only. See Chaingun and Boltgun
 	Default {
 		PKWeapon.alwaysbob true;
 		weapon.BobRangeX 0.31;
@@ -36,7 +40,7 @@ Class PKWeapon : Weapon abstract {
 		}
 		spitch = frandompick[sfx](-0.1,0.1);
 	}
-	override void Tick() {
+	/*override void Tick() {
 		super.Tick();
 		if (owner || isFrozen())
 			return;
@@ -44,7 +48,7 @@ Class PKWeapon : Weapon abstract {
 		A_SetPitch(pitch+spitch,SPF_INTERPOLATE);
 		if (abs(pitch) > 8)
 			spitch *= -1;
-	}
+	}*/
 	override void DoEffect() {
 		Super.DoEffect();
 		if (!owner)
@@ -129,12 +133,24 @@ Class PKWeapon : Weapon abstract {
 				A_StartSound(invoker.emptysound);
 			flags |= WRF_NOPRIMARY;
 		}
+		else if (invoker.bNOAUTOPRIMARY) {
+			if (!(player.oldbuttons & BT_ATTACK))
+				invoker.holdFireOnSelect = false;
+			if (invoker.holdFireOnSelect)
+				flags |= WRF_NOPRIMARY;
+		}
 		if ((player.cmd.buttons & BT_ALTATTACK) && (!invoker.ammo2 || invoker.ammo2.amount < invoker.ammouse2)) {
 			A_ClearRefire();
 			//console.printf("%s out of %s: have %d, needed %d",invoker.GetClassName(),invoker.ammo2.GetClassName(),invoker.ammo2.amount,invoker.ammouse2);
 			if (!(player.oldbuttons & BT_ALTATTACK))
 				A_StartSound(invoker.emptysound);
 			flags |= WRF_NOSECONDARY;
+		}
+		else if (invoker.bNOAUTOSECONDARY) {
+			if (!(player.oldbuttons & BT_ALTATTACK))
+				invoker.holdFireOnSelect = false;
+			if (invoker.holdFireOnSelect)
+				flags |= WRF_NOSECONDARY;
 		}
 		A_WeaponReady(flags);
 	}
@@ -154,6 +170,11 @@ Class PKWeapon : Weapon abstract {
 		TNT1 A 0 A_Lower();
 		wait;
 	Select:
+		TNT1 A 0 {
+			if ((invoker.bNOAUTOPRIMARY && player.cmd.buttons & BT_ATTACK && player.oldbuttons & BT_ATTACK) ||
+				(invoker.bNOAUTOSECONDARY && player.cmd.buttons & BT_ALTATTACK && player.oldbuttons & BT_ALTATTACK))
+				invoker.holdFireOnSelect = true;
+		}
 		TNT1 A 0 A_Raise();
 		wait;
 	LoadSprites:
@@ -303,10 +324,27 @@ Class PK_WeaponIcon : Actor {
 		}
 		FloatBobStrength = weap.FloatBobStrength;
 		FloatBobPhase = weap.FloatBobPhase;
-		if (weap.GetClassName() == "PK_Shotgun")
+		name weapcls = weap.GetClassName();
+		switch (weapcls) {
+		case 'PK_Shotgun':
 			frame = 0;
-		else if (weap.GetClassName() == "PK_Stakegun")
+			break;
+		case 'PK_Stakegun':
 			frame = 1;
+			break;
+		case 'PK_Chaingun':
+			frame = 2;
+			break;
+		case 'PK_ElectroDriver':
+			frame = 3;
+			break;
+		case 'PK_Rifle':
+			frame = 4;
+			break;
+		case 'PK_Boltgun':
+			frame = 5;
+			break;
+		}
 	}
 	override void Tick () {
 		if (!weap || weap.owner) {

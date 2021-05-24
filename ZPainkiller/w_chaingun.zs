@@ -4,9 +4,9 @@ Class PK_Chaingun : PKWeapon {
 	private bool hideFlash;
 	private int atkframe;
 	private int atkframeDelay;
-	private bool holdFireOnSelect; //a version of NOAUTOFIRE but for primary attack only
 	Default {
 		//+WEAPON.NOAUTOFIRE
+		+PKWeapon.NOAUTOPRIMARY
 		PKWeapon.emptysound "weapons/empty/chaingun";
 		weapon.slotnumber 4;
 		weapon.ammotype1	"PK_GrenadeAmmo";
@@ -71,12 +71,12 @@ Class PK_Chaingun : PKWeapon {
 		MIGN A 1 {
 			invoker.holddur = 0;
 			//don't let the player fire primary if they're holding Fire since the moment of selection:
-			if (!(player.oldbuttons & BT_ATTACK))
+			/*if (!(player.oldbuttons & BT_ATTACK))
 				invoker.holdFireOnSelect = false;
 			int fflags;
 			if (invoker.holdFireOnSelect)
-				fflags |= WRF_NOPRIMARY;
-			PK_WeaponReady(fflags);
+				fflags |= WRF_NOPRIMARY;*/
+			PK_WeaponReady();
 		}
 		loop;
 	Fire:
