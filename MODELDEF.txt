@@ -1,72 +1,3 @@
-Model PK_Pentagram {
-	Path "models/penta"
-	Model 0 "penta2.md3"
-	DONTCULLBACKFACES
-	INTERPOLATEDOUBLEDFRAMES
-	ZOffset 10
-	
-	FrameIndex	BAL1	A	0	0
-	FrameIndex	BAL1	B	0	1
-	FrameIndex	BAL1	C	0	2
-	FrameIndex	BAL1	D	0	3
-	FrameIndex	BAL1	E	0	4
-	FrameIndex	BAL1	F	0	5
-	FrameIndex	BAL1	G	0	6
-	FrameIndex	BAL1	H	0	7
-	FrameIndex	BAL1	I	0	8
-	FrameIndex	BAL1	J	0	9
-	FrameIndex	BAL1	K	0	10
-	FrameIndex	BAL1	L	0	11
-	FrameIndex	BAL1	M	0	12
-	FrameIndex	BAL1	N	0	13
-	FrameIndex	BAL1	O	0	14
-	FrameIndex	BAL1	P	0	15
-	FrameIndex	BAL1	Q	0	16
-	FrameIndex	BAL1	R	0	17
-	FrameIndex	BAL1	S	0	18
-	FrameIndex	BAL1	T	0	19
-	FrameIndex	BAL1	U	0	20
-	FrameIndex	BAL1	V	0	21
-	FrameIndex	BAL1	W	0	22
-	FrameIndex	BAL1	X	0	23
-	FrameIndex	BAL1	Y	0	24
-	FrameIndex	BAL1	Z	0	25
-	FrameIndex	BAL2	A	0	26
-	FrameIndex	BAL2	B	0	27
-	FrameIndex	BAL2	C	0	28
-	FrameIndex	BAL2	D	0	29
-	FrameIndex	BAL2	E	0	30
-	FrameIndex	BAL2	F	0	31
-	FrameIndex	BAL2	G	0	32
-	FrameIndex	BAL2	H	0	33
-	FrameIndex	BAL2	I	0	34
-	FrameIndex	BAL2	J	0	35
-	FrameIndex	BAL2	K	0	36
-	FrameIndex	BAL2	L	0	37
-	FrameIndex	BAL2	M	0	38
-	FrameIndex	BAL2	N	0	39
-	FrameIndex	BAL2	O	0	40
-	FrameIndex	BAL2	P	0	41
-	FrameIndex	BAL2	Q	0	42
-	FrameIndex	BAL2	R	0	43
-	FrameIndex	BAL2	S	0	44
-	FrameIndex	BAL2	T	0	45
-	FrameIndex	BAL2	U	0	46
-	FrameIndex	BAL2	V	0	47
-}
-	
-
-Model PK_PickupRing {
-	Path "models"
-	Model 0 "pickup_ring.obj"
-	DONTCULLBACKFACES
-	ROTATING
-	Rotation-Speed 0.65
-	Scale 3 3 3
-	ZOffset 0.1
-	FrameIndex BAL1 A 0 0
-}
-
 Model PK_Shotgun {
 	Path "models/shotgun"
 	Model 0 "item_shotgun.obj"
@@ -75,6 +6,8 @@ Model PK_Shotgun {
 	ZOffset 64
 	USEACTORROLL
 	USEACTORPITCH
+	ROTATING
+	rotation-vector 0.1 1 0
 	
 	FrameIndex BAL1 A 0 0
 }
@@ -86,6 +19,8 @@ Model PK_Stakegun {
 	ZOffset 64
 	USEACTORROLL
 	USEACTORPITCH
+	ROTATING
+	rotation-vector 0.1 1 0
 	
 	FrameIndex BAL1 A 0 0
 }
@@ -98,6 +33,8 @@ Model PK_Chaingun {
 	ZOffset 16
 	USEACTORROLL
 	USEACTORPITCH
+	ROTATING
+	rotation-vector 0.1 1 0
 	
 	FrameIndex BAL1 A 0 0
 }
@@ -108,6 +45,8 @@ Model PK_Electrodriver {
 	ZOffset 64
 	USEACTORROLL
 	USEACTORPITCH
+	ROTATING
+	rotation-vector 0.1 1 0
 	
 	FrameIndex BAL1 A 0 0
 }
@@ -119,6 +58,8 @@ Model PK_Rifle {
 	ZOffset 16
 	USEACTORROLL
 	USEACTORPITCH
+	ROTATING
+	rotation-vector 0.1 1 0
 	
 	FrameIndex BAL1 A 0 0
 }
@@ -130,6 +71,8 @@ Model PK_Boltgun {
 	ZOffset 70
 	USEACTORROLL
 	USEACTORPITCH
+	ROTATING
+	rotation-vector 0.1 1 0
 	
 	FrameIndex BAL1 A 0 0
 }
@@ -406,4 +349,73 @@ Model PK_Lightning2 {
 	AngleOffset 0
 	SurfaceSkin 0 0 "lightning/electrobolt_10.png"	
 	FrameIndex MODL J 0 0
+}
+
+Model PK_Pentagram {
+	Path "models/penta"
+	Model 0 "penta2.md3"
+	DONTCULLBACKFACES
+	INTERPOLATEDOUBLEDFRAMES
+	ZOffset 10
+	
+	FrameIndex	BAL1	A	0	0
+	FrameIndex	BAL1	B	0	1
+	FrameIndex	BAL1	C	0	2
+	FrameIndex	BAL1	D	0	3
+	FrameIndex	BAL1	E	0	4
+	FrameIndex	BAL1	F	0	5
+	FrameIndex	BAL1	G	0	6
+	FrameIndex	BAL1	H	0	7
+	FrameIndex	BAL1	I	0	8
+	FrameIndex	BAL1	J	0	9
+	FrameIndex	BAL1	K	0	10
+	FrameIndex	BAL1	L	0	11
+	FrameIndex	BAL1	M	0	12
+	FrameIndex	BAL1	N	0	13
+	FrameIndex	BAL1	O	0	14
+	FrameIndex	BAL1	P	0	15
+	FrameIndex	BAL1	Q	0	16
+	FrameIndex	BAL1	R	0	17
+	FrameIndex	BAL1	S	0	18
+	FrameIndex	BAL1	T	0	19
+	FrameIndex	BAL1	U	0	20
+	FrameIndex	BAL1	V	0	21
+	FrameIndex	BAL1	W	0	22
+	FrameIndex	BAL1	X	0	23
+	FrameIndex	BAL1	Y	0	24
+	FrameIndex	BAL1	Z	0	25
+	FrameIndex	BAL2	A	0	26
+	FrameIndex	BAL2	B	0	27
+	FrameIndex	BAL2	C	0	28
+	FrameIndex	BAL2	D	0	29
+	FrameIndex	BAL2	E	0	30
+	FrameIndex	BAL2	F	0	31
+	FrameIndex	BAL2	G	0	32
+	FrameIndex	BAL2	H	0	33
+	FrameIndex	BAL2	I	0	34
+	FrameIndex	BAL2	J	0	35
+	FrameIndex	BAL2	K	0	36
+	FrameIndex	BAL2	L	0	37
+	FrameIndex	BAL2	M	0	38
+	FrameIndex	BAL2	N	0	39
+	FrameIndex	BAL2	O	0	40
+	FrameIndex	BAL2	P	0	41
+	FrameIndex	BAL2	Q	0	42
+	FrameIndex	BAL2	R	0	43
+	FrameIndex	BAL2	S	0	44
+	FrameIndex	BAL2	T	0	45
+	FrameIndex	BAL2	U	0	46
+	FrameIndex	BAL2	V	0	47
+}
+	
+
+Model PK_PickupRing {
+	Path "models"
+	Model 0 "pickup_ring.obj"
+	DONTCULLBACKFACES
+	ROTATING
+	Rotation-Speed 0.65
+	Scale 3 3 3
+	ZOffset 0.1
+	FrameIndex BAL1 A 0 0
 }
