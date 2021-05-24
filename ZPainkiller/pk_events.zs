@@ -151,6 +151,7 @@ Class PK_MainHandler : EventHandler {
 			if (dmc)
 				dmc.GiveSoul(amt);
 		}
+		//PKDEMON cheat (turns you into demon instantly)
 		if (e.name == "PK_DemonMorph") {
 			let dmc = PK_DemonMorphControl(plr.FindInventory("PK_DemonMorphControl"));
 			if (dmc)
@@ -339,11 +340,26 @@ Class PK_MainHandler : EventHandler {
 		if (!player || !player.mo)
 			return;
 		let plr = player.mo;		
-		if (plr && plr.FindInventory("PK_CardControl")) {
-			let control = PK_CardControl(plr.FindInventory("PK_CardControl"));
-			if (control)
-				control.StopGoldenCards();
+		let control = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		if (control) {
+			control.StopGoldenCards();
+			if (pk_debugmessages)
+				console.printf("Stopping golden cards for player %d",plr.PlayerNumber());
 		}
+	}
+	void StopPlayerDemonMorph(PlayerInfo player) {
+		if (!player || !player.mo)
+			return;
+		let plr = player.mo;
+		let control = PK_DemonMorphControl(plr.FindInventory("PK_DemonMorphControl"));
+		if (control) {
+			control.pk_souls = 0;
+			if (pk_debugmessages)
+				console.printf("Soul count for player %d set to %d",plr.PlayerNumber(),control.pk_souls);
+		}
+		if (pk_debugmessages)
+			console.printf("Removing demon weapon from player %d",plr.PlayerNumber());
+		plr.TakeInventory("PK_DemonWeapon",999);
 	}
 	override void PlayerDied (PlayerEvent e) {
 		PlayerInfo player = players[e.PlayerNumber];
@@ -355,22 +371,13 @@ Class PK_MainHandler : EventHandler {
 				player.SetPSprite(i,null);
 		}
 	}
-	override void PlayerDisconnected (PlayerEvent e) {
-		StopPlayerGoldenCards(players[e.PlayerNumber]);
-	}
 	override void WorldUnloaded (WorldEvent e) {
 		for (int pn = 0; pn < MAXPLAYERS; pn++) {
 			if (!playerInGame[pn])
 				continue;
 			PlayerInfo plr = players[pn];
-			if (!plr || !plr.mo)
-				continue;
-			let control = PK_CardControl(plr.mo.FindInventory("PK_CardControl"));
-			if (control) {
-				control.StopGoldenCards();
-				if (pk_debugmessages)
-					console.printf("Stopping golden cards for player %d",pn);
-			}
+			StopPlayerGoldenCards(plr);
+			StopPlayerDemonMorph(plr);
 		}
 	}
 }
