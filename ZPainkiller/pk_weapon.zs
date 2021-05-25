@@ -17,7 +17,7 @@ Class PKWeapon : Weapon abstract {
 	protected bool alwaysbob;
 	property alwaysbob : alwaysbob;
 	protected double spitch;
-	protected bool holdFireOnSelect; //a version of NOAUTOFIRE but for one attack only. See Chaingun and Boltgun
+	protected bool holdFireOnSelect; //a version of NOAUTOFIRE but for one attack only. It also only prevents firing in select and doesn't affect the refire function. See Chaingun and Boltgun
 	Default {
 		PKWeapon.alwaysbob true;
 		weapon.BobRangeX 0.31;
