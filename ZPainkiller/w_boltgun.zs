@@ -277,7 +277,7 @@ Class PK_Bolt : PK_Stake {
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		sprite = GetSpriteIndex("BOLT");
-		basedmg = mod ? 60 : 40;
+		basedmg = mod ? 70 : 53;
 		onFire = true; //this prevents it from spawning the fire trail that the stake would spawn after 12 tics
 		if (mod)
 			trailcolor = "F43510";
