@@ -326,10 +326,10 @@ Class PK_EquipmentSpawner : Actor {
 				which will spawn bullets more commonly, but we'll use it as weapon1
 				for RocketAmmo replacements which will spawn rockets more commonly.
 			*/
-			if (weapon2.GetClassName() == "PK_Chaingun") {
+			/*if (weapon2.GetClassName() == "PK_Chaingun") {
 				primary2 = GetDefaultByType(weapon2).ammotype2;
 				secondary2 = GetDefaultByType(weapon2).ammotype1;
-			}
+			}*/
 			//if none of the players have weapon1 and it doesn't exist on the map, increase the chance of spawning ammo for weapon2:
 			if (!CheckExistingWeapons(weapon1))
 				altSetChance *= 1.5;
