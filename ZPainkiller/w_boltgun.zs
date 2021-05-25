@@ -18,7 +18,7 @@ Class PK_Boltgun : PKWeapon {
 		inventory.pickupsound "pickups/weapons/Boltgun";
 		Tag "$PK_BOLTGUN_TAG";
 	}
-	/*override void DoEffect() {
+	override void DoEffect() {
 		super.DoEffect();
 		if (!owner || !owner.player)
 			return;
@@ -26,15 +26,17 @@ Class PK_Boltgun : PKWeapon {
 			scopedelay--;
 			return;
 		}
-		let plr = owner.player;
 		let wpn = owner.player.readyweapon;
+		if (wpn != self)
+			return;
+		let plr = owner.player;
 		if (plr.cmd.buttons & BT_ZOOM && !(plr.oldbuttons & BT_ZOOM)) {
 			scopedelay = 5;
 			scoped = !scoped;
 			state scopestate = scoped ? ResolveState("GoScope") : ResolveState("Unscope");
 			plr.SetPSprite(PSP_HIGHLIGHTS,scopestate);
 		}
-	}*/
+	}
 	states {
 	Cache:		
 		BGUN ABCD 0;
@@ -60,6 +62,10 @@ Class PK_Boltgun : PKWeapon {
 	Ready:
 		BGUN A 1 {
 			PK_WeaponReady(WRF_NOBOB);
+			vector2 wofs = (0,32);
+			if (invoker.scoped)
+				wofs += (invoker.scopeOfs,invoker.scopeOfs) * 3;
+			A_WeaponOffset(wofs.x,wofs.y);
 			if (invoker.ammo2.amount < 10) {
 				let psp = player.FindPSprite(OverlayID());
 				if (psp)
@@ -67,7 +73,7 @@ Class PK_Boltgun : PKWeapon {
 			}
 			A_Overlay(PSP_OVERGUN,"Bolts",nooverride:true);
 			A_Overlay(PSP_SCOPE3,"Scope",nooverride:true);
-			if (player.cmd.buttons & BT_ZOOM && !(player.oldbuttons & BT_ZOOM)) {
+			/*if (player.cmd.buttons & BT_ZOOM && !(player.oldbuttons & BT_ZOOM)) {
 				if (!invoker.scoped) {
 					A_ZoomFactor(2);
 					A_Overlay(PSP_HIGHLIGHTS,"GoScope",nooverride:true);
@@ -77,7 +83,7 @@ Class PK_Boltgun : PKWeapon {
 					A_ZoomFactor(1.0);
 					invoker.scoped = false;
 				}
-			}
+			}*/
 		}
 		loop;
 	GoScope:
@@ -158,8 +164,8 @@ Class PK_Boltgun : PKWeapon {
 		#### A 4 {
 			if (!CheckInfiniteAmmo())
 				TakeInventory(invoker.ammo1.GetClass(),1);
-			int xofs = invoker.scoped ? 0 : 3;
-			int yofs = invoker.scoped ? 11 : 5;
+			double xofs = invoker.scoped ? 0 : 3;
+			double yofs = invoker.scoped ? 11 : 5;
 			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
 			A_StartSound("weapons/boltgun/fire1",CHAN_5);
 			A_WeaponOffset(4,4,WOF_ADD);
@@ -167,10 +173,10 @@ Class PK_Boltgun : PKWeapon {
 		#### B 4 {
 			if (!CheckInfiniteAmmo())
 				TakeInventory(invoker.ammo1.GetClass(),2);
-			int xofs = invoker.scoped ? -3 : 0;
-			int yofs = invoker.scoped ? 9 : 3;
+			double xofs = invoker.scoped ? -1.5 : 0;
+			double yofs = invoker.scoped ? 10 : 3;
 			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
-			xofs = invoker.scoped ? 3 : 6;
+			xofs = invoker.scoped ? 1.5 : 6;
 			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
 			A_StartSound("weapons/boltgun/fire2",CHAN_6);
 			A_WeaponOffset(4,4,WOF_ADD);
@@ -178,10 +184,10 @@ Class PK_Boltgun : PKWeapon {
 		#### C 2 {
 			if (!CheckInfiniteAmmo())
 				TakeInventory(invoker.ammo1.GetClass(),2);
-			int xofs = invoker.scoped ? -6 : -3;
-			int yofs = invoker.scoped ? 7 : 1;
+			double xofs = invoker.scoped ? -3 : -3;
+			double yofs = invoker.scoped ? 9 : 1;
 			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
-			xofs = invoker.scoped ? 6 : 9;
+			xofs = invoker.scoped ? 3 : 9;
 			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
 			A_StartSound("weapons/boltgun/fire3",CHAN_7);
 			A_WeaponOffset(4,4,WOF_ADD);
