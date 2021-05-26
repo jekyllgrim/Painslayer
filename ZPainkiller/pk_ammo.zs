@@ -158,7 +158,7 @@ Class PK_FuelAmmo : Ammo {
 		inventory.pickupmessage "$PKI_FUELAMMO";
 		inventory.pickupsound "pickups/ammo/fuel";
 		inventory.icon "pkhfuel";
-		inventory.amount 50;
+		inventory.amount 80;
 		inventory.maxamount 500;
 		ammo.backpackamount 200;
 		ammo.backpackmaxamount 500;
