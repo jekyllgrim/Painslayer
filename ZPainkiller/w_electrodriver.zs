@@ -115,17 +115,17 @@ Class PK_ElectroDriver : PKWeapon {
 	AltHold:
 		ELDR A 1 {
 			bool infin = CheckInfiniteAmmo();
-			if (player.cmd.buttons & BT_ATTACK && (invoker.ammo2.amount >= 40 || infin)) {
+			if (player.cmd.buttons & BT_ATTACK && (invoker.ammo2.amount >= 80 || infin)) {
 				A_WeaponOffset(0,32);
 				if (!infin)
-					TakeInventory(invoker.ammotype2,40);
+					TakeInventory(invoker.ammotype2,80);
 				A_ClearRefire();
 				A_StopSound(CH_LOOP);
 				return ResolveState("DiskFire");
 			}
 			if (!infin) {
 				invoker.celldepleterate++;
-				int req = invoker.hasDexterity ? 1 : 3;
+				int req = invoker.hasDexterity ? 1 : 2;
 				if (invoker.celldepleterate > req) {				
 					invoker.celldepleterate = 0;
 					if (invoker.ammo2.amount >= 1 && !infin)
