@@ -631,7 +631,7 @@ Class PK_BaseSilverCard : PK_InventoryToken abstract {
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);
 		if (!owner || !owner.player) {
-			DepleteOrDestroy();
+			Destroy();
 			return;
 		}
 		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
@@ -644,7 +644,7 @@ Class PK_BaseSilverCard : PK_InventoryToken abstract {
 	}
 	override void DetachFromOwner() {
 		if (!owner || !owner.player) {
-			DepleteOrDestroy();
+			Destroy();
 			return;
 		}
 		RemoveCard();
@@ -731,22 +731,58 @@ Class PKC_DarkSoul : PK_BaseSilverCard {
 
 //Makes PK_Soul and PK_GoldPikcup descendants fly towards the player (special handling in their Tick when they have a tracer):
 Class PKC_SoulCatcher : PK_BaseSilverCard {
+	protected int effectDistance;
+	property effectDistance : effectDistance;
 	Default {
-		tag "SoulCatcher";
+		PKC_SoulCatcher.effectDistance 144;
+	}
+	/*	Function adapted by Cherno: returns true if there's a potential path between
+		the calling actor (player) and the target actor (soul or gold pickups).
+		It returns true if the actor is on a different elevation or behind a corner
+		but it'll return false if there's an actual wall or a blocking line
+		between the two actors.
+	*/
+	bool CheckPath(Actor from, Actor to) {
+		if (!from || !to)
+			return false;
+		int stepCount = from.Distance2d(to)/from.radius + 1;
+		for (int i = 0; i < stepCount; ++i) {
+			if (from.CheckBlock(CBF_NOACTORS | CBF_ABSOLUTEANGLE, AAPTR_DEFAULT, i*from.radius, 0, 0, from.AngleTo(to))) {
+				return false;
+				break;
+			}
+		}
+		return true;
 	}
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner || !owner.player)
 			return;
-		BlockThingsIterator itr = BlockThingsIterator.Create(owner,144);
+		if (effectDistance <= 0)
+			return;
+		int edist = effectDistance + owner.radius;
+		BlockThingsIterator itr = BlockThingsIterator.Create(owner,edist);
 		while (itr.next()) {
-			let next = itr.thing;
-			if (next && (next is "PK_GoldPickup" || next is "PK_Soul") && !next.tracer) {
-				next.tracer = owner;
+			let trg = itr.thing;
+			if (trg && (trg is "PK_GoldPickup" || trg is "PK_Soul") && !trg.tracer && owner.Distance3D(trg) <= edist && CheckPath(owner,trg)) {
+				trg.tracer = owner;
 				if (pk_debugmessages)
-					console.printf("found %s",next.GetClassName());
+					console.printf("Soul Catcher found %s",trg.GetClassName());
 			}
 		}
+	}
+}
+
+//this is used if the QoL "alaways attract soulds/gold" feature is active
+Class PK_QoLCatcher : PKC_SoulCatcher {
+	Default {
+		PKC_SoulCatcher.effectDistance 80;
+	}
+	override void DoEffect() {
+		if (owner.FindInventory("PKC_SoulCatcher"))
+			return;
+		effectDistance = Clamp(pk_QoLCatcherDistance,0,default.effectDistance);
+		super.DoEffect();
 	}
 }
 

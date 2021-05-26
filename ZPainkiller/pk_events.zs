@@ -327,6 +327,8 @@ Class PK_MainHandler : EventHandler {
 			plr.GiveInventory("PK_CardControl",1);
 		if (!plr.FindInventory("PK_InvReplacementControl"))
 			plr.GiveInventory("PK_InvReplacementControl",1);
+		if (!plr.FindInventory("PK_QoLCatcher"))
+			plr.GiveInventory("PK_QoLCatcher",1);
 		/*let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (cardcontrol) {
 			cardcontrol.RefreshCards();
