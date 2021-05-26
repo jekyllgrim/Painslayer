@@ -1,1 +1,37 @@
 server int pk_debugmessages = 0;
+server int pk_QoLCatcherDistance = 0;
+
+//// MENU TOOLTIPS
+
+user bool pktltp_show_tips = true;
+user bool pktltp_show_delay = false;
+user bool pktltp_delay_skip = true;
+user int pktltp_delay_tics = 25;
+user bool pktltp_time_out = false;
+user int pktltp_time_out_val = 5;
+user bool pktltp_draw_order = false;
+
+user bool pktltp_border_toggle = false;
+user bool pktltp_border_type = true;
+user int pktltp_border_horizontal_thickness = 3;
+user int pktltp_border_vertical_thickness = 3;
+user color pktltp_border_color;
+user float pktltp_border_alpha = 1.0;
+
+user bool pktltp_show_background = true;
+user int pktltp_background_name = 2;
+user bool pktltp_background_mode = false;
+user int pktltp_background_horizontal_padding = 9;
+user int pktltp_background_vertical_padding = 3;
+
+user int pktltp_tooltip_location = 5;
+user int pktltp_location_horizontal_margin = 10;
+user int pktltp_location_vertical_margin = 10;
+user int pktltp_tooltip_alignment = 2;
+
+user int pktltp_tooltip_font = 2;
+user string pktltp_tooltip_font_name;
+user bool pktltp_font_color_override = true;
+user int pktltp_font_color = 23;
+
+user bool pktltp_i_disabledOptions = true;

@@ -4,6 +4,8 @@ version "4.5.0"
 #include "ZPainkiller/klazer/KLAZ_Beam.zsc"
 #include "ZPainkiller/mk_matrix.zsc"
 #include "ZPainkiller/StatusScreen_base.zsc"
+#include "ZPainkiller/Tooltips/ToolTips_Lists.zs"
+#include "ZPainkiller/Tooltips/ToolTips_Options.zs"
 
 #include "ZPainkiller/pk_constants.zs"
 #include "ZPainkiller/pk_main.zs"
