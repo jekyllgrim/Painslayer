@@ -22,15 +22,18 @@ Class PK_Rifle : PKWeapon {
 		inventory.pickupsound "pickups/weapons/rifle";
 		Tag "$PK_RIFLE_TAG";
 	}
-	action void FireFlameThrower() {		
-		let flm = PK_FlameThrowerFlame(A_FireProjectile("PK_FlameThrowerFlame",angle:frandom[flt](-3,3),useammo:false, spawnofs_xy:3,spawnheight:4,pitch:frandom[flt](-3,3)));	
-		if (flm) {
-			flm.realspeed = 7.2;
-			flm.addvel = true;
-			if (invoker.hasWmod) {
-				flm.scale *= 1.5;
-				flm.realspeed *= 1.5;
-				flm.A_SetSize(flm.radius * 1.2, flm.height * 1.2);
+	action void FireFlameThrower() {
+		int projnum = CheckInfiniteAmmo() ? 2 : 1;
+		for (int i = projnum; i > 0; i--) {	
+			let flm = PK_FlameThrowerFlame(A_FireProjectile("PK_FlameThrowerFlame",angle:frandom[flt](-3,3),useammo:false, spawnofs_xy:3,spawnheight:4,pitch:frandom[flt](-3,3)));	
+			if (flm) {
+				flm.realspeed = 7.2;
+				flm.addvel = true;
+				if (invoker.hasWmod) {
+					flm.scale *= 1.5;
+					flm.realspeed *= 1.5;
+					flm.A_SetSize(flm.radius * 1.2, flm.height * 1.2);
+				}
 			}
 		}
 	}
@@ -116,6 +119,12 @@ Class PK_Rifle : PKWeapon {
 		if (psph)
 			A_OverlayScale (PSP_HIGHLIGHTS, Clamp(pspb.scale.x- deduct,1,99), Clamp(pspb.scale.y- deduct,1,99),WOF_INTERPOLATE);
 	}
+	action void DrawRifleOverlays(bool nooverride = true) {
+		A_Overlay(RIFLE_BOLT,"Bolt",nooverride:nooverride);
+		A_Overlay(RIFLE_STOCK,"Stock",nooverride:nooverride);
+		A_Overlay(RIFLE_BARREL,"Barrel",nooverride:nooverride);
+		A_Overlay(RIFLE_STRAP,"Strap",nooverride:nooverride);
+	}
 	states {
 	Spawn:
 		BAL1 A -1;
@@ -140,10 +149,7 @@ Class PK_Rifle : PKWeapon {
 			}
 			PK_WeaponReady(flags:fflags);
 			invoker.shots = 0;
-			A_Overlay(RIFLE_BOLT,"Bolt",nooverride:true);
-			A_Overlay(RIFLE_STOCK,"Stock",nooverride:true);
-			A_Overlay(RIFLE_BARREL,"Barrel",nooverride:true);
-			A_Overlay(RIFLE_STRAP,"Strap",nooverride:true);
+			DrawRifleOverlays();
 		}
 		loop;
 	Strap:
@@ -252,17 +258,16 @@ Class PK_Rifle : PKWeapon {
 				return ResolveState("ComboFire");
 			}
 			if (!infin) {
-				invoker.fuelDepleteRate++;
-				int req = invoker.hasDexterity ? 1 : 3;
-				if (invoker.fuelDepleteRate > req) {
-					invoker.fuelDepleteRate = 0;
-					if (invoker.ammo2.amount >= 1 && !infin)
-						TakeInventory(invoker.ammotype2,1);
-					else if (!infin) {
+				//invoker.fuelDepleteRate++;
+				int req = invoker.hasDexterity ? 2 : 1;
+				//if (invoker.fuelDepleteRate > req) {
+					//invoker.fuelDepleteRate = 0;
+					if (invoker.ammo2.amount >= req)
+						TakeInventory(invoker.ammotype2,req);
+					else
 						return ResolveState("AltHoldEnd");
-					}
-				}
-			}	
+				//}
+			}
 			A_Overlay(PSP_HIGHLIGHTS,"FlameHighlights");
 			PK_AttackSound("weapons/rifle/flameloop",CH_LOOP,flags:CHANF_LOOPING);
 			DampedRandomOffset(3,3,3);
@@ -274,16 +279,13 @@ Class PK_Rifle : PKWeapon {
 			return ResolveState(null);
 		}
 		TNT1 A 0 {
-			if (CountInv(invoker.ammotype2) <= 0)
-				return ResolveState("AltHoldEnd");
 			if (waterlevel > 2)
 				A_ClearRefire();
 			else
 				A_ReFire();
-			return ResolveState(null);
 		}
 	AltHoldEnd:
-		TNT1 A 0 {
+		PKRI A 4 {
 			A_ClearRefire();
 			A_RemoveLight('PKWeaponlight');
 			A_StopSound(CH_LOOP);
