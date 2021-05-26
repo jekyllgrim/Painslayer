@@ -23,9 +23,9 @@ Class PK_Rifle : PKWeapon {
 		Tag "$PK_RIFLE_TAG";
 	}
 	action void FireFlameThrower() {
-		int projnum = CheckInfiniteAmmo() ? 2 : 1;
-		for (int i = projnum; i > 0; i--) {	
-			let flm = PK_FlameThrowerFlame(A_FireProjectile("PK_FlameThrowerFlame",angle:frandom[flt](-3,3),useammo:false, spawnofs_xy:3,spawnheight:4,pitch:frandom[flt](-3,3)));	
+		//int projnum = CheckInfiniteAmmo() ? 2 : 1;
+		//for (int i = projnum; i > 0; i--) {	
+			let flm = PK_FlameThrowerFlame(A_FireProjectile("PK_FlameThrowerFlame",angle:frandom[flt](-3,3),/*useammo:false,*/spawnofs_xy:3,spawnheight:4,pitch:frandom[flt](-3,3)));	
 			if (flm) {
 				flm.realspeed = 7.2;
 				flm.addvel = true;
@@ -35,7 +35,7 @@ Class PK_Rifle : PKWeapon {
 					flm.A_SetSize(flm.radius * 1.2, flm.height * 1.2);
 				}
 			}
-		}
+		//}
 	}
 	action void StartStrapSwing(double rfactor = 1.0) {
 		if (!player)
@@ -247,7 +247,7 @@ Class PK_Rifle : PKWeapon {
 			A_ClearOverlays(RIFLE_PILOT,RIFLE_PILOT);
 		}
 	AltHold:
-		PKRI A 1 {				
+		PKRI A 2 {				
 			bool infin = CheckInfiniteAmmo();
 			if (player.cmd.buttons & BT_ATTACK && (invoker.ammo2.amount >= 50 || infin)) {
 				A_RemoveLight('PKWeaponlight');
@@ -257,7 +257,7 @@ Class PK_Rifle : PKWeapon {
 				A_StopSound(CH_LOOP);
 				return ResolveState("ComboFire");
 			}
-			if (!infin) {
+			/*if (!infin) {
 				//invoker.fuelDepleteRate++;
 				int req = invoker.hasDexterity ? 2 : 1;
 				//if (invoker.fuelDepleteRate > req) {
@@ -267,7 +267,7 @@ Class PK_Rifle : PKWeapon {
 					else
 						return ResolveState("AltHoldEnd");
 				//}
-			}
+			}*/
 			A_Overlay(PSP_HIGHLIGHTS,"FlameHighlights");
 			PK_AttackSound("weapons/rifle/flameloop",CH_LOOP,flags:CHANF_LOOPING);
 			DampedRandomOffset(3,3,3);
@@ -501,7 +501,7 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 				hitvictim = victim;
 				ripdepth -= victim.health;
 				int fl = (random[burn](1,3) == 1) ? 0 : DMG_NO_PAIN;
-				victim.DamageMobj(self,target,5,"Fire",flags:DMG_THRUSTLESS|fl);
+				victim.DamageMobj(self,target,8,"Fire",flags:DMG_THRUSTLESS|fl);
 				if (!victim.FindInventory("PK_BurnControl")) {
 					victim.GiveInventory("PK_BurnControl",1);
 					let control = PK_BurnControl(victim.FindInventory("PK_BurnControl"));
