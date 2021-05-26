@@ -436,13 +436,13 @@ Class PK_BurnControl : PK_InventoryToken {
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner || !target || owner.waterlevel > 1) {
-			DepleteOrDestroy();
+			Destroy();
 			return;
 		}
 		if (owner.isFrozen())
 			return;
 		if (timer <= 0) {
-			DepleteOrDestroy();
+			Destroy();
 			return;
 		}
 		timer--;
@@ -721,7 +721,6 @@ Class PK_FlamerTank : PK_Projectile {
 			//console.printf("Landed %d | pitch: %d | targetPitch: %d",landed, tankmodel.pitch, targetPitch);
 			A_SetTics(random[gas](140,180));
 		}
-		goto XDeath;
 	XDeath:
 		TNT1 A 1 {
 			landed = true;
@@ -753,7 +752,27 @@ Class PK_FlamerTank : PK_Projectile {
 			}
 			if (tankmodel)
 				tankmodel.destroy();
-			A_Explode(320,144);
+			int exdist;
+			A_Explode(320,exdist);
+			BlockThingsIterator itr = BlockThingsIterator.Create(self,exdist);
+			while (itr.next()) {
+				let trg = itr.thing;
+				if (!trg || trg == target)
+					continue; 
+				if (!trg.bShootable || !(trg.bIsMonster || (trg is "PlayerPawn")) || target.bKILLED)
+					continue;
+				double cdist = Distance3D(trg);
+				if (cdist > exdist)
+					continue;
+				if (trg.FindInventory("PK_BurnControl"))
+					continue;
+				if (!CheckSight(trg))
+					continue;				
+				trg.GiveInventory("PK_BurnControl",1);
+				let control = PK_BurnControl(trg.FindInventory("PK_BurnControl"));
+				if (control && target)
+					control.target = target;
+			}
 		}
 		stop;
 	}
