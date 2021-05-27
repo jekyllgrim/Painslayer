@@ -9,7 +9,7 @@ AddOptionMenu "OptionsMenu" {
 Optionmenu "PK_Settings" {
 	Class "PKTLTPOptionsMenu"
 	Title "$PKM_TITLE"
-	PKTLTPScaleSlider "$PKM_QOLCATCHER",	"$PKM_QOLCATCHER_Tip", "White", "pk_QoLCatcherDistance", 0, 128, 8, "$PKM_DISABLED"
+	PKTLTPScaleSlider "$PKM_QOLCATCHER",	"$PKM_QOLCATCHER_Tip", "White", "pk_QoLCatcherDistance", 0, 96, 8, "$PKM_DISABLED"
 	StaticText ""
 	StaticText "$TLTPTOOLTIPMNU_VERSION", "yellow"
 	Submenu "$OPTMNU_TLTPTOOLTIP", "TooltipOptionsMenu"
