@@ -879,3 +879,26 @@ Class PK_Pentagram : PK_PowerupGiver {
 		loop;
 	}
 }
+
+Class PK_PowerAntiRad : PowerIronFeet {
+	mixin PK_PowerUp;
+	Default {
+		deathsound "pickups/powerups/radsuitEnd";
+		Powerup.Color "0, 0, 0", 0;
+	}
+}
+
+Class PK_AntiRadArmor : PK_PowerupGiver {
+	Default {
+		Powerup.Type "PK_PowerAntiRad";
+		Inventory.PickupMessage "$PKI_ANTIRAD";
+		PK_PowerUpGiver.pickupRingColor "11821c";
+		inventory.pickupsound "pickups/powerups/radsuit";
+		scale 0.4;	
+	}
+	States {
+	Spawn:
+		HLBO B -1;
+		stop;
+	}
+}	
