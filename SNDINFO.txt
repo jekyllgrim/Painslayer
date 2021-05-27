@@ -312,8 +312,10 @@ pickups/armor/bronze		"sounds/items/item-shield-small.wav"
 pickups/armor/silver		"sounds/items/item-shield-medium.wav"	
 pickups/armor/gold			"sounds/items/item-shield-big.wav"
 
-pickups/powerups/invulnerability "sounds/items/item-pentakl-take.wav"
+pickups/powerups/pentagram "sounds/items/item-pentakl-take.wav"
+pickups/powerups/pentagramEnd "sounds/items/item-pentakl-timeout.ogg"
 pickups/powerups/lightamp "sounds/items/item-pentagram-take.wav"
+pickups/powerups/lightampEnd "sounds/items/item-pentagram-timeout.wav"
 
 pickups/ammopack	"sounds/items/pickup_ammo_megapack.wav"
 
