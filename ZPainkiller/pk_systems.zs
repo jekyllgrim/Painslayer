@@ -449,9 +449,7 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 	Also keeps track of currently active powerups so that the HUD
 	can draw timers for them.
 */
-Class PK_CardControl : PK_InventoryToken {
-	Array < Inventory > activePowerups; //Not related to cards. Stores currently active powerups.
-	
+Class PK_CardControl : PK_InventoryToken {	
 	int pk_gold; //current amount of gold
 	array <name> UnlockedTarotCards; //holds names of all purchased cards for the board
 	name EquippedSlots[5]; //holds names of all cards equipped into slots
@@ -467,12 +465,6 @@ Class PK_CardControl : PK_InventoryToken {
 	Default {
 		PK_CardControl.goldUses 1;
 		PK_CardControl.goldDuration 30;
-	}
-	
-	clearscope Inventory GetActivePowerup(int i) {
-		if (i < 0 || i >= activePowerups.Size())
-			return null;
-		return Inventory(activePowerups[i]);
 	}
 	
 	/*	When you try to use cards when out of uses, a sound will be played
@@ -643,19 +635,6 @@ Class PK_CardControl : PK_InventoryToken {
 			else
 				StopGoldenCards();
 		}
-	}
-	
-	override bool HandlePickup (Inventory item) {
-		bool ret = super.HandlePickup(item);
-		if (!ret)
-			return ret;
-		let iitem = Inventory(item);
-		//if a powerup was picked up, push it into the array:
-		if (iitem && iitem is "Powerup") {
-			if (activePowerups.Find(iitem) == activePowerups.Size())
-				activePowerups.Push(iitem);
-		}
-		return ret;
 	}
 }
 

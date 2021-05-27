@@ -16,7 +16,7 @@ Class PainkillerHUD : BaseStatusBar {
 	void DrawMonsterArrow(double ascale = 2., vector2 apos = (960,92), vector2 shadowofs = (0,0)) {
 		vector2 hscale = GetHUDScale();
         hscale = ( int(hscale.x), int(hscale.x) );
-        vector2 rscale = ascale * hscale / 5;
+        vector2 rscale = hscale * ascale / 5;
 		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos,rotation:arrowangle,scale:rscale,tint:color(256,0,0,0));	//dark arrow outline
 		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos,rotation:arrowangle,scale:rscale*0.8);	//arrow
 		if (shadowofs != (0,0))
@@ -37,8 +37,6 @@ Class PainkillerHUD : BaseStatusBar {
 		if (state == HUD_none || automapactive || (isDemon && !pk_debugmessages))
 			return;
 		BeginHUD(forcescaled:true);
-		//DrawVisualElements();
-		//DrawNumbers();
 		if (state == HUD_Fullscreen || state == HUD_AltHud)
 			DrawTopElements();
 		if (state == HUD_StatusBar || state == HUD_Fullscreen)
@@ -52,6 +50,21 @@ Class PainkillerHUD : BaseStatusBar {
 			DrawKeys(keyofs.x,keyofs.y);
 		}
 		fullscreenOffsets = true;
+	}
+	
+	const PWICONSIZE = 18;
+	override void DrawPowerUps() {
+		Vector2 pos = (-PWICONSIZE / 2, -42);
+		for (let iitem = CPlayer.mo.Inv; iitem != NULL; iitem = iitem.Inv) {
+			let item = Powerup(iitem);
+			if (item != null) {
+				let icon = item.GetPowerupIcon();
+				if (icon && icon.IsValid() && !item.IsBlinking()) {
+					DrawTexture(icon, pos, DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_CENTER, 1.0, (PWICONSIZE, PWICONSIZE));
+				}
+				pos.y -= PWICONSIZE;
+			}
+		}
 	}
 	
 	override void Tick() {
@@ -257,8 +270,7 @@ Class PainkillerHUD : BaseStatusBar {
 		return false;
 	}
 	
-	void DrawKeys(int x, int y)
-	{
+	void DrawKeys(int x, int y) {
 		int yo = y;
 		int xo = x;
 		int i;

@@ -720,7 +720,7 @@ Mixin Class PK_PowerUp {
 			owner.A_StartSound(lastSecondsSound,CHAN_AUTO,CHANF_LOCAL);
 	}
 	override void EndEffect () {
-		if (deathsound && owner && owner.player)
+		if (owner && owner.player && deathsound)
 			owner.A_StartSound(deathsound,CHAN_AUTO,CHANF_LOCAL);
 		super.EndEffect();
 	}
@@ -761,6 +761,7 @@ Class PK_WeaponModifier : Powerup {
 	mixin PK_PowerUp;
 	Default {
 		deathsound "pickups/wmod/end";
+		inventory.icon "wmodicon";
 	}
 }		
 
@@ -812,6 +813,7 @@ Class PK_PowerDemonEyes : PowerTorch {
 	mixin PK_PowerUp;
 	Default {
 		deathsound "pickups/powerups/lightampEnd";
+		inventory.icon "iconeyes";
 	}
 }
 
@@ -838,6 +840,7 @@ Class PK_PowerPentagram : PowerInvulnerable {
 	mixin PK_PowerUp;
 	Default {
 		deathsound "pickups/powerups/pentagramEnd";
+		inventory.icon "penticon";
 	}
 }
 
@@ -884,7 +887,8 @@ Class PK_PowerAntiRad : PowerIronFeet {
 	mixin PK_PowerUp;
 	Default {
 		deathsound "pickups/powerups/radsuitEnd";
-		Powerup.Color "0, 0, 0", 0;
+		Powerup.Color "000000", 0;
+		inventory.icon "HLBOB0";
 	}
 }
 
