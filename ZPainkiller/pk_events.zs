@@ -151,11 +151,17 @@ Class PK_MainHandler : EventHandler {
 			if (dmc)
 				dmc.GiveSoul(amt);
 		}
-		//PKDEMON cheat (turns you into demon instantly)
+		//PKDEMON cheat (toggles demon morph instantly)
 		if (e.name == "PK_DemonMorph") {
 			let dmc = PK_DemonMorphControl(plr.FindInventory("PK_DemonMorphControl"));
-			if (dmc)
-				dmc.GiveSoul(Clamp(dmc.pk_souls + 66,0,66));
+			if (plr.FindInventory("PK_DemonWeapon")) {
+				plr.A_TakeInventory("PK_DemonWeapon");
+				if (dmc)
+					dmc.GiveSoul(-66);
+			}
+			else if (dmc) {
+				dmc.GiveSoul(66);
+			}
 		}
 	}
 	
@@ -420,6 +426,7 @@ Class PK_ReplacementHandler : EventHandler {
 			case 'Infrared'		: e.Replacement = 'PK_DemonEyes';  break;
 			case 'InvulnerabilitySphere'		: e.Replacement = 'PK_Pentagram';  break;
 			case 'Backpack'		: e.Replacement = 'PK_AmmoPack';  break;
+			case 'RadSuit'			: e.Replacement = 'PK_AntiRadArmor';  break;
 		}
 		//e.IsFinal = true;
 	}

@@ -11,8 +11,7 @@ Class PainkillerHUD : BaseStatusBar {
 	private bool isDemon;
 	private PK_Mainhandler mainhandler;
 	
-	PK_CardControl cardcontrol;
-	
+	PK_CardControl cardcontrol;	
 	
 	void DrawMonsterArrow(double ascale = 2., vector2 apos = (960,92), vector2 shadowofs = (0,0)) {
 		vector2 hscale = GetHUDScale();
