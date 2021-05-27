@@ -59,19 +59,26 @@ Class PKWeapon : Weapon abstract {
 		if (alwaysbob && weap == self)
 			owner.player.WeaponState |= WF_WEAPONBOBBING;
 		hasDexterity = owner.FindInventory("PowerDoubleFiringSpeed",true);
-		hasWmod = owner.CountInv("PK_WeaponModifier");
+		hasWmod = owner.FindInventory("PK_WeaponModifier",subclass:true);
 	}
 	
 	action bool CheckInfiniteAmmo() {
 		return (sv_infiniteammo || FindInventory("PowerInfiniteAmmo",true) );
 	}
-	
+	static bool CheckWmod(actor checker) {
+		if (!checker || !checker.player || !checker.player.readyweapon)
+			return false;
+		let weap = PKWeapon(checker.player.readyweapon);
+		if (!weap || !weap.hasWmod)
+			return false;
+		return true;
+	}
 	//plays a sound and also a WeaponModifier sound if Weaponmodifier is in inventory:
 	action void PK_AttackSound(sound snd = "", int channel = CHAN_AUTO, int flags = 0) {
 		if (snd)
 			A_StartSound(snd,channel,flags);
 		//will play it only once for repeating weapons (important):
-		if (CountInv("PK_WeaponModifier") && player && !player.refire) {
+		if (invoker.hasWmod && player && !player.refire) {
 			A_StartSound("pickups/wmod/use",CH_WMOD);
 		}
 	}
@@ -267,7 +274,7 @@ Class PK_BulletPuff : PKPuff {
 			let deb = Spawn("PK_RandomDebris",puffdata.Hitlocation + (0,0,debrisOfz));
 			if (deb)
 				deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
-			bool mod = (target && target.CountInv("PK_WeaponModifier"));
+			bool mod = target && PKWeapon.CheckWmod(target);
 			name lit = mod ? 'PK_BulletPuffMod' : 'PK_BulletPuff';
 			A_AttachLightDef('puf',lit);
 			if (mod || (random[sfx](0,10) > 7)) {
@@ -417,8 +424,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		if (target && target.CountInv("PK_WeaponModifier"))
-			mod = true;
+		mod = target && PKWeapon.CheckWmod(target);
 		if (trailcolor)
 			spawnpos = pos;
 		if (!flarecolor)
@@ -634,8 +640,8 @@ Class PK_BulletTracer : FastProjectile {
 		scale 0.3;
 	}
 	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		if (target && target.CountInv("PK_WeaponModifier")) {
+		super.PostBeginPlay();		
+		if (target && PKWeapon.CheckWmod(target)) {
 			A_SetRenderstyle(5,Style_AddShaded);
 			SetShade("FF2000");
 			scale *= 2;

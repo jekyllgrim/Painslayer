@@ -167,7 +167,7 @@ Class PK_Boltgun : PKWeapon {
 			double xofs = invoker.scoped ? 0 : 3;
 			double yofs = invoker.scoped ? 11 : 5;
 			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
-			A_StartSound("weapons/boltgun/fire1",CHAN_5);
+			PK_AttackSound("weapons/boltgun/fire1",CHAN_5);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
 		#### B 4 {
@@ -237,7 +237,7 @@ Class PK_Boltgun : PKWeapon {
 			if (psp)
 				invoker.prevOfs = (psp.x,psp.y);
 			A_Overlay(PSP_OVERGUN,"Bolts");
-			A_StartSound("weapons/boltgun/heater");
+			PK_AttackSound("weapons/boltgun/heater");
 		}
 		BGUB ABCD 1 A_WeaponOffset(1.2,1.2,WOF_ADD);
 		BGUB E 2 {

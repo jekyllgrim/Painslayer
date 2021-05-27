@@ -93,7 +93,7 @@ Class PK_ElectroDriver : PKWeapon {
 		loop;
 	Fire:
 		TNT1 A 0 {
-			A_StartSound("weapons/edriver/starshot");
+			PK_AttackSound("weapons/edriver/starshot");
 			A_FireProjectile("PK_Shuriken",spawnofs_xy:5);
 			A_WeaponOffset(2+frandom[eld](-0.5,0.5),34+frandom[eld](-0.5,0.5));
 		}
@@ -109,7 +109,7 @@ Class PK_ElectroDriver : PKWeapon {
 		goto ready;
 	AltFire:
 		TNT1 A 0 {
-			A_StartSound("weapons/edriver/electroloopstart",CHAN_VOICE);
+			PK_AttackSound("weapons/edriver/electroloopstart",CHAN_VOICE);
 			invoker.targOfs = (0,32);
 		}
 	AltHold:
@@ -399,7 +399,7 @@ Class PK_Shuriken : PK_StakeProjectile {
 		loop;
 	Death:
 		MODL B 100 {
-			if (target && target.CountInv("PK_WeaponModifier"))
+			if (target && PKWeapon.CheckWmod(target))
 				return ResolveState("Boom");
 			StickToWall();
 			A_StartSound("weapons/edriver/starwall",attenuation:2);
@@ -436,7 +436,7 @@ Class PK_Shuriken : PK_StakeProjectile {
 	Crash:
 	XDeath:
 		TNT1 A 1 {
-			if (target && target.CountInv("PK_WeaponModifier"))
+			if (target && PKWeapon.CheckWmod(target))
 				return ResolveState("Boom");
 			return ResolveState(null);
 		}

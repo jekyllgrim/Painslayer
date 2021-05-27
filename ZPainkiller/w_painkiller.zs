@@ -209,7 +209,7 @@ Class PK_PainkillerPuff : PK_BulletPuff {
 				if (deb)
 					deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
 			}
-			bool mod = (target && target.CountInv("PK_WeaponModifier"));
+			bool mod = target && PKWeapon.CheckWmod(target);
 			if (mod || (random[sfx](0,10) > 2)) {
 				let bull = PK_RicochetBullet(Spawn("PK_RicochetBullet",pos));
 				if (bull) {
@@ -459,7 +459,7 @@ Class Killer_BeamEmitter : Actor {
 		}
 		SetOrigin(tracer.pos,true);
 		A_FaceMaster(0,0,flags:FAF_MIDDLE);
-		if (!master.CountInv("PK_WeaponModifier")) {
+		if (!target || !PKWeapon.CheckWmod(target)) {
 			let adiff = DeltaAngle(angle,master.angle);
 			if (adiff < 163 && adiff > -170) {
 				StopBeams();

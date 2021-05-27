@@ -1142,19 +1142,28 @@ Class PKC_WeaponModifier : PK_BaseGoldenCard {
 	}
 	override void GoldenCardStart() {
 		super.GoldenCardStart();
-		owner.GiveInventory("PK_WeaponModifier",1);
-		let wmod = PK_WeaponModifier(owner.FindInventory("PK_WeaponModifier"));
+		owner.GiveInventory("PK_WeaponModifierForCard",1);
+		/*let wmod = PK_WeaponModifier(owner.FindInventory("PK_WeaponModifier"));
 		if (wmod)
-			wmod.effectTics += 999999;
+			wmod.effectTics += 999999;*/
 	}
 	override void GoldenCardEnd() {
 		super.GoldenCardEnd();
-		let wmod = PK_WeaponModifier(owner.FindInventory("PK_WeaponModifier"));
+		/*let wmod = PK_WeaponModifier(owner.FindInventory("PK_WeaponModifier"));
 		if (wmod && wmod.effectTics > 0) {
 			wmod.effectTics -= 999999;
-		}
+		}*/
+		owner.A_TakeInventory("PK_WeaponModifierForCard");
 	}
 }
+
+Class PK_WeaponModifierForCard : PK_WeaponModifier {
+	Default {
+		deathsound "";
+		Powerup.duration 999999;		
+	}
+}
+	
 
 //spawns explosions while the player is running around
 Class PKC_StepsOfThunder : PK_BaseGoldenCard {
