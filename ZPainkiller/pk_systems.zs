@@ -107,7 +107,7 @@ Class PK_DemonMorphControl : PK_InventoryToken {
 	}
 	override void Tick() {}
 	void GiveSoul(int amount = 1) {
-		pk_souls += amount;
+		pk_souls = Clamp(pk_souls + amount, 0, pk_fullsouls);
 		if (!owner || !owner.player || !owner.player.readyweapon)
 			return;
 		if (pk_souls >= pk_minsouls && !owner.FindInventory("PK_DemonWeapon")) {
@@ -347,8 +347,8 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 			//destroy();
 			return;
 		}
-		restlife = random[cont](42,60);
-		maxlife = int(35*frandom[cont](6,10));
+		restlife = 45;//random[cont](42,60);
+		maxlife = 35*7;//int(35*frandom[cont](6,10));
 		//spawn a hitbox for the Killer projectile to let the player juggle the corpse:
 		kft = KillerFlyTarget(Spawn("KillerFlyTarget",master.pos));
 		if (kft) {
@@ -358,17 +358,19 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 		}
 	}	
 	override void Tick () {
-		if (master) {	
-			SetOrigin(master.pos,true);
-			if (!master.isFrozen())
-				age++;
-			if (GetAge() == 1 && kft)
-				kft.vel = master.vel;	
-			if  (master.vel.length() < 0.02)
-				restcounter++;
-			else
-				restcounter = 0;
-		}		
+		if (!master || master.health > 0) {
+			Destroy();
+			return;
+		}
+		SetOrigin(master.pos,true);
+		if (!master.isFrozen())
+			age++;
+		if (GetAge() == 1 && kft)
+			kft.vel = master.vel;	
+		if  (master.vel.length() < 0.02)
+			restcounter++;
+		else
+			restcounter = 0;
 		double rad = 8;
 		double smkz = 20;
 		if (master) {
@@ -376,7 +378,7 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 			smkz = master.height;
 		}
 		//this handles death if killed in Demon Mode:
-		if (master && master.bKILLED && master.FindInventory("PK_DemonTargetControl")) {
+		if (master.bKILLED && master.FindInventory("PK_DemonTargetControl")) {
 			for (int i = 40; i > 0; i--) {
 				smkz = master.default.height;
 				let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz)));
@@ -441,8 +443,15 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 	}
 }
 
-// holds current gold and equipped cards:
+/*	The main control class for cards, gold and active powerups.
+	Handles card equipment and activation, deactivation, timers.
+	Keeps track of current amount of gold.
+	Also keeps track of currently active powerups so that the HUD
+	can draw timers for them.
+*/
 Class PK_CardControl : PK_InventoryToken {
+	Array < Inventory > activePowerups; //Not related to cards. Stores currently active powerups.
+	
 	int pk_gold; //current amount of gold
 	array <name> UnlockedTarotCards; //holds names of all purchased cards for the board
 	name EquippedSlots[5]; //holds names of all cards equipped into slots
@@ -451,8 +460,8 @@ Class PK_CardControl : PK_InventoryToken {
 	private int dryUseTimer; //> 0 you try to use gold cards when you're out of uses
 	int goldUses;
 	private int totalGoldUses;
-	property goldUses : goldUses;
 	int goldDuration;
+	property goldUses : goldUses;
 	property goldDuration : goldDuration;
 		
 	Default {
@@ -460,6 +469,17 @@ Class PK_CardControl : PK_InventoryToken {
 		PK_CardControl.goldDuration 30;
 	}
 	
+	clearscope Inventory GetActivePowerup(int i) {
+		if (i < 0 || i >= activePowerups.Size())
+			return null;
+		return Inventory(activePowerups[i]);
+	}
+	
+	/*	When you try to use cards when out of uses, a sound will be played
+		and red card icons will appear in the hud. They'll appear for a short
+		time, which is the value of this timer. It's read by the HUD so it
+		has to be clearscope.
+	*/
 	clearscope int GetDryUseTimer() {
 		return dryUseTimer;
 	}
@@ -469,7 +489,7 @@ Class PK_CardControl : PK_InventoryToken {
 		return totalGoldUses;
 	}
 	
-	//called to reset everything that needs resetting when starting a new map:
+	//called to reset everything that needs resetting when starting a new map (or with PKREFRESH cheat):
 	void RefreshCards() {
 		totalGoldUses = 0;
 		goldUses = 1;
@@ -511,6 +531,8 @@ Class PK_CardControl : PK_InventoryToken {
 		if (pk_debugmessages) {
 			Console.Printf("Remaining gold activations: %d | Total activations: %d",goldUses,totalGoldUses);
 		}
+		if (owner.player && owner.player == players[consoleplayer])
+			owner.A_StartSound("cards/loop",CH_PWR,CHANF_LOOPING);
 		for (int i = 2; i < EquippedCards.Size(); i++) {
 			let card = PK_BaseGoldenCard(owner.FindInventory(EquippedCards[i]));
 			if (!card)
@@ -522,9 +544,12 @@ Class PK_CardControl : PK_InventoryToken {
 		owner.A_StartSound("cards/use",CHAN_AUTO,CHANF_LOCAL);
 		goldActive = true;
 	}
+	
+	//Make current golden cards inactive, play a sound (optionally):
 	void StopGoldenCards(bool silent = false) {
 		goldActive = false;
 		goldDuration = default.goldDuration;
+		owner.A_StopSound(CH_PWR);
 		if (!silent)
 			owner.A_StartSound("cards/end",CHAN_AUTO,CHANF_LOCAL);
 		if (EquippedCards.Size() < 5) {
@@ -541,14 +566,12 @@ Class PK_CardControl : PK_InventoryToken {
 			card.GoldenCardEnd();
 		}
 	}	
+	
+	//This is called when the board is closed to equip the actual cards:
 	void PK_EquipCards() {
 		for (int i = 0; i < EquippedCards.Size(); i++) {
 			EquippedCards[i] = null;
 		}
-		/*EquippedCards.Clear();
-		EquippedCards.Reserve(5);		
-		if (pk_debugmessages)
-			console.printf("Allocated %d card slots successfully",EquippedCards.Size());*/
 		//give the equipped cards:
 		for (int i = 0; i < EquippedCards.Size(); i++) {
 			//construct card classname based on card ID from ui
@@ -604,6 +627,7 @@ Class PK_CardControl : PK_InventoryToken {
 			}
 		}
 	}
+	
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner || !owner.player) {
@@ -619,6 +643,19 @@ Class PK_CardControl : PK_InventoryToken {
 			else
 				StopGoldenCards();
 		}
+	}
+	
+	override bool HandlePickup (Inventory item) {
+		bool ret = super.HandlePickup(item);
+		if (!ret)
+			return ret;
+		let iitem = Inventory(item);
+		//if a powerup was picked up, push it into the array:
+		if (iitem && iitem is "Powerup") {
+			if (activePowerups.Find(iitem) == activePowerups.Size())
+				activePowerups.Push(iitem);
+		}
+		return ret;
 	}
 }
 
@@ -776,7 +813,7 @@ Class PKC_SoulCatcher : PK_BaseSilverCard {
 //this is used if the QoL "alaways attract soulds/gold" feature is active
 Class PK_QoLCatcher : PKC_SoulCatcher {
 	Default {
-		PKC_SoulCatcher.effectDistance 80;
+		PKC_SoulCatcher.effectDistance 96;
 	}
 	override void DoEffect() {
 		if (owner.FindInventory("PKC_SoulCatcher"))
