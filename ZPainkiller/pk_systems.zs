@@ -1145,13 +1145,13 @@ Class PKC_WeaponModifier : PK_BaseGoldenCard {
 		owner.GiveInventory("PK_WeaponModifier",1);
 		let wmod = PK_WeaponModifier(owner.FindInventory("PK_WeaponModifier"));
 		if (wmod)
-			wmod.duration += 99;
+			wmod.effectTics += 999999;
 	}
 	override void GoldenCardEnd() {
 		super.GoldenCardEnd();
 		let wmod = PK_WeaponModifier(owner.FindInventory("PK_WeaponModifier"));
-		if (wmod && wmod.duration > 0) {
-			wmod.duration -= 99;
+		if (wmod && wmod.effectTics > 0) {
+			wmod.effectTics -= 999999;
 		}
 	}
 }

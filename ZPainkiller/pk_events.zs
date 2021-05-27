@@ -416,7 +416,7 @@ Class PK_ReplacementHandler : EventHandler {
 			case 'GreenArmor' 		: e.Replacement = (random[repl](1,100) > 60) ? 'PK_SilverArmor' : 'PK_BronzeArmor';	break;
 			Case 'BlueArmor'		: e.Replacement = 'PK_GoldArmor'; break;
 			
-			case 'Berserk'			: e.Replacement = 'PK_WeaponModifier';  break;
+			case 'Berserk'			: e.Replacement = 'PK_WeaponModifierGiver';  break;
 			case 'Infrared'		: e.Replacement = 'PK_DemonEyes';  break;
 			case 'InvulnerabilitySphere'		: e.Replacement = 'PK_Pentagram';  break;
 			case 'Backpack'		: e.Replacement = 'PK_AmmoPack';  break;

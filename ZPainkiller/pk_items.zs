@@ -620,75 +620,161 @@ Class PK_AmmoPack : Backpack {
 	}
 }
 
-// A base 'power-up' class that doesn't define any special behavior except being time-limited. It's designed to be used in manual checks.
-Class PK_PowerUp : PK_Inventory abstract {
-	mixin PK_SpawnPickupRing;
-	int duration;
-	property duration : duration;
-	Default {
-		+COUNTITEM
-		+INVENTORY.AUTOACTIVATE
-		+INVENTORY.ALWAYSPICKUP
-		inventory.maxamount 1;
-		PK_PowerUp.duration 40;
-	}
-	override void DoEffect() {
-		super.DoEffect();
-		if (!owner || !owner.player)
-			return;
-		if (GetAge() % 35 == 0 && !owner.CountInv("PK_DemonWeapon")) {
-			duration--;
-			if (pk_debugmessages)
-				console.printf("%s remaining time: %d",GetClassName(),duration);
-		}
-		if (duration <= 0) {
-			if (deathsound)
-				owner.A_StartSound(deathsound, CHAN_AUTO, CHANF_LOCAL);
-			DepleteOrDestroy();
-		}
-	}
-	override bool TryPickup (in out Actor other) {
-		if (!(other is "PlayerPawn"))
-			return false;
-		if (other.CountInv("PK_DemonWeapon"))
-			return false;
-		let pwr = PK_PowerUp(other.FindInventory(GetClassName()));
-		if (pwr && pwr.duration > 0) {
-			pwr.duration = pwr.default.duration;
-			GoAwayAndDie();
-			return false;
-		}
-		return super.TryPickup(other);
-	}
-}
-
 Mixin Class PK_SpawnPickupRing {
-	color ringcolor;
-	property ringcolor : ringcolor;
+	color pickupRingColor;
+	property pickupRingColor : pickupRingColor;
 	override void BeginPlay() {
 		super.BeginPlay();
-		if (!ringcolor)
+		if (!pickupRingColor)
 			return;
 		let ring = Spawn("PK_PickupRing",(pos.x,pos.y,floorz));
 		if (ring) {
 			ring.master = self;
-			ring.SetShade(color(ringcolor));
+			ring.SetShade(color(pickupRingColor));
 		}
 	}
 }
 
-Class PK_WeaponModifier : PK_PowerUp {
+Class PK_PickupRing : Actor {
+	Default {
+		+NOINTERACTION
+		+BRIGHT
+		renderstyle 'AddShaded';
+		alpha 0.75;
+	}
+	override void Tick() {
+		if (!master) {
+			Destroy();
+			return;
+		}
+		let mmaster = Inventory(master);
+		if (!mmaster || mmaster.owner) {
+			Destroy();
+			return;
+		}
+		if (!isFrozen())
+			SetOrigin(master.pos,true);
+	}
+	States {
+	Spawn:
+		BAL1 A -1;
+		stop;
+	}
+}
+
+Class PK_PowerupGiver : PowerupGiver {
+	mixin PK_PlayerSightCheck;
+	color pickupRingColor;
+	property pickupRingColor : pickupRingColor;
+	override void BeginPlay() {
+		super.BeginPlay();
+		if (!pickupRingColor)
+			return;
+		let ring = Spawn("PK_PickupRing",(pos.x,pos.y,floorz));
+		if (ring) {
+			ring.master = self;
+			ring.SetShade(color(pickupRingColor));
+		}
+	}
+	Default {
+		powerup.duration -40;
+		+COUNTITEM
+		+INVENTORY.AUTOACTIVATE
+		+INVENTORY.ALWAYSPICKUP
+		Inventory.MaxAmount 0;
+	}
+	override bool TryPickup (in out Actor other) {
+		if (!(other.player))
+			return false;
+		if (other.CountInv("PK_DemonWeapon"))
+			return false;
+		return super.TryPickup(other);
+	}
+}
+
+Mixin Class PK_PowerUp {
+	sound lastSecondsSound;
+	property lastSecondsSound : lastSecondsSound;
+	Default {
+		+INVENTORY.ADDITIVETIME
+	}
+	override void Tick () {
+		if (Owner == NULL)	{
+			Destroy ();
+			return;
+		}
+		//do not tick if the player is currently morphed into demon:
+		if (owner.CountInv("PK_DemonWeapon"))
+			return;
+		if (EffectTics == 0 || (EffectTics > 0 && --EffectTics == 0)) {
+			Destroy ();
+		}
+	}
+	override void DoEffect() {
+		super.DoEffect();
+		if (!owner || !owner.player) {
+			Destroy();
+			return;
+		}
+		if (lastSecondsSound && EffectTics >= 0 && EffectTics <= 35*5 && (EffectTics % 35 == 0))
+			owner.A_StartSound(lastSecondsSound,CHAN_AUTO,CHANF_LOCAL);
+	}
+	override void EndEffect () {
+		if (deathsound && owner && owner.player)
+			owner.A_StartSound(deathsound,CHAN_AUTO,CHANF_LOCAL);
+		super.EndEffect();
+	}
+	override bool HandlePickup (Inventory item) {
+		if (item.GetClass() == GetClass()) {
+			let power = Powerup(item);
+			if (power.EffectTics == 0)	{
+				power.bPickupGood = true;
+				return true;
+			}
+			/*	Increase the effect's duration, but do not go over
+				the default maximum duration (in contrast to vanilla
+				PowerUp). I.e. you can't extend the duration 
+				beyond max even if you pick up multiple powerups.
+			*/
+			if (power.bAdditiveTime) {
+				EffectTics = Clamp(EffectTics + power.EffectTics, 0, default.EffectTics);
+				BlendColor = power.BlendColor;
+			}
+			// If it's not blinking yet, you can't replenish the power unless the
+			// powerup is required to be picked up.
+			else if (EffectTics > BLINKTHRESHOLD && !power.bAlwaysPickup) {
+				return true;
+			}
+			// Reset the effect duration.
+			else if (power.EffectTics > EffectTics) {
+				EffectTics = power.EffectTics;
+				BlendColor = power.BlendColor;
+			}
+			power.bPickupGood = true;
+			return true;
+		}
+		return false;
+	}
+}
+
+Class PK_WeaponModifier : Powerup {
+	mixin PK_PowerUp;
+	Default {
+		deathsound "pickups/wmod/end";
+	}
+}		
+
+Class PK_WeaponModifierGiver : PK_PowerUpGiver {
 	Default {
 		inventory.pickupmessage "$PKI_WMODIFIER";
 		inventory.pickupsound "pickups/wmod/pickup";
-		deathsound "pickups/wmod/end";
-		//activesound "pickups/wmod/use";
-		PK_PowerUp.duration 30;
+		Powerup.Type "PK_WeaponModifier";
+		PowerUp.duration -30;
 		xscale 0.43;
 		yscale 0.36;
 		+FLOATBOB
 		FloatBobStrength 0.32;
-		PK_PowerUp.ringcolor "f77300";
+		PK_PowerUpGiver.pickupRingColor "f77300";
 	}
 	override void Tick() {
 		super.Tick();
@@ -722,41 +808,20 @@ Class PK_WeaponModifier : PK_PowerUp {
 	}
 }
 
-Class PK_PickupRing : Actor {
+Class PK_PowerDemonEyes : PowerTorch {
+	mixin PK_PowerUp;
 	Default {
-		+NOINTERACTION
-		+BRIGHT
-		renderstyle 'AddShaded';
-		alpha 0.75;
-	}
-	override void Tick() {
-		if (!master) {
-			Destroy();
-			return;
-		}
-		let mmaster = Inventory(master);
-		if (!mmaster || mmaster.owner) {
-			Destroy();
-			return;
-		}
-		if (!isFrozen())
-			SetOrigin(master.pos,true);
-	}
-	States {
-	Spawn:
-		BAL1 A -1;
-		stop;
+		deathsound "pickups/powerups/lightampEnd";
 	}
 }
 
-Class PK_DemonEyes : Infrared {
-	mixin PK_SpawnPickupRing;
+Class PK_DemonEyes : PK_PowerupGiver {
 	Default {
 		scale 0.5;
 		+FLOATBOB
 		FloatBobStrength 0.3;
-		PK_DemonEyes.ringcolor "ffa703";
-		Powerup.Type "PowerTorch";
+		PK_PowerUpGiver.pickupRingColor "fefc6a";
+		Powerup.Type "PK_PowerDemonEyes";
 		inventory.pickupmessage "$PKI_DEMONEYES";
 		inventory.pickupsound "pickups/powerups/lightamp";
 	}
@@ -769,17 +834,25 @@ Class PK_DemonEyes : Infrared {
 	}
 }
 
-Class PK_Pentagram : InvulnerabilitySphere {
-	mixin PK_PlayerSightCheck;
-	mixin PK_SpawnPickupRing;
+Class PK_PowerPentagram : PowerInvulnerable {
+	mixin PK_PowerUp;
+	Default {
+		deathsound "pickups/powerups/pentagramEnd";
+	}
+}
+
+
+Class PK_Pentagram : PK_PowerupGiver {
 	Default {
 		+FLOATBOB
 		+BRIGHT
-		renderstyle 'Add';
 		+INVENTORY.BIGPOWERUP
+		Powerup.Type "PK_PowerPentagram";
+		Inventory.PickupMessage "$GOTINVUL";
+		renderstyle 'Add';
 		FloatBobStrength 0.35;
-		PK_Pentagram.ringcolor "FF1904";
-		inventory.pickupsound "pickups/powerups/invulnerability";
+		PK_PowerUpGiver.pickupRingColor "FF1904";
+		inventory.pickupsound "pickups/powerups/pentagram";
 		scale 1.5;
 	}
 	override void Tick() {
