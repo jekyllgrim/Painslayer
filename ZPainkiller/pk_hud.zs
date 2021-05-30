@@ -13,14 +13,24 @@ Class PainkillerHUD : BaseStatusBar {
 	
 	PK_CardControl cardcontrol;	
 	
-	void DrawMonsterArrow(double ascale = 2., vector2 apos = (960,92), vector2 shadowofs = (0,0)) {
-		vector2 hscale = GetHUDScale();
-        hscale = ( int(hscale.x), int(hscale.x) );
-        vector2 rscale = hscale * ascale / 5;
-		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos,rotation:arrowangle,scale:rscale,tint:color(256,0,0,0));	//dark arrow outline
-		PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos,rotation:arrowangle,scale:rscale*0.8);	//arrow
-		if (shadowofs != (0,0))
-			PK_StatusBarScreen.DrawRotatedImage("pkxarrow",apos + shadowofs,rotation:arrowangle,scale:rscale,alpha:0.45,tint:color(256,48,0,0));
+	void DrawMonsterArrow(double arrowScale = 0.47, vector2 arrowPos = (0,22), vector2 shadowofs = (0,0)) {
+		let hudscale = GetHudScale();		
+		double hscale = hudscale.x;
+        vector2 targetScale = (arrowScale,arrowScale) * hscale;
+		//this is done to make sure ultrawide is supported:
+		double aspectmod_x = Screen.GetAspectRatio() / (1920./1080.);
+		targetScale.x /= aspectmod_x;
+		//Console.Printf("Aspect ratio %f | aspect mod: %f",Screen.GetAspectRatio(), aspectmod_x);
+		arrowPos *= hscale;
+		int fflags = PK_StatusBarScreen.SS_SCREEN_TOP_CENTER;
+		//dark arrow outline:
+		PK_StatusBarScreen.DrawImage("pkxarrow",arrowPos,fflags,scale:targetScale,rotation:arrowangle,tint:color(256,0,0,0));	
+		//the arrow itself:
+		PK_StatusBarScreen.DrawImage("pkxarrow",arrowPos,fflags,scale:targetScale*0.8,rotation:arrowangle);	
+		//arrow shadow (optional):
+		if (shadowofs != (0,0)) {
+			PK_StatusBarScreen.DrawImage("pkxarrow",arrowPos + shadowofs,fflags,alpha:0.45,scale:targetScale,rotation:arrowangle,tint:color(256,48,0,0));
+		}
 	}
 	
 	override void Init() {
@@ -33,10 +43,11 @@ Class PainkillerHUD : BaseStatusBar {
 	override void Draw (int state, double TicFrac) {
 		Super.Draw (state, TicFrac);
 		hudstate = state;
-		//the hud is completely skipped if automap is active or the player is in a demon mode
+		//the hud is completely skipped if automap is active or the player
+		//is in a demon mode and debug messages aren't active:
 		if (state == HUD_none || automapactive || (isDemon && !pk_debugmessages))
 			return;
-		BeginHUD(forcescaled:true);
+		BeginHUD();
 		if (state == HUD_Fullscreen || state == HUD_AltHud)
 			DrawTopElements();
 		if (state == HUD_StatusBar || state == HUD_Fullscreen)
@@ -54,15 +65,16 @@ Class PainkillerHUD : BaseStatusBar {
 	
 	const PWICONSIZE = 18;
 	override void DrawPowerUps() {
-		Vector2 pos = (-PWICONSIZE / 2, -42);
+		Vector2 pos = (-PWICONSIZE / 2, -49);
 		for (let iitem = CPlayer.mo.Inv; iitem != NULL; iitem = iitem.Inv) {
 			let item = Powerup(iitem);
 			if (item != null) {
 				let icon = item.GetPowerupIcon();
-				if (icon && icon.IsValid() && !item.IsBlinking()) {
-					DrawTexture(icon, pos, DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_CENTER, 1.0, (PWICONSIZE, PWICONSIZE));
+				if (icon.IsValid()) {
+					if (!item.IsBlinking())
+						DrawTexture(icon, pos, DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_CENTER, 1.0, (PWICONSIZE, PWICONSIZE));
+					pos.y -= PWICONSIZE;
 				}
-				pos.y -= PWICONSIZE;
 			}
 		}
 	}
@@ -180,7 +192,7 @@ Class PainkillerHUD : BaseStatusBar {
 			//draw compass at bottom center
 			DrawImage("pkxtop0",(0,4),DI_SCREEN_BOTTOM|DI_SCREEN_HCENTER|DI_ITEM_BOTTOM);
 			//draw arrow and outline (shadow and glass are skipped in this version for simplicity)
-			DrawMonsterArrow(1.4,(960,988));	
+			DrawMonsterArrow(0.37,(0,246));	
 		
 			//gold counter above health:
 			DrawImage("pkhgold",(5,-38),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER);
@@ -217,7 +229,7 @@ Class PainkillerHUD : BaseStatusBar {
 		//draw the compass background:
 		DrawImage("pkxtop0",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);
 		//draw the compass arrow (in 3 layers):
-		DrawMonsterArrow(ascale: 1.75, shadowofs: (5,10));
+		DrawMonsterArrow(shadowofs: (5,10));
 		
 		//draw the top bar and the compass outline:
 		DrawImage("pkxtop1",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);	//main top
