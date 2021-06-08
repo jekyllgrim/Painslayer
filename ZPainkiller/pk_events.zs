@@ -44,8 +44,8 @@ Class PK_MainHandler : EventHandler {
 	array <Actor> demontargets; //holds all monsters, players and enemy projectiles
 	array <Actor> allenemies; //only monsters
 	
-	//returns true if ANY of the players has the item
-	//(unless checkall is true, then it returns true if ALL have it)
+	//By default returns true if ANY of the players has the item.
+	//If 'checkall' argument is true, the function returns true if ALL players have the item.
 	static bool CheckPlayersHave(Class<Inventory> itm, bool checkall = false) {
 		if(!itm)
 			return false;
