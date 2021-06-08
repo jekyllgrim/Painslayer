@@ -48,6 +48,10 @@ Class PKCardsMenu : PKCGenericMenu {
 	
 	bool queueForClose;
 	
+	override void Drawer() {		
+		PK_StatusBarScreen.Fill("000000",0,0,statscr_base_width,statscr_base_height,1);
+		super.Drawer();
+	}
 	override void Init (Menu parent) {
 		super.Init(parent);
 		
@@ -92,6 +96,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			imagescale:(1*backgroundRatio,1*backgroundRatio)*/
 		);
 		background.Pack(mainFrame);
+		
 		
 		//define the frame that will keep everything except text popups:
 		boardelements = new("PKCFrame").Init((0,0),backgroundsize);
