@@ -701,8 +701,8 @@ Class PK_FlamerTank : PK_Projectile {
 		}
 		loop;
 	Bounce:
-		TNT1 A 5 {
-			A_StartSound("weapons/gastank/bounce");
+		TNT1 A 1 {
+			A_StartSound("weapons/gastank/bounce",flags:CHANF_NOSTOP);
 		}
 		goto spawn;
 	Death:
@@ -752,9 +752,25 @@ Class PK_FlamerTank : PK_Projectile {
 			}
 			if (tankmodel)
 				tankmodel.destroy();
-			int exdist;
+			int exdist = 180;
 			A_Explode(320,exdist);
-			BlockThingsIterator itr = BlockThingsIterator.Create(self,exdist);
+			double pangle;
+			while (pangle < 360) {
+				double zp;
+				if (pos.z <= floorz)
+					zp = 12;
+				else if (pos.z >= ceilingz-12)
+					zp = -24;
+				A_SpawnItemEx(
+					"PK_FlameThrowerFlame",
+					xofs:16,
+					zofs:zp,
+					xvel:2,
+					angle:pangle
+				);
+				pangle += 20;
+			}
+			/*(BlockThingsIterator itr = BlockThingsIterator.Create(self,exdist);
 			while (itr.next()) {
 				let trg = itr.thing;
 				if (!trg || trg == target)
@@ -772,7 +788,7 @@ Class PK_FlamerTank : PK_Projectile {
 				let control = PK_BurnControl(trg.FindInventory("PK_BurnControl"));
 				if (control && target)
 					control.target = target;
-			}
+			}*/
 		}
 		stop;
 	}
