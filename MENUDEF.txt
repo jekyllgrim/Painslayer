@@ -1,4 +1,4 @@
-AddListMenu "MainMenu" {
+/*AddListMenu "MainMenu" {
 	TextItem "$PKM_TITLE_SHORT", "b", "PK_Settings"
 }
 
@@ -12,11 +12,11 @@ Optionmenu "PK_Settings" {
 	PKTLTPScaleSlider "$PKM_QOLCATCHER",	"$PKM_QOLCATCHER_Tip", "White", "pk_QoLCatcherDistance", 0, 96, 8, "$PKM_DISABLED"
 	StaticText ""
 	StaticText "$TLTPTOOLTIPMNU_VERSION", "yellow"
-	Submenu "$OPTMNU_TLTPTOOLTIP", "TooltipOptionsMenu"
+	Submenu "$OPTMNU_TLTPTOOLTIP", "PKTooltipOptionsMenu"
 	StaticText " "
 }
 
-OptionMenu "TooltipOptionsMenu"
+OptionMenu "PKTooltipOptionsMenu"
 {
 	Class "PKTLTPOptionsMenu"
 	Title "$TLTPTOOLTIPMNU_TITLE"
@@ -74,10 +74,10 @@ OptionMenu "TooltipOptionsMenu"
 	PKTLTPOption		"$TLTPTOOLTIPMNU_DISPLAYSETTINGS_FONT_COLOR",				"$TLTPTOOLTIPMNU_TOOLTIP_FONT_COLOR",				"White", "pktltp_font_color", "TextColors"
 
 	StaticText		""
-	PKTLTPSubmenu		"$TLTPTOOLTIPMNU_TITLE_LISTTEST", 							"$TLTPTOOLTIPMNU_TOOLTIP_LISTMENU", 				"White", "TooltipListTest"
+	PKTLTPSubmenu		"$TLTPTOOLTIPMNU_TITLE_LISTTEST", 							"$TLTPTOOLTIPMNU_TOOLTIP_LISTMENU", 				"White", "PKTooltipListTest"
 }
 
-ListMenu "TooltipListTest"
+ListMenu "PKTooltipListTest"
 {
 	Class "PKTLTPListMenu"
 	
