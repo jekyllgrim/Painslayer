@@ -221,7 +221,7 @@ Class PK_BombAmmo : Ammo {
 	next to the primary (that is currently disabled)
 */
 
-Class PK_EquipmentSpawner : Actor {
+Class PK_EquipmentSpawner : Inventory {
 	Class<Ammo> primary1; //primary ammo type for the 1st weapon
 	Class<Ammo> secondary1; //secondary ammo type for the 1st weapon
 	Class<Ammo> primary2; //primary ammo type for the 2nd weapon
@@ -242,6 +242,7 @@ Class PK_EquipmentSpawner : Actor {
 	property dropChance : dropChance;
 	Default {
 		+NOBLOCKMAP
+		-SPECIAL
 		//+INVENTORY.NEVERRESPAWN
 		PK_EquipmentSpawner.altSetChance 50;
 		PK_EquipmentSpawner.secondaryChance 35;
@@ -253,10 +254,10 @@ Class PK_EquipmentSpawner : Actor {
 		let am = Inventory(Spawn(ammopickup,spawnpos));
 		if (am) {
 			am.vel = vel;
-			if (bDROPPED) {
-				am.bDROPPED = true;
+			if (bTOSSED) {
+				am.bTOSSED = true;
 				am.amount = Clamp(am.amount / 2, 1, am.amount);
-				//console.printf("Spawner bDROPPED: %d | ammo bDROPPED: %d",bDROPPED,am.bDROPPED);
+				//console.printf("Spawner bTOSSED: %d | ammo bTOSSED: %d",bTOSSED,am.bTOSSED);
 			}
 		}		
 	}
@@ -309,7 +310,7 @@ Class PK_EquipmentSpawner : Actor {
 			Destroy();
 			return;
 		}	
-		if (bDROPPED && dropChance < frandom[ammoSpawn](1,100)) {
+		if (bTOSSED && dropChance < frandom[ammoSpawn](1,100)) {
 			Destroy();
 			return;
 		}
@@ -351,7 +352,7 @@ Class PK_EquipmentSpawner : Actor {
 				secondaryChance = secondaryChance2;
 		}
 		//ammo dropped by enemies should almost always be primary:
-		if (bDROPPED)
+		if (bTOSSED)
 			secondaryChance *= 0.25;
 		//finally, decide whether we need to spawn primary or secondary ammo:
 		class<Ammo> tospawn = (secondaryChance >= frandom[ammoSpawn](1,100)) ? ammo2toSpawn : ammo1toSpawn;
@@ -457,6 +458,10 @@ Class PK_AmmoSpawner_Stimpack : PK_EquipmentSpawner {
 	}
 }
 
+/////////////////////////
+// WEAPON PICKUPS
+/////////////////////////
+
 /*	This is a weapon spawner. Even though the total number of weapons in Painkiller
 	is the same as in Doom, their power tiers are rather different, and some weapons
 	are more similar to each other (e.g. Chaingun and Rifle).
@@ -501,7 +506,7 @@ Class PK_BaseWeaponSpawner : PK_EquipmentSpawner {
 				tospawn = weapon2;
 		}
 		//if weapon2 is true and the item was NOT dropped, stagger spawning:
-		if (weapon2 && !bDROPPED) {
+		if (weapon2 && !bTOSSED) {
 			stagger = true;
 		}
 		if (pk_debugmessages > 1) {
@@ -518,7 +523,7 @@ Class PK_BaseWeaponSpawner : PK_EquipmentSpawner {
 		(this is mainly because weapons, being 3D and all, look very "prominent"
 		and I just don't want many of them to exist on the map at once)
 		*/
-		if (bDROPPED && PK_MainHandler.CheckPlayersHave(tospawn, true)) {
+		if (bTOSSED && PK_MainHandler.CheckPlayersHave(tospawn, true)) {
 			//simply randomly pick primary or secondary ammo:
 			Class<Weapon> weap = (Class<Weapon>)(tospawn);			
 			Class<Ammo> amToSpawn = null;
