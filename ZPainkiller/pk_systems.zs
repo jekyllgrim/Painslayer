@@ -780,7 +780,7 @@ Class PKC_SoulCatcher : PK_BaseSilverCard {
 		BlockThingsIterator itr = BlockThingsIterator.Create(owner,edist);
 		while (itr.next()) {
 			let trg = itr.thing;
-			if (trg && (trg is "PK_GoldPickup" || trg is "PK_Soul") && !trg.tracer && owner.Distance3D(trg) <= edist && CheckPath(owner,trg)) {
+			if (trg && (trg is "PK_GoldPickup" || trg is "PK_Soul") && !trg.bCOUNTITEM && !trg.tracer && owner.Distance3D(trg) <= edist && CheckPath(owner,trg)) {
 				trg.tracer = owner;
 				if (pk_debugmessages)
 					console.printf("Soul Catcher found %s",trg.GetClassName());

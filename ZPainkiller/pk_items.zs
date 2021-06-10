@@ -200,10 +200,12 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		return true;
 	}
 	override void Tick() {
-		super.Tick();
+		super.Tick();		
 		if (owner)
 			return;
 		if (isFrozen())
+			return;
+		if (bCOUNTITEM)
 			return;
 		//Soul Catcher effect:
 		if (tracer && tracer.player) {

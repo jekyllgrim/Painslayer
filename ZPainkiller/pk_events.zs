@@ -239,6 +239,7 @@ Class PK_MainHandler : EventHandler {
 					continue;
 				//throw gold around randomly
 				goldPickup.VelFromAngle(frandom[gold](1,3),random[gold](0,359));
+				goldpickup.bCOUNTITEM = true;
 				//console.printf("goldpickup bDROPPED: %d",goldpickup.bDROPPED);
 			}
 			//spawn some extra small gold:
@@ -333,8 +334,8 @@ Class PK_MainHandler : EventHandler {
 			plr.GiveInventory("PK_CardControl",1);
 		if (!plr.FindInventory("PK_InvReplacementControl"))
 			plr.GiveInventory("PK_InvReplacementControl",1);
-		if (!plr.FindInventory("PK_QoLCatcher"))
-			plr.GiveInventory("PK_QoLCatcher",1);
+		/*if (!plr.FindInventory("PK_QoLCatcher"))
+			plr.GiveInventory("PK_QoLCatcher",1);*/
 		/*let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (cardcontrol) {
 			cardcontrol.RefreshCards();
