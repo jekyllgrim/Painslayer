@@ -12,8 +12,8 @@ Painslayer gameplay modification for GZDoom engine ("Painslayer") by Agent_Ash a
 
 The visual assets used in Painslayer, such as sprites, UI icons and other images, as well as 3D models and their textures ("the Artwork") are split into several categories. The Artwork categories, as well as the corresponding permissions and artwork locations are listed below:
 
-i.   Original artwork created by the Author (usually inspired by works of People Can Fly)
-     **Permissions**: these assets may NOT be used, copied or edited by anyone for any purpose without first obtaining an explicit permission from the Author (with the exception of modifications made for personal use that will not be released publicly).
+i.   Original artwork created by the Author (usually inspired by works of People Can Fly)  
+     **Permissions**: these assets may NOT be used, copied or edited by anyone for any purpose without first obtaining an explicit permission from the Author (with the exception of modifications made for personal use that will not be released publicly).  
      **Locations**: 
 
 ```
@@ -35,8 +35,8 @@ sprites/pickups/
 sprites/WeaponIcons/
 ```
 
-ii.  Graphics, originally created by People Can Fly, modified in various ways, including but not limited to rescaling, color correction and partial redrawing
-     **Permissions**: these assets is used under the Fair Use doctrine. The Author does not own this artwork or any licenses to it. This artwork may be removed from Painslayer, should People Can Fly request it. You may use this artwork, as long as your use still falls under the Fair Use doctrine.
+ii.  Graphics, originally created by People Can Fly, modified in various ways, including but not limited to rescaling, color correction and partial redrawing  
+     **Permissions**: these assets is used under the Fair Use doctrine. The Author does not own this artwork or any licenses to it. This artwork may be removed from Painslayer, should People Can Fly request it. You may use this artwork, as long as your use still falls under the Fair Use doctrine.  
      **Locations**:
 
 ```
@@ -56,8 +56,8 @@ sprites/souls/
 sprites/Flamethrower/
 ```
 
-iii. Open-source assets
-     **Permissions**: can be used by anyone for any purpose.
+iii. Open-source assets  
+     **Permissions**: can be used by anyone for any purpose.  
      **Locations**:
 
 ```
@@ -96,24 +96,21 @@ Summary of the permissions (not equivalent to the full license text):
 
 The code libraries, their license types and their locations are as follows:
 
-i.   Original code by the Author (with the occasional help of the members of the ZDoom community)
-     License: GPLv3
-     Location: `ZPainkiller/` (not including any subfolders)
-
-ii.  ZForms library by Jessica Russell and Chronos "phantombeta" Ouroboros
-     License: free license
-     Location: `ZPainkiller/Zforms/`
-
-iii. ToolTips library by Nero
-     License: GPLv3
-     Location: `ZPainkiller/Tooltips/`
-
-iv.  StatusBarScreen library by Lewisk3
-     License: MIT License
-     Location: `ZPainkiller/StatusBarScreen/`
-
-v.   MK_Matrix library by Marisa Kirisame
-     License: GNU GPL
-     Location: `ZPainkiller/mk_matrix/`
+1. Original code by the Author (with the occasional help of the members of the ZDoom community)  
+    **License**: GPLv3  
+    **Location**: `ZPainkiller/` (not including any subfolders)
+2. *ZForms* library by Jessica Russell and Chronos "phantombeta" Ouroboros  
+    **License**: free license  
+    **Location**: `ZPainkiller/Zforms/`
+3. *ToolTips* library by Nero  
+    **License**: GPLv3  
+    **Location**: `ZPainkiller/Tooltips/`
+4. *StatusBarScreen* library by Lewisk3  
+    **License**: MIT License  
+    **Location**: `ZPainkiller/StatusBarScreen/`
+5. *MK_Matrix* library by Marisa Kirisame  
+    **License**: GNU GPL  
+    **Location**: `ZPainkiller/mk_matrix/`
 
 Refer to the aforementioned code locations for license information on each code component.
+
