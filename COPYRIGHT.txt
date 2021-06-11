@@ -110,3 +110,8 @@ v.   MK_Matrix library by Marisa Kirisame
      Location: "ZPainkiller/mk_matrix/"
 
 Refer to the aforementioned code locations for license information on each code component.
+
+
+              *** THE AUDIO ***
+			  
+All sounds used in Painslayer are owned by People Can Fly and are used under Fair Use doctrine. The Author does not own any of the sounds or any licenses to them. They may be removed from Painslayer, should People Can Fly request it.

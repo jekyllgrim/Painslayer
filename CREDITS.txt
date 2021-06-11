@@ -1,9 +1,13 @@
-People Can Fly: Painkiller, Painkiller sounds, HUD graphics
-
 Agent_Ash aka Jekyll Grim Payne: Idea, code, weapon and item sprites
 
 kodi: Beam library
 
 Cherno: Demon Morph shaders
 
-Lewisk3: StatusScreen Base library
+Lewisk3: StatusBarScreen (https://github.com/Lewisk3/StatusBarScreen)
+
+phantombeta, Gutawer: ZForms (https://gitlab.com/Gutawer/gzdoom-zforms)
+
+Nero: Tooltips (https://github.com/Saican/Tooltips/tree/master)
+
+Marisa Kirisame: MK_Matrix

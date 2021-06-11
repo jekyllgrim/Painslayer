@@ -120,3 +120,24 @@ The code libraries, their license types and their locations are as follows:
 
 Refer to the aforementioned code locations for license information on each code component.
 
+## The Audio
+
+All sounds used in Painslayer are owned by People Can Fly and are used under Fair Use doctrine. The Author does not own any of the sounds or any licenses to them. They may be removed from Painslayer, should People Can Fly request it.
+
+# Credits
+
+**People Can Fly**: Painkiller, Painkiller sounds, HUD graphics
+
+**Agent_Ash aka Jekyll Grim Payne**: Idea, code, weapon and item sprites
+
+**kodi**: Beam library
+
+**Cherno**: Demon Morph shaders
+
+**Lewisk3**: [StatusBarScreen](https://github.com/Lewisk3/StatusBarScreen)
+
+phantombeta, Gutawer: [ZForms](https://gitlab.com/Gutawer/gzdoom-zforms)
+
+Nero: [Tooltips](https://github.com/Saican/Tooltips/tree/master)
+
+Marisa Kirisame: MK_Matrix
