@@ -2,6 +2,8 @@
 
 *Painslayer* is a gameplay mod for GZDoom engine by Agent_Ash aka Jekyll Grim Payne, inspired by *Painkiller* (2004) by People Can Fly. 
 
+*Painslayer* requires [GZDoom 4.6.0](https://zdoom.org/downloads).
+
 # Copyright information and permissions
 
 Painslayer gameplay modification for GZDoom engine ("Painslayer") by Agent_Ash also known as Jekyll Grim Payne ("the Author") is based on the Painkiller game series by People Can Fly and consists of several components that are subject to different licenses and permissions.
