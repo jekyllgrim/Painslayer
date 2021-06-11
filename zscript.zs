@@ -2,7 +2,7 @@ version "4.5.0"
 
 #include "ZPainkiller/klazer/KLAZ_kColor.zsc"
 #include "ZPainkiller/klazer/KLAZ_Beam.zsc"
-#include "ZPainkiller/mk_matrix.zsc"
+#include "ZPainkiller/mk_matrix/mk_matrix.zsc"
 #include "ZPainkiller/StatusBarScreen/PK_StatusScreen_base.zsc"
 #include "ZPainkiller/StatusBarScreen/PK_StatusScreen_3D.zsc"
 #include "ZPainkiller/StatusBarScreen/PK_StatusScreen_shape2D.zsc"
