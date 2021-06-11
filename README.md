@@ -8,7 +8,7 @@
 
 Painslayer gameplay modification for GZDoom engine ("Painslayer") by Agent_Ash also known as Jekyll Grim Payne ("the Author") is based on the Painkiller game series by People Can Fly and consists of several components that are subject to different licenses and permissions.
 
-## Short summary of the permissions (not equivalent to the full text):
+### Short summary of the permissions (not equivalent to the full text):
 
 * Most of the graphics in Painslayer (specifically, weapon and pickup sprites) are owned by the Author and may NOT be used, copied or edited by anyone for any purpose without first obtaining an explicit permission from the Author.
 * The code used in Painslayer was produced by several authors and can be freely used by anyone for any purpose, provided the authors are credited, the required licenses are applied to the derivative works, and the relevant license and copyright information is kept intact (i.e. all files containing license information shall be copied to derivate works).
@@ -94,7 +94,7 @@ sprites/SFX/
 
 The codebase of Painslayer includes original code produced by the Author, as well as several libraries, each under their own license.
 
-Summary of the permissions (not equivalent to the full license text): 
+### Summary of the permissions (not equivalent to the full license text): 
 
 * Painslayer codebase can be used freely by anyone for any purpose, provided the attached licene information is kept intact and the original authors are credited in all derivative works. 
 
