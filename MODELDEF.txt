@@ -8,6 +8,7 @@ Model PK_Shotgun {
 	USEACTORPITCH
 	ROTATING
 	rotation-vector 0.1 1 0
+	rotation-speed 0.5
 	
 	FrameIndex BAL1 A 0 0
 }
@@ -21,6 +22,7 @@ Model PK_Stakegun {
 	USEACTORPITCH
 	ROTATING
 	rotation-vector 0.1 1 0
+	rotation-speed 0.5
 	
 	FrameIndex BAL1 A 0 0
 }
@@ -35,6 +37,7 @@ Model PK_Chaingun {
 	USEACTORPITCH
 	ROTATING
 	rotation-vector 0.1 1 0
+	rotation-speed 0.5
 	
 	FrameIndex BAL1 A 0 0
 }
@@ -47,6 +50,7 @@ Model PK_Electrodriver {
 	USEACTORPITCH
 	ROTATING
 	rotation-vector 0.1 1 0
+	rotation-speed 0.5
 	
 	FrameIndex BAL1 A 0 0
 }
@@ -60,6 +64,7 @@ Model PK_Rifle {
 	USEACTORPITCH
 	ROTATING
 	rotation-vector 0.1 1 0
+	rotation-speed 0.5
 	
 	FrameIndex BAL1 A 0 0
 }
@@ -73,6 +78,7 @@ Model PK_Boltgun {
 	USEACTORPITCH
 	ROTATING
 	rotation-vector 0.1 1 0
+	rotation-speed 0.5
 	
 	FrameIndex BAL1 A 0 0
 }
