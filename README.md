@@ -13,65 +13,76 @@ Painslayer gameplay modification for GZDoom engine ("Painslayer") by Agent_Ash a
 The visual assets used in Painslayer, such as sprites, UI icons and other images, as well as 3D models and their textures ("the Artwork") are split into several categories. The Artwork categories, as well as the corresponding permissions and artwork locations are listed below:
 
 i.   Original artwork created by the Author (usually inspired by works of People Can Fly)
-     Permissions: these assets may NOT be used, copied or edited by anyone for any purpose without first obtaining an explicit permission from the Author (with the exception of modifications made for personal use that will not be released publicly).
-     Locations:
-     `graphics/Boltgun/`
-     `graphics/Chaingun/`
-     `graphics/ElectroDriver/`
-     `graphics/hud/HUDelements/`
-     `graphics/Items/`
-     `graphics/Painkiller/`
-     `graphics/Rifle/`
-     `graphics/ShotgunFreezer/`
-     `graphics/StakeGun/`
-     `sprites/debris/`
-     `sprites/DemonEyes/`
-     `sprites/electro/`
-     `sprites/gold/`
-     `sprites/Painkiller/`
-     `sprites/pickups/`
-     `sprites/WeaponIcons/`
+     **Permissions**: these assets may NOT be used, copied or edited by anyone for any purpose without first obtaining an explicit permission from the Author (with the exception of modifications made for personal use that will not be released publicly).
+     **Locations**: 
+
+```
+graphics/Boltgun/
+graphics/Chaingun/
+graphics/ElectroDriver/
+graphics/hud/HUDelements/
+graphics/Items/
+graphics/Painkiller/
+graphics/Rifle/
+graphics/ShotgunFreezer/
+graphics/StakeGun/
+sprites/debris/
+sprites/DemonEyes/
+sprites/electro/
+sprites/gold/
+sprites/Painkiller/
+sprites/pickups/
+sprites/WeaponIcons/
+```
 
 ii.  Graphics, originally created by People Can Fly, modified in various ways, including but not limited to rescaling, color correction and partial redrawing
-     Permissions: these assets is used under the Fair Use doctrine. The Author does not own this artwork or any licenses to it. This artwork may be removed from Painslayer, should People Can Fly request it. You may use this artwork, as long as your use still falls under the Fair Use doctrine.
-     Locations:
-     `graphics/HUD/ammo/`
-     `graphics/HUD/icons/`
-     `graphics/HUD/numbers/`
-     `graphics/HUD/Tarot/`
-     `graphics/HUD/DCRHA.png`
-     `models/boltgun/`
-     `models/chaingun/`
-     `models/electrodriver/`
-     `models/painkiller/`
-     `models/rifle/`
-     `models/Shotgun/`
-     `models/Stakegun/`
-     `sprites/souls/`
-     `sprites/Flamethrower/`
+     **Permissions**: these assets is used under the Fair Use doctrine. The Author does not own this artwork or any licenses to it. This artwork may be removed from Painslayer, should People Can Fly request it. You may use this artwork, as long as your use still falls under the Fair Use doctrine.
+     **Locations**:
+
+```
+graphics/HUD/ammo/
+graphics/HUD/icons/
+graphics/HUD/numbers/
+graphics/HUD/Tarot/
+graphics/HUD/DCRHA.png
+models/boltgun/
+models/chaingun/
+models/electrodriver/
+models/painkiller/
+models/rifle/
+models/Shotgun/
+models/Stakegun/
+sprites/souls/
+sprites/Flamethrower/
+```
 
 iii. Open-source assets
-     Permissions: can be used by anyone for any purpose.
-     Locations:
-     `graphics/FLARA.png`
-     `graphics/FLARB.png`
-     `graphics/PKIMARK1.png`
-     `graphics/PKIMARK2.png`
-     `graphics/PKIMARK3.png`
-     `graphics/PKIMARK4.png`
-     `graphics/XHAIRB99.IMGZ`
-     `graphics/XHAIRS99.IMGZ`
-     `models/penta/`
-     `models/CrossSectionPrimitive.obj`
-     `models/flatbeam.obj`
-     `models/pickup_ring.obj`
-     `models/pickup_ring.png`
-     `models/pickup_ringwall.png`
-     `models/shaftB.png`
-     `models/spark.png`
-     `models/tracer.md3`
-     `models/tracer.png`
-     `sprites/SFX/`
+     **Permissions**: can be used by anyone for any purpose.
+     **Locations**:
+
+```
+graphics/FLARA.png
+graphics/FLARB.png
+graphics/PKIMARK1.png
+graphics/PKIMARK2.png
+graphics/PKIMARK3.png
+graphics/PKIMARK4.png
+graphics/XHAIRB99.IMGZ
+graphics/XHAIRS99.IMGZ
+models/penta/
+models/CrossSectionPrimitive.obj
+models/flatbeam.obj
+models/pickup_ring.obj
+models/pickup_ring.png
+models/pickup_ringwall.png
+models/shaftB.png
+models/spark.png
+models/tracer.md3
+models/tracer.png
+sprites/SFX/
+```
+
+
 
 ## The Code
 
