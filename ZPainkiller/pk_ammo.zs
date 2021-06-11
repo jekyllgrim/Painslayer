@@ -259,6 +259,9 @@ Class PK_EquipmentSpawner : Inventory {
 				am.amount = Clamp(am.amount / 2, 1, am.amount);
 				//console.printf("Spawner bTOSSED: %d | ammo bTOSSED: %d",bTOSSED,am.bTOSSED);
 			}
+			//this is important to make sure that the weapon that wasn't dropped doesn't get DROPPED flag (and this can't be crushed by moving ceilings)
+			else
+				am.bDROPPED = false;
 		}		
 	}
 	
@@ -515,7 +518,8 @@ Class PK_BaseWeaponSpawner : PK_EquipmentSpawner {
 			string wclass1 = weapon1.GetClassName();
 			string wclass2 = "weapon2 (not defined)";
 			if (weapon2) wclass2 = weapon2.GetClassName();
-			console.printf("Players %s %s | Players %s %s | Secondary chance: %d, Spawning %s",phave1,wclass1,phave2,wclass2,secondaryChance,tospawn.GetClassName());
+			string dr = bTOSSED ? "It was dropped." : "It was placed on the map.";
+			console.printf("Players %s %s | Players %s %s | Secondary chance: %d, spawning %s. %s",phave1,wclass1,phave2,wclass2,secondaryChance,tospawn.GetClassName(),dr);
 		}
 		/* 
 		If it was  dropped by an enemy and ALL players have the chosen weapon, 
@@ -571,7 +575,7 @@ Class PK_BaseWeaponSpawner : PK_EquipmentSpawner {
 			else if (wcount <= 1)
 				toSpawnFinal = toSpawn;
 			if (pk_debugmessages > 1)
-				Console.PrintF("There are at least %d instaces of %s on this map. Spawning %s instead",wcount,toSpawn.GetClassName(),toSpawnFinal.GetClassName());
+				Console.PrintF("There are at least %d instaces of %s on this map. Spawning %s",wcount,toSpawn.GetClassName(),toSpawnFinal.GetClassName());
 			SpawnInvPickup(pos,toSpawnFinal);
 		}
 		stop;
