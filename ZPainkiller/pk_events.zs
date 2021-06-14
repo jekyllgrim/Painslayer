@@ -356,6 +356,8 @@ Class PK_MainHandler : EventHandler {
 	}
 	//open Black Tarot at map start:
 	override void PlayerEntered(PlayerEvent e) {
+		if (!pk_autoOpenBoard)
+			return;
 		if (level.Mapname == "TITLEMAP")
 			return;
 		if (!PlayerInGame[e.PlayerNumber])
