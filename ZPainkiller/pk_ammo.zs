@@ -323,17 +323,6 @@ Class PK_EquipmentSpawner : Inventory {
 		if (weapon2) {
 			primary2 = GetDefaultByType(weapon2).ammotype1;
 			secondary2 = GetDefaultByType(weapon2).ammotype2;	
-			/*	Chaingun is a special case: rockets are used for its primary ammo,
-				but, unless the controller will replace RocketAmmo, it shouldn't spawn
-				rockets nearly as commonly as bullets.
-				So, we use Chaingun as weapon2 for Clip/Clipbox replacements, etc.,
-				which will spawn bullets more commonly, but we'll use it as weapon1
-				for RocketAmmo replacements which will spawn rockets more commonly.
-			*/
-			/*if (weapon2.GetClassName() == "PK_Chaingun") {
-				primary2 = GetDefaultByType(weapon2).ammotype2;
-				secondary2 = GetDefaultByType(weapon2).ammotype1;
-			}*/
 			//if none of the players have weapon1 and it doesn't exist on the map, increase the chance of spawning ammo for weapon2:
 			if (!CheckExistingWeapons(weapon1))
 				altSetChance *= 1.5;

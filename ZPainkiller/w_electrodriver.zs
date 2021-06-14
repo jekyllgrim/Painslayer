@@ -44,7 +44,7 @@ Class PK_ElectroDriver : PKWeapon {
 		if (!ltarget) {
 			FLineTraceData hit;
 			LineTrace(angle,atkdist,pitch,TRF_ABSPOSITION,player.viewz,pos.x,pos.y,data:hit);
-			if (hit.HitType != TRACE_HitNone && hit.HitType != TRACE_HitActor) {
+			if (hit.HitType != TRACE_HitNone && hit.HitType != TRACE_HitActor && hit.HitType != TRACE_HitSky) {
 				Spawn("PK_ElectricPuff",hit.HitLocation);
 			}
 			return hit.HitLocation;

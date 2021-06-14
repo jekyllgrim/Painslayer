@@ -315,7 +315,7 @@ Graphic "STAKEHOLE", 202, 191
 {
 	YScale 1.200
 	Offset 98, 92
-	Patch "GRAPHICS/STAKEHOLE.PNG", 0, 0
+	Patch "Graphics/Stakegun/STAKEHOLE.PNG", 0, 0
 }
 
 Sprite "FLARA0", 256, 256

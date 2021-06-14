@@ -1,5 +1,36 @@
-/*AddListMenu "MainMenu" {
-	TextItem "$PKM_TITLE_SHORT", "b", "PK_Settings"
+DEFAULTLISTMENU
+{
+	Font "TimesMenu", "Untranslated", "DarkRed"
+	Selector "", 0,0 //"P_mnuSel", -228, -8
+}
+
+ListMenu "MainMenu" {
+	size 1920, 1080
+	StaticPatchCentered 960, 0, "P_MENU"
+	LineSpacing 92
+	StaticPatchCentered 960, 339, "P_mnublk"
+	StaticPatchCentered 960, 431, "P_mnublk"
+	StaticPatchCentered 960, 523, "P_mnublk"
+	StaticPatchCentered 960, 615, "P_mnublk"
+	StaticPatchCentered 960, 707, "P_mnublk"
+	StaticPatchCentered 960, 799, "P_mnublk"
+	
+	Position 960, 360
+	PKTextItemCentered "$MNU_NEWGAME", "", "PlayerclassMenu"
+	PKTextItemCentered "$MNU_OPTIONS", "", "OptionsMenu"
+	PKTextItemCentered "$PKM_TITLE_SHORT", "", "PK_Settings"
+	PKTextItemCentered "$MNU_LOADGAME", "", "LoadGameMenu"
+	PKTextItemCentered "$MNU_SAVEGAME", "", "SaveGameMenu"
+	PKTextItemCentered "$MNU_QUITGAME", "", "QuitMenu"
+}
+
+ListMenu "SkillMenu" {
+	size 1920, 1080
+	StaticPatchCentered 960, 0, "P_MENU"
+	//LineSpacing 32
+	//StaticTextCentered 960, 260, "$MNU_CHOOSESKILL"	
+	Position 300, 199
+	centermenu
 }
 
 AddOptionMenu "OptionsMenu" {
@@ -9,11 +40,16 @@ AddOptionMenu "OptionsMenu" {
 Optionmenu "PK_Settings" {
 	Class "PKTLTPOptionsMenu"
 	Title "$PKM_TITLE"
+	PKTLTPControl "Open Black Tarot", "Black Tarot Board lets you purchase and equip cards", "White", "netevent PKCOpenBoard"
+	PKTLTPControl "Use Golden Cards", "Activate currently equipped Golden Tarot Cards", "White", "netevent PK_UseGoldenCards"	
 	PKTLTPScaleSlider "$PKM_QOLCATCHER",	"$PKM_QOLCATCHER_Tip", "White", "pk_QoLCatcherDistance", 0, 96, 8, "$PKM_DISABLED"
+	StaticText ""
+	StaticText ""
+	StaticText ""
+	StaticText ""
 	StaticText ""
 	StaticText "$TLTPTOOLTIPMNU_VERSION", "yellow"
 	Submenu "$OPTMNU_TLTPTOOLTIP", "PKTooltipOptionsMenu"
-	StaticText " "
 }
 
 OptionMenu "PKTooltipOptionsMenu"

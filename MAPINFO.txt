@@ -2,3 +2,50 @@ Gameinfo {
 	AddEventHandlers = "PK_Mainhandler", "PK_ReplacementHandler", "PK_BoardEventHandler"//, "PK_BoardElementsHandler"
 	StatusBarClass = "PainkillerHUD"
 }
+
+skill baby
+{
+	AutoUseHealth
+	AmmoFactor = 2
+	DamageFactor = 0.25
+	MonsterHealth = 0.5
+	EasyBossBrain
+	SpawnFilter = Baby
+	Name = "$PKM_SKILL0"
+	MustConfirm = "$PKM_SKILL0_Desc"
+}
+
+skill easy
+{
+	AmmoFactor = 1.2
+	EasyBossBrain
+	DamageFactor = 0.5
+	SpawnFilter = Easy
+	Name = "$PKM_SKILL1"
+}
+
+skill normal
+{
+	SpawnFilter = Normal
+	Name = "$PKM_SKILL2"
+	DefaultSkill
+}
+
+skill hard
+{
+	Aggressiveness = 0.5
+	SpawnFilter = Hard
+	Name = "$PKM_SKILL3"
+	MustConfirm = "$PKM_SKILL3_Desc"
+}
+
+skill nightmare
+{
+	AmmoFactor = 0.8
+	DisableCheats
+	Aggressiveness = 1.0
+	InstantReaction
+	SpawnFilter = Nightmare
+	Name = "$PKM_SKILL4"
+	MustConfirm = "$PKM_SKILL4_Desc"
+}

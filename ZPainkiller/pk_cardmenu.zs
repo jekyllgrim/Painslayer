@@ -49,7 +49,8 @@ Class PKCardsMenu : PKCGenericMenu {
 	bool queueForClose;
 	
 	override void Drawer() {		
-		PK_StatusBarScreen.Fill("000000",0,0,statscr_base_width,statscr_base_height,1);
+		if (!multiplayer)
+			PK_StatusBarScreen.Fill("000000",0,0,statscr_base_width,statscr_base_height,1);
 		super.Drawer();
 	}
 	override void Init (Menu parent) {
@@ -73,8 +74,11 @@ Class PKCardsMenu : PKCGenericMenu {
 			queueForClose = true;
 			return;
 		}
+		
+		bool mouseEnabled = CVar.GetCVar('m_use_mouse',players[consoleplayer]).GetInt() > 0 && CVar.GetCVar('use_mouse',players[consoleplayer]).GetInt() > 0;
+		
 		menuEHandler = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
-		if (menuEHandler && CVar.GetCVar('m_use_mouse',players[consoleplayer]).GetInt() > 0) {
+		if (menuEHandler && mouseEnabled) {
 			if (!menuEHandler.boardOpened) {
 				firstUse = true;
 				menuEHandler.boardOpened = true;
@@ -92,7 +96,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		background.Init(
 			(0,0),
 			backgroundsize,
-			image:"graphics/Tarot/cardsboard.png"/*,
+			image:"graphics/HUD/Tarot/cardsboard.png"/*,
 			imagescale:(1*backgroundRatio,1*backgroundRatio)*/
 		);
 		background.Pack(mainFrame);
@@ -115,7 +119,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		closeFirstUseBtn.SetTexture( "", "", "", "" );
 		closeFirstUseBtn.Pack(boardElements);
 		
-		if (CVar.GetCVar('m_use_mouse',players[consoleplayer]).GetInt() <= 0) {
+		if (!mouseEnabled) {
 			string str = String.Format(Stringtable.Localize("$TAROT_NEEDMOUSE"),Stringtable.Localize("$OPTMNU_TITLE"),Stringtable.Localize("$OPTMNU_MOUSE"),Stringtable.Localize("$MOUSEMNU_MOUSEINMENU"));
 			needMousePopup = New("PKCBoardMessage");
 			needMousePopup.pack(mainFrame);
@@ -137,10 +141,10 @@ Class PKCardsMenu : PKCGenericMenu {
 			command:"BoardButton"
 		);
 		exitbutton.SetTexture(
-			"Graphics/Tarot/board_button_highlighted.png",
-			"Graphics/Tarot/board_button_highlighted.png",
-			"Graphics/Tarot/board_button_highlighted.png",
-			"Graphics/Tarot/board_button_highlighted.png"
+			"graphics/HUD/Tarot/board_button_highlighted.png",
+			"graphics/HUD/Tarot/board_button_highlighted.png",
+			"graphics/HUD/Tarot/board_button_highlighted.png",
+			"graphics/HUD/Tarot/board_button_highlighted.png"
 		);
 		exitbutton.Pack(boardelements);
 
@@ -164,7 +168,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		let silverSlotBkg = new("PKCImage").Init(
 			(0,0),
 			silverSlotSize,
-			"graphics/Tarot/tooltip_bg.png",
+			"graphics/HUD/Tarot/tooltip_bg.png",
 			imagescale:(1.6,1.6),
 			tiled:true
 		);
@@ -189,7 +193,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		let goldSlotBkg = new("PKCImage").Init(
 			(0,0),
 			goldSlotSize,
-			"graphics/Tarot/tooltip_bg.png",
+			"graphics/HUD/Tarot/tooltip_bg.png",
 			imagescale:(1.6,1.6),
 			tiled:true
 		);
@@ -302,7 +306,7 @@ Class PKCardsMenu : PKCGenericMenu {
 				cmdhandler:handler,
 				command:"HandleCard"
 			);
-			string texpath = String.Format("graphics/Tarot/cards/%s.png",PKCCardIDs[i]);
+			string texpath = String.Format("graphics/HUD/Tarot/cards/%s.png",PKCCardIDs[i]);
 			card.SetTexture(texpath, texpath, texpath, texpath);
 			card.menu = PKCardsMenu(self);
 			card.buttonScale = cardscale;
@@ -723,7 +727,7 @@ Class PKCBoardMessage : PKCFrame {
 		outline.Init(
 			(0,0),
 			msgsize,
-			"graphics/Tarot/tooltip_bg_outline.png",
+			"graphics/HUD/Tarot/tooltip_bg_outline.png",
 			imagescale:(1.6,1.6),
 			tiled:true
 		);
@@ -734,7 +738,7 @@ Class PKCBoardMessage : PKCFrame {
 		bkg.Init(
 			intofs,
 			msgsize-(intofs*2),
-			"graphics/Tarot/tooltip_bg.png",
+			"graphics/HUD/Tarot/tooltip_bg.png",
 			imagescale:(1.6,1.6),
 			tiled:true
 		);
@@ -881,16 +885,16 @@ Class PKCTarotCard : PKCButton {
 		
 		//fade the card out if it's not purchased (and thus is inaccessible)
 		if (!cardbought)
-			drawTiledImage((0, 0), box.size, "graphics/Tarot/tooltip_bg.png", true, buttonScale,alpha: 0.75);
+			drawTiledImage((0, 0), box.size, "graphics/HUD/Tarot/tooltip_bg.png", true, buttonScale,alpha: 0.75);
 		//fade the card out if it's locked (equipped in a slot and the board has already been used in this map)
 		if (cardlocked)
-			drawTiledImage((0, 0), box.size, "graphics/Tarot/tooltip_bg.png", true, buttonScale,alpha: 0.4);
+			drawTiledImage((0, 0), box.size, "graphics/HUD/Tarot/tooltip_bg.png", true, buttonScale,alpha: 0.4);
 		
 		//otherwise play the burn frame animation
 		else if (purchaseAnim) {
 			if (purchaseFrame <= 16) {
 				purchaseFrame++;
-				string tex = String.Format("graphics/Tarot/cardburn/pkcburn%d.png",purchaseFrame);
+				string tex = String.Format("graphics/HUD/Tarot/cardburn/pkcburn%d.png",purchaseFrame);
 				drawImage((0,0),tex,true,buttonScale);
 			}
 			else {

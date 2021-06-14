@@ -15,6 +15,7 @@ TAROT_YES			= "Yes";
 TAROT_NO			= "No";
 TAROT_CLOSE		 	= "Close";
 TAROT_GOLDABR		= "g";
+TAROT_LOWSKILL		= "Black Tarot isn not available on the easiest difficulty";
 
 PK_OPENBOARD			= "Open Black Tarot board";
 PK_USEGOLDCARDS			= "Activate Golden Cards";
@@ -124,11 +125,19 @@ PKO_GRENADE		= "%o blew %k up";
 
 PKM_DISABLED		= "Disabled";
 PKM_TITLE			= "Painslayer Settings";
-PKM_TITLE_SHORT	= "Painsettings";
+PKM_TITLE_SHORT	= "Mod Settings";
 PKM_QOLCATCHER		= "Auto-attract souls/gold distance";
 PKM_QOLCATCHER_Tip= 	"A quality-of-life feature: attracts souls/gold from a distance.\n"
 						"Works the same way as the Soul Catcher card, except\n"
 						"the maximum distance is smaller.";
+PKM_SKILL0			= "Slumber";
+PKM_SKILL0_Desc	= "Very low difficulty. Enemies deal less damage and have less HP. You can't use Black Tarot cards in this mode.";
+PKM_SKILL1			= "Daydream";
+PKM_SKILL2			= "Insomnia";
+PKM_SKILL3			= "Nightmare";
+PKM_SKILL3_Desc	= "High difficulty. You get 80% of ammo from pickups, and enemies are more aggressive";
+PKM_SKILL4			= "Trauma";
+PKM_SKILL4_Desc	= "Very high difficulty. You get only 80% of ammo from pickups, enemies are very aggressive and they don't drop any souls, so healing is very difficult.";
 
 //// Tooltips menu
 
@@ -320,6 +329,7 @@ TAROT_YES			= "Да";
 TAROT_NO			= "Нет";
 TAROT_CLOSE		 	= "Закрыть";
 TAROT_GOLDABR		= " з.";
+TAROT_LOWSKILL		= "Карты Таро недоступны на самой низкой сложности";
 
 PK_OPENBOARD			= "Открыть Черные карты Таро";
 PK_USEGOLDCARDS			= "Активировать золотые карты";

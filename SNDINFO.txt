@@ -56,8 +56,10 @@ $playeralias		player	male	*jump		pkplayer/jump
 // world:
 world/bodypoof	BODYPOOF
 world/null	DSEMPTY
-world/mapstart "sounds/world/startlevel.wav"
-world/mapend "sounds/world/area_cleared.wav"
+world/mapstart 	"sounds/world/startlevel.wav"
+world/mapend 	"sounds/world/area_cleared.wav"
+world/checkpoint "sounds/world/checkpoint.wav"
+world/gameover  "sounds/world/game-over.mp3"
 
 //cards:
 cards/cantuse "sounds/items/card-cannot_use.wav"
@@ -87,12 +89,17 @@ ui/menu/accept		"sounds/menu/option-accept.wav"
 ui/menu/back		"sounds/menu/back-accept.wav"
 ui/menu/hover		"sounds/menu/option-light-on.wav"
 ui/menu/open		"sounds/menu/option-light-on_main3.wav"
+ui/menu/logo		"sounds/menu/option-sign_pact_alt.wav"//"sounds/menu/painkiller-mainlogo.wav"
+ui/menu/startgame	"sounds/menu/option-sign_pact_alt.wav"
 
 $alias menu/clear		ui/menu/back		// Close 
 $alias menu/cursor		ui/menu/hover		// Move cursor up/down
 $alias menu/backup		ui/menu/back		// Backup to previous menu
 $alias menu/activate	ui/menu/open		// Activate a new menu
 $alias menu/choose		ui/menu/accept		// Choose a menu item
+$alias menu/invalid		ui/board/wrongplace // Menu not available
+menu/quit1 "sounds/menu/option-light-on_main5.wav"
+$alias menu/quit2 menu/quit1
 
 ///WEAPONS\\\
 

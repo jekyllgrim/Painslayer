@@ -236,7 +236,8 @@ Class PK_Stake : PK_StakeProjectile {
 				return -1;
 			}
 		}
-		if (!victim.bISMONSTER && victim.bSOLID) {
+		if (!victim.bISMONSTER && (victim.bSOLID || victim.bSHOOTABLE)) {
+			victim.DamageMobj (self, target, basedmg, 'normal');
 			stickobject = victim;
 			return -1;
 		}

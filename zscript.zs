@@ -11,6 +11,7 @@ version "4.5.0"
 
 #include "ZPainkiller/pk_constants.zs"
 #include "ZPainkiller/pk_main.zs"
+#include "ZPainkiller/pk_menu.zs"
 #include "ZPainkiller/pk_events.zs"
 #include "ZPainkiller/pk_weapon.zs"
 #include "ZPainkiller/pk_ammo.zs"

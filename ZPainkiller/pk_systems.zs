@@ -414,26 +414,27 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 			}
 			//Class<Inventory> soul = (master && master.default.health >= 500) ? "PK_RedSoul" : "PK_Soul";			
 			double pz = (pos.z ~== floorz) ? frandom[soul](8,14) : 0;
-			//Spawn(soul,pos+(0,0,pz));
-			
+						
 			// Spawn soul. In contrast to Painkiller, here soul healing amount is based on the monster's health:
-			let soul = PK_Soul(Spawn("PK_Soul",pos+(0,0,pz)));
-			if (soul && master) {
-				soul.bearer = master.GetClass();
-				/*//define an amount between 1-20 based on monster's health (linearly mapped between 20-500):
-				double am = Clamp(LinearMap(double(master.SpawnHealth()), 20, 500, 1, 20), 1, 20);
-				soul.amount = am;
-				//slightly change soul's alpha and scale based on the resulting number:
-				soul.alpha = Clamp(LinearMap(am, 1, 20, 0.5, 1.5), 0.5 , 1.5);
-				soul.scale *= Clamp(LinearMap(am, 1, 20, 0.6, 1.15), 0.7, 1.15);
-				//if the amount is over 15, make the soul red:
-				if (am >= 15) {
-					soul.A_SetTranslation("PK_RedSoul");
-					//soul.A_SetRenderstyle(soul.alpha,Style_Shaded);
-					//soul.SetShade("FF0000");
-					soul.pickupsound = "pickups/soul/red";
+			if (skill < 4) {
+				let soul = PK_Soul(Spawn("PK_Soul",pos+(0,0,pz)));
+				if (soul && master) {
+					soul.bearer = master.GetClass();
+					/*//define an amount between 1-20 based on monster's health (linearly mapped between 20-500):
+					double am = Clamp(LinearMap(double(master.SpawnHealth()), 20, 500, 1, 20), 1, 20);
+					soul.amount = am;
+					//slightly change soul's alpha and scale based on the resulting number:
+					soul.alpha = Clamp(LinearMap(am, 1, 20, 0.5, 1.5), 0.5 , 1.5);
+					soul.scale *= Clamp(LinearMap(am, 1, 20, 0.6, 1.15), 0.7, 1.15);
+					//if the amount is over 15, make the soul red:
+					if (am >= 15) {
+						soul.A_SetTranslation("PK_RedSoul");
+						//soul.A_SetRenderstyle(soul.alpha,Style_Shaded);
+						//soul.SetShade("FF0000");
+						soul.pickupsound = "pickups/soul/red";
+					}
+					console.printf("Spawned soul, master: %s, amount: %d",master.GetClassName(),soul.amount);*/
 				}
-				console.printf("Spawned soul, master: %s, amount: %d",master.GetClassName(),soul.amount);*/
 			}
 			if (master)
 				master.destroy();

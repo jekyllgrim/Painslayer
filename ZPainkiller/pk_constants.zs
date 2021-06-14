@@ -19,7 +19,8 @@ enum PK_WeaponLayers {
 	RIFLE_STOCK	= 5,
 	RLIGHT_STOCK	= 6,
 	
-	PSP_DEMON = 66
+	PSP_DEMON = 66,
+	PSP_PKUI = 67
 }	
 
 enum PK_SoundChannels {

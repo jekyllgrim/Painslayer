@@ -112,14 +112,22 @@ Class PK_MainHandler : EventHandler {
 		if (e.name == "PKCOpenBoard") {
 			if (pk_debugmessages)
 				console.printf("Trying to open board");
+			if (skill < 1) {
+				if (e.player == consoleplayer) {
+					plr.A_StartSound("ui/board/wrongplace",PSP_PKUI,CHANF_UI|CHANF_LOCAL);
+					string str = Stringtable.Localize("$TAROT_LOWSKILL");
+					console.printf("%s",str);
+				}
+				return;
+			}
 			if (cardcontrol.goldActive || plr.health <= 0 || plr.FindInventory("PK_DemonWeapon")) {
 				if (e.player == consoleplayer) {
-					plr.A_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI|CHANF_LOCAL);
+					plr.A_StartSound("ui/board/wrongplace",PSP_PKUI,CHANF_UI|CHANF_LOCAL);
 					if (pk_debugmessages)
 						console.printf("Can't open the board at this time");
 				}
 				if (pk_debugmessages)
-					console.printf("health: %d | goldActive: %d | has demon weapon: %d",cardcontrol.goldActive,plr.health,plr.CountInv("PK_DemonWeapon"));
+					console.printf("skill: %d | health: %d | goldActive: %d | has demon weapon: %d",skill,cardcontrol.goldActive,plr.health,plr.CountInv("PK_DemonWeapon"));
 				return;
 			}
 			Menu.SetMenu("PKCardsMenu");
@@ -138,7 +146,7 @@ Class PK_MainHandler : EventHandler {
 			if (e.player == consoleplayer) {				
 				string str = (amt > 0) ? Stringtable.Localize(PKCH_GoldMessage[random(0,3)]) : Stringtable.Localize(PKCH_GoldMessage[random(4,5)]);
 				console.printf(str);
-				S_StartSound("pickups/gold/vbig",CHAN_AUTO,CHANF_UI);
+				S_StartSound("pickups/gold/vbig",PSP_PKUI,CHANF_UI|CHANF_LOCAL);
 			}
 		}
 		//PKREFRESH cheat (reset golden card uses)
@@ -187,6 +195,8 @@ Class PK_MainHandler : EventHandler {
 	
 	override void WorldLoaded(WorldEvent e) {
 		Shader.SetEnabled(players[consoleplayer], "DemonMorph", false); 
+		if (level.Mapname == "TITLEMAP")
+			return;
 		if (e.IsSaveGame || e.isReopen)
 			return;
 		for (int pn = 0; pn < MAXPLAYERS; pn++) {
@@ -201,7 +211,7 @@ Class PK_MainHandler : EventHandler {
 				if (pk_debugmessages)
 					console.printf("New map start: Refreshing cards for player %d. Gold Uses left: %d",pn,cardcontrol.goldUses);
 			}
-		}
+		}		
 		//spawn gold randomly in secret areas:
 		//iterate throguh sectors:
 		for (int i = 0; i < level.Sectors.Size(); i++) {
@@ -259,9 +269,14 @@ Class PK_MainHandler : EventHandler {
 	
 	//add controllers for Demon Mode, Haste and Confusion effects:
 	override void WorldThingspawned (worldevent e) {
+		if (level.Mapname == "TITLEMAP")
+			return;
 		let act = e.thing;		
 		if (!act)
 			return;
+		/*if (act.player && IsVoodooDoll(PlayerPawn(act))) {
+			console.printf("actor at %f,%f,%f is a voodoo doll",act.pos.x,act.pos.y,act.pos.z);
+		}*/
 		//this is only used by the HUD compass:
 		if (act.bISMONSTER && !act.bFRIENDLY)
 			allenemies.push(act);
@@ -322,12 +337,14 @@ Class PK_MainHandler : EventHandler {
 	
 	//players need control items for demon morph, cards and item replacement handling:
 	override void PlayerSpawned(PlayerEvent e) {
+		if (level.Mapname == "TITLEMAP")
+			return;
 		if (!PlayerInGame[e.PlayerNumber])
 			return;
 		let plr = players[e.PlayerNumber].mo;
 		if (!plr)
 			return;
-		//S_StartSound("world/mapstart",CHAN_AUTO);
+		//plr.A_StartSound("world/mapstart",PSP_PKUI,CHANF_UI|CHANF_LOCAL);
 		if  (!plr.FindInventory("PK_DemonMorphControl"))
 			plr.GiveInventory("PK_DemonMorphControl",1);
 		if  (!plr.FindInventory("PK_CardControl"))
@@ -336,14 +353,18 @@ Class PK_MainHandler : EventHandler {
 			plr.GiveInventory("PK_InvReplacementControl",1);
 		/*if (!plr.FindInventory("PK_QoLCatcher"))
 			plr.GiveInventory("PK_QoLCatcher",1);*/
-		/*let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
-		if (cardcontrol) {
-			cardcontrol.RefreshCards();
-			if (pk_debugmessages)
-				console.printf("New map start: Refreshing cards for player %d. Gold Uses left: %d",plr.PlayerNumber(),cardcontrol.goldUses);
-		}
-		else if (pk_debugmessages)
-			console.printf("Player %d doesn't have PK_CardControl",plr.PlayerNumber());*/
+	}
+	//open Black Tarot at map start:
+	override void PlayerEntered(PlayerEvent e) {
+		if (level.Mapname == "TITLEMAP")
+			return;
+		if (!PlayerInGame[e.PlayerNumber])
+			return;
+		let plr = players[e.PlayerNumber].mo;
+		if (!plr)
+			return;
+		if (e.PlayerNumber == consoleplayer)
+			Menu.SetMenu("PKCardsMenu");
 	}
 	void StopPlayerGoldenCards(PlayerInfo player) {
 		if (!player || !player.mo)
@@ -379,8 +400,11 @@ Class PK_MainHandler : EventHandler {
 			for (int i = -1000; i < 0; i++)
 				player.SetPSprite(i,null);
 		}
+		player.mo.A_StartSound("world/gameover",PSP_PKUI,CHANF_UI|CHANF_LOCAL);
 	}
 	override void WorldUnloaded (WorldEvent e) {
+		if (level.Mapname == "TITLEMAP")
+			return;
 		for (int pn = 0; pn < MAXPLAYERS; pn++) {
 			if (!playerInGame[pn])
 				continue;
@@ -443,8 +467,6 @@ Class PK_ReplacementHandler : EventHandler {
 
 Class PK_BoardEventHandler : EventHandler {
 	ui bool boardOpened; //whether the Black Tarot board has been opened on this map
-	ui bool allowOpenBoard; //if false, the board won't open (to block openmenu CCMD, since I only want the menu to be openable with a netevent
-	
 	bool SoulKeeper;
 	
 	override void WorldThingDamaged(worldevent e) {
