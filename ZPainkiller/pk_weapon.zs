@@ -597,10 +597,10 @@ Class PK_StakeProjectile : PK_Projectile {
 			A_FaceMovementDirection(flags:FMDF_INTERPOLATE );
 		//otherwise stake is dead, so we'll move it alongside the object/plane it's supposed to be attached to:
 		if (bTHRUACTORS) {
-			//topz = CurSector.ceilingplane.ZAtPoint(pos.xy);
-			//botz = CurSector.floorplane.ZAtPoint(pos.xy);
+			topz = CurSector.ceilingplane.ZAtPoint(pos.xy);
+			botz = CurSector.floorplane.ZAtPoint(pos.xy);
 			//Destroy the stake if it's run into ceiling/floor by a moving sector (e.g. a door opened, pulled the stake up and pushed it into the ceiling). Only do this if the stake didn't actually hit a plane before that:
-			if (!hitplane && (pos.z >= ceilingz-height || pos.z <= floorz)) {
+			if (!hitplane && (pos.z >= topz-height || pos.z <= botz)) {
 				StakeBreak();
 				return;
 			}

@@ -122,11 +122,8 @@ Class PK_Stake : PK_StakeProjectile {
 		decal "Stakedecal";
 	}
 	override void StakeBreak() {
-		double ofz = botz+1;
-		if (pos.z >= topz)
-			ofz = topz-1;
 		for (int i = random[sfx](3,5); i > 0; i--) {
-			let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,ofz)));
+			let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,pos.z)));
 			if (deb) {
 				deb.spritename = "PSDE";
 				deb.frame = i;
