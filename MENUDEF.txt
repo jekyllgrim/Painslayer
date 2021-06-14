@@ -15,7 +15,7 @@ ListMenu "MainMenu" {
 	StaticPatchCentered 960, 707, "P_mnublk"
 	StaticPatchCentered 960, 799, "P_mnublk"
 	
-	Position 960, 360
+	Position 992, 360
 	PKTextItemCentered "$MNU_NEWGAME", "", "PlayerclassMenu"
 	PKTextItemCentered "$MNU_OPTIONS", "", "OptionsMenu"
 	PKTextItemCentered "$PKM_TITLE_SHORT", "", "PK_Settings"
@@ -24,14 +24,23 @@ ListMenu "MainMenu" {
 	PKTextItemCentered "$MNU_QUITGAME", "", "QuitMenu"
 }
 
-ListMenu "SkillMenu" {
+ListMenu "SkillMenu"
+{
+	PKDrawMenuBackground 0, 0, "P_MENU"
+	Font "BigFont", "White", "DarkRed"
+	StaticText 74, 16, "$MNU_CHOOSESKILL"
+	Position 200, 56
+	centerMenu
+}
+
+/*ListMenu "SkillMenu" {
 	size 1920, 1080
 	StaticPatchCentered 960, 0, "P_MENU"
 	//LineSpacing 32
 	//StaticTextCentered 960, 260, "$MNU_CHOOSESKILL"	
 	Position 300, 199
 	centermenu
-}
+}*/
 
 AddOptionMenu "OptionsMenu" {
 	Submenu "$PKM_TITLE", "PK_Settings"
@@ -40,9 +49,10 @@ AddOptionMenu "OptionsMenu" {
 Optionmenu "PK_Settings" {
 	Class "PKTLTPOptionsMenu"
 	Title "$PKM_TITLE"
-	PKTLTPControl "Open Black Tarot", "Black Tarot Board lets you purchase and equip cards", "White", "netevent PKCOpenBoard"
-	PKTLTPControl "Use Golden Cards", "Activate currently equipped Golden Tarot Cards", "White", "netevent PK_UseGoldenCards"	
-	PKTLTPScaleSlider "$PKM_QOLCATCHER",	"$PKM_QOLCATCHER_Tip", "White", "pk_QoLCatcherDistance", 0, 96, 8, "$PKM_DISABLED"
+	PKTLTPControl "$PKM_OpenTarot", "$PKM_OpenTarot_Desc", "White", "netevent PKCOpenBoard"
+	PKTLTPControl "$PKM_UseCards", "$PKM_UseCards_Desc", "White", "netevent PK_UseGoldenCards"	
+	PKTLTPOption "$PKM_AutoOpenTarot", "$PKM_AutoOpenTarot_Desc", "White", "pk_autoOpenBoard", "OnOff"
+	PKTLTPScaleSlider "$PKM_QOLCATCHER",	"$PKM_QOLCATCHER_Desc", "White", "pk_QoLCatcherDistance", 0, 96, 8, "$PKM_DISABLED"
 	StaticText ""
 	StaticText ""
 	StaticText ""
