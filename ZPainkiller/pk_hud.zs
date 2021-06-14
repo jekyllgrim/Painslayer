@@ -17,10 +17,6 @@ Class PainkillerHUD : BaseStatusBar {
 		let hudscale = GetHudScale();		
 		double hscale = hudscale.x;
         vector2 targetScale = (arrowScale,arrowScale) * hscale;
-		//this is done to make sure ultrawide is supported:
-		double aspectmod_x = Screen.GetAspectRatio() / (1920./1080.);
-		targetScale.x /= aspectmod_x;
-		//Console.Printf("Aspect ratio %f | aspect mod: %f",Screen.GetAspectRatio(), aspectmod_x);
 		arrowPos *= hscale;
 		int fflags = PK_StatusBarScreen.SS_SCREEN_TOP_CENTER;
 		//dark arrow outline:
@@ -124,7 +120,7 @@ Class PainkillerHUD : BaseStatusBar {
 		}
 		//define the angle for the monster compass arrow based on the relative position of the monster:
 		if (closestact) {
-			arrowangle = -(Actor.DeltaAngle(player.angle, player.AngleTo(closestact)));
+			arrowangle = (Actor.DeltaAngle(player.angle, player.AngleTo(closestact)));
 			//console.printf("%s angle %d",closestact.GetClassName(),arrowangle);
 		}
 	}
