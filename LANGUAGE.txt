@@ -127,9 +127,18 @@ PKM_DISABLED		= "Disabled";
 PKM_TITLE			= "Painslayer Settings";
 PKM_TITLE_SHORT	= "Mod Settings";
 PKM_QOLCATCHER		= "Auto-attract souls/gold distance";
-PKM_QOLCATCHER_Tip= 	"A quality-of-life feature: attracts souls/gold from a distance.\n"
+PKM_QOLCATCHER_Desc= 	"A quality-of-life feature: attracts souls/gold from a distance.\n"
 						"Works the same way as the Soul Catcher card, except\n"
 						"the maximum distance is smaller.";
+PKM_OpenTarot			= "Open Black Tarot";
+PKM_OpenTarot_Desc	= "Black Tarot Board lets you purchase and equip cards";
+PKM_UseCards			= "Use Golden Cards";
+PKM_UseCards_Desc		= "Activate currently equipped Golden Tarot Cards";
+PKM_AutoOpenTarot		= "Open Black Tarot board at map start";
+PKM_AutoOpenTarot_Desc =	"When you open Black Tarot board for the first time in a map,\n"
+							"you can equip cards for free (after that they'll be locked).\n"
+							"By default this happens at map start. This option allows you\n"
+							"to change that behavior.";
 PKM_SKILL0			= "Slumber";
 PKM_SKILL0_Desc	= "Very low difficulty. Enemies deal less damage and have less HP. You can't use Black Tarot cards in this mode.";
 PKM_SKILL1			= "Daydream";
@@ -137,7 +146,7 @@ PKM_SKILL2			= "Insomnia";
 PKM_SKILL3			= "Nightmare";
 PKM_SKILL3_Desc	= "High difficulty. You get 80% of ammo from pickups, and enemies are more aggressive";
 PKM_SKILL4			= "Trauma";
-PKM_SKILL4_Desc	= "Very high difficulty. You get only 80% of ammo from pickups, enemies are very aggressive and they don't drop any souls, so healing is very difficult.";
+PKM_SKILL4_Desc	= "Very high difficulty. You get only 60% of ammo from pickups, enemies are very aggressive and they don't drop any souls.";
 
 //// Tooltips menu
 
