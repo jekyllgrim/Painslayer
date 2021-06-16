@@ -135,6 +135,7 @@ Class PK_Chaingun : PKWeapon {
 		goto AltHold;
 	AltHold:
 		TNT1 AAA 2 {
+			A_Overlay(PSP_OVERGUN,"MinigunFire",noOverride: true);
 			if (invoker.ammo2.amount < 1)
 				return ResolveState("AltFireEnd");
 			invoker.holddur++;
