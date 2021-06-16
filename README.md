@@ -4,6 +4,59 @@
 
 *Painslayer* requires [GZDoom 4.6.0](https://zdoom.org/downloads).
 
+# Contents
+
+- [How to play](#how-to-play)
+  * [How to play the latest stable release](#how-to-play-the-latest-stable-release)
+  * [How to play the freshest dev build](#how-to-play-the-freshest-dev-build)
+- [Copyright information and permissions](#copyright-information-and-permissions)
+  + [Short summary of the permissions (not equivalent to the full text):](#short-summary-of-the-permissions--not-equivalent-to-the-full-text--)
+  * [The Artwork](#the-artwork)
+  * [The Code](#the-code)
+  * [The Audio](#the-audio)
+- [Credits](#credits)
+
+# How to play
+
+## How to play the latest stable release
+
+Releases aren't always super-stable or bug-free, but they should be playable. Some releases are development versions which don't have all the planned features implemented yet.
+
+1. Navigate to the "Releases" tab at the top or following this URL: https://github.com/jekyllgrim/Painslayer/releases
+2. Download the attached PK3 file. Run it as you'd run any .wad or .pk3:
+
+```
+gzdoom.exe -file Painslayer.###.pk3
+```
+
+(`###` in the example above stand for the version number, e.g. 085.)
+
+## How to play the freshest dev build
+
+It's possible to play the version that is currently in the repository but hasn't been made into a separate release yet:
+
+1. Click the green "**Code**" button in the top right part of the page.
+
+2. Click "**Download ZIP**". You do NOT need to unpack the downloaded archive!
+
+3. (Optional) Rename the downloaded **.zip** to **.pk3** to remember that you don't need to unpack it.
+
+4. Run the archive as you would run any mod; from command line or a bat file in the GZDoom directory:
+
+    ```
+    gzdoom.exe -file Painslayer-master.zip 
+    ```
+
+    Or, if you renamed it: 
+
+    ```
+    gzdoom.exe -file Painslayer-master.pk3
+    ```
+
+5. If you're getting errors, try running it with the latest [development build of GZDoom](https://devbuilds.drdteam.org/gzdoom/). Github builds may contain features that haven't made it into a stable GZDoom release yet.
+
+6. Enjoy!
+
 # Copyright information and permissions
 
 Painslayer gameplay modification for GZDoom engine ("Painslayer") by Agent_Ash also known as Jekyll Grim Payne ("the Author") is based on the Painkiller game series by People Can Fly and consists of several components that are subject to different licenses and permissions.
@@ -94,7 +147,7 @@ sprites/SFX/
 
 The codebase of Painslayer includes original code produced by the Author, as well as several libraries, each under their own license.
 
-### Summary of the permissions (not equivalent to the full license text): 
+**Summary of the permissions (not equivalent to the full license text):** 
 
 * Painslayer codebase can be used freely by anyone for any purpose, provided the attached licene information is kept intact and the original authors are credited in all derivative works. 
 
