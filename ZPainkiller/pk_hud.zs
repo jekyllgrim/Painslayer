@@ -127,15 +127,15 @@ Class PainkillerHUD : BaseStatusBar {
 	
 	//show 3 active golden cards at the lower center of the screen
 	protected void DrawActiveGoldenCards() {
-		if (!cardcontrol || (!cardcontrol.goldActive && cardcontrol.GetDryUseTimer() == 0))
+		if (!cardcontrol || (!cardcontrol.goldActive && cardcontrol.GetDryUseTimer() <= 0))
 			return;			
 		for (int i = 2; i < 5; i++) {
 			if (cardcontrol.EquippedSlots[i]) {
-				string texpath = String.Format("graphics/Tarot/cards/%s.png",cardcontrol.EquippedSlots[i]);
+				string texpath = String.Format("graphics/HUD/Tarot/cards/%s.png",cardcontrol.EquippedSlots[i]);
 				DrawImage(texpath,((-77 + i*22),195),DI_SCREEN_HCENTER|DI_ITEM_LEFT_TOP,scale:(0.14,0.14));
 				//if out of uses, draw a red overlay atop the cards
 				if (cardcontrol.GetDryUseTimer() > 0)
-					DrawImage("graphics/Tarot/cards/UsedCard.png",((-77 + i*22),195),DI_SCREEN_HCENTER|DI_ITEM_LEFT_TOP,alpha:0.75,scale:(0.14,0.14));
+					DrawImage("graphics/HUD/Tarot/cards/UsedCard.png",((-77 + i*22),195),DI_SCREEN_HCENTER|DI_ITEM_LEFT_TOP,alpha:0.75,scale:(0.14,0.14));
 			}
 		}
 	}
