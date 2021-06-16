@@ -32,7 +32,7 @@ Class PainkillerHUD : BaseStatusBar {
 	}
 	
 	/*	My HUD was originally coded using StatusBar's DrawImage, DrawString and DrawInventoryIcon,
-		but later I realized I need to ignore "Preserve HUD scale" option because it leads to
+		but later I realized I need to ignore "Preserve HUD aspect ratio" option because it leads to
 		Y-stretching of pixels, which ruins round HUD elements.
 		Since I didn't feel like rewriting the whole HUD, functions below are super-lazy wrappers
 		that simply multiply vertical scale and pos by ~0.83 if "Preserve HUD scale" option is enabled.
