@@ -285,6 +285,8 @@ Class PK_FreezeControl : PK_InventoryToken {
 			layer.angle = owner.angle;
 			layer.scale.x = owner.scale.x*1.32;
 			layer.scale.y = owner.scale.y*1.07;
+			layer.bSPRITEFLIP = owner.bSPRITEFLIP;
+			layer.bYFLIP = owner.bYFLIP;
 		}
 	}
 	override void DoEffect() {
