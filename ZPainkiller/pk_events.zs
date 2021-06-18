@@ -414,6 +414,15 @@ Class PK_MainHandler : EventHandler {
 	}
 }
 
+Class PK_ShaderHandler : StaticEventHandler {
+	override void WorldLoaded(WorldEvent e) {
+		PlayerInfo plr = players[consoleplayer];
+		if (!plr || !plr.mo || plr.mo.FindInventory("PK_DemonWeapon"))
+			return;
+		Shader.SetEnabled(players[consoleplayer], "DemonMorph", false);
+	}
+}
+
 Class PK_ReplacementHandler : EventHandler {
 	//array <Weapon> mapweapons;
 	array < Class<Weapon> > mapweapons;
