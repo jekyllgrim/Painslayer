@@ -194,7 +194,6 @@ Class PK_MainHandler : EventHandler {
 	
 	
 	override void WorldLoaded(WorldEvent e) {
-		Shader.SetEnabled(players[consoleplayer], "DemonMorph", false); 
 		if (level.Mapname == "TITLEMAP")
 			return;
 		if (e.IsSaveGame || e.isReopen)
@@ -337,8 +336,6 @@ Class PK_MainHandler : EventHandler {
 	
 	//players need control items for demon morph, cards and item replacement handling:
 	override void PlayerSpawned(PlayerEvent e) {
-		if (level.Mapname == "TITLEMAP")
-			return;
 		if (!PlayerInGame[e.PlayerNumber])
 			return;
 		let plr = players[e.PlayerNumber].mo;
@@ -351,8 +348,8 @@ Class PK_MainHandler : EventHandler {
 			plr.GiveInventory("PK_CardControl",1);
 		if (!plr.FindInventory("PK_InvReplacementControl"))
 			plr.GiveInventory("PK_InvReplacementControl",1);
-		/*if (!plr.FindInventory("PK_QoLCatcher"))
-			plr.GiveInventory("PK_QoLCatcher",1);*/
+		if (!plr.FindInventory("PK_QoLCatcher"))
+			plr.GiveInventory("PK_QoLCatcher",1);
 	}
 	//open Black Tarot at map start:
 	override void PlayerEntered(PlayerEvent e) {
