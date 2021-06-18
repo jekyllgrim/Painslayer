@@ -11,7 +11,6 @@ Class PainkillerHUD : BaseStatusBar {
 	private bool isDemon;
 	private PK_Mainhandler mainhandler;
 	protected transient CVar aspectScale;
-	protected vector2 itemScale;
 	
 	PK_CardControl cardcontrol;	
 	
@@ -73,7 +72,6 @@ Class PainkillerHUD : BaseStatusBar {
 		Super.Draw (state, TicFrac);
 		if (aspectScale == null)
 			aspectScale = CVar.GetCvar('hud_aspectscale',CPlayer);
-		//itemScale = aspectScale.GetBool() == true ? (1,0.83) : (1, 1);
 		hudstate = state;
 		//the hud is completely skipped if automap is active or the player
 		//is in a demon mode and debug messages aren't active:
