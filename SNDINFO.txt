@@ -8,11 +8,6 @@ plats/pt1_strt			"sounds/world/elevators/elevator2-middle-loop.wav"//"sounds/wor
 plats/pt1_stop			"sounds/world/elevators/elevator2-stop.wav"
 plats/pt1_mid			"sounds/world/elevators/elevator2-middle-loop.wav"
 //doors:
-doors/dr1_open			dsdoropn
-doors/dr1_clos			dsdorcls
-doors/dr2_open			dsbdopn
-doors/dr2_clos			dsbdcls
-
 doors/slow/open		"sounds/world/elevators/elevator3-start.wav"
 doors/slow/loop		"sounds/world/elevators/elevator3-middle-loop.wav"
 doors/slow/stop		"sounds/world/elevators/elevator3-stop.wav"
