@@ -17,6 +17,7 @@ Class PK_Chaingun : PKWeapon {
 		weapon.ammogive2	100;		
 		inventory.pickupmessage "$PKI_CHAINGUN";
 		inventory.pickupsound "pickups/weapons/chaingun";
+		inventory.icon "PWICC0";
 		Tag "$PK_CHAINGUN_TAG";
 	}
 	action void SetMinigunFrame(int delay = 0) {
@@ -248,6 +249,7 @@ Class PK_Rocket : PK_Grenade {
 	Default {
 		speed 30;
 		seesound "weapons/chaingun/rocketfire";
+		deathsound "weapons/chaingun/rocketboom";
 		decal 'Scorch';
 		damage (20);
 		ExplosionDamage 128;
