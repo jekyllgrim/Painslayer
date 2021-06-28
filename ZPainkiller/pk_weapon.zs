@@ -422,6 +422,17 @@ Class PK_Projectile : PK_BaseActor abstract {
 			return false;
 		return super.CanCollideWith(other, passive);
 	}
+	static bool CheckVulnerable(actor victim, actor missile = null) {
+		if (!victim)
+			return false;
+		/*if (missile) {
+			if (missile.bMTHRUSPECIES && missile.target && missile.target.species == victim.species)
+				return true;
+			if (victim.bSPECTRAL && !missile.bSPECTRAL)
+				return true;
+		}*/
+		return (victim.bSHOOTABLE && !victim.bNONSHOOTABLE && !victim.bNOCLIP && !victim.bNOINTERACTION && !victim.bINVULNERABLE && !victim.bDORMANT && !victim.bNODAMAGE  && !victim.bSPECTRAL);
+	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		mod = target && PKWeapon.CheckWmod(target);

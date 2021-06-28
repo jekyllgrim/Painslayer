@@ -20,6 +20,7 @@ Class PK_Rifle : PKWeapon {
 		weapon.ammogive2	100;
 		inventory.pickupmessage "$PKI_RIFLEAMMO";
 		inventory.pickupsound "pickups/weapons/rifle";
+		inventory.icon "PWICE0";
 		Tag "$PK_RIFLE_TAG";
 	}
 	action void FireFlameThrower() {
@@ -496,7 +497,7 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 		damage 0;
 	}
 	override int SpecialMissileHit(actor victim) {
-		if (victim && victim.health > 0 && victim.bSHOOTABLE && (victim != target || age > 10)) {
+		if (victim && (!target || victim != target || age > 10) && victim.health > 0 && CheckVulnerable(victim)) {
 			if (victim != hitvictim) {
 				hitvictim = victim;
 				ripdepth -= victim.health;
