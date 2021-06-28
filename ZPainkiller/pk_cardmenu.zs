@@ -34,6 +34,8 @@ Class PKCardsMenu : PKCGenericMenu {
 	
 	PKCFrame boardElements;		//everything in the board except the background and popups
 	PKCBoardMessage cardinfo;		//card information popup
+	PKCLabel cardinfoTip;
+	PKCLabel cardinfoCost;
 	PKCBoardMessage promptPopup;	//an exit or purchase popup that blocks the board
 	PKCBoardMessage firstUsePopup;	//first use notification
 	PKCBoardMessage needMousePopup;	//need mouse notification
@@ -559,46 +561,58 @@ Class PKCardsMenu : PKCGenericMenu {
 			return;
 		vector2 tippos = (62,430);
 		vector2 tipsize = (378,173);
-
-		string title = Stringtable.Localize(card.cardname);	//pulls name from LANGUAGE
-		string desc = Stringtable.Localize(card.carddesc);	//pulls desc from LANGUAGE
-		
-		cardinfo = New("PKCBoardMessage");
-		cardinfo.pack(mainFrame);
-		cardinfo.Init(
-			tippos,
-			tipsize,
-			String.Format("%s",title),
-			textscale:MENUTEXTSCALE*1.2,
-			textcolor: Font.FindFontColor('PKRedText')
-		);
-		
 		vector2 tiptextofs = (16,16);	
-		let tiptext = new("PKCLabel").Init(
-			tiptextofs+(0,48),
-			tipsize-(tiptextofs*1.2),
-			String.Format("%s",desc), 
-			font_times,
-			textscale:MENUTEXTSCALE*1,
-			textcolor: Font.FindFontColor('PKBaseText'),
-			linespacing: 0.1
-		);
-		tiptext.Pack(cardinfo);	
+
+		string title = String.Format("%s",Stringtable.Localize(card.cardname));	//card name
+		string desc = String.Format("%s",Stringtable.Localize(card.carddesc));	//description
+		string cost = String.Format("%d%s",card.cardcost,Stringtable.Localize("$TAROT_GOLDABR")); //cost and the abbreviation for "gold"
 		
-		if (card.cardbought)
-			return;
-			
-		let cardcost = new("PKCLabel").Init(
-			tiptextofs+(185,0),
-			(160,64),
-			String.Format("%d%s",card.cardcost,Stringtable.Localize("$TAROT_GOLDABR")), 
-			font_times,
-			alignment:PKCElement.AlignType_TopRight,
-			textscale:1,
-			textcolor: Font.FindFontColor('PKGreenText'),
-			linespacing: 0.1
-		);
-		cardcost.Pack(cardinfo);	
+		if (!cardinfo) {
+			cardinfo = New("PKCBoardMessage");
+			cardinfo.pack(mainFrame);
+			cardinfo.Init(
+				tippos,
+				tipsize,
+				title,
+				textscale:MENUTEXTSCALE*1.2,
+				textcolor: Font.FindFontColor('PKRedText')
+			);
+		}
+		else {
+			cardinfo.hidden = false;
+			cardinfo.text = title;
+		}
+		if (!cardinfoTip) {
+			cardinfoTip = new("PKCLabel").Init(
+				tiptextofs+(0,48),
+				tipsize-(tiptextofs*1.2),
+				desc, 
+				font_times,
+				textscale:MENUTEXTSCALE*1,
+				textcolor: Font.FindFontColor('PKBaseText'),
+				linespacing: 0.1
+			);
+			cardinfoTip.Pack(cardinfo);	
+		}
+		else
+			cardinfoTip.text = desc;
+		if (!cardinfoCost) {
+			cardinfoCost = new("PKCLabel").Init(
+				tiptextofs+(185,0),
+				(160,64),
+				cost, 
+				font_times,
+				alignment:PKCElement.AlignType_TopRight,
+				textscale:1,
+				textcolor: Font.FindFontColor('PKGreenText'),
+				linespacing: 0.1
+			);
+			cardinfoCost.Pack(cardinfo);	
+		}
+		else {
+			cardinfoCost.text = cost;
+			cardinfoCost.hidden = card.cardbought;
+		}
 	}
 
     override bool MenuEvent (int mkey, bool fromcontroller) {
@@ -692,13 +706,11 @@ Class PKCardsMenu : PKCGenericMenu {
 			}
 		}
 		//show card info if mouse hovers over a card and there's no card selected:
-		if (!cardinfo && HoveredCard && HoveredCard.isEnabled() && !HoveredCard.hidden && !SelectedCard)
+		if ((!cardinfo || cardinfo.hidden) && HoveredCard && HoveredCard.isEnabled() && !HoveredCard.hidden && !SelectedCard)
 			ShowCardToolTip(HoveredCard);
 		//as soon as you hover off the card, immediately remove card info:
-		if (cardinfo && (!HoveredCard || !HoveredCard.isEnabled() || HoveredCard.hidden || SelectedCard)) {
-		//It's actually not a good idea to continuously create and destroy stuff like that, I simply designed it like this initially and it was too bothersome  to redo.
-			cardinfo.unpack();
-			cardinfo.destroy();
+		if (cardinfo && !cardinfo.hidden && (!HoveredCard || !HoveredCard.isEnabled() || HoveredCard.hidden || SelectedCard)) {
+			cardinfo.hidden = true;
 		}
 		//exit button continuously flashes, like in original:
 		if (exitbutton) {
@@ -718,6 +730,8 @@ Class PKCardsMenu : PKCGenericMenu {
 */
 Class PKCBoardMessage : PKCFrame {
 	private int dur;
+	string text;
+	PKCLabel msgPrompt;
 	PKCBoardMessage init (vector2 msgpos, vector2 msgsize, string msgtext = "", double TextScale = 1.0, int TextColor = 0,  AlignType alignment = AlignType_TopLeft) {
 		self.setBox(msgpos, msgsize);
 		self.alpha = 1;
@@ -745,24 +759,29 @@ Class PKCBoardMessage : PKCFrame {
 		
 		if (msgtext == "")
 			return self;
+		text = msgtext;
 		
 		if (textColor == 0)
 			textcolor = Font.FindFontColor('PKWhiteText');
 		
 		vector2 msgTextOfs = intofs+(12,12);
-		let msgPrompt = new("PKCLabel");
+		msgPrompt = new("PKCLabel");
 		msgPrompt.Pack(self);
 		msgPrompt.Init(
 			msgTextOfs,
 			msgsize-(msgTextOfs*2),
-			msgtext,
+			text,
 			font_times,
 			alignment: alignment,
 			textscale: TextScale,
 			textcolor: TextColor
-		);
-		
+		);		
 		return self;
+	}
+	override void drawer() {
+		super.drawer();
+		if (msgPrompt && text)
+			msgPrompt.text = text;
 	}
 }
 
@@ -875,10 +894,12 @@ Class PKCTarotCard : PKCButton {
 	int cardCost;
 	int purchaseFrame;
 	bool purchaseAnim;
+	TextureID cardtexture;
 	override void drawer() {
 		string texture = btnTextures[curButtonState];
-		TextureID tex = TexMan.checkForTexture(texture, TexMan.Type_Any);
-		Vector2 imageSize = TexMan.getScaledSize(tex);			
+		if (!cardtexture)
+			cardtexture = TexMan.checkForTexture(texture, TexMan.Type_Any);
+		Vector2 imageSize = TexMan.getScaledSize(cardtexture);			
 		imageSize.x *= buttonScale.x;
 		imageSize.y *= buttonScale.y;
 		drawImage((0,0), texture, true, buttonScale);
@@ -937,8 +958,6 @@ Class PKCPromptHandler : PKCHandler {
 			}
 			let popup = menu.promptPopup;
 			if (popup) {
-				//Popup.Unpack();
-				//Popup.destroy();
 				popup.hidden = true;
 				popup.disabled = true;
 			}
@@ -948,8 +967,6 @@ Class PKCPromptHandler : PKCHandler {
 			S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			let popup = menu.promptPopup;
 			if (popup) {
-				//Popup.Unpack();
-				//Popup.destroy();
 				popup.hidden = true;
 				popup.disabled = true;
 			}
