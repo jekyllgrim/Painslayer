@@ -490,6 +490,7 @@ Class PK_Grenade : PK_Projectile {
 		bouncefactor 0.35;
 		gravity 0.45;
 		bouncesound "weapons/grenade/bounce";
+		deathsound "weapons/grenade/explosion";
 		height 6;
 		radius 8;
 		speed 13;		
@@ -530,13 +531,14 @@ Class PK_Grenade : PK_Projectile {
 		}
 		loop;
 	XDeath:
+		TNT1 A 0 A_Scream();
 	Death:
 		TNT1 A 1 {
 			A_Stop();
 			bNOGRAVITY = true;
 			A_RemoveChildren(1,RMVF_EVERYTHING);
 			A_StopSound(CHAN_BODY);
-			A_StartSound("weapons/grenade/explosion",CHAN_5);
+			//A_StartSound("weapons/grenade/explosion",CHAN_5);
 			A_Explode(-1);
 			let exp = PK_GenericExplosion(Spawn("PK_GenericExplosion",pos));
 			if (mod && exp) {

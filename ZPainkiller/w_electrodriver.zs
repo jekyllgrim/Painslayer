@@ -14,6 +14,7 @@ Class PK_ElectroDriver : PKWeapon {
 		scale 0.23;
 		inventory.pickupmessage "$PKI_ELECTRODRIVER";
 		inventory.pickupsound "pickups/weapons/eldriver";
+		inventory.icon "PWICD0";
 		Tag "$PK_ELECTRODRIVER_TAG";
 	}
 	action vector3 FindElectroTarget(int atkdist = 280) {
