@@ -1,6 +1,7 @@
 Gameinfo {
 	AddEventHandlers = "PK_Mainhandler", "PK_ShaderHandler", "PK_ReplacementHandler", "PK_BoardEventHandler"
 	StatusBarClass = "PainkillerHUD"
+	CursorPic = "pkmcur"
 }
 
 skill baby
