@@ -324,7 +324,7 @@ Class PK_StakeStuck : PK_BaseActor {
 			#### A 1 NoDelay {
 				if (master) {
 					SetOrigin(master.pos + stuckpos,true);
-					angle = master.angle + stuckangle;
+					angle = master.angle - stuckangle;
 					if (master.bWALLSPRITE)
 						angle -= 90;
 					if (master.bISMONSTER) {
