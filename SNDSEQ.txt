@@ -1,23 +1,23 @@
 :DoorOpenNormal
-	//play		doors/slow/open
+	play		doors/slow/open
 	playrepeat	doors/slow/loop
 	stopsound	doors/slow/stop
 end
 
 :DoorCloseNormal
-	//play		doors/slow/open
+	play		doors/slow/open
 	playrepeat	doors/slow/loop
 	stopsound	doors/slow/stop
 end
 
 :DoorOpenBlazing
-	//play		doors/fast/open
+	play		doors/fast/open
 	playrepeat	doors/fast/loop
 	stopsound	doors/fast/stop
 end
 
 :DoorCloseBlazing
-	//play		doors/fast/open
+	play		doors/fast/open
 	playrepeat	doors/fast/loop
 	stopsound	doors/fast/stop
 end
@@ -30,6 +30,7 @@ end
 ]
 
 :CeilingNormal
+	play		platform/start
 	playrepeat	platform/loop
 	stopsound	platform/stop
 end
@@ -39,13 +40,13 @@ end
 end
 
 :Floor
-	//play		platform/start
+	play		platform/start
 	playrepeat	platform/loop
 	stopsound	platform/stop
 end
 
 :Platform
-	//play		platform/start
+	play		platform/start
 	playrepeat	platform/loop
 	stopsound	platform/stop
 end

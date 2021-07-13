@@ -11,17 +11,17 @@ world/checkpoint "sounds/world/checkpoint.wav"
 world/gameover  "sounds/world/game-over.mp3"
 
 //doors:
-doors/fast/open		"sounds/world/elevators/elevator3-start.wav"
-doors/fast/loop		"sounds/world/elevators/elevator3-middle-loop.wav"
-doors/fast/stop		"sounds/world/elevators/elevator3-stop.wav"
-doors/slow/open		"sounds/world/elevators/elevator5-start.wav"
-doors/slow/loop		"sounds/world/elevators/elevator5-middle-loop.wav"
-doors/slow/stop		"sounds/world/elevators/elevator5-stop.wav"
+doors/fast/open		"sounds/world/elevators/door_fast-start.ogg"
+doors/fast/loop		"sounds/world/elevators/door_fast-loop.ogg"
+doors/fast/stop		"sounds/world/elevators/door_fast-stop.ogg"
+doors/slow/open		"sounds/world/elevators/door_slow-start.ogg"
+doors/slow/loop		"sounds/world/elevators/door_slow-loop.ogg"
+doors/slow/stop		"sounds/world/elevators/door_slow-stop.ogg"
 
 //platforms
-platform/start			"sounds/world/elevators/elevator2-start.wav"
-platform/loop			"sounds/world/elevators/elevator2-middle-loop.wav"
-platform/stop			"sounds/world/elevators/elevator2-stop.wav"
+platform/start			"sounds/world/elevators/platform-start.ogg"
+platform/loop			"sounds/world/elevators/platform-loop.ogg"
+platform/stop			"sounds/world/elevators/platform-stop.ogg"
 
 // player:
 
