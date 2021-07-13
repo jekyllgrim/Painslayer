@@ -2,7 +2,7 @@ Class PK_ElectroDriver : PKWeapon {
 	private bool attackrate;
 	private int celldepleterate;
 	Default {
-		PKWeapon.alwaysbob false;
+		-PKWeapon.ALWAYSBOB
 		PKWeapon.emptysound "weapons/empty/electrodriver";
 		weapon.slotnumber 5;
 		weapon.ammotype1 "PK_ShurikenAmmo";

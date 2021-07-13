@@ -6,20 +6,19 @@
 Class PKWeapon : Weapon abstract {
 	mixin PK_Math;
 	protected int PKWflags;
-	FlagDef NOAUTOPRIMARY : PKWflags, 0;
-	FlagDef NOAUTOSECONDARY : PKWflags, 1;
+	FlagDef NOAUTOPRIMARY 		: PKWflags, 0;
+	FlagDef NOAUTOSECONDARY 	: PKWflags, 1;
+	FlagDef ALWAYSBOB			: PKWflags, 2;
 	sound emptysound;
 	property emptysound : emptysound;
 	protected bool hasDexterity;
 	protected bool hasWmod;
 	protected vector2 targOfs;
 	protected vector2 shiftOfs;
-	protected bool alwaysbob;
-	property alwaysbob : alwaysbob;
 	protected double spitch;
 	protected bool holdFireOnSelect; //a version of NOAUTOFIRE but for one attack only. It also only prevents firing in select and doesn't affect the refire function. See Chaingun and Boltgun
 	Default {
-		PKWeapon.alwaysbob true;
+		+PKWeapon.ALWAYSBOB
 		weapon.BobRangeX 0.31;
 		weapon.BobRangeY 0.15;
 		weapon.BobStyle "InverseSmooth";
@@ -56,7 +55,7 @@ Class PKWeapon : Weapon abstract {
 		let weap = owner.player.readyweapon;
 		if (!weap)
 			return;
-		if (alwaysbob && weap == self)
+		if (bALWAYSBOB && weap == self)
 			owner.player.WeaponState |= WF_WEAPONBOBBING;
 		hasDexterity = owner.FindInventory("PowerDoubleFiringSpeed",subclass:true);
 		hasWmod = owner.FindInventory("PK_WeaponModifier",subclass:true);
