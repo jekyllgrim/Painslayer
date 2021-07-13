@@ -258,7 +258,8 @@ Class PK_Killer : PK_Projectile {
 		A_FaceMovementDirection(0,0,0);
 		actor emit = Spawn("Killer_BeamEmitter",pos);
 		if (emit) {
-			emit.target = target;
+			emit.target = target; //this is to track kill credit
+			emit.master = target;
 			emit.tracer = self;
 			emit.pitch = pitch;
 			//console.printf("killer pitch %d", pitch);
@@ -415,38 +416,38 @@ Class Killer_BeamEmitter : Actor {
 	PK_TrackingBeam beam2;
 	protected string prevspecies;
 	void StartBeams() {
-		if (!target)
+		if (!master)
 			return;
-		let weap = PK_Painkiller(target.FindInventory("PK_Painkiller"));
+		let weap = PK_Painkiller(master.FindInventory("PK_Painkiller"));
 		if (weap)
 			weap.beam = true;
-		string curspecies = target.species;
+		string curspecies = master.species;
 		if (curspecies.IndexOf("PKPlayerSpecies") < 0) {
-			prevspecies = target.species;
-			target.species = String.Format("PKPlayerSpecies%d",target.PlayerNumber());
-			species = target.species;
-			//Console.printf("target species: %s",target.species);
+			prevspecies = master.species;
+			master.species = String.Format("PKPlayerSpecies%d",master.PlayerNumber());
+			species = master.species;
+			//Console.printf("master species: %s",master.species);
 		}
-		beam1 = PK_TrackingBeam.MakeBeam("PK_TrackingBeam",target,tracer,"f2ac21",radius: 9.0,targetOffset:(13,13,12), style: STYLE_ADDSHADED);
+		beam1 = PK_TrackingBeam.MakeBeam("PK_TrackingBeam",master,tracer,"f2ac21",radius: 9.0,masterOffset:(13,13,12), style: STYLE_ADDSHADED);
 		if(beam1) {
 			beam1.alpha = 0.5;
 		}
-		beam2 = PK_TrackingBeam.MakeBeam("PK_TrackingBeam",target,tracer,"FFFFFF",radius: 1.6,targetOffset:(13,13,12),style: STYLE_ADDSHADED);
+		beam2 = PK_TrackingBeam.MakeBeam("PK_TrackingBeam",master,tracer,"FFFFFF",radius: 1.6,masterOffset:(13,13,12),style: STYLE_ADDSHADED);
 		if(beam2) {
 			beam2.alpha = 3.0;
 		}
-		target.A_StartSound("weapons/painkiller/laser",CHAN_VOICE,CHANF_LOOPING,volume:0.5);
+		master.A_StartSound("weapons/painkiller/laser",CHAN_VOICE,CHANF_LOOPING,volume:0.5);
 	}	
 	void StopBeams() {
-		if (target) {
-			target.A_StopSound(CHAN_VOICE);
-			let weap = PK_Painkiller(target.FindInventory("PK_Painkiller"));
+		if (master) {
+			master.A_StopSound(CHAN_VOICE);
+			let weap = PK_Painkiller(master.FindInventory("PK_Painkiller"));
 			if (weap)
 				weap.beam = false;
-			string curspecies = target.species;
+			string curspecies = master.species;
 			if (curspecies.IndexOf("PKPlayerSpecies") >= 0) {
-				target.species = prevspecies;
-				//Console.printf("target species: %s",target.species);
+				master.species = prevspecies;
+				//Console.printf("master species: %s",master.species);
 			}
 		}
 		if(beam1) {
@@ -456,33 +457,33 @@ Class Killer_BeamEmitter : Actor {
 			beam2.destroy();
 	}	
 	override void Tick() {
-		if (!target || !tracer) {
+		if (!master || !tracer) {
 			StopBeams();
 			destroy();
 			return;
 		}
 		SetOrigin(tracer.pos,true);
-		A_Facetarget(0,0,flags:FAF_MIDDLE);
-		if (!target || !PKWeapon.CheckWmod(target)) {
-			let adiff = DeltaAngle(angle,target.angle);
+		A_Facemaster(0,0,flags:FAF_MIDDLE);
+		if (!master || !PKWeapon.CheckWmod(master)) {
+			let adiff = DeltaAngle(angle,master.angle);
 			if (adiff < 163 && adiff > -170) {
 				StopBeams();
 				return;
 			}
-			let pdiff = abs(pitch - -target.pitch);
-			//console.printf("pitch %d | target pitch %d | diff %d",pitch,target.pitch,pdiff);
+			let pdiff = abs(pitch - -master.pitch);
+			//console.printf("pitch %d | master pitch %d | diff %d",pitch,master.pitch,pdiff);
 			if (pdiff > 10) {
 				StopBeams();
 				return;
 			}
 		}
-		if (!CheckSight(target,SF_IGNOREWATERBOUNDARY)) {
+		if (!CheckSight(master,SF_IGNOREWATERBOUNDARY)) {
 			StopBeams();
 			return;
 		}
 		StartBeams();
 		//this rail deals the actual damage, it doesn't define any visuals
-		A_CustomRailGun(2,color1:"FFFFFF",flags:RGF_SILENT,pufftype:"PK_KillerBeamPuff",range:Distance3D(target),duration:1,sparsity:1024);
+		A_CustomRailGun(2,color1:"FFFFFF",flags:RGF_SILENT,pufftype:"PK_KillerBeamPuff",range:Distance3D(master),duration:1,sparsity:1024);
 	}
 }
 
