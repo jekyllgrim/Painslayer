@@ -59,7 +59,7 @@ Class PK_Boltgun : PKWeapon {
 			A_Overlay(PSP_SCOPE3,"Scope");
 		}
 		TNT1 A 0 A_Raise();
-		wait;
+		goto super::Select;
 	Ready:
 		BGUN A 1 {
 			PK_WeaponReady(WRF_NOBOB);
