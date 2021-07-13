@@ -108,7 +108,7 @@ PKI_STAKEGUN	 	= "Picked up Stakegun/Grenade Launcher";
 PKI_CHAINGUN		= "Picked up Rocket Launcher/Chaingun";
 PKI_ELECTRODRIVER	= "Picked up Electro/Driver";
 PKI_BOLTGUN			= "Picked up Boltgun/Heater";
-PKI_RIFLEAMMO		= "Picked up Assault Rifle/Flamethrower";
+PKI_RIFLE			= "Picked up Assault Rifle/Flamethrower";
 //weapon tags
 PK_SHOTGUN_TAG		= "Shotgun/Freezer";
 PK_STAKEGUN_TAG		= "Stakegun/Grenade Launcher";

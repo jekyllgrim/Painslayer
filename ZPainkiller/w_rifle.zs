@@ -18,7 +18,7 @@ Class PK_Rifle : PKWeapon {
 		weapon.ammotype2	"PK_FuelAmmo";
 		weapon.ammouse2		1;
 		weapon.ammogive2	100;
-		inventory.pickupmessage "$PKI_RIFLEAMMO";
+		inventory.pickupmessage "$PKI_RIFLE";
 		inventory.pickupsound "pickups/weapons/rifle";
 		inventory.icon "PWICE0";
 		Tag "$PK_RIFLE_TAG";
