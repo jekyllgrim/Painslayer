@@ -334,11 +334,10 @@ Class PK_MainHandler : EventHandler {
 		}
 	}
 	
-	//players need control items for demon morph, cards and item replacement handling:
-	override void PlayerSpawned(PlayerEvent e) {
-		if (!PlayerInGame[e.PlayerNumber])
+	void GiveStartingPlayerItems(int pnumber) {
+		if (!PlayerInGame[pnumber])
 			return;
-		let plr = players[e.PlayerNumber].mo;
+		let plr = players[pnumber].mo;
 		if (!plr)
 			return;
 		//plr.A_StartSound("world/mapstart",PSP_PKUI,CHANF_UI|CHANF_LOCAL);
@@ -350,6 +349,13 @@ Class PK_MainHandler : EventHandler {
 			plr.GiveInventory("PK_InvReplacementControl",1);
 		if (!plr.FindInventory("PK_QoLCatcher"))
 			plr.GiveInventory("PK_QoLCatcher",1);
+	}
+	//players need control items for demon morph, cards and item replacement handling:
+	override void PlayerRespawned(PlayerEvent e) {
+		GiveStartingPlayerItems(e.PlayerNumber);
+	}	
+	override void PlayerSpawned(PlayerEvent e) {
+		GiveStartingPlayerItems(e.PlayerNumber);
 	}
 	//open Black Tarot at map start:
 	override void PlayerEntered(PlayerEvent e) {
