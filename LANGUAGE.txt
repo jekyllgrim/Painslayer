@@ -135,6 +135,8 @@ PKO_FLAME			= "%k burnt %o to a crisp";
 PKO_FLAMETANK		= "%k killed %o with a fiery explosion";
 PKO_EXBOLT			= "%k managed to hit %o with a bomb-on-a-stick";
 PKO_BOLT			= "%k pinned %o to the wall multiple times";
+PKO_DEMON			= "%k killed %o as a DEMON";
+PKO_SOT			= "%o was killed by %k's thunderous steps";
 
 // MENU
 
