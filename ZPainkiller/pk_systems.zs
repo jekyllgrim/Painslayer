@@ -134,6 +134,7 @@ Class PK_DemonWeapon : PKWeapon {
 		+WEAPON.CHEATNOTWEAPON;
 		+WEAPON.NO_AUTO_SWITCH;
 		weapon.upsound "";
+		Obituary "$PKO_DEMON";
 	}
 	
 	override void AttachToOwner(actor other) {
@@ -1187,6 +1188,7 @@ Class PKC_StepsOfThunder : PK_BaseGoldenCard {
 	private int cycle; //how often to spawn explosions
 	Default {
 		tag "StepsOfThunder";
+		Obituary "$PKO_SOT";
 	}
 	override void DoEffect() {
 		super.DoEffect();
@@ -1195,7 +1197,14 @@ Class PKC_StepsOfThunder : PK_BaseGoldenCard {
 		if (owner.Vel.Length() > 4) {
 			cycle++;
 			if (cycle % 10 == 0) {
-				owner.A_Explode(20,256,XF_NOTMISSILE,alert:false,fulldamagedistance:128);
+				//if for whatever reason owner's PlayerPawn has a target field, record it:
+				actor prevtarget = owner.target ? owner.target : null;
+				//set the PlayerPawn's target to self in order to properly assign kill credit and obituary:
+				owner.target = self;
+				//do the damage:
+				owner.A_Explode(20,256/*,XF_NOTMISSILE*/,alert:false,fulldamagedistance:128);
+				//set the PlayerPawn's target to whatever it was before, if anything:
+				owner.target = prevtarget;
 				owner.A_Quake(2,5,0,32,"");
 				owner.A_StartSound("cards/thunderwalk",15);
 			}
