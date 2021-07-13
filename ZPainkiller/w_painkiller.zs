@@ -238,7 +238,7 @@ Class PK_Killer : PK_Projectile {
 		PK_Projectile.flarescale 0.2;
 		PK_Projectile.flarealpha 0.75;
 		PK_Projectile.flareactor "PK_KillerFlare";
-		Obituary "%PKO_KILLER";
+		Obituary "$PKO_KILLER";
 		+SKYEXPLODE
 		+NOEXTREMEDEATH
 		+NODAMAGETHRUST
