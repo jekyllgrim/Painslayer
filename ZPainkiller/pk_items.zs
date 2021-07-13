@@ -26,7 +26,6 @@ Class PK_InvReplacementControl : Inventory {
 		+INVENTORY.PERSISTENTPOWER
 		inventory.maxamount 1;
 	}
-	const ALLWEAPONS = 9;
 	static const Class<Weapon> vanillaWeapons[] = {
 		"Fist",
 		"Chainsaw",
@@ -66,7 +65,7 @@ Class PK_InvReplacementControl : Inventory {
 		array < int > changeweapons; //stores all weapons that need to be exchanged
 		int selweap = -1; //will store readyweapon
 		//record all weapons that need to be replaced
-		for (int i = 0; i < ALLWEAPONS; i++) {
+		for (int i = 0; i < vanillaWeapons.Size(); i++) {
 			//if a weapon is found, cache its position in the array:
 			Class<Weapon> oldweap = vanillaWeapons[i];
 			if (owner.CountInv(oldweap) >= 1) {
@@ -80,7 +79,7 @@ Class PK_InvReplacementControl : Inventory {
 		//if no old weapons were found, do nothing else:
 		if (changeweapons.Size() <= 0)
 			return;
-		for (int i = 0; i < ALLWEAPONS; i++) {
+		for (int i = 0; i < vanillaWeapons.Size(); i++) {
 			//do nothing if this weapon wasn't cached:
 			if (changeweapons.Find(i) == changeweapons.Size())
 				continue;
@@ -116,7 +115,7 @@ Class PK_InvReplacementControl : Inventory {
     override bool HandlePickup (Inventory item) {
         let oldItemClass = item.GetClassName();
         Class<Inventory> replacement =  null;
-		for (int i = 0; i < ALLWEAPONS; i++) {
+		for (int i = 0; i < vanillaWeapons.Size(); i++) {
 			if (pkWeapons[i] && oldItemClass == vanillaWeapons[i]) {
 				replacement = pkWeapons[i];
 				break;

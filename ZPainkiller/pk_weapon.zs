@@ -58,7 +58,7 @@ Class PKWeapon : Weapon abstract {
 			return;
 		if (alwaysbob && weap == self)
 			owner.player.WeaponState |= WF_WEAPONBOBBING;
-		hasDexterity = owner.FindInventory("PowerDoubleFiringSpeed",true);
+		hasDexterity = owner.FindInventory("PowerDoubleFiringSpeed",subclass:true);
 		hasWmod = owner.FindInventory("PK_WeaponModifier",subclass:true);
 	}
 	
