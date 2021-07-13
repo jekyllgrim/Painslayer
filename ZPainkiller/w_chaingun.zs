@@ -5,7 +5,6 @@ Class PK_Chaingun : PKWeapon {
 	private int atkframe;
 	private int atkframeDelay;
 	Default {
-		//+WEAPON.NOAUTOFIRE
 		+PKWeapon.NOAUTOPRIMARY
 		PKWeapon.emptysound "weapons/empty/chaingun";
 		weapon.slotnumber 4;
@@ -61,23 +60,9 @@ Class PK_Chaingun : PKWeapon {
 			A_ZoomFactor(1,ZOOM_NOSCALETURNING);
 		}
 		goto super::deselect;
-	Select:
-		//record if player picks up the weapon while holding Fire:
-		TNT1 A 0 {
-			if (player.cmd.buttons & BT_ATTACK && player.oldbuttons & BT_ATTACK)
-				invoker.holdFireOnSelect = true;
-		}
-		TNT1 A 0 A_Raise();
-		wait;
 	Ready:
 		MIGN A 1 {
 			invoker.holddur = 0;
-			//don't let the player fire primary if they're holding Fire since the moment of selection:
-			/*if (!(player.oldbuttons & BT_ATTACK))
-				invoker.holdFireOnSelect = false;
-			int fflags;
-			if (invoker.holdFireOnSelect)
-				fflags |= WRF_NOPRIMARY;*/
 			PK_WeaponReady();
 		}
 		loop;

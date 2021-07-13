@@ -16,7 +16,7 @@ Class PKWeapon : Weapon abstract {
 	protected vector2 targOfs;
 	protected vector2 shiftOfs;
 	protected double spitch;
-	protected bool holdFireOnSelect; //a version of NOAUTOFIRE but for one attack only. It also only prevents firing in select and doesn't affect the refire function. See Chaingun and Boltgun
+	protected bool blockFireOnSelect; //a version of NOAUTOFIRE but for one attack only. It also only prevents firing in select and doesn't affect the refire function. See Chaingun and Boltgun
 	Default {
 		+PKWeapon.ALWAYSBOB
 		weapon.BobRangeX 0.31;
@@ -39,15 +39,6 @@ Class PKWeapon : Weapon abstract {
 		}
 		spitch = frandompick[sfx](-0.1,0.1);
 	}
-	/*override void Tick() {
-		super.Tick();
-		if (owner || isFrozen())
-			return;
-		A_SetAngle(angle+1.5,SPF_INTERPOLATE);
-		A_SetPitch(pitch+spitch,SPF_INTERPOLATE);
-		if (abs(pitch) > 8)
-			spitch *= -1;
-	}*/
 	override void DoEffect() {
 		Super.DoEffect();
 		if (!owner)
@@ -141,8 +132,8 @@ Class PKWeapon : Weapon abstract {
 		}
 		else if (invoker.bNOAUTOPRIMARY) {
 			if (!(player.oldbuttons & BT_ATTACK))
-				invoker.holdFireOnSelect = false;
-			if (invoker.holdFireOnSelect)
+				invoker.blockFireOnSelect = false;
+			if (invoker.blockFireOnSelect)
 				flags |= WRF_NOPRIMARY;
 		}
 		if ((player.cmd.buttons & BT_ALTATTACK) && (!invoker.ammo2 || invoker.ammo2.amount < invoker.ammouse2)) {
@@ -154,8 +145,8 @@ Class PKWeapon : Weapon abstract {
 		}
 		else if (invoker.bNOAUTOSECONDARY) {
 			if (!(player.oldbuttons & BT_ALTATTACK))
-				invoker.holdFireOnSelect = false;
-			if (invoker.holdFireOnSelect)
+				invoker.blockFireOnSelect = false;
+			if (invoker.blockFireOnSelect)
 				flags |= WRF_NOSECONDARY;
 		}
 		A_WeaponReady(flags);
@@ -177,9 +168,17 @@ Class PKWeapon : Weapon abstract {
 		wait;
 	Select:
 		TNT1 A 0 {
+			if (pk_debugmessages >= 2) {
+				string str1 = player.cmd.buttons & BT_ATTACK ? "is pressing Fire" : "is NOT pressing Fire";
+				string str2 = player.cmd.buttons & BT_ALTATTACK ? "is pressing AltFire" : "is NOT pressing AltFire";
+				string str3 = invoker.bNOAUTOPRIMARY ? "gun has +NOAUTOPRIMARY" : "gun has -NOAUTOPRIMARY";
+				string str4 = invoker.bNOAUTOSECONDARY ? "gun has +NOAUTOSECONDARY" : "gun has -NOAUTOSECONDARY";	
+				console.printf("player %s, %s, %s, %s", str1, str2, str3, str4);
+			}
 			if ((invoker.bNOAUTOPRIMARY && player.cmd.buttons & BT_ATTACK && player.oldbuttons & BT_ATTACK) ||
-				(invoker.bNOAUTOSECONDARY && player.cmd.buttons & BT_ALTATTACK && player.oldbuttons & BT_ALTATTACK))
-				invoker.holdFireOnSelect = true;
+				(invoker.bNOAUTOSECONDARY && player.cmd.buttons & BT_ALTATTACK && player.oldbuttons & BT_ALTATTACK)) {
+				invoker.blockFireOnSelect = true;
+			}
 		}
 		TNT1 A 0 A_Raise();
 		wait;
