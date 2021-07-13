@@ -16,6 +16,7 @@ Class PK_ElectroDriver : PKWeapon {
 		inventory.pickupsound "pickups/weapons/eldriver";
 		inventory.icon "PWICD0";
 		Tag "$PK_ELECTRODRIVER_TAG";
+		Obituary "$PKO_ELECTRO";
 	}
 	action vector3 FindElectroTarget(int atkdist = 280) {
 		actor ltarget;			
@@ -51,7 +52,7 @@ Class PK_ElectroDriver : PKWeapon {
 			return hit.HitLocation;
 		}
 		int dmg = invoker.hasDexterity ? 8 : 4;
-		int fflags = DMG_THRUSTLESS;
+		int fflags = DMG_THRUSTLESS|DMG_PLAYERATTACK;
 		if (frandom[eld](1,3) > 2)
 			fflags |= DMG_NO_PAIN;
 		ltarget.DamageMobj(self,self,dmg,'normal',flags:fflags);
@@ -72,7 +73,7 @@ Class PK_ElectroDriver : PKWeapon {
 				if (!CheckSight(next,SF_IGNOREWATERBOUNDARY))
 					continue;
 				PK_TrackingBeam.MakeBeam("PK_Lightning",ltarget,radius:32,hitpoint:next.pos+(0,0,next.height*0.5),masterOffset:(0,0,ltarget.height*0.5),style:STYLE_ADD);
-				next.DamageMobj(self,self,dmg * 0.75,'normal',flags:DMG_THRUSTLESS|DMG_NO_PAIN);
+				next.DamageMobj(self,self,dmg * 0.75,'normal',flags:DMG_THRUSTLESS|DMG_NO_PAIN|DMG_PLAYERATTACK);
 				if (!next.FindInventory("PK_ElectroTargetControl"))
 					next.GiveInventory("PK_ElectroTargetControl",1);
 			}
@@ -356,13 +357,13 @@ Class PK_Shuriken : PK_StakeProjectile {
 		PK_Projectile.trailscale 0.018;
 		PK_Projectile.trailfade 0.03;
 		PK_Projectile.trailalpha 0.12;
-		obituary "%k showed %o a world full of stars";
+		obituary "$PKO_DRIVER";
 		speed 35;
 		radius 5;
 		height 4;
 		damage (5);
 		+FORCEXYBILLBOARD;
-		+ROLLSPRITE;
+		+ROLLSPRITE;		
 	}
 	override void StakeBreak() {
 		for (int i = random[sfx](2,4); i > 0; i--) {
@@ -471,7 +472,7 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 		PK_Projectile.trailalpha 0.12;
 		PK_Projectile.flareactor "PK_DiskFlare";
 		PK_Projectile.flarecolor "1ba7f8";
-		obituary "%k gave %o a capital punishment";
+		obituary "$PKO_ELECTRODRIVER";
 		speed 40;
 		radius 6;
 		height 4;
@@ -534,10 +535,10 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 						disktargets.delete(i);					
 					else {
 						PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:trg.pos+(0,0,trg.height*0.5),style:STYLE_ADD);
-						if (random(0,2) == 2)
-							trg.DamageMobj(self,self,2,'normal',flags:DMG_THRUSTLESS);
-						else
-							trg.DamageMobj(self,self,2,'normal',flags:DMG_THRUSTLESS|DMG_NO_PAIN);
+						int fflags = DMG_THRUSTLESS;
+						if (random[eld](0,2) < 2)
+							fflags |= DMG_NO_PAIN;
+						trg.DamageMobj(self,target,2,'normal',flags:fflags);
 						if (!trg.FindInventory("PK_ElectroTargetControl"))
 							trg.GiveInventory("PK_ElectroTargetControl",1);
 						if (!CheckSight(trg,SF_IGNOREWATERBOUNDARY)) {

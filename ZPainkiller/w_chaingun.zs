@@ -19,6 +19,7 @@ Class PK_Chaingun : PKWeapon {
 		inventory.pickupsound "pickups/weapons/chaingun";
 		inventory.icon "PWICC0";
 		Tag "$PK_CHAINGUN_TAG";
+		Obituary "$PKO_CHAINGUN";
 	}
 	action void SetMinigunFrame(int delay = 0) {
 		let psp = player.FindPsprite(OverlayID());
@@ -255,6 +256,7 @@ Class PK_Rocket : PK_Grenade {
 		ExplosionDamage 128;
 		+NOGRAVITY
 		bouncetype 'none';
+		Obituary "$PKO_ROCKET";
 	}
 	override void PostBeginplay() {
 		PK_Projectile.PostBeginplay();

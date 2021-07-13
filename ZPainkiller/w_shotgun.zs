@@ -14,6 +14,7 @@ Class PK_Shotgun : PKWeapon {
 		inventory.pickupsound "pickups/weapons/shotgun";
 		inventory.icon "PWICA0";
 		Tag "$PK_SHOTGUN_TAG";
+		Obituary "$PKO_SHOTGUN";
 	}
 	override void DoEffect() {
 		super.DoEffect();

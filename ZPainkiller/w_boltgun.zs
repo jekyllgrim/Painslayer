@@ -274,6 +274,7 @@ Class PK_Bolt : PK_Stake {
 		+NOGRAVITY
 		scale 0.86;
 		speed 95;
+		Obituary "$PKO_BOLT";
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -308,7 +309,7 @@ Class PK_ExplosiveBolt : PK_Projectile {
 		speed 75;
 		damage (25);
 		decal "Scorch";
-		obituary "$PKO_EXSTAKE";
+		obituary "$PKO_EXBOLT";
 	}
 	states {
 	Death:

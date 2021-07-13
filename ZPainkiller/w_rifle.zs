@@ -22,6 +22,7 @@ Class PK_Rifle : PKWeapon {
 		inventory.pickupsound "pickups/weapons/rifle";
 		inventory.icon "PWICE0";
 		Tag "$PK_RIFLE_TAG";
+		Obituary "$PKO_RIFLE";
 	}
 	action void FireFlameThrower() {
 		//int projnum = CheckInfiniteAmmo() ? 2 : 1;
@@ -495,6 +496,7 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 		radius 16;
 		height 22;
 		damage 0;
+		Obituary "$PKO_FLAME";
 	}
 	override int SpecialMissileHit(actor victim) {
 		if (victim && (!target || victim != target || age > 10) && victim.health > 0 && CheckVulnerable(victim)) {
@@ -640,6 +642,7 @@ Class PK_FlamerTank : PK_Projectile {
 		radius 16;
 		speed 14;		
 		damage (80);
+		Obituary "$PKO_FLAMETANK";
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();

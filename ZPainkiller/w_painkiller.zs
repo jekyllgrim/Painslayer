@@ -7,7 +7,7 @@ Class PK_Painkiller : PKWeapon {
 	private int wmodCounter;
 	Default {
 		+WEAPON.MELEEWEAPON;
-		Obituary "%k ripped %o apart with Painkiller";
+		Obituary "$PKO_PAIN";
 		Tag "Painkiller";
 		weapon.slotnumber 1;
 		inventory.pickupmessage "Picked up Painkiller";
@@ -238,6 +238,7 @@ Class PK_Killer : PK_Projectile {
 		PK_Projectile.flarescale 0.2;
 		PK_Projectile.flarealpha 0.75;
 		PK_Projectile.flareactor "PK_KillerFlare";
+		Obituary "%PKO_KILLER";
 		+SKYEXPLODE
 		+NOEXTREMEDEATH
 		+NODAMAGETHRUST
@@ -257,7 +258,7 @@ Class PK_Killer : PK_Projectile {
 		A_FaceMovementDirection(0,0,0);
 		actor emit = Spawn("Killer_BeamEmitter",pos);
 		if (emit) {
-			emit.master = target;
+			emit.target = target;
 			emit.tracer = self;
 			emit.pitch = pitch;
 			//console.printf("killer pitch %d", pitch);
@@ -407,43 +408,45 @@ Class Killer_BeamEmitter : Actor {
 	Default {
 		radius 1;
 		height 1;
+		+MISSILE
+		Obituary "$PKO_KILLERBEAM";
 	}
 	PK_TrackingBeam beam1;
 	PK_TrackingBeam beam2;
 	protected string prevspecies;
 	void StartBeams() {
-		if (!master)
+		if (!target)
 			return;
-		let weap = PK_Painkiller(master.FindInventory("PK_Painkiller"));
+		let weap = PK_Painkiller(target.FindInventory("PK_Painkiller"));
 		if (weap)
 			weap.beam = true;
-		string curspecies = master.species;
+		string curspecies = target.species;
 		if (curspecies.IndexOf("PKPlayerSpecies") < 0) {
-			prevspecies = master.species;
-			master.species = String.Format("PKPlayerSpecies%d",master.PlayerNumber());
-			species = master.species;
-			//Console.printf("master species: %s",master.species);
+			prevspecies = target.species;
+			target.species = String.Format("PKPlayerSpecies%d",target.PlayerNumber());
+			species = target.species;
+			//Console.printf("target species: %s",target.species);
 		}
-		beam1 = PK_TrackingBeam.MakeBeam("PK_TrackingBeam",master,tracer,"f2ac21",radius: 9.0,masterOffset:(13,13,12), style: STYLE_ADDSHADED);
+		beam1 = PK_TrackingBeam.MakeBeam("PK_TrackingBeam",target,tracer,"f2ac21",radius: 9.0,targetOffset:(13,13,12), style: STYLE_ADDSHADED);
 		if(beam1) {
 			beam1.alpha = 0.5;
 		}
-		beam2 = PK_TrackingBeam.MakeBeam("PK_TrackingBeam",master,tracer,"FFFFFF",radius: 1.6,masterOffset:(13,13,12),style: STYLE_ADDSHADED);
+		beam2 = PK_TrackingBeam.MakeBeam("PK_TrackingBeam",target,tracer,"FFFFFF",radius: 1.6,targetOffset:(13,13,12),style: STYLE_ADDSHADED);
 		if(beam2) {
 			beam2.alpha = 3.0;
 		}
-		master.A_StartSound("weapons/painkiller/laser",CHAN_VOICE,CHANF_LOOPING,volume:0.5);
+		target.A_StartSound("weapons/painkiller/laser",CHAN_VOICE,CHANF_LOOPING,volume:0.5);
 	}	
 	void StopBeams() {
-		if (master) {
-			master.A_StopSound(CHAN_VOICE);
-			let weap = PK_Painkiller(master.FindInventory("PK_Painkiller"));
+		if (target) {
+			target.A_StopSound(CHAN_VOICE);
+			let weap = PK_Painkiller(target.FindInventory("PK_Painkiller"));
 			if (weap)
 				weap.beam = false;
-			string curspecies = master.species;
+			string curspecies = target.species;
 			if (curspecies.IndexOf("PKPlayerSpecies") >= 0) {
-				master.species = prevspecies;
-				//Console.printf("master species: %s",master.species);
+				target.species = prevspecies;
+				//Console.printf("target species: %s",target.species);
 			}
 		}
 		if(beam1) {
@@ -453,33 +456,33 @@ Class Killer_BeamEmitter : Actor {
 			beam2.destroy();
 	}	
 	override void Tick() {
-		if (!master || !tracer) {
+		if (!target || !tracer) {
 			StopBeams();
 			destroy();
 			return;
 		}
 		SetOrigin(tracer.pos,true);
-		A_FaceMaster(0,0,flags:FAF_MIDDLE);
+		A_Facetarget(0,0,flags:FAF_MIDDLE);
 		if (!target || !PKWeapon.CheckWmod(target)) {
-			let adiff = DeltaAngle(angle,master.angle);
+			let adiff = DeltaAngle(angle,target.angle);
 			if (adiff < 163 && adiff > -170) {
 				StopBeams();
 				return;
 			}
-			let pdiff = abs(pitch - -master.pitch);
-			//console.printf("pitch %d | master pitch %d | diff %d",pitch,master.pitch,pdiff);
+			let pdiff = abs(pitch - -target.pitch);
+			//console.printf("pitch %d | target pitch %d | diff %d",pitch,target.pitch,pdiff);
 			if (pdiff > 10) {
 				StopBeams();
 				return;
 			}
 		}
-		if (!CheckSight(master,SF_IGNOREWATERBOUNDARY)) {
+		if (!CheckSight(target,SF_IGNOREWATERBOUNDARY)) {
 			StopBeams();
 			return;
 		}
 		StartBeams();
 		//this rail deals the actual damage, it doesn't define any visuals
-		A_CustomRailGun(2,color1:"FFFFFF",flags:RGF_SILENT,pufftype:"PK_KillerBeamPuff",range:Distance3D(master),duration:1,sparsity:1024);
+		A_CustomRailGun(2,color1:"FFFFFF",flags:RGF_SILENT,pufftype:"PK_KillerBeamPuff",range:Distance3D(target),duration:1,sparsity:1024);
 	}
 }
 
@@ -505,6 +508,7 @@ Class PK_KillerBeamPuff : Actor {
 Class PK_ComboKiller : PK_Killer {
 	Default {
 		PK_Projectile.flarecolor "";
+		Obituary "$PKO_PAINKILLER";
 		+SKYEXPLODE
 		-NOEXTREMEDEATH
 		+EXTREMEDEATH

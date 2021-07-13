@@ -117,9 +117,24 @@ PK_ELECTRODRIVER_TAG = "Electro/Driver";
 PK_RIFLE_TAG		= "Assault Rifle/Flamethrower";
 PK_BOLTGUN_TAG		= "Boltgun/Heater";
 //obituaries
+PKO_PAIN			= "%o was ripped apart with %k's Pain";
+PKO_KILLER			= "%o coudn't dodge %k's Killer";
+PKO_KILLERBEAM		= "%o was slowly burnt by %k's Killer Beam";
+PKO_PAINKILLER		= "%k ripped %o to shreds with Painkiller";
+PKO_SHOTGUN		= "%o was blown away by %k's shotgun";
 PKO_STAKE			= "%k pinned %o to the wall";
-PKO_EXSTAKE		= "%k was impressed by %o's grenade-on-a-stick";
-PKO_GRENADE		= "%o blew %k up";
+PKO_EXSTAKE		= "%k managed to hit %o with a grenade-on-a-stick";
+PKO_GRENADE		= "%o stood too close to %k's grenade";
+PKO_CHAINGUN		= "%k mowed %o down with a minigun";
+PKO_ROCKET			= "%o was blown up by %k's rockets";
+PKO_ELECTRO		= "%o was electrocuted by %k";
+PKO_DRIVER			= "%o was pinned by %k's shurikens";
+PKO_ELECTRODRIVER = "%o was shocked do death by %k's electric disc";
+PKO_RIFLE			= "%k perforated %o with an assault rifle";
+PKO_FLAME			= "%k burnt %o to a crisp";
+PKO_FLAMETANK		= "%k killed %o with a fiery explosion";
+PKO_EXBOLT			= "%k managed to hit %o with a bomb-on-a-stick";
+PKO_BOLT			= "%k pinned %o to the wall multiple times";
 
 // MENU
 
