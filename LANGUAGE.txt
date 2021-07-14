@@ -157,13 +157,15 @@ PKM_AutoOpenTarot_Desc =	"When you open Black Tarot board for the first time in 
 							"By default this happens at map start. This option allows you\n"
 							"to change that behavior.";
 PKM_SKILL0			= "Slumber";
-PKM_SKILL0_Desc	= "Very low difficulty. Enemies deal less damage and have less HP. You can't use Black Tarot cards in this mode.";
+PKM_SKILL0_Desc	= "Very low difficulty. You receive 200% ammo from pickups. Enemies deal 25% damage and have 50% health. You can't use Black Tarot cards in this mode.";
 PKM_SKILL1			= "Daydream";
+PKM_SKILL1_Desc	= "Low difficulty. You receive 120% ammo from pickups. Enemies deal 50% damage and have 50% health.";
 PKM_SKILL2			= "Insomnia";
+PKM_SKILL2_Desc	= "Standard difficulty. Default values for ammo amounts, monster damage, health and behavior.";
 PKM_SKILL3			= "Nightmare";
-PKM_SKILL3_Desc	= "High difficulty. You get 80% of ammo from pickups, and enemies are more aggressive";
+PKM_SKILL3_Desc	= "High difficulty. You receive 80% of ammo from pickups, and enemies are more aggressive";
 PKM_SKILL4			= "Trauma";
-PKM_SKILL4_Desc	= "Very high difficulty. You get only 60% of ammo from pickups, enemies are very aggressive and they don't drop any souls.";
+PKM_SKILL4_Desc	= "Very high difficulty. You receive 60% of ammo from pickups, enemies are very aggressive and don't drop any souls.";
 
 //// Tooltips menu
 
@@ -448,7 +450,7 @@ PKI_STAKEGUN	 	= "Вы подобрали коломёт/гранатомёт";
 PKI_CHAINGUN		= "Вы подобрали ракетницу/пулемёт";
 PKI_ELECTRODRIVER	= "Вы подобрали электро/драйвер";
 PKI_BOLTGUN			= "Вы подобрали болтомёт/шаромёт";
-PKI_RIFLEAMMO		= "Вы подобрали винтовку/огнемёт";
+PKI_RIFLE			= "Вы подобрали винтовку/огнемёт";
 //weapon tags
 PK_SHOTGUN_TAG		= "Дробовик/охладитель";
 PK_STAKEGUN_TAG		= "Коломёт/гранатомёт";
@@ -456,3 +458,52 @@ PK_CHAINGUN_TAG		= "Ракетница/пулемёт";
 PK_ELECTRODRIVER_TAG = "Электро/драйвер";
 PK_RIFLE_TAG		= "Винтовка/огнемёт";
 PK_BOLTGUN_TAG		= "Болтомёт/шаромёт";
+//obituaries
+PKO_PAIN			= "%k разрывает игрока %o на части с помощью Pain";
+PKO_KILLER			= "Игроку %o не удалось увернуться от Killer игрока %k";
+PKO_KILLERBEAM		= "%k медленно сжигает игрока %o лучом Killer";
+PKO_PAINKILLER		= "%k разрывает игрока %o на части с помощью Painkiller";
+PKO_SHOTGUN		= "%k отбрасывает игрока %o дробовиком";
+PKO_STAKE			= "%k пригвождает игрока %o к стене";
+PKO_EXSTAKE		= "%k попадает в игрока %o гранатой на палке";
+PKO_GRENADE		= "%o не успевает отойти от гранаты игрока %k";
+PKO_CHAINGUN		= "%k прошивает игрока %o пулеметным огнем";
+PKO_ROCKET			= "%o подрывается на ракетах игрока %k";
+PKO_ELECTRO		= "%k убивает игрока %o током";
+PKO_DRIVER			= "%k пригвождает игрока %o сюрикэнами";
+PKO_ELECTRODRIVER = "%o погибает от электродиска, запущенного игроком %k";
+PKO_RIFLE			= "%k расстреливает игрока %o автоматом";
+PKO_FLAME			= "%k сжигает игрока %o";
+PKO_FLAMETANK		= "%k убивает игрока %o пламенным взрывом";
+PKO_EXBOLT			= "%k попадает в игрока %o бомбой на палке";
+PKO_BOLT			= "%k многократно пригвождает игрока %o к стене";
+PKO_DEMON			= "%k убивает игрока %o в обличье ДЕМОНА";
+PKO_SOT			= "%o погибает от громовой поступи игрока %k";
+
+// MENU
+
+PKM_TITLE			= "Настройки Painslayer";
+PKM_TITLE_SHORT	= "Настройки мода";
+PKM_QOLCATCHER		= "Расстояние, на котором золото/души притягиваются";
+PKM_QOLCATCHER_Desc= 	"Эта функция позволяет облегчить подбирание душ и золота, притягивая их.\n"
+						"Работает так же, как карта \"Ловец душ\" с тем отличием,\n"
+						"что максимальная дистанция притягивания меньше.";
+PKM_OpenTarot			= "Открыть доску Таро";
+PKM_OpenTarot_Desc	= "На доске Черного Таро можно покупать и снаряжать карты";
+PKM_UseCards			= "Использовать золотые карты";
+PKM_UseCards_Desc		= "Активировать снаряженные золотые карты Таро";
+PKM_AutoOpenTarot		= "Открывать доску Таро в начале уровня";
+PKM_AutoOpenTarot_Desc =	"Когда вы первый раз открываете доску Таро на уровне, вы можете\n"
+							"покупать и снаряжать карты бесплатно (затем ячейки блокируются).\n"
+							"По умолчанию доска открывается в начале уровня автоматически.\n"
+							"Эта настройка позволяет изменить это.";
+PKM_SKILL0			= "Грёзы";
+PKM_SKILL0_Desc	= "Очень низкая сложность. Вы получаете 200% патронов из коробок. Враги наносят 25% урона, у них 50% здоровья. В этом режиме нельзя использовать Черное Таро.";
+PKM_SKILL1			= "Дрёма";
+PKM_SKILL1_Desc	= "Низкая сложность. Вы получаете 120% патронов из коробок. Враги наносят 50% урона, у них 50% здоровья.";
+PKM_SKILL2			= "Бессонница";
+PKM_SKILL2_Desc	= "Нормальная сложность. Стандартные показатели боезапаса и силы врагов.";
+PKM_SKILL3			= "Кошмар";
+PKM_SKILL3_Desc	= "Высокая сложность. Вы получаете 80% патронов из коробок, а враги более агрессивны.";
+PKM_SKILL4			= "Травма";
+PKM_SKILL4_Desc	= "Очень высокая сложность. Вы получаете 60% патронов из коробок, враги более агрессивны и не оставляют после себя душ.";

@@ -23,6 +23,7 @@ skill easy
 	DamageFactor = 0.5
 	SpawnFilter = Easy
 	Name = "$PKM_SKILL1"
+	MustConfirm = "$PKM_SKILL1_Desc"
 }
 
 skill normal
@@ -30,6 +31,7 @@ skill normal
 	SpawnFilter = Normal
 	Name = "$PKM_SKILL2"
 	DefaultSkill
+	MustConfirm = "$PKM_SKILL2_Desc"
 }
 
 skill hard
