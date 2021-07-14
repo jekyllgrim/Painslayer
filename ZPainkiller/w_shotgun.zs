@@ -86,7 +86,7 @@ Class PK_Shotgun : PKWeapon {
 			PK_WeaponReady(WRF_NOSECONDARY|WRF_NOBOB);
 		}
 		PSHT A 1 A_WeaponOffset(0,32,WOF_INTERPOLATE);
-		TNT1 A 0 A_ReFire();			
+		//TNT1 A 0 A_ReFire();			
 		goto ready;
 	Flash:
 		SMUZ A 2 bright {
