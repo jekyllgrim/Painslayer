@@ -52,7 +52,7 @@ Optionmenu "PK_Settings" {
 	PKTLTPControl "$PKM_OpenTarot", "$PKM_OpenTarot_Desc", "White", "netevent PKCOpenBoard"
 	PKTLTPControl "$PKM_UseCards", "$PKM_UseCards_Desc", "White", "netevent PK_UseGoldenCards"	
 	PKTLTPOption "$PKM_AutoOpenTarot", "$PKM_AutoOpenTarot_Desc", "White", "pk_autoOpenBoard", "OnOff"
-	PKTLTPScaleSlider "$PKM_QOLCATCHER",	"$PKM_QOLCATCHER_Desc", "White", "pk_QoLCatcherDistance", 0, 96, 8, "$PKM_DISABLED"
+	PKTLTPScaleSlider "$PKM_QOLCATCHER",	"$PKM_QOLCATCHER_Desc", "White", "pk_QoLCatcherDistance", 0, 96, 8, "$OPTVAL_OFF"
 	StaticText ""
 	StaticText ""
 	StaticText ""
