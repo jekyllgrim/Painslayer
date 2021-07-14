@@ -123,10 +123,24 @@ Class PKWeapon : Weapon abstract {
 	}
 	
 	action void PK_WeaponReady(int flags = 0) {
-		if ((player.cmd.buttons & BT_ATTACK) && (!invoker.ammo1 || invoker.ammo1.amount < invoker.ammouse1)) {
+		if (pk_debugmessages > 3) {
+			let psp = player.FindPsprite(OverlayID());
+			if (psp) {
+				textureID sprt = psp.curstate.GetSpriteTexture(0);
+				string call = String.Format("calling PK_WeaponReady on %s%d",TexMan.GetName(sprt),psp.frame);
+				string prim = (player.cmd.buttons & BT_ATTACK) ? " pressing Fire," : "";
+				string sec = (player.cmd.buttons & BT_ALTATTACK) ? " pressing AltFire," : "";
+				string primamt = prim ? String.Format(" has ammo1: %d (need: %d)", invoker.ammo1.amount, invoker.ammouse1) : "";
+				string secamt = sec ? String.Format(" has ammo2: %d (need: %d)", invoker.ammo2.amount, invoker.ammouse2) : "";
+				string plr = (prim || sec) ? " player" : "";
+				console.printf("%s%s%s%s%s%s",call,plr,prim,sec,primamt,secamt);
+			}
+		}
+		if (/*(player.cmd.buttons & BT_ATTACK) && */(!invoker.ammo1 || invoker.ammo1.amount < invoker.ammouse1)) {
 			A_ClearRefire();
-			//console.printf("%s out of %s: have %d, needed %d",invoker.GetClassName(),invoker.ammo1.GetClassName(),invoker.ammo1.amount,invoker.ammouse1);
-			if (!(player.oldbuttons & BT_ATTACK))
+			if (pk_debugmessages > 2)
+				console.printf("player is pressing Fire, has no primary ammo");
+			if ((player.cmd.buttons & BT_ATTACK) && !(player.oldbuttons & BT_ATTACK))
 				A_StartSound(invoker.emptysound);
 			flags |= WRF_NOPRIMARY;
 		}
@@ -136,10 +150,11 @@ Class PKWeapon : Weapon abstract {
 			if (invoker.blockFireOnSelect)
 				flags |= WRF_NOPRIMARY;
 		}
-		if ((player.cmd.buttons & BT_ALTATTACK) && (!invoker.ammo2 || invoker.ammo2.amount < invoker.ammouse2)) {
+		if (/*(player.cmd.buttons & BT_ALTATTACK) &&*/ (!invoker.ammo2 || invoker.ammo2.amount < invoker.ammouse2)) {
 			A_ClearRefire();
-			//console.printf("%s out of %s: have %d, needed %d",invoker.GetClassName(),invoker.ammo2.GetClassName(),invoker.ammo2.amount,invoker.ammouse2);
-			if (!(player.oldbuttons & BT_ALTATTACK))
+			if (pk_debugmessages > 2)
+				console.printf("player is pressing AltFire, has no secondary ammo");
+			if ((player.cmd.buttons & BT_ALTATTACK) && !(player.oldbuttons & BT_ALTATTACK))
 				A_StartSound(invoker.emptysound);
 			flags |= WRF_NOSECONDARY;
 		}
