@@ -1,6 +1,8 @@
 server int pk_debugmessages = 0;
 server int pk_QoLCatcherDistance = 0;
 server bool pk_autoOpenBoard = true;
+server bool pk_allowDemonMorph = true;
+server bool pk_allowFreeCards = true;
 
 //// MENU TOOLTIPS
 

@@ -108,7 +108,7 @@ Class PK_DemonMorphControl : PK_InventoryToken {
 	override void Tick() {}
 	void GiveSoul(int amount = 1) {
 		pk_souls = Clamp(pk_souls + amount, 0, pk_fullsouls);
-		if (!owner || !owner.player || !owner.player.readyweapon)
+		if (!pk_allowDemonMorph || !owner || !owner.player || !owner.player.readyweapon)
 			return;
 		if (pk_souls >= pk_minsouls && !owner.FindInventory("PK_DemonWeapon")) {
 			owner.GiveInventory("PK_DemonWeapon",1);

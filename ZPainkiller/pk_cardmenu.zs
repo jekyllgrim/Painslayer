@@ -351,7 +351,7 @@ Class PKCardsMenu : PKCGenericMenu {
 			
 		}
 		//unlock 2 random silver and 3 random gold cards if you have none unlocked ("pistol start"):	
-		if (goldcontrol && goldcontrol.UnlockedTarotCards.Size() == 0) {
+		if (pk_allowFreeCards && goldcontrol && goldcontrol.UnlockedTarotCards.Size() == 0) {
 			//S_StartSound("ui/board/cardunlocked",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			//console.printf("fist unlock");

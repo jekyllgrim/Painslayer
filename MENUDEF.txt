@@ -49,11 +49,18 @@ AddOptionMenu "OptionsMenu" {
 Optionmenu "PK_Settings" {
 	Class "PKTLTPOptionsMenu"
 	Title "$PKM_TITLE"
+	StaticText ""
+	StaticText "$PKM_SUB_CONTROLS", yellow
+	StaticText ""
 	PKTLTPControl "$PKM_OpenTarot", "$PKM_OpenTarot_Desc", "White", "netevent PKCOpenBoard"
 	PKTLTPControl "$PKM_UseCards", "$PKM_UseCards_Desc", "White", "netevent PK_UseGoldenCards"	
+	StaticText ""
+	StaticText "$PKM_SUB_GAMEPLAY", yellow
+	StaticText ""
 	PKTLTPOption "$PKM_AutoOpenTarot", "$PKM_AutoOpenTarot_Desc", "White", "pk_autoOpenBoard", "OnOff"
 	PKTLTPScaleSlider "$PKM_QOLCATCHER",	"$PKM_QOLCATCHER_Desc", "White", "pk_QoLCatcherDistance", 0, 96, 8, "$OPTVAL_OFF"
-	StaticText ""
+	PKTLTPOption "$PKM_ALLOWDEMON", "$PKM_ALLOWDEMON_DESC", "White", "pk_allowDemonMorph", "OnOff"
+	PKTLTPOption "$PKM_GIFTCARRDS", "$PKM_GIFTCARRDS_DESC", "White", "pk_allowFreeCards", "OnOff"
 	StaticText ""
 	StaticText ""
 	StaticText ""

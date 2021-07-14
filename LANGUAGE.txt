@@ -140,13 +140,21 @@ PKO_SOT			= "%o was killed by %k's thunderous steps";
 
 // MENU
 
-PKM_DISABLED		= "Disabled";
 PKM_TITLE			= "Painslayer Settings";
 PKM_TITLE_SHORT	= "Mod Settings";
+PKM_SUB_CONTROLS	= "CONTROLS";
+PKM_SUB_GAMEPLAY	= "GAMEPLAY";
+PKM_ALLOWDEMON		= "Allow Demon Mode";
+PKM_ALLOWDEMON_DESC	= 	"By default upon collecting 66 soulds you will turn into Demon.\n"
+							"This option lets you completely disable that feature.";
 PKM_QOLCATCHER		= "Auto-attract souls/gold distance";
 PKM_QOLCATCHER_Desc= 	"A quality-of-life feature: attracts souls/gold from a distance.\n"
 						"Works the same way as the Soul Catcher card, except\n"
 						"the maximum distance is smaller.";
+PKM_GIFTCARRDS		= "Allow free starting cards";
+PKM_GIFTCARRDS_DESC = 	"By default when you open Black Tarot board for the first time,\n"
+							"you will receive a few cards for free.\n"
+							"This option lets you change that behavior.";
 PKM_OpenTarot			= "Open Black Tarot";
 PKM_OpenTarot_Desc	= "Black Tarot Board lets you purchase and equip cards";
 PKM_UseCards			= "Use Golden Cards";
@@ -157,15 +165,25 @@ PKM_AutoOpenTarot_Desc =	"When you open Black Tarot board for the first time in 
 							"By default this happens at map start. This option allows you\n"
 							"to change that behavior.";
 PKM_SKILL0			= "Slumber";
-PKM_SKILL0_Desc	= "Very low difficulty. You receive 200% ammo from pickups. Enemies deal 25% damage and have 50% health. You can't use Black Tarot cards in this mode.";
+PKM_SKILL0_Desc	= 	"Very low difficulty.\n"
+						"You receive 200% ammo from pickups.\n"
+						"Enemies deal 25% damage and have 50% health.\n"
+						"You can't use Black Tarot cards in this mode.";
 PKM_SKILL1			= "Daydream";
-PKM_SKILL1_Desc	= "Low difficulty. You receive 120% ammo from pickups. Enemies deal 50% damage and have 50% health.";
+PKM_SKILL1_Desc	= 	"Low difficulty.\n"
+						"You receive 120% ammo from pickups.\n"
+						"Enemies deal 50% damage and have 50% health.";
 PKM_SKILL2			= "Insomnia";
-PKM_SKILL2_Desc	= "Standard difficulty. Default values for ammo amounts, monster damage, health and behavior.";
+PKM_SKILL2_Desc	= 	"Standard difficulty.\n"
+						"Default values for ammo amounts, monster damage, health and behavior.";
 PKM_SKILL3			= "Nightmare";
-PKM_SKILL3_Desc	= "High difficulty. You receive 80% of ammo from pickups, and enemies are more aggressive";
+PKM_SKILL3_Desc	= 	"High difficulty.\n"
+						"You receive 80% of ammo from pickups.\n"
+						"Enemies are more aggressive";
 PKM_SKILL4			= "Trauma";
-PKM_SKILL4_Desc	= "Very high difficulty. You receive 60% of ammo from pickups, enemies are very aggressive and don't drop any souls.";
+PKM_SKILL4_Desc	= 	"Very high difficulty.\n"
+						"You receive 60% of ammo from pickups.\n"
+						"Enemies are very aggressive and don't drop any souls.";
 
 //// Tooltips menu
 
@@ -484,10 +502,19 @@ PKO_SOT			= "%o погибает от громовой поступи игрок
 
 PKM_TITLE			= "Настройки Painslayer";
 PKM_TITLE_SHORT	= "Настройки мода";
+PKM_SUB_CONTROLS	= "УПРАВЛЕНИЕ";
+PKM_SUB_GAMEPLAY	= "ИГРОВОЙ ПРОЦЕСС";
+PKM_ALLOWDEMON		= "Разрешить превращение в демона";
+PKM_ALLOWDEMON_DESC	= 	"По умолчанию, собрав 66 душ, вы превращаетесь в демона.\n"
+							"Эта настройка позволяет полностью отключить такую возможность.";
 PKM_QOLCATCHER		= "Расстояние, на котором золото/души притягиваются";
-PKM_QOLCATCHER_Desc= 	"Эта функция позволяет облегчить подбирание душ и золота, притягивая их.\n"
-						"Работает так же, как карта \"Ловец душ\" с тем отличием,\n"
-						"что максимальная дистанция притягивания меньше.";
+PKM_QOLCATCHER_Desc= 	"Эта функция позволяет облегчить подбирание душ и золота,\n"
+						"притягивая их. Работает так же, как карта \"Ловец душ\",\n"
+						"только максимальная дистанция притягивания меньше.";
+PKM_GIFTCARRDS		= "Дарить несколько карт";
+PKM_GIFTCARRDS_DESC = 	"По умолчанию, когда вы открываете доску Таро в первый раз,\n"
+							"вы получаете несколько карт в подарок.\n"
+							"Эта настройка позволяет изменить это.";
 PKM_OpenTarot			= "Открыть доску Таро";
 PKM_OpenTarot_Desc	= "На доске Черного Таро можно покупать и снаряжать карты";
 PKM_UseCards			= "Использовать золотые карты";
