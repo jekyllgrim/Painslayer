@@ -43,6 +43,7 @@ Class PK_MainHandler : EventHandler {
 	
 	array <Actor> demontargets; //holds all monsters, players and enemy projectiles
 	array <Actor> allenemies; //only monsters
+	array <PK_StakeProjectile> stakes; //stake projectiles
 	
 	//By default returns true if ANY of the players has the item.
 	//If 'checkall' argument is true, the function returns true if ALL players have the item.
@@ -266,13 +267,19 @@ Class PK_MainHandler : EventHandler {
 		}
 	}
 	
-	//add controllers for Demon Mode, Haste and Confusion effects:
 	override void WorldThingspawned (worldevent e) {
 		if (level.Mapname == "TITLEMAP")
 			return;
 		let act = e.thing;		
 		if (!act)
 			return;
+		//record all stake projectiles that exist in the world (see PK_StakeStickHandler)
+		if (act is "PK_StakeProjectile") {
+			let stake = PK_StakeProjectile(act);
+			if (stake) {
+				stakes.Push(stake);
+			}
+		}
 		/*if (act.player && IsVoodooDoll(PlayerPawn(act))) {
 			console.printf("actor at %f,%f,%f is a voodoo doll",act.pos.x,act.pos.y,act.pos.z);
 		}*/
@@ -429,6 +436,34 @@ Class PK_ShaderHandler : StaticEventHandler {
 	}
 }
 
+/*	When hitting a wall, stakes get attached to a secplane of the sector
+	behind the wall, so that if the wall moves (as a door/lift), the stake
+	will move with it.
+	Since for whatever reason secplane can't be saved into save games,
+	and the secplane variable used by stakes has to be transient,
+	(see pk_weapons.zs/PK_StakeProjectile), whenever a save is loaded,
+	I make all existing dead stakes call their StickToWall() function again
+	to make them find the required stickplane AGAIN.
+*/
+Class PK_StakeStickHandler : StaticEventHandler {
+	override void WorldLoaded(WorldEvent e) {
+		if (!e.isSaveGame)
+			return;
+		let handler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));
+		if (!handler)
+			return;
+		for (int i = 0; i < handler.stakes.Size(); i++) {
+			PK_StakeProjectile stake = handler.stakes[i];
+			if (!stake)
+				continue;
+			if (!stake.stuckToSecPlane)
+				continue;
+			stake.StickToWall();
+		}
+	}
+}
+
+//weapon and item replacements
 Class PK_ReplacementHandler : EventHandler {
 	//array <Weapon> mapweapons;
 	array < Class<Weapon> > mapweapons;

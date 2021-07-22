@@ -504,7 +504,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 Class PK_StakeProjectile : PK_Projectile {
 	protected int hitplane; //0: none, 1: floor, 2: ceiling
 	protected actor stickobject; //a non-monster object that was hit
-	protected SecPlane stickplane; //a plane to stick to
+	protected transient SecPlane stickplane; //a plane to stick to (has to be transient, can't be recorded into savegames)
 	protected vector2 sticklocation; //the point at the line the stake collided with
 	protected double stickoffset; //how far the stake is from the nearest ceiling or floor (depending on whether it hit top or bottom part of the line)
 	protected double topz; //ZAtPoint below stake
@@ -512,6 +512,7 @@ Class PK_StakeProjectile : PK_Projectile {
 	actor pinvictim; //The fake corpse that will be pinned to a wall
 	protected double victimofz; //the offset from the center of the stake to the victim's corpse center
 	protected state sspawn; //pointer to Spawn label
+	bool stuckToSecPlane; //a non-transient way to record whether it stuck to a wall. Used by PK_StakeStickHandler
 	Default {
 		+MOVEWITHSECTOR
 		+NOEXTREMEDEATH
@@ -554,6 +555,7 @@ Class PK_StakeProjectile : PK_Projectile {
 			
 		//3D floor is easiest, so we start with it:
 		if (trac.Hit3DFloor) {
+			stuckToSecPlane = true;
 			//we simply attach the stake to the 3D floor's top plane, nothing else
 			F3DFloor flr = trac.Hit3DFloor;
 			stickplane = flr.top;
@@ -572,6 +574,7 @@ Class PK_StakeProjectile : PK_Projectile {
 					console.printf("%s hit one-sided line, not doing anything else",myclass);
 				return;
 			}
+			stuckToSecPlane = true;
 			//if it's two-sided:
 			//check which side we're on:
 			int lside = PointOnLineSide(pos.xy,tline);
