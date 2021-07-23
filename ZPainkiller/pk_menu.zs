@@ -1,12 +1,11 @@
+//same as vanilla ListMenuTextItem, but centered like ListMenuItemStaticPatchCentered
 class ListMenuItemPKTextItemCentered : ListMenuItemTextItem {
 	
 	override void Draw(bool selected, ListMenuDescriptor desc)	{
 		let font = menuDelegate.PickFont(mFont);
 		String text = Stringtable.Localize(mText);
 		double x = mXpos - font.StringWidth(text) / 2;
-		//DrawText(desc, font, selected ? mColorSelected : mColor, x, abs(mYpos), text, mYpos < 0);
-		PK_StatusBarScreen.DrawString(font, text, (x, abs(mYpos)), 0, selected ? mColorSelected : mColor, scale: (0.5,
- 0.5));
+		DrawText(desc, font, selected ? mColorSelected : mColor, x, abs(mYpos), text, mYpos < 0);
 	}
 	
 	void PK_DrawMenuText(ListMenuDescriptor desc, Font fnt, int color, double x, double y, String text, bool ontop = false)	{
@@ -25,6 +24,7 @@ class ListMenuItemPKDrawMenuBackground : ListMenuItemStaticPatch {
 	override void Draw(bool selected, ListMenuDescriptor desc) {
 		if (!mTexture.Exists())
 			return;
+		PK_StatusBarScreen.Fill("000000",0,0,statscr_base_width,statscr_base_height,1);
 		PK_StatusBarScreen.DrawTexture(mTexture, (960,540));
 	}
 }
