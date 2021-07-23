@@ -6,7 +6,7 @@ DEFAULTLISTMENU
 
 ListMenu "MainMenu" {
 	size 1920, 1080
-	StaticPatchCentered 960, 0, "P_MENU"
+	PKDrawMenuBackground 0, 0, "P_MENU"
 	LineSpacing 92
 	StaticPatchCentered 960, 339, "P_mnublk"
 	StaticPatchCentered 960, 431, "P_mnublk"
@@ -15,17 +15,16 @@ ListMenu "MainMenu" {
 	StaticPatchCentered 960, 707, "P_mnublk"
 	StaticPatchCentered 960, 799, "P_mnublk"
 	
-	Position 992, 360
-	PKTextItemCentered "$MNU_NEWGAME", "", "PlayerclassMenu"
-	PKTextItemCentered "$MNU_OPTIONS", "", "OptionsMenu"
-	PKTextItemCentered "$PKM_TITLE_SHORT", "", "PK_Settings"
-	PKTextItemCentered "$MNU_LOADGAME", "", "LoadGameMenu"
-	PKTextItemCentered "$MNU_SAVEGAME", "", "SaveGameMenu"
-	PKTextItemCentered "$MNU_QUITGAME", "", "QuitMenu"
+	Position 960, 360
+	PKTextItemCentered  "$MNU_NEWGAME", "", "PlayerclassMenu"
+	PKTextItemCentered  "$MNU_OPTIONS", "", "OptionsMenu"
+	PKTextItemCentered  "$PKM_TITLE_SHORT", "", "PK_Settings"
+	PKTextItemCentered  "$MNU_LOADGAME", "", "LoadGameMenu"
+	PKTextItemCentered  "$MNU_SAVEGAME", "", "SaveGameMenu"
+	PKTextItemCentered  "$MNU_QUITGAME", "", "QuitMenu"
 }
 
-ListMenu "SkillMenu"
-{
+ListMenu "SkillMenu" {
 	PKDrawMenuBackground 0, 0, "P_MENU"
 	Font "BigFont", "White", "DarkRed"
 	StaticText 74, 16, "$MNU_CHOOSESKILL"
