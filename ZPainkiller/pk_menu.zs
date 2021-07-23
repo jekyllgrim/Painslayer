@@ -21,7 +21,11 @@ class ListMenuItemPKTextItemCentered : ListMenuItemTextItem {
 }
 
 class ListMenuItemPKDrawMenuBackground : ListMenuItemStaticPatch {
+	bool shouldDraw;
+
 	override void Draw(bool selected, ListMenuDescriptor desc) {
+		if (gamestate == GS_LEVEL)
+			return;
 		if (!mTexture.Exists())
 			return;
 		PK_StatusBarScreen.Fill("000000",0,0,statscr_base_width,statscr_base_height,1);
