@@ -1202,7 +1202,7 @@ Class PKC_StepsOfThunder : PK_BaseGoldenCard {
 				//set the PlayerPawn's target to self in order to properly assign kill credit and obituary:
 				owner.target = self;
 				//do the damage:
-				owner.A_Explode(20,256/*,XF_NOTMISSILE*/,alert:false,fulldamagedistance:128);
+				owner.A_Explode(20,256,0,alert:false,fulldamagedistance:128);
 				//set the PlayerPawn's target to whatever it was before, if anything:
 				owner.target = prevtarget;
 				owner.A_Quake(2,5,0,32,"");
