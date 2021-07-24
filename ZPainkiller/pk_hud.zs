@@ -1,4 +1,7 @@
 Class PainkillerHUD : BaseStatusBar {
+	const noYStretch = 0.833333;
+	const PWICONSIZE = 18;
+		
 	HUDFont mIndexFont;
 	HUDFont mStatFont;
 	
@@ -23,6 +26,7 @@ Class PainkillerHUD : BaseStatusBar {
 		//dark arrow outline:
 		PK_StatusBarScreen.DrawImage("pkxarrow",arrowPos,fflags,scale:targetScale,rotation:arrowangle,tint:color(256,0,0,0));	
 		//the arrow itself:
+		//PK_StatusBarScreen.DrawRotatedImage("pkxarrow",arrowPos,rotation:arrowangle,scale:targetScale,flags:fflags);
 		PK_StatusBarScreen.DrawImage("pkxarrow",arrowPos,fflags,scale:targetScale*0.8,rotation:arrowangle);	
 		//arrow shadow (optional):
 		if (shadowofs != (0,0)) {
@@ -37,26 +41,23 @@ Class PainkillerHUD : BaseStatusBar {
 		that simply multiply vertical scale and pos by ~0.83 if "Preserve HUD scale" option is enabled.
 	*/
 	void PK_DrawImage(String texture, Vector2 pos, int flags = 0, double Alpha = 1., Vector2 box = (-1, -1), Vector2 scale = (1, 1)) {
-		double mod = 0.833333;
 		if (aspectScale.GetBool() == true) {
-			scale.y *= mod;
-			pos.y *= mod;
+			scale.y *= noYStretch;
+			pos.y *= noYStretch;
 		}
 		DrawImage(texture, pos, flags, Alpha, box, scale);
 	}
 	void PK_DrawString(HUDFont font, String string, Vector2 pos, int flags = 0, int translation = Font.CR_UNTRANSLATED, double Alpha = 1., int wrapwidth = -1, int linespacing = 4, Vector2 scale = (1, 1)) {
-		double mod = 0.833333;
 		if (aspectScale.GetBool() == true) {
-			scale.y *= mod;
-			pos.y *= mod;
+			scale.y *= noYStretch;
+			pos.y *= noYStretch;
 		}
 		DrawString(font, string, pos, flags, translation, Alpha, wrapwidth, linespacing, scale);
 	}
 	void PK_DrawInventoryIcon(Inventory item, Vector2 pos, int flags = 0, double alpha = 1.0, Vector2 boxsize = (-1, -1), Vector2 scale = (1.,1.)) {
-		double mod = 0.833333;
 		if (aspectScale.GetBool() == true) {
-			scale.y *= mod;
-			pos.y *= mod;
+			scale.y *= noYStretch;
+			pos.y *= noYStretch;
 		}
 		DrawInventoryIcon(item, pos, flags, alpha, boxsize, scale);
 	}
@@ -93,7 +94,6 @@ Class PainkillerHUD : BaseStatusBar {
 		fullscreenOffsets = true;
 	}
 	
-	const PWICONSIZE = 18;
 	override void DrawPowerUps() {
 		Vector2 pos = (-PWICONSIZE / 2, -49);
 		for (let iitem = CPlayer.mo.Inv; iitem != NULL; iitem = iitem.Inv) {
@@ -166,10 +166,12 @@ Class PainkillerHUD : BaseStatusBar {
 		for (int i = 2; i < 5; i++) {
 			if (cardcontrol.EquippedSlots[i]) {
 				string texpath = String.Format("graphics/HUD/Tarot/cards/%s.png",cardcontrol.EquippedSlots[i]);
-				PK_DrawImage(texpath,((-77 + i*22),195),DI_SCREEN_HCENTER|DI_ITEM_LEFT_TOP,scale:(0.14,0.14));
+				vector2 cardpos = ((-77 + i*22),-50);
+				int fflags = DI_SCREEN_CENTER_BOTTOM|DI_ITEM_LEFT_TOP;
+				PK_DrawImage(texpath,cardpos,fflags,scale:(0.14,0.14));
 				//if out of uses, draw a red overlay atop the cards
 				if (cardcontrol.GetDryUseTimer() > 0)
-					PK_DrawImage("graphics/HUD/Tarot/cards/UsedCard.png",((-77 + i*22),195),DI_SCREEN_HCENTER|DI_ITEM_LEFT_TOP,alpha:0.75,scale:(0.14,0.14));
+					PK_DrawImage("graphics/HUD/Tarot/cards/UsedCard.png",cardpos,fflags,alpha:0.75,scale:(0.14,0.14));
 			}
 		}
 	}
