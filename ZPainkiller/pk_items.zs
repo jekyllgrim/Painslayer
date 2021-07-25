@@ -407,8 +407,9 @@ Class PK_Soul : PK_Inventory {
 			amount = am;
 			//slightly change soul's alpha and scale based on the resulting number:
 			alpha = Clamp(LinearMap(am, 1, 20, 0.5, 1.5), 0.5 , 1.5);
-			int colalpha = Clamp(LinearMap(alpha, 0.5, 1.5, 64, 255), 128 , 255);
 			scale *= Clamp(LinearMap(am, 1, 20, 0.6, 1.15), 0.7, 1.15);
+			//define color and its density based on the alpha of the soul
+			int colalpha = Clamp(LinearMap(alpha, 0.5, 1.5, 64, 255), 128 , 255);
 			color lit = Color(colalpha, 0, 255, 0);
 			//if the amount is over 15, make the soul red:
 			if (am >= 15) {
