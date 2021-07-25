@@ -24,9 +24,10 @@ Class PK_ElectroDriver : PKWeapon {
 		BlockThingsIterator itr = BlockThingsIterator.Create(self,atkdist);
 		while (itr.next()) {
 			let next = itr.thing;
-			if (next == self)
-				continue; 
-			if (!next.bShootable || !(next.bIsMonster || (next is "PlayerPawn")))
+			if (!next || next == self)
+				continue;
+			bool isValid = (next.bSHOOTABLE && ( (!next.bIsMonster && !next.player) || health > 0 ));
+			if (!isValid)
 				continue;
 			double dist = Distance3D(next);
 			if (dist > atkdist)
@@ -45,8 +46,8 @@ Class PK_ElectroDriver : PKWeapon {
 		}
 		if (!ltarget) {
 			FLineTraceData hit;
-			LineTrace(angle,atkdist,pitch,TRF_ABSPOSITION,player.viewz,pos.x,pos.y,data:hit);
-			if (hit.HitType != TRACE_HitNone && hit.HitType != TRACE_HitActor && hit.HitType != TRACE_HitSky) {
+			LineTrace(angle,atkdist,pitch,TRF_ABSPOSITION|TRF_SOLIDACTORS,player.viewz,pos.x,pos.y,data:hit);
+			if (hit.HitType != TRACE_HitNone && hit.HitType != TRACE_HitSky) {
 				Spawn("PK_ElectricPuff",hit.HitLocation);
 			}
 			return hit.HitLocation;
@@ -63,7 +64,7 @@ Class PK_ElectroDriver : PKWeapon {
 				let next = itr.thing;
 				if (!next || next == self)
 					continue; 
-				if (next == ltarget || !next.bShootable || !(next.bIsMonster || (next is "PlayerPawn")) || !self.IsHostile (next) || self.bKILLED)
+				if (next == ltarget || next.health <= 0 || !next.bShootable || !(next.bIsMonster || (next is "PlayerPawn")) || !self.IsHostile (next) || self.bKILLED)
 					continue;
 				double cdist = Distance3D(next);
 				if (cdist > 180)
@@ -244,11 +245,13 @@ Class PK_ElectricPuff : PKPuff {
 Class PK_ElectroTargetControl : PK_InventoryToken {
 	protected int deadtics;
 	protected int deadage;
+	protected bool isFlesh;
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);
 		if (!owner)
 			return;
-		owner.A_StartSound("weapons/edriver/shockloop",CHAN_6,CHANF_LOOPING,attenuation:3);
+		isFlesh = (owner.bISMONSTER || owner is "PlayerPawn");
+		owner.A_StartSound("weapons/edriver/shockloop",CH_LOOP,CHANF_LOOPING,attenuation:3);
 		deadtics = 35*random[eld](3,5);
 		for (int i = 3; i > 0; i--) {
 			let etarget = Spawn("PK_ElectroTarget",owner.pos + (0,0,owner.height*0.5));
@@ -267,22 +270,25 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 		}
 		if (owner.isFrozen())
 			return;
-		let smk = Spawn("PK_BlackSmoke",owner.pos+(frandom[eld](-8,8),frandom[eld](-8,8),owner.height*0.5 + frandom[eld](-4,12)));
-		if (smk) {
-			smk.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](0.6,0.9));
+		if (isFlesh) {
+			let smk = Spawn("PK_BlackSmoke",owner.pos+(frandom[eld](-8,8),frandom[eld](-8,8),owner.height*0.5 + frandom[eld](-4,12)));
+			if (smk) {
+				smk.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](0.6,0.9));
+			}
 		}
 		if (owner.health <= 0) {
-			owner.A_SetTRanslation("Scorched");
+			if (isFlesh)
+				owner.A_SetTRanslation("Scorched");
 			owner.SetOrigin(owner.pos + (frandom[eld](-1,1),frandom[eld](-1,1),frandom[eld](0.5,1.5)),false);
 			deadage++;
 			if (deadage > deadtics){
-				owner.A_StopSound(CHAN_6);
+				owner.A_StopSound(CH_LOOP);
 				DepleteOrDestroy();
 				return;
 			}
 		}
-		else if (GetAge() > 20) {
-			owner.A_StopSound(CHAN_6);
+		if (GetAge() > 300 || (owner.health > 0 && GetAge() > 20)) {
+			owner.A_StopSound(CH_LOOP);
 			DepleteOrDestroy();
 			return;
 		}
@@ -510,8 +516,9 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 		while (itr.next()) {
 			let next = itr.thing;
 			if (!next || next == target)
-				continue; 
-			if (!next.bShootable || !(next.bIsMonster || (next is "PlayerPawn")) || !target.IsHostile (next) || target.bKILLED)
+				continue;
+			bool isValid = (next.bSHOOTABLE && (next.bISMONSTER || next.player) && next.health > 0 && next.isHOSTILE(target));
+			if (!isValid)
 				continue;
 			double cdist = Distance3D(next);
 			if (cdist > atkdist)
