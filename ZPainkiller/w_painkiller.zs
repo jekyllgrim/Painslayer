@@ -151,21 +151,8 @@ Class PK_Painkiller : PKWeapon {
 			PKIM CCC 1 A_WeaponOffset(0.5,0.3,WOF_ADD);
 			PKIM BBBAAA 1 {
 				A_WeaponReady(WRF_NOBOB);
-				A_WeaponOffset(-4.75,-1.1,WOF_ADD);
+				A_WeaponOffset(-5,-1.5,WOF_ADD);
 			}
-			/*
-			PKIM A 1 A_WeaponOffset(8, 7.8,WOF_ADD);
-			PKIM A 1 A_WeaponOffset(8,12  ,WOF_ADD);
-			PKIM B 1 A_WeaponOffset(8,15.6,WOF_ADD);
-			PKIM BCC 1 A_WeaponOffset(PSP_UNDERGUN,-2.6,WOF_ADD);
-			PKIM BBA 1 {
-				A_WeaponOffset(-2,-6  ,WOF_ADD);
-				A_WeaponReady(WRF_NOBOB);
-			}
-			PKIM AAA 1 {
-				A_WeaponOffset(-1,-1.3,WOF_ADD);
-				A_WeaponReady(WRF_NOBOB);
-			}*/
 			goto ready;
 		KillerReturn:
 			TNT1 A 0 {
@@ -173,17 +160,15 @@ Class PK_Painkiller : PKWeapon {
 				invoker.killer_fired = false;
 				//A_StartSound("weapons/painkiller/killerback");
 			}
-			PKIM A 1 A_WeaponOffset(12,11.7,WOF_ADD);
-			PKIM B 1 A_WeaponOffset(12,18  ,WOF_ADD);
-			PKIM C 1 A_WeaponOffset(12,23.4,WOF_ADD);
-			PKIR AAA 1 A_WeaponOffset(-7.5,-3.9,WOF_ADD);
-			PKIR AAA 1 {
-				A_WeaponOffset(-3,-9  ,WOF_ADD);
+			PKIM ABC 1 A_WeaponOffset(13.5,4.5,WOF_ADD);
+			PKIM CCC 1 A_WeaponOffset(0.75,0.45,WOF_ADD);
+			PKIM BBB 1 {
 				A_WeaponReady(WRF_NOBOB);
+				A_WeaponOffset(-7.125,-1.65,WOF_ADD);
 			}
 			PKIR AAA 1 {
-				A_WeaponOffset(-1.5,-1.95,WOF_ADD);
 				A_WeaponReady(WRF_NOBOB);
+				A_WeaponOffset(-8,-3,WOF_ADD);
 			}
 			goto ready;
 	}
