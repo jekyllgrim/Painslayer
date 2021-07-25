@@ -407,17 +407,17 @@ Class PK_Soul : PK_Inventory {
 			amount = am;
 			//slightly change soul's alpha and scale based on the resulting number:
 			alpha = Clamp(LinearMap(am, 1, 20, 0.5, 1.5), 0.5 , 1.5);
+			int colalpha = Clamp(LinearMap(alpha, 0.5, 1.5, 64, 255), 128 , 255);
 			scale *= Clamp(LinearMap(am, 1, 20, 0.6, 1.15), 0.7, 1.15);
-			color lit = "00FF00";
+			color lit = Color(colalpha, 0, 255, 0);
 			//if the amount is over 15, make the soul red:
 			if (am >= 15) {
 				A_SetTranslation("PK_RedSoul");
 				//A_SetRenderstyle(alpha,Style_Shaded);
 				//SetShade("FF0000");
-				lit = "FF0000";
+				lit = Color(colalpha, 255, 0, 0);
 				pickupsound = "pickups/soul/red";
 			}
-			lit *= alpha * 2;
 			A_AttachLight('soul',DynamicLight.PointLight,lit, 48 * scale.x, 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_NOSHADOWMAP|DYNAMICLIGHT.LF_DONTLIGHTACTORS);
 		}
 		if (pk_debugmessages > 2) {
