@@ -1142,8 +1142,11 @@ Class PK_DexterityEffect : PowerDoubleFiringSpeed {
 		super.DoEffect();
 		if (!owner || !owner.player)
 			return;
-		for (int i = CH_END; i > 0; i--)
+		for (int i = CH_END; i > 0; i--) {
+			if (i == CHAN_BODY) //don't affect player jump/land/pain/etc. sounds
+				continue;
 			owner.A_SoundPitch(i,1.2);
+		}
 	}
 	override void DetachFromOwner() {
 		if (!owner || !owner.player)
