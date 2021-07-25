@@ -1,6 +1,8 @@
 Class PainkillerHUD : BaseStatusBar {
 	const noYStretch = 0.833333;
 	const PWICONSIZE = 18;
+	const PKHUDwidth = 320;
+	const PKHUDheight = 200;
 		
 	HUDFont mIndexFont;
 	HUDFont mStatFont;
@@ -15,23 +17,19 @@ Class PainkillerHUD : BaseStatusBar {
 	private PK_Mainhandler mainhandler;
 	protected transient CVar aspectScale;
 	
-	PK_CardControl cardcontrol;	
+	PK_CardControl cardcontrol;
 	
-	void DrawMonsterArrow(double arrowScale = 0.47, vector2 arrowPos = (0,22), vector2 shadowofs = (0,0)) {
-		let hudscale = GetHudScale();		
-		double hscale = hudscale.x;
-        vector2 targetScale = (arrowScale,arrowScale) * hscale;
-		arrowPos *= hscale;
-		int fflags = (hudstate == HUD_StatusBar) ? PK_StatusBarScreen.SS_SCREEN_BOTTOM_CENTER : PK_StatusBarScreen.SS_SCREEN_TOP_CENTER;
-		//dark arrow outline:
-		PK_StatusBarScreen.DrawImage("pkxarrow",arrowPos,fflags,scale:targetScale,rotation:arrowangle,tint:color(256,0,0,0));	
-		//the arrow itself:
-		//PK_StatusBarScreen.DrawRotatedImage("pkxarrow",arrowPos,rotation:arrowangle,scale:targetScale,flags:fflags);
-		PK_StatusBarScreen.DrawImage("pkxarrow",arrowPos,fflags,scale:targetScale*0.8,rotation:arrowangle);	
-		//arrow shadow (optional):
+	void DrawMonsterArrow(vector2 arrowPos = (0,23), vector2 shadowofs = (0,0)) {
+		int fflags = (hudstate == HUD_StatusBar) ? DI_SCREEN_CENTER_BOTTOM : DI_SCREEN_HCENTER;
+		vector2 arrowscale = (1, 1);
+		if (hudstate == HUD_StatusBar)
+			arrowscale *= 1.2;
+		//draw shadow:
 		if (shadowofs != (0,0)) {
-			PK_StatusBarScreen.DrawImage("pkxarrow",arrowPos + shadowofs,fflags,alpha:0.45,scale:targetScale,rotation:arrowangle,tint:color(256,48,0,0));
+			DrawImageRotated("pkharrow", arrowPos+shadowOfs, fflags, arrowangle, scale: arrowscale, col:color(128,0,0,0));	
 		}
+		//draw arrow:
+		DrawImageRotated("pkharrow", arrowPos, fflags, arrowangle, scale: arrowscale);
 	}
 	
 	/*	My HUD was originally coded using StatusBar's DrawImage, DrawString and DrawInventoryIcon,
@@ -47,6 +45,7 @@ Class PainkillerHUD : BaseStatusBar {
 		}
 		DrawImage(texture, pos, flags, Alpha, box, scale);
 	}
+	
 	void PK_DrawString(HUDFont font, String string, Vector2 pos, int flags = 0, int translation = Font.CR_UNTRANSLATED, double Alpha = 1., int wrapwidth = -1, int linespacing = 4, Vector2 scale = (1, 1)) {
 		if (aspectScale.GetBool() == true) {
 			scale.y *= noYStretch;
@@ -54,12 +53,45 @@ Class PainkillerHUD : BaseStatusBar {
 		}
 		DrawString(font, string, pos, flags, translation, Alpha, wrapwidth, linespacing, scale);
 	}
+	
 	void PK_DrawInventoryIcon(Inventory item, Vector2 pos, int flags = 0, double alpha = 1.0, Vector2 boxsize = (-1, -1), Vector2 scale = (1.,1.)) {
 		if (aspectScale.GetBool() == true) {
 			scale.y *= noYStretch;
 			pos.y *= noYStretch;
 		}
 		DrawInventoryIcon(item, pos, flags, alpha, boxsize, scale);
+	}
+	
+	//show 3 active golden cards at the lower center of the screen
+	protected void DrawActiveGoldenCards() {
+		if (!cardcontrol || (!cardcontrol.goldActive && cardcontrol.GetDryUseTimer() <= 0))
+			return;			
+		for (int i = 2; i < 5; i++) {
+			if (cardcontrol.EquippedSlots[i]) {
+				string texpath = String.Format("graphics/HUD/Tarot/cards/%s.png",cardcontrol.EquippedSlots[i]);
+				vector2 cardpos = ((-77 + i*22),-80);
+				int fflags = DI_SCREEN_CENTER_BOTTOM|DI_ITEM_LEFT_TOP;
+				PK_DrawImage(texpath,cardpos,fflags,scale:(0.14,0.14));
+				//if out of uses, draw a red overlay atop the cards
+				if (cardcontrol.GetDryUseTimer() > 0)
+					PK_DrawImage("graphics/HUD/Tarot/cards/UsedCard.png",cardpos,fflags,alpha:0.75,scale:(0.14,0.14));
+			}
+		}
+	}
+	
+	override void DrawPowerUps() {
+		Vector2 pos = (-PWICONSIZE / 2, -49);
+		for (let iitem = CPlayer.mo.Inv; iitem != NULL; iitem = iitem.Inv) {
+			let item = Powerup(iitem);
+			if (item != null) {
+				let icon = item.GetPowerupIcon();
+				if (icon.IsValid()) {
+					if (!item.IsBlinking())
+						DrawTexture(icon, pos, DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_CENTER, 1.0, (PWICONSIZE, PWICONSIZE));
+					pos.y -= PWICONSIZE;
+				}
+			}
+		}
 	}
 	
 	override void Init() {
@@ -78,7 +110,7 @@ Class PainkillerHUD : BaseStatusBar {
 		//is in a demon mode and debug messages aren't active:
 		if (state == HUD_none || automapactive || (isDemon && !pk_debugmessages))
 			return;
-		BeginHUD();
+		BeginHUD(PKHUDwidth,PKHUDheight);
 		if (state == HUD_Fullscreen || state == HUD_AltHud)
 			DrawTopElements();
 		if (state == HUD_StatusBar || state == HUD_Fullscreen)
@@ -92,21 +124,6 @@ Class PainkillerHUD : BaseStatusBar {
 			DrawKeys(keyofs.x,keyofs.y);
 		}
 		fullscreenOffsets = true;
-	}
-	
-	override void DrawPowerUps() {
-		Vector2 pos = (-PWICONSIZE / 2, -49);
-		for (let iitem = CPlayer.mo.Inv; iitem != NULL; iitem = iitem.Inv) {
-			let item = Powerup(iitem);
-			if (item != null) {
-				let icon = item.GetPowerupIcon();
-				if (icon.IsValid()) {
-					if (!item.IsBlinking())
-						DrawTexture(icon, pos, DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_CENTER, 1.0, (PWICONSIZE, PWICONSIZE));
-					pos.y -= PWICONSIZE;
-				}
-			}
-		}
 	}
 	
 	override void Tick() {
@@ -159,23 +176,6 @@ Class PainkillerHUD : BaseStatusBar {
 		}
 	}
 	
-	//show 3 active golden cards at the lower center of the screen
-	protected void DrawActiveGoldenCards() {
-		if (!cardcontrol || (!cardcontrol.goldActive && cardcontrol.GetDryUseTimer() <= 0))
-			return;			
-		for (int i = 2; i < 5; i++) {
-			if (cardcontrol.EquippedSlots[i]) {
-				string texpath = String.Format("graphics/HUD/Tarot/cards/%s.png",cardcontrol.EquippedSlots[i]);
-				vector2 cardpos = ((-77 + i*22),-50);
-				int fflags = DI_SCREEN_CENTER_BOTTOM|DI_ITEM_LEFT_TOP;
-				PK_DrawImage(texpath,cardpos,fflags,scale:(0.14,0.14));
-				//if out of uses, draw a red overlay atop the cards
-				if (cardcontrol.GetDryUseTimer() > 0)
-					PK_DrawImage("graphics/HUD/Tarot/cards/UsedCard.png",cardpos,fflags,alpha:0.75,scale:(0.14,0.14));
-			}
-		}
-	}
-	
 	//draws currently equipped cards (not present in the original game):
 	protected void DrawEquippedCards() {
 		if (!cardcontrol)
@@ -224,7 +224,7 @@ Class PainkillerHUD : BaseStatusBar {
 			//draw compass at bottom center
 			PK_DrawImage("pkxtop0",(0,4),DI_SCREEN_BOTTOM|DI_SCREEN_HCENTER|DI_ITEM_BOTTOM);
 			//draw arrow and outline (shadow and glass are skipped in this version for simplicity)
-			DrawMonsterArrow(0.37, arrowPos: (0,-24));	
+			DrawMonsterArrow(arrowPos: (0,-24));
 		
 			//gold counter above health:
 			PK_DrawImage("pkhgold",(5,-38),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER);
@@ -261,7 +261,7 @@ Class PainkillerHUD : BaseStatusBar {
 		//draw the compass background:
 		PK_DrawImage("pkxtop0",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);
 		//draw the compass arrow (in 3 layers):
-		DrawMonsterArrow(shadowofs: (5,10));
+		DrawMonsterArrow(shadowofs: (3,3));
 		
 		//draw the top bar and the compass outline:
 		PK_DrawImage("pkxtop1",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);	//main top
