@@ -136,7 +136,7 @@ Class PKWeapon : Weapon abstract {
 				console.printf("%s%s%s%s%s%s",call,plr,prim,sec,primamt,secamt);
 			}
 		}
-		if (/*(player.cmd.buttons & BT_ATTACK) && */(!invoker.ammo1 || invoker.ammo1.amount < invoker.ammouse1)) {
+		if (!invoker.ammo1 || invoker.ammo1.amount < invoker.ammouse1) {
 			A_ClearRefire();
 			if (pk_debugmessages > 2)
 				console.printf("player is pressing Fire, has no primary ammo");
@@ -150,7 +150,7 @@ Class PKWeapon : Weapon abstract {
 			if (invoker.blockFireOnSelect)
 				flags |= WRF_NOPRIMARY;
 		}
-		if (/*(player.cmd.buttons & BT_ALTATTACK) &&*/ (!invoker.ammo2 || invoker.ammo2.amount < invoker.ammouse2)) {
+		if (!invoker.ammo2 || invoker.ammo2.amount < invoker.ammouse2) {
 			A_ClearRefire();
 			if (pk_debugmessages > 2)
 				console.printf("player is pressing AltFire, has no secondary ammo");
