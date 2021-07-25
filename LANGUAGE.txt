@@ -164,6 +164,11 @@ PKM_AutoOpenTarot_Desc =	"When you open Black Tarot board for the first time in 
 							"you can equip cards for free (after that they'll be locked).\n"
 							"By default this happens at map start. This option allows you\n"
 							"to change that behavior.";
+PKM_CGUNSWITCH		= "Switch Rocket Launcher/Minigun fire modes";
+PKM_CGUNSWITCH_DESC	= 	"By default primary attack is Rocket Launcher and secondary\n"
+							"is Minigun, like in the original Painkiller. However, some\n"
+							"players might find it confusing, so this option allows\n"
+							"to switch those modes around.";
 PKM_SKILL0			= "Slumber";
 PKM_SKILL0_Desc	= 	"Very low difficulty.\n"
 						"You receive 200% ammo from pickups.\n"

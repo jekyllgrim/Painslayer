@@ -4,6 +4,8 @@ Class PK_Chaingun : PKWeapon {
 	private bool hideFlash;
 	private int atkframe;
 	private int atkframeDelay;
+	private transient CVAR c_switchmodes;
+	private bool switchmodes;
 	Default {
 		+PKWeapon.NOAUTOPRIMARY
 		PKWeapon.emptysound "weapons/empty/chaingun";
@@ -48,6 +50,50 @@ Class PK_Chaingun : PKWeapon {
 			invoker.hideFlash = false;
 		if (!invoker.hideFlash)
 			A_Overlay(PSP_PFLASH,"AltFlash");
+	}
+	override void DoEffect() {
+		super.DoEffect();
+		if (!owner || !owner.player)
+			return;
+		if (c_switchmodes == null)
+			c_switchmodes = CVAR.GetCVar('pk_switchChaingunModes',owner.player);
+		if (c_switchmodes/* && switchmodes != c_switchmodes.GetBool()*/) {
+			//let def = GetDefaultByType("PK_Chaingun");
+			if (switchmodes) {
+				ammotype1 = default.ammotype2;
+				ammouse1 = default.ammouse2;
+				ammogive1 = default.ammogive2;
+				ammotype2 = default.ammotype1;
+				ammouse2 = default.ammouse1;
+				ammogive2 = default.ammogive1;
+				bNOAUTOPRIMARY = false;
+				bNOAUTOSECONDARY = true;
+			}
+			else {
+				ammotype1 = default.ammotype1;
+				ammouse1 = default.ammouse1;
+				ammogive1 = default.ammogive1;
+				ammotype2 = default.ammotype2;
+				ammouse2 = default.ammouse2;
+				ammogive2 = default.ammogive2;
+				bNOAUTOPRIMARY = default.bNOAUTOPRIMARY;
+				bNOAUTOSECONDARY = default.bNOAUTOSECONDARY;
+			}
+			ammo1 = Ammo(owner.FindInventory (ammotype1));
+			ammo2 = Ammo(owner.FindInventory (ammotype2));
+			switchmodes = c_switchmodes.GetBool();
+		}
+	}
+	override State GetAtkState (bool hold) {	
+		if (switchmodes)
+			return super.GetAltAtkState(hold);
+		return super.GetAtkState(hold);
+	}
+	
+	override State GetAltAtkState (bool hold)	{
+		if (switchmodes)
+			return super.GetAtkState(hold);
+		return super.GetAltAtkState(hold);
 	}
 	States {
 	Spawn:
