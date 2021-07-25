@@ -61,14 +61,14 @@ leave this note intact.
                         ((          /////         ((                          
 */
 
-Class PK_ViewProjection : Object
+class PK_ViewProjection : Object
 {
 	float FOV;
 	vector3 view_pos;
 	vector3 view_ang;
 }
 
-extend Class PK_StatusBarScreen
+extend class PK_StatusBarScreen
 {
 	static Vector2 VRotate(Vector2 pos, double angle, bool invert=false)
 	{
@@ -105,7 +105,7 @@ extend Class PK_StatusBarScreen
 		return vp;
 	}
 		
-	static PK_ViewProjection CreatePK_ViewProjection(float FOV, vector3 view_position, float viewer_angle, float viewer_pitch, float viewer_roll)
+	static PK_ViewProjection CreateViewProjection(float FOV, vector3 view_position, float viewer_angle, float viewer_pitch, float viewer_roll)
 	{
 		PK_ViewProjection vp = new("PK_ViewProjection");
 		vp.FOV = FOV;
@@ -128,15 +128,12 @@ extend Class PK_StatusBarScreen
 	static bool, vector2 ProjectToHUD(PK_ViewProjection viewp, vector3 _worldpos, vector3 projoffs)
 	{		
 		// Dependant variables
+		double pixel_stretch = level.pixelstretch;
 		float hor_fov = viewp.FOV;
 		vector3 world_view_pos = viewp.view_pos;
 		vector3 world_ang = viewp.view_ang;
 		vector3 world_pos = _worldpos;
-		
-		// Process offsets
-		Vector3 adjustedWorldPos = world_view_pos + LevelLocals.vec3Diff(world_view_pos, world_pos);
-		world_pos = adjustedWorldPos + projoffs;
-		
+		 				
 		// Projection variables
 		vector2 resolution = (Screen.GetWidth(), Screen.GetHeight());
 		double aspect_ratio = max(4.0 / 3, Screen.GetAspectRatio());
@@ -147,7 +144,7 @@ extend Class PK_StatusBarScreen
 		// [--]  .:Projection mathematics:. [--] \\
 		
 		// Pitch Correction
-		world_ang.y = VectorAngle( cos(world_ang.y), sin(world_ang.y) );
+		world_ang.y = VectorAngle( cos(world_ang.y), sin(world_ang.y) * pixel_stretch );
 		
 		// Get view angles
 		let cosang	= cos(world_ang.x);
@@ -167,8 +164,12 @@ extend Class PK_StatusBarScreen
 		vector3 right_in   = right_unit / tan_fov_2.x;
 		vector3 down_in	   = down_unit  / tan_fov_2.y;
 		
+        forw_in.z   *= pixel_stretch;
+        right_in.z  *= pixel_stretch;
+        down_in.z   *= pixel_stretch;
+		
 		// Get project difference and 3D depth
-		vector3 diff = levellocals.vec3diff(world_view_pos, world_pos);
+		vector3 diff = levellocals.vec3diff(world_view_pos, world_pos + projoffs);
 		vector2 proj_pos = (diff dot right_in, diff dot down_in);
 		double  depth	 = diff dot forw_in;
 	
@@ -186,7 +187,7 @@ extend Class PK_StatusBarScreen
 	
 		
 	static void DrawString3D( Font fnt, String str, Vector2 pos, int flags = 0, int translation = Font.CR_UNTRANSLATED, 
-							double Alpha = 1., Vector2 scale = (1, 1), Color tint = Color(0,0,0,0), int linespacing = 20, 
+							double Alpha = 1., Vector2 scale = (1, 1), Color tint = Color(0,0,0,0), int charspacing = 0, int linespacing = 20, 
 							float distance=0 )
 	{
 		Array<String> lines;
@@ -209,7 +210,8 @@ extend Class PK_StatusBarScreen
 				DTA_Alpha, alpha,
 				DTA_VirtualWidth, int(resolution.x/nscale.x),
 				DTA_VirtualHeight,int(resolution.y/nscale.y),
-				DTA_ColorOverlay, tint
+				DTA_ColorOverlay, tint,
+				DTA_Spacing, charspacing
 			);
 		}		
 	}

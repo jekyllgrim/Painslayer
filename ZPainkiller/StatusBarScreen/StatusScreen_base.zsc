@@ -1,7 +1,7 @@
 const statscr_base_width = 1920.0;
 const statscr_base_height = 1080.0;
 
-Class PK_StatusColor Abstract 
+class PK_StatusColor Abstract 
 {
 	static clearscope double hue2rgb(double p, double q, double t)
 	{
@@ -31,7 +31,7 @@ Class PK_StatusColor Abstract
 	}
 }
 
-Class PK_StatusBarScreen Abstract ui
+class PK_StatusBarScreen Abstract ui
 {
 	enum AlignFlags
 	{
@@ -194,7 +194,7 @@ Class PK_StatusBarScreen Abstract ui
 	}
 	
 	static void DrawString( Font fnt, String str, Vector2 pos, int flags = 0, int translation = Font.CR_UNTRANSLATED, 
-							double Alpha = 1., Vector2 scale = (1, 1), Color tint = Color(0,0,0,0), int linespacing = 20 )
+							double Alpha = 1., Vector2 scale = (1, 1), Color tint = Color(0,0,0,0), int charspacing = 0, int linespacing = 20 )
 	{
 		Array<String> lines;
 		str.Split(lines, "\n");
@@ -213,7 +213,8 @@ Class PK_StatusBarScreen Abstract ui
 				DTA_VirtualHeightF, int(GetBaseHeight()*(1./scale.y*0.5)),
 				DTA_KeepRatio, true,
 				DTA_Alpha, alpha,
-				DTA_ColorOverlay, tint
+				DTA_ColorOverlay, tint,
+				DTA_Spacing, charspacing
 			);
 		}		
 	}

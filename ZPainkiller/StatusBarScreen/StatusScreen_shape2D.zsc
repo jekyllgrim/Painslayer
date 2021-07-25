@@ -1,4 +1,4 @@
-extend Class PK_StatusBarScreen
+extend class PK_StatusBarScreen
 { 
 	static void DrawRotatedImage(String graphic, vector2 pos, double rotation = 0, Vector2 scale = (1, 1), double Alpha = 1., int flags = 0, vector2 texoffs = (0,0), Color tint=Color(0,0,0,0), bool animated = false, bool absolute=false)
 	{
