@@ -5,7 +5,8 @@ TAROT_PURCHASE		= "Spend %d gold to buy this card?";
 TAROT_CANTPURCHASE	= "You don't have enough gold to buy this card.";
 TAROT_CANTUNEQUIP	= "This card is already equipped and locked in the slot.\nYou don't have enough gold to unlock this card.";
 TAROT_PAYTOUNEQUIP	= "This card is already equipped and locked in the slot. Will you spend %d gold to unlock it?\n(Reach next map to re-equip cards for free.)";
-TAROT_FIRSTUSE		= "Welcome to the Black Tarot.\nAs a one-time gift you will now receive some random cards.";
+TAROT_FIRSTUSE		= 	"Welcome to the Black Tarot.\n\n"
+						"As a one-time gift you will now receive some random cards.";
 TAROT_EXIT			= 	"Are you sure you want to close the Black Tarot Board?"
 						"\n"
 						"To change the equipped cards again you will have to complete this level or pay in gold.";
@@ -13,12 +14,9 @@ TAROT_SILVERINFO	=  "The effects of Silver Cards are active throughout the level
 TAROT_GOLDINFO		=  "Golden Cards have to be activated manually and will remain active for a short time.";
 TAROT_YES			= "Yes";
 TAROT_NO			= "No";
-TAROT_CLOSE		 	= "Close";
+TAROT_CLOSE		 	= "OK";
 TAROT_GOLDABR		= "g";
 TAROT_LOWSKILL		= "Black Tarot isn not available on the easiest difficulty";
-
-PK_OPENBOARD			= "Open Black Tarot board";
-PK_USEGOLDCARDS			= "Activate Golden Cards";
 
 PK_ENDURANCE_DESC 		= "Take only half the damage.";
 PK_SPEED_DESC 			= "Move faster.";
@@ -159,6 +157,9 @@ PKM_OpenTarot			= "Open Black Tarot";
 PKM_OpenTarot_Desc	= "Black Tarot Board lets you purchase and equip cards";
 PKM_UseCards			= "Use Golden Cards";
 PKM_UseCards_Desc		= "Activate currently equipped Golden Tarot Cards";
+PKM_OpenCodex			= "Open Codex";
+PKM_OpenCodex_Desc	= 	"The Codex contains useful information about weapons, items\n"
+							"and various in-game mechanics.";
 PKM_AutoOpenTarot		= "Open Black Tarot board at map start";
 PKM_AutoOpenTarot_Desc =	"When you open Black Tarot board for the first time in a map,\n"
 							"you can equip cards for free (after that they'll be locked).\n"
@@ -370,7 +371,8 @@ TAROT_PURCHASE		= "Купить эту карту за %d золота?";
 TAROT_CANTPURCHASE	= "Недостаточно золота для покупки карты.";
 TAROT_CANTUNEQUIP	= "Эта карта размещена в ячейке и заблокирована.\nУ вас недостаточно золота, чтобы разблокировать ее.";
 TAROT_PAYTOUNEQUIP	= "Эта карта размещена в ячейке и заблокирована. Разблокировать ее за %d золота?\n(В начале следующего уровня это можно будет сделать бесплатно.)";
-TAROT_FIRSTUSE		= "Черные карты Таро приветствуют вас.\nВ качестве первого и последнего подарка вы сейчас получите несколько карт.";
+TAROT_FIRSTUSE		= 	"Черные карты Таро приветствуют вас.\n\n"
+						"В качестве первого и последнего подарка вы сейчас получите несколько карт.";
 TAROT_EXIT			= 	"Вы точно хотите закрыть доску?"
 						"\n"
 						"Закрыв доску, вы сможете изменить выбранные карты только в начале следующего уровня или за золото.";
@@ -378,12 +380,9 @@ TAROT_SILVERINFO	=  "Серебряные карты действуют в те�
 TAROT_GOLDINFO		=  "Золотые активируются вручную, после чего действуют короткое время.";
 TAROT_YES			= "Да";
 TAROT_NO			= "Нет";
-TAROT_CLOSE		 	= "Закрыть";
+TAROT_CLOSE		= "ОК";
 TAROT_GOLDABR		= " з.";
 TAROT_LOWSKILL		= "Карты Таро недоступны на самой низкой сложности";
-
-PK_OPENBOARD			= "Открыть Черные карты Таро";
-PK_USEGOLDCARDS			= "Активировать золотые карты";
 
 PK_ENDURANCE_DESC 		= "Вы получаете вдвое меньше урона.";
 PK_SPEED_DESC 			= "Вы двигаетесь быстрее.";
