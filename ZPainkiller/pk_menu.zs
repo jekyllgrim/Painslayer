@@ -20,9 +20,9 @@ class ListMenuItemPKTextItemCentered : ListMenuItemTextItem {
 	}
 }
 
+//a dedicated element that will draw fullscreen background for the main menu
+//but only if we're not in a map (only intro screen and titlemap qualify)
 class ListMenuItemPKDrawMenuBackground : ListMenuItemStaticPatch {
-	bool shouldDraw;
-
 	override void Draw(bool selected, ListMenuDescriptor desc) {
 		if (gamestate == GS_LEVEL)
 			return;

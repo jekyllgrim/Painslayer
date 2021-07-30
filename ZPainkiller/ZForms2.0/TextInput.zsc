@@ -1,0 +1,910 @@
+class PKZFTextInput : PKZFElement {
+	protected Font fnt;
+	Font getFont() { return self.fnt; }
+	void setFont(Font fnt) {
+		if (fnt == NULL) {
+			self.fnt = newConsoleFont;
+		}
+		else {
+			self.fnt = fnt;
+		}
+	}
+
+	protected double textScale;
+	double getTextScale() { return self.textScale; }
+	void setTextScale(double textScale) { self.textScale = textScale; }
+
+	protected int textColor;
+	int getTextColor() { return self.textColor; }
+	void setTextColor(int textColor) { self.textColor = textColor; }
+
+	protected PKZFBoxTextures background;
+	PKZFBoxTextures getBackgroundTexture() { return self.background; }
+	void setBackgroundTexture(PKZFBoxTextures background) { self.background = background; }
+	protected PKZFBoxDrawer bgDrawer;
+
+	protected string text;
+
+	protected bool clicking;
+	protected bool typing;
+
+	protected int cursor;
+	protected int selCursor;
+	protected double curOffset;
+
+	protected int blinkTimer;
+	protected bool blink;
+
+	protected Array<string> lines;
+	protected Array<int> realLineLength;
+
+	protected int cursorLine;
+	protected int cursorRelative;
+	protected bool cursorLineBeginning;
+
+	protected int selCursorLine;
+	protected int selCursorRelative;
+	protected bool selCursorLineBeginning;
+
+	protected double upDownX;
+
+	protected bool multiline;
+	protected PKZFScrollbar bar;
+	protected double scrollbarWidth;
+
+	void config(
+		Font fnt = NULL, double textScale = 1, int textColor = Font.CR_WHITE,
+		PKZFBoxTextures background = NULL, bool multiline = false,
+		PKZFHandler cmdHandler = NULL, string command = "",
+		double scrollbarWidth = 0.0,
+		PKZFBoxTextures scrollBarNormal = NULL, PKZFBoxTextures scrollBarHover = NULL,
+		PKZFBoxTextures scrollBarClick = NULL, PKZFBoxTextures scrollBg = NULL
+	) {
+
+		setFont(fnt);
+		setBackgroundTexture(background);
+		setTextScale(textScale);
+		setTextColor(textColor);
+
+		self.text = "";
+		if (multiline != self.multiline) curOffset = 0.0;
+		self.multiline = multiline;
+		self.scrollbarWidth = scrollbarWidth;
+		if (self.multiline && scrollbarWidth > 0.0) {
+			self.bar.setBox((getXSize(), 0.0), (scrollbarWidth, box.size.y));
+			self.bar.config(scrollBarNormal, scrollBarHover, scrollBarClick, scrollBg);
+			self.bar.size = 1.0;
+		}
+		self.cmdHandler = cmdHandler;
+		self.command = command;
+		self.alpha = 1;
+		self.selCursor = -1;
+		updateLines();
+	}
+
+	static PKZFTextInput create(
+		Vector2 pos, Vector2 size, Font fnt = NULL, double textScale = 1,
+		int textColor = Font.CR_WHITE, PKZFBoxTextures background = NULL,
+		bool multiline = false, PKZFHandler cmdHandler = NULL, string command = "",
+		double scrollbarWidth = 0.0,
+		PKZFBoxTextures scrollBarNormal = NULL, PKZFBoxTextures scrollBarHover = NULL,
+		PKZFBoxTextures scrollBarClick = NULL, PKZFBoxTextures scrollBg = NULL
+	) {
+
+		let ret = new('PKZFTextInput');
+
+		ret.setBox(pos, size);
+		ret.bar = PKZFScrollbar.create((0, 0), (0, 0), NULL, NULL);
+		ret.bar.master = ret;
+		ret.config(fnt, textScale, textColor, background, multiline, cmdHandler, command, scrollbarWidth, scrollBarNormal, scrollBarHover, scrollBarClick, scrollBg);
+
+		return ret;
+	}
+
+	string getText() {
+		return text;
+	}
+
+	void setText(string text) {
+		self.text = text;
+		cursor = 0;
+		selCursor = -1;
+		updateLines();
+	}
+
+	double getXSize() {
+		if (multiline) {
+			return box.size.x - scrollbarWidth;
+		}
+		return box.size.x;
+	}
+
+	bool breakingSpaceChar(int c) {
+		if (c < 0x2000) return c == 0x0020 || c == 0x1680;
+		else {
+			return
+				c == 0x2000 ||
+				c == 0x2001 ||
+				c == 0x2002 ||
+				c == 0x2003 ||
+				c == 0x2004 ||
+				c == 0x2005 ||
+				c == 0x2006 ||
+				c == 0x2008 ||
+				c == 0x2009 ||
+				c == 0x200A ||
+				c == 0x3000;
+		}
+	}
+
+	void updateLines() {
+		if (!multiline) return;
+		lines.clear();
+		realLineLength.clear();
+		if (text.length() == 0) {
+			lines.push("");
+			cursorLine = 0;
+			cursorRelative = 0;
+			return;
+		}
+		let width = getXSize() - 2.0 * 4.0 * textScale;
+		let pos = 0;
+		bool firstCharWord = true;
+		String curLine;
+		String curWord;
+		while (true) {
+			int codepoint;
+			[codepoint, pos] = text.getNextCodePoint(pos);
+			if (codepoint == 0x0A) {
+				lines.push(curLine .. curWord);
+				realLineLength.push(curLine.length() + curWord.length() + 1);
+				curLine = "";
+				curWord = "";
+				firstCharWord = true;
+			}
+			else if (codepoint == 0x20) {
+				firstCharWord = false;
+				curLine = curLine .. curWord;
+				curLine.appendCharacter(codepoint);
+				curWord = "";
+			}
+			else {
+				let newWord = curWord;
+				newWord.appendCharacter(codepoint);
+				let newLine = curLine .. newWord;
+				if (fnt.stringWidth(newLine) * textScale > width) {
+					if (firstCharWord) {
+						lines.push(curWord);
+						realLineLength.push(curWord.length());
+						curLine = "";
+						curWord = "";
+						curWord.appendCharacter(codepoint);
+						firstCharWord = true;
+					}
+					else {
+						lines.push(curLine);
+						realLineLength.push(curLine.length());
+						curWord = newWord;
+						curLine = "";
+						firstCharWord = true;
+					}
+				}
+				else {
+					curWord = newWord;
+				}
+			}
+			if (pos == text.length()) {
+				lines.push(curLine .. curWord);
+				realLineLength.push(curLine.length() + curWord.length());
+				break;
+			}
+		}
+		let cur = 0;
+		let line = 0;
+		while (true) {
+			let lineLength = lines[line].length();
+			if (cur + lineLength >= cursor) {
+				cursorLine = line;
+				cursorRelative = cursor - cur;
+				break;
+			}
+			cur += realLineLength[line];
+			line += 1;
+		}
+		if (
+			cursorLineBeginning && cursorLine < lines.size() - 1 &&
+			lines[line].length() > 0 && cursorRelative == lines[line].length()
+		) {
+			cursorLine += 1;
+			cursorRelative = 0;
+		}
+		cur = 0;
+		line = 0;
+		while (true) {
+			let lineLength = lines[line].length();
+			if (cur + lineLength >= selCursor) {
+				selCursorLine = line;
+				selCursorRelative = selCursor - cur;
+				break;
+			}
+			cur += realLineLength[line];
+			line += 1;
+		}
+		if (
+			selCursorLineBeginning && selCursorLine < lines.size() - 1 &&
+			lines[line].length() > 0 && selCursorRelative == lines[line].length()
+		) {
+			selCursorLine += 1;
+			selCursorRelative = 0;
+		}
+	}
+
+	override void ticker() {
+		blinkTimer += 1;
+		if (blinkTimer == 35) {
+			blinkTimer = 0;
+			blink = !blink;
+		}
+		if (clicking) {
+			double dir;
+			int new;
+			bool beginning;
+			[dir, new, beginning] = getCursorPositionFromMouse();
+			if (dir != 0) {
+				curOffset -= 0.1 * dir;
+			}
+			if (multiline) {
+				curOffset = clamp(
+					curOffset,
+					-(lines.size() * fnt.getHeight() * textScale - box.size.y + 2.0 * 4.0 * textScale),
+					0.0
+				);
+			}
+			else {
+				curOffset = clamp(
+					curOffset,
+					-(fnt.stringWidth(text) * textScale - getXSize() + 2.0 * 4.0 * textScale + textScale),
+					0.0
+				);
+			}
+			
+			if (new != cursor) {
+				selCursor = new;
+				selCursorLineBeginning = beginning;
+			}
+			else {
+				selCursor = -1;
+			}
+			updateLines();
+			updateUpDownX();
+
+			if (multiline && bar != NULL) {
+				let areaHeight = (lines.size() + 1) * fnt.getHeight() * textScale - 2.0 * 4.0 * textScale;
+				bar.size = box.size.y / areaHeight;
+				bar.position = -(curOffset) / areaHeight;
+			}
+		}
+	}
+
+	int getLowCursor() {
+		if (selCursor == -1) return cursor;
+		return min(cursor, selCursor);
+	}
+
+	int getHighCursor() {
+		if (selCursor == -1) return cursor;
+		return max(cursor, selCursor);
+	}
+
+	override bool handleBack() {
+		if (typing) {
+			if (!clicking) {
+				if (cmdHandler != NULL) {
+					cmdHandler.textInputExit(self, command);
+				}
+				getGlobalStore().blockMenuEvent = false;
+				typing = false;
+				selCursor = -1;
+				cursor = 0;
+				updateLines();
+			}
+			return true;
+		}
+		return false;
+	}
+
+	override void drawer() {
+		if (hidden) { return; }
+
+		if (scrollbarWidth > 0.0) bar.setBox((getXSize(), 0.0), (scrollbarWidth, box.size.y));
+		let mousePos = getGlobalStore().mousePos;
+		if (multiline && bar != NULL) {
+			let areaHeight = (lines.size() + 1) * fnt.getHeight() * textScale - 2.0 * 4.0 * textScale;
+			bar.size = box.size.y / areaHeight;
+			if (!typing) curOffset = -(bar.position * areaHeight);
+			if (scrollbarWidth > 0.0) bar.drawer();
+		}
+
+		PKZFAABB beforeClip, clipRect;
+		PKZFAABB aabb;
+		aabb.size = (getXSize(), box.size.y);
+		screenClip(beforeClip, clipRect, aabb);
+		Screen.setClipRect(int(clipRect.pos.x), int(clipRect.pos.y), int(clipRect.size.x), int(clipRect.size.y));
+
+		if (background) {
+			bgDrawer.draw(self, (0, 0), (getXSize(), box.size.y), background, true);
+		}
+
+		if (multiline) {
+			let pos = getAlignedDrawPos(
+				(getXSize(), box.size.y), 
+				(fnt.stringWidth(text), fnt.getHeight()) * textScale, AlignType_TopLeft
+			) + (4.0, 4.0) * textScale;
+
+			if (selCursor != -1) {
+				let cursorLine0 = 0;
+				let cursorLine1 = 0;
+				let cursorRel0 = 0;
+				let cursorRel1 = 0;
+				if (cursorLine < selCursorLine) {
+					cursorLine0 = cursorLine;
+					cursorLine1 = selCursorLine;
+					cursorRel0 = cursorRelative;
+					cursorRel1 = selCursorRelative;
+				}
+				else if (cursorLine > selCursorLine) {
+					cursorLine0 = selCursorLine;
+					cursorLine1 = cursorLine;
+					cursorRel0 = selCursorRelative;
+					cursorRel1 = cursorRelative;
+				}
+				else {
+					cursorLine0 = cursorLine;
+					cursorLine1 = cursorLine;
+					cursorRel0 = min(cursorRelative, selCursorRelative);
+					cursorRel1 = max(cursorRelative, selCursorRelative);
+				}
+				for (int i = cursorLine0; i <= cursorLine1; i++) {
+					let str = lines[i];
+					let min = 0;
+					let max = str.length();
+					if (i == cursorLine0) {
+						min = cursorRel0;
+					}
+					if (i == cursorLine1) {
+						max = cursorRel1;
+					}
+					let cursorX0 = fnt.stringWidth(str.left(min)) * textScale + 4.0 * textScale;
+					let cursorX1 = (min == str.length()) ? cursorX0 + 4.0 * textScale : fnt.stringWidth(str.left(max)) * textScale + 4.0 * textScale;
+					fill(
+						(cursorX0, pos.y - 1.0 + i * textScale * fnt.getHeight() + curOffset),
+						(cursorX1 - cursorX0, fnt.getHeight() * textScale + 2.0),
+						"5294E2", 1.0
+					);
+				}
+			}
+
+			for (int i = 0; i < self.lines.size(); i++) {
+				drawText(pos + (0, fnt.getHeight() * textScale * i + curOffset), fnt, self.lines[i], textColor, textScale);
+			}
+
+			if (blink && typing && selCursor == -1) {
+				let cursorX = fnt.stringWidth(lines[cursorLine].left(cursorRelative)) * textScale + 4.0 * textScale;
+				fill(
+					(
+						clamp(cursorX - textScale / 2.0, 0.0, getXSize() - textScale * 2.0),
+						pos.y - 1.0 + cursorLine * textScale * fnt.getHeight() + curOffset
+					),
+					(textScale, fnt.getHeight() * textScale + 2.0),
+					"FFFFFF", 1.0
+				);
+			}
+		}
+		else {
+			let pos = getAlignedDrawPos(box.size, (fnt.stringWidth(text), fnt.getHeight()) * textScale, AlignType_CenterLeft);
+
+			if (selCursor != -1) {
+				let cursor0 = min(cursor, selCursor);
+				let cursor1 = max(cursor, selCursor);
+				let cursorX0 = fnt.stringWidth(text.left(cursor0)) * textScale + 4.0 * textScale + curOffset;
+				let cursorX1 = fnt.stringWidth(text.left(cursor1)) * textScale + 4.0 * textScale + curOffset;
+				fill((cursorX0, pos.y - 1.0), (cursorX1 - cursorX0, fnt.getHeight() * textScale + 2.0), "5294E2", 1.0);
+			}
+
+			drawText(pos + (4.0 * textScale, 0) + (curOffset, 0), fnt, text, textColor, textScale);
+
+			if (blink && typing && selCursor == -1) {
+				let cursorX = fnt.stringWidth(text.left(cursor)) * textScale + 4.0 * textScale + curOffset;
+				fill((cursorX - textScale / 2.0, pos.y - 1.0), (textScale, fnt.getHeight() * textScale + 2.0), "FFFFFF", 1.0);
+			}
+		}
+		Screen.setClipRect(int(beforeClip.pos.x), int(beforeClip.pos.y), int(beforeClip.size.x), int(beforeClip.size.y));
+
+	}
+
+	double, int, bool getCursorPositionFromMouse() {
+		PKZFAABB screenBox; boxToScreen(screenBox);
+		let mousePos = getGlobalStore().mousePos;
+		let diff = mousePos - screenBox.pos;
+		diff /= getScale();
+		diff.x -= 4.0 * textScale;
+		let ret0 = 0.0;
+		if (multiline) {
+			if (diff.y < 0.0) {
+				ret0 = diff.y;
+				diff.y = 0.0;
+			}
+			else if (diff.y > box.size.y) {
+				ret0 = diff.y - box.size.y;
+				diff.y = box.size.y;
+			}
+		}
+		else {
+			if (diff.x < 0.0) {
+				ret0 = diff.x;
+				diff.x = 0.0;
+			}
+			else if (diff.x > getXSize() - 4.0 * textScale) {
+				ret0 = diff.x - getXSize() + 4.0 * textScale;
+				diff.x = getXSize() - 4.0 * textScale;
+			}
+		}
+
+		let str = text;
+		let cursorOff = 0;
+		if (multiline) {
+			let index = clamp(int((diff.y - curOffset - 4.0) / textScale) / fnt.getHeight(), 0, lines.size() - 1);
+			str = lines[index];
+			for (int i = 0; i < index; i++) {
+				cursorOff += realLineLength[i];
+			}
+		}
+
+		let pos = 0;
+		let lastSubstr = "";
+		let substr = "";
+		let last = multiline ? 0.0 : curOffset;
+		while (pos != str.length()) {
+			int codepoint;
+			[codepoint, pos] = str.getNextCodePoint(pos);
+			substr = str.left(pos);
+
+			let new = fnt.stringWidth(substr) * textScale + (multiline ? 0.0 : curOffset);
+			if (abs(new - diff.x) > abs(last - diff.x)) { break; }
+			last = new;
+			lastSubstr = substr;
+		}
+
+		return ret0, lastSubstr.length() + cursorOff, lastSubstr.length() == 0;
+	}
+
+	bool ctrlStop(int codepoint) {
+		return !((codepoint >= 0x30 && codepoint <= 0x39) || (codepoint >= 0x41 && codepoint <= 0x5A) || (codepoint >= 0x61 && codepoint <= 0x7A));
+	}
+
+	void moveCursor(int dir, bool shift, bool ctrl) {
+		if (shift && selCursor == -1) {
+			selCursor = cursor;
+		}
+		let cursorSel = (selCursor != -1) ? selCursor : cursor;
+
+		if (multiline) {
+			if (selCursor == -1) {
+				if (
+					!ctrl && cursorRelative == 0 && dir == -1 && cursorLine > 0 &&
+					(cursorLineBeginning || lines[cursorLine].length() == 0)
+				) {
+					cursorLineBeginning = false;
+					if (lines[cursorLine - 1].length() == realLineLength[cursorLine - 1]) return;
+				}
+				else if (
+					!ctrl && cursorRelative == lines[cursorLine].length() && dir == 1 && cursorLine < lines.size() - 1 &&
+					(!cursorLineBeginning || lines[cursorLine].length() == 0)
+				) {
+					cursorLineBeginning = true;
+					if (lines[cursorLine].length() == realLineLength[cursorLine]) return;
+				}
+				else {
+					cursorLineBeginning = dir == -1;
+				}
+			}
+			else {
+				if (
+					!ctrl && selCursorRelative == 0 && dir == -1 && selCursorLine > 0 &&
+					(selCursorLineBeginning || lines[selCursorLine].length() == 0)
+				) {
+					selCursorLineBeginning = false;
+					if (lines[selCursorLine - 1].length() == realLineLength[selCursorLine - 1]) return;
+				}
+				else if (
+					!ctrl && selCursorRelative == lines[selCursorLine].length() && dir == 1 && selCursorLine < lines.size() - 1 &&
+					(!selCursorLineBeginning || lines[selCursorLine].length() == 0)
+				) {
+					selCursorLineBeginning = true;
+					if (lines[selCursorLine].length() == realLineLength[selCursorLine]) return;
+				}
+				else {
+					selCursorLineBeginning = dir == -1;
+				}
+			}
+		}
+
+		if ((dir == -1 && cursorSel > 0) || (dir == 1 && cursorSel < text.length())) {
+			let cursorJumpSize = 1;
+			let lastCharCtrlStop = false;
+			while (true) {
+				let cur = cursorSel + dir * cursorJumpSize;
+				if ((text.byteAt(cur) & 0xC0) == 0x80) {
+					cursorJumpSize += 1;
+					continue;
+				}
+				if (ctrl) {
+					let cp = text.getNextCodePoint(cur);
+					if (cursorJumpSize > 1 && !lastCharCtrlStop && ctrlStop(cp)) {
+						if (dir == -1) cursorJumpSize -= 1;
+						break;
+					}
+					if (cur == 0 || cur == text.length()) {
+						break;
+					}
+					lastCharCtrlStop = ctrlStop(cp);
+				}
+				else {
+					break;
+				}
+				cursorJumpSize += 1;
+			}
+			if (selCursor != -1) {
+				selCursor += dir * cursorJumpSize;
+			}
+			else {
+				cursor += dir * cursorJumpSize;
+			}
+			if (cursor == selCursor) {
+				selCursor = -1;
+			}
+		}
+	}
+
+	override void activate() {
+		getGlobalStore().blockMenuEvent = true;
+		typing = true;
+		blink = true;
+		blinkTimer = 0;
+		cursor = 0;
+		selCursor = (text.length() == 0) ? -1 : text.length();
+	}
+
+	void updateUpDownX() {
+		if (!multiline) return;
+		if (selCursor == -1) upDownX = fnt.stringWidth(lines[cursorLine].left(cursorRelative)) * textScale;
+		else upDownX = fnt.stringWidth(lines[selCursorLine].left(selCursorRelative)) * textScale;
+	}
+
+	override bool onNavEvent(PKZFNavEventType type, bool fromController) {
+		if (isEnabled() && isFocused() && type == PKZFNavEventType_Confirm) {
+			setHoverBlock(self);
+			getGlobalStore().blockMenuEvent = true;
+			typing = true;
+			blink = true;
+			blinkTimer = 0;
+			cursorLineBeginning = true;
+			cursor = 0;
+			selCursor = -1;
+
+			updateLines();
+			updateUpDownX();
+
+			return true;
+		}
+		return false;
+	}
+
+	override bool onUIEvent(PKZFUiEvent ev) {
+		if (bar != NULL) bar.onUIEvent(ev);
+		let mousePos = getGlobalStore().mousePos;
+		mouseBlock |= bar.blocksMouse(mousePos);
+
+		bool dontFixOffset = false;
+		
+		PKZFAABB screenBox; boxToScreen(screenBox);
+
+		// if the player's clicked, and their mouse is in the right place, set the state accordingly
+		if (ev.type == UIEvent.Type_LButtonDown) {
+			if (!mouseBlock && isEnabled() && screenBox.pointCollides(mousePos)) {
+				clicking = true;
+				setHoverBlock(self);
+				getGlobalStore().blockMenuEvent = true;
+				typing = true;
+				blink = true;
+				blinkTimer = 0;
+
+				double dir;
+				bool beginning;
+				[dir, cursor, beginning] = getCursorPositionFromMouse();
+				selCursor = -1;
+				cursorLineBeginning = beginning;
+				updateLines();
+				updateUpDownX();
+			}
+			else {
+				if (typing && cmdHandler != NULL) {
+					cmdHandler.textInputExit(self, command);
+					getGlobalStore().blockMenuEvent = false;
+				}
+				clicking = false;
+				typing = false;
+				cursor = 0;
+				selCursor = -1;
+			}
+		}
+		else if (ev.type == UIEvent.Type_LButtonUp) {
+			clicking = false;
+			setHoverBlock(NULL);
+		}
+		else if (typing && ev.type == UIEvent.Type_Char) {
+			if (selCursor != -1) {
+				let sub = text.mid(getLowCursor(), getHighCursor() - getLowCursor());
+				if (!multiline) curOffset += fnt.stringWidth(sub);
+				text.remove(getLowCursor(), getHighCursor() - getLowCursor());
+				cursor = getLowCursor();
+				selCursor = -1;
+				if (multiline) {
+					curOffset = clamp(
+						curOffset,
+						-(lines.size() * fnt.getHeight() * textScale - box.size.y + 2.0 * 4.0 * textScale),
+						0.0
+					);
+				}
+			}
+			if (!multiline) curOffset = min(curOffset, 0.0);
+			text = text.left(cursor) .. ev.keyString .. text.mid(cursor);
+			cursor += ev.keyString.length();
+			blink = true;
+			blinkTimer = 0;
+			cursorLineBeginning = false;
+			updateLines();
+			updateUpDownX();
+			if (cmdHandler != NULL) {
+				cmdHandler.textInputChanged(self, command);
+			}
+		}
+		else if (typing && (ev.type == UiEvent.Type_KeyDown || ev.type == UiEvent.Type_KeyRepeat)) {
+			if (ev.KeyChar == 65 && ev.isCtrl) {
+				cursor = 0;
+				if (text.length() != 0) {
+					selCursor = text.length();
+				}
+				updateLines();
+				updateUpDownX();
+			}
+			if (ev.KeyChar == UiEvent.Key_Return) {
+				if (multiline) {
+					if (selCursor != -1) {
+						let sub = text.mid(getLowCursor(), getHighCursor() - getLowCursor());
+						text.remove(getLowCursor(), getHighCursor() - getLowCursor());
+						cursor = getLowCursor();
+						selCursor = -1;
+					}
+					text = text.left(cursor) .. "\n" .. text.mid(cursor);
+					cursor += 1;
+					blink = true;
+					blinkTimer = 0;
+					cursorLineBeginning = true;
+					updateLines();
+					updateUpDownX();
+					if (cmdHandler != NULL) {
+						cmdHandler.textInputChanged(self, command);
+					}
+				}
+				else {
+					getGlobalStore().blockMenuEvent = false;
+					typing = false;
+					cursor = 0;
+					selCursor = -1;
+					if (cmdHandler != NULL) {
+						cmdHandler.textInputExit(self, command);
+					}
+				}
+			}
+			if (ev.KeyChar == UiEvent.Key_Left && !clicking) {
+				if (!ev.isShift && selCursor != -1) {
+					let new = getLowCursor();
+					if (new != cursor) cursorLineBeginning = selCursorLineBeginning;
+					cursor = new;
+					selCursor = -1;
+				}
+				else {
+					moveCursor(-1, ev.isShift, ev.isCtrl);
+				}
+				blink = true;
+				blinkTimer = 0;
+				updateLines();
+				updateUpDownX();
+			}
+			if (ev.KeyChar == UiEvent.Key_Right && !clicking) {
+				if (!ev.isShift && selCursor != -1) {
+					let new = getHighCursor();
+					if (new != cursor) cursorLineBeginning = selCursorLineBeginning;
+					cursor = new;
+					selCursor = -1;
+				}
+				else {
+					moveCursor(1, ev.isShift, ev.isCtrl);
+				}
+				blink = true;
+				blinkTimer = 0;
+				updateLines();
+				updateUpDownX();
+			}
+			if ((ev.KeyChar == UiEvent.Key_Up || ev.KeyChar == UiEvent.Key_Down) && !clicking && multiline) {
+				if (ev.KeyChar == UiEvent.Key_Up && !ev.isShift && selCursor != -1) {
+					let new = getLowCursor();
+					if (new != cursor) cursorLineBeginning = selCursorLineBeginning;
+					cursor = new;
+					selCursor = -1;
+					updateLines();
+					updateUpDownX();
+				}
+				else if (ev.KeyChar == UiEvent.Key_Down && !ev.isShift && selCursor != -1) {
+					let new = getHighCursor();
+					if (new != cursor) cursorLineBeginning = selCursorLineBeginning;
+					cursor = new;
+					selCursor = -1;
+					updateLines();
+					updateUpDownX();
+				}
+				else {
+					if (selCursor == -1 && ev.isShift) {
+						selCursor = cursor;
+						selCursorLine = cursorLine;
+						selCursorRelative = cursorRelative;
+					}
+					let c = 0;
+					let cLine = (selCursor == -1) ? cursorLine : selCursorLine;
+					if (ev.KeyChar == UiEvent.Key_Up && cLine == 0) {
+						c = 0;
+						if (selCursor == -1) cursor = c;
+						else selCursor = c;
+						if (cursor == selCursor) selCursor = -1;
+						updateLines();
+						updateUpDownX();
+					}
+					else if (ev.KeyChar == UiEvent.Key_Down && cLine == lines.size() - 1) {
+						c = text.length();
+						if (selCursor == -1) cursor = c;
+						else selCursor = c;
+						if (cursor == selCursor) selCursor = -1;
+						updateLines();
+						updateUpDownX();
+					}
+					else {
+						let newLine = cLine + ((ev.KeyChar == UiEvent.Key_Down) ? 1 : -1);
+						let str = lines[newLine];
+						let pos = 0;
+						let lastSubstr = "";
+						let substr = "";
+						let last = 0.0;
+						while (pos != str.length()) {
+							int codepoint;
+							[codepoint, pos] = str.getNextCodePoint(pos);
+							substr = str.left(pos);
+
+							let new = fnt.stringWidth(substr) * textScale;
+							if (abs(new - upDownX) > abs(last - upDownX)) { break; }
+							last = new;
+							lastSubstr = substr;
+						}
+						let newCursor = lastSubstr.length();
+						for (int i = 0; i < newLine; i++) {
+							newCursor += realLineLength[i];
+						}
+						c = newCursor;
+						if (selCursor == -1) cursor = c;
+						else selCursor = c;
+						if (cursor == selCursor) selCursor = -1;
+						if (selCursor == -1) cursorLineBeginning = lastSubstr.length() == 0;
+						else selCursorLineBeginning = lastSubstr.length() == 0;
+						updateLines();
+					}
+				}
+				blink = true;
+				blinkTimer = 0;
+			}
+			if (ev.KeyChar == UiEvent.Key_Backspace && !clicking) {
+				if (selCursor != -1) {
+					let sub = text.mid(getLowCursor(), getHighCursor() - getLowCursor());
+					if (!multiline) curOffset += fnt.stringWidth(sub);
+					text.remove(getLowCursor(), getHighCursor() - getLowCursor());
+					cursor = getLowCursor();
+					selCursor = -1;
+				}
+				else if (cursor > 0) {
+					let cursorBefore = cursor;
+					moveCursor(-1, false, ev.isCtrl);
+					text.remove(cursor, cursorBefore - cursor);
+				}
+				if (!multiline) curOffset = min(curOffset, 0.0);
+				blink = true;
+				blinkTimer = 0;
+				cursorLineBeginning = false;
+				updateLines();
+				updateUpDownX();
+				if (multiline) {
+					curOffset = clamp(
+						curOffset,
+						-(lines.size() * fnt.getHeight() * textScale - box.size.y + 2.0 * 4.0 * textScale),
+						0.0
+					);
+				}
+				if (cmdHandler != NULL) {
+					cmdHandler.textInputChanged(self, command);
+				}
+			}
+		}
+		else if (ev.type == UiEvent.Type_WheelDown && multiline && screenBox.pointCollides(mousePos)) {
+			let c = floor(-curOffset / (fnt.getHeight() * textScale));
+			c += 1;
+			curOffset = -c * fnt.getHeight() * textScale;
+			curOffset = clamp(
+				curOffset,
+				-(lines.size() * fnt.getHeight() * textScale - box.size.y + 2.0 * 4.0 * textScale),
+				0.0
+			);
+			dontFixOffset = true;
+			if (!typing) {
+				let areaHeight = (lines.size() + 1) * fnt.getHeight() * textScale - 2.0 * 4.0 * textScale;
+				bar.size = box.size.y / areaHeight;
+				bar.position = -(curOffset) / areaHeight;
+			}
+		}
+		else if (ev.type == UiEvent.Type_WheelUp && multiline && screenBox.pointCollides(mousePos)) {
+			let c = ceil(-curOffset / (fnt.getHeight() * textScale));
+			c -= 1;
+			curOffset = -c * fnt.getHeight() * textScale;
+			curOffset = clamp(
+				curOffset,
+				-(lines.size() * fnt.getHeight() * textScale - box.size.y + 2.0 * 4.0 * textScale + textScale),
+				0.0
+			);
+			dontFixOffset = true;
+			if (!typing) {
+				let areaHeight = (lines.size() + 1) * fnt.getHeight() * textScale - 2.0 * 4.0 * textScale;
+				bar.size = box.size.y / areaHeight;
+				bar.position = -(curOffset) / areaHeight;
+			}
+		}
+		
+		if (!dontFixOffset) {
+			if (multiline) {
+				let cLine = (selCursor != -1) ? selCursorLine : cursorLine;
+				let topCursorPos = cLine * fnt.getHeight() * textScale;
+				let bottomCursorPos = topCursorPos + fnt.getHeight() * textScale;
+				if (bottomCursorPos + curOffset > box.size.y - 2.0 * 4.0 * textScale) {
+					curOffset = -(bottomCursorPos - box.size.y + 2.0 * 4.0 * textScale);
+				}
+				else if (topCursorPos + curOffset < 4.0 * textScale) {
+					curOffset = -topCursorPos;
+				}
+			}
+			else {
+				let c = (selCursor != -1) ? selCursor : cursor;
+				let cursorPos = fnt.stringWidth(text.left(c)) * textScale;
+				let cursorWidth = textScale + 4.0 * textScale;
+				if (cursorPos + cursorWidth + curOffset > getXSize() - 4.0 * textScale) {
+					curOffset = -(cursorPos + cursorWidth - getXSize() + 4.0 * textScale);
+				}
+				else if (cursorPos + curOffset < 4.0 * textScale) {
+					curOffset = -cursorPos;
+				}
+			}
+		}
+		if (typing && multiline && bar != NULL) {
+			let areaHeight = (lines.size() + 1) * fnt.getHeight() * textScale - 2.0 * 4.0 * textScale;
+			bar.size = box.size.y / areaHeight;
+			bar.position = -(curOffset) / areaHeight;
+		}
+
+		return false;
+	}
+}

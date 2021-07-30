@@ -1,0 +1,124 @@
+class PKZFScrollbar : PKZFElement {
+	// these are intentionally not protected
+	// since the only intended purpose of this element
+	// is to be used in another element, which should deal with
+	// encapsulation itself
+	PKZFBoxTextures background;
+	PKZFBoxDrawer bgDrawer;
+	PKZFBoxTextures textures[3];
+	PKZFBoxDrawer barDrawers[3];
+
+	enum BarState {
+		BarState_Normal,
+		BarState_Hover,
+		BarState_Click
+	}
+
+	double position;
+	double size;
+
+	protected BarState curBarState;
+
+	protected double originalPos;
+	protected Vector2 originalMousePos;
+	protected bool clicking;
+
+	void config(
+		PKZFBoxTextures normal, PKZFBoxTextures hover = NULL,
+		PKZFBoxTextures click = NULL, PKZFBoxTextures background = NULL
+	) {
+		self.background = background;
+		self.textures[BarState_Normal] = normal;
+		self.textures[BarState_Hover] = (hover != NULL) ? hover : normal;
+		self.textures[BarState_Click] = (click != NULL) ? click : normal;
+		self.alpha = 1.0;
+	}
+
+	static PKZFScrollbar create(
+		Vector2 pos, Vector2 size,
+		PKZFBoxTextures normal, PKZFBoxTextures hover = NULL,
+		PKZFBoxTextures click = NULL, PKZFBoxTextures background = NULL
+	) {
+		let ret = new('PKZFScrollbar');
+
+		ret.config(normal, hover, click, background);
+		ret.setBox(pos, size);
+
+		return ret;
+	}
+
+	void barBox(PKZFAABB ret) {
+		ret.pos = (0, box.size.y * position);
+		ret.size = (box.size.x, box.size.y * size);
+	}
+
+	override bool handleMousePosition(bool mouseBlock, Vector2 mousePos) {
+		if (curBarState == BarState_Click) {
+			if (size < 1.0) {
+				let delta = mousePos - relToScreen((0, 0)) - originalMousePos;
+				delta /= getScale();
+				position = originalPos + delta.y / box.size.y;
+				clampBarPos();
+			}
+		}
+		else {
+			PKZFAABB box; barBox(box);
+			PKZFAABB screenBox; aabbToScreen(screenBox, box);
+			if (!mouseBlock && isEnabled() && !getHoverBlock() && screenBox.pointCollides(mousePos)) {
+				curBarState = BarState_Hover;
+			}
+			else {
+				curBarState = BarState_Normal;
+			}
+		}
+
+		return false;
+	}
+
+	override void drawer() {
+		PKZFAABB beforeClip, clipRect;
+		screenClip(beforeClip, clipRect);
+		Screen.setClipRect(int(clipRect.pos.x), int(clipRect.pos.y), int(clipRect.size.x), int(clipRect.size.y));
+
+		if (background) {
+			bgDrawer.draw(self, (0, 0), box.size, background, true);
+		}
+
+		if (size < 1.0) {
+			PKZFAABB box; barBox(box);
+			barDrawers[curBarState].draw(self, box.pos, box.size, textures[curBarState], true);
+		}
+
+		Screen.setClipRect(int(beforeClip.pos.x), int(beforeClip.pos.y), int(beforeClip.size.x), int(beforeClip.size.y));
+	}
+
+	void clampBarPos() {
+		position = clamp(position, 0.0, 1.0 - size);
+	}
+
+	override bool onUIEvent(PKZFUiEvent ev) {
+		let mousePos = getGlobalStore().mousePos;
+		if (ev.type == UIEvent.Type_LButtonDown) {
+			PKZFAABB box; barBox(box);
+			PKZFAABB screenBox; aabbToScreen(screenBox, box);
+			if (!mouseBlock && isEnabled() && screenBox.pointCollides(mousePos)) {
+				curBarState = BarState_Click;
+				originalPos = position;
+				originalMousePos = mousePos - relToScreen((0, 0));
+				setHoverBlock(self);
+			}
+		}
+		else if (ev.type == UIEvent.Type_LButtonUp) {
+			PKZFAABB box; barBox(box);
+			PKZFAABB screenBox; aabbToScreen(screenBox, box);
+			if (!mouseBlock && screenBox.pointCollides(mousePos) && curBarState == BarState_Click) {
+				curBarState = BarState_Hover;
+			}
+			else {
+				curBarState = BarState_Normal;
+			}
+			setHoverBlock(NULL);
+		}
+		return false;
+	}
+}

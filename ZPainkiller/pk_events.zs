@@ -133,6 +133,9 @@ Class PK_MainHandler : EventHandler {
 			}
 			Menu.SetMenu("PKCardsMenu");
 		}
+		if (e.name == "PKCOpenCodex") {
+			Menu.SetMenu("PKCodexMenu");
+		}
 		if (e.name == "PK_UseGoldenCards") {
 			cardcontrol.UseGoldenCards();
 		}

@@ -1,4 +1,4 @@
-class PKCUiEvent ui {
+struct PKZFUiEvent ui {
 	// 
 	int Type;
 	//
@@ -12,7 +12,7 @@ class PKCUiEvent ui {
 	bool IsCtrl;
 	bool IsAlt;
 
-	static void fromGZDUiEvent(UiEvent gzdEv, PKCUiEvent ev) {
+	static void fromGZDUiEvent(UiEvent gzdEv, PKZFUiEvent ev) {
 		ev.Type = gzdEv.Type;
 		ev.KeyString = gzdEv.KeyString;
 		ev.KeyChar = gzdEv.KeyChar;

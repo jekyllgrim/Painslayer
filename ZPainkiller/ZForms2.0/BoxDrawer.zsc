@@ -1,0 +1,256 @@
+struct PKZFBoxDrawer ui {
+	private Shape2D shape;
+	private Shape2DTransform transform;
+
+	private bool initialised;
+	private Vector2 lastPos;
+	private Vector2 lastSize;
+	private PKZFBoxTextures lastTextures;
+	private Vector2 lastScale;
+
+	void draw(
+		PKZFElement master, Vector2 pos, Vector2 size, PKZFBoxTextures textures,
+		bool animate, Vector2 scale = (1, 1)
+	) {
+		let absPos = master.relToScreen(pos) * master.getScale();
+		let scaledSize = size * master.getScale();
+		if (
+			shape == NULL || scaledSize != lastSize ||
+			textures != lastTextures || scale != lastScale
+		) {
+			if (shape == NULL) shape = new("Shape2D");
+			calc(master, size, textures, scale);
+			if (shape == NULL) return;
+			lastSize = scaledSize;
+			lastTextures = textures;
+			lastScale = scale;
+		}
+		if (transform == NULL || absPos != lastPos) {
+			if (transform == NULL) transform = new("Shape2DTransform");
+			transform.clear();
+			transform.translate(absPos);
+			lastPos = absPos;
+		}
+		shape.setTransform(transform);
+		let texID = TexMan.checkForTexture(textures.getBoxTexture(), TexMan.Type_Any);
+		PKZFAABB clipRect; master.getClipAABB(clipRect);
+		Screen.drawShape(
+			texID, animate, shape, DTA_Alpha, master.getDrawAlpha(),
+			DTA_ClipLeft, int(floor(clipRect.pos.x)),
+			DTA_ClipTop, int(floor(clipRect.pos.y)),
+			DTA_ClipRight, int(ceil(clipRect.pos.x + clipRect.size.x)),
+			DTA_ClipBottom, int (ceil(clipRect.pos.y + clipRect.size.y))
+		);
+	}
+
+	void shape2DAddQuad(
+		Shape2D shape, Vector2 pos, Vector2 size, Vector2 uvPos, Vector2 uvSize, out int vertCount
+	) {
+		shape.pushVertex((pos.x         , pos.y         ));
+		shape.pushVertex((pos.x + size.x, pos.y         ));
+		shape.pushVertex((pos.x         , pos.y + size.y));
+		shape.pushVertex((pos.x + size.x, pos.y + size.y));
+
+		shape.pushTriangle(vertCount + 0, vertCount + 3, vertCount + 1);
+		shape.pushTriangle(vertCount + 0, vertCount + 2, vertCount + 3);
+
+		shape.pushCoord((uvPos.x           , uvPos.y           ));
+		shape.pushCoord((uvPos.x + uvSize.x, uvPos.y           ));
+		shape.pushCoord((uvPos.x           , uvPos.y + uvSize.y));
+		shape.pushCoord((uvPos.x + uvSize.x, uvPos.y + uvSize.y));
+
+		vertCount += 4;
+	}
+
+	Vector2 scaleVec(Vector2 vec, Vector2 scale) {
+		return (vec.x * scale.x, vec.y * scale.y);
+	}
+
+	void calcTiledImage(
+		Shape2D shape, Vector2 screenPos, Vector2 screenSize, Vector2 scaledSize,
+		Vector2 uvPos, Vector2 uvSize, out int vertCount
+	) {
+		if (scaledSize.x ~== 0 || scaledSize.y ~== 0) {
+			return;
+		}
+
+		double fracX = screenSize.x / scaledSize.x;
+		double fracY = screenSize.y / scaledSize.y;
+		int countX = int (ceil (fracX));
+		int countY = int (ceil (fracY));
+
+		double drawSizeLimitX = fracX;
+		double drawPosX = screenPos.x;
+		for (int x = 0; x < countX; x++) {
+			double drawSizeLimitY = fracY;
+			double drawPosY = screenPos.y;
+
+			double drawFracX = min (1, drawSizeLimitX);
+			double drawSizeX = scaledSize.x * drawFracX;
+			double drawUVSizeX = uvSize.x * drawFracX;
+
+			for (int y = 0; y < countY; y++) {
+				double drawFracY = min (1, drawSizeLimitY);
+				double drawSizeY = scaledSize.y * drawFracY;
+				double drawUVSizeY = uvSize.y * drawFracY;
+
+				shape2DAddQuad(shape, (drawPosX, drawPosY), (drawSizeX, drawSizeY), uvPos, (drawUVSizeX, drawUVSizeY), vertCount);
+
+				drawPosY += drawSizeY;
+				drawSizeLimitY -= drawFracY;
+			}
+
+			drawPosX += drawSizeX;
+			drawSizeLimitX -= drawFracX;
+		}
+	}
+
+	Shape2D calc(
+		PKZFElement master, Vector2 size, PKZFBoxTextures textures, Vector2 scale = (1, 1)
+	) {
+		double screenScale = master.getScale();
+
+		Vector2 imageSize = master.texSize(textures.getBoxTexture());
+		Vector2 imageSizeInv = (1 / imageSize.x, 1 / imageSize.y);
+
+		// Abort if the image has an invalid resolution.
+		if (imageSize.x < 0 || imageSize.x ~== 0 || imageSize.y < 0 || imageSize.y ~== 0) {
+			return null;
+		}
+
+		let absPos = (0, 0);
+		let scaledSize = size * screenScale;
+		if (scaledSize ~== (0, 0)) {
+			return null;
+		}
+
+		let midSliceTopLeft = textures.getMidSliceTopLeft();
+		let midSliceBottomRight = textures.getMidSliceBottomRight();
+		let midSliceSize = midSliceBottomRight - midSliceTopLeft;
+
+		// Raw
+		Vector2 tlRawSize = scaleVec(imageSize, midSliceTopLeft);
+
+		Vector2 brRawPos = scaleVec(imageSize, midSliceBottomRight);
+		Vector2 brRawSize = imageSize - brRawPos;
+
+		Vector2 midRawPos = tlRawSize;
+		Vector2 midRawSize = brRawPos - tlRawSize;
+
+		// UVs
+		Vector2 tlUVSize = scaleVec(tlRawSize, imageSizeInv);
+
+		Vector2 brUVSize = scaleVec(brRawSize, imageSizeInv);
+		Vector2 brUVPos = scaleVec(brRawPos, imageSizeInv);
+
+		Vector2 midUVPos = scaleVec(midRawPos, imageSizeInv);
+		Vector2 midUVSize = scaleVec(midRawSize, imageSizeInv);
+
+		// Scaled
+		Vector2 tlScaledSize = scaleVec(tlRawSize * screenScale, scale);
+
+		Vector2 brScaledPos = scaleVec(brRawPos * screenScale, scale);
+		Vector2 brScaledSize = scaleVec(brRawSize * screenScale, scale);
+
+		Vector2 midScaledPos = scaleVec(midRawPos * screenScale, scale);
+		Vector2 midScaledSize = scaleVec(midRawSize * screenScale, scale);
+
+		// Screen
+		Vector2 tlScreenPos = absPos;
+		Vector2 tlScreenSize = tlScaledSize;
+
+		Vector2 brScreenPos = absPos + scaledSize - brScaledSize;
+		Vector2 brScreenSize = (absPos + scaledSize) - brScreenPos;
+
+		Vector2 midScreenPos = tlScreenPos + tlScreenSize;
+		Vector2 midScreenSize = brScreenPos - midScreenPos;
+
+		shape.clear();
+
+		int vertCount = 0;
+
+		/* Corners */ {
+			// UVs
+			Vector2 trUVPos = (brUVPos.x, 0);
+			Vector2 trUVSize = (brUVSize.x, tlUVSize.y);
+
+			Vector2 blUVPos = (0, brUVPos.y);
+			Vector2 blUVSize = (tlUVSize.x, brUVSize.y);
+			// Screen
+			Vector2 trScreenPos = (brScreenPos.x, tlScreenPos.y);
+			Vector2 trScreenSize = (brScreenSize.x, tlScreenSize.y);
+
+			Vector2 blScreenPos = (tlScreenPos.x, brScreenPos.y);
+			Vector2 blScreenSize = (tlScreenSize.x, brScreenSize.y);
+
+			shape2DAddQuad(shape, tlScreenPos, tlScreenSize,  (0, 0), tlUVSize, vertCount);
+			shape2DAddQuad(shape, trScreenPos, trScreenSize, trUVPos, trUVSize, vertCount);
+			shape2DAddQuad(shape, brScreenPos, brScreenSize, brUVPos, brUVSize, vertCount);
+			shape2DAddQuad(shape, blScreenPos, blScreenSize, blUVPos, blUVSize, vertCount);
+		}
+
+		/* Sides */ {
+			// UVs
+			Vector2 topUVPos = (midUVPos.x, 0);
+			Vector2 topUVSize = (midUVSize.x, tlUVSize.y);
+
+			Vector2 bottomUVPos = (midUVPos.x, brUVPos.y);
+			Vector2 bottomUVSize = (midUVSize.x, brUVSize.y);
+
+			Vector2 leftUVPos = (0, midUVPos.y);
+			Vector2 leftUVSize = (tlUVSize.x, midUVSize.y);
+
+			Vector2 rightUVPos = (brUVPos.x, midUVPos.y);
+			Vector2 rightUVSize = (brUVSize.x, midUVSize.y);
+			// Screen
+			Vector2 topScreenPos = (midScreenPos.x, tlScreenPos.y);
+			Vector2 topScreenSize = (midScreenSize.x, tlScreenSize.y);
+
+			Vector2 bottomScreenPos = (midScreenPos.x, brScreenPos.y);
+			Vector2 bottomScreenSize = (midScreenSize.x, brScreenSize.y);
+
+			Vector2 leftScreenPos = (tlScreenPos.x, midScreenPos.y);
+			Vector2 leftScreenSize = (tlScreenSize.x, midScreenSize.y);
+
+			Vector2 rightScreenPos = (brScreenPos.x, midScreenPos.y);
+			Vector2 rightScreenSize = (brScreenSize.x, midScreenSize.y);
+
+			if (textures.getScaleSides()) {
+				if (midSliceSize.x != 0.0) {
+					shape2DAddQuad(shape, topScreenPos, topScreenSize, topUVPos, topUVSize, vertCount);
+					shape2DAddQuad(shape, bottomScreenPos, bottomScreenSize, bottomUVPos, bottomUVSize, vertCount);
+				}
+				if (midSliceSize.y != 0.0) {
+					shape2DAddQuad(shape, leftScreenPos, leftScreenSize, leftUVPos, leftUVSize, vertCount);
+					shape2DAddQuad(shape, rightScreenPos, rightScreenSize, rightUVPos, rightUVSize, vertCount);
+				}
+			} else {
+				Vector2 topScaledSize = (midScaledSize.x, tlScaledSize.y);
+				Vector2 bottomScaledSize = (midScaledSize.x, brScaledSize.y);
+				Vector2 leftScaledSize = (tlScaledSize.x, midScaledSize.y);
+				Vector2 rightScaledSize = (brScaledSize.x, midScaledSize.y);
+
+				if (midSliceSize.x != 0.0) {
+					calcTiledImage(shape, topScreenPos, topScreenSize, topScaledSize, topUVPos, topUVSize, vertCount);
+					calcTiledImage(shape, bottomScreenPos, bottomScreenSize, bottomScaledSize, bottomUVPos, bottomUVSize, vertCount);
+				}
+				if (midSliceSize.y != 0.0) {
+					calcTiledImage(shape, leftScreenPos, leftScreenSize, leftScaledSize, leftUVPos, leftUVSize, vertCount);
+					calcTiledImage(shape, rightScreenPos, rightScreenSize, rightScaledSize, rightUVPos, rightUVSize, vertCount);
+				}
+			}
+		}
+
+		if (textures.getScaleMiddle()) {
+			if (midSliceSize.x != 0.0 && midSliceSize.y != 0.0) {
+				shape2DAddQuad(shape, midScreenPos, midScreenSize, midUVPos, midUVSize, vertCount);
+			}
+		} else {
+			if (midSliceSize.x != 0.0 && midSliceSize.y != 0.0) {
+				calcTiledImage(shape, midScreenPos, midScreenSize, midScaledSize, midUVPos, midUVSize, vertCount);
+			}
+		}
+
+		return shape;
+	}
+}

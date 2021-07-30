@@ -1,0 +1,109 @@
+/// Bounding box class for positioning items.
+struct PKZFAABB {
+	Vector2 pos;
+	Vector2 size;
+
+	bool pointCollides(Vector2 point) {
+		if (point.x > pos.x && point.x < pos.x + size.x &&
+			point.y > pos.y && point.y < pos.y + size.y   ) {
+			return true;
+		}
+		return false;
+	}
+
+	void rectOfIntersection(PKZFAABB ret, PKZFAABB other) {
+		double left = max(pos.x, other.pos.x);
+		double right = min(pos.x + size.x, other.pos.x + other.size.x);
+		double top = max(pos.y, other.pos.y);
+		double bottom = min(pos.y + size.y, other.pos.y + other.size.y);
+		ret.pos = (0, 0);
+		ret.size = (0, 0);
+		if (right - left > 0 && bottom - top > 0) {
+			ret.pos = (left, top);
+			ret.size = (right - left, bottom - top);
+		}
+	}
+
+	enum OutCode {
+		OUT_Inside = 0,
+		OUT_Left   = 1 << 0,
+		OUT_Right  = 1 << 1,
+		OUT_Bottom = 1 << 2,
+		OUT_Top    = 1 << 3
+	}
+	
+	OutCode computeOutcode(Vector2 point) {
+		let min = pos;
+		let max = pos + size;
+
+		OutCode code = OUT_Inside;
+		
+		if (point.x < min.x) {
+			code |= OUT_Left;
+		}
+		else if (point.x > max.x) {
+			code |= OUT_Right;
+		}
+		if (point.y < min.y) {
+			code |= OUT_Top;
+		}
+		else if (point.y > max.y) {
+			code |= OUT_Bottom;
+		}
+		
+		return code;
+	}
+	
+	/// Clips a line to this AABB.
+	bool, Vector2, Vector2 cohenSutherlandClip(Vector2 point0, Vector2 point1) {
+		let min = pos;
+		let max = pos + size;
+		
+		OutCode outcode0 = computeOutCode(point0);
+		OutCode outcode1 = computeOutCode(point1);
+		
+		while (true) {
+			// trivial accept - points are both on screen
+			if ((outcode0 | outcode1) == 0) {
+				return true, point0, point1;
+			}
+			// trivial reject - points are in the same region offscreen
+			else if ((outcode0 & outcode1) != 0) {
+				return false, point0, point1;
+			}
+			else {
+				Vector2 new;
+				OutCode outcodeOut = (outcode0 != 0) ? outcode0 : outcode1;
+				
+				if ((outcodeOut & OUT_Bottom) != 0) {
+					new.x = point0.x + (point1.x - point0.x) * (max.y - point0.y) / (point1.y - point0.y);
+					new.y = max.y;
+				}
+				else if ((outcodeOut & OUT_Top) != 0) {
+					new.x = point0.x + (point1.x - point0.x) * (min.y - point0.y) / (point1.y - point0.y);
+					new.y = min.y;
+				}
+				else if ((outcodeOut & OUT_Right) != 0) {
+					new.y = point0.y + (point1.y - point0.y) * (max.x - point0.x) / (point1.x - point0.x);
+					new.x = max.x;
+				}
+				else if ((outcodeOut & OUT_Left) != 0) {
+					new.y = point0.y + (point1.y - point0.y) * (min.x - point0.x) / (point1.x - point0.x);
+					new.x = min.x;
+				}
+				
+				if (outcodeOut == outCode0) {
+					point0.x = new.x;
+					point0.y = new.y;
+					outCode0 = computeOutCode(point0);
+				}
+				else {
+					point1.x = new.x;
+					point1.y = new.y;
+					outCode1 = computeOutCode(point1);
+				}
+			}
+		}
+		return false, (0, 0), (0, 0);
+	}
+}

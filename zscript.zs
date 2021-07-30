@@ -12,19 +12,8 @@ version "4.6.0"
 //tooltips by nero:
 #include "ZPainkiller/Tooltips/ToolTips_Lists.zs"
 #include "ZPainkiller/Tooltips/ToolTips_Options.zs"
-//zforms:
-#include "ZPainkiller/ZForms/Frame.zsc"
-#include "ZPainkiller/ZForms/Handler.zsc"
-#include "ZPainkiller/ZForms/Image.zsc"
-#include "ZPainkiller/ZForms/Label.zsc"
-#include "ZPainkiller/ZForms/UiEvent.zsc"
-#include "ZPainkiller/ZForms/BaseMenu.zsc"
-#include "ZPainkiller/ZForms/BoundingBox.zsc"
-#include "ZPainkiller/ZForms/BoxTextures.zsc"
-#include "ZPainkiller/ZForms/Button.zsc"
-#include "ZPainkiller/ZForms/Element.zsc"
-//2.0:
-/*#include "ZPainkiller/ZForms2.0/BaseMenu.zsc"
+//zforms 2.0:
+#include "ZPainkiller/ZForms2.0/BaseMenu.zsc"
 #include "ZPainkiller/ZForms2.0/BoundingBox.zsc"
 #include "ZPainkiller/ZForms2.0/BoxDrawer.zsc"
 #include "ZPainkiller/ZForms2.0/BoxImage.zsc"
@@ -33,6 +22,8 @@ version "4.6.0"
 #include "ZPainkiller/ZForms2.0/ButtonBase.zsc"
 #include "ZPainkiller/ZForms2.0/DropdownList.zsc"
 #include "ZPainkiller/ZForms2.0/Element.zsc"
+#include "ZPainkiller/ZForms2.0/ElementContainer.zsc"
+#include "ZPainkiller/ZForms2.0/FocusLinkHelper.zsc"
 #include "ZPainkiller/ZForms2.0/Frame.zsc"
 #include "ZPainkiller/ZForms2.0/Handler.zsc"
 #include "ZPainkiller/ZForms2.0/Image.zsc"
@@ -45,7 +36,7 @@ version "4.6.0"
 #include "ZPainkiller/ZForms2.0/Tabs.zsc"
 #include "ZPainkiller/ZForms2.0/TextInput.zsc"
 #include "ZPainkiller/ZForms2.0/ToggleButton.zsc"
-#include "ZPainkiller/ZForms2.0/UiEvent.zsc"*/
+#include "ZPainkiller/ZForms2.0/UiEvent.zsc"
 
 //Painslayer:
 #include "ZPainkiller/pk_constants.zs"
@@ -64,5 +55,4 @@ version "4.6.0"
 #include "ZPainkiller/w_rifle.zs"
 #include "ZPainkiller/w_boltgun.zs"
 #include "ZPainkiller/pk_hud.zs"
-#include "ZPainkiller/pk_cardmenu.zs"
-//#include "ZPainkiller/pk_cardmenu2.0.zs" //zforms 2.0pre version
+#include "ZPainkiller/pk_cardmenu2.0.zs" //zforms 2.0pre version

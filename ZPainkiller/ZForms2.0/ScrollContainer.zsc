@@ -1,0 +1,101 @@
+class PKZFScrollContainer : PKZFElementContainer {
+	protected PKZFElement scrollArea;
+	PKZFElement getScrollArea() { return scrollArea; }
+	protected PKZFScrollbar bar;
+
+	protected double scrollWidth;
+	protected double scrollAreaHeight;
+	protected double scrollNotchJump;
+	protected double contentBarGap;
+
+	void config(
+		double scrollWidth, double scrollAreaHeight, double scrollNotchJump,
+		PKZFBoxTextures scrollBarNormal, PKZFBoxTextures scrollBarHover = NULL,
+		PKZFBoxTextures scrollBarClick = NULL, PKZFBoxTextures scrollBg = NULL,
+		double contentBarGap = 0.0
+	) {
+		self.scrollAreaHeight = max(scrollAreaHeight, box.size.y);
+		self.scrollNotchJump = scrollNotchJump;
+		self.contentBarGap = contentBarGap;
+		self.scrollWidth = scrollWidth;
+
+		scrollArea.setBox((0, 0), (box.size.x - scrollWidth - contentBarGap, scrollAreaHeight));
+		bar.setBox((box.size.x - scrollWidth, 0.0), (scrollWidth, box.size.y));
+		bar.config(scrollBarNormal, scrollBarHover, scrollBarClick, scrollBg);
+
+		self.alpha = 1.0;
+	}
+
+	static PKZFScrollContainer create(
+		Vector2 pos, Vector2 size,
+		double scrollWidth, double scrollAreaHeight, double scrollNotchJump,
+		PKZFBoxTextures scrollBarNormal, PKZFBoxTextures scrollBarHover = NULL,
+		PKZFBoxTextures scrollBarClick = NULL, PKZFBoxTextures scrollBg = NULL,
+		PKZFElement scrollArea = NULL, double contentBarGap = 0.0
+	) {
+		let ret = new('PKZFScrollContainer');
+
+		ret.setBox(pos, size);
+
+		if (scrollArea == NULL) {
+			ret.scrollArea = PKZFFrame.create((0, 0), (0, 0));
+		}
+		else {
+			ret.scrollArea = scrollArea;
+		}
+		ret.bar = PKZFScrollbar.create((0, 0), (0, 0), NULL, NULL);
+
+		ret.config(scrollWidth, scrollAreaHeight, scrollNotchJump, scrollBarNormal, scrollBarHover, scrollBarClick, scrollBg, contentBarGap);
+		ret.elements.push(ret.bar);
+		ret.bar.master = ret;
+		ret.elements.push(ret.scrollArea);
+		ret.scrollArea.master = ret;
+
+		return ret;
+	}
+
+	override bool onNavEvent(PKZFNavEventType type, bool fromController) {
+		if (isFocused() && isEnabled()) {
+			switch (type) {
+			case PKZFNavEventType_Down: {
+				let oldPos = bar.position;
+				bar.position += scrollNotchJump / scrollAreaHeight;
+				bar.clampBarPos();
+				return bar.position != oldPos;
+			}
+			case PKZFNavEventType_Up: {
+				let oldPos = bar.position;
+				bar.position -= scrollNotchJump / scrollAreaHeight;
+				bar.clampBarPos();
+				return bar.position != oldPos;
+			}
+			}
+		}
+		return Super.onNavEvent(type, fromController);
+	}
+
+	override bool onUIEvent(PKZFUiEvent ev) {
+		if (Super.onUIEvent(ev)) return true;
+		let mousePos = getGlobalStore().mousePos;
+		if (ev.type == UiEvent.Type_WheelDown || ev.type == UiEvent.Type_WheelUp) {
+			PKZFAABB screenBox; boxToScreen(screenBox);
+			if (isEnabled() && screenBox.pointCollides(mousePos)) {
+				let dir = ev.type == UiEvent.Type_WheelDown ? 1.0 : -1.0;
+				let oldPos = bar.position;
+				bar.position += (dir * scrollNotchJump) / scrollAreaHeight;
+				bar.clampBarPos();
+				return oldPos != bar.position;
+			}
+		}
+		return false;
+	}
+
+	override void topDrawer() {
+		scrollArea.setBox((0, 0), (box.size.x - scrollWidth - contentBarGap, scrollAreaHeight));
+		bar.setBox((box.size.x - scrollWidth, 0.0), (scrollWidth, box.size.y));
+		bar.size = box.size.y / scrollAreaHeight;
+		bar.size = min(bar.size, 1.0);
+		scrollArea.box.pos.y = -bar.position * scrollAreaHeight;
+		Super.topDrawer();
+	}
+}

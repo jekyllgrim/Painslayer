@@ -10,7 +10,7 @@
 
 
 
-Class PKCardsMenu : PKCGenericMenu {
+Class PKCardsMenu : PKZFGenericMenu {
 	double backgroundRatio;
 	vector2 boardTopLeft;
 	
@@ -26,20 +26,20 @@ Class PKCardsMenu : PKCGenericMenu {
 	PKCTarotCard SelectedCard;	//card attached to the pointer
 	PKCTarotCard HoveredCard;	//card the pointer is hovering over
 	
-	PKCFrame silverSlotsInfo;
-	PKCFrame goldSlotsInfo;
+	PKZFFrame silverSlotsInfo;
+	PKZFFrame goldSlotsInfo;
 	
-	PKCFrame boardElements;		//everything in the board except the background and popups
+	PKZFFrame boardElements;		//everything in the board except the background and popups
 	PKCBoardMessage cardinfo;		//card information popup
-	PKCLabel cardinfoTip;
-	PKCLabel cardinfoCost;
+	PKZFLabel cardinfoTip;
+	PKZFLabel cardinfoCost;
 	PKCBoardMessage promptPopup;	//an exit or purchase popup that blocks the board
 	PKCBoardMessage firstUsePopup;	//first use notification
 	PKCBoardMessage needMousePopup;	//need mouse notification
 	int firstUsePopupDur;				//first use notification display duration
 	int needMousePopupDur;			//need mouse notification display duration
 	
-	PKCButton exitbutton;			//big round flashing menu close button
+	PKZFButton exitbutton;			//big round flashing menu close button
 	bool ExitHovered;				//whether it's hovered
 	int ExitAlphaDir;
 	
@@ -47,34 +47,31 @@ Class PKCardsMenu : PKCGenericMenu {
 	
 	bool queueForClose;
 	
-	override void Drawer() {		
+	override void Drawer() {
 		if (!multiplayer)
 			PK_StatusBarScreen.Fill("000000",0,0,statscr_base_width,statscr_base_height,1);
-		super.Drawer();
+			super.Drawer();
 	}
 	override void Init (Menu parent) {
 		super.Init(parent);
 		
-		/*vector2 screensize = (Screen.GetWidth(),screen.GetHeight());		
-		SetBaseResolution(screensize);
-		backgroundRatio = screensize.y / PK_BOARD_HEIGHT;
-		vector2 backgroundsize = (PK_BOARD_WIDTH*backgroundRatio,PK_BOARD_HEIGHT*backgroundRatio);
-		boardTopLeft = */
+		vector2 backgroundsize = (PK_BOARD_WIDTH,PK_BOARD_HEIGHT);	
+		SetBaseResolution(backgroundsize);		
 		
-		//check if player is alive
+		//check the player isn't dead
 		let plr = players[consoleplayer].mo;
 		if (!plr || plr.health < 0) {
 			queueForClose = true;
 			return;
 		}
-		//check if golden cards are active and don't open the menu if so
+		//check the player has the control item
 		goldcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (!goldcontrol || goldcontrol.goldActive) {
 			queueForClose = true;
 			return;
 		}
 		
-		//check if mouse is enabled and mouse in menus is enabled
+		//check that mouse is enabled and "use mouse in menus" is enabled (there's no keyboard controls for the board)
 		bool mouseEnabled = CVar.GetCVar('m_use_mouse',players[consoleplayer]).GetInt() > 0 && CVar.GetCVar('use_mouse',players[consoleplayer]).GetInt() > 0;
 		
 		//checks if the board is opened for the first time on the current map:
@@ -91,10 +88,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		S_StartSound("ui/board/open",CHAN_VOICE,CHANF_UI,volume:snd_menuvolume);
 		
 		//first create the background (always 4:3, never stretched)
-		vector2 backgroundsize = (PK_BOARD_WIDTH,PK_BOARD_HEIGHT);	
-		SetBaseResolution(backgroundsize);
-		let background = new("PKCImage");
-		background.Init(
+		let background = PKZFImage.Create(
 			(0,0),
 			backgroundsize,
 			image:"graphics/HUD/Tarot/cardsboard.png"/*,
@@ -104,48 +98,45 @@ Class PKCardsMenu : PKCGenericMenu {
 		
 		
 		//define the frame that will keep everything except text popups:
-		boardelements = new("PKCFrame").Init((0,0),backgroundsize);
+		boardelements = PKZFFrame.Create((0,0),backgroundsize);
 		boardelements.pack(mainFrame);
 
 		handler = new("PKCMenuHandler");
 		handler.menu = self;		
 		
 		//clicking anywhere on the board is supposed to close the First Use popup:
-		let closeFirstUseBtn = new("PKCButton").Init(
+		let closeFirstUseBtn = PKZFButton.Create(
 			(0,0),
 			backgroundsize,
 			cmdhandler:handler,
 			command:"CloseFirstUse"
 		);
-		closeFirstUseBtn.SetTexture( "", "", "", "" );
 		closeFirstUseBtn.Pack(boardElements);
 		
 		if (!mouseEnabled) {
 			string str = String.Format(Stringtable.Localize("$TAROT_NEEDMOUSE"),Stringtable.Localize("$OPTMNU_TITLE"),Stringtable.Localize("$OPTMNU_MOUSE"),Stringtable.Localize("$MOUSEMNU_MOUSEINMENU"));
-			needMousePopup = New("PKCBoardMessage");
-			needMousePopup.pack(mainFrame);
-			needMousePopup.Init(
+			needMousePopup = PKCBoardMessage.Create(
 				(192,256),
 				(700,256),
 				str,
 				textscale:PK_MENUTEXTSCALE*1.2
 			);
+			needMousePopup.pack(mainFrame);
 			needMousePopupDur = 800;
 			return;
 		}
 		
 		//create big round exit button:
-		exitbutton = new("PKCButton").Init(
+		let exittex = PKZFBoxTextures.CreateSingleTexture("graphics/HUD/Tarot/board_button_highlighted.png",false);
+		exitbutton = PKZFButton.Create(
 			(511,196),
 			(173,132),
 			cmdhandler:handler,
-			command:"BoardButton"
-		);
-		exitbutton.SetTexture(
-			"graphics/HUD/Tarot/board_button_highlighted.png",
-			"graphics/HUD/Tarot/board_button_highlighted.png",
-			"graphics/HUD/Tarot/board_button_highlighted.png",
-			"graphics/HUD/Tarot/board_button_highlighted.png"
+			command:"BoardButton",
+			inactive:exittex,
+			hover:exittex,
+			click:exittex,
+			disabled:exittex
 		);
 		exitbutton.Pack(boardelements);
 
@@ -153,65 +144,70 @@ Class PKCardsMenu : PKCGenericMenu {
 		CardsInit();	//initialize cards
 		SlotInfoInit(); //hover text with info about slots
 		
-		let goldcounter = PKCGoldCounter(new("PKCGoldCounter"));
-		goldcounter.Pack(boardElements);
-		goldcounter.Init(
+		let goldcounter = PKCGoldCounter.Create(
 			(728,237),
 			(170,50)
 		);		
+		goldcounter.Pack(boardElements);
 	}
 	
 	private void SlotInfoInit() {
 		double bkgalpha = 0.7;
 		vector2 silverSlotSize = (280,80);
-		silverSlotsInfo = new("PKCFrame").Init((75,255),silverSlotSize);
+		silverSlotsInfo = PKZFFrame.Create((75,255),silverSlotSize);
 		silverSlotsInfo.Pack(boardElements);
-		let silverSlotBkg = new("PKCImage").Init(
+		silverSlotsInfo.setDontBlockMouse(true);
+		let silverSlotBkg = PKZFImage.Create(
 			(0,0),
 			silverSlotSize,
 			"graphics/HUD/Tarot/tooltip_bg.png",
 			imagescale:(1.6,1.6),
 			tiled:true
 		);
-		silverSlotBkg.alpha = bkgalpha;
+		silverSlotBkg.SetAlpha(bkgalpha);
+		silverSlotBkg.setDontBlockMouse(true);
 		silverSlotBkg.Pack(silverSlotsInfo);
-		let silverSlotText = new("PKCLabel").Init(
+		let silverSlotText = PKZFLabel.Create(
 			(5,5),
 			(270,70),
 			Stringtable.Localize("$TAROT_SILVERINFO"),
 			font_times,
-			alignment: PKCElement.AlignType_HCenter,
+			alignment: PKZFElement.AlignType_HCenter,
 			textscale:PK_MENUTEXTSCALE*0.9,
 			textcolor: Font.FindFontColor('PKWhiteText'),
 			linespacing: 0.1
 		);
 		silverSlotText.Pack(silverSlotsInfo);
-		silverSlotsInfo.hidden = true;
+		silverSlotText.setDontBlockMouse(true);
+		silverSlotsInfo.Hide();
 
 		vector2 goldSlotSize = (360,80);
-		goldSlotsInfo = new("PKCFrame").Init((560,440),goldSlotSize);
+		goldSlotsInfo = PKZFFrame.Create((560,440),goldSlotSize);
 		goldSlotsInfo.Pack(boardElements);
-		let goldSlotBkg = new("PKCImage").Init(
+		goldSlotsInfo.setDontBlockMouse(true);
+		let goldSlotBkg = PKZFImage.Create(
 			(0,0),
 			goldSlotSize,
 			"graphics/HUD/Tarot/tooltip_bg.png",
 			imagescale:(1.6,1.6),
 			tiled:true
 		);
-		goldSlotBkg.alpha = bkgalpha;
+		goldSlotBkg.SetAlpha(bkgalpha);
 		goldSlotBkg.Pack(goldSlotsInfo);
-		let goldSlotText = new("PKCLabel").Init(
+		goldSlotBkg.setDontBlockMouse(true);
+		let goldSlotText = PKZFLabel.Create(
 			(5,5),
 			(350,70),
 			Stringtable.Localize("$TAROT_GOLDINFO"),
 			font_times,
-			alignment: PKCElement.AlignType_HCenter,
+			alignment: PKZFElement.AlignType_HCenter,
 			textscale:PK_MENUTEXTSCALE*0.9,
 			textcolor: Font.FindFontColor('PKWhiteText'),
 			linespacing: 0.1
 		);
 		goldSlotText.Pack(goldSlotsInfo);
-		goldSlotsInfo.hidden = true;
+		goldSlotText.setDontBlockMouse(true);
+		goldSlotsInfo.Hide();
 	}
 	
 	//horizontal positions of slots
@@ -224,14 +220,12 @@ Class PKCardsMenu : PKCGenericMenu {
 		for (int i = 0; i < 5; i++) {			
 			double slotY = (i < 2) ? 179 : 364;
 			vector2 slotpos = (PKCSlotXPos[i],slotY);
-			let cardslot = PKCCardSlot(new("PKCCardSlot"));
-			cardslot.Init(
+			let cardslot = PKCCardSlot.Create(
 				slotpos,
 				slotsize,
 				cmdhandler:handler,
 				command:"CardSlot"
 			);
-			cardslot.SetTexture("","","","");
 			cardslot.slotpos = slotpos;
 			cardslot.slotsize = slotsize;
 			cardslot.slottype = (i < 2) ? false : true;
@@ -300,15 +294,21 @@ Class PKCardsMenu : PKCGenericMenu {
 		for (int i = 0; i < PKCCardIDs.Size(); i++) {
 			//first 12 cards are silver, so we define pos based on where we are in the IDs array:
 			vector2 cardpos = (i < 12) ? (PKCCardXPos[i],56) : (PKCCardXPos[i-12],618);
-			let card = PKCTarotCard(new("PKCTarotCard"));
-			card.Init(
+			string texpath = String.Format("graphics/HUD/Tarot/cards/%s.png",PKCCardIDs[i]);
+			let cardTex = PKZFBoxTextures.CreateSingleTexture(texpath,false);
+			let card = PKCTarotCard.Create(
 				cardpos,
 				cardsize,
 				cmdhandler:handler,
-				command:"HandleCard"
+				command:"HandleCard",
+				inactive:cardTex,
+				hover:cardTex,
+				click:cardTex,
+				disabled:cardTex
 			);
-			string texpath = String.Format("graphics/HUD/Tarot/cards/%s.png",PKCCardIDs[i]);
-			card.SetTexture(texpath, texpath, texpath, texpath);
+			card.setDontBlockMouse(true);
+			card.cardtexture = TexMan.checkForTexture(texpath, TexMan.Type_Any);
+			card.cardtextureName = texpath;
 			card.menu = PKCardsMenu(self);
 			card.buttonScale = cardscale;
 			card.defaultscale = cardscale;
@@ -338,8 +338,7 @@ Class PKCardsMenu : PKCGenericMenu {
 				for (int i = 0; i < cardslots.Size(); i++) {
 					if (goldcontrol.EquippedSlots[i] == card.cardID) {
 						let cardslot = cardslots[i];
-						card.box.pos = cardslot.slotpos;
-						card.box.size = cardslot.slotsize;
+						card.SetBox(cardslot.slotpos, cardslot.slotsize);
 						card.buttonscale = (1,1);
 						cardslot.placedcard = card;
 						if (!firstUse)
@@ -349,24 +348,12 @@ Class PKCardsMenu : PKCGenericMenu {
 			}
 			
 		}
-		//unlock 2 random silver and 3 random gold cards if you have none unlocked ("pistol start"):	
+		//unlock 2 random silver and 3 random gold cards if you have none unlocked ("pistol start") and a CVAR allows that:	
 		if (pk_allowFreeCards && goldcontrol && goldcontrol.UnlockedTarotCards.Size() == 0) {
 			//S_StartSound("ui/board/cardunlocked",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-			//console.printf("fist unlock");
-			
-			string firstUseLine = Stringtable.Localize("$TAROT_FIRSTUSE");
-			//show "first use" text popup (doesn't block the board):
-			firstUsePopup = New("PKCBoardMessage");
-			firstUsePopup.pack(mainFrame);
-			firstUsePopup.Init(
-				(192,256),
-				(700,128),
-				firstUseLine,
-				textscale:PK_MENUTEXTSCALE* 1.2,
-				alignment: PKCElement.AlignType_HCenter
-			);
-			firstUsePopupDur = 120;	//"first use" message is temporary
+			//console.printf("fist unlock");			
+			ShowFirstUsePopup();
 			
 			//these arrays are used to make sure we don't unlock the same card more than once:
 			array <PKCTarotCard> UnlockedGoldCards;
@@ -415,22 +402,21 @@ Class PKCardsMenu : PKCGenericMenu {
 		vector2 popupsize = (640,260);
 
 
-		promptPopup = New("PKCBoardMessage");
-		promptPopup.pack(mainFrame);
-		promptPopup.Init(
+		promptPopup = PKCBoardMessage.Create(
 			popuppos,
 			popupsize,
 			Stringtable.Localize("$TAROT_EXIT"),
 			textscale:PK_MENUTEXTSCALE* 1,
-			alignment: PKCElement.AlignType_HCenter
+			alignment: PKZFElement.AlignType_HCenter
 		);
+		promptPopup.pack(mainFrame);
 		
 		let promptHandler = PKCPromptHandler(new("PKCPromptHandler"));
 		promptHandler.menu = self;		
 		
 		//create Yes button:
 		vector2 buttonsize = (100,60);
-		let yesButton = new("PKCButton").Init(
+		let yesButton = PKZFButton.Create(
 			(100,160),
 			buttonsize,
 			text:Stringtable.Localize("$TAROT_YES"),
@@ -440,11 +426,10 @@ Class PKCardsMenu : PKCGenericMenu {
 			textscale:PK_MENUTEXTSCALE*1.5,
 			textColor:Font.FindFontColor('PKBaseText')
 		);
-		yesButton.SetTexture("","","","");
 		yesButton.pack(promptPopup);
 		
 		//create No button:
-		let noButton = new("PKCButton").Init(
+		let noButton = PKZFButton.Create(
 			(440,160),
 			buttonsize,
 			text:Stringtable.Localize("$TAROT_NO"),
@@ -454,8 +439,39 @@ Class PKCardsMenu : PKCGenericMenu {
 			textscale:PK_MENUTEXTSCALE*1.5,
 			textColor:Font.FindFontColor('PKBaseText')
 		);
-		noButton.SetTexture("","","","");
 		noButton.pack(promptPopup);
+	}
+	
+	void ShowFirstUsePopup() {
+		vector2 popuppos = (192,160);
+		vector2 popupsize = (640,260);
+			
+		string firstUseLine = Stringtable.Localize("$TAROT_FIRSTUSE");
+		//show "first use" text popup (doesn't block the board):
+		promptPopup = PKCBoardMessage.Create(
+			popuppos,
+			popupsize,
+			firstUseLine,
+			textscale:PK_MENUTEXTSCALE* 1.2,
+			alignment: PKZFElement.AlignType_HCenter
+		);
+		promptPopup.pack(mainFrame);
+		
+		let promptHandler = PKCPromptHandler(new("PKCPromptHandler"));
+		promptHandler.menu = self;
+		
+		vector2 buttonsize = (100,60);
+		let okButton = PKZFButton.Create(
+			(265,160),
+			buttonsize,
+			text:Stringtable.Localize("$TAROT_CLOSE"),
+			cmdhandler:promptHandler,
+			command:"CancelPrompt",
+			fnt:font_times,
+			textscale:PK_MENUTEXTSCALE*1.5,
+			textColor:Font.FindFontColor('PKBaseText')
+		);
+		okButton.pack(promptPopup);
 	}
 
 	void ShowPurchasePopup(PKCTarotCard card, bool unequip = false) {
@@ -466,15 +482,14 @@ Class PKCardsMenu : PKCGenericMenu {
 		vector2 popuppos = (192,160);
 		vector2 popupsize = (640,260);
 		
-		promptPopup = New("PKCBoardMessage");
-		promptPopup.pack(mainFrame);
-		promptPopup.Init(
+		promptPopup = PKCBoardMessage.Create(
 			popuppos,
 			popupsize,
 			card.cardname,
 			textscale:PK_MENUTEXTSCALE* 1.4,
-			alignment: PKCElement.AlignType_HCenter
+			alignment: PKZFElement.AlignType_HCenter
 		);
+		promptPopup.pack(mainFrame);
 		
 		int gold;
 		if (goldcontrol)
@@ -486,12 +501,12 @@ Class PKCardsMenu : PKCGenericMenu {
 		else
 			purchaseLine = (gold >= card.cardcost) ? Stringtable.Localize("$TAROT_PAYTOUNEQUIP") : Stringtable.Localize("$TAROT_CANTUNEQUIP");
 		vector2 purchaseTextofs = (16,16);	
-		let purchaseText = new("PKCLabel").Init(
+		let purchaseText = PKZFLabel.Create(
 			purchaseTextofs+(0,40),
 			popupsize-(purchaseTextofs*1.2),
 			String.Format(purchaseLine,card.cardCost), 
 			font_times,
-			alignment: PKCElement.AlignType_HCenter,
+			alignment: PKZFElement.AlignType_HCenter,
 			textscale:PK_MENUTEXTSCALE*1,
 			textcolor: Font.FindFontColor('PKBaseText'),
 			linespacing: 0.1
@@ -506,9 +521,7 @@ Class PKCardsMenu : PKCGenericMenu {
 		
 		if (gold >= card.cardcost) {		
 			//create Yes button:
-			let yesButton = new("PKCButton");
-			yesButton.pack(promptPopup);
-			yesButton.Init(
+			let yesButton = PKZFButton.Create(
 				(100,160),
 				buttonsize,
 				text:Stringtable.Localize("$TAROT_YES"),
@@ -518,13 +531,11 @@ Class PKCardsMenu : PKCGenericMenu {
 				textscale:PK_MENUTEXTSCALE*1.5,
 				textColor:Font.FindFontColor('PKBaseText')
 			);
-			yesButton.SetTexture("","","","");		
+			yesButton.pack(promptPopup);
 			
 		
 			//create No button:
-			let noButton = new("PKCButton");
-			noButton.pack(promptPopup);
-			noButton.Init(
+			let noButton = PKZFButton.Create(
 				(440,160),
 				buttonsize,
 				text:Stringtable.Localize("$TAROT_NO"),
@@ -534,14 +545,12 @@ Class PKCardsMenu : PKCGenericMenu {
 				textscale:PK_MENUTEXTSCALE*1.5,
 				textColor:Font.FindFontColor('PKBaseText')
 			);
-			noButton.SetTexture("","","","");
+			noButton.pack(promptPopup);
 		}
 		
 		else {		
 			//create Close button:
-			let okButton = new("PKCButton");
-			okButton.pack(promptPopup);
-			okButton.Init(
+			let okButton = PKZFButton.Create(
 				(265,160),
 				buttonsize,
 				text:Stringtable.Localize("$TAROT_CLOSE"),
@@ -551,7 +560,7 @@ Class PKCardsMenu : PKCGenericMenu {
 				textscale:PK_MENUTEXTSCALE*1.5,
 				textColor:Font.FindFontColor('PKBaseText')
 			);
-			okButton.SetTexture("","","","");	
+			okButton.pack(promptPopup);
 		}			
 	}
 	
@@ -567,22 +576,21 @@ Class PKCardsMenu : PKCGenericMenu {
 		string cost = String.Format("%d%s",card.cardcost,Stringtable.Localize("$TAROT_GOLDABR")); //cost and the abbreviation for "gold"
 		
 		if (!cardinfo) {
-			cardinfo = New("PKCBoardMessage");
-			cardinfo.pack(mainFrame);
-			cardinfo.Init(
+			cardinfo = PKCBoardMessage.Create(
 				tippos,
 				tipsize,
 				title,
 				textscale:PK_MENUTEXTSCALE*1.2,
 				textcolor: Font.FindFontColor('PKRedText')
 			);
+			cardinfo.pack(mainFrame);
 		}
 		else {
-			cardinfo.hidden = false;
+			cardinfo.Show();
 			cardinfo.text = title;
 		}
 		if (!cardinfoTip) {
-			cardinfoTip = new("PKCLabel").Init(
+			cardinfoTip = PKZFLabel.Create(
 				tiptextofs+(0,48),
 				tipsize-(tiptextofs*1.2),
 				desc, 
@@ -594,14 +602,14 @@ Class PKCardsMenu : PKCGenericMenu {
 			cardinfoTip.Pack(cardinfo);	
 		}
 		else
-			cardinfoTip.text = desc;
+			cardinfoTip.SetText(desc);
 		if (!cardinfoCost) {
-			cardinfoCost = new("PKCLabel").Init(
+			cardinfoCost = PKZFLabel.Create(
 				tiptextofs+(185,0),
 				(160,64),
 				cost, 
 				font_times,
-				alignment:PKCElement.AlignType_TopRight,
+				alignment:PKZFElement.AlignType_TopRight,
 				textscale:1,
 				textcolor: Font.FindFontColor('PKGreenText'),
 				linespacing: 0.1
@@ -609,45 +617,47 @@ Class PKCardsMenu : PKCGenericMenu {
 			cardinfoCost.Pack(cardinfo);	
 		}
 		else {
-			cardinfoCost.text = cost;
-			cardinfoCost.hidden = card.cardbought;
+			cardinfoCost.SetText(cost);
+			if (card.cardbought)
+				cardinfoCost.Show();
+			else
+				cardinfoCost.Hide();
 		}
 	}
 
-    override bool MenuEvent (int mkey, bool fromcontroller) {
-        if (mkey == MKEY_Back) {
-			//show "mouse needed" message if no mouse detected
-			if (needMousePopup) {
-				S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-				PKCCloseBoard();
-				return true;
-			}
-			if  (firstUse) {
-				//if first use prompt is active, hitting Esc will close the popup, not the menu:
-				if (firstUsePopup) {
-					S_StartSound("ui/menu/open",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-					firstUsePopup.Unpack();
-					firstUsePopup.destroy();
-					return false;
-				}			
-				//if exit prompt is active, hitting Esc will close the popup, not the menu:
-				if (promptPopup && promptPopup.isEnabled()) {
-					S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-					promptPopup.hidden = true;
-					promptPopup.disabled = true;
-				}
-				//otherwise draw a Yes/No exit prompt:
-				else
-					ShowExitPopup();
-				return false;
-			}
-			//if not first use, just close the board with the right sound
-			else {
-				PKCCloseBoard();
-				return true;
-			}
+    override void HandleBack () {
+		//show "mouse needed" message if no mouse detected
+		if (needMousePopup) {
+			S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+			PKCCloseBoard();
+			super.HandleBack();
+			return;
 		}
-		return false;
+		if  (firstUse) {
+			//if first use prompt is active, hitting Esc will close the popup, not the menu:
+			/*if (firstUsePopup) {
+				S_StartSound("ui/menu/open",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+				firstUsePopup.Unpack();
+				firstUsePopup.destroy();
+				return;
+			}*/			
+			//if exit prompt is active, hitting Esc will close the popup, not the menu:
+			if (promptPopup && promptPopup.isEnabled()) {
+				S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+				promptPopup.Hide();
+				promptPopup.Disable();
+			}
+			//otherwise draw a Yes/No exit prompt:
+			else
+				ShowExitPopup();
+			return;
+		}
+		//if not first use, just close the board with the right sound
+		else {
+			PKCCloseBoard();
+			super.HandleBack();
+			return;
+		}
     }
 	
 	void DeselectCard() {
@@ -659,11 +669,11 @@ Class PKCardsMenu : PKCGenericMenu {
 			Close();
 			return;
 		}
-		if ((promptPopup && promptPopup.isEnabled()) || needMousePopup) {
-			boardElements.disabled = true;
+		if ((promptPopup && promptPopup.isEnabled()) || needMousePopup || firstUsePopup) {
+			boardElements.Disable();
 		}
 		else {
-			boardElements.disabled = false;
+			boardElements.Enable();
 		}
 		
 		if (needMousePopup) {
@@ -693,31 +703,30 @@ Class PKCardsMenu : PKCGenericMenu {
 			for (int i = 0; i < cardslots.Size(); i++) {
 				let cardslot = cardslots[i];
 				if (cardslot && cardslot.placedcard == SelectedCard) {					
-					SelectedCard.box.pos = cardslot.slotpos;
-					SelectedCard.box.size = cardslot.slotsize;
+					SelectedCard.SetBox(cardslot.slotpos, cardslot.slotsize);
 					SelectedCard.buttonscale = (1,1);
 					selectedCard = null;
 					break;
 				}
 			}
 			if (selectedCard) {
-				SelectedCard.box.pos = boardelements.screenToRel((mouseX,mouseY)) - SelectedCard.box.size / 2;
+				SelectedCard.SetBox(boardelements.screenToRel(GetMousePos()) - SelectedCard.GetSize() / 2, SelectedCard.GetSize());
 			}
 		}
 		//show card info if mouse hovers over a card and there's no card selected:
-		if ((!cardinfo || cardinfo.hidden) && HoveredCard && HoveredCard.isEnabled() && !HoveredCard.hidden && !SelectedCard)
+		if ((!cardinfo || cardinfo.isHidden()) && HoveredCard && HoveredCard.isEnabled() && !HoveredCard.isHidden() && !SelectedCard)
 			ShowCardToolTip(HoveredCard);
 		//as soon as you hover off the card, immediately remove card info:
-		if (cardinfo && !cardinfo.hidden && (!HoveredCard || !HoveredCard.isEnabled() || HoveredCard.hidden || SelectedCard)) {
-			cardinfo.hidden = true;
+		if (cardinfo && !cardinfo.isHidden() && (!HoveredCard || !HoveredCard.isEnabled() || HoveredCard.isHidden() || SelectedCard)) {
+			cardinfo.Hide();
 		}
 		//exit button continuously flashes, like in original:
 		if (exitbutton) {
-			if (exitbutton.alpha <= 0.25)
+			if (exitbutton.GetAlpha() <= 0.25)
 				ExitAlphaDir = 1;
-			else if (exitbutton.alpha >= 1)
+			else if (exitbutton.GetAlpha() >= 1)
 				ExitAlphaDir = -1;
-			exitbutton.alpha = (exitbutton.isHovered && !SelectedCard) ? 1.0 : Clamp(exitbutton.alpha+0.05*ExitAlphaDir,0.25,1.0);
+			exitbutton.SetAlpha( (exitbutton.isHovered() && !SelectedCard) ? 1.0 : Clamp(exitbutton.GetAlpha()+0.05*ExitAlphaDir,0.25,1.0) );
 		}
 		super.Ticker();
 	}
@@ -727,66 +736,65 @@ Class PKCardsMenu : PKCGenericMenu {
 	A generalized Board message frame that includes a lighter outline,
 	a darker inner image, and a slot for text. Use by popups.
 */
-Class PKCBoardMessage : PKCFrame {
+Class PKCBoardMessage : PKZFFrame {
 	private int dur;
 	string text;
-	PKCLabel msgPrompt;
-	PKCBoardMessage init (vector2 msgpos, vector2 msgsize, string msgtext = "", double TextScale = 1.0, int TextColor = 0,  AlignType alignment = AlignType_TopLeft) {
-		self.setBox(msgpos, msgsize);
-		self.alpha = 1;
+	PKZFLabel msgPrompt;
+	static PKCBoardMessage Create (vector2 msgpos, vector2 msgsize, string msgtext = "", double TextScale = 1.0, int TextColor = 0,  AlignType alignment = AlignType_TopLeft) {
+		let ret = new('PKCBoardMessage');
+
+		ret.setBox(msgpos, msgsize);
+		ret.alpha = 1;
 	
-		let outline = new("PKCImage");
-		outline.Pack(self);
-		outline.Init(
+		let outline = PKZFImage.Create(
 			(0,0),
 			msgsize,
 			"graphics/HUD/Tarot/tooltip_bg_outline.png",
 			imagescale:(1.6,1.6),
 			tiled:true
 		);
+		outline.Pack(ret);
 				
 		vector2 intofs = (4,4);
-		let bkg = new("PKCImage");
-		bkg.Pack(self);
-		bkg.Init(
+		let bkg = PKZFImage.Create(
 			intofs,
 			msgsize-(intofs*2),
 			"graphics/HUD/Tarot/tooltip_bg.png",
 			imagescale:(1.6,1.6),
 			tiled:true
 		);
+		bkg.Pack(ret);
 		
 		if (msgtext == "")
-			return self;
-		text = msgtext;
+			return ret;
+		ret.text = msgtext;
 		
 		if (textColor == 0)
-			textcolor = Font.FindFontColor('PKWhiteText');
+			TextColor = Font.FindFontColor('PKWhiteText');
 		
 		vector2 msgTextOfs = intofs+(12,12);
-		msgPrompt = new("PKCLabel");
-		msgPrompt.Pack(self);
-		msgPrompt.Init(
+		ret.msgPrompt = PKZFLabel.Create(
 			msgTextOfs,
 			msgsize-(msgTextOfs*2),
-			text,
+			ret.text,
 			font_times,
 			alignment: alignment,
 			textscale: TextScale,
 			textcolor: TextColor
 		);		
-		return self;
+		ret.msgPrompt.Pack(ret);
+		return ret;
 	}
 	override void drawer() {
 		super.drawer();
 		if (msgPrompt && text)
-			msgPrompt.text = text;
+			msgPrompt.SetText(text);
 	}
 }
 
-Class PKCGoldCounter : PKCFrame {
+Class PKCGoldCounter : PKZFFrame {
 	PK_CardControl goldcontrol;	//this item holds the amount of gold
-	PKCImage GoldDigits[6]; //there's a total of 6 digits
+	PKZFImage GoldDigits[6]; //there's a total of 6 digits
 	vector2 DigitPos[6];
 	//digits are not spaced totally evently, so we define their X pos explicitly:
 	static const int PKCGoldDigitXPos[] = { -3, 24, 53, 82, 111, 141 };
@@ -794,30 +802,30 @@ Class PKCGoldCounter : PKCFrame {
 	
 	DynamicValueInterpolator GoldInterpolator[6];
 	
-	PKCGoldCounter init(Vector2 pos, Vector2 size) {
-		self.setBox(pos, size);
-		self.alpha = 1;
+	static PKCGoldCounter Create(Vector2 pos, Vector2 size) {
+		let ret = new('PKCGoldCounter');
+		ret.setBox(pos, size);
+		ret.alpha = 1;
 		
 		//the rightmost digit of the counter is always 0 since max gold is 99990, so we just draw it here and don't modify it further:
 		vector2 digitsize = (27,50);
-		let img = new("PKCImage");
-		img.pack(self);
-		img.Init(
+		let img = PKZFImage.Create(
 			(-3,-5),
 			digitsize,
 			"PKCNUMS"
 		);
-		DigitPos[0] = img.box.pos;
-		GoldDigits[0] = img;
+		img.pack(ret);
+		ret.DigitPos[0] = img.GetPos();
+		ret.GoldDigits[0] = img;
 		
 		for (int i = 5; i > 0; i--) {
-			GoldInterpolator[i] = DynamicValueInterpolator.Create(0,0.1,4,64);
+			ret.GoldInterpolator[i] = DynamicValueInterpolator.Create(0,0.1,4,64);
 		}
 		
 		//cast the gold item
-		goldcontrol = PK_CardControl(players[consoleplayer].mo.FindInventory("PK_CardControl"));
+		ret.goldcontrol = PK_CardControl(players[consoleplayer].mo.FindInventory("PK_CardControl"));
 
-		return self;
+		return ret;
 	}
 	
 	override void ticker() {
@@ -851,13 +859,12 @@ Class PKCGoldCounter : PKCFrame {
 				GoldDigits[i].destroy();
 			}			
 			//draw a new digit graphic with the required offset
-			let img = new("PKCImage");
-			img.pack(self);
-			img.Init(
+			let img = PKZFImage.Create(
 				digitpos,
 				digitsize,
 				"PKCNUMS"
 			);
+			img.pack(self);
 			if (newY != targetYofs && abs((newY+5) % 64) <= 4)
 				S_StartSound("ui/board/digitchange",CHAN_VOICE,CHANF_UI|CHANF_NOSTOP,volume:snd_menuvolume);
 		
@@ -869,16 +876,23 @@ Class PKCGoldCounter : PKCFrame {
 }
 		
 // Slots are also buttons, but they can hold cards in them
-Class PKCCardSlot : PKCButton {
+Class PKCCardSlot : PKZFButton {
 	vector2 slotpos;
 	vector2 slotsize;
-	PKCButton placedcard;
+	PKZFButton placedcard;
 	bool slottype;
 	int slotID;
+
+	static PKCCardSlot Create(Vector2 pos, Vector2 size, PKZFHandler cmdHandler = NULL, string command = "") {
+		let ret = new('PKCCardSlot');
+		ret.config("", cmdHandler, command, null, null, null, null, null, 1, 0, -1);
+		ret.setBox(pos, size);
+		return ret;
+	}
 }
 
 //cards are buttons that hold various data and also become translucent if not purchased
-Class PKCTarotCard : PKCButton {
+Class PKCTarotCard : PKZFButton {
 	PKCardsMenu menu;
 	bool cardbought;	
 	bool cardlocked;	//is set to true for cards placed in slots once the board has been closed
@@ -894,21 +908,22 @@ Class PKCTarotCard : PKCButton {
 	int purchaseFrame;
 	bool purchaseAnim;
 	TextureID cardtexture;
+	string cardtextureName;
 	override void drawer() {
-		string texture = btnTextures[curButtonState];
+		/*string texture = btnTextures[curButtonState];
 		if (!cardtexture)
-			cardtexture = TexMan.checkForTexture(texture, TexMan.Type_Any);
+			cardtexture = TexMan.checkForTexture(texture, TexMan.Type_Any);*/
 		Vector2 imageSize = TexMan.getScaledSize(cardtexture);			
 		imageSize.x *= buttonScale.x;
 		imageSize.y *= buttonScale.y;
-		drawImage((0,0), texture, true, buttonScale);
+		drawImage((0,0), cardtextureName, true, buttonScale);
 		
 		//fade the card out if it's not purchased (and thus is inaccessible)
 		if (!cardbought)
-			drawTiledImage((0, 0), box.size, "graphics/HUD/Tarot/tooltip_bg.png", true, buttonScale,alpha: 0.75);
+			drawTiledImage((0, 0), GetSize(), "graphics/HUD/Tarot/tooltip_bg.png", true, buttonScale,alpha: 0.75);
 		//fade the card out if it's locked (equipped in a slot and the board has already been used in this map)
 		if (cardlocked)
-			drawTiledImage((0, 0), box.size, "graphics/HUD/Tarot/tooltip_bg.png", true, buttonScale,alpha: 0.4);
+			drawTiledImage((0, 0), GetSize(), "graphics/HUD/Tarot/tooltip_bg.png", true, buttonScale,alpha: 0.4);
 		
 		//otherwise play the burn frame animation
 		else if (purchaseAnim) {
@@ -923,15 +938,28 @@ Class PKCTarotCard : PKCButton {
 			}
 		}
 	}
+	
+	static PKCTarotCard create(Vector2 pos, Vector2 size, string text = "", PKZFHandler cmdHandler = NULL, string command = "",
+	               PKZFBoxTextures inactive = NULL, PKZFBoxTextures hover = NULL, PKZFBoxTextures click = NULL,
+	               PKZFBoxTextures disabled = NULL, Font fnt = NULL, double textScale = 1, int textColor = Font.CR_WHITE,
+	               int holdInterval = -1) {
+		let ret = new('PKCTarotCard');
+
+		ret.config(text, cmdHandler, command, inactive, hover, click, disabled, fnt, textScale, textColor, holdInterval);
+		ret.setBox(pos, size);
+
+		return ret;
+	}
 }
 
 //a separate handler for the exit and purchase prompts
-Class PKCPromptHandler : PKCHandler {
+Class PKCPromptHandler : PKZFHandler {
 	PKCardsMenu menu;
 	PKCTarotCard card;
 	
 	//this handles Yes and No buttons in the popup:
-	override void buttonClickCommand(PKCButton caller, string command) {
+	override void buttonClickCommand(PKZFButton caller, string command) {
+		//Console.printf("buttonClickCommand, %p, %s", caller, command);
 		if (!menu)
 			return;
 		if (!caller || !caller.isEnabled())
@@ -957,8 +985,8 @@ Class PKCPromptHandler : PKCHandler {
 			}
 			let popup = menu.promptPopup;
 			if (popup) {
-				popup.hidden = true;
-				popup.disabled = true;
+				popup.Hide();
+				popup.Disable();
 			}
 		}
 		//No: close the popup
@@ -966,38 +994,38 @@ Class PKCPromptHandler : PKCHandler {
 			S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			let popup = menu.promptPopup;
 			if (popup) {
-				popup.hidden = true;
-				popup.disabled = true;
+				popup.Hide();
+				popup.Disable();
 			}
 		}
 	}
 	
 	//this makes Yes and No buttons slightly grow and become red when hovered:
-	override void elementHoverChanged(PKCElement caller, string command, bool unhovered) {
+	override void elementHoverChanged(PKZFElement caller, string command, bool unhovered) {
 		if (!menu || command == "")
 			return;
 		if (!caller || !caller.isEnabled())
 			return;
-		let btn = PKCButton(caller);			
+		let btn = PKZFButton(caller);			
 		if (!unhovered) {
-			btn.textscale = 1.8;
-			btn.textcolor = Font.FindFontColor('PKRedText');
+			btn.SetTextScale(1.8);
+			btn.SetTextColor(Font.FindFontColor('PKRedText'));
 			S_StartSound("ui/menu/hover",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 		}
 		else {
-			btn.textscale = 1.5;
-			btn.textcolor = Font.FindFontColor('PKBaseText');
+			btn.SetTextScale(1.5);
+			btn.SetTextColor(Font.FindFontColor('PKBaseText'));
 		}
 	}
 }
 
 //the main handler for the board menu
-Class PKCMenuHandler : PKCHandler {
+Class PKCMenuHandler : PKZFHandler {
 	PKCardsMenu menu;
 	PKCCardSlot hoveredslot;
 	//PK_BoardElementsHandler elementsEHandler;
 		
-	override void buttonClickCommand(PKCButton caller, string command) {
+	override void buttonClickCommand(PKZFButton caller, string command) {
 		if (!menu)
 			return;
 		if (!caller || !caller.isEnabled())
@@ -1022,6 +1050,7 @@ Class PKCMenuHandler : PKCHandler {
 		}
 		//card slot: if you have a card picked and click the slot, the card will be placed in it and scaled up to its size:
 		if (command == "CardSlot") {
+			console.printf("trying to click slot");
 			let cardslot = PKCCardSlot(Caller);
 			//check if there's a selected card
 			if (menu.SelectedCard) {
@@ -1029,16 +1058,14 @@ Class PKCMenuHandler : PKCHandler {
 				let card = PKCTarotCard(menu.SelectedCard);
 				//get pointer to previously placed card if there is one:
 				PKCTarotCard placedcard = (cardslot.placedcard) ? PKCTarotCard(cardslot.placedcard) : null;
-				//proceed if slot type matches to card type (silver/gold) and there's no placed card OR there is one but it's not locked:
+				//proceed if slot type matches card type (silver/gold) and there's no placed card OR there is one but it's not locked:
 				if (card.slottype == cardslot.slottype && (!placedcard || !placedcard.cardlocked)) {
-					card.box.pos = cardslot.slotpos;
-					card.box.size = cardslot.slotsize;
+					card.SetBox(cardslot.slotpos, cardslot.slotsize);
 					card.buttonscale = (1,1);
 					menu.SelectedCard = null; //detach from cursor
 					//if there was a card placed in the slot, move that card back to its default pos before placing this one
 					if (placedcard) {
-						placedcard.box.size = placedcard.defaultsize;
-						placedcard.box.pos = placedcard.defaultpos;
+						placedcard.SetBox(placedcard.defaultpos, placedcard.defaultsize);
 						placedcard.buttonscale = placedcard.defaultscale;
 					}
 					//attach the card to slot
@@ -1063,14 +1090,13 @@ Class PKCMenuHandler : PKCHandler {
 					return;
 				}
 				else {
-					card.box.size = card.defaultsize;
+					card.SetBox(card.GetPos(),  card.defaultsize);
 					card.buttonscale = card.defaultscale;
 					S_StartSound("ui/board/takecard",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 					cardslot.placedcard = null;
 					menu.SelectedCard = card;
 					//move it to the top of the elements array so that it's rendered on the top layer:
-					menu.boardelements.elements.delete(menu.boardelements.elements.find(card));
-					menu.boardelements.elements.push(card);
+					menu.boardelements.moveElement(menu.boardelements.indexOfElement(card), menu.boardelements.elementCount() - 1);
 					EventHandler.SendNetworkEvent("PKCClearSlot",cardslot.slotID);
 				}
 			}
@@ -1095,19 +1121,18 @@ Class PKCMenuHandler : PKCHandler {
 				S_StartSound("ui/board/takecard",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 				menu.SelectedCard = card;
 				//move it to the top of the elements array so that it's rendered on the top layer:
-				menu.boardelements.elements.delete(menu.boardelements.elements.find(card));
-				menu.boardelements.elements.push(card);
+				menu.boardelements.moveElement(menu.boardelements.indexOfElement(card), menu.boardelements.elementCount() - 1);
 			}
 			//if we already have a card, put it back
 			else {
 				S_StartSound("ui/board/returncard",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-				card.box.pos = card.defaultpos;
+				card.SetBox(card.defaultpos, card.GetSize());
 				menu.SelectedCard = null;
 			}
 		}
 	}
 	
-	override void elementHoverChanged(PKCElement caller, string command, bool unhovered) {
+	override void elementHoverChanged(PKZFElement caller, string command, bool unhovered) {
 		if (!menu)
 			return;
 		if (!caller || !caller.isEnabled())
@@ -1126,23 +1151,21 @@ Class PKCMenuHandler : PKCHandler {
 				hoveredslot = PKCCardSlot(Caller);
 				if (hoveredslot.slottype == 1) {
 					if (menu.goldSlotsInfo)
-						menu.goldSlotsInfo.hidden = false;
-					menu.boardelements.elements.delete(menu.boardelements.elements.find(menu.goldSlotsInfo));
-					menu.boardelements.elements.push(menu.goldSlotsInfo);
+						menu.goldSlotsInfo.Show();
+					menu.boardelements.moveElement(menu.boardelements.indexOfElement(menu.goldSlotsInfo), menu.boardelements.elementCount() - 1);
 				}
 				else {
 					if (menu.silverSlotsInfo)
-						menu.silverSlotsInfo.hidden = false;
-					menu.boardelements.elements.delete(menu.boardelements.elements.find(menu.silverSlotsInfo));
-					menu.boardelements.elements.push(menu.silverSlotsInfo);
+						menu.silverSlotsInfo.Show();
+					menu.boardelements.moveElement(menu.boardelements.indexOfElement(menu.silverSlotsInfo), menu.boardelements.elementCount() - 1);
 				}
 			}
 			else {
 				hoveredslot = null;
 				if (menu.goldSlotsInfo)
-					menu.goldSlotsInfo.hidden = true;
+					menu.goldSlotsInfo.Hide();
 				if (menu.silverSlotsInfo)
-					menu.silverSlotsInfo.hidden = true;
+					menu.silverSlotsInfo.Hide();
 			}
 		}
 		if (command == "HandleCard") {

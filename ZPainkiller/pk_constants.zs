@@ -1,4 +1,7 @@
 const font_times = "TimesS2";
+const PK_BOARD_WIDTH = 1024;
+const PK_BOARD_HEIGHT = 768;
+const PK_MENUTEXTSCALE = 1;
 
 enum PK_WeaponLayers {
 	PSP_UNDERGUN 	= -1,

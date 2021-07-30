@@ -1,0 +1,70 @@
+class PKZFFocusLinkHelper ui {
+	private Array<PKZFElement> elements;
+	private uint width;
+	private uint height;
+	private bool horzWraparound;
+	private bool vertWraparound;
+
+	static PKZFFocusLinkHelper create(uint width, uint height, bool horzWraparound, bool vertWraparound) {
+		let ret = new("PKZFFocusLinkHelper");
+
+		ret.width = width;
+		ret.height = height;
+		ret.elements.resize(width * height);
+		ret.horzWraparound = horzWraparound;
+		ret.vertWraparound = vertWraparound;
+
+		return ret;
+	}
+
+	void setElement(uint row, uint col, PKZFElement elem) {
+		if (row >= height) throwAbortException("row >= height");
+		if (col >= width) throwAbortException("col >= width");
+		elements[row * width + col] = elem;
+	}
+
+	private void setUp(uint row, uint col) {
+		let newRow = row - 1;
+		if (row == 0) {
+			if (!vertWraparound) return;
+			newRow = height - 1;
+		}
+		elements[row * width + col].setFocusNeighbor(PKZFNavEventType_Up, elements[newRow * width + col]);
+	}
+	private void setDown(uint row, uint col) {
+		let newRow = row + 1;
+		if (row == height - 1) {
+			if (!vertWraparound) return;
+			newRow = 0;
+		}
+		elements[row * width + col].setFocusNeighbor(PKZFNavEventType_Down, elements[newRow * width + col]);
+	}
+	private void setLeft(uint row, uint col) {
+		let newCol = col - 1;
+		if (col == 0) {
+			if (!horzWraparound) return;
+			newCol = width - 1;
+		}
+		elements[row * width + col].setFocusNeighbor(PKZFNavEventType_Left, elements[row * width + newCol]);
+	}
+	private void setRight(uint row, uint col) {
+		let newCol = col + 1;
+		if (col == width - 1) {
+			if (!horzWraparound) return;
+			newCol = 0;
+		}
+		elements[row * width + col].setFocusNeighbor(PKZFNavEventType_Right, elements[row * width + newCol]);
+	}
+
+	void setLinks() {
+		for (uint r = 0; r < height; r++) {
+			for (uint c = 0; c < width; c++) {
+				if (elements[r * width + c] == NULL) continue;
+				setUp(r, c);
+				setDown(r, c);
+				setLeft(r, c);
+				setRight(r, c);
+			}
+		}
+	}
+}

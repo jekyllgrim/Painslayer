@@ -1,0 +1,180 @@
+class PKZFTabs : PKZFElementContainer {
+	protected Array<PKZFRadioButton> tabLabels;
+	protected Array<PKZFFrame> tabFrames;
+	protected PKZFRadioController curTab;
+
+	protected double tabHeight;
+	double getTabHeight() { return self.tabHeight; }
+	void setTabHeight(double tabHeight) { self.tabHeight = tabHeight; }
+
+	protected double tabLabelMargin;
+	double getTabLabelMargin() { return self.tabLabelMargin; }
+	void setTabLabelMargin(double tabLabelMargin) { self.tabLabelMargin = tabLabelMargin; }
+
+	protected Font tabFont;
+	Font getTabFont() { return self.tabFont; }
+	void setTabFont(Font tabFont) {
+		if (tabFont == NULL) {
+			self.tabFont = smallfont;
+		}
+		else {
+			self.tabFont = tabFont;
+		}
+	}
+
+	protected double tabTextScale;
+	double getTabTextScale() { return self.tabTextScale; }
+	void setTabTextScale(double tabTextScale) { self.tabTextScale = tabTextScale; }
+
+	protected PKZFBoxTextures tabNormal;
+	PKZFBoxTextures getTabNormalTexture() { return self.tabNormal; }
+	void setTabNormalTexture(PKZFBoxTextures tabNormal) { self.tabNormal = tabNormal; setTabLabelBoxes(); }
+
+	protected PKZFBoxTextures tabHover;
+	PKZFBoxTextures getTabHoverTexture() { return self.tabHover; }
+	void setTabHoverTexture(PKZFBoxTextures tabHover) { self.tabHover = tabHover; setTabLabelBoxes(); }
+
+	protected PKZFBoxTextures tabActive;
+	PKZFBoxTextures getTabActiveTexture() { return self.tabActive; }
+	void setTabActiveTexture(PKZFBoxTextures tabActive) { self.tabActive = tabActive; setTabLabelBoxes(); }
+
+	protected uint tabFocus;
+
+	protected int lastTab;
+
+	protected bool setBoxes;
+	void setTabLabelBoxes() {
+		if (setBoxes) {
+			double curX = 0.0;
+			for (int i = 0; i < tabLabels.size(); i++) {
+				let l = tabLabels[i];
+				l.setBox((curX, 0.0), (tabFont.stringWidth(l.getText()) * tabTextScale + 2.0 * tabLabelMargin, tabHeight));
+				l.config(curTab, i, tabNormal, tabHover, tabActive, NULL, l.getText(), tabFont, tabTextScale);
+				curX += l.box.size.x;
+			}
+		}
+	}
+	
+	void config(
+		double tabHeight, double tabLabelMargin, Font tabFont = NULL, double tabTextScale = 1.0,
+		PKZFBoxTextures tabNormal = NULL, PKZFBoxTextures tabHover = NULL, PKZFBoxTextures tabActive = NULL
+	) {
+		self.setBoxes = false;
+
+		setTabHeight(tabHeight);
+		setTabLabelMargin(tabLabelMargin);
+		setTabFont(tabFont);
+		setTabTextScale(tabTextScale);
+		setTabNormalTexture(tabNormal);
+		setTabHoverTexture(tabHover);
+		setTabActiveTexture(tabActive);
+		setAlpha(1.0);
+
+		self.setBoxes = true;
+
+		setTabLabelBoxes();
+	}
+
+	static PKZFTabs create(
+		Vector2 pos, Vector2 size,
+		double tabHeight, double tabLabelMargin, Font tabFont = NULL, double tabTextScale = 1.0,
+		PKZFBoxTextures tabNormal = NULL, PKZFBoxTextures tabHover = NULL, PKZFBoxTextures tabActive = NULL
+	) {
+		let ret = new("PKZFTabs");
+
+		ret.setBox(pos, size);
+		ret.curTab = new("PKZFRadioController");
+		ret.config(tabHeight, tabLabelMargin, tabFont, tabTextScale, tabNormal, tabHover, tabActive);
+
+		return ret;
+	}
+
+	override void getFocusAABB(PKZFAABB box) {
+		let label = tabLabels[tabFocus];
+		box.pos = label.relToMainFrame((0, 0));
+		box.size = label.box.size;
+	}
+
+	override void beenFocused(PKZFNavEventType type) {
+		switch (type) {
+		case PKZFNavEventType_Left: tabFocus = tabLabels.size() - 1; break;
+
+		case PKZFNavEventType_Right:
+		case PKZFNavEventType_Tab:
+			tabFocus = 0; break;
+
+		case PKZFNavEventType_Down:
+		case PKZFNavEventType_Up:
+			tabFocus = curTab.curVal; break;
+		}
+	}
+
+	void showCorrectTab() {
+		for (int i = 0; i < tabFrames.size(); i++) {
+			if (i == curTab.curVal) { tabFrames[i].show(); }
+			else { tabFrames[i].hide(); }
+		}
+	}
+
+	void addTab(string label) {
+		let button = PKZFRadioButton.create((0, 0), (0, 0), curTab, 0, text: label);
+		let frame = PKZFFrame.create((0.0, tabHeight), (box.size.x, box.size.y - tabHeight));
+
+		button.master = self;
+		frame.master = self;
+
+		elements.push(button);
+		elements.push(frame);
+
+		tabLabels.push(button);
+		tabFrames.push(frame);
+
+		setTabLabelBoxes();
+
+		showCorrectTab();
+	}
+
+	PKZFFrame getTabFrame(int index) {
+		return tabFrames[index];
+	}
+
+	override void topDrawer() {
+		if (curTab.curVal != lastTab) {
+			lastTab = curTab.curVal;
+			showCorrectTab();
+		}
+		Super.topDrawer();
+	}
+
+	override void drawer() {
+		if (curTab.curVal != lastTab) {
+			lastTab = curTab.curVal;
+			showCorrectTab();
+		}
+		Super.drawer();
+	}
+
+	override bool onNavEvent(PKZFNavEventType type, bool fromController) {
+		if (isFocused() && isEnabled()) {
+			switch (type) {
+			case PKZFNavEventType_Right:
+				if (tabFocus != tabLabels.size() - 1) {
+					tabFocus += 1;
+					return true;
+				}
+				break;
+			case PKZFNavEventType_Left:
+				if (tabFocus != 0) {
+					tabFocus -= 1;
+					return true;
+				}
+				break;
+			case PKZFNavEventType_Confirm:
+				curTab.curVal = tabFocus;
+				break;
+			}
+		}
+		return Super.onNavEvent(type, fromController);
+	}
+
+}

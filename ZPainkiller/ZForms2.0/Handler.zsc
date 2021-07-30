@@ -1,0 +1,28 @@
+class PKZFHandler ui {
+	virtual void buttonClickCommand(PKZFButton caller, string command) {
+	}
+	
+	virtual void buttonHeldCommand(PKZFButton caller, string command) {
+	}
+
+	virtual void radioButtonChanged(PKZFRadioButton caller, string command, PKZFRadioController variable) {
+	}
+
+	virtual void toggleButtonChanged(PKZFToggleButton caller, string command, bool on) {
+	}
+
+	virtual void textInputExit(PKZFTextInput caller, string command) {
+	}
+
+	virtual void textInputChanged(PKZFTextInput caller, string command) {
+	}
+
+	virtual void sliderChanged(PKZFSlider caller, string command) {
+	}
+
+	virtual void dropdownChanged(PKZFDropdownList caller, string command) {
+	}
+
+	virtual void elementHoverChanged(PKZFElement caller, string command, bool unhovered) {
+	}
+}
