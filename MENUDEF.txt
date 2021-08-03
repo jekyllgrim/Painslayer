@@ -51,8 +51,9 @@ Optionmenu "PK_Settings" {
 	StaticText ""
 	StaticText "$PKM_SUB_CONTROLS", yellow
 	StaticText ""
+	PKTLTPControl "$PKM_UseCards", "$PKM_UseCards_Desc", "White", "netevent PK_UseGoldenCards"
 	PKTLTPControl "$PKM_OpenTarot", "$PKM_OpenTarot_Desc", "White", "netevent PKCOpenBoard"
-	PKTLTPControl "$PKM_UseCards", "$PKM_UseCards_Desc", "White", "netevent PK_UseGoldenCards"	
+	PKTLTPControl "$PKM_OpenCodex", "$PKM_OpenCodex_Desc", "White", "netevent PKCOpenCodex"	
 	StaticText ""
 	StaticText "$PKM_SUB_GAMEPLAY", yellow
 	StaticText ""

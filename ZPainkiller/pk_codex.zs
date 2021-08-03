@@ -1,136 +1,159 @@
-Class PKCodexMenu : PKCGenericMenu {
-	PKCodexHandler handler;
-	int activeTab;	
-	enum PKCodexTabs {
-		PKCX_Weapons,
-		PKCX_Powerups,
-		PKCX_Gold,
-		PKCX_Cards,
-		
-		PKCX_PainKiller,
-		PKCX_Shotgun,
-		PKCX_Stakegun,
-		PKCX_Chaingun,
-		PKCX_ELD,
-		PKCX_Rifle,
-		PKCX_Boltgun
+enum PKCodexTabs {
+	PKCX_Weapons,
+	PKCX_Powerups,
+	PKCX_Gold,
+	PKCX_Cards,
+	
+	PKCX_PainKiller,
+	PKCX_Shotgun,
+	PKCX_Stakegun,
+	PKCX_Chaingun,
+	PKCX_ELD,
+	PKCX_Rifle,
+	PKCX_Boltgun
+}
+
+Class PKCodexMenu : PKZFGenericMenu {
+	PKCodexTabhandler handler;
+	vector2 backgroundsize;
+	int activeTab;
+
+	PKZFRadioButton CreateTabButton(vector2 pos, vector2 size, String text, PKZFRadioController controller, int value,PKZFBoxTextures inactiveTex, PKZFBoxTextures activeTex = null) {
+		let ret = PKZFRadioButton.Create(
+			pos,
+			size,
+			controller,
+			value,
+			inactive:inactiveTex,
+			hover:(activeTex ? activeTex : inactiveTex),
+			click:(activeTex ? activeTex : inactiveTex),
+			text:text,
+			fnt:font_times,
+			textscale:PK_MENUTEXTSCALE*1.25,
+			textColor:Font.FindFontColor('PKBaseText'),
+			cmdhandler:handler
+		);
+		return ret;
 	}
-		
+	
+	static const string TabNames[] = {
+		"WEAPONS",
+		"POWERUPS",
+		"GOLD",
+		"TAROT"
+	};
+	
+	override void Drawer() {
+		//PK_StatusBarScreen.Fill("46382c",0,0,backgroundsize.x,backgroundsize.y,1);	
+		super.Drawer();
+	}
+	
 	override void Init (Menu parent) {
 		super.Init(parent);
 		S_StartSound("ui/board/open",CHAN_VOICE,CHANF_UI,volume:snd_menuvolume);
 		
 		//first create the background (always 4:3, never stretched)
-		vector2 backgroundsize = (PK_BOARD_WIDTH,PK_BOARD_HEIGHT);	
-		SetBaseResolution(backgroundsize);
-		let background = new("PKCImage");
-		background.Init(
-			(0,0),
-			backgroundsize,
-			image:"graphics/HUD/codexbg.png"
-		);
-		background.Pack(mainFrame);
+		backgroundsize = (PK_BOARD_WIDTH,PK_BOARD_HEIGHT);	
+		SetBaseResolution(backgroundsize);	
 		
-		handler = new("PKCodexHandler");
+		handler = new("PKCodexTabhandler");
 		handler.menu = self;
 		
+		let lightFrame = PKZFBoxTextures.createTexturePixels(
+			"graphics/HUD/Codex/codxbbut1.png",
+			(10,9),
+			(74,75),
+			false, false
+		);
+		let darkFrame = PKZFBoxTextures.createTexturePixels(
+			"graphics/HUD/Codex/codxbbut2.png",
+			(10,9),
+			(74,75),
+			false, false
+		);
+		
+		let backgroundBorder = PKZFBoxImage.Create((0,0), backgroundsize, darkFrame);
+		backgroundBorder.pack(mainFrame);
+		
+		let bord = PKZFBoxTextures.createTexturePixels(
+			"graphics/HUD/Codex/codxbbutn.png",
+			(10,9),
+			(74,75),
+			false, false
+		);
+		
+		let tabController = new("PKZFRadioController");
+		
 		vector2 buttonpos = (32,32);
-		int buttongap = buttonpos.x;
-		vector2 buttonsize = ( (PK_BOARD_WIDTH - (buttongap*5)) / 4, 52);
+		double buttongap = buttonpos.x * 0.5;
+		vector2 buttonsize = ( (PK_BOARD_WIDTH - (buttonpos.x*2 + buttongap * 3)) / 4, 64);
 		
-		let tab_weapons = new("PKCButton").Init(
-			buttonpos,
-			buttonsize,
-			text:Stringtable.Localize("WEAPONS"),
-			cmdhandler:handler,
-			command:"OpenTab_Weapons",
-			fnt:font_times,
-			textscale:PK_MENUTEXTSCALE*1.5,
-			textColor:Font.FindFontColor('PKBaseText')
-		);
-		tab_weapons.SetTexture("","","","");
+		vector2 nextBtnPos = buttonpos;
+		for (int i = 0; i < 4; i++) {
+			let tab = CreateTabButton(nextBtnPos, buttonsize, TabNames[i], tabController, i,  darkFrame, lightFrame);
+			nextBtnPos.x += buttonsize.x + buttongap;
+			tab.Pack(mainFrame);
+		}
+		
+		/*let tab_weapons = CreateTabButton(buttonpos, buttonsize, Stringtable.Localize("WEAPONS"), tabController, PKCX_Weapons,  darkFrame, lightFrame);
 		tab_weapons.pack(mainFrame);
+		nextBtnPos.x += buttonsize.x + buttongap;
+		let tab_powerups = CreateTabButton(nextBtnPos, buttonsize, Stringtable.Localize("POWERUPS"), tabController, PKCX_Powerups, darkFrame, lightFrame);
+		tab_powerups.pack(mainFrame);		
+		nextBtnPos.x += buttonsize.x + buttongap;
+		let tab_Gold = CreateTabButton(nextBtnPos, buttonsize, Stringtable.Localize("GOLD"), tabController, PKCX_Gold,  darkFrame, lightFrame);
+		tab_Gold.pack(mainFrame);		
+		nextBtnPos.x += buttonsize.x + buttongap;
+		let tab_Cards = CreateTabButton(nextBtnPos, buttonsize, Stringtable.Localize("TAROT"), tabController, PKCX_Cards,darkFrame, lightFrame);
+		tab_Cards.pack(mainFrame);*/
 		
-		buttonpos.x += buttonsize.x + buttongap;
-		let tab_powerups = new("PKCButton").Init(
-			buttonpos,
-			buttonsize,
-			text:Stringtable.Localize("POWERUPS"),
-			cmdhandler:handler,
-			command:"OpenTab_Powerups",
-			fnt:font_times,
-			textscale:PK_MENUTEXTSCALE*1.5,
-			textColor:Font.FindFontColor('PKBaseText')
-		);
-		tab_powerups.SetTexture("","","","");
-		tab_powerups.pack(mainFrame);
+		vector2 sectionPos = (buttonpos.x * 0.5, buttonpos.y + buttonsize.y * 1.5);
+		vector2 sectionSize = (PK_BOARD_WIDTH - sectionPos.x * 2, PK_BOARD_HEIGHT - sectionPos.y * 1.25);
 		
-		buttonpos.x += buttonsize.x + buttongap;
-		let tab_Gold = new("PKCButton").Init(
-			buttonpos,
-			buttonsize,
-			text:Stringtable.Localize("GOLD"),
-			cmdhandler:handler,
-			command:"OpenTab_Gold",
-			fnt:font_times,
-			textscale:PK_MENUTEXTSCALE*1.5,
-			textColor:Font.FindFontColor('PKBaseText')
-		);
-		tab_Gold.SetTexture("","","","");
-		tab_Gold.pack(mainFrame);
-		
-		buttonpos.x += buttonsize.x + buttongap;
-		let tab_Cards = new("PKCButton").Init(
-			buttonpos,
-			buttonsize,
-			text:Stringtable.Localize("BLACK TAROT"),
-			cmdhandler:handler,
-			command:"OpenTab_Cards",
-			fnt:font_times,
-			textscale:PK_MENUTEXTSCALE*1.5,
-			textColor:Font.FindFontColor('PKBaseText')
-		);
-		tab_Cards.SetTexture("","","","");
-		tab_Cards.pack(mainFrame);
+		let sectionBorder = PKZFBoxImage.Create(sectionPos, sectionSize, lightFrame);
+		sectionBorder.pack(mainFrame);
 	}
 }
 
-Class PKCodexHandler : PKCHandler {
+Class PKCodexTabhandler : PKZFHandler {
 	PKCodexMenu menu;
-	override void buttonClickCommand(PKCButton caller, string command) {
+	override void radioButtonChanged(PKZFRadioButton caller, string command, PKZFRadioController variable) {
 		if (!menu)
 			return;
 		if (!caller || !caller.isEnabled())
 			return;
-		if (command == "OpenTab_Weapons") {	
+		if (caller.getValue() == PKCX_Weapons) {
 			S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			return;
 		}
-		if (command == "OpenTab_Powerups") {	
+		if (caller.getValue() == PKCX_Powerups) {	
 			S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			return;
 		}
-		if (command == "OpenTab_Cards") {	
+		if (caller.getValue() == PKCX_Cards) {	
 			S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			return;
 		}
-		if (command == "OpenTab_Gold") {	
+		if (caller.getValue() == PKCX_Gold) {	
 			S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			return;
 		}
 	}
-	override void elementHoverChanged(PKCElement caller, string command, bool unhovered) {
-		if (!menu || command == "")
+	override void elementHoverChanged(PKZFElement caller, string command, bool unhovered) {
+		if (!menu)
 			return;
 		if (!caller || !caller.isEnabled())
 			return;
-		let btn = PKCButton(caller);			
+		let btn = PKZFRadioButton(caller);
+		if (!btn)
+			return;
 		if (!unhovered) {
-			btn.textcolor = Font.FindFontColor('PKRedText');
+			btn.SetTextColor(Font.FindFontColor('PKRedText'));
 			S_StartSound("ui/menu/hover",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 		}
 		else {
-			btn.textcolor = Font.FindFontColor('PKBaseText');
+			btn.SetTextColor(Font.FindFontColor('PKBaseText'));
 		}
 	}
 }
+

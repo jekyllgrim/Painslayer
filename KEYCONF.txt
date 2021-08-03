@@ -4,5 +4,10 @@ alias "PKCONSUME" "netevent PK_GiveSouls %1"
 alias "PKDEMON" "netevent PK_DemonMorph"
 
 addkeysection "Painslayer" PainslayerKeys
-addmenukey "$PK_OPENBOARD" 		"netevent PKCOpenBoard"
-addmenukey "$PK_USEGOLDCARDS" 	"netevent PK_UseGoldenCards"
+addmenukey "$PKM_OpenTarot" 	"netevent PKCOpenBoard"
+addmenukey "$PKM_OpenCodex" 	"netevent PKCOpenCodex"
+addmenukey "$PKM_UseCards" 		"netevent PK_UseGoldenCards"
+
+defaultbind Y "netevent PKCOpenBoard"
+defaultbind H "netevent PKCOpenCodex"
+defaultbind F "netevent PK_UseGoldenCards"
