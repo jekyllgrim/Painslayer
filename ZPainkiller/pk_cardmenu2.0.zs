@@ -1150,12 +1150,12 @@ Class PKCMenuHandler : PKZFHandler {
 			if (!unhovered) {
 				hoveredslot = PKCCardSlot(Caller);
 				if (hoveredslot.slottype == 1) {
-					if (menu.goldSlotsInfo)
+					if (menu.goldSlotsInfo && menu.goldSlotsInfo.isHidden())
 						menu.goldSlotsInfo.Show();
 					menu.boardelements.moveElement(menu.boardelements.indexOfElement(menu.goldSlotsInfo), menu.boardelements.elementCount() - 1);
 				}
 				else {
-					if (menu.silverSlotsInfo)
+					if (menu.silverSlotsInfo && menu.silverSlotsInfo.isHidden())
 						menu.silverSlotsInfo.Show();
 					menu.boardelements.moveElement(menu.boardelements.indexOfElement(menu.silverSlotsInfo), menu.boardelements.elementCount() - 1);
 				}
