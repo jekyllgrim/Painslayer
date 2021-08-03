@@ -56,3 +56,4 @@ version "4.6.0"
 #include "ZPainkiller/w_boltgun.zs"
 #include "ZPainkiller/pk_hud.zs"
 #include "ZPainkiller/pk_cardmenu2.0.zs" //zforms 2.0pre version
+#include "ZPainkiller/pk_codex.zs"
