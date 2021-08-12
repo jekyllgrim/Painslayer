@@ -1102,32 +1102,25 @@ Sprite "BGUND0", 186, 105
 	Patch "BGUND", 0, 0
 }
 
-Sprite "BGUSA0", 186, 105
+Sprite "BGUSE0", 186, 105
 {
 	YScale 1.200
 	Offset -126, -106
 	Patch "BGUSE", 0, 0
 }
 
-Sprite "BGUSB0", 186, 105
+Sprite "BGUSA0", 19, 19
 {
-	YScale 1.200
-	Offset -126, -106
-	Patch "BGUSB", 0, 0
+	YScale 1.2
+	Offset -252, -163
+	Patch "TNT1A0", 0, 0
 }
 
-Sprite "BGUSC0", 186, 105
+Sprite "BGUSF0", 186, 105
 {
 	YScale 1.200
 	Offset -126, -106
 	Patch "BGUSF", 0, 0
-}
-
-Sprite "BGUSD0", 186, 105
-{
-	YScale 1.200
-	Offset -126, -106
-	Patch "BGUSD", 0, 0
 }
 
 Sprite "BGUVA0", 560, 200
