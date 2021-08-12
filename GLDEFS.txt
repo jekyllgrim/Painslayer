@@ -1,3 +1,9 @@
+Material Sprite "BGUSA0"
+{
+	Shader "shaders/CamTexweapon.fp"
+	Texture camTex "Weapon.camtex"
+}
+
 HardwareShader PostProcess Scene
 {
 	Name "DemonMorph"

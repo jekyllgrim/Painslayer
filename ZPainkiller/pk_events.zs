@@ -41,6 +41,17 @@ Class PK_MainHandler : EventHandler {
 		Test_CheckWeaponInInventory("PK_Electrodriver",tx,ty); ty += parag;
 	}*/
 	
+	override void RenderOverlay(renderEvent e) {
+		PlayerInfo plr = players[consoleplayer];
+		if (plr && plr.readyweapon is "PK_Boltgun") {			
+			let camTex = TexMan.CheckForTexture("Weapon.camtex", TexMan.Type_Any);
+			if (camTex.IsValid())
+			{
+				Screen.DrawTexture(camTex, false, 0.0, 0.0, DTA_Alpha, 0.0);
+			}
+		}
+	}
+	
 	array <Actor> demontargets; //holds all monsters, players and enemy projectiles
 	array <Actor> allenemies; //only monsters
 	array <PK_StakeProjectile> stakes; //stake projectiles

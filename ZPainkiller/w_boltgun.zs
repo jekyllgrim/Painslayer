@@ -3,6 +3,8 @@ Class PK_Boltgun : PKWeapon {
 	private int scopedelay;
 	const scopeOfs = 14;
 	private vector2 prevOfs;
+	private PK_ReflectionCamera cam;
+	
 	Default {
 		+PKWeapon.NOAUTOSECONDARY
 		PKWeapon.emptysound "weapons/empty/rifle";
@@ -23,11 +25,19 @@ Class PK_Boltgun : PKWeapon {
 		super.DoEffect();
 		if (!owner || !owner.player)
 			return;
+		let wpn = owner.player.readyweapon;
+		if (wpn == self && !cam) {
+			cam = PK_ReflectionCamera(Spawn("PK_ReflectionCamera", pos));
+			cam.plr = PlayerPawn(owner);
+			TexMan.SetCameraToTexture(cam, "Weapon.camtex", 120/*owner.player.FOV*/);
+		}
+		if (wpn != self && cam) {
+			cam.Destroy();
+		}
 		if (scopedelay > 0) {
 			scopedelay--;
 			return;
 		}
-		let wpn = owner.player.readyweapon;
 		if (wpn != self)
 			return;
 		let plr = owner.player;
@@ -133,18 +143,20 @@ Class PK_Boltgun : PKWeapon {
 			}
 		}
 		wait;
-	Scope:
-		BGUS A -1 {
+	Scope:	
+		BGUS E -1 {
 			A_Overlay(PSP_SCOPE1,"ScopeBase");
 			A_Overlay(PSP_SCOPE2,"ScopeHighlight");
+			A_OverlayFlags(PSP_SCOPE2,PSPF_ALPHA|PSPF_FORCEALPHA,true);
+			A_OverlayAlpha(PSP_SCOPE2,0.5);
 			A_OverlayPivotAlign(PSP_SCOPE2,PSPA_CENTER,PSPA_CENTER);
 		}
 		stop;
 	ScopeBase:
-		BGUS B -1;
+		BGUS A -1;
 		stop;
 	ScopeHighlight:
-		BGUS C 1 {
+		BGUS F 1 {
 			double ofs = 0 + (0.083 * Clamp(pitch,-60,60));			
 			A_OverlayRotate(OverlayID(),Normalize180(angle));
 			A_OverlayOffset(OverlayID(),ofs,ofs,WOF_INTERPOLATE);
@@ -201,12 +213,12 @@ Class PK_Boltgun : PKWeapon {
 		#### D 2 {
 			A_StartSound("weapons/boltgun/reload");
 			A_ClearOverlays(PSP_SCOPE1,PSP_SCOPE3);
-			A_Overlay(PSP_SCOPE1,"ScopeReload");
+			A_Overlay(PSP_SCOPE2,"ScopeReload");
 			return ResolveState(null);
 		}
 		#### EFGHI 2 A_WeaponOffset(-1,-1,WOF_ADD);
 		#### IJKLM 2 A_WeaponOffset(-0.5,-0.5,WOF_ADD);
-		#### # 0 A_Overlay(PSP_SCOPE1,"ScopeReload");
+		#### # 0 A_Overlay(PSP_SCOPE2,"ScopeReload");
 		#### NNOOPPQQRRSSTT 1 A_WeaponOffset(-0.25,-0.25,WOF_ADD);
 		TNT1 A 0 A_WeaponOffset(invoker.prevOfs.x,invoker.prevOfs.y,WOF_INTERPOLATE);
 		goto ready;
@@ -215,21 +227,33 @@ Class PK_Boltgun : PKWeapon {
 		TNT1 A 0 A_WeaponOffset(invoker.prevOfs.x,invoker.prevOfs.y);
 		goto ready;
 	ScopeReload:
-		TNT1 A 0 A_OverlayPivot(OverlayID(),0,1);
-		BGUS DDDD 1 {
+		BGUS E 0 {
+			A_OverlayPivot(OverlayID(),0,1);
+			A_OverlayPivot(PSP_SCOPE1,0,1);
+			A_Overlay(PSP_SCOPE1,"ScopeBase");
+		}
+		#### #### 1 {
 			A_OverlayOffset(OverlayID(),2,-2,WOF_ADD);
 			A_OverlayRotate(OverlayID(),-1.2,WOF_ADD);
 			A_OverlayScale(OverlayID(),0.03,0.03,WOF_ADD);
+			A_OverlayOffset(PSP_SCOPE1,4,-2,WOF_ADD);
+			A_OverlayRotate(PSP_SCOPE1,-1.2,WOF_ADD);
+			A_OverlayScale(PSP_SCOPE1,0.03,0.03,WOF_ADD);
 		}
-		BGUS D 6;
-		BGUS DDDD 1 {
+		#### # 6;
+		#### #### 1 {
 			A_OverlayOffset(OverlayID(),-2,2,WOF_ADD);
 			A_OverlayRotate(OverlayID(),1.2,WOF_ADD);
 			A_OverlayScale(OverlayID(),-0.03,-0.03,WOF_ADD);
+			A_OverlayOffset(PSP_SCOPE1,-4,2,WOF_ADD);
+			A_OverlayRotate(PSP_SCOPE1,1.2,WOF_ADD);
+			A_OverlayScale(PSP_SCOPE1,-0.03,-0.03,WOF_ADD);
 		}
-		BGUS D -1 {
+		#### # -1 {
 			A_OverlayRotate(OverlayID(),0);
 			A_OverlayScale(OverlayID(),1,1);
+			A_OverlayRotate(PSP_SCOPE1,0);
+			A_OverlayScale(PSP_SCOPE1,1,1);
 		}
 		stop;
 	AltFire:
@@ -265,6 +289,30 @@ Class PK_Boltgun : PKWeapon {
 		BGUB JKLMNA 2  A_WeaponOffset(-0.1,-0.1,WOF_ADD);
 		TNT1 A 0 A_WeaponOffset(invoker.prevOfs.x,invoker.prevOfs.y,WOF_INTERPOLATE);
 		goto Ready;
+	}
+}
+
+Class PK_ReflectionCamera : Actor {
+	PlayerPawn plr;
+	Default	{
+		+NOINTERACTION
+		radius 1;
+		height 1;
+	}
+	override void Tick() {
+		if (!plr) {
+			Destroy();
+			return;
+		}
+		Warp(
+			plr, 
+			xofs:-plr.radius, 
+			yofs:8,
+			zofs: plr.player.viewheight - 8
+		);
+		A_SetRoll(plr.roll + 180,SPF_INTERPOLATE);
+		A_SetAngle(plr.angle + 180,SPF_INTERPOLATE);
+		A_SetPitch(plr.pitch * -1,SPF_INTERPOLATE);
 	}
 }
 

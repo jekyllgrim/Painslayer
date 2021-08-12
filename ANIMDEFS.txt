@@ -1,0 +1,1 @@
+CameraTexture "Weapon.camtex" 200 200
