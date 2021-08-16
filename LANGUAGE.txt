@@ -142,6 +142,15 @@ PKM_TITLE			= "Painslayer Settings";
 PKM_TITLE_SHORT	= "Mod Settings";
 PKM_SUB_CONTROLS	= "CONTROLS";
 PKM_SUB_GAMEPLAY	= "GAMEPLAY";
+PKM_PKMovement		= "Painkiller movement physics";
+PKM_PKMovement_Desc = 	"Enables Painkiller movement instead of Doom movement.\n"
+							"This involves different friction, momentum and jumping.\n"
+							"Doesn't work with custom player classes.";
+PKM_PKMAutoJump	= "Allow auto-jumping";
+PKM_PKMAutoJump_Desc	= 	"By default when using Painkiller movement you have to\n"
+							"press 'jump' every time you want to jump.\n"
+							"If you enable this option, you will be able to jump\n"
+							"continuously by holding 'jump', like in Doom.";
 PKM_ALLOWDEMON		= "Allow Demon Mode";
 PKM_ALLOWDEMON_DESC	= 	"By default upon collecting 66 soulds you will turn into Demon.\n"
 							"This option lets you completely disable that feature.";
@@ -399,10 +408,10 @@ PK_HASTE_DESC			= "Замедляет врагов в 4 раза.";
 
 PK_SOULKEEPER_DESC		= "Души врагов никогда не исчезают.";
 PK_BLESSING_DESC		= "Увеличивает базовое здоровье до 150 ед.";
-PK_REPLENISH_DESC		= "В каоробках вдвое больше патронов.";
+PK_REPLENISH_DESC		= "В коробках вдвое больше патронов.";
 PK_DARKSOUL_DESC		= "Для превращения в демона достаточно 50 душ.";
-PK_SOULCATCHER_DESC		= "Вы притягиваете золото и души на расстоянии.";
-PK_FORGIVENESS_DESC		= "Золотые карты можно активировать дважды за уровень.";
+PK_SOULCATCHER_DESC	= "Вы притягиваете золото и души на расстоянии.";
+PK_FORGIVENESS_DESC	= "Золотые карты можно активировать дважды за уровень.";
 PK_GREED_DESC			= "Вы получаете вдвое больше золота.";
 PK_SOULREDEEMER_DESC	= "Души восстанавливают больше здоровья.";
 PK_REGENERATION_DESC	= "Если вам 10 сек. не наносят урон, здоровье начинает восстанавливаться.";
@@ -508,6 +517,15 @@ PKM_TITLE			= "Настройки Painslayer";
 PKM_TITLE_SHORT	= "Настройки мода";
 PKM_SUB_CONTROLS	= "УПРАВЛЕНИЕ";
 PKM_SUB_GAMEPLAY	= "ИГРОВОЙ ПРОЦЕСС";
+PKM_PKMovement		= "Физика движения из Painkiller";
+PKM_PKMovement_Desc = 	"Включить физику перемещения в стиле Painkiller вместо Doom.\n"
+							"Эта настройка влияет на трение, ускорение и прыжки.\n"
+							"Не работает с нестандартными классами игрока.";
+PKM_PKMAutoJump	= "Разрешить автопрыжок";
+PKM_PKMAutoJump_Desc	= 		"По умолчанию при использовании физики движения из Painkiller\n"
+							"нужно нажимать клавишу прыжка всякий раз, когда вы хотите прыгнуть.\n"
+							"Включение этой настройки позволяет прыгать постоянно, просто зажав\n"
+							"клавишу прыжка - как в Doom.";
 PKM_ALLOWDEMON		= "Разрешить превращение в демона";
 PKM_ALLOWDEMON_DESC	= 	"По умолчанию, собрав 66 душ, вы превращаетесь в демона.\n"
 							"Эта настройка позволяет полностью отключить такую возможность.";

@@ -57,6 +57,8 @@ Optionmenu "PK_Settings" {
 	StaticText ""
 	StaticText "$PKM_SUB_GAMEPLAY", yellow
 	StaticText ""
+	PKTLTPOption "$PKM_PKMovement", "$PKM_PKMovement_Desc", "White", "pk_movement", "OnOff"
+	PKTLTPOption "$PKM_PKMAutoJump", "$PKM_PKMAutoJump_Desc", "White", "pkzm_autojump", "OnOff", "pk_movement"
 	PKTLTPOption "$PKM_AutoOpenTarot", "$PKM_AutoOpenTarot_Desc", "White", "pk_autoOpenBoard", "OnOff"
 	PKTLTPScaleSlider "$PKM_QOLCATCHER",	"$PKM_QOLCATCHER_Desc", "White", "pk_QoLCatcherDistance", 0, 96, 8, "$OPTVAL_OFF"
 	PKTLTPOption "$PKM_ALLOWDEMON", "$PKM_ALLOWDEMON_DESC", "White", "pk_allowDemonMorph", "OnOff"

@@ -39,6 +39,7 @@ version "4.6.0"
 #include "ZPainkiller/ZForms2.0/UiEvent.zsc"
 
 //Painslayer:
+#include "ZPainkiller/pk_player.zs"
 #include "ZPainkiller/pk_constants.zs"
 #include "ZPainkiller/pk_main.zs"
 #include "ZPainkiller/pk_menu.zs"

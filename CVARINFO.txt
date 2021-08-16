@@ -5,6 +5,11 @@ server bool pk_allowDemonMorph = true;
 server bool pk_allowFreeCards = true;
 user bool pk_switchChaingunModes = false;
 
+// ZMovement
+
+server bool pk_movement = false;
+server bool pkzm_autojump = false;
+
 //// MENU TOOLTIPS
 
 user bool pktltp_show_tips = true;
