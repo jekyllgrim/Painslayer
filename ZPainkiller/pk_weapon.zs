@@ -6,23 +6,27 @@
 Class PKWeapon : Weapon abstract {
 	mixin PK_Math;
 	protected int PKWflags;
-	FlagDef NOAUTOPRIMARY 		: PKWflags, 0;
-	FlagDef NOAUTOSECONDARY 	: PKWflags, 1;
+	FlagDef NOAUTOPRIMARY 	: PKWflags, 0; //NOAUTOFIRE for primary attack
+	FlagDef NOAUTOSECONDARY 	: PKWflags, 1; //NOAUTOFIRE for secondary attack
 	FlagDef ALWAYSBOB			: PKWflags, 2;
-	sound emptysound;
+	sound emptysound; //clicking sound when trying to fire without ammo
 	property emptysound : emptysound;
-	protected bool hasDexterity;
-	protected bool hasWmod;
-	protected vector2 targOfs;
-	protected vector2 shiftOfs;
-	protected double spitch;
-	protected bool blockFireOnSelect; //a version of NOAUTOFIRE but for one attack only. It also only prevents firing in select and doesn't affect the refire function. See Chaingun and Boltgun
+	protected bool hasDexterity; //player has one of dexterity effects/cards
+	protected bool hasWmod; //player has Weapon Modifier powerup/card
+	protected vector2 targOfs; //used by DampedRandomOffset
+	protected vector2 shiftOfs; //used by DampedRandomOffset
+	protected double spitch; //used by DampedRandomOffset
+	/* a version of NOAUTOFIRE but for one attack only. It also only prevents firing on
+	selection and doesn't affect the refire function. See NOAUTO* flags above. See Chaingun 
+	and Boltgun for implementation:
+	*/
+	protected bool blockFireOnSelect;
 	Default {
 		+PKWeapon.ALWAYSBOB
-		weapon.BobRangeX 0.31;
-		weapon.BobRangeY 0.15;
 		weapon.BobStyle "InverseSmooth";
-		weapon.BobSpeed 1.7;
+		weapon.BobRangeX 0.37;
+		weapon.BobRangeY 0.17;
+		weapon.BobSpeed 1.5;
 		weapon.upsound "weapons/select";
 		+FLOATBOB;
 		+WEAPON.AMMO_OPTIONAL;
@@ -46,8 +50,8 @@ Class PKWeapon : Weapon abstract {
 		let weap = owner.player.readyweapon;
 		if (!weap)
 			return;
-		if (bALWAYSBOB && weap == self)
-			owner.player.WeaponState |= WF_WEAPONBOBBING;
+		//if (bALWAYSBOB && weap == self)
+			//owner.player.WeaponState |= WF_WEAPONBOBBING;
 		hasDexterity = owner.FindInventory("PowerDoubleFiringSpeed",subclass:true);
 		hasWmod = owner.FindInventory("PK_WeaponModifier",subclass:true);
 	}
@@ -71,6 +75,20 @@ Class PKWeapon : Weapon abstract {
 		if (invoker.hasWmod && player && !player.refire) {
 			A_StartSound("pickups/wmod/use",CH_WMOD);
 		}
+	}
+	
+	/*a version of A_OverlayRotate without intepolation
+	Necessary because interpolation breaks with animation.
+	See stakegun primary fire for example.
+	*/
+	action void PK_AddWeaponRotate(double degrees = 0, int flags = 0) {
+		let psp = player.FindPsprite(OverlayID());
+		if (!psp)
+			return;
+		double targetAngle = degrees;
+		if (flags & WOF_ADD)
+			targetAngle += psp.rotation;
+		A_OverlayRotate(OverlayID(), targetAngle);
 	}
 	
 	//a wrapper function that fires tracers with A_FireProjectile so that they don't break on portals and such:
@@ -109,6 +127,10 @@ Class PKWeapon : Weapon abstract {
 		return A_FireProjectile(missiletype, angle, useammo, spawnofs_xy, spawnheight, flags, pitchOfs);
 	}
 	
+	/* This function staggers an overlay offset change over a few tics, so that
+	I can randomize layer offsets but make it smoother than if it were called
+	every tic. Used by ElectroDriver and Flamethrower.
+	*/
 	action void DampedRandomOffset(double rangeX, double rangeY, double rate = 1) {
 		let psp = Player.FindPSprite(PSP_WEAPON);			
 		if (!psp)
