@@ -22,8 +22,7 @@ enum PK_WeaponLayers {
 	RIFLE_STOCK	= 5,
 	RLIGHT_STOCK	= 6,
 	
-	PSP_DEMON = 66,
-	PSP_PKUI = 67
+	PSP_DEMON = 66
 }	
 
 enum PK_SoundChannels {
@@ -36,5 +35,6 @@ enum PK_SoundChannels {
 	*/
 	CH_END		= 14,
 	//	Demon Morph looping sound will play on this channel:
-	CH_HELL	= 66
+	CH_HELL	= 66,
+	CH_PKUI 	= 67
 }
