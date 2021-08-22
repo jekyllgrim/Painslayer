@@ -3,7 +3,16 @@ server int pk_QoLCatcherDistance = 0;
 server bool pk_autoOpenBoard = true;
 server bool pk_allowDemonMorph = true;
 server bool pk_allowFreeCards = true;
-user bool pk_switchChaingunModes = false;
+
+// Weapon Primary/Secondary fire settings
+
+user bool pk_swith_Painkiller 			= false;
+user bool pk_switch_ShotgunFreezer 		= false;
+user bool pk_switch_StakeGrenade 		= false;
+user bool pk_switch_MinigunRocket 		= false;
+user bool pk_switch_ElectroDriver		= false;
+user bool pk_switch_RifleFlamethrower 	= false;
+user bool pk_switch_BoltgunHeater 		= false;
 
 // ZMovement
 
