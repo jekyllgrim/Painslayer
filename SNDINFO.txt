@@ -320,6 +320,8 @@ pickups/powerups/lightamp "sounds/items/item-pentagram-take.wav"
 pickups/powerups/lightampEnd "sounds/items/item-pentagram-timeout.wav"
 pickups/powerups/radsuit "sounds/items/radsuit-take.ogg"
 pickups/powerups/radsuitEnd "sounds/items/radsuit-runout1.ogg"
+pickups/chestOfSouls/pickup "sounds/items/ghost_dissappear.ogg"
+pickups/chestOfSouls/idle "sounds/items/ghost_onfly-loop.ogg"
 
 pickups/ammopack	"sounds/items/pickup_ammo_megapack.wav"
 

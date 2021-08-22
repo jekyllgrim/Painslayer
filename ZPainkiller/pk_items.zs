@@ -384,7 +384,7 @@ Class PK_Soul : PK_Inventory {
 		+BRIGHT
 		+DONTGIB
 		PK_Soul.maxage 350;
-		inventory.pickupmessage "";
+		inventory.pickupmessage "$PKI_SOUL";
 		inventory.amount 2;
 		inventory.maxamount 100;
 		renderstyle 'Add';
@@ -441,11 +441,15 @@ Class PK_Soul : PK_Inventory {
 			if (Distance3D(tracer) < 32) {
 				CallTryPickup(tracer);
 				PlayPickupSound(tracer);
+				PrintPickupMessage(tracer.CheckLocalView(), PickupMessage ());
 				tracer = null;
 			}
 		}
 		else if (bNOINTERACTION)
 			bNOINTERACTION = false;
+	}
+	override string PickupMessage () {
+		return String.Format(StringTable.Localize(PickupMsg),amount);
 	}
 	override bool TryPickup (in out Actor other) {
 		if (!(other is "PlayerPawn"))
@@ -456,7 +460,7 @@ Class PK_Soul : PK_Inventory {
 		if (other.FindInventory("PKC_SoulRedeemer"))
 			amount *= 2;
 		other.GiveBody(Amount, MaxAmount);
-		Console.Printf("Consumed %d health from a soul",amount);
+		//Console.Printf("Consumed %d health from a soul",amount);
 		GoAwayAndDie();
 		return true;
 	}
@@ -468,6 +472,47 @@ Class PK_Soul : PK_Inventory {
 				A_FadeOut(0.05);
 		}
 		goto spawn+1;
+	}
+}
+
+Class PK_ChestOfSouls : Inventory {
+	mixin PK_PickupSound;
+	Default {
+		+COUNTITEM
+		Inventory.Amount 20;
+		Inventory.Maxamount 0;
+		Inventory.PickupMessage "$PKI_CHESTOFSOULS";
+		Inventory.PickupSound "pickups/chestOfSouls/pickup";
+		xscale 0.4;
+		yscale 0.34;
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		//A_AttachLight('base',DynamicLight.FlickerLight,color(0,0,80,0), 16, 18, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTACTORS,(0,0,24));
+		A_AttachLight('spot',DynamicLight.FlickerLight,color(200,0,255,0), 0, 48, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTACTORS|DYNAMICLIGHT.LF_SPOT,(0,0,0),spoti:24,spoto:48,spotp:-90);
+		A_StartSound("pickups/chestOfSouls/idle",flags:CHANF_LOOP,attenuation:5);
+	}
+	override bool TryPickup (in out Actor other) {
+		if (!(other is "PlayerPawn"))
+			return false;
+		let cont = PK_DemonMorphControl(other.FindInventory("PK_DemonMorphControl"));
+		if (cont)
+			cont.GiveSoul(amount);
+		other.GiveInventory("PowerChestOfSoulsRegen",1);
+		GoAwayAndDie();
+		return true;
+	}
+	States {
+	Spawn:
+		PSOC ABCDEFGHIJKL 3;
+		loop;
+	}
+}
+
+Class PowerChestOfSoulsRegen : PowerRegeneration {
+	Default {
+		Powerup.Duration -20;
+		Powerup.Strength 1;
 	}
 }
 

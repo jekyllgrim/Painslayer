@@ -126,7 +126,7 @@ Class PK_MainHandler : EventHandler {
 				console.printf("Trying to open board");
 			if (skill < 1) {
 				if (e.player == consoleplayer) {
-					plr.A_StartSound("ui/board/wrongplace",PSP_PKUI,CHANF_UI|CHANF_LOCAL);
+					plr.A_StartSound("ui/board/wrongplace",CH_PKUI,CHANF_UI|CHANF_LOCAL);
 					string str = Stringtable.Localize("$TAROT_LOWSKILL");
 					console.printf("%s",str);
 				}
@@ -134,7 +134,7 @@ Class PK_MainHandler : EventHandler {
 			}
 			if (cardcontrol.goldActive || plr.health <= 0 || plr.FindInventory("PK_DemonWeapon")) {
 				if (e.player == consoleplayer) {
-					plr.A_StartSound("ui/board/wrongplace",PSP_PKUI,CHANF_UI|CHANF_LOCAL);
+					plr.A_StartSound("ui/board/wrongplace",CH_PKUI,CHANF_UI|CHANF_LOCAL);
 					if (pk_debugmessages)
 						console.printf("Can't open the board at this time");
 				}
@@ -161,7 +161,7 @@ Class PK_MainHandler : EventHandler {
 			if (e.player == consoleplayer) {				
 				string str = (amt > 0) ? Stringtable.Localize(PKCH_GoldMessage[random(0,3)]) : Stringtable.Localize(PKCH_GoldMessage[random(4,5)]);
 				console.printf(str);
-				S_StartSound("pickups/gold/vbig",PSP_PKUI,CHANF_UI|CHANF_LOCAL);
+				S_StartSound("pickups/gold/vbig",CH_PKUI,CHANF_UI|CHANF_LOCAL);
 			}
 		}
 		//PKREFRESH cheat (reset golden card uses)
@@ -361,7 +361,7 @@ Class PK_MainHandler : EventHandler {
 		let plr = players[pnumber].mo;
 		if (!plr)
 			return;
-		//plr.A_StartSound("world/mapstart",PSP_PKUI,CHANF_UI|CHANF_LOCAL);
+		//plr.A_StartSound("world/mapstart",CH_PKUI,CHANF_UI|CHANF_LOCAL);
 		if  (!plr.FindInventory("PK_DemonMorphControl"))
 			plr.GiveInventory("PK_DemonMorphControl",1);
 		if  (!plr.FindInventory("PK_CardControl"))
@@ -426,7 +426,7 @@ Class PK_MainHandler : EventHandler {
 			for (int i = -1000; i < 0; i++)
 				player.SetPSprite(i,null);
 		}
-		player.mo.A_StartSound("world/gameover",PSP_PKUI,CHANF_UI|CHANF_LOCAL);
+		player.mo.A_StartSound("world/gameover",CH_PKUI,CHANF_UI|CHANF_LOCAL);
 	}
 	override void WorldUnloaded (WorldEvent e) {
 		if (level.Mapname == "TITLEMAP")
@@ -507,6 +507,7 @@ Class PK_ReplacementHandler : EventHandler {
 			
 			case 'SoulSphere' 		: e.Replacement = 'PK_GoldSoul';	break;
 			case 'MegaSphere' 		: e.Replacement = 'PK_MegaSoul';	break;
+			case 'BlurSphere' 		: e.Replacement = 'PK_ChestOfSouls';	break;
 			case 'GreenArmor' 		: e.Replacement = (random[repl](1,100) > 60) ? 'PK_SilverArmor' : 'PK_BronzeArmor';	break;
 			Case 'BlueArmor'		: e.Replacement = 'PK_GoldArmor'; break;
 			
