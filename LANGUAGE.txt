@@ -79,6 +79,7 @@ PKCH_TAKEGOLD1		= "Let's lighten your pockets...";
 PKCH_TAKEGOLD2		= "Don't forget to save some for the ride to the other side.";
 
 //items
+PKI_SOUL			= "Consumed %d health from a soul";
 PKI_GOLDSOUL		= "Gold soul!";
 PKI_MEGASOUL		= "Mega soul!";
 PKI_WMODIFIER		= "Weapon Modifier!";
@@ -87,7 +88,8 @@ PKI_ARMOR1			= "Bronze armor";
 PKI_ARMOR2			= "Silver armor";
 PKI_ARMOR3			= "Gold armor";
 PKI_AMMOPACK		= "Ammo pack!";
-PKI_ANTIRAD			= "Insoluble sabatons";
+PKI_ANTIRAD		= "Insoluble sabatons";
+PKI_CHESTOFSOULS	= "A Chest of Souls";
 //ammo
 PKI_SHELLS			= "Picked up shotgun shells.";
 PKI_FREEZEAMMO		= "Picked up Freezer Ammo.";
@@ -108,12 +110,21 @@ PKI_ELECTRODRIVER	= "Picked up Electro/Driver";
 PKI_BOLTGUN			= "Picked up Boltgun/Heater";
 PKI_RIFLE			= "Picked up Assault Rifle/Flamethrower";
 //weapon tags
-PK_SHOTGUN_TAG		= "Shotgun/Freezer";
-PK_STAKEGUN_TAG		= "Stakegun/Grenade Launcher";
-PK_CHAINGUN_TAG		= "Rocket Launcher/Chaingun";
-PK_ELECTRODRIVER_TAG = "Electro/Driver";
-PK_RIFLE_TAG		= "Assault Rifle/Flamethrower";
-PK_BOLTGUN_TAG		= "Boltgun/Heater";
+PK_PAINKILLER_TAG		= "Pain	         /  Killer";
+PK_SHOTGUN_TAG			= "Shotgun       /  Freezer";
+PK_STAKEGUN_TAG		= "Stakegun      /  G. Launcher";
+PK_CHAINGUN_TAG		= "R. Launcher   /  Chaingun";
+PK_ELECTRODRIVER_TAG 	= "Driver        /  Electro";
+PK_RIFLE_TAG			= "Assault Rifle /  Flamethrower";
+PK_BOLTGUN_TAG			= "Boltgun       /  Heater";
+
+PK_PAINKILLER_ITAG	= "Killer        /  Pain";
+PK_SHOTGUN_ITAG		= "Freezer       /  Shotgun";
+PK_STAKEGUN_ITAG		= "G. Launcher   /  Stakegun";
+PK_CHAINGUN_ITAG		= "Chaingun      /  R. Launcher";
+PK_ELECTRODRIVER_ITAG = "Electro       /  Driver";
+PK_RIFLE_ITAG			= "Flamethrower  /  Assault Rifle";
+PK_BOLTGUN_ITAG		= "Heater        /  Boltgun";
 //obituaries
 PKO_PAIN			= "%o was ripped apart with %k's Pain";
 PKO_KILLER			= "%o coudn't dodge %k's Killer";
@@ -174,11 +185,9 @@ PKM_AutoOpenTarot_Desc =	"When you open Black Tarot board for the first time in 
 							"you can equip cards for free (after that they'll be locked).\n"
 							"By default this happens at map start. This option allows you\n"
 							"to change that behavior.";
-PKM_CGUNSWITCH		= "Switch Rocket Launcher/Minigun fire modes";
-PKM_CGUNSWITCH_DESC	= 	"In the original Painkiller the Chaingun's primary attack\n"
-							"fires rockets, while the secondary attack is a minigun.\n"
-							"This order is confusing for some players, so this option allows\n"
-							"to switch those modes around.";
+PKM_FIREMODES 		= "Weapon fire modes";
+PKM_FIREMODES_DESC	= "Switch primary/secondary fire modes";
+
 PKM_SKILL0			= "Slumber";
 PKM_SKILL0_Desc	= 	"Very low difficulty.\n"
 						"You receive 200% ammo from pickups.\n"
@@ -462,7 +471,8 @@ PKI_AMMOPACK		= "Ящик патронов!";
 PKI_ARMOR1			= "Бронзовый доспех";
 PKI_ARMOR2			= "Серебряный доспех";
 PKI_ARMOR3			= "Золотой доспех";
-PKI_ANTIRAD			= "Нерастворимые сабатоны";
+PKI_ANTIRAD		= "Нерастворимые сабатоны";
+PKI_CHESTOFSOULS	= "Сундук с душами";
 //ammo
 PKI_SHELLS			= "Вы подобрали патроны для дробовика.";
 PKI_FREEZEAMMO		= "Вы подобрали боеприпасы для охладителя.";
@@ -471,7 +481,7 @@ PKI_GRENADEAMMO		= "Вы подобрали гранаты.";
 PKI_MINIGUNAMMO		= "Вы подобрали патроны для пулемёта.";
 PKI_STARAMMO		= "Вы подобрали сюрикэны.";
 PKI_ELECTROAMMO		= "Вы подобрали аккумулятор.";
-PKI_RIFLEAMMO		= "Вы подобрали патроны для винтовки.";
+PKI_RIFLEAMMO		= "Вы подобрали патроны для автомата.";
 PKI_FUELAMMO		= "Вы подобрали топливо для огнемёта.";
 PKI_BOLTAMMO		= "Вы подобрали стальные болты.";
 PKI_HEATERAMMO		= "Вы подобрали шаровые бомбы.";
@@ -481,14 +491,22 @@ PKI_STAKEGUN	 	= "Вы подобрали коломёт/гранатомёт";
 PKI_CHAINGUN		= "Вы подобрали ракетницу/пулемёт";
 PKI_ELECTRODRIVER	= "Вы подобрали электро/драйвер";
 PKI_BOLTGUN			= "Вы подобрали болтомёт/шаромёт";
-PKI_RIFLE			= "Вы подобрали винтовку/огнемёт";
+PKI_RIFLE			= "Вы подобрали автомат/огнемёт";
 //weapon tags
-PK_SHOTGUN_TAG		= "Дробовик/охладитель";
-PK_STAKEGUN_TAG		= "Коломёт/гранатомёт";
-PK_CHAINGUN_TAG		= "Ракетница/пулемёт";
-PK_ELECTRODRIVER_TAG = "Электро/драйвер";
-PK_RIFLE_TAG		= "Винтовка/огнемёт";
-PK_BOLTGUN_TAG		= "Болтомёт/шаромёт";
+PK_PAINKILLER_TAG		= "Pain	      /  Killer";
+PK_SHOTGUN_TAG			= "Дробовик   /  охладитель";
+PK_STAKEGUN_TAG		= "Коломёт    /  гранатомёт";
+PK_CHAINGUN_TAG		= "Ракетница  /  пулемёт";
+PK_ELECTRODRIVER_TAG 	= "Драйвер    /  электро";
+PK_RIFLE_TAG			= "Автомат    /  огнемёт";
+PK_BOLTGUN_TAG			= "Болтомёт   /  шаромёт";
+
+PK_SHOTGUN_ITAG		= "Охладитель /  дробовик";
+PK_STAKEGUN_ITAG		= "Гранатомёт /  коломёт";
+PK_CHAINGUN_ITAG		= "Пулемёт    /  ракетница";
+PK_ELECTRODRIVER_ITAG = "Электро    /  драйвер";
+PK_RIFLE_ITAG			= "Огнемёт    /  автомат";
+PK_BOLTGUN_ITAG		= "Шаромёт    /  болтомёт";
 //obituaries
 PKO_PAIN			= "%k разрывает игрока %o на части с помощью Pain";
 PKO_KILLER			= "Игроку %o не удалось увернуться от Killer игрока %k";
@@ -541,16 +559,17 @@ PKM_OpenTarot			= "Открыть доску Таро";
 PKM_OpenTarot_Desc	= "На доске Черного Таро можно покупать и снаряжать карты";
 PKM_UseCards			= "Использовать золотые карты";
 PKM_UseCards_Desc		= "Активировать снаряженные золотые карты Таро";
+PKM_OpenCodex			= "Открыть Кодекс";
+PKM_OpenCodex_Desc	= 	"В кодексе можно узнать полезную информацию об оружии,\n"
+							"предметах и различных механиках.";
 PKM_AutoOpenTarot		= "Открывать доску Таро в начале уровня";
 PKM_AutoOpenTarot_Desc =	"Когда вы первый раз открываете доску Таро на уровне, вы можете\n"
 							"покупать и снаряжать карты бесплатно (затем ячейки блокируются).\n"
 							"По умолчанию доска открывается в начале уровня автоматически.\n"
 							"Эта настройка позволяет изменить это.";
-PKM_CGUNSWITCH		= "Поменять режимы стрельбы ракетницы/пулемёта";
-PKM_CGUNSWITCH_DESC	= 	"В оригинальном Painkiller ракетница - основной режим стрельбы\n"
-							"а пулемёт - вторичный. Однако этот порядок сбивает некоторых\n"
-							"игроков с толку. Эта настройка позволяет поменять режимы\n"
-							"стрельбы местами, чтобы пулемёт был основным.";
+PKM_FIREMODES 		= "Настройка режимов стрельбы";
+PKM_FIREMODES_DESC	= "Позволяет переключить основной/альтернативный режим огня";
+
 PKM_SKILL0			= "Грёзы";
 PKM_SKILL0_Desc	= "Очень низкая сложность. Вы получаете 200% патронов из коробок. Враги наносят 25% урона, у них 50% здоровья. В этом режиме нельзя использовать Черное Таро.";
 PKM_SKILL1			= "Дрёма";
