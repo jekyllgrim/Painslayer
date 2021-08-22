@@ -1,4 +1,5 @@
 Gameinfo {
+	PlayerClasses = "PK_PainkillerPlayer"
 	AddEventHandlers = "PK_Mainhandler", "PK_StakeStickHandler", "PK_ShaderHandler", "PK_ReplacementHandler", "PK_BoardEventHandler"
 	StatusBarClass = "PainkillerHUD"
 	CursorPic = "pkmcur"
