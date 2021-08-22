@@ -2,6 +2,7 @@ Class PK_Shotgun : PKWeapon {
 	int freload; //counter for freezer reload to prevent from quickly re-entering AltFire by using Fire first
 	Default {
 		PKWeapon.emptysound "weapons/empty/shotgun";
+		PKWeapon.ammoSwitchCVar 'pk_switch_ShotgunFreezer';
 		weapon.slotnumber 2;
 		weapon.ammotype1 "PK_Shells";
 		weapon.ammogive1 20;

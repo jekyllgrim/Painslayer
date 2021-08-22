@@ -7,6 +7,7 @@ Class PK_Painkiller : PKWeapon {
 	private int wmodCounter;
 	Default {
 		+WEAPON.MELEEWEAPON;
+		PKWeapon.ammoSwitchCVar 'pk_swith_Painkiller';
 		Obituary "$PKO_PAIN";
 		Tag "Painkiller";
 		weapon.slotnumber 1;
@@ -40,7 +41,7 @@ Class PK_Painkiller : PKWeapon {
 					let psp = Player.FindPSprite(PSP_Weapon);
 					if (psp) 
 						psp.sprite = GetSpriteIndex("PKIM");
-					A_WeaponReady(WRF_NOPRIMARY);
+					PK_WeaponReady(WRF_NOPRIMARY);
 				}
 				else if (!invoker.pk_killer && invoker.killer_fired)
 					return ResolveState("KillerReturn");
@@ -102,7 +103,7 @@ Class PK_Painkiller : PKWeapon {
 					}
 				}		
 				A_SoundPitch(CH_LOOP,spitch);
-				if ((player.cmd.buttons & BT_ALTATTACK) && !(player.oldbuttons & BT_ALTATTACK)) {
+				if (PressingAttackButton(secondary: true, holdCheck: PAB_NOTHELD)) {
 					A_StopSound(CH_LOOP);
 					invoker.combofire = true;
 					A_ClearRefire();
@@ -111,7 +112,7 @@ Class PK_Painkiller : PKWeapon {
 				A_WeaponOffset(frandom(-0.15,0.15),frandom(32,32.3));
 				return ResolveState(null);
 			}
-			TNT1 A 0 A_ReFire("Hold");
+			TNT1 A 0 PK_Refire();
 			goto HoldEnd;
 		Hold.Mod:
 			PKIW ### 1 bright {
@@ -120,7 +121,6 @@ Class PK_Painkiller : PKWeapon {
 			stop;
 		HoldEnd:
 			TNT1 A 0 {
-				A_ClearRefire();
 				A_StopSound(CH_LOOP);
 				A_StartSound("weapons/painkiller/stop",CHAN_BODY);
 			}
@@ -129,11 +129,11 @@ Class PK_Painkiller : PKWeapon {
 		AltFire:
 			TNT1 A 0 {
 				if (invoker.pk_killer) {
-					if (!(player.oldbuttons & BT_ALTATTACK))
+					if ((PressingAttackButton(secondary:true, holdCheck: PAB_NOTHELD)))
 						invoker.pk_killer.SetStateLabel("XDeath");
 					return ResolveState("Ready");
 				}
-				else if (player.oldbuttons & BT_ALTATTACK)
+				else if ((PressingAttackButton(secondary:true, holdCheck: PAB_HELD)))
 					return ResolveState("Ready");
 				A_StartSound("weapons/painkiller/killer");
 				if (invoker.combofire)

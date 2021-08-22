@@ -6,9 +6,9 @@
 Class PKWeapon : Weapon abstract {
 	mixin PK_Math;
 	protected int PKWflags;
-	FlagDef NOAUTOPRIMARY 	: PKWflags, 0; //NOAUTOFIRE for primary attack
-	FlagDef NOAUTOSECONDARY 	: PKWflags, 1; //NOAUTOFIRE for secondary attack
-	FlagDef ALWAYSBOB			: PKWflags, 2;
+	FlagDef NOAUTOPRIMARY 		: PKWflags, 0; //NOAUTOFIRE analog for primary attack only
+	FlagDef NOAUTOSECONDARY 	: PKWflags, 1; //NOAUTOFIRE analog for secondary attack only
+	FlagDef ALWAYSBOB			: PKWflags, 2; //if true, weapon will bob all the time (currently unused)
 	sound emptysound; //clicking sound when trying to fire without ammo
 	property emptysound : emptysound;
 	protected bool hasDexterity; //player has one of dexterity effects/cards
@@ -21,12 +21,25 @@ Class PKWeapon : Weapon abstract {
 	and Boltgun for implementation:
 	*/
 	protected bool blockFireOnSelect;
+	
+	//Functionality needed to let the player switch primary/secondary fire buttons:
+	protected transient CVar c_switchmodes; //pointer to the related cvar
+	protected bool switchmodes; //true if fire modes were switched 
+	protected name ammoSwitchCVar; //holds the name of the firemodes cvar for this weapon 
+	property ammoSwitchCVar : ammoSwitchCVar; //allows assigning the cvar via defaults
+	
+	//state pointers:
+	protected state s_fire;
+	protected state s_hold;
+	protected state s_altfire;
+	protected state s_althold;
+	
 	Default {
 		+PKWeapon.ALWAYSBOB
 		weapon.BobStyle "InverseSmooth";
-		weapon.BobRangeX 0.37;
+		weapon.BobRangeX 0.32;
 		weapon.BobRangeY 0.17;
-		weapon.BobSpeed 1.5;
+		weapon.BobSpeed 1.85;
 		weapon.upsound "weapons/select";
 		+FLOATBOB;
 		+WEAPON.AMMO_OPTIONAL;
@@ -42,11 +55,16 @@ Class PKWeapon : Weapon abstract {
 			icon.master = self;
 		}
 		spitch = frandompick[sfx](-0.1,0.1);
+		s_fire = FindState("Fire");
+		s_hold = FindState("Hold");
+		s_altfire = FindState("AltFire");
+		s_althold = FindState("AltHold");
 	}
 	override void DoEffect() {
 		Super.DoEffect();
-		if (!owner)
-			return;
+		if (!owner || !owner.player)
+			return;		
+		SwitchAmmoTypes();
 		let weap = owner.player.readyweapon;
 		if (!weap)
 			return;
@@ -54,6 +72,9 @@ Class PKWeapon : Weapon abstract {
 			//owner.player.WeaponState |= WF_WEAPONBOBBING;
 		hasDexterity = owner.FindInventory("PowerDoubleFiringSpeed",subclass:true);
 		hasWmod = owner.FindInventory("PK_WeaponModifier",subclass:true);
+		
+		//if (weap == self)
+			//console.printf("(%d) NOAUTOPRIMARY %d | NOAUTOSECONDARY %d | blockFireOnSelect %d",GetAge(),bNOAUTOPRIMARY,bNOAUTOSECONDARY,blockFireOnSelect);
 	}
 	
 	action bool CheckInfiniteAmmo() {
@@ -69,19 +90,279 @@ Class PKWeapon : Weapon abstract {
 	}
 	//plays a sound and also a WeaponModifier sound if Weaponmodifier is in inventory:
 	action void PK_AttackSound(sound snd = "", int channel = CHAN_AUTO, int flags = 0) {
+		//play regular attack sound:
 		if (snd)
 			A_StartSound(snd,channel,flags);
-		//will play it only once for repeating weapons (important):
+		//play weapon modifier sound only once for automatic weapons (important):
 		if (invoker.hasWmod && player && !player.refire) {
 			A_StartSound("pickups/wmod/use",CH_WMOD);
 		}
 	}
 	
-	/*a version of A_OverlayRotate without intepolation
-	Necessary because interpolation breaks with animation.
-	See stakegun primary fire for example.
+	//This switches around ammotypes when the player switches primary/secondary attacks:
+	virtual void SwitchAmmoTypes() {
+		if (!ammoSwitchCVar)
+			return;
+		if (c_switchmodes == null)
+			c_switchmodes = CVAR.GetCVar(ammoSwitchCVar,owner.player);
+		//switchmodes = c_switchmodes.GetBool(); return;
+		if (!c_switchmodes/* || switchmodes == c_switchmodes.GetBool()*/)
+			return;
+		if (c_switchmodes.GetBool()) {
+			ammotype1 = default.ammotype2;
+			ammouse1 = default.ammouse2;
+			ammogive1 = default.ammogive2;
+			ammotype2 = default.ammotype1;
+			ammouse2 = default.ammouse1;
+			ammogive2 = default.ammogive1;
+			//bNOAUTOPRIMARY = default.bNOAUTOSECONDARY;
+			//bNOAUTOSECONDARY = default.bNOAUTOPRIMARY;
+		}
+		else {
+			ammotype1 = default.ammotype1;
+			ammouse1 = default.ammouse1;
+			ammogive1 = default.ammogive1;
+			ammotype2 = default.ammotype2;
+			ammouse2 = default.ammouse2;
+			ammogive2 = default.ammogive2;
+			//bNOAUTOPRIMARY = default.bNOAUTOPRIMARY;
+			//bNOAUTOSECONDARY = default.bNOAUTOSECONDARY;
+		}
+		ammo1 = Ammo(owner.FindInventory (ammotype1));
+		ammo2 = Ammo(owner.FindInventory (ammotype2));
+		switchmodes = c_switchmodes.GetBool();
+	}
+	
+	//If firemodes are switched, we need to return different states:
+	override State GetAtkState (bool hold) {	
+		if (switchmodes) {
+			return super.GetAltAtkState(hold);
+		}
+		return super.GetAtkState(hold);
+	}	
+	override State GetAltAtkState (bool hold)	{
+		if (switchmodes) {
+			return super.GetAtkState(hold);
+		}
+		return super.GetAltAtkState(hold);
+	}
+	
+	//This checks if we have enough ammo and incorporates the firemodes switch feature:
+	action bool PK_CheckAmmo(bool secondary = false, int amount = -1) {
+		if (CheckInfiniteAmmo())
+			return true;
+		let tAmmo = secondary ? invoker.ammo2 : invoker.ammo1;
+		if (invoker.switchmodes) //switch ammo pointers if firemodes are switched 
+			tAmmo = secondary ? invoker.ammo1 : invoker.ammo2;
+		if (!tAmmo)
+			return true; //this weapon doesn't use ammo at all
+		//check for default ammouse value if -1, otherwise check for specified:
+		if (amount <= -1) {
+			amount = secondary ? invoker.ammouse2 : invoker.ammouse1;
+			if (invoker.switchmodes)
+				amount = secondary ? invoker.ammouse1 : invoker.ammouse2;
+		}
+		if (tAmmo.amount < amount)
+			return false;
+		return true;
+	}
+	
+	action void PK_DepleteAmmo(bool secondary = false, int amount = -1) {
+		if (CheckInfiniteAmmo())
+			return;
+		let tAmmo = secondary ? invoker.ammo2 : invoker.ammo1;
+		if (invoker.switchmodes)
+			tAmmo = secondary ? invoker.ammo1 : invoker.ammo2;
+		if (!tAmmo)
+			return;
+		let tAmmoType = secondary ? invoker.AmmoType2 : invoker.AmmoType1;
+		if (invoker.switchmodes)
+			tAmmoType = secondary ? invoker.AmmoType1 : invoker.AmmoType2;
+		if (!tAmmoType)
+			return;
+		if (amount <= -1) {
+			amount = secondary ? invoker.ammouse2 : invoker.ammouse1;
+			if (invoker.switchmodes)
+				amount = secondary ? invoker.ammouse1 : invoker.ammouse2;
+		}
+		TakeInventory(tAmmoType,amount);
+	}
+	
+	
+	enum PABCheck {
+		PAB_ANY,
+		PAB_HELD,
+		PAB_NOTHELD,
+		PAB_HELDONLY
+	}
+	//A variation on GetPlayerInput that incorporates the switching primary/secondary attack feature:
+	action bool PressingAttackButton(bool secondary = false, int holdCheck = PAB_ANY) {
+		if (!player)
+			return false;
+		//get the button:
+		int button = secondary ? BT_ALTATTACK : BT_ATTACK;
+		//if fire modes are switched, switch buttons around:
+		if (invoker.switchmodes)
+			button = secondary ? BT_ATTACK : BT_ALTATTACK;
+		
+		bool pressed = (player.cmd.buttons & button); //check if pressed now 
+		bool held = (player.oldbuttons & button); //check if it was held from previous tic
+		
+		if (holdCheck == PAB_HELDONLY)
+			return held;		
+		if (holdCheck == PAB_NOTHELD) {
+			return !held && pressed;
+		}		
+		if (holdCheck == PAB_HELD) {
+			return held && pressed;
+		}		
+		//otherwise return true if pressed is true:
+		return pressed;
+	}
+	
+	//A custom version of A_Refire():
+	action void PK_ReFire() {
+		if (!player)
+			return;		
+		let psp = Player.FindPsprite(overlayID());
+		if (!psp)
+			return;
+		//just to get rid of invoker:
+		let s_fire = invoker.s_fire;
+		let s_hold = invoker.s_hold;
+		let s_altfire = invoker.s_altfire;
+		let s_althold = invoker.s_althold;
+		state targetState = null;
+		//check if this is being called from Fire or Hold:
+		if ((s_fire && InStateSequence(psp.curstate,s_fire)) || (s_hold && InStateSequence(psp.curstate,s_hold))) {
+			//console.printf("In Fire/Hold sequence");
+			//check if fire button is being held and we have enough primary ammo:
+			if (PressingAttackButton() && PK_CheckAmmo()) {
+				//console.printf("Pressing Fire button");
+				if (s_hold) {
+					targetState = s_hold; //point to Hold if it exists
+					//console.printf("jumping to Fire state");
+				}
+				else {
+					targetState = s_fire; //otherwise point to Fire
+					//console.printf("jumping to Hold state");
+				}
+			}
+		}
+		//otherwise check if this is being called from AltFire or AltHold:
+		else if ((s_altfire && InStateSequence(psp.curstate,s_altfire)) || (s_althold && InStateSequence(psp.curstate,s_althold))) {
+			//console.printf("In AlFire/AlHold sequence");
+			//check if altfire button is being held and we have enough secondary ammo:
+			if (PressingAttackButton(secondary:true) && PK_CheckAmmo(secondary:true)) {
+				//console.printf("Pressing AltFire button");
+				if (s_althold) {
+					targetState = s_althold; //point to AltHold if it exists
+					//console.printf("jumping to AltFire state");
+				}
+				else {
+					targetState = s_altfire; //otherwise point to AltFire
+					//console.printf("jumping to AltHold state");
+				}
+			}
+		}
+		//Perform jump if the state is not null and set refire:
+		if (targetState) {
+			player.refire++;
+			player.SetPsprite(OverlayID(),targetState);
+		}
+		//otherwise unset refire, because why wouldn't we just do it here?
+		else {
+			player.refire = 0;			
+		}
+		//console.printf("player refire: %d",player.refire);
+	}
+	
+	/*	A version of A_WeaponReady that incporates:
+		- the feature to switch primary/secondary firemodes;
+		- NOAUTOPRIMARY/NOAUTOSECONDARY flags;
+		- playing a dry click sound if the player is pressing an attack
+		button but not holding it.
 	*/
-	action void PK_AddWeaponRotate(double degrees = 0, int flags = 0) {
+	action void PK_WeaponReady(int flags = 0) {
+		//buncha debug stuff
+		if (pk_debugmessages > 3) {
+			let psp = player.FindPsprite(OverlayID());
+			if (psp) {
+				textureID sprt = psp.curstate.GetSpriteTexture(0);
+				string call = String.Format("calling PK_WeaponReady on %s%d",TexMan.GetName(sprt),psp.frame);
+				string prim = (player.cmd.buttons & BT_ATTACK) ? " pressing Fire," : "";
+				string sec = (player.cmd.buttons & BT_ALTATTACK) ? " pressing AltFire," : "";
+				string primamt = prim ? String.Format(" has ammo1: %d (need: %d)", invoker.ammo1.amount, invoker.ammouse1) : "";
+				string secamt = sec ? String.Format(" has ammo2: %d (need: %d)", invoker.ammo2.amount, invoker.ammouse2) : "";
+				string plr = (prim || sec) ? " player" : "";
+				console.printf("%s%s%s%s%s%s",call,plr,prim,sec,primamt,secamt);
+			}
+		}		
+		A_RemoveLight('PKWeaponlight');
+		
+		bool NOAUTOPRIMARY 	= invoker.bNOAUTOPRIMARY;
+		bool NOAUTOSECONDARY 	= invoker.bNOAUTOSECONDARY;
+		bool firePressed 		= PressingAttackButton(secondary:false); 
+		bool fireHeld 			= PressingAttackButton(secondary:false,	holdCheck:PAB_HELD);	
+		bool altfirePressed 	= PressingAttackButton(secondary:true);
+		bool altfireHeld 		= PressingAttackButton(secondary:true,	holdCheck:PAB_HELD);
+		
+		//console.printf("%s: should block fire %d | fire held %d || should block alt fire %d | alt fire held %d",invoker.GetClassName(),NOAUTOPRIMARY,fireHeld,NOAUTOSECONDARY,altFireHeld);
+		
+		if (NOAUTOPRIMARY && !fireHeld) {
+			invoker.blockFireOnSelect = false;
+		}
+		else if (NOAUTOSECONDARY && !altFireHeld) {
+			invoker.blockFireOnSelect = false;
+		}
+		
+		if (!PK_CheckAmmo() || invoker.blockFireOnSelect) {
+			A_ClearRefire();
+			if (firePressed && !fireHeld)
+				A_StartSound(invoker.emptysound);
+			flags |= WRF_NOPRIMARY;
+		}
+		if (!PK_CheckAmmo(secondary:true) || invoker.blockFireOnSelect) {
+			A_ClearRefire();
+			if (altFirePressed && !AltFireHeld)
+				A_StartSound(invoker.emptysound);
+			flags |= WRF_NOSECONDARY;
+		}
+		
+		/*	Finally I need to invert WRF_NOPRIMARY/WRF_NOSECONDARY flags if firemodes are switched.
+			This has to be done here, so that it covers both the flags that were set in the
+			cheks above, AND the flags that were set in the function call itself, since those
+			also need to be inverted.
+		*/
+		if (invoker.switchmodes) {
+			bool invertprimary;
+			bool invertsecondary;
+			if (flags & WRF_NOPRIMARY) {
+				flags &= ~WRF_NOPRIMARY;
+				invertprimary = true;
+			}
+			if (flags & WRF_NOSECONDARY) {
+				flags &= ~WRF_NOSECONDARY;
+				invertsecondary = true;
+			}
+			if (invertprimary) {
+				flags |= WRF_NOSECONDARY;				
+			}
+			if (invertsecondary) {
+				flags |= WRF_NOPRIMARY;				
+			}
+		}
+		
+		A_WeaponReady(flags);
+	}
+	
+	/*
+		A version of A_OverlayRotate that allows additive rotation
+		without intepolation. Necessary because interpolation breaks 
+		when combined with animation. 
+		See stakegun primary fire for an example of use.
+	*/
+	action void PK_WeaponRotate(double degrees = 0, int flags = 0) {
 		let psp = player.FindPsprite(OverlayID());
 		if (!psp)
 			return;
@@ -89,6 +370,17 @@ Class PKWeapon : Weapon abstract {
 		if (flags & WOF_ADD)
 			targetAngle += psp.rotation;
 		A_OverlayRotate(OverlayID(), targetAngle);
+	}
+	
+	// Same but for scale:	
+	action void PK_WeaponScale(double wx = 1, double wy = 1, int flags = 0) {
+		let psp = player.FindPsprite(OverlayID());
+		if (!psp)
+			return;
+		vector2 targetScale = (wx,wy);
+		if (flags & WOF_ADD)
+			targetScale += psp.scale;
+		A_OverlayScale(OverlayID(), targetScale.x, targetScale.y);
 	}
 	
 	//a wrapper function that fires tracers with A_FireProjectile so that they don't break on portals and such:
@@ -114,9 +406,9 @@ Class PKWeapon : Weapon abstract {
 		}
 	}
 	
-	/*	if a gravity-affected projectile is fired via the regular A_FireProjectile directly upwards,
-		it won't actually fly upwards, it'll get a curve out of nowhere
-		this function sets the pitch correctly to circumvent that
+	/*	If a gravity-affected projectile is fired via the regular A_FireProjectile directly upwards,
+		it won't actually fly upwards, it'll get a curve out of nowhere.
+		This function sets the pitch correctly to circumvent that.
 	*/
 	action actor PK_FireArchingProjectile(class<Actor> missiletype, double angle = 0, bool useammo = true, double spawnofs_xy = 0, double spawnheight = 0, int flags = 0, double pitch = 0) {
 		if (!self || !self.player) 
@@ -127,9 +419,9 @@ Class PKWeapon : Weapon abstract {
 		return A_FireProjectile(missiletype, angle, useammo, spawnofs_xy, spawnheight, flags, pitchOfs);
 	}
 	
-	/* This function staggers an overlay offset change over a few tics, so that
-	I can randomize layer offsets but make it smoother than if it were called
-	every tic. Used by ElectroDriver and Flamethrower.
+	/*	This function staggers an overlay offset change over a few tics, so that
+		I can randomize layer offsets but make it smoother than if it were called
+		every tic. Used by Electro and Flamethrower.
 	*/
 	action void DampedRandomOffset(double rangeX, double rangeY, double rate = 1) {
 		let psp = Player.FindPSprite(PSP_WEAPON);			
@@ -144,52 +436,8 @@ Class PKWeapon : Weapon abstract {
 		A_WeaponOffset(invoker.shiftOfs.x, invoker.shiftOfs.y, WOF_ADD);
 	}
 	
-	action void PK_WeaponReady(int flags = 0) {
-		if (pk_debugmessages > 3) {
-			let psp = player.FindPsprite(OverlayID());
-			if (psp) {
-				textureID sprt = psp.curstate.GetSpriteTexture(0);
-				string call = String.Format("calling PK_WeaponReady on %s%d",TexMan.GetName(sprt),psp.frame);
-				string prim = (player.cmd.buttons & BT_ATTACK) ? " pressing Fire," : "";
-				string sec = (player.cmd.buttons & BT_ALTATTACK) ? " pressing AltFire," : "";
-				string primamt = prim ? String.Format(" has ammo1: %d (need: %d)", invoker.ammo1.amount, invoker.ammouse1) : "";
-				string secamt = sec ? String.Format(" has ammo2: %d (need: %d)", invoker.ammo2.amount, invoker.ammouse2) : "";
-				string plr = (prim || sec) ? " player" : "";
-				console.printf("%s%s%s%s%s%s",call,plr,prim,sec,primamt,secamt);
-			}
-		}
-		if (!invoker.ammo1 || invoker.ammo1.amount < invoker.ammouse1) {
-			A_ClearRefire();
-			if (pk_debugmessages > 2)
-				console.printf("player is pressing Fire, has no primary ammo");
-			if ((player.cmd.buttons & BT_ATTACK) && !(player.oldbuttons & BT_ATTACK))
-				A_StartSound(invoker.emptysound);
-			flags |= WRF_NOPRIMARY;
-		}
-		else if (invoker.bNOAUTOPRIMARY) {
-			if (!(player.oldbuttons & BT_ATTACK))
-				invoker.blockFireOnSelect = false;
-			if (invoker.blockFireOnSelect)
-				flags |= WRF_NOPRIMARY;
-		}
-		if (!invoker.ammo2 || invoker.ammo2.amount < invoker.ammouse2) {
-			A_ClearRefire();
-			if (pk_debugmessages > 2)
-				console.printf("player is pressing AltFire, has no secondary ammo");
-			if ((player.cmd.buttons & BT_ALTATTACK) && !(player.oldbuttons & BT_ALTATTACK))
-				A_StartSound(invoker.emptysound);
-			flags |= WRF_NOSECONDARY;
-		}
-		else if (invoker.bNOAUTOSECONDARY) {
-			if (!(player.oldbuttons & BT_ALTATTACK))
-				invoker.blockFireOnSelect = false;
-			if (invoker.blockFireOnSelect)
-				flags |= WRF_NOSECONDARY;
-		}
-		A_WeaponReady(flags);
-	}
-	
-	states {
+	States {
+	//can't define a weapon class without Ready/Fire/Deselect/Select
 	Ready:
 		TNT1 A 1;
 		loop;
@@ -200,7 +448,9 @@ Class PKWeapon : Weapon abstract {
 		TNT1 A 0 {
 			A_StopSound(CH_LOOP);
 			A_RemoveLight('PKWeaponlight');
+			invoker.blockFireOnSelect = false;
 		}
+		//instant weapon switch:
 		TNT1 A 0 A_Lower();
 		wait;
 	Select:
@@ -212,12 +462,23 @@ Class PKWeapon : Weapon abstract {
 				string str4 = invoker.bNOAUTOSECONDARY ? "gun has +NOAUTOSECONDARY" : "gun has -NOAUTOSECONDARY";	
 				console.printf("player %s, %s, %s, %s", str1, str2, str3, str4);
 			}
-			if ((invoker.bNOAUTOPRIMARY && player.cmd.buttons & BT_ATTACK && player.oldbuttons & BT_ATTACK) ||
-				(invoker.bNOAUTOSECONDARY && player.cmd.buttons & BT_ALTATTACK && player.oldbuttons & BT_ALTATTACK)) {
+			bool blockFire = invoker.bNOAUTOPRIMARY;
+			bool blockAltFire = invoker.bNOAUTOSECONDARY;
+			bool fireHeld = PressingAttackButton();
+			bool altFireHeld = PressingAttackButton(secondary:true);
+			//console.printf("block fire %d | fire held %d | block alt fire %d | alt fire held %d",blockFire,fireHeld,blockAltFire,altFireHeld);
+			if 	((blockfire && fireHeld) || (blockAltFire && altFireHeld)) {
 				invoker.blockFireOnSelect = true;
+				console.printf("blocking fire on selection");
 			}
 		}
-		TNT1 A 0 A_Raise();
+		//instant weapon switch:
+		TNT1 A 0 {
+			let psp = player.FindPsprite(PSP_WEAPON);
+			if (psp)
+				psp.y = WEAPONTOP;
+			return ResolveState("Ready");
+		}
 		wait;
 	LoadSprites:
 		PSGT AHIJK 0;
@@ -346,6 +607,7 @@ class PK_BulletPuffSmoke : PK_BlackSmoke {
 	}
 }
 	
+//A weapon icon that  floats above weapon pickups:
 Class PK_WeaponIcon : Actor {
 	//state mspawn;
 	PKWeapon weap;
@@ -402,6 +664,7 @@ Class PK_WeaponIcon : Actor {
 	}
 }
 
+//Base projectile class that can produce relatively solid trails:
 Class PK_Projectile : PK_BaseActor abstract {
 	protected bool mod; //affteced by Weapon Modifier
 	mixin PK_Math;
@@ -446,9 +709,11 @@ Class PK_Projectile : PK_BaseActor abstract {
 		PK_Projectile.trailactor "PK_BaseFlare";
 	}
 	/*
-	For whatever reason the fancy pitch offset calculation used in arching projectiles like grenades (see PK_FireArchingProjectile) screws up the projectiles' collision, so that it'll collide with the player if it fell 
-	down on them after being fired directly upwards.
-	I had to add this override to circumvent that.
+		For whatever reason the fancy pitch offset calculation used in arching projectiles 
+		like grenades (see PK_FireArchingProjectile) screws up the projectiles' collision, 
+		so that it'll collide with the player if it fell down on them after being fired 
+		directly upwards.
+		I had to add this override to circumvent that.
 	*/
 	override bool CanCollideWith(Actor other, bool passive) {
 		if (!other)
@@ -457,6 +722,8 @@ Class PK_Projectile : PK_BaseActor abstract {
 			return false;
 		return super.CanCollideWith(other, passive);
 	}
+	//This is just to make sure the projectile doesn't collide with certain
+	//non-collidable actors. Used by stuff like stakes.
 	static bool CheckVulnerable(actor victim, actor missile = null) {
 		if (!victim)
 			return false;
@@ -483,6 +750,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 			fl.falpha = flarealpha;
 		}
 	}
+	//An override initially by Arctangent that spawns trails like FastProjectile does it:
 	override void Tick () {
 		Vector3 oldPos = self.pos;		
 		Super.Tick();	
@@ -601,7 +869,7 @@ Class PK_StakeProjectile : PK_Projectile {
 			//check which side we're on:
 			int lside = PointOnLineSide(pos.xy,tline);
 			string sside = (lside == 0) ? "front" : "back";
-			//we'll attack the stake to the sector on the other side:
+			//we'll attach the stake to the sector on the other side:
 			let targetsector = (lside == 0 && tline.backsector) ? tline.backsector : tline.frontsector;
 			let floorHitZ = targetsector.floorplane.ZatPoint (sticklocation);
 			let ceilHitZ = targetsector.ceilingplane.ZatPoint (sticklocation);
@@ -628,7 +896,7 @@ Class PK_StakeProjectile : PK_Projectile {
 		}
 		return -1;
 	}
-	//virtual for breaking; child actors override it to add debris spawning and such:
+	//virtual for breaking apart; child actors override it to add debris spawning and such:
 	virtual void StakeBreak() {
 		if (pk_debugmessages > 2)
 			console.printf("%s Destroyed",GetClassName());
@@ -648,7 +916,10 @@ Class PK_StakeProjectile : PK_Projectile {
 		if (bTHRUACTORS) {
 			topz = CurSector.ceilingplane.ZAtPoint(pos.xy);
 			botz = CurSector.floorplane.ZAtPoint(pos.xy);
-			//Destroy the stake if it's run into ceiling/floor by a moving sector (e.g. a door opened, pulled the stake up and pushed it into the ceiling). Only do this if the stake didn't actually hit a plane before that:
+			/*	Destroy the stake if it's run into ceiling/floor by a moving sector 
+				(e.g. a door opened, pulled the stake up and pushed it into the ceiling). 
+				Only do this if the stake didn't actually hit a plane before that:
+			*/
 			if (!hitplane && (pos.z >= topz-height || pos.z <= botz)) {
 				StakeBreak();
 				return;
@@ -706,6 +977,7 @@ Class PK_BulletTracer : FastProjectile {
 	}
 }
 
+//a ricochetting bullet, looks similar to a tracer:
 Class PK_RicochetBullet : PK_SmallDebris {
 	Default {
 		renderstyle 'Add';
@@ -721,7 +993,7 @@ Class PK_RicochetBullet : PK_SmallDebris {
 	override void Tick() {
 		super.Tick();
 		if (!isFrozen())
-			scale.x = default.scale.x * 0.1 * vel.length(); //faster trails will be longer
+			scale.x = default.scale.x * 0.1 * vel.length(); //faster trails will be longer!
 	}
 	states {
 	Spawn:
@@ -730,6 +1002,7 @@ Class PK_RicochetBullet : PK_SmallDebris {
 	}
 }
 
+//Decorative explosion actor that spawns debris and stuff:
 Class PK_GenericExplosion : PK_SmallDebris {
 	int randomdebris;
 	int explosivedebris;
@@ -798,7 +1071,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 	}
 }
 		
-
+//Explosion debris that spawn black smoke and flame:
 Class PK_ExplosiveDebris : PK_RandomDebris {	
 	Default {
 		scale 0.5;
@@ -829,6 +1102,7 @@ Class PK_ExplosiveDebris : PK_RandomDebris {
 	}
 }
 
+//Debris that spawn white smoke:
 Class PK_SmokingDebris : PK_RandomDebris {	
 	Default {
 		scale 0.5;
@@ -847,6 +1121,7 @@ Class PK_SmokingDebris : PK_RandomDebris {
 	}
 }
 
+//Flame spawned by burning debris:
 Class PK_DebrisFlame : PK_BaseFlare {
 	Default {
 		scale 0.05;
@@ -860,7 +1135,7 @@ Class PK_DebrisFlame : PK_BaseFlare {
 	}
 	states {
 	Spawn:
-		TNT1 A 0 NoDelay A_Jump(256,1,3);
+		TNT1 A 0 NoDelay A_Jump(256,1,3); //randomize appearance a bit:
 		BOM4 IJKLMNOPQ 1 {
 			A_FadeOut(0.05);
 			roll += wrot;

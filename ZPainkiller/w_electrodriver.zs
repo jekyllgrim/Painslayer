@@ -4,6 +4,7 @@ Class PK_ElectroDriver : PKWeapon {
 	Default {
 		-PKWeapon.ALWAYSBOB
 		PKWeapon.emptysound "weapons/empty/electrodriver";
+		PKWeapon.ammoSwitchCVar 'pk_switch_ElectroDriver';
 		weapon.slotnumber 5;
 		weapon.ammotype1 "PK_ShurikenAmmo";
 		weapon.ammogive1 20;
@@ -90,7 +91,7 @@ Class PK_ElectroDriver : PKWeapon {
 	Ready:
 		ELDR A 1 {
 			PK_WeaponReady();
-			if (invoker.ammo2.amount > invoker.ammouse2)
+			if (PK_CheckAmmo(secondary:true))
 				A_Overlay(PSP_UNDERGUN,"ElectricSpark",nooverride:true);
 		}
 		loop;
@@ -108,7 +109,7 @@ Class PK_ElectroDriver : PKWeapon {
 				A_SetTics(2);
 		}
 		ELDR A 2 A_WeaponOffset(-0.5,-0.5,WOF_ADD);
-		TNT1 A 0 A_ReFire();
+		TNT1 A 0 PK_ReFire();
 		goto ready;
 	AltFire:
 		TNT1 A 0 {
@@ -118,26 +119,23 @@ Class PK_ElectroDriver : PKWeapon {
 	AltHold:
 		ELDR A 1 {
 			bool infin = CheckInfiniteAmmo();
-			if (player.cmd.buttons & BT_ATTACK && (invoker.ammo2.amount >= 80 || infin)) {
+			if (PressingAttackButton() && PK_CheckAmmo(secondary:true, 80)) {
 				A_WeaponOffset(0,32);
-				if (!infin)
-					TakeInventory(invoker.ammotype2,80);
+				PK_DepleteAmmo(secondary:true,80);
 				A_ClearRefire();
 				A_StopSound(CH_LOOP);
 				return ResolveState("DiskFire");
 			}
-			if (!infin) {
+			//if (!infin) {
 				invoker.celldepleterate++;
 				int req = invoker.hasDexterity ? 1 : 2;
 				if (invoker.celldepleterate > req) {				
 					invoker.celldepleterate = 0;
-					if (invoker.ammo2.amount >= 1 && !infin)
-						TakeInventory(invoker.ammotype2,1);
-					else if (!infin) {
+					if (!PK_CheckAmmo(secondary:true))
 						return ResolveState("AltHoldEnd");
-					}
+					PK_DepleteAmmo(secondary:true);
 				}
-			}
+			//}
 			A_StartSound("weapons/edriver/electroloop",CH_LOOP,CHANF_LOOPING);
 			vector3 atkpos = FindElectroTarget();
 			PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
@@ -156,7 +154,7 @@ Class PK_ElectroDriver : PKWeapon {
 			A_OverlayAlpha(PSP_HIGHLIGHTS,brt2);
 			return ResolveState(null);
 		}
-		TNT1 A 0 A_Refire();
+		TNT1 A 0 PK_Refire();
 	AltHoldEnd:
 		TNT1 A 0 {
 			A_ClearRefire();
@@ -187,7 +185,7 @@ Class PK_ElectroDriver : PKWeapon {
 			A_OverlayRenderstyle(OverlayID(),STYLE_Add);
 		}
 		ELDS A 1 bright {
-			if (!player.readyweapon || player.readyweapon != invoker || invoker.ammo2.amount < invoker.ammouse2) {
+			if (!player.readyweapon || player.readyweapon != invoker || !PK_CheckAmmo(secondary:true)) {
 				A_ClearOverlays(PSP_HIGHLIGHTS,PSP_HIGHLIGHTS);
 				return ResolveState("Null");
 			}

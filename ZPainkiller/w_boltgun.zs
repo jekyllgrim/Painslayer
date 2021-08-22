@@ -8,6 +8,7 @@ Class PK_Boltgun : PKWeapon {
 	Default {
 		+PKWeapon.NOAUTOSECONDARY
 		PKWeapon.emptysound "weapons/empty/rifle";
+		PKWeapon.ammoSwitchCVar 'pk_switch_BoltgunHeater';
 		weapon.slotnumber 	7;
 		weapon.ammotype1	"PK_BoltAmmo";
 		weapon.ammouse1		5;
@@ -72,12 +73,11 @@ Class PK_Boltgun : PKWeapon {
 		goto super::Select;
 	Ready:
 		BGUN A 1 {
-			PK_WeaponReady(WRF_NOBOB);
 			vector2 wofs = (0,32);
 			if (invoker.scoped)
 				wofs += (invoker.scopeOfs,invoker.scopeOfs) * 3;
 			A_WeaponOffset(wofs.x,wofs.y);
-			if (invoker.ammo2.amount < 10) {
+			if (!PK_CheckAmmo(true,10)) {
 				let psp = player.FindPSprite(OverlayID());
 				if (psp)
 					psp.frame = 1;
@@ -95,6 +95,7 @@ Class PK_Boltgun : PKWeapon {
 					invoker.scoped = false;
 				}
 			}*/
+			PK_WeaponReady(invoker.scoped ? WRF_NOBOB : 0);
 		}
 		loop;
 	GoScope:
@@ -136,7 +137,7 @@ Class PK_Boltgun : PKWeapon {
 		stop;
 	Bolts:
 		BGUN C 1 {
-			if (invoker.ammo1.amount < 5) {
+			if (!PK_CheckAmmo()) {
 				let psp = player.FindPSprite(OverlayID());
 				if (psp)
 					psp.frame = 3;
@@ -168,15 +169,14 @@ Class PK_Boltgun : PKWeapon {
 			if (psp)
 				invoker.prevOfs = (psp.x,psp.y);
 			A_ClearOverlays(PSP_OVERGUN,PSP_OVERGUN);
-			if (invoker.ammo2.amount < 10) {
+			if (PK_CheckAmmo(true,10)) {
 				let psp = player.FindPSprite(OverlayID());
 				if (psp)
 					psp.sprite = GetSpriteIndex("BGU2");
 			}
 		}
 		#### A 4 {
-			if (!CheckInfiniteAmmo())
-				TakeInventory(invoker.ammo1.GetClass(),1);
+			PK_DepleteAmmo(amount:1);
 			double xofs = invoker.scoped ? 0 : 3;
 			double yofs = invoker.scoped ? 11 : 5;
 			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
@@ -184,8 +184,7 @@ Class PK_Boltgun : PKWeapon {
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
 		#### B 4 {
-			if (!CheckInfiniteAmmo())
-				TakeInventory(invoker.ammo1.GetClass(),2);
+			PK_DepleteAmmo(amount:2);
 			double xofs = invoker.scoped ? -1.5 : 0;
 			double yofs = invoker.scoped ? 10 : 3;
 			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
@@ -195,8 +194,7 @@ Class PK_Boltgun : PKWeapon {
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
 		#### C 2 {
-			if (!CheckInfiniteAmmo())
-				TakeInventory(invoker.ammo1.GetClass(),2);
+			PK_DepleteAmmo(amount:2);
 			double xofs = invoker.scoped ? -3 : -3;
 			double yofs = invoker.scoped ? 9 : 1;
 			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
@@ -206,7 +204,7 @@ Class PK_Boltgun : PKWeapon {
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
 		#### # 0 {
-			if (invoker.ammo1.amount < invoker.ammouse1)
+			if (!PK_CheckAmmo())
 				return ResolveState("FireEndEmpty");
 			return ResolveState(null);
 		}
@@ -267,8 +265,7 @@ Class PK_Boltgun : PKWeapon {
 		BGUB ABCD 1 A_WeaponOffset(1.2,1.2,WOF_ADD);
 		BGUB E 2 {
 			A_WeaponOffset(6,6,WOF_ADD);
-			if (!CheckInfiniteAmmo())
-				TakeInventory(invoker.ammo2.GetClass(),10);
+			PK_DepleteAmmo(true);
 			double ofs = -2.2;
 			double ang = 5;
 			double bpitch = invoker.hasWmod ? -15 : -25;
@@ -280,7 +277,7 @@ Class PK_Boltgun : PKWeapon {
 		}
 		BGUB FGHI 3 A_WeaponOffset(-2.5,-2.5,WOF_ADD);
 		TNT1 A 0 {
-			if (invoker.ammo2.amount < invoker.ammouse2) {
+			if (!PK_CheckAmmo(true)) {
 				A_WeaponOffset(invoker.prevOfs.x,invoker.prevOfs.y,WOF_INTERPOLATE);
 				return ResolveState("Ready");
 			}

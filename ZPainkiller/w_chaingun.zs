@@ -4,11 +4,10 @@ Class PK_Chaingun : PKWeapon {
 	private bool hideFlash;
 	private int atkframe;
 	private int atkframeDelay;
-	private transient CVAR c_switchmodes;
-	private bool switchmodes;
 	Default {
 		+PKWeapon.NOAUTOPRIMARY
 		PKWeapon.emptysound "weapons/empty/chaingun";
+		PKWeapon.ammoSwitchCVar 'pk_switch_MinigunRocket';
 		weapon.slotnumber 4;
 		weapon.ammotype1	"PK_GrenadeAmmo";
 		weapon.ammouse1	1;
@@ -44,56 +43,13 @@ Class PK_Chaingun : PKWeapon {
 			dmg = 11;
 		}
 		PK_FireBullets(spread,spread,-1,dmg,spawnheight:player.viewz-pos.z-40,spawnofs:8.6);
+		player.refire++;
 		if (invoker.hasDexterity)
 			invoker.hideFlash = !invoker.hideFlash;
 		else
 			invoker.hideFlash = false;
 		if (!invoker.hideFlash)
 			A_Overlay(PSP_PFLASH,"AltFlash");
-	}
-	override void DoEffect() {
-		super.DoEffect();
-		if (!owner || !owner.player)
-			return;
-		if (c_switchmodes == null)
-			c_switchmodes = CVAR.GetCVar('pk_switchChaingunModes',owner.player);
-		if (c_switchmodes/* && switchmodes != c_switchmodes.GetBool()*/) {
-			//let def = GetDefaultByType("PK_Chaingun");
-			if (switchmodes) {
-				ammotype1 = default.ammotype2;
-				ammouse1 = default.ammouse2;
-				ammogive1 = default.ammogive2;
-				ammotype2 = default.ammotype1;
-				ammouse2 = default.ammouse1;
-				ammogive2 = default.ammogive1;
-				bNOAUTOPRIMARY = false;
-				bNOAUTOSECONDARY = true;
-			}
-			else {
-				ammotype1 = default.ammotype1;
-				ammouse1 = default.ammouse1;
-				ammogive1 = default.ammogive1;
-				ammotype2 = default.ammotype2;
-				ammouse2 = default.ammouse2;
-				ammogive2 = default.ammogive2;
-				bNOAUTOPRIMARY = default.bNOAUTOPRIMARY;
-				bNOAUTOSECONDARY = default.bNOAUTOSECONDARY;
-			}
-			ammo1 = Ammo(owner.FindInventory (ammotype1));
-			ammo2 = Ammo(owner.FindInventory (ammotype2));
-			switchmodes = c_switchmodes.GetBool();
-		}
-	}
-	override State GetAtkState (bool hold) {	
-		if (switchmodes)
-			return super.GetAltAtkState(hold);
-		return super.GetAtkState(hold);
-	}
-	
-	override State GetAltAtkState (bool hold)	{
-		if (switchmodes)
-			return super.GetAtkState(hold);
-		return super.GetAltAtkState(hold);
 	}
 	States {
 	Spawn:
@@ -152,7 +108,6 @@ Class PK_Chaingun : PKWeapon {
 			A_OverlayRotate(OverlayID(),0);
 			A_OverlayScale(OverlayID(),1,1);
 		}
-		TNT1 A 0 PK_WeaponReady();
 		goto ready;
 	AltFire:
 		TNT1 A 0 {
@@ -169,17 +124,17 @@ Class PK_Chaingun : PKWeapon {
 	AltHold:
 		TNT1 AAA 2 {
 			A_Overlay(PSP_OVERGUN,"MinigunFire",noOverride: true);
-			if (invoker.ammo2.amount < 1)
+			if (!PK_CheckAmmo(true))
 				return ResolveState("AltFireEnd");
 			invoker.holddur++;
-			PK_AttackSound("weapons/chaingun/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
+			PK_AttackSound("weapons/chaingun/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);			
 			PK_FireChaingun();			
 			A_QuakeEX(1,1,0,2,0,1,sfx:"world/null");
 			return ResolveState(null);
 		}
 		TNT1 A 0 {
 			A_RemoveLight('PKWeaponlight');
-			A_ReFire();
+			PK_ReFire();
 		}
 	AltFireEnd:
 		TNT1 A 0 {

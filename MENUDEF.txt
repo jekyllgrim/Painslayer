@@ -60,16 +60,66 @@ Optionmenu "PK_Settings" {
 	PKTLTPOption "$PKM_PKMovement", "$PKM_PKMovement_Desc", "White", "pk_movement", "OnOff"
 	PKTLTPOption "$PKM_PKMAutoJump", "$PKM_PKMAutoJump_Desc", "White", "pkzm_autojump", "OnOff", "pk_movement"
 	PKTLTPOption "$PKM_AutoOpenTarot", "$PKM_AutoOpenTarot_Desc", "White", "pk_autoOpenBoard", "OnOff"
-	PKTLTPScaleSlider "$PKM_QOLCATCHER",	"$PKM_QOLCATCHER_Desc", "White", "pk_QoLCatcherDistance", 0, 96, 8, "$OPTVAL_OFF"
+	PKTLTPScaleSlider "$PKM_QOLCATCHER",	"$PKM_QOLCATCHER_Desc", "White", "pk_QoLCatcherDistance", 0, 96, 8, "$OnOff"
 	PKTLTPOption "$PKM_ALLOWDEMON", "$PKM_ALLOWDEMON_DESC", "White", "pk_allowDemonMorph", "OnOff"
 	PKTLTPOption "$PKM_GIFTCARRDS", "$PKM_GIFTCARRDS_DESC", "White", "pk_allowFreeCards", "OnOff"
-	PKTLTPOption "$PKM_CGUNSWITCH", "$PKM_CGUNSWITCH_DESC", "White", "pk_switchChaingunModes", "OnOff"
 	StaticText ""
+	StaticText "$PKM_FIREMODES", yellow
+	PKTLTPOption "$CNTRLMNU_SLOT1", "$PKM_FIREMODES_DESC", "White", "pk_swith_Painkiller", 			"PKIL_MODES"
+	PKTLTPOption "$CNTRLMNU_SLOT2", "$PKM_FIREMODES_DESC", "White", "pk_switch_ShotgunFreezer", 		"SHFR_MODES"
+	PKTLTPOption "$CNTRLMNU_SLOT3", "$PKM_FIREMODES_DESC", "White", "pk_switch_StakeGrenade",			"STGR_MODES"
+	PKTLTPOption "$CNTRLMNU_SLOT4", "$PKM_FIREMODES_DESC", "White", "pk_switch_MinigunRocket", 		"CGUN_MODES"
+	PKTLTPOption "$CNTRLMNU_SLOT5", "$PKM_FIREMODES_DESC", "White", "pk_switch_ElectroDriver", 		"ELDR_MODES"
+	PKTLTPOption "$CNTRLMNU_SLOT6", "$PKM_FIREMODES_DESC", "White", "pk_switch_RifleFlamethrower", 	"RIFT_MODES"
+	PKTLTPOption "$CNTRLMNU_SLOT7", "$PKM_FIREMODES_DESC", "White", "pk_switch_BoltgunHeater", 		"BOHE_MODES"
+	Command "$OPTMNU_DEFAULTS", "pk_switch_defaults"
 	StaticText ""
 	StaticText ""
 	StaticText ""
 	StaticText "$TLTPTOOLTIPMNU_VERSION", "yellow"
 	Submenu "$OPTMNU_TLTPTOOLTIP", "PKTooltipOptionsMenu"
+}
+
+OptionValue "PKIL_MODES"
+{
+	0, "$PK_PAINKILLER_TAG"
+	1, "$PK_PAINKILLER_ITAG"
+}
+
+OptionValue "SHFR_MODES"
+{
+	0, "$PK_SHOTGUN_TAG"
+	1, "$PK_SHOTGUN_ITAG"
+}
+
+OptionValue "STGR_MODES"
+{
+	0, "$PK_STAKEGUN_TAG"
+	1, "$PK_STAKEGUN_ITAG"
+}
+
+OptionValue "CGUN_MODES"
+{
+	0, "$PK_CHAINGUN_TAG"
+	1, "$PK_CHAINGUN_ITAG"
+}
+
+OptionValue "ELDR_MODES"
+{
+	0, "$PK_ELECTRODRIVER_TAG"
+	1, "$PK_ELECTRODRIVER_ITAG"
+}
+
+OptionValue "RIFT_MODES"
+{
+	0, "$PK_RIFLE_TAG"
+	1, "$PK_RIFLE_ITAG"
+}
+
+OptionValue "BOHE_MODES"
+{
+	0, "$PK_BOLTGUN_TAG"
+	1, "$PK_BOLTGUN_ITAG"
 }
 
 OptionMenu "PKTooltipOptionsMenu"

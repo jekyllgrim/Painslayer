@@ -1,6 +1,8 @@
 Class PK_Stakegun : PKWeapon {
 	Default {
+		+PKWeapon.NOAUTOSECONDARY
 		PKWeapon.emptysound "weapons/empty/rifle";
+		PKWeapon.ammoSwitchCVar 'pk_switch_StakeGrenade';
 		weapon.slotnumber 3;
 		weapon.ammotype1	"PK_StakeAmmo";
 		weapon.ammouse1		1;
@@ -36,10 +38,20 @@ Class PK_Stakegun : PKWeapon {
 				A_WeaponOffset(11,9,WOF_ADD);
 				double pofs = (invoker.hasWmod) ? 0 : -2.5;
 				PK_FireArchingProjectile("PK_Stake",spawnofs_xy:2,spawnheight:5,flags:FPF_NOAUTOAIM,pitch:pofs);
+				A_OverlayPivot(OverlayID(),0.2,1.0);
 			}
-			PSGN BBBBB 1 A_WeaponOffset(1.44,1.2,WOF_ADD);
-			PSGN CDEF 3 A_WeaponOffset(-0.8,-0.5,WOF_ADD);
-			PSGN GGGGGGG 2 A_WeaponOffset(-0.12,-0.1,WOF_ADD);
+			PSGN BBBBB 1 {
+				A_WeaponOffset(1.44,1.2,WOF_ADD);
+				PK_WeaponRotate(-0.6,WOF_ADD);
+			}
+			PSGN CDEF 3 {
+				A_WeaponOffset(-0.8,-0.5,WOF_ADD);
+				PK_WeaponRotate(-0.2,WOF_ADD);
+			}
+			PSGN GGGGGGG 2 {
+				A_WeaponOffset(-0.12,-0.1,WOF_ADD);
+				PK_WeaponRotate(0.2923,WOF_ADD);
+			}
 			PSGN A 0 {
 				if (invoker.ammo1.amount < 1) {
 					let psp = player.FindPSprite(PSP_Weapon);
@@ -47,8 +59,14 @@ Class PK_Stakegun : PKWeapon {
 						psp.sprite = GetSpriteIndex("PSGT");
 				}
 			}
-			#### HIJKAA 3 A_WeaponOffset(-2.35,-2.04,WOF_ADD);
-			TNT1 A 0 A_WeaponOffset(0,32,WOF_INTERPOLATE);
+			#### HIJKAA 3 {
+				A_WeaponOffset(-2.35,-2.04,WOF_ADD);
+				PK_WeaponRotate(0.2923,WOF_ADD);
+			}
+			TNT1 A 0 {
+				A_WeaponOffset(0,32,WOF_INTERPOLATE);
+				PK_WeaponRotate(0);
+			}
 			goto ready;
 		AltFire:
 			PSGN A 0 {
