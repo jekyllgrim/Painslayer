@@ -2,6 +2,7 @@ alias "PKGOLD" "netevent PK_GiveGold %1"
 alias "PKREFRESH" "netevent PK_RefreshCards"
 alias "PKCONSUME" "netevent PK_GiveSouls %1"
 alias "PKDEMON" "netevent PK_DemonMorph"
+alias "pk_switch_defaults" "pk_swith_Painkiller false; pk_switch_ShotgunFreezer false; pk_switch_StakeGrenade false; pk_switch_MinigunRocket false; pk_switch_ElectroDriver false; pk_switch_RifleFlamethrower false; pk_switch_BoltgunHeater false"
 
 addkeysection "Painslayer" PainslayerKeys
 addmenukey "$PKM_OpenTarot" 	"netevent PKCOpenBoard"

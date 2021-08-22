@@ -156,11 +156,13 @@ Class PK_PainkillerPlayer : DoomPlayer
 	
 	Override void PlayerThink()
 	{
-		bNOFRICTION = pk_movement && self.player && self.player.mo == self;
 		if (!pk_movement) {
+			gravity = default.gravity;
+			bNOFRICTION = default.bNOFRICTION;
 			super.PlayerThink();
 			return;
 		}
+		bNOFRICTION = self.player && self.player.mo == self;
 		//======================================
 		//Store info needed in multiple places
 		
@@ -1200,7 +1202,10 @@ Class PK_PainkillerPlayer : DoomPlayer
 	}
 	
 	Override Vector2 BobWeapon(double ticfrac)
-	{		
+	{
+		if (!pk_movement) {
+			return super.BobWeapon(ticfrac);
+		}
 		if(!ZMPlayer) { return (0, 0); }
 		
 		let weapon = ZMPlayer.ReadyWeapon;
