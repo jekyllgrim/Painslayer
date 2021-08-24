@@ -618,7 +618,7 @@ Class PKCardsMenu : PKZFGenericMenu {
 		}
 		else {
 			cardinfoCost.SetText(cost);
-			if (card.cardbought)
+			if (!card.cardbought)
 				cardinfoCost.Show();
 			else
 				cardinfoCost.Hide();
