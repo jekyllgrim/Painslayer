@@ -1,8 +1,8 @@
 Class PainkillerHUD : BaseStatusBar {
 	const noYStretch = 0.833333;
 	const PWICONSIZE = 18;
-	const PKHUDwidth = 320;
-	const PKHUDheight = 200;
+	//const PKHUDwidth = 320;
+	//const PKHUDheight = 200;
 		
 	HUDFont mIndexFont;
 	HUDFont mStatFont;
@@ -24,6 +24,10 @@ Class PainkillerHUD : BaseStatusBar {
 		vector2 arrowscale = (1, 1);
 		if (hudstate == HUD_StatusBar)
 			arrowscale *= 1.2;
+		/*if (aspectScale.GetBool() == true) {
+			arrowscale.y *= noYStretch;
+			arrowPos.y *= noYStretch;
+		}*/
 		//draw shadow:
 		if (shadowofs != (0,0)) {
 			DrawImageRotated("pkharrow", arrowPos+shadowOfs, fflags, arrowangle, scale: arrowscale, col:color(128,0,0,0));	
@@ -39,26 +43,26 @@ Class PainkillerHUD : BaseStatusBar {
 		that simply multiply vertical scale and pos by ~0.83 if "Preserve HUD scale" option is enabled.
 	*/
 	void PK_DrawImage(String texture, Vector2 pos, int flags = 0, double Alpha = 1., Vector2 box = (-1, -1), Vector2 scale = (1, 1)) {
-		if (aspectScale.GetBool() == true) {
+		/*if (aspectScale.GetBool() == true) {
 			scale.y *= noYStretch;
 			pos.y *= noYStretch;
-		}
+		}*/
 		DrawImage(texture, pos, flags, Alpha, box, scale);
 	}
 	
 	void PK_DrawString(HUDFont font, String string, Vector2 pos, int flags = 0, int translation = Font.CR_UNTRANSLATED, double Alpha = 1., int wrapwidth = -1, int linespacing = 4, Vector2 scale = (1, 1)) {
-		if (aspectScale.GetBool() == true) {
+		/*if (aspectScale.GetBool() == true) {
 			scale.y *= noYStretch;
 			pos.y *= noYStretch;
-		}
+		}*/
 		DrawString(font, string, pos, flags, translation, Alpha, wrapwidth, linespacing, scale);
 	}
 	
 	void PK_DrawInventoryIcon(Inventory item, Vector2 pos, int flags = 0, double alpha = 1.0, Vector2 boxsize = (-1, -1), Vector2 scale = (1.,1.)) {
-		if (aspectScale.GetBool() == true) {
+		/*if (aspectScale.GetBool() == true) {
 			scale.y *= noYStretch;
 			pos.y *= noYStretch;
-		}
+		}*/
 		DrawInventoryIcon(item, pos, flags, alpha, boxsize, scale);
 	}
 	
@@ -103,14 +107,15 @@ Class PainkillerHUD : BaseStatusBar {
 	
 	override void Draw (int state, double TicFrac) {
 		Super.Draw (state, TicFrac);
-		if (aspectScale == null)
+		/*if (aspectScale == null)
 			aspectScale = CVar.GetCvar('hud_aspectscale',CPlayer);
+		*/
 		hudstate = state;
 		//the hud is completely skipped if automap is active or the player
 		//is in a demon mode and debug messages aren't active:
 		if (state == HUD_none || automapactive || (isDemon && !pk_debugmessages))
 			return;
-		BeginHUD(PKHUDwidth,PKHUDheight);
+		BeginHUD();
 		if (state == HUD_Fullscreen || state == HUD_AltHud)
 			DrawTopElements();
 		if (state == HUD_StatusBar || state == HUD_Fullscreen)
@@ -139,7 +144,7 @@ Class PainkillerHUD : BaseStatusBar {
 		else
 			goldnum = cardcontrol.pk_gold;
 		//get souls amount:
-		let dmcont = PK_DemonMorphControl(CPlayer.mo.FindInventory("PK_DemonMorphControl"));
+		let dmcont = PK_DemonMorphControl(player.FindInventory("PK_DemonMorphControl"));
 		if (dmcont) {
 			soulsnum = dmcont.pk_souls;
 			//make souls number red if it's only 3 souls before turning into demon:
