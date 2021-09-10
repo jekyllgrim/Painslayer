@@ -655,6 +655,57 @@ Class PK_GoldArmor : PK_BronzeArmor  {
 ////////            ////////
 ////////////////////////////
 
+Class PK_PowerupOverlay : CustomInventory {
+	protected PK_PowerPentagram penta;
+	Default {
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.PERSISTENTPOWER;
+		+INVENTORY.AUTOACTIVATE;
+		inventory.amount 1;
+		inventory.maxamount 1;
+	}
+	override void Tick() {
+		super.Tick();
+		if (!owner || (owner.player && PK_Mainhandler.IsVoodooDoll(PlayerPawn(owner)))) {
+			Destroy();
+			return;
+		}
+	}
+	States {
+	Use:
+		TNT1 A 1 A_Overlay(PWR_HANDLER,"Handler");
+		fail;
+	Handler:
+		TNT1 A 1 {
+			if (!invoker.penta) {
+				invoker.penta = PK_PowerPentagram(FindInventory("PK_PowerPentagram"));
+				if (invoker.penta)
+					A_Overlay(PWR_PENTA,"Pentagram",nooverride:true);
+			}
+		}
+		loop;
+	Pentagram:
+		PHRN ABCDEFEDCB 5 {
+			if (!invoker.penta)
+				return ResolveState("Null");
+			else if (invoker.penta.isBlinking())
+				return ResolveState("PentagramFast");
+			return ResolveState(null);
+		}
+		loop;
+	PentagramFast:
+		PHRN ABCDEFGHI 4 {
+			if (!invoker.penta)
+				return ResolveState("Null");
+			else if (!invoker.penta.isBlinking())
+				return ResolveState("Pentagram");
+			return ResolveState(null);
+		}
+		loop;
+	}
+}
+
 Class PK_AmmoPack : Backpack {
 	Default {
 		inventory.pickupsound "pickups/ammopack";
@@ -742,8 +793,8 @@ Class PK_PowerupGiver : PowerupGiver {
 }
 
 Mixin Class PK_PowerUp {
-	sound lastSecondsSound;
-	property lastSecondsSound : lastSecondsSound;
+	sound runningOutSound;
+	property runningOutSound : runningOutSound;
 	Default {
 		+INVENTORY.ADDITIVETIME
 	}
@@ -765,12 +816,12 @@ Mixin Class PK_PowerUp {
 			Destroy();
 			return;
 		}
-		if (lastSecondsSound && EffectTics >= 0 && EffectTics <= 35*5 && (EffectTics % 35 == 0))
-			owner.A_StartSound(lastSecondsSound,CHAN_AUTO,CHANF_LOCAL);
+		if (runningOutSound && EffectTics >= 0 && EffectTics <= 35*5 && (EffectTics % 35 == 0))
+			owner.A_StartSound(runningOutSound,CHAN_AUTO,CHANF_LOCAL|CHANF_UI);
 	}
 	override void EndEffect () {
 		if (owner && owner.player && deathsound)
-			owner.A_StartSound(deathsound,CHAN_AUTO,CHANF_LOCAL);
+			owner.A_StartSound(deathsound,CHAN_AUTO,CHANF_LOCAL|CHANF_UI);
 		super.EndEffect();
 	}
 	override bool HandlePickup (Inventory item) {
