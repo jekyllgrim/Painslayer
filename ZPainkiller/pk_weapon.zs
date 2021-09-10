@@ -72,9 +72,6 @@ Class PKWeapon : Weapon abstract {
 			//owner.player.WeaponState |= WF_WEAPONBOBBING;
 		hasDexterity = owner.FindInventory("PowerDoubleFiringSpeed",subclass:true);
 		hasWmod = owner.FindInventory("PK_WeaponModifier",subclass:true);
-		
-		//if (weap == self)
-			//console.printf("(%d) NOAUTOPRIMARY %d | NOAUTOSECONDARY %d | blockFireOnSelect %d",GetAge(),bNOAUTOPRIMARY,bNOAUTOSECONDARY,blockFireOnSelect);
 	}
 	
 	action bool CheckInfiniteAmmo() {
@@ -115,8 +112,6 @@ Class PKWeapon : Weapon abstract {
 			ammotype2 = default.ammotype1;
 			ammouse2 = default.ammouse1;
 			ammogive2 = default.ammogive1;
-			//bNOAUTOPRIMARY = default.bNOAUTOSECONDARY;
-			//bNOAUTOSECONDARY = default.bNOAUTOPRIMARY;
 		}
 		else {
 			ammotype1 = default.ammotype1;
@@ -125,8 +120,6 @@ Class PKWeapon : Weapon abstract {
 			ammotype2 = default.ammotype2;
 			ammouse2 = default.ammouse2;
 			ammogive2 = default.ammogive2;
-			//bNOAUTOPRIMARY = default.bNOAUTOPRIMARY;
-			//bNOAUTOSECONDARY = default.bNOAUTOSECONDARY;
 		}
 		ammo1 = Ammo(owner.FindInventory (ammotype1));
 		ammo2 = Ammo(owner.FindInventory (ammotype2));
@@ -190,10 +183,10 @@ Class PKWeapon : Weapon abstract {
 	
 	
 	enum PABCheck {
-		PAB_ANY,
-		PAB_HELD,
-		PAB_NOTHELD,
-		PAB_HELDONLY
+		PAB_ANY,		//don't check if the button is held down
+		PAB_HELD,		//check if the button is held down
+		PAB_NOTHELD,	//check if the button is NOT held down
+		PAB_HELDONLY	//check ONLY if the button is held down and ignore if it's pressed now
 	}
 	//A variation on GetPlayerInput that incorporates the switching primary/secondary attack feature:
 	action bool PressingAttackButton(bool secondary = false, int holdCheck = PAB_ANY) {
@@ -208,16 +201,18 @@ Class PKWeapon : Weapon abstract {
 		bool pressed = (player.cmd.buttons & button); //check if pressed now 
 		bool held = (player.oldbuttons & button); //check if it was held from previous tic
 		
-		if (holdCheck == PAB_HELDONLY)
-			return held;		
-		if (holdCheck == PAB_NOTHELD) {
+		switch (holdCheck) {
+		case PAB_HELDONLY:			//true if held and not pressed
+			return held;
+			break;
+		case PAB_NOTHELD:				//true if not held, only pressed
 			return !held && pressed;
-		}		
-		if (holdCheck == PAB_HELD) {
+			break;
+		case PAB_HELD:					//true if held and pressed
 			return held && pressed;
-		}		
-		//otherwise return true if pressed is true:
-		return pressed;
+			break;
+		}
+		return pressed;				//true if pressed, ignore held check
 	}
 	
 	//A custom version of A_Refire():
@@ -767,6 +762,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 		int steps = int( distance );
 		
 		for( int i = 0; i < steps; i++ )  {
+		
 			let trl = PK_BaseFlare( Spawn(trailactor,oldPos+(0,0,trailz)) );
 			if (trl) {
 				trl.master = self;
