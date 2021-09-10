@@ -103,28 +103,37 @@ PKI_FUELAMMO		= "Picked up Flamethrower Fuel.";
 PKI_BOLTAMMO		= "Picked up Steel Bolts.";
 PKI_HEATERAMMO		= "Picked up Heater Bombs.";
 //weapons
+PKI_PAINKILLER			= "Picked up Pain/Killer";
 PKI_SHOTGUN			= "Picked up Shotgun/Freezer";
-PKI_STAKEGUN	 	= "Picked up Stakegun/Grenade Launcher";
-PKI_CHAINGUN		= "Picked up Rocket Launcher/Chaingun";
-PKI_ELECTRODRIVER	= "Picked up Electro/Driver";
+PKI_STAKEGUN	 		= "Picked up Stakegun/Grenade Launcher";
+PKI_CHAINGUN			= "Picked up Rocket Launcher/Chaingun";
+PKI_ELECTRODRIVER		= "Picked up Electro/Driver";
 PKI_BOLTGUN			= "Picked up Boltgun/Heater";
-PKI_RIFLE			= "Picked up Assault Rifle/Flamethrower";
+PKI_RIFLE				= "Picked up Assault Rifle/Flamethrower";
+//weapon names
+PK_PAINKILLER_TAG		= "Pain/Killer";
+PK_SHOTGUN_TAG			= "Shotgun/Freezer";
+PK_STAKEGUN_TAG		= "Stakegun/Grenade Launcher";
+PK_CHAINGUN_TAG		= "Rocket Launcher/Chaingun";
+PK_ELECTRODRIVER_TAG 	= "Electro/Driver";
+PK_RIFLE_TAG			= "Assault Rifle/Flamethrower";
+PK_BOLTGUN_TAG			= "Boltgun/Heater";
 //weapon tags
-PK_PAINKILLER_TAG		= "Pain	         /  Killer";
-PK_SHOTGUN_TAG			= "Shotgun       /  Freezer";
-PK_STAKEGUN_TAG		= "Stakegun      /  G. Launcher";
-PK_CHAINGUN_TAG		= "R. Launcher   /  Chaingun";
-PK_ELECTRODRIVER_TAG 	= "Driver        /  Electro";
-PK_RIFLE_TAG			= "Assault Rifle /  Flamethrower";
-PK_BOLTGUN_TAG			= "Boltgun       /  Heater";
+PK_PAINKILLER_SLOT	= "Pain	         /  Killer";
+PK_SHOTGUN_SLOT		= "Shotgun       /  Freezer";
+PK_STAKEGUN_SLOT		= "Stakegun      /  G. Launcher";
+PK_CHAINGUN_SLOT		= "R. Launcher   /  Chaingun";
+PK_ELECTRODRIVER_SLOT = "Driver        /  Electro";
+PK_RIFLE_SLOT			= "Assault Rifle /  Flamethrower";
+PK_BOLTGUN_SLOT		= "Boltgun       /  Heater";
 
-PK_PAINKILLER_ITAG	= "Killer        /  Pain";
-PK_SHOTGUN_ITAG		= "Freezer       /  Shotgun";
-PK_STAKEGUN_ITAG		= "G. Launcher   /  Stakegun";
-PK_CHAINGUN_ITAG		= "Chaingun      /  R. Launcher";
-PK_ELECTRODRIVER_ITAG = "Electro       /  Driver";
-PK_RIFLE_ITAG			= "Flamethrower  /  Assault Rifle";
-PK_BOLTGUN_ITAG		= "Heater        /  Boltgun";
+PK_PAINKILLER_ISLOT	= "Killer        /  Pain";
+PK_SHOTGUN_ISLOT		= "Freezer       /  Shotgun";
+PK_STAKEGUN_ISLOT		= "G. Launcher   /  Stakegun";
+PK_CHAINGUN_ISLOT		= "Chaingun      /  R. Launcher";
+PK_ELECTRODRIVER_ISLOT = "Electro       /  Driver";
+PK_RIFLE_ISLOT			= "Flamethrower  /  Assault Rifle";
+PK_BOLTGUN_ISLOT		= "Heater        /  Boltgun";
 //obituaries
 PKO_PAIN			= "%o was ripped apart with %k's Pain";
 PKO_KILLER			= "%o coudn't dodge %k's Killer";
@@ -215,7 +224,7 @@ OPTMNU_TLTPTOOLTIP = "Tooltips Settings";
 
 TLTPTOOLTIPMNU_TITLE = "Tooltips Options";
 TLTPTOOLTIPMNU_VERSION = "Tooltips - The Ultimate Menu Helper Mod v0.3.2.1";
-TLTPTOOLTIPMNU_TAGLINE = "- An Overengineered Solution to a Problem No One Has -";
+TLTPTOOLTIPMNU_SLOTLINE = "- An Overengineered Solution to a Problem No One Has -";
 
 //
 // Category Headings
@@ -486,27 +495,36 @@ PKI_FUELAMMO		= "Вы подобрали топливо для огнемёта.
 PKI_BOLTAMMO		= "Вы подобрали стальные болты.";
 PKI_HEATERAMMO		= "Вы подобрали шаровые бомбы.";
 //weapons
+PKI_PAINKILLER			= "Вы подобрали Pain/Killer";
 PKI_SHOTGUN			= "Вы подобрали дробовик/охладитель";
-PKI_STAKEGUN	 	= "Вы подобрали коломёт/гранатомёт";
-PKI_CHAINGUN		= "Вы подобрали ракетницу/пулемёт";
-PKI_ELECTRODRIVER	= "Вы подобрали электро/драйвер";
+PKI_STAKEGUN	 		= "Вы подобрали коломёт/гранатомёт";
+PKI_CHAINGUN			= "Вы подобрали ракетницу/пулемёт";
+PKI_ELECTRODRIVER		= "Вы подобрали электро/драйвер";
+PKI_RIFLE				= "Вы подобрали автомат/огнемёт";
 PKI_BOLTGUN			= "Вы подобрали болтомёт/шаромёт";
-PKI_RIFLE			= "Вы подобрали автомат/огнемёт";
+//weapon names
+PK_PAINKILLER_TAG		= "Pain/Killer";
+PK_SHOTGUN_TAG			= "Дробовик/охладитель";
+PK_STAKEGUN_TAG		= "Коломёт/гранатомёт";
+PK_CHAINGUN_TAG		= "Ракетница/пулемёт";
+PK_ELECTRODRIVER_TAG 	= "Электро/драйвер";
+PK_RIFLE_TAG			= "Автомат/огнемёт";
+PK_BOLTGUN_TAG			= "Болтомёт/шаромёт";
 //weapon tags
-PK_PAINKILLER_TAG		= "Pain	      /  Killer";
-PK_SHOTGUN_TAG			= "Дробовик   /  охладитель";
-PK_STAKEGUN_TAG		= "Коломёт    /  гранатомёт";
-PK_CHAINGUN_TAG		= "Ракетница  /  пулемёт";
-PK_ELECTRODRIVER_TAG 	= "Драйвер    /  электро";
-PK_RIFLE_TAG			= "Автомат    /  огнемёт";
-PK_BOLTGUN_TAG			= "Болтомёт   /  шаромёт";
+PK_PAINKILLER_SLOT		= "Pain	      /  Killer";
+PK_SHOTGUN_SLOT			= "Дробовик   /  охладитель";
+PK_STAKEGUN_SLOT		= "Коломёт    /  гранатомёт";
+PK_CHAINGUN_SLOT		= "Ракетница  /  пулемёт";
+PK_ELECTRODRIVER_SLOT 	= "Драйвер    /  электро";
+PK_RIFLE_SLOT			= "Автомат    /  огнемёт";
+PK_BOLTGUN_SLOT			= "Болтомёт   /  шаромёт";
 
-PK_SHOTGUN_ITAG		= "Охладитель /  дробовик";
-PK_STAKEGUN_ITAG		= "Гранатомёт /  коломёт";
-PK_CHAINGUN_ITAG		= "Пулемёт    /  ракетница";
-PK_ELECTRODRIVER_ITAG = "Электро    /  драйвер";
-PK_RIFLE_ITAG			= "Огнемёт    /  автомат";
-PK_BOLTGUN_ITAG		= "Шаромёт    /  болтомёт";
+PK_SHOTGUN_ISLOT		= "Охладитель /  дробовик";
+PK_STAKEGUN_ISLOT		= "Гранатомёт /  коломёт";
+PK_CHAINGUN_ISLOT		= "Пулемёт    /  ракетница";
+PK_ELECTRODRIVER_ISLOT = "Электро    /  драйвер";
+PK_RIFLE_ISLOT			= "Огнемёт    /  автомат";
+PK_BOLTGUN_ISLOT		= "Шаромёт    /  болтомёт";
 //obituaries
 PKO_PAIN			= "%k разрывает игрока %o на части с помощью Pain";
 PKO_KILLER			= "Игроку %o не удалось увернуться от Killer игрока %k";
@@ -547,8 +565,8 @@ PKM_PKMAutoJump_Desc	= 		"По умолчанию при использован�
 PKM_ALLOWDEMON		= "Разрешить превращение в демона";
 PKM_ALLOWDEMON_DESC	= 	"По умолчанию, собрав 66 душ, вы превращаетесь в демона.\n"
 							"Эта настройка позволяет полностью отключить такую возможность.";
-PKM_QOLCATCHER		= "Расстояние, на котором золото/души притягиваются";
-PKM_QOLCATCHER_Desc= 	"Эта функция позволяет облегчить подбирание душ и золота,\n"
+PKM_QOLCATCHER		= "Дистанция автопритягивания золота/душ";
+PKM_QOLCATCHER_Desc = 	"Эта функция позволяет облегчить подбирание душ и золота,\n"
 						"притягивая их. Работает так же, как карта \"Ловец душ\",\n"
 						"только максимальная дистанция притягивания меньше.";
 PKM_GIFTCARRDS		= "Дарить несколько карт";
