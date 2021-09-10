@@ -13,7 +13,7 @@ Class PK_Painkiller : PKWeapon {
 		weapon.slotnumber 1;
 		inventory.pickupmessage "Picked up Painkiller";
 		inventory.icon "pkxpkill";
-		Tag "Painkiller";
+		Tag "$PK_PAINKILLER_TAG";
 	}
 	states {
 		Spawn:
