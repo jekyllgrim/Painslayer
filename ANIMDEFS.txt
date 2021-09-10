@@ -1,1 +1,15 @@
 CameraTexture "Weapon.camtex" 200 200
+
+texture PCDXPAIN
+	pic PKILA tics 2
+	pic PKILB tics 2
+	pic PKILC tics 2
+	pic PKILD tics 2
+	
+texture PCDXKILL
+	pic PCDXKIL2 tics 20
+	pic PCDXKIL3 tics 2
+	pic PCDXKIL4 tics 5
+	pic PCDXKIL3 tics 3
+	pic PCDXKIL2 tics 3
+	pic PCDXKIL1 tics 50
