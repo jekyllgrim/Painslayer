@@ -25,7 +25,7 @@ Class PK_Stakegun : PKWeapon {
 		Ready:
 			PSGN A 1 {
 				PK_WeaponReady();
-				if (invoker.ammo1.amount < 1) {
+				if (!PK_CheckAmmo()) {
 					let psp = player.FindPSprite(PSP_Weapon);
 					if (psp)
 						psp.sprite = GetSpriteIndex("PSGT");
@@ -73,7 +73,7 @@ Class PK_Stakegun : PKWeapon {
 				PK_AttackSound("weapons/stakegun/grenade");
 				A_WeaponOffset(6,2,WOF_ADD);
 				PK_FireArchingProjectile("PK_Grenade",spawnofs_xy:1,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
-				if (invoker.ammo1.amount < 1) {
+				if (!PK_CheckAmmo()) {
 					let psp = Player.FindPSprite(PSP_WEAPON);
 					if (psp)
 						psp.sprite = GetSpriteIndex("PSGT");
@@ -208,7 +208,7 @@ Class PK_Stake : PK_StakeProjectile {
 					pinvictim.target = victim;
 					pinvictim.master = self;
 					pinvictim.angle = victim.angle;
-					pinvictim.height = victim.default.height*0.5;
+					//pinvictim.A_SetSize(victim.default.radius, victim.default.height);
 					pinvictim.sprite = victim.sprite;
 					pinvictim.frame = victim.frame;
 					pinvictim.translation = victim.translation;
@@ -389,6 +389,7 @@ Class PK_StakeStuckCounter : Inventory {
 
 // This dummy item handles what happens to the actual monster killed by a stake
 Class PK_PinToWall : PK_InventoryToken {
+	//private PlayerPawn CPlayer;
 	private int PrevRenderstyle;
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);
@@ -404,8 +405,13 @@ Class PK_PinToWall : PK_InventoryToken {
 			DepleteOrDestroy();
 			return;
 		}
-		if (master)
+		//if (!CPlayer)
+			//CPlayer = players[consoleplayer].mo;
+		if (master) {
 			owner.SetOrigin(master.pos,true);
+		}
+		//if (owner.bWALLSPRITE)
+			//owner.A_SetAngle(Clamp(AngleTo(CPlayer),-40,40),SPF_INTERPOLATE);
 	}
 	override void DetachFromOwner() {
 		if (!owner)
@@ -426,7 +432,7 @@ Class PK_PinVictim : Actor {		//the fake corpse (receives its visuals from the s
 	}
 	override void Tick(){
 		super.Tick();
-		//if the target is alive  or doesn't exist, remove fake corpse
+		//if the target is alive or doesn't exist, remove fake corpse
 		if (!target || !target.bKILLED) {
 			destroy();
 			return;
