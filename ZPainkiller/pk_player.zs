@@ -154,15 +154,22 @@ Class PK_PainkillerPlayer : DoomPlayer
 		bNOFRICTION = True;
 	}*/
 	
+	Override void Tick()
+	{
+		Super.Tick();
+		if (pk_movement)
+			bNOFRICTION = self.player && self.player.mo == self;
+		else			
+			bNOFRICTION = default.bNOFRICTION;
+	}
+	
 	Override void PlayerThink()
 	{
 		if (!pk_movement) {
 			gravity = default.gravity;
-			bNOFRICTION = default.bNOFRICTION;
 			super.PlayerThink();
 			return;
 		}
-		bNOFRICTION = self.player && self.player.mo == self;
 		//======================================
 		//Store info needed in multiple places
 		
