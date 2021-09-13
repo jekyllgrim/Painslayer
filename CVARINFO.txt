@@ -6,7 +6,7 @@ server bool pk_allowFreeCards = true;
 
 // Weapon Primary/Secondary fire settings
 
-user bool pk_swith_Painkiller 			= false;
+user bool pk_switch_Painkiller 			= false;
 user bool pk_switch_ShotgunFreezer 		= false;
 user bool pk_switch_StakeGrenade 		= false;
 user bool pk_switch_MinigunRocket 		= false;

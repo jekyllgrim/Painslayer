@@ -65,7 +65,7 @@ Optionmenu "PK_Settings" {
 	PKTLTPOption "$PKM_GIFTCARRDS", "$PKM_GIFTCARRDS_DESC", "White", "pk_allowFreeCards", "OnOff"
 	StaticText ""
 	StaticText "$PKM_FIREMODES", yellow
-	PKTLTPOption "$CNTRLMNU_SLOT1", "$PKM_FIREMODES_DESC", "White", "pk_swith_Painkiller", 			"PKIL_MODES"
+	PKTLTPOption "$CNTRLMNU_SLOT1", "$PKM_FIREMODES_DESC", "White", "pk_switch_Painkiller", 			"PKIL_MODES"
 	PKTLTPOption "$CNTRLMNU_SLOT2", "$PKM_FIREMODES_DESC", "White", "pk_switch_ShotgunFreezer", 		"SHFR_MODES"
 	PKTLTPOption "$CNTRLMNU_SLOT3", "$PKM_FIREMODES_DESC", "White", "pk_switch_StakeGrenade",			"STGR_MODES"
 	PKTLTPOption "$CNTRLMNU_SLOT4", "$PKM_FIREMODES_DESC", "White", "pk_switch_MinigunRocket", 		"CGUN_MODES"

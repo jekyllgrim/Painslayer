@@ -7,7 +7,7 @@ Class PK_Painkiller : PKWeapon {
 	private int wmodCounter;
 	Default {
 		+WEAPON.MELEEWEAPON;
-		PKWeapon.ammoSwitchCVar 'pk_swith_Painkiller';
+		PKWeapon.ammoSwitchCVar 'pk_switch_Painkiller';
 		Obituary "$PKO_PAIN";
 		Tag "Painkiller";
 		weapon.slotnumber 1;
