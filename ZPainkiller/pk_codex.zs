@@ -25,6 +25,11 @@ Class PKCodexMenu : PKZFGenericMenu {
 	vector2 infoSectionPos;
 	vector2 infoSectionSize;
 	
+	PKZFBoxTextures lightFrame;
+	PKZFBoxTextures darkFrame;
+	
+	bool showWMText;
+	
 	static const string mainTabnames[] = {
 		"WEAPONS",
 		"POWERUPS",
@@ -70,14 +75,14 @@ Class PKCodexMenu : PKZFGenericMenu {
 		tabhandler.menu = self;
 		
 		//dark frame for inactive/non-interactive board elements:
-		let lightFrame = PKZFBoxTextures.createTexturePixels(
+		lightFrame = PKZFBoxTextures.createTexturePixels(
 			"graphics/HUD/Codex/codxbbut1.png",
 			(10,9),
 			(74,75),
 			false, false
 		);
 		//light frame for active board elements:
-		let darkFrame = PKZFBoxTextures.createTexturePixels(
+		darkFrame = PKZFBoxTextures.createTexturePixels(
 			"graphics/HUD/Codex/codxbbut2.png",
 			(10,9),
 			(74,75),
@@ -160,6 +165,16 @@ Class PKCodexMenu : PKZFGenericMenu {
 		"PK_Boltgun"
 	};
 	
+	static const name PK_ModeCVars[] = {
+		'pk_switch_Painkiller',
+		'pk_switch_ShotgunFreezer',
+		'pk_switch_StakeGrenade',
+		'pk_switch_MinigunRocket',
+		'pk_switch_ElectroDriver',
+		'pk_switch_RifleFlamethrower',
+		'pk_switch_BoltgunHeater'
+	};
+	
 	//Create weapons tabs and a frame:
 	void WeaponsTabInit() {		
 		let wpnTabCont = new("PKZFRadioController"); //define a new controller
@@ -171,6 +186,8 @@ Class PKCodexMenu : PKZFGenericMenu {
 		//cover the buttons themselves!
 		vector2 wpnSectionPos = (btnPos.x + btnSize.x + 8, btnPos.y);
 		vector2 wpnSectionSize = (infoSectionSize.x - wpnSectionPos.x, infoSectionSize.y);		
+		
+			
 		//Define buttons with weapon names:
 		for (int i = 0; i < weaponTabElements.Size(); i++) {
 			PKZFTabButton tab; PKZFFrame tabframe;
@@ -182,46 +199,360 @@ Class PKCodexMenu : PKZFGenericMenu {
 				wpnTabHandler,				
 				i,
 				wpnSectionPos, wpnSectionSize,
-				textscale:0.85
-			);
+				textscale:0.9
+			);			
+			btnPos.y += (btnSize.y + btnYgap);
 			tab.Pack(mainTabs[0]);
 			tabframe.Pack(mainTabs[0]);
 			tab.setAlignment(PKZFElement.AlignType_CenterLeft);
-			weaponTabElements[i] = tabframe;
-			if (i == 0) {
-				//let img = PKZFImage.Create((0,0),(283,189),"PCDXPAIN");
-				//let img2 = PKZFImage.Create((0,169),(283,189),"PCDXKILL");
-				let img = PKZFImage.Create((0,0),(200,159),"Graphics/HUD/Codex/CODX_PK_1.PNG");
-				let img2 = PKZFImage.Create((0,170),(200,159),"Graphics/HUD/Codex/CODX_PK_2.PNG");
-				let img3 = PKZFImage.Create((0,340),(200,159),"Graphics/HUD/Codex/CODX_PK_3.PNG");
-				let text = PKZFLabel.Create((204,0),(420,170),
-					"Hold Primary: Pain\n\nDeal continuous damage with the spinning blades.",
-					fnt:font_times,
-					textscale:PK_MENUTEXTSCALE*0.9,
-					textColor:Font.FindFontColor('PKBaseText')
-				);
-				let text2 = PKZFLabel.Create((204,170),(420,170),
-					"Tap Secondary: Killer\n\nFire the folded blade unit. The unit can stick into walls and creates a laser beam that burns enemies when you aim at it.\nNOTE: This attack can juggle corpses.",
-					fnt:font_times,
-					textscale:PK_MENUTEXTSCALE*0.9,
-					textColor:Font.FindFontColor('PKBaseText')
-				);
-				let text3 = PKZFLabel.Create((204,340),(420,170),
-					"Hold Primary, tap Secondary: Painkiller\n\nLaunch the spinning blades forward. This projectile is slow but deals a lot of damage on impact.",
-					fnt:font_times,
-					textscale:PK_MENUTEXTSCALE*0.9,
-					textColor:Font.FindFontColor('PKBaseText')
-				);
-				img.pack(tabframe);
-				img2.pack(tabframe);
-				img3.pack(tabframe);
-				text.pack(tabframe);
-				text2.pack(tabframe);
-				text3.pack(tabframe);
+			weaponTabElements[i] = tabframe;		
+			
+			//these will hold attack icons and descriptions
+			string imgpath1;
+			string imgpath2;
+			string imgpath3;
+			string text1; string alttext1;
+			string text2; string alttext2;
+			string text3;
+			
+			//cache the names "Primary" and "Secondary":
+			string fire_name = StringTable.Localize("$PKC_Primary");
+			string altfire_name = StringTable.Localize("$PKC_Secondary");
+			
+			//check if this weapon has its fire/altfire modes switched:
+			bool modeswitch = CVar.GetCVar(PK_ModeCVars[i],Players[Consoleplayer]).GetBool();
+			//if so, switch the words "Primary" and "Secondary":
+			if (modeswitch) {
+				string fire_name_sw = altfire_name;
+				string altfire_name_sw = fire_name;
+				fire_name = fire_name_sw;
+				altfire_name = altfire_name_sw;
 			}
-			btnPos.y += (btnSize.y + btnYgap);
+			
+			if (i == PKCX_PainKiller) {
+				imgpath1 = "Graphics/HUD/Codex/CODX_PK_1.PNG";
+				imgpath2 = "Graphics/HUD/Codex/CODX_PK_2.PNG";
+				imgpath3 = "Graphics/HUD/Codex/CODX_PK_3.PNG";
+				text1 = String.Format(
+					"%s %s: %s\n\n%s",
+					StringTable.Localize("$PKC_Hold"),
+					fire_name,
+					StringTable.Localize("$PKC_Pain"),
+					StringTable.Localize("$PKC_PainDesc")
+				);
+				alttext1 = String.Format(
+					"%s %s: %s\n\n%s",
+					StringTable.Localize("$PKC_Hold"),
+					fire_name,
+					StringTable.Localize("$PKC_Pain"),
+					StringTable.Localize("$PKC_PainDescWM")
+				);
+				text2 = String.Format(
+					"%s %s: %s\n\n%s",
+					StringTable.Localize("$PKC_Tap"),
+					altfire_name,
+					StringTable.Localize("$PKC_Killer"),
+					StringTable.Localize("$PKC_KillerDesc")
+				);
+				alttext2 = String.Format(
+					"%s %s: %s\n\n%s",
+					StringTable.Localize("$PKC_Tap"),
+					altfire_name,
+					StringTable.Localize("$PKC_Killer"),
+					StringTable.Localize("$PKC_KillerDescWM")
+				);
+				text3 = String.Format(
+					"%s %s, %s %s: %s\n\n%s",
+					StringTable.Localize("$PKC_Hold"),
+					fire_name,
+					StringTable.Localize("$PKC_Tap").MakeLower(),
+					altfire_name,
+					StringTable.Localize("$PKC_Painkiller"),
+					StringTable.Localize("$PKC_PainkillerDesc")
+				);
+			}
+			if (i == PKCX_Shotgun) {
+				imgpath1 = "Graphics/HUD/Codex/CODX_SH_1.PNG";
+				imgpath2 = "Graphics/HUD/Codex/CODX_SH_2.PNG";
+				imgpath3 = "Graphics/HUD/Codex/CODX_SH_3.PNG";
+				text1 = String.Format(
+					"%s: %s\n\n%s",
+					fire_name,
+					StringTable.Localize("$PKC_Shotgun"),
+					StringTable.Localize("$PKC_ShotgunDesc")
+				);
+				alttext1 = String.Format(
+					"%s: %s\n\n%s",
+					fire_name,
+					StringTable.Localize("$PKC_Shotgun"),
+					StringTable.Localize("$PKC_ShotgunDescWM")
+				);
+				text2 = String.Format(
+					"%s: %s\n\n%s",
+					altfire_name,
+					StringTable.Localize("$PKC_Freezer"),
+					StringTable.Localize("$PKC_FreezerDesc")
+				);
+				alttext2 = String.Format(
+					"%s: %s\n\n%s",
+					altfire_name,
+					StringTable.Localize("$PKC_Freezer"),
+					StringTable.Localize("$PKC_FreezerDescWM")
+				);
+				text3 = String.Format(
+					"%s, %s %s: %s\n\n%s",
+					altfire_name,
+					StringTable.Localize("$PKC_then"),
+					fire_name,
+					StringTable.Localize("$PKC_ShotgunFreezer"),
+					StringTable.Localize("$PKC_ShotgunFreezerDesc")
+				);
+			}
+			if (i == PKCX_Stakegun) {
+				imgpath1 = "Graphics/HUD/Codex/CODX_ST_1.PNG";
+				imgpath2 = "Graphics/HUD/Codex/CODX_ST_2.PNG";
+				imgpath3 = "Graphics/HUD/Codex/CODX_ST_3.PNG";
+				text1 = String.Format(
+					"%s: %s\n\n%s",
+					fire_name,
+					StringTable.Localize("$PKC_Stakegun"),
+					StringTable.Localize("$PKC_StakegunDesc")
+				);
+				alttext1 = String.Format(
+					"%s: %s\n\n%s",
+					fire_name,
+					StringTable.Localize("$PKC_Stakegun"),
+					StringTable.Localize("$PKC_StakegunDescWM")
+				);
+				text2 = String.Format(
+					"%s: %s\n\n%s",
+					altfire_name,
+					StringTable.Localize("$PKC_Grenade"),
+					StringTable.Localize("$PKC_GrenadeDesc")
+				);
+				alttext2 = String.Format(
+					"%s: %s\n\n%s",
+					altfire_name,
+					StringTable.Localize("$PKC_Grenade"),
+					StringTable.Localize("$PKC_GrenadeDescWM")
+				);
+				text3 = String.Format(
+					"%s, %s %s: %s\n\n%s",
+					altfire_name,
+					StringTable.Localize("$PKC_then"),
+					fire_name,
+					StringTable.Localize("$PKC_StakeGrenade"),
+					StringTable.Localize("$PKC_StakeGrenadeDesc")
+				);
+			}
+			if (i == PKCX_Chaingun) {
+				imgpath1 = "Graphics/HUD/Codex/CODX_CH_1.PNG";
+				imgpath2 = "Graphics/HUD/Codex/CODX_CH_2.PNG";
+				imgpath3 = "";
+				text1 = String.Format(
+					"%s: %s\n\n%s",
+					fire_name,
+					StringTable.Localize("$PKC_RLauncher"),
+					StringTable.Localize("$PKC_RLauncherDesc")
+				);
+				alttext1 = String.Format(
+					"%s: %s\n\n%s",
+					fire_name,
+					StringTable.Localize("$PKC_RLauncher"),
+					StringTable.Localize("$PKC_RLauncherDescWM")
+				);
+				text2 = String.Format(
+					"%s %s: %s\n\n%s",
+					StringTable.Localize("$PKC_Hold"),
+					altfire_name,
+					StringTable.Localize("$PKC_Chaingun"),
+					StringTable.Localize("$PKC_ChaingunDesc")
+				);
+				alttext2 = String.Format(
+					"%s %s: %s\n\n%s",
+					StringTable.Localize("$PKC_Hold"),
+					altfire_name,
+					StringTable.Localize("$PKC_Chaingun"),
+					StringTable.Localize("$PKC_ChaingunDescWM")
+				);
+				text3 = "";
+			}
+			if (i == PKCX_ELD) {
+				imgpath1 = "Graphics/HUD/Codex/CODX_ED_1.PNG";
+				imgpath2 = "Graphics/HUD/Codex/CODX_ED_2.PNG";
+				imgpath3 = "Graphics/HUD/Codex/CODX_ED_3.PNG";
+				text1 = String.Format(
+					"%s: %s\n\n%s",
+					fire_name,
+					StringTable.Localize("$PKC_Driver"),
+					StringTable.Localize("$PKC_DriverDesc")
+				);
+				alttext1 = String.Format(
+					"%s: %s\n\n%s",
+					fire_name,
+					StringTable.Localize("$PKC_Driver"),
+					StringTable.Localize("$PKC_DriverDescWM")
+				);
+				text2 = String.Format(
+					"%s %s: %s\n\n%s",
+					StringTable.Localize("$PKC_Hold"),
+					altfire_name,
+					StringTable.Localize("$PKC_Electro"),
+					StringTable.Localize("$PKC_ElectroDesc")
+				);
+				alttext2 = String.Format(
+					"%s %s: %s\n\n%s",
+					StringTable.Localize("$PKC_Hold"),
+					altfire_name,
+					StringTable.Localize("$PKC_Electro"),
+					StringTable.Localize("$PKC_ElectroDescWM")
+				);
+				text3 = String.Format(
+					"%s %s, %s %s: %s\n\n%s",
+					StringTable.Localize("$PKC_Hold"),
+					altfire_name,
+					StringTable.Localize("$PKC_Tap"),
+					fire_name,
+					StringTable.Localize("$PKC_ElectroDisc"),
+					StringTable.Localize("$PKC_ElectroDiscDesc")
+				);
+			}
+			if (i == PKCX_Rifle) {
+				imgpath1 = "Graphics/HUD/Codex/CODX_RF_1.PNG";
+				imgpath2 = "Graphics/HUD/Codex/CODX_RF_2.PNG";
+				imgpath3 = "Graphics/HUD/Codex/CODX_RF_3.PNG";
+				
+				text1 = String.Format(
+					"%s %s: %s\n\n%s",
+					StringTable.Localize("$PKC_Hold"),
+					fire_name,
+					StringTable.Localize("$PKC_Rifle"),
+					StringTable.Localize("$PKC_RifleDesc")
+				);
+				alttext1 = String.Format(
+					"%s %s: %s\n\n%s",
+					StringTable.Localize("$PKC_Hold"),
+					fire_name,
+					StringTable.Localize("$PKC_Rifle"),
+					StringTable.Localize("$PKC_RifleDescWM")
+				);
+				text2 = String.Format(
+					"%s %s: %s\n\n%s",
+					StringTable.Localize("$PKC_Hold"),
+					altfire_name,
+					StringTable.Localize("$PKC_Flamer"),
+					StringTable.Localize("$PKC_FlamerDesc")
+				);
+				alttext2 = String.Format(
+					"%s %s: %s\n\n%s",
+					StringTable.Localize("$PKC_Hold"),
+					altfire_name,
+					StringTable.Localize("$PKC_Flamer"),
+					StringTable.Localize("$PKC_FlamerDescWM")
+				);
+				text3 = String.Format(
+					"%s %s, %s %s: %s\n\n%s",
+					StringTable.Localize("$PKC_Hold"),
+					altfire_name,
+					StringTable.Localize("$PKC_Tap").MakeLower(),
+					fire_name,
+					StringTable.Localize("$PKC_FlameTank"),
+					StringTable.Localize("$PKC_FlameTankDesc")
+				);
+			}
+			if (i == PKCX_Boltgun) {
+				imgpath1 = "Graphics/HUD/Codex/CODX_BG_1.PNG";
+				imgpath2 = "Graphics/HUD/Codex/CODX_BG_2.PNG";
+				imgpath3 = "Graphics/HUD/Codex/CODX_BG_3.PNG";
+				text1 = String.Format(
+					"%s: %s\n\n%s",
+					fire_name,
+					StringTable.Localize("$PKC_Boltgun"),
+					StringTable.Localize("$PKC_BoltgunDesc")
+				);
+				alttext1 = String.Format(
+					"%s: %s\n\n%s",
+					fire_name,
+					StringTable.Localize("$PKC_Boltgun"),
+					StringTable.Localize("$PKC_BoltgunDescWM")
+				);
+				text2 = String.Format(
+					"%s: %s\n\n%s",
+					altfire_name,
+					StringTable.Localize("$PKC_Heater"),
+					StringTable.Localize("$PKC_HeaterDesc")
+				);
+				alttext2 = String.Format(
+					"%s: %s\n\n%s",
+					altfire_name,
+					StringTable.Localize("$PKC_Heater"),
+					StringTable.Localize("$PKC_HeaterDescWM")
+				);
+				text3 = String.Format(
+					"%s, %s %s: %s\n\n%s",
+					altfire_name,
+					StringTable.Localize("$PKC_then"),
+					fire_name,
+					StringTable.Localize("$PKC_HeaterBolts"),
+					StringTable.Localize("$PKC_HeaterBoltsDesc")
+				);
+			}
+			
+			//create attack description sections:
+			double wpnInfoYGap = 32; //gap between attack descriptions
+			vector2 wpnInfoBorderPos = (0,16);
+			vector2 wpnInfoBorderSize = (644,175);
+			vector2 nextwpnInfoBorderPos = wpnInfoBorderPos;
+			
+			//create 3 sections (2 for Chaingun):
+			int goal = text3 ? 3 : 2;
+			for (int i = 0; i < goal; i++) {
+				let wpnInfoBorder =  PKZFBoxImage.Create(nextwpnInfoBorderPos, wpnInfoBorderSize,darkFrame);
+				nextwpnInfoBorderPos.y += wpnInfoBorderSize.y + (wpnInfoYGap / 2);
+				wpnInfoBorder.Pack(tabframe);
+			}
+			
+			//create attack icons:
+			vector2 wpnImgPos = wpnInfoBorderPos + (8,8);
+			vector2 wpnImgSize = (200,wpnInfoBorderSize.y - 16);
+			vector2 wpnDescPos = (wpnImgPos.x + wpnImgSize.x + 8,wpnImgPos.y);
+			vector2 wpnDescSize = (416,wpnImgSize.y);
+						
+			//fire modes are switched, switch around image1 and image2:
+			if (modeswitch) {
+				string imgpath1sw = imgpath2;
+				string imgpath2sw = imgpath1;
+				imgpath1 = imgpath1sw;
+				imgpath2 = imgpath2sw;
+			}
+			//Create images for Primary, Secondary and Combo
+			let img1 = PKZFImage.Create(wpnImgPos,wpnImgSize,imgpath1);
+			img1.pack(tabframe);
+			wpnImgPos.y += wpnImgSize.y + wpnInfoYGap;
+			let img2 = PKZFImage.Create(wpnImgPos,wpnImgSize,imgpath2);
+			img2.pack(tabframe);
+			wpnImgPos.y += wpnImgSize.y + wpnInfoYGap;
+			//chaingun doesn't have a combo attack, so make it optional:
+			if (imgpath3) {
+				let img3 = PKZFImage.Create(wpnImgPos,wpnImgSize,imgpath3);
+				img3.pack(tabframe);
+			}
+			
+			//create text for Primary (switch to Secondary if modes are switched)
+			let wtext1 = modeswitch ? PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize,text2, alttext2) : PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize,	text1, alttext1);
+			wtext1.pack(tabframe);
+			wpnDescPos.y += wpnDescSize.y + wpnInfoYGap;
+			//create text for Secondary (switch to Primary if modes are switched)
+			let wtext2 = modeswitch ? PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize,text1, alttext1) : PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize,	text2, alttext2);
+			wtext2.pack(tabframe);
+			wpnDescPos.y += wpnDescSize.y + wpnInfoYGap;
+			//create text for Combo attack (Chaingun doesn't have it)
+			if (text3) {
+				let wtext3 = PKZFWeaponDescLabel.Create(	wpnDescPos,wpnDescSize,	text3);
+				wtext3.pack(tabframe);
+			}
 		}
-	}
+	}		
 }
 
 Class PKCodexTabhandler : PKZFHandler {
@@ -292,4 +623,39 @@ Class PKZFTabButton : PKZFRadioButton {
 			}
 		}
 	}	
+}
+
+Class PKZFWeaponDescLabel : PKZFLabel {
+	PKCodexMenu menu;
+	string maintext;
+	string alttext;
+	int baseTextColor;
+	
+	static PKZFWeaponDescLabel create(
+		Vector2 pos, Vector2 size, string text = "", string alttext = "", Font fnt = font_times, AlignType alignment = AlignType_TopLeft,
+		bool wrap = true, bool autoSize = false, double textScale = PK_MENUTEXTSCALE*0.85, int textColor = Font.CR_WHITE,
+		double lineSpacing = 0, PKZFElement forElement = NULL
+	) {
+		let ret = new('PKZFWeaponDescLabel');
+		
+		ret.baseTextColor = textColor;
+		ret.maintext = text;
+		ret.alttext = alttext;
+		ret.setBox(pos, size);
+		ret.config(text, fnt, alignment, wrap, autoSize, textScale, textColor, lineSpacing, forElement);
+
+		return ret;
+	}
+	
+	override void Ticker() {
+		super.Ticker();
+		if (alttext && menu && menu.showWMText) {		
+			SetText(alttext);
+			SetTextColor(Font.FindFontColor('PKRedText'));
+		}
+		else {
+			SetText(maintext);
+			SetTextColor(baseTextColor);
+		}
+	}
 }
