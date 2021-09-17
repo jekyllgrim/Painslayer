@@ -31,10 +31,10 @@ Class PKCodexMenu : PKZFGenericMenu {
 	bool showWMText;
 	
 	static const string mainTabnames[] = {
-		"WEAPONS",
-		"POWERUPS",
-		"GOLD",
-		"TAROT"
+		"$PKC_WEAPONS",
+		"$PKC_POWERUPS",
+		"$PKC_GOLD",
+		"$PKC_TAROT"
 	};
 
 	PKZFTabButton, PKZFFrame CreateTab(vector2 pos, vector2 size, String text, PKZFRadioController controller, PKZFHandler handler, int value, vector2 framePos, vector2 frameSize, PKZFBoxTextures inactiveTex = null, PKZFBoxTextures activeTex = null, PKZFBoxTextures hoverTex = null, PKZFBoxTextures clickTex = null, double textScale = 1, int textColor = Font.CR_WHITE/*, PKZFElement.AlignType alignment = PKZFElementAlignType_Center*/) {
@@ -58,10 +58,11 @@ Class PKCodexMenu : PKZFGenericMenu {
 		return tabButton, tabContents;
 	}
 	
-	/*override void Drawer() {
-		PK_StatusBarScreen.Fill("46382c",0,0,backgroundsize.x,backgroundsize.y,1);	
+	override void Drawer() {
+		//PK_StatusBarScreen.Fill("46382c",0,0,backgroundsize.x,backgroundsize.y,1);	
 		super.Drawer();
-	}*/
+		//console.printf("Show WM: %d",showWMText);
+	}
 	
 	override void Init (Menu parent) {
 		super.Init(parent);
@@ -126,7 +127,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 			[tab, tabframe] = CreateTab(
 				nextBtnPos, 
 				buttonsize, 
-				mainTabnames[i], 
+				StringTable.Localize(mainTabnames[i]),
 				tabController, 
 				tabhandler, 
 				i,
@@ -176,7 +177,8 @@ Class PKCodexMenu : PKZFGenericMenu {
 	};
 	
 	//Create weapons tabs and a frame:
-	void WeaponsTabInit() {		
+	void WeaponsTabInit() {
+		
 		let wpnTabCont = new("PKZFRadioController"); //define a new controller
 		let wpnTabHandler = tabhandler; //the handler can be reused
 		vector2 btnPos = (24,24); //button positon
@@ -185,8 +187,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 		//Define weapon info section: has to be smaller than the info section so that it doesn't
 		//cover the buttons themselves!
 		vector2 wpnSectionPos = (btnPos.x + btnSize.x + 8, btnPos.y);
-		vector2 wpnSectionSize = (infoSectionSize.x - wpnSectionPos.x, infoSectionSize.y);		
-		
+		vector2 wpnSectionSize = (infoSectionSize.x - wpnSectionPos.x, infoSectionSize.y);
 			
 		//Define buttons with weapon names:
 		for (int i = 0; i < weaponTabElements.Size(); i++) {
@@ -539,20 +540,57 @@ Class PKCodexMenu : PKZFGenericMenu {
 			}
 			
 			//create text for Primary (switch to Secondary if modes are switched)
-			let wtext1 = modeswitch ? PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize,text2, alttext2) : PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize,	text1, alttext1);
+			let wtext1 = modeswitch ? PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize, self, text2, alttext2) : PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize, self,  text1, alttext1);
 			wtext1.pack(tabframe);
 			wpnDescPos.y += wpnDescSize.y + wpnInfoYGap;
 			//create text for Secondary (switch to Primary if modes are switched)
-			let wtext2 = modeswitch ? PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize,text1, alttext1) : PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize,	text2, alttext2);
+			let wtext2 = modeswitch ? PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize, self, text1, alttext1) : PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize, self,  text2, alttext2);
 			wtext2.pack(tabframe);
 			wpnDescPos.y += wpnDescSize.y + wpnInfoYGap;
 			//create text for Combo attack (Chaingun doesn't have it)
 			if (text3) {
-				let wtext3 = PKZFWeaponDescLabel.Create(	wpnDescPos,wpnDescSize,	text3);
+				let wtext3 = PKZFWeaponDescLabel.Create(	wpnDescPos,wpnDescSize,self,text3);
 				wtext3.pack(tabframe);
 			}
 		}
+		//Define Weapon Modifier button:
+		let WMtexOff = PKZFBoxTextures.CreateSingleTexture("Graphics/HUD/Codex/CODX_WM0.png",true);
+		let WMtexHover = PKZFBoxTextures.CreateSingleTexture("Graphics/HUD/Codex/CODX_WM1.png",true);
+		let WMtexOn = PKZFBoxTextures.CreateSingleTexture("Graphics/HUD/Codex/CODX_WM2.png",true);
+		vector2 WMbtnSize = (96,96);
+		vector2 WMbtnPos = btnPos + (0, 18);
+		let WMhandler = New("PKWMHandler");
+		WMhandler.menu = self;
+		//WMhandler.OffHover = WMtexOffHover;
+		//WMhandler.OnHover = WMtexOnHover;
+		let WMbtn = PKZFToggleButton.Create(
+			WMbtnPos, WMbtnSize,
+			inactive:WMtexOff, hover:WMtexHover, click:WMtexOn,
+			cmdHandler: WMhandler
+		);
+		let WMbtnDesc = PKZFWeaponDescLabel.Create(WMbtnPos + (WMbtnSize.x,16), (180,64), self, StringTable.Localize("$PKC_WM_Off"), StringTable.Localize("$PKC_WM_On"), textcolor: Font.FindFontColor('PKBaseText'));
+		//WMbtnDesc.SetAlignment(PKZFElement.AlignType_Left);
+		WMbtn.Pack(mainTabs[0]);
+		WMbtnDesc.Pack(mainTabs[0]);
 	}		
+}
+
+Class PKWMHandler : PKZFHandler {
+	PKCodexMenu menu;
+	PKZFBoxTextures OffHover;
+	PKZFBoxTextures OnHover;
+	override void toggleButtonChanged(PKZFToggleButton caller, string command, bool on) {
+		if (!menu)
+			return;
+		if (!caller || !caller.isEnabled())
+			return; 
+		let btn = PKZFToggleButton(caller);
+		if (!btn)
+			return;
+		//btn.SetTextures(btn.getInactiveTexture(), on ? OnHover : OffHover, btn.getClickTexture(), btn.getDisabledTexture());
+		menu.showWMText = !menu.showWMText;
+		S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+	}
 }
 
 Class PKCodexTabhandler : PKZFHandler {
@@ -628,19 +666,20 @@ Class PKZFTabButton : PKZFRadioButton {
 Class PKZFWeaponDescLabel : PKZFLabel {
 	PKCodexMenu menu;
 	string maintext;
-	string alttext;
+	string WMText;
 	int baseTextColor;
 	
 	static PKZFWeaponDescLabel create(
-		Vector2 pos, Vector2 size, string text = "", string alttext = "", Font fnt = font_times, AlignType alignment = AlignType_TopLeft,
+		Vector2 pos, Vector2 size, PKCodexMenu menu, string text = "", string alttext = "", Font fnt = font_times, AlignType alignment = AlignType_TopLeft,
 		bool wrap = true, bool autoSize = false, double textScale = PK_MENUTEXTSCALE*0.85, int textColor = Font.CR_WHITE,
 		double lineSpacing = 0, PKZFElement forElement = NULL
 	) {
 		let ret = new('PKZFWeaponDescLabel');
 		
+		ret.menu = menu;
 		ret.baseTextColor = textColor;
 		ret.maintext = text;
-		ret.alttext = alttext;
+		ret.WMText = alttext;
 		ret.setBox(pos, size);
 		ret.config(text, fnt, alignment, wrap, autoSize, textScale, textColor, lineSpacing, forElement);
 
@@ -649,8 +688,8 @@ Class PKZFWeaponDescLabel : PKZFLabel {
 	
 	override void Ticker() {
 		super.Ticker();
-		if (alttext && menu && menu.showWMText) {		
-			SetText(alttext);
+		if (WMText && menu && menu.showWMText) {
+			SetText(WMText);
 			SetTextColor(Font.FindFontColor('PKRedText'));
 		}
 		else {

@@ -156,8 +156,15 @@ PKO_BOLT			= "%k pinned %o to the wall multiple times";
 PKO_DEMON			= "%k killed %o as a DEMON";
 PKO_SOT			= "%o was killed by %k's thunderous steps";
 
-// CODES
-
+// CODEX ------------------------------
+//Main tabs
+PKC_WEAPONS		= "WEAPONS";
+PKC_POWERUPS		= "POWERUPS";
+PKC_GOLD			= "GOLD";
+PKC_TAROT			= "TAROT";
+//Weapon modifier:
+PKC_WM_On			= "Showing Weapon Modifier stats";
+PKC_WM_Off			= "Showing standard weapon stats";
 //painkiller:
 PKC_Hold			= "Hold";
 PKC_Tap			= "Tap";
@@ -167,63 +174,63 @@ PKC_Primary		= "Primary";
 PKC_Secondary		= "Secondary";
 PKC_Pain			= "Pain";
 PKC_PainDesc		= "Deal continuous damage with the spinning blades.";
-PKC_PainDescWM		= "WM: Blades spin faster, dealing more damage per second.";
+PKC_PainDescWM		= "Weapon Modifier effects: Blades spin faster, dealing more damage per second.";
 PKC_Killer			= "Killer";
 PKC_KillerDesc		= 	"Fire the folded blade unit. The unit can stick into walls and creates a laser beam that burns enemies when you aim at it.\n"
 						"NOTE: This attack can juggle corpses.";
-PKC_KillerDescWM	= 	"WM: Laser beam is always active, regardless of where you're aiming.";
+PKC_KillerDescWM	= 	"Weapon Modifier effects: Laser beam is always active, regardless of where you're aiming.";
 PKC_Painkiller		= "Painkiller";
 PKC_PainkillerDesc	= "Launch the spinning blades forward. This projectile is slow but deals a lot of damage on impact.";
 //shotgun/freezer:
 PKC_Shotgun		= "Shotgun";
 PKC_ShotgunDesc	= "A fast-firing shotgun with decent damage and spread.";
-PKC_ShotgunDescWM	= "WM: Shotgun spread tightens, and pellets deal slightly more damage.";
+PKC_ShotgunDescWM	= "Weapon Modifier effects: Shotgun spread tightens, and pellets deal slightly more damage.";
 PKC_Freezer		= "Freezer";
 PKC_FreezerDesc	= "Fire two projectiles that freeze enemies on impact. Frozen enemies receive more damage, especially from the shotgun. Does not work on bosses.";
-PKC_FreezerDescWM	= "WM: Freeze duration is doubled.";
+PKC_FreezerDescWM	= "Weapon Modifier effects: Freeze duration is doubled.";
 PKC_ShotgunFreezer = "Shatter";
 PKC_ShotgunFreezerDesc = "Fire freezer, then immediately fire shotgun to deal a lot of extra damage and potentially shatter the frozen enemy.";
 //stakegun/grenade launcher:
 PKC_Stakegun		= "Stakegun";
 PKC_StakegunDesc	= "Fire a powerful projectile that can pin enemies to walls. After 0.34 seconds in flight stakes catch on fire. Burning stakes deal more damage.";
-PKC_StakegunDescWM= "WM: Stakes fly in a straight line and start burning immediately.";
+PKC_StakegunDescWM= "Weapon Modifier effects: Stakes fly in a straight line and start burning immediately.";
 PKC_Grenade		= "Grenade Launcher";
 PKC_GrenadeDesc	= "Fire a bouncing grenade that explodes after a period of time or when hitting an enemy. Shares ammo with the Rocket Launcher.";
-PKC_GrenadeDescWM	= "WM: Grenades spawn flames upon exploding, setting enemies on fire.";
+PKC_GrenadeDescWM	= "Weapon Modifier effects: Grenades spawn flames upon exploding, setting enemies on fire.";
 PKC_StakeGrenade	= "Makeshift Rocket";
 PKC_StakeGrenadeDesc	= "Launch a grenade, then fire a stake at it to create a powerful makeshift rocket. Deals more damage than Rocket Launcher rockets.";
 //rocket launcher/chaingun
 PKC_RLauncher		= "Rocket Launcher";
 PKC_RLauncherDesc	= "Fire a rocket. Don't stand too close! Shares ammo with the Grenade Launcher.";
-PKC_RLauncherDescWM= "WM: Rockets spawn flames upon exploding, setting enemies on fire.";
+PKC_RLauncherDescWM= "Weapon Modifier effects: Rockets spawn flames upon exploding, setting enemies on fire.";
 PKC_Chaingun		= "Minigun";
 PKC_ChaingunDesc	= "Rapid-fire minigun. Needs some time to spin up before it can start firing.\nNote: The gun's spread will increase as you keep firing.";
-PKC_ChaingunDescWM= "WM: Minigun spread is significantly reduced, and damage is slightly increased.";
+PKC_ChaingunDescWM= "Weapon Modifier effects: Minigun spread is significantly reduced, and damage is slightly increased.";
 //Electro/driver
 PKC_Driver			= "Driver";
 PKC_DriverDesc		= "Fire shurikens at high speed. After 0.5 seconds in flight shurikens explode: catch enemies in the explosion for a lot of extra damage.";
-PKC_DriverDescWM	= "Explosion damage is reduced, but shurikens always explode on impact.";
+PKC_DriverDescWM	= "Weapon Modifier effects: Explosion damage is reduced, but shurikens always explode on impact.";
 PKC_Electro		= "Electro";
 PKC_ElectroDesc	= "Fire a continuous stream of electricity that automatically latches onto enemies within a small radius around your crosshair. Effective at stunlocking.";
-PKC_ElectroDescWM	= "Upon hitting an enemy, the lightning jumps to other enemies around it.";
+PKC_ElectroDescWM	= "Weapon Modifier effects: Upon hitting an enemy, the lightning jumps to other enemies around it.";
 PKC_ElectroDisc	= "Electric Disc";
 PKC_ElectroDiscDesc= "Fire an electrically charged container of shurikens. It sticks into enemies and walls, then starts firing electric bolts at surrounding enemies before exploding after a while.";
 //Rifle/Flamethrower
 PKC_Rifle			= "Rifle";
 PKC_RifleDesc		= "Fire the Rifle in bursts of up to 7 successive shots. Deals significant damage and has tight spread.";
-PKC_RifleDescWM	= "WM: The rifle fires in full auto and deals more damage.";
+PKC_RifleDescWM	= "Weapon Modifier effects: The rifle fires in full auto and deals more damage.";
 PKC_Flamer			= "Flamethrower";
 PKC_FlamerDesc		= "Fire flamethrower. Sets enemies on fire, dealing damage over time. Flames can fly through enemies, but gradually slow down, resulting in limited range.";
-PKC_FlamerDescWM	= "WM: The flames fly faster, increasing the flamethrower's effective range.";
+PKC_FlamerDescWM	= "Weapon Modifier effects: The flames fly faster, increasing the flamethrower's effective range.";
 PKC_FlameTank		= "Fuel tank";
 PKC_FlameTankDesc	= "Launch the whole fuel tank. The tank explodes when shot, or upon impact with an enemy, or after a short while. Burns surrounding enemies upon exploding.";
 //boltgun/heater:
 PKC_Boltgun		= "Boltgun";
 PKC_BoltgunDesc	= "Fire 5 steel bolts in quick succession. Bolts fly in a straight line and can pin enemies to walls.";
-PKC_BoltgunDescWM	= "WM: Bolts are set on fire, dealing more damage.";
+PKC_BoltgunDescWM	= "Weapon Modifier effects: Bolts are set on fire, dealing more damage.";
 PKC_Heater			= "Heater";
 PKC_HeaterDesc		= "Fire 10 bouncing bombs that explode when impacting enemies, or bounce off a surface once and explode on the next impact.";
-PKC_HeaterDescWM	= "WM: Bombs are launched further and explode on impact without bouncing.";
+PKC_HeaterDescWM	= "Weapon Modifier effects: Bombs are launched further and explode on impact without bouncing.";
 PKC_HeaterBolts	= "Heater Rockets";
 PKC_HeaterBoltsDesc= "Fire bombs, then try to hit them with bolts to create makeshift heater rockets. They deal a lot of damage, but this attack is difficult to pull off.";
 
