@@ -211,6 +211,8 @@ Class PKCodexMenu : PKZFGenericMenu {
 			//these will hold attack icons and descriptions
 			string imgpath1;
 			string imgpath2;
+			string imgpath1wm;
+			string imgpath2wm;
 			string imgpath3;
 			string text1; string alttext1;
 			string text2; string alttext2;
@@ -230,10 +232,14 @@ Class PKCodexMenu : PKZFGenericMenu {
 				altfire_name = altfire_name_sw;
 			}
 			
+			string baseImgPath = showWMText ? "Graphics/HUD/Codex/WMIcons/" : "Graphics/HUD/Codex/";
+			
 			if (i == PKCX_PainKiller) {
 				imgpath1 = "Graphics/HUD/Codex/CODX_PK_1.PNG";
 				imgpath2 = "Graphics/HUD/Codex/CODX_PK_2.PNG";
 				imgpath3 = "Graphics/HUD/Codex/CODX_PK_3.PNG";
+				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_PK_1.PNG";
+				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_PK_2.PNG";
 				text1 = String.Format(
 					"%s %s: %s\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
@@ -276,6 +282,8 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1 = "Graphics/HUD/Codex/CODX_SH_1.PNG";
 				imgpath2 = "Graphics/HUD/Codex/CODX_SH_2.PNG";
 				imgpath3 = "Graphics/HUD/Codex/CODX_SH_3.PNG";
+				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_SH_1.PNG";
+				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_SH_2.PNG";
 				text1 = String.Format(
 					"%s: %s\n\n%s",
 					fire_name,
@@ -313,6 +321,8 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1 = "Graphics/HUD/Codex/CODX_ST_1.PNG";
 				imgpath2 = "Graphics/HUD/Codex/CODX_ST_2.PNG";
 				imgpath3 = "Graphics/HUD/Codex/CODX_ST_3.PNG";
+				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_ST_1.PNG";
+				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_ST_2.PNG";
 				text1 = String.Format(
 					"%s: %s\n\n%s",
 					fire_name,
@@ -350,6 +360,8 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1 = "Graphics/HUD/Codex/CODX_CH_1.PNG";
 				imgpath2 = "Graphics/HUD/Codex/CODX_CH_2.PNG";
 				imgpath3 = "";
+				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_CH_1.PNG";
+				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_CH_2.PNG";
 				text1 = String.Format(
 					"%s: %s\n\n%s",
 					fire_name,
@@ -382,6 +394,8 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1 = "Graphics/HUD/Codex/CODX_ED_1.PNG";
 				imgpath2 = "Graphics/HUD/Codex/CODX_ED_2.PNG";
 				imgpath3 = "Graphics/HUD/Codex/CODX_ED_3.PNG";
+				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_ED_1.PNG";
+				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_ED_2.PNG";
 				text1 = String.Format(
 					"%s: %s\n\n%s",
 					fire_name,
@@ -422,6 +436,8 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1 = "Graphics/HUD/Codex/CODX_RF_1.PNG";
 				imgpath2 = "Graphics/HUD/Codex/CODX_RF_2.PNG";
 				imgpath3 = "Graphics/HUD/Codex/CODX_RF_3.PNG";
+				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_RF_1.PNG";
+				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_RF_2.PNG";
 				
 				text1 = String.Format(
 					"%s %s: %s\n\n%s",
@@ -465,6 +481,8 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1 = "Graphics/HUD/Codex/CODX_BG_1.PNG";
 				imgpath2 = "Graphics/HUD/Codex/CODX_BG_2.PNG";
 				imgpath3 = "Graphics/HUD/Codex/CODX_BG_3.PNG";
+				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_BG_1.PNG";
+				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_BG_2.PNG";
 				text1 = String.Format(
 					"%s: %s\n\n%s",
 					fire_name,
@@ -525,12 +543,16 @@ Class PKCodexMenu : PKZFGenericMenu {
 				string imgpath2sw = imgpath1;
 				imgpath1 = imgpath1sw;
 				imgpath2 = imgpath2sw;
+				string imgpath1wmsw = imgpath2wm;
+				string imgpath2wmsw = imgpath1wm;
+				imgpath1wm = imgpath1wmsw;
+				imgpath2wm = imgpath2wmsw;
 			}
 			//Create images for Primary, Secondary and Combo
-			let img1 = PKZFImage.Create(wpnImgPos,wpnImgSize,imgpath1);
+			let img1 = PKZFWMImage.Create(wpnImgPos,wpnImgSize,self,imgpath1,imgpath1wm);
 			img1.pack(tabframe);
 			wpnImgPos.y += wpnImgSize.y + wpnInfoYGap;
-			let img2 = PKZFImage.Create(wpnImgPos,wpnImgSize,imgpath2);
+			let img2 = PKZFWMImage.Create(wpnImgPos,wpnImgSize,self,imgpath2,imgpath2wm);
 			img2.pack(tabframe);
 			wpnImgPos.y += wpnImgSize.y + wpnInfoYGap;
 			//chaingun doesn't have a combo attack, so make it optional:
@@ -573,6 +595,31 @@ Class PKCodexMenu : PKZFGenericMenu {
 		WMbtn.Pack(mainTabs[0]);
 		WMbtnDesc.Pack(mainTabs[0]);
 	}		
+}
+
+Class PKZFWMImage : PKZFImage {
+	PKCodexMenu menu;
+	string image1;
+	string image2;
+
+	static PKZFImage create(Vector2 pos, Vector2 size, PKCodexMenu menu, string image1 = "", string image2 = "", AlignType alignment = AlignType_TopLeft, Vector2 imageScale = (1, 1), bool tiled = false) {
+		let ret = new('PKZFWMImage');
+
+		ret.config(image1, alignment, imageScale, tiled);
+		ret.menu = menu;
+		ret.image1 = image1;
+		ret.image2 = image2;
+		ret.setBox(pos, size);
+
+		return ret;
+	}
+	
+	override void Ticker() {
+		super.Ticker();
+		if (!menu || !image1 || !image2)
+			return;
+		image = menu.showWMText ? image2 : image1;
+	}
 }
 
 Class PKWMHandler : PKZFHandler {

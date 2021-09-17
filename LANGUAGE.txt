@@ -193,7 +193,7 @@ PKC_ShotgunFreezerDesc = "Fire freezer, then immediately fire shotgun to deal a 
 //stakegun/grenade launcher:
 PKC_Stakegun		= "Stakegun";
 PKC_StakegunDesc	= "Fire a powerful projectile that can pin enemies to walls. After 0.34 seconds in flight stakes catch on fire. Burning stakes deal more damage.";
-PKC_StakegunDescWM= "Weapon Modifier effects: Stakes fly in a straight line and start burning immediately.";
+PKC_StakegunDescWM= "Weapon Modifier effects: Stakes are set on fire immediately and fly in a straight line at an increased speed.";
 PKC_Grenade		= "Grenade Launcher";
 PKC_GrenadeDesc	= "Fire a bouncing grenade that explodes after a period of time or when hitting an enemy. Shares ammo with the Rocket Launcher.";
 PKC_GrenadeDescWM	= "Weapon Modifier effects: Grenades spawn flames upon exploding, setting enemies on fire.";
