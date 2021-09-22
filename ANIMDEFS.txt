@@ -1,1 +1,19 @@
 CameraTexture "Weapon.camtex" 200 200
+
+texture PCDXSOUA range PCDXSOUU tics 2
+texture GSOUA0 range GSOUU0 tics 2
+texture MSOUA0 range MSOUU0 tics 2
+texture PSOCA0 range PSOCL0 tics 3
+
+texture PCDXEYES
+	pic PDEYH0 rand 8 80
+	pic PDEYF0 tics 1
+	pic PDEYD0 tics 1
+	pic PDEYB0 tics 1
+	pic PDEYA0 tics 2
+	pic PDEYB0 tics 2
+	pic PDEYC0 tics 2
+	pic PDEYD0 tics 2
+	pic PDEYE0 tics 2
+	pic PDEYF0 tics 2
+	pic PDEYG0 tics 2

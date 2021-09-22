@@ -159,7 +159,7 @@ PKO_SOT			= "%o was killed by %k's thunderous steps";
 // CODEX ------------------------------
 //Main tabs
 PKC_WEAPONS		= "WEAPONS";
-PKC_POWERUPS		= "POWERUPS";
+PKC_POWERUPS		= "ITEMS";
 PKC_GOLD			= "GOLD";
 PKC_TAROT			= "TAROT";
 //Weapon modifier:
@@ -233,6 +233,92 @@ PKC_HeaterDesc		= "Fire 10 bouncing bombs that explode when impacting enemies, o
 PKC_HeaterDescWM	= "Weapon Modifier effects: Bombs are launched further and explode on impact without bouncing.";
 PKC_HeaterBolts	= "Heater Rockets";
 PKC_HeaterBoltsDesc= "Fire bombs, then try to hit them with bolts to create makeshift heater rockets. They deal a lot of damage, but this attack is difficult to pull off.";
+
+// Powerups Tab:
+PKC_Gold =				"Gold";
+PKC_Souls =			"Enemy souls";
+PKC_ChestOfSouls =	"Chest of Souls";
+PKC_GoldSoul =			"Gold Soul";
+PKC_MegaSoul =			"Mega Soul";
+PKC_Armor =			"Armor";
+PKC_AmmoPack =			"Ammo Pack";
+PKC_WeaponModifier =	"Weapon Modifier";
+PKC_DemonEyes =		"Demon Eyes";
+PKC_Pentagram =		"Pentagram";
+PKC_Sabatons =			"Insoluble Sabatons";
+PKC_CrystalBall =		"Crystal Ball";
+
+PKC_Gold_Desc =
+	"Gold is used to purchase Gold and Silver Cards on the Black Tarot Board."
+	"\n\n"
+	"Gold comes in 4 varieties: small (\cD+10G\cJ), medium (\cD+25G\cJ), large (\cD+100G\cJ) and very large (\cD+500G\cJ)."
+	"\n\n"
+	"There are several ways to acquire gold:"
+	"\n\n"
+	"- Dealing \cGexcessive damage \cJto enemies (such as blowing up weaker enemies) makes them drop coins."
+	"\n\n"
+	"- \cGJuggling enemy corpses with Killer\cJ: before a corpse disappears, simply shoot at it with the Killer "
+	"to grab it and draw it closer. Keep doing it to juggle the corpse; every 3rd juggle produces a medium gold piece."
+	"\n\n"
+	"- Gold dynamically spawns in \cGsecret areas\cJ in levels. This is the only way to find large and very large "
+	"gold pieces.";
+	
+PKC_Souls_Desc =				
+	"Killed enemies quickly disintegrate and drop their souls. They have two uses:\n"
+	"- Souls are your primary way to heal, since there are no medikits in Painslayer.\n"
+	"- Upon collecting 66 souls you will turn into a demon."
+	"\n\n"
+	"HEALING: One soul can give you between 1 and 20 HP, depending on how much health the enemy "
+	"originally had. If a soul contains 15 or more HP, it turns red."
+	"\n\n"
+	"DEMON MODE: When you collect 66 souls you'll turn into a Demon. As a Demon you are completely "
+	"invincible and you gain a unique devastating attack.\n"
+	"- When you are 2 or 1 souls away from becoming a Demon, your screen will briefly flash in demon vision.\n"
+	"- Equipping ''Dark Soul'' Black Tarot card reduces the required number of souls from 66 to 50."
+	"\n\n"
+	"TRAUMA: Demons don't drop souls on Trauma difficulty mode.";
+PKC_ChestOfSouls_Desc =
+	"Chest of Souls has two effects:"
+	"\n\n"
+	"- After picking it up you'll regenerate 1 HP every second over 20 seconds."
+	"\n\n"
+	"- Your soul counter will immediately increase by 20. As such, collecting Chests of Souls is a "
+	"very quick way to turn into Demon.";
+PKC_GoldSoul_Desc =
+	"Gold Soul is a special soul that restores your HP to 100. "
+	"It can't be dropped by enemies, only found on the map.";
+PKC_MegaSoul_Desc =
+	"Mega Soul is a special soul that restores your HP to 200 and gives you 200 armor. "
+	"It can't be dropped by enemies, only found on the map.";
+PKC_Armor_Desc =
+	"You can find 3 types of armor in Painslayer:"
+	"\n\n"
+	"BRONZE armor provides 100 points of armor and absorbs 33.3% of incoming damage."
+	"\n\n"
+	"SILVER armor provides 150 points of armor and absorbs 60% of incoming damage."
+	"\n\n"
+	"GOLD armor provides 200 points of armor and absorbs 80% of incoming damage.";
+PKC_AmmoPack_Desc =
+	"Ammo Pack is a rare pickup that provides a lot of ammo for all weapons.";
+PKC_WeaponModifier_Desc =
+	"Weapon Modifier empowers all your weapons for 30 seconds. The effects of the Weapon Modifier "
+	"are unique for each weapon; you can find all the details about its effects on the "
+	"WEAPONS tab."
+	"\n\n"
+	"When on the WEAPONS tab, click the Weapon Modifier icon to see the information about how it affects "
+	"specific weapon attacks."
+	"\n\n"
+	"Weapon Modifier only affects primary and secondary attacks, not combo attacks."
+	"\n\n"
+	"Weapon Modifier also heals you to 100 HP when you pick it up.";
+PKC_DemonEyes_Desc =
+	"Demon Eyes description";
+PKC_Pentagram_Desc =
+	"Pentagram description";
+PKC_Sabatons_Desc =
+	"Insoluble Sabatons description";
+PKC_CrystalBall_Desc =
+	"Crystal Ball description";
 
 // MENU
 

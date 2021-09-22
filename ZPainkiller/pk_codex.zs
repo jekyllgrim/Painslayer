@@ -6,24 +6,44 @@ enum PKCodexTabs {
 }
 
 enum PKWeaponTabs {
-	PKCX_PainKiller,
-	PKCX_Shotgun,
-	PKCX_Stakegun,
-	PKCX_Chaingun,
-	PKCX_ELD,
-	PKCX_Rifle,
-	PKCX_Boltgun
+	PKCW_PainKiller,
+	PKCW_Shotgun,
+	PKCW_Stakegun,
+	PKCW_Chaingun,
+	PKCW_ELD,
+	PKCW_Rifle,
+	PKCW_Boltgun
 }
+
+enum PKItemTabs {
+	PKCI_Gold,
+	PKCI_Souls,
+	PKCI_ChestOfSouls,
+	PKCI_GoldSoul,
+	PKCI_MegaSoul,
+	PKCI_Armor,
+	PKCI_AmmoPack,
+	PKCI_WeaponModifier,
+	PKCI_DemonEyes,
+	PKCI_Pentagram,
+	PKCI_Sabatons,
+	PKCI_CrystalBall
+};
+	
 
 Class PKCodexMenu : PKZFGenericMenu {
 	
 	vector2 backgroundsize;
 	PKCodexTabhandler tabhandler;
 	PKZFFrame mainTabs[4];
-	PKZFFrame weaponTabElements[7];
 	
-	vector2 infoSectionPos;
-	vector2 infoSectionSize;
+	vector2 contentFramePos;
+	vector2 contentFrameSize;	
+	
+	vector2 subTabLabelPos;	
+	vector2 subTabLabelSize;
+	vector2 infoAreaPos;
+	vector2 infoAreaSize;
 	
 	PKZFBoxTextures lightFrame;
 	PKZFBoxTextures darkFrame;
@@ -117,8 +137,8 @@ Class PKCodexMenu : PKZFGenericMenu {
 		double buttongap = buttonpos.x * 0.5;
 		vector2 buttonsize = ( (backgroundsize.x - (buttonpos.x*2 + buttongap * 3)) / 4, 72);		
 		//define Info section size and position:
-		infoSectionPos = (buttonpos.x * 0.5, buttonpos.y + buttonsize.y - 9);
-		infoSectionSize = (backgroundsize.x - infoSectionPos.x * 2, PK_BOARD_HEIGHT - infoSectionPos.y * 1.25);
+		contentFramePos = (buttonpos.x * 0.5, buttonpos.y + buttonsize.y - 9);
+		contentFrameSize = (backgroundsize.x - contentFramePos.x * 2, PK_BOARD_HEIGHT - contentFramePos.y * 1.25);
 		
 		//create main tabs:
 		vector2 nextBtnPos = buttonpos;
@@ -131,7 +151,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 				tabController, 
 				tabhandler, 
 				i,
-				infoSectionPos, infoSectionSize,
+				contentFramePos, contentFrameSize,
 				btnInactiveFrame, btnActiveFrame, btnHoverFrame,
 				textScale: 1.25,
 				textColor: Font.FindFontColor('PKBaseText')
@@ -144,16 +164,39 @@ Class PKCodexMenu : PKZFGenericMenu {
 		}
 		
 		//Draw border & background for the Info section:
-		let sectionBorder = PKZFBoxImage.Create(infoSectionPos, infoSectionSize, lightFrame);
+		let sectionBorder = PKZFBoxImage.Create(contentFramePos, contentFrameSize, lightFrame);
 		sectionBorder.pack(mainFrame);		
 		//move the Info section in front of the background but behind 
 		//the buttons (so that the button bottoms can overlap its top edge)
 		mainFrame.moveElement(mainFrame.indexOfElement(sectionBorder), mainFrame.indexOfElement(backgroundBorder)+1);
 		
+		
+		//base sub-tab values (buttons and info are):
+		subTabLabelPos = (24,24); //button positon
+		subTabLabelSize = (300,45);
+		//Define info area: has to be smaller than the whole tab
+		//content area, so that it doesn't cover the sub-tab buttons!
+		infoAreaPos = (subTabLabelPos.x + subTabLabelSize.x + 8, subTabLabelPos.y);
+		infoAreaSize = (contentFrameSize.x - infoAreaPos.x - 16, contentFrameSize.y - 32);
+		
 		//Create WEAPONS tab elements:
 		WeaponsTabInit();
 		
-		
+		//Create POWERUPS tab:
+		/*
+			Gold: Small, Med, Large, V. Large
+			Souls: Green soul, Red soul, Demon Mode
+			Gold Soul
+			Mega Soul
+			Chest of Souls
+			Armor: Bronze, Silver, Gold
+			Ammo Pack
+			Weapon Modifier
+			Demon Eyes
+			Pentagram
+			Insoluble Sabatons
+		*/
+		PowerupsTabInit();
 	}
 		
 	static const Class<Weapon> PK_Weapons[] = {
@@ -177,36 +220,29 @@ Class PKCodexMenu : PKZFGenericMenu {
 	};
 	
 	//Create weapons tabs and a frame:
-	void WeaponsTabInit() {
-		
-		let wpnTabCont = new("PKZFRadioController"); //define a new controller
-		let wpnTabHandler = tabhandler; //the handler can be reused
-		vector2 btnPos = (24,24); //button positon
-		double btnYgap = 24;						//vertical gap between buttons
-		vector2 btnSize = (300,45);
-		//Define weapon info section: has to be smaller than the info section so that it doesn't
-		//cover the buttons themselves!
-		vector2 wpnSectionPos = (btnPos.x + btnSize.x + 8, btnPos.y);
-		vector2 wpnSectionSize = (infoSectionSize.x - wpnSectionPos.x, infoSectionSize.y);
+	void WeaponsTabInit() {		
+		let tabcntrl = new("PKZFRadioController"); //define a new controller
+		vector2 btnPos = subTabLabelPos; //button positon
+		double tabLabelGap = 24;
 			
 		//Define buttons with weapon names:
-		for (int i = 0; i < weaponTabElements.Size(); i++) {
+		for (int i = 0; i < PK_Weapons.Size(); i++) {
 			PKZFTabButton tab; PKZFFrame tabframe;
 			[tab, tabframe] = CreateTab(
 				btnPos, 
-				btnSize,
+				subTabLabelSize,
 				GetDefaultByType(PK_Weapons[i]).GetTag(), //use weapon's tag as the button's name
-				wpnTabCont,
-				wpnTabHandler,				
+				tabcntrl,
+				tabhandler,				
 				i,
-				wpnSectionPos, wpnSectionSize,
+				infoAreaPos, infoAreaSize,
 				textscale:0.9
 			);			
-			btnPos.y += (btnSize.y + btnYgap);
-			tab.Pack(mainTabs[0]);
-			tabframe.Pack(mainTabs[0]);
+			btnPos.y += (subTabLabelSize.y + tabLabelGap);
+			tab.Pack(mainTabs[PKCX_Weapons]);
+			tabframe.Pack(mainTabs[PKCX_Weapons]);
 			tab.setAlignment(PKZFElement.AlignType_CenterLeft);
-			weaponTabElements[i] = tabframe;		
+			//weaponTabElements[i] = tabframe;		
 			
 			//these will hold attack icons and descriptions
 			string imgpath1;
@@ -234,7 +270,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 			
 			string baseImgPath = showWMText ? "Graphics/HUD/Codex/WMIcons/" : "Graphics/HUD/Codex/";
 			
-			if (i == PKCX_PainKiller) {
+			if (i == PKCW_PainKiller) {
 				imgpath1 = "Graphics/HUD/Codex/CODX_PK_1.PNG";
 				imgpath2 = "Graphics/HUD/Codex/CODX_PK_2.PNG";
 				imgpath3 = "Graphics/HUD/Codex/CODX_PK_3.PNG";
@@ -278,7 +314,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 					StringTable.Localize("$PKC_PainkillerDesc")
 				);
 			}
-			if (i == PKCX_Shotgun) {
+			if (i == PKCW_Shotgun) {
 				imgpath1 = "Graphics/HUD/Codex/CODX_SH_1.PNG";
 				imgpath2 = "Graphics/HUD/Codex/CODX_SH_2.PNG";
 				imgpath3 = "Graphics/HUD/Codex/CODX_SH_3.PNG";
@@ -317,7 +353,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 					StringTable.Localize("$PKC_ShotgunFreezerDesc")
 				);
 			}
-			if (i == PKCX_Stakegun) {
+			if (i == PKCW_Stakegun) {
 				imgpath1 = "Graphics/HUD/Codex/CODX_ST_1.PNG";
 				imgpath2 = "Graphics/HUD/Codex/CODX_ST_2.PNG";
 				imgpath3 = "Graphics/HUD/Codex/CODX_ST_3.PNG";
@@ -356,7 +392,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 					StringTable.Localize("$PKC_StakeGrenadeDesc")
 				);
 			}
-			if (i == PKCX_Chaingun) {
+			if (i == PKCW_Chaingun) {
 				imgpath1 = "Graphics/HUD/Codex/CODX_CH_1.PNG";
 				imgpath2 = "Graphics/HUD/Codex/CODX_CH_2.PNG";
 				imgpath3 = "";
@@ -390,7 +426,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 				);
 				text3 = "";
 			}
-			if (i == PKCX_ELD) {
+			if (i == PKCW_ELD) {
 				imgpath1 = "Graphics/HUD/Codex/CODX_ED_1.PNG";
 				imgpath2 = "Graphics/HUD/Codex/CODX_ED_2.PNG";
 				imgpath3 = "Graphics/HUD/Codex/CODX_ED_3.PNG";
@@ -432,7 +468,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 					StringTable.Localize("$PKC_ElectroDiscDesc")
 				);
 			}
-			if (i == PKCX_Rifle) {
+			if (i == PKCW_Rifle) {
 				imgpath1 = "Graphics/HUD/Codex/CODX_RF_1.PNG";
 				imgpath2 = "Graphics/HUD/Codex/CODX_RF_2.PNG";
 				imgpath3 = "Graphics/HUD/Codex/CODX_RF_3.PNG";
@@ -477,7 +513,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 					StringTable.Localize("$PKC_FlameTankDesc")
 				);
 			}
-			if (i == PKCX_Boltgun) {
+			if (i == PKCW_Boltgun) {
 				imgpath1 = "Graphics/HUD/Codex/CODX_BG_1.PNG";
 				imgpath2 = "Graphics/HUD/Codex/CODX_BG_2.PNG";
 				imgpath3 = "Graphics/HUD/Codex/CODX_BG_3.PNG";
@@ -592,9 +628,110 @@ Class PKCodexMenu : PKZFGenericMenu {
 		);
 		let WMbtnDesc = PKZFWeaponDescLabel.Create(WMbtnPos + (WMbtnSize.x,16), (180,64), self, StringTable.Localize("$PKC_WM_Off"), StringTable.Localize("$PKC_WM_On"), textcolor: Font.FindFontColor('PKBaseText'));
 		//WMbtnDesc.SetAlignment(PKZFElement.AlignType_Left);
-		WMbtn.Pack(mainTabs[0]);
-		WMbtnDesc.Pack(mainTabs[0]);
-	}		
+		WMbtn.Pack(mainTabs[PKCX_Weapons]);
+		WMbtnDesc.Pack(mainTabs[PKCX_Weapons]);
+	}
+	
+	static const string powerupTabNames[] = {
+		"$PKC_Gold",
+		"$PKC_Souls",
+		"$PKC_ChestOfSouls",
+		"$PKC_GoldSoul",
+		"$PKC_MegaSoul",
+		"$PKC_Armor",
+		"$PKC_AmmoPack",
+		"$PKC_WeaponModifier",
+		"$PKC_DemonEyes",
+		"$PKC_Pentagram",
+		"$PKC_Sabatons",
+		"$PKC_CrystalBall"
+	};
+	
+	static const string powerupTabDescs[] = {
+		"$PKC_Gold_Desc",
+		"$PKC_Souls_Desc",
+		"$PKC_ChestOfSouls_Desc",
+		"$PKC_GoldSoul_Desc",
+		"$PKC_MegaSoul_Desc",
+		"$PKC_Armor_Desc",
+		"$PKC_AmmoPack_Desc",
+		"$PKC_WeaponModifier_Desc",
+		"$PKC_DemonEyes_Desc",
+		"$PKC_Pentagram_Desc",
+		"$PKC_Sabatons_Desc",
+		"$PKC_CrystalBall_Desc"
+	};
+	
+	static const string powerupTabImages[] = {
+		"PCDXGOLD",	//gold
+		"PCDXSOUA",		//souls
+		"PSOCA0",		//chest of souls
+		"GSOUA0",		//gold soul
+		"MSOUA0",		//mega soul
+		"PCDXARMR",		//armors
+		"sprites/pickups/AMPKA0.png", //ammo pack
+		"sprites/pickups/PMODA0.png", //WMod
+		"PCDXEYES",		//eyes
+		"",
+		"",
+		""
+	};
+	
+	void PowerupsTabInit() {
+		let tabcntrl = new("PKZFRadioController"); //define a new controller
+		vector2 btnPos = subTabLabelPos; //button positon
+		double tabLabelGap = 3; //vertical gap between buttons
+		
+		//the area where the item sprite/graphic will be displayed:
+		//background
+		vector2 itemBkgPos = (0,0);
+		vector2 itemBkgSize = (infoAreaSize.x, infoAreaSize.y / 4);
+		//image area proper
+		vector2 imgAreaPos = (8,8);
+		vector2 imgAreaSize = itemBkgSize - (imgAreaPos * 2);
+		//the whole area for its text description:
+		vector2 itemDescAreaPos = (itemBkgPos.x, itemBkgPos.y + itemBkgSize.y);
+		vector2 itemDescAreaSize = (itemBkgSize.x, infoAreaSize.y - itemBkgSize.y);
+		//a small area at the top is dedicated to the item's name:
+		vector2 itemNamePos = itemDescAreaPos + (16,16);
+		vector2 itemNameSize = (itemDescAreaSize.x - (itemNamePos.x*2),64);
+		//the rest is for its free-form description:
+		vector2 descPos = (itemNamePos.x, itemNamePos.y + itemNameSize.y);
+		vector2 descSize = (itemNameSize.x, itemDescAreaSize.y - itemNameSize.y);
+			
+		//Define buttons:
+		for (int i = 0; i < powerupTabNames.Size(); i++) {
+			PKZFTabButton tab; PKZFFrame tabframe;
+			[tab, tabframe] = CreateTab(
+				btnPos, 
+				subTabLabelSize,
+				powerupTabNames[i],
+				tabcntrl,
+				tabhandler,				
+				i,
+				infoAreaPos, infoAreaSize,
+				textscale:0.9
+			);			
+			btnPos.y += (subTabLabelSize.y + tabLabelGap);
+			tab.Pack(mainTabs[PKCX_Powerups]);
+			tabframe.Pack(mainTabs[PKCX_Powerups]);
+			tab.setAlignment(PKZFElement.AlignType_CenterLeft);
+			
+			//backgrounds for the item graphic and description:
+			let itemIconbkg = PKZFBoxImage.Create(itemBkgPos,itemBkgSize,darkFrame);
+			let itemDescbkg = PKZFBoxImage.Create(itemDescAreaPos,itemDescAreaSize,darkFrame);
+			itemIconbkg.Pack(tabframe);
+			itemDescbkg.Pack(tabframe);
+			
+			let itemImg = PKZFImage.Create(imgAreaPos,imgAreaSize,powerupTabImages[i],PKZFElement.AlignType_Center);
+			itemImg.Pack(tabframe);
+			
+			let title = PKZFLabel.Create(itemNamePos,itemNameSize,StringTable.Localize(powerupTabNames[i]),font_times,alignment:PKZFElement.AlignType_TopCenter,textScale:PK_MENUTEXTSCALE*1.5,textcolor:Font.CR_White);
+			let desc = PKZFLabel.Create(descPos,descSize,StringTable.Localize(powerupTabDescs[i]),font_times,textScale:PK_MENUTEXTSCALE*0.8,textcolor:Font.CR_White);		
+			title.Pack(tabframe);	
+			desc.Pack(tabframe);
+		}
+	}
 }
 
 Class PKZFWMImage : PKZFImage {
@@ -666,12 +803,12 @@ Class PKCodexTabhandler : PKZFHandler {
 			return;
 		}
 		if (!unhovered) {
-			btn.SetTextColor(Font.FindFontColor('PKRedText'));
+			//btn.SetTextColor(Font.FindFontColor('PKRedText'));
 			S_StartSound("ui/menu/hover",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-		}
-		else {
+		}/*
+		else if (caller.curButtonState != ButtonState_Click) {
 			btn.SetTextColor(btn.baseTextColor);
-		}
+		}*/
 	}
 }
 
@@ -697,6 +834,10 @@ Class PKZFTabButton : PKZFRadioButton {
 	
 	override void Drawer() {
 		Super.Drawer();
+		if (curButtonState == ButtonState_Disabled || curButtonState == ButtonState_Inactive)
+			SetTextColor(baseTextColor);
+		else
+			SetTextColor(Font.FindFontColor('PKRedText'));
 		if (tabframe) {
 			if (curButtonState == ButtonState_Click) {
 				tabframe.Show();
