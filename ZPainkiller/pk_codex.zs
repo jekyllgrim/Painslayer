@@ -247,6 +247,8 @@ Class PKCodexMenu : PKZFGenericMenu {
 			//cache the names "Primary" and "Secondary" (checking if fire modes are switched)
 			string fire_name = StringTable.Localize(modeswitch ? "$PKC_Secondary" : "$PKC_Primary");
 			string altfire_name = StringTable.Localize(modeswitch ? "$PKC_Primary" : "$PKC_Secondary");
+			//string fire_name = PK_Keybinds.getKeyboard(modeswitch ? "+altattack" : "+attack");
+			//string altfire_name = PK_Keybinds.getKeyboard(modeswitch ? "+attack" : "+altattack");
 			
 			string baseImgPath = showWMText ? "Graphics/HUD/Codex/WMIcons/" : "Graphics/HUD/Codex/";
 			
@@ -717,12 +719,12 @@ Class PKCodexMenu : PKZFGenericMenu {
 		"$PKC_GOLDOBTAIN"
 	};
 	
-	static const string tarotTabDescs[] = {
+	/*static const string tarotTabDescs[] = {
 		"$PKC_TAROTBOARD_DESC",
 		"$PKC_CARDTYPES_DESC",
 		"$PKC_GOLDTYPES_DESC",
 		"$PKC_GOLDOBTAIN_DESC"
-	};
+	};*/
 	
 	static const string tarotTabImages[] = {
 		"PCDXBORD",
@@ -752,6 +754,14 @@ Class PKCodexMenu : PKZFGenericMenu {
 		//the rest is for its free-form description:
 		vector2 descPos = (itemNamePos.x, itemNamePos.y + itemNameSize.y);
 		vector2 descSize = (itemNameSize.x, itemDescAreaSize.y - itemNameSize.y);
+		
+		string temp = String.Format(StringTable.Localize("$PKC_TAROTBOARD_DESC"),PK_Keybinds.getKeyboard("netevent PKCOpenBoard"));
+		
+		string tarotTabDescs[4];
+		tarotTabDescs[0] = String.Format(StringTable.Localize("$PKC_TAROTBOARD_DESC"),PK_Keybinds.getKeyboard("netevent PKCOpenBoard"));
+		tarotTabDescs[1] = String.Format(StringTable.Localize("$PKC_CARDTYPES_DESC"),PK_Keybinds.getKeyboard("netevent PK_UseGoldenCards"));
+		tarotTabDescs[2] = StringTable.Localize("$PKC_GOLDTYPES_DESC");
+		tarotTabDescs[3] = StringTable.Localize("$PKC_GOLDOBTAIN_DESC");
 			
 		//Define buttons:
 		for (int i = 0; i < tarotTabNames.Size(); i++) {
@@ -781,7 +791,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 			itemImg.Pack(tabframe);
 			
 			let title = PKZFLabel.Create(itemNamePos,itemNameSize,StringTable.Localize(tarotTabNames[i]),font_times,alignment:PKZFElement.AlignType_TopCenter,textScale:PK_MENUTEXTSCALE*1.5,textcolor:Font.CR_White);
-			let desc = PKZFLabel.Create(descPos,descSize,StringTable.Localize(tarotTabDescs[i]),font_times,textScale:PK_MENUTEXTSCALE*0.8,textcolor:Font.CR_White);		
+			let desc = PKZFLabel.Create(descPos,descSize,tarotTabDescs[i],font_times,textScale:PK_MENUTEXTSCALE*0.8,textcolor:Font.CR_White);		
 			title.Pack(tabframe);	
 			desc.Pack(tabframe);
 		}

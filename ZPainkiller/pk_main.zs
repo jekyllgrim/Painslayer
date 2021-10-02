@@ -25,6 +25,15 @@ mixin class PK_PlayerSightCheck {
 	}
 }
 
+//A class that returns the name of a key bound to a specific action (thanks to 3saster):
+class PK_Keybinds {
+    static string getKeyboard(string keybind) {
+        Array<int> keyInts;
+        Bindings.GetAllKeysForCommand(keyInts, keybind);
+        return Bindings.NameAllKeys(keyInts);
+    }
+}
+
 Class PK_BaseActor : Actor abstract {
 	protected double pi;
 	protected name bcolor;
