@@ -257,60 +257,51 @@ PKC_Gold_Desc =
 	"\n\n"
 	"- Dealing \cGexcessive damage \cJto enemies (such as blowing up weaker enemies) makes them drop coins."
 	"\n\n"
-	"- \cGJuggling enemy corpses with Killer\cJ: before a corpse disappears, simply shoot at it with the Killer "
-	"to grab it and draw it closer. Keep doing it to juggle the corpse; every 3rd juggle produces a medium gold piece."
+	"- \cGJuggling enemy corpses with Killer\cJ: before a corpse disappears, simply shoot at it with the Killer to grab it and draw it closer. Keep doing it to juggle the corpse; every 3rd juggle produces a medium gold piece."
 	"\n\n"
-	"- Gold dynamically spawns in \cGsecret areas\cJ in levels. This is the only way to find large and very large "
-	"gold pieces.";
+	"- Gold dynamically spawns in \cGsecret areas\cJ in levels. This is the only way to find large and very large gold pieces.";
 	
 PKC_Souls_Desc =				
 	"Killed enemies quickly disintegrate and drop their souls. They have two uses:\n"
 	"- Souls are your primary way to heal, since there are no medikits in Painslayer.\n"
 	"- Upon collecting 66 souls you will turn into a demon."
 	"\n\n"
-	"HEALING: One soul can give you between 1 and 20 HP, depending on how much health the enemy "
-	"originally had. If a soul contains 15 or more HP, it turns red."
+	"\cQHEALING\cJ: One soul can give you \cQbetween 1 and 20 HP\cJ, depending on how much health the enemy originally had. If a soul contains 15 or more HP, it turns red."
 	"\n\n"
-	"DEMON MODE: When you collect 66 souls you'll turn into a Demon. As a Demon you are completely "
-	"invincible and you gain a unique devastating attack.\n"
+	"\cRDEMON MODE\cJ: When you collect \cR66 souls\cJ you'll turn into a \cRDemon\cJ. As a Demon you are completely invincible and you gain a unique devastating attack.\n"
 	"- When you are 2 or 1 souls away from becoming a Demon, your screen will briefly flash in demon vision.\n"
-	"- Equipping ''Dark Soul'' Black Tarot card reduces the required number of souls from 66 to 50."
+	"- Equipping \cZ''Dark Soul''\cJ Black Tarot card reduces the required number of souls from 66 to 50."
 	"\n\n"
-	"TRAUMA: Demons don't drop souls on Trauma difficulty mode.";
+	"Note: Demons don't drop souls on \cDTrauma difficulty mode\cJ.";
 PKC_ChestOfSouls_Desc =
 	"Chest of Souls has two effects:"
 	"\n\n"
-	"- After picking it up you'll regenerate 1 HP every second over 20 seconds."
+	"- After picking it up you'll \cQregenerate 1 HP every second\cJ over 20 seconds."
 	"\n\n"
-	"- Your soul counter will immediately increase by 20. As such, collecting Chests of Souls is a "
-	"very quick way to turn into Demon.";
+	"- Your \cRsoul counter will immediately increase by 20\cJ. As such, collecting Chests of Souls is a very quick way to turn into a \cRDemon\cJ.";
 PKC_GoldSoul_Desc =
-	"Gold Soul is a special soul that restores your HP to 100. "
-	"It can't be dropped by enemies, only found on the map.";
+	"Gold Soul is a special soul that \cQrestores your HP to 100\cJ. It can't be dropped by enemies, only found on the map.";
 PKC_MegaSoul_Desc =
-	"Mega Soul is a special soul that restores your HP to 200 and gives you 200 armor. "
-	"It can't be dropped by enemies, only found on the map.";
+	"Mega Soul is a special soul that \cQrestores your HP to 200\cJ and gives you \cN200 armor\cJ. It can't be dropped by enemies, only found on the map.";
 PKC_Armor_Desc =
 	"You can find 3 types of armor in Painslayer:"
 	"\n\n"
-	"BRONZE armor provides 100 points of armor and absorbs 33.3% of incoming damage."
+	"\cEBronze armor\cJ provides \cN100 points of armor\cJ and absorbs 33.3% of incoming damage."
 	"\n\n"
-	"SILVER armor provides 150 points of armor and absorbs 60% of incoming damage."
+	"\cZSilver armor\cJ provides \cN150 points of armor\cJ and absorbs 60% of incoming damage."
 	"\n\n"
-	"GOLD armor provides 200 points of armor and absorbs 80% of incoming damage.";
+	"\cFGold armor\cJ provides \cN200 points of armor\cJ and absorbs 80% of incoming damage.";
 PKC_AmmoPack_Desc =
 	"Ammo Pack is a rare pickup that provides a lot of ammo for all weapons.";
 PKC_WeaponModifier_Desc =
-	"Weapon Modifier empowers all your weapons for 30 seconds. The effects of the Weapon Modifier "
-	"are unique for each weapon; you can find all the details about its effects on the "
+	"Weapon Modifier empowers all your weapons for 30 seconds. The effects of the Weapon Modifier are unique for each weapon; you can find all the details about its effects on the "
 	"WEAPONS tab."
 	"\n\n"
-	"When on the WEAPONS tab, click the Weapon Modifier icon to see the information about how it affects "
-	"specific weapon attacks."
+	"When on the WEAPONS tab, click the \cDWeapon Modifier icon\cJ to see the information about how it affects specific weapon attacks."
 	"\n\n"
 	"Weapon Modifier only affects primary and secondary attacks, not combo attacks."
 	"\n\n"
-	"Weapon Modifier also heals you to 100 HP when you pick it up.";
+	"Weapon Modifier also \cQheals you to 100 HP\cJ when you pick it up.";
 PKC_DemonEyes_Desc =
 	"Demon Eyes description";
 PKC_Pentagram_Desc =
@@ -319,6 +310,46 @@ PKC_Sabatons_Desc =
 	"Insoluble Sabatons description";
 PKC_CrystalBall_Desc =
 	"Crystal Ball description";
+	
+// TAROT tab:
+PKC_TAROTBOARD		= "Black Tarot Board";
+PKC_CARDTYPES		= "Black Tarot Cards";
+PKC_GOLDTYPES		= "Gold pickups";
+PKC_GOLDOBTAIN		= "Obtaining gold";
+
+PKC_TAROTBOARD_DESC =
+	"Once a map you can open the Black Tarot Board and equip Black Tarot cards that provide various benefits."
+	"\n\n"
+	"By default the Board opens automatically at map start. Using \cDMod Settings\cJ you can change this behavior to open the board manually by pressing the \cDOpen Black Tarot\cJ key."
+	"\n\n"
+	"Once you close the Board, the active card slots become locked. To equip new cards you have to finish the current level. Alternatively, you can also unlock the slots with \cFGold\cJ.";
+	
+PKC_CARDTYPES_DESC =
+	"There are two types of Black Tarot Cards: Silver Cards and Golden Cards."
+	"\n\n"
+	"\cZSilver Cards\cJ provide passive bonuses and are active all the time while equipped. You can equip up to \cD3\cJ Silver Cards."
+	"\n\n"
+	"\cfGolden Cards\cJ have to be activated manually by pressing \cDUse Golden Cards\cJ button (see \cDMod Settings\cJ to set it up). Golden Cards can be activated once per level (unless you equip a Silver Card that increases that number). You can equip up to \cD2\cJ Golden Cards."
+	"\n\n"
+	"By default you will receive 3 random Silver Cards and 2 random Golden Cards as a gift the first time you open the Black Tarot Board in a new game. You can change this behavior using \cDMod Settings > Allow free starting cards\cJ option.";
+PKC_GOLDTYPES_DESC =
+	"Gold is used to purchase Silver and Golden Cards on the Black Tarot Board."
+	"\n\n"
+	"Gold comes in 4 varieties:\n"
+	"- Small (\cF+10G\cJ)\n"
+	"- Medium (\cF+25G\cJ)\n"
+	"- Large (\cF+100G\cJ)\n"
+	"- Very Large (\cF+500G\cJ)"
+	"\n\n"
+	"Gold can be found in secret areas or obtained from enemies. See \cDObtaining Gold\cJ tab for details.";
+PKC_GOLDOBTAIN_DESC =
+	"There are several ways to acquire gold:"
+	"\n\n"
+	"- Gold will spawn in \cDsecret areas\cJ on any maps you play. Look for them to obtain the largest gold pickups."
+	"\n\n"
+	"- Dealing \cGexcessive damage \cJto enemies, such as blowing up/gibbing weaker enemies. This makes them drop coins."
+	"\n\n"
+	"- \cIJuggling enemy corpses with Killer\cJ: before a corpse disappears, simply shoot at it with the Killer. This prevents the corpse from despawning and will push it upwards and closer to you. Keep doing it to juggle the corpse; every 3rd juggle produces a medium gold piece.";
 
 // MENU
 

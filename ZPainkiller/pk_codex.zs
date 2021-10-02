@@ -1,8 +1,8 @@
 enum PKCodexTabs {
 	PKCX_Weapons,
 	PKCX_Powerups,
-	PKCX_Gold,
-	PKCX_Cards,
+	//PKCX_Gold,
+	PKCX_Tarot
 }
 
 enum PKWeaponTabs {
@@ -15,7 +15,7 @@ enum PKWeaponTabs {
 	PKCW_Boltgun
 }
 
-enum PKItemTabs {
+/*enum PKItemTabs {
 	PKCI_Gold,
 	PKCI_Souls,
 	PKCI_ChestOfSouls,
@@ -28,14 +28,14 @@ enum PKItemTabs {
 	PKCI_Pentagram,
 	PKCI_Sabatons,
 	PKCI_CrystalBall
-};
+};*/
 	
 
 Class PKCodexMenu : PKZFGenericMenu {
 	
 	vector2 backgroundsize;
 	PKCodexTabhandler tabhandler;
-	PKZFFrame mainTabs[4];
+	PKZFFrame mainTabs[3];
 	
 	vector2 contentFramePos;
 	vector2 contentFrameSize;	
@@ -53,7 +53,6 @@ Class PKCodexMenu : PKZFGenericMenu {
 	static const string mainTabnames[] = {
 		"$PKC_WEAPONS",
 		"$PKC_POWERUPS",
-		"$PKC_GOLD",
 		"$PKC_TAROT"
 	};
 
@@ -135,7 +134,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 		//define/calculate button positions, gaps between them and sizes:
 		vector2 buttonpos = (32,32);
 		double buttongap = buttonpos.x * 0.5;
-		vector2 buttonsize = ( (backgroundsize.x - (buttonpos.x*2 + buttongap * 3)) / 4, 72);		
+		vector2 buttonsize = ( (backgroundsize.x - (buttonpos.x*2 + buttongap * 3)) / maintabs.Size(), 72);		
 		//define Info section size and position:
 		contentFramePos = (buttonpos.x * 0.5, buttonpos.y + buttonsize.y - 9);
 		contentFrameSize = (backgroundsize.x - contentFramePos.x * 2, PK_BOARD_HEIGHT - contentFramePos.y * 1.25);
@@ -180,23 +179,11 @@ Class PKCodexMenu : PKZFGenericMenu {
 		infoAreaSize = (contentFrameSize.x - infoAreaPos.x - 16, contentFrameSize.y - 32);
 		
 		//Create WEAPONS tab elements:
-		WeaponsTabInit();
-		
+		WeaponsTabInit();		
 		//Create POWERUPS tab:
-		/*
-			Gold: Small, Med, Large, V. Large
-			Souls: Green soul, Red soul, Demon Mode
-			Gold Soul
-			Mega Soul
-			Chest of Souls
-			Armor: Bronze, Silver, Gold
-			Ammo Pack
-			Weapon Modifier
-			Demon Eyes
-			Pentagram
-			Insoluble Sabatons
-		*/
 		PowerupsTabInit();
+		//Create TAROT tab:
+		TarotTabInit();
 	}
 		
 	static const Class<Weapon> PK_Weapons[] = {
@@ -254,19 +241,12 @@ Class PKCodexMenu : PKZFGenericMenu {
 			string text2; string alttext2;
 			string text3;
 			
-			//cache the names "Primary" and "Secondary":
-			string fire_name = StringTable.Localize("$PKC_Primary");
-			string altfire_name = StringTable.Localize("$PKC_Secondary");
-			
 			//check if this weapon has its fire/altfire modes switched:
 			bool modeswitch = CVar.GetCVar(PK_ModeCVars[i],Players[Consoleplayer]).GetBool();
-			//if so, switch the words "Primary" and "Secondary":
-			if (modeswitch) {
-				string fire_name_sw = altfire_name;
-				string altfire_name_sw = fire_name;
-				fire_name = fire_name_sw;
-				altfire_name = altfire_name_sw;
-			}
+			
+			//cache the names "Primary" and "Secondary" (checking if fire modes are switched)
+			string fire_name = StringTable.Localize(modeswitch ? "$PKC_Secondary" : "$PKC_Primary");
+			string altfire_name = StringTable.Localize(modeswitch ? "$PKC_Primary" : "$PKC_Secondary");
 			
 			string baseImgPath = showWMText ? "Graphics/HUD/Codex/WMIcons/" : "Graphics/HUD/Codex/";
 			
@@ -277,35 +257,35 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_PK_1.PNG";
 				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_PK_2.PNG";
 				text1 = String.Format(
-					"%s %s: %s\n\n%s",
+					"\cD%s %s: \cI%s\cJ\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					fire_name,
 					StringTable.Localize("$PKC_Pain"),
 					StringTable.Localize("$PKC_PainDesc")
 				);
 				alttext1 = String.Format(
-					"%s %s: %s\n\n%s",
+					"\cD%s %s: \cI%s\cG\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					fire_name,
 					StringTable.Localize("$PKC_Pain"),
 					StringTable.Localize("$PKC_PainDescWM")
 				);
 				text2 = String.Format(
-					"%s %s: %s\n\n%s",
+					"\cD%s %s: \cI%s\cJ\n\n%s",
 					StringTable.Localize("$PKC_Tap"),
 					altfire_name,
 					StringTable.Localize("$PKC_Killer"),
 					StringTable.Localize("$PKC_KillerDesc")
 				);
 				alttext2 = String.Format(
-					"%s %s: %s\n\n%s",
+					"\cD%s %s: \cI%s\cG\n\n%s",
 					StringTable.Localize("$PKC_Tap"),
 					altfire_name,
 					StringTable.Localize("$PKC_Killer"),
 					StringTable.Localize("$PKC_KillerDescWM")
 				);
 				text3 = String.Format(
-					"%s %s, %s %s: %s\n\n%s",
+					"\cD%s %s, %s %s: \cI%s\cJ\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					fire_name,
 					StringTable.Localize("$PKC_Tap").MakeLower(),
@@ -321,31 +301,31 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_SH_1.PNG";
 				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_SH_2.PNG";
 				text1 = String.Format(
-					"%s: %s\n\n%s",
+					"\cD%s: \cI%s\cJ\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Shotgun"),
 					StringTable.Localize("$PKC_ShotgunDesc")
 				);
 				alttext1 = String.Format(
-					"%s: %s\n\n%s",
+					"\cD%s: \cI%s\cG\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Shotgun"),
 					StringTable.Localize("$PKC_ShotgunDescWM")
 				);
 				text2 = String.Format(
-					"%s: %s\n\n%s",
+					"\cD%s: \cI%s\cJ\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_Freezer"),
 					StringTable.Localize("$PKC_FreezerDesc")
 				);
 				alttext2 = String.Format(
-					"%s: %s\n\n%s",
+					"\cD%s: \cI%s\cG\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_Freezer"),
 					StringTable.Localize("$PKC_FreezerDescWM")
 				);
 				text3 = String.Format(
-					"%s, %s %s: %s\n\n%s",
+					"\cD%s, %s %s: \cI%s\cJ\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_then"),
 					fire_name,
@@ -360,31 +340,31 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_ST_1.PNG";
 				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_ST_2.PNG";
 				text1 = String.Format(
-					"%s: %s\n\n%s",
+					"\cD%s: \cI%s\cJ\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Stakegun"),
 					StringTable.Localize("$PKC_StakegunDesc")
 				);
 				alttext1 = String.Format(
-					"%s: %s\n\n%s",
+					"\cD%s: \cI%s\cG\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Stakegun"),
 					StringTable.Localize("$PKC_StakegunDescWM")
 				);
 				text2 = String.Format(
-					"%s: %s\n\n%s",
+					"\cD%s: \cI%s\cJ\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_Grenade"),
 					StringTable.Localize("$PKC_GrenadeDesc")
 				);
 				alttext2 = String.Format(
-					"%s: %s\n\n%s",
+					"\cD%s: \cI%s\cG\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_Grenade"),
 					StringTable.Localize("$PKC_GrenadeDescWM")
 				);
 				text3 = String.Format(
-					"%s, %s %s: %s\n\n%s",
+					"\cD%s, %s %s: \cI%s\cJ\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_then"),
 					fire_name,
@@ -399,26 +379,24 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_CH_1.PNG";
 				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_CH_2.PNG";
 				text1 = String.Format(
-					"%s: %s\n\n%s",
+					"\cD%s: \cI%s\cJ\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_RLauncher"),
 					StringTable.Localize("$PKC_RLauncherDesc")
-				);
-				alttext1 = String.Format(
-					"%s: %s\n\n%s",
+				);				alttext1 = String.Format(					"\cD%s: \cI%s\cG\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_RLauncher"),
 					StringTable.Localize("$PKC_RLauncherDescWM")
 				);
 				text2 = String.Format(
-					"%s %s: %s\n\n%s",
+					"\cD%s %s: \cI%s\cJ\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Chaingun"),
 					StringTable.Localize("$PKC_ChaingunDesc")
 				);
 				alttext2 = String.Format(
-					"%s %s: %s\n\n%s",
+					"\cD%s %s: \cI%s\cG\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Chaingun"),
@@ -433,33 +411,33 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_ED_1.PNG";
 				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_ED_2.PNG";
 				text1 = String.Format(
-					"%s: %s\n\n%s",
+					"\cD%s: \cI%s\cJ\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Driver"),
 					StringTable.Localize("$PKC_DriverDesc")
 				);
 				alttext1 = String.Format(
-					"%s: %s\n\n%s",
+					"\cD%s: \cI%s\cG\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Driver"),
 					StringTable.Localize("$PKC_DriverDescWM")
 				);
 				text2 = String.Format(
-					"%s %s: %s\n\n%s",
+					"\cD%s %s: \cI%s\cJ\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Electro"),
 					StringTable.Localize("$PKC_ElectroDesc")
 				);
 				alttext2 = String.Format(
-					"%s %s: %s\n\n%s",
+					"\cD%s %s: \cI%s\cG\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Electro"),
 					StringTable.Localize("$PKC_ElectroDescWM")
 				);
 				text3 = String.Format(
-					"%s %s, %s %s: %s\n\n%s",
+					"\cD%s %s, %s %s: \cI%s\cJ\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Tap"),
@@ -476,35 +454,35 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_RF_2.PNG";
 				
 				text1 = String.Format(
-					"%s %s: %s\n\n%s",
+					"\cD%s %s: \cI%s\cJ\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					fire_name,
 					StringTable.Localize("$PKC_Rifle"),
 					StringTable.Localize("$PKC_RifleDesc")
 				);
 				alttext1 = String.Format(
-					"%s %s: %s\n\n%s",
+					"\cD%s %s: \cI%s\cG\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					fire_name,
 					StringTable.Localize("$PKC_Rifle"),
 					StringTable.Localize("$PKC_RifleDescWM")
 				);
 				text2 = String.Format(
-					"%s %s: %s\n\n%s",
+					"\cD%s %s: \cI%s\cJ\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Flamer"),
 					StringTable.Localize("$PKC_FlamerDesc")
 				);
 				alttext2 = String.Format(
-					"%s %s: %s\n\n%s",
+					"\cD%s %s: \cI%s\cG\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Flamer"),
 					StringTable.Localize("$PKC_FlamerDescWM")
 				);
 				text3 = String.Format(
-					"%s %s, %s %s: %s\n\n%s",
+					"\cD%s %s, %s %s: \cI%s\cJ\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Tap").MakeLower(),
@@ -520,31 +498,31 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_BG_1.PNG";
 				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_BG_2.PNG";
 				text1 = String.Format(
-					"%s: %s\n\n%s",
+					"\cD%s: \cI%s\cJ\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Boltgun"),
 					StringTable.Localize("$PKC_BoltgunDesc")
 				);
 				alttext1 = String.Format(
-					"%s: %s\n\n%s",
+					"\cD%s: \cI%s\cG\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Boltgun"),
 					StringTable.Localize("$PKC_BoltgunDescWM")
 				);
 				text2 = String.Format(
-					"%s: %s\n\n%s",
+					"\cD%s: \cI%s\cJ\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_Heater"),
 					StringTable.Localize("$PKC_HeaterDesc")
 				);
 				alttext2 = String.Format(
-					"%s: %s\n\n%s",
+					"\cD%s: \cI%s\cG\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_Heater"),
 					StringTable.Localize("$PKC_HeaterDescWM")
 				);
 				text3 = String.Format(
-					"%s, %s %s: %s\n\n%s",
+					"\cD%s, %s %s: \cI%s\cJ\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_then"),
 					fire_name,
@@ -575,14 +553,13 @@ Class PKCodexMenu : PKZFGenericMenu {
 						
 			//fire modes are switched, switch around image1 and image2:
 			if (modeswitch) {
-				string imgpath1sw = imgpath2;
-				string imgpath2sw = imgpath1;
-				imgpath1 = imgpath1sw;
-				imgpath2 = imgpath2sw;
-				string imgpath1wmsw = imgpath2wm;
-				string imgpath2wmsw = imgpath1wm;
-				imgpath1wm = imgpath1wmsw;
-				imgpath2wm = imgpath2wmsw;
+				string cacheimg1 = imgpath1;
+				imgpath1 = imgpath2;
+				imgpath2 = cacheimg1;
+				
+				string cacheimg1wm = imgpath1wm;
+				imgpath1wm = imgpath2wm;
+				imgpath2wm = cacheimg1wm;
 			}
 			//Create images for Primary, Secondary and Combo
 			let img1 = PKZFWMImage.Create(wpnImgPos,wpnImgSize,self,imgpath1,imgpath1wm);
@@ -633,7 +610,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 	}
 	
 	static const string powerupTabNames[] = {
-		"$PKC_Gold",
+		//"$PKC_Gold",
 		"$PKC_Souls",
 		"$PKC_ChestOfSouls",
 		"$PKC_GoldSoul",
@@ -648,7 +625,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 	};
 	
 	static const string powerupTabDescs[] = {
-		"$PKC_Gold_Desc",
+		//"$PKC_Gold_Desc",
 		"$PKC_Souls_Desc",
 		"$PKC_ChestOfSouls_Desc",
 		"$PKC_GoldSoul_Desc",
@@ -663,7 +640,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 	};
 	
 	static const string powerupTabImages[] = {
-		"PCDXGOLD",	//gold
+		//"PCDXGOLD",	//gold
 		"PCDXSOUA",		//souls
 		"PSOCA0",		//chest of souls
 		"GSOUA0",		//gold soul
@@ -728,6 +705,83 @@ Class PKCodexMenu : PKZFGenericMenu {
 			
 			let title = PKZFLabel.Create(itemNamePos,itemNameSize,StringTable.Localize(powerupTabNames[i]),font_times,alignment:PKZFElement.AlignType_TopCenter,textScale:PK_MENUTEXTSCALE*1.5,textcolor:Font.CR_White);
 			let desc = PKZFLabel.Create(descPos,descSize,StringTable.Localize(powerupTabDescs[i]),font_times,textScale:PK_MENUTEXTSCALE*0.8,textcolor:Font.CR_White);		
+			title.Pack(tabframe);	
+			desc.Pack(tabframe);
+		}
+	}
+	
+	static const string tarotTabNames[] = {
+		"$PKC_TAROTBOARD",
+		"$PKC_CARDTYPES",
+		"$PKC_GOLDTYPES",
+		"$PKC_GOLDOBTAIN"
+	};
+	
+	static const string tarotTabDescs[] = {
+		"$PKC_TAROTBOARD_DESC",
+		"$PKC_CARDTYPES_DESC",
+		"$PKC_GOLDTYPES_DESC",
+		"$PKC_GOLDOBTAIN_DESC"
+	};
+	
+	static const string tarotTabImages[] = {
+		"PCDXBORD",
+		"PCDXTARO",
+		"PCDXGOLD",
+		""
+	};
+	
+	void TarotTabInit() {
+		let tabcntrl = new("PKZFRadioController"); //define a new controller
+		vector2 btnPos = subTabLabelPos; //button positon
+		double tabLabelGap = 6; //vertical gap between buttons
+		
+		//the area where the item sprite/graphic will be displayed:
+		//background
+		vector2 itemBkgPos = (0,0);
+		vector2 itemBkgSize = (infoAreaSize.x, infoAreaSize.y / 3.2);
+		//image area proper
+		vector2 imgAreaPos = (8,8);
+		vector2 imgAreaSize = itemBkgSize - (imgAreaPos * 2);
+		//the whole area for its text description:
+		vector2 itemDescAreaPos = (itemBkgPos.x, itemBkgPos.y + itemBkgSize.y);
+		vector2 itemDescAreaSize = (itemBkgSize.x, infoAreaSize.y - itemBkgSize.y);
+		//a small area at the top is dedicated to the item's name:
+		vector2 itemNamePos = itemDescAreaPos + (16,16);
+		vector2 itemNameSize = (itemDescAreaSize.x - (itemNamePos.x*2),64);
+		//the rest is for its free-form description:
+		vector2 descPos = (itemNamePos.x, itemNamePos.y + itemNameSize.y);
+		vector2 descSize = (itemNameSize.x, itemDescAreaSize.y - itemNameSize.y);
+			
+		//Define buttons:
+		for (int i = 0; i < tarotTabNames.Size(); i++) {
+			PKZFTabButton tab; PKZFFrame tabframe;
+			[tab, tabframe] = CreateTab(
+				btnPos, 
+				subTabLabelSize,
+				tarotTabNames[i],
+				tabcntrl,
+				tabhandler,				
+				i,
+				infoAreaPos, infoAreaSize,
+				textscale:0.9
+			);			
+			btnPos.y += (subTabLabelSize.y + tabLabelGap);
+			tab.Pack(mainTabs[PKCX_Tarot]);
+			tabframe.Pack(mainTabs[PKCX_Tarot]);
+			tab.setAlignment(PKZFElement.AlignType_CenterLeft);
+			
+			//backgrounds for the item graphic and description:
+			let itemIconbkg = PKZFBoxImage.Create(itemBkgPos,itemBkgSize,darkFrame);
+			let itemDescbkg = PKZFBoxImage.Create(itemDescAreaPos,itemDescAreaSize,darkFrame);
+			itemIconbkg.Pack(tabframe);
+			itemDescbkg.Pack(tabframe);
+			
+			let itemImg = PKZFImage.Create(imgAreaPos,imgAreaSize,tarotTabImages[i],PKZFElement.AlignType_Center);
+			itemImg.Pack(tabframe);
+			
+			let title = PKZFLabel.Create(itemNamePos,itemNameSize,StringTable.Localize(tarotTabNames[i]),font_times,alignment:PKZFElement.AlignType_TopCenter,textScale:PK_MENUTEXTSCALE*1.5,textcolor:Font.CR_White);
+			let desc = PKZFLabel.Create(descPos,descSize,StringTable.Localize(tarotTabDescs[i]),font_times,textScale:PK_MENUTEXTSCALE*0.8,textcolor:Font.CR_White);		
 			title.Pack(tabframe);	
 			desc.Pack(tabframe);
 		}
@@ -878,11 +932,11 @@ Class PKZFWeaponDescLabel : PKZFLabel {
 		super.Ticker();
 		if (WMText && menu && menu.showWMText) {
 			SetText(WMText);
-			SetTextColor(Font.FindFontColor('PKRedText'));
+			//SetTextColor(Font.FindFontColor('PKRedText'));
 		}
 		else {
 			SetText(maintext);
-			SetTextColor(baseTextColor);
+			//SetTextColor(baseTextColor);
 		}
 	}
 }
