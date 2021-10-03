@@ -121,6 +121,8 @@ Class PKCardsMenu : PKZFGenericMenu {
 				str,
 				textscale:PK_MENUTEXTSCALE*1.2
 			);
+			let pressEsc = PKZFLabel.Create((0,180),(700,32),Stringtable.Localize("$TAROT_PRESSESC"),font_times,alignment:PKZFElement.AlignType_BottomCenter,textscale:PK_MENUTEXTSCALE*1.2,textcolor:Font.FindFontColor('PKWhiteText'));
+			pressEsc.Pack(needMousePopup);
 			needMousePopup.pack(mainFrame);
 			needMousePopupDur = 800;
 			return;
