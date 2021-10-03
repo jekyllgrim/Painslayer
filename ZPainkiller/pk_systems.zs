@@ -187,24 +187,41 @@ Class PK_DemonWeapon : PKWeapon {
 		owner.bNOBLOOD = true;
 		owner.bNOPAIN = true;
 		if (cursouls >= fullsouls) {
-			//disable golden cards before changing speed/gravity
-			let cardcontrol = PK_CardControl(owner.FindInventory("PK_CardControl"));
-			if (cardcontrol && cardcontrol.goldActive)
-				cardcontrol.StopGoldenCards();
-			//record previous speed and gravity for the slowmo effect
-			p_speed = owner.speed;
-			p_gravity = owner.gravity;
-			//the owner will be slowed down a little
-			owner.speed *= 0.6;
-			owner.gravity *= 0.6;
-			if (pk_debugmessages)
-				console.printf("Changing player %d speed to %f and gravity to %f",owner.player.mo.PlayerNumber(),owner.speed,owner.gravity);
+			StartDemonMode();
 		}
 		//also reduce view bob
 		owner.player.mo.viewbob = 0.4;		
 		//and INSTANTLY switch the current weapon to Demon Weapon
 		owner.player.readyweapon = self;
 		owner.player.readyweapon.crosshair = 99;
+	}
+	void StartDemonMode() {		
+		//disable golden cards before changing speed/gravity
+		let cardcontrol = PK_CardControl(owner.FindInventory("PK_CardControl"));
+		if (cardcontrol && cardcontrol.goldActive)
+			cardcontrol.StopGoldenCards();
+		//record previous speed and gravity for the slowmo effect
+		p_speed = owner.speed;
+		p_gravity = owner.gravity;
+		//the owner will be slowed down a little
+		owner.speed *= 0.6;
+		owner.gravity *= 0.6;
+		if (pk_debugmessages)
+			console.printf("Changing player %d speed to %f and gravity to %f",owner.player.mo.PlayerNumber(),owner.speed,owner.gravity);
+		//Remove all active powerups from the owner's inventory:
+		Array<Powerup> powerups;
+		for (let iitem = owner.Inv; iitem != NULL; iitem = iitem.Inv) {
+			let item = Powerup (iitem);
+			if (item != null) {
+				powerups.Push (item);
+			}
+		}
+
+		for (int i = 0; i < powerups.Size (); i++) {
+			Owner.RemoveInventory (powerups [i]);
+			if (pk_debugmessages)
+				console.printf("Taking \cD%s\cJ from player's inventory",powerups[i].GetClassName());
+		}
 	}
 	override void DoEffect() {
 		super.DoEffect();
