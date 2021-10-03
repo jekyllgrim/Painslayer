@@ -30,6 +30,8 @@ class PK_Keybinds {
     static string getKeyboard(string keybind) {
         Array<int> keyInts;
         Bindings.GetAllKeysForCommand(keyInts, keybind);
+		if (keyInts.Size() == 0)
+			return Stringtable.Localize("$PKC_NOTBOUND");
         return Bindings.NameAllKeys(keyInts);
     }
 }
