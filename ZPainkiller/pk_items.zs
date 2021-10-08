@@ -504,6 +504,8 @@ Class PK_ChestOfSouls : Inventory {
 	}
 	States {
 	Spawn:
+		TNT1 A 0 NoDelay A_Jump(256,random[sfx](1,12));
+	Idle:
 		PSOC ABCDEFGHIJKL 3;
 		loop;
 	}
@@ -792,13 +794,19 @@ Class PK_PowerupGiver : PowerupGiver {
 	}
 }
 
-Mixin Class PK_PowerUp {
+/*	A mixin class that defines the following:
+	- Plays runningOutsound every second if the remaining powerup time is between 1-5 seconds
+	- Plays deathsound when the powerup effect ends
+	- If a new powerup is picked up when the same powerup is active, its time is reset (but not added)
+*/
+
+Mixin Class PK_PowerUpBehavior {
 	sound runningOutSound;
 	property runningOutSound : runningOutSound;
 	Default {
 		+INVENTORY.ADDITIVETIME
 	}
-	override void Tick () {
+	/*override void Tick () {
 		if (Owner == NULL)	{
 			Destroy ();
 			return;
@@ -809,7 +817,7 @@ Mixin Class PK_PowerUp {
 		if (EffectTics == 0 || (EffectTics > 0 && --EffectTics == 0)) {
 			Destroy ();
 		}
-	}
+	}*/
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner || !owner.player) {
@@ -857,8 +865,14 @@ Mixin Class PK_PowerUp {
 	}
 }
 
-Class PK_WeaponModifier : Powerup {
-	mixin PK_PowerUp;
+/*	A standalone class containing the same behavior.
+	Used by those powerups that don't need to be based on an existing ZDoom power-up.
+*/
+class PK_Powerup : Powerup {
+	mixin PK_PowerUpBehavior;
+}
+
+Class PK_WeaponModifier : PK_Powerup {
 	Default {
 		deathsound "pickups/wmod/end";
 		inventory.icon "wmodicon";
@@ -909,11 +923,139 @@ Class PK_WeaponModifierGiver : PK_PowerUpGiver {
 	}
 }
 
-Class PK_PowerDemonEyes : PowerTorch {
-	mixin PK_PowerUp;
+Class PK_PowerDemonEyes : PK_Powerup {
+	private PK_DemonEyesLight eyeslight1, eyeslight2;
+	private int lightdir;
+	private array <actor> feartargets;
+	const feardist = 450;
+	const fearangle = 40;
 	Default {
 		deathsound "pickups/powerups/lightampEnd";
 		inventory.icon "iconeyes";
+	}
+	override void InitEffect() {
+		super.InitEffect();
+		if (owner && owner.player) {
+			eyeslight1 = PK_DemonEyesLight(Spawn("PK_DemonEyesLight",owner.pos));
+			eyeslight1.user = PlayerPawn(owner);
+			eyeslight2 = PK_DemonEyesLight(Spawn("PK_DemonEyesLight",owner.pos));
+			eyeslight2.user = PlayerPawn(owner);
+			eyeslight2.isLeft = true;
+			owner.player.extralight = 12;
+		}
+		lightdir = 1;
+	}
+	override void DoEffect() {
+		super.DoEffect();
+		/*if (level.time % 3 == 0 && owner && owner.player) {
+			let plr = owner.player;
+			plr.extralight += lightdir;
+			if (plr.extralight > 12 || plr.extralight < -18) 
+				lightdir *= -1;
+		}*/
+		BlockThingsIterator itr = BlockThingsIterator.Create(owner,feardist);
+		while (itr.next()) {
+			let next = itr.thing;
+			if (!next || next == self)
+				continue;
+			if (feartargets.Find(next) != feartargets.Size())
+				continue;
+			bool isValid = (!next.bFRIGHTENED && next.bSHOOTABLE && next.bIsMonster && next.health > 0);
+			if (!isValid)
+				continue;
+			double dist = owner.Distance3D(next);
+			if (dist > feardist)
+				continue;
+			if (!owner.CheckSight(next,SF_IGNOREWATERBOUNDARY))
+				continue;
+			vector3 targetpos = LevelLocals.SphericalCoords((owner.pos.x,owner.pos.y,owner.player.viewz),next.pos+(0,0,next.default.height*0.5),(owner.angle,owner.pitch));	
+			if (abs(targetpos.x) > fearangle || abs(targetpos.y) > fearangle)
+				continue;
+			feartargets.Push(next);
+			let marker = Spawn("PK_FearTargetMarker",next.pos + (0,0,next.height * 0.5));
+			if (marker) marker.master = next;
+		}
+		for (int i = 0; i < feartargets.Size(); i++) {
+			if (!feartargets[i])
+				continue;
+			let trg = feartargets[i];
+			if (trg.health <= 0 || owner.Distance3D(trg) > feardist || !owner.CheckSight(trg,SF_IGNOREWATERBOUNDARY)) {
+				trg.bFRIGHTENED = trg.default.bFRIGHTENED;
+				feartargets.Delete(i);
+				continue;
+			}
+			vector3 targetpos = LevelLocals.SphericalCoords((owner.pos.x,owner.pos.y,owner.player.viewz),trg.pos+(0,0,trg.default.height*0.5),(owner.angle,owner.pitch));	
+			if (abs(targetpos.x) > fearangle || abs(targetpos.y) > fearangle) {
+				trg.bFRIGHTENED = trg.default.bFRIGHTENED;
+				feartargets.Delete(i);
+				continue;
+			}
+			trg.bFRIGHTENED = true;
+		}
+	}
+	override void EndEffect() {
+		if (eyeslight1)
+			eyeslight1.Destroy();
+		if (eyeslight2)
+			eyeslight2.Destroy();
+		if (owner && owner.player)			
+			owner.player.extralight = 0;
+		for (int i = 0; i < feartargets.Size(); i++) {
+			if (!feartargets[i])
+				continue;
+			feartargets[i].bFRIGHTENED = feartargets[i].default.bFRIGHTENED;
+		}
+		super.EndEffect();
+	}
+}
+
+class PK_FearTargetMarker : PK_SmallDebris {
+	Default {
+		+NOINTERACTION
+		+BRIGHT
+	}
+	override void Tick() {
+		if (!master || master.health <= 0 || !master.bFRIGHTENED) {
+			Destroy();
+			return;
+		}
+		SetOrigin(master.pos + (0,0,master.height * 0.5),true);
+		if (scale.x > 0.5)
+			scale *= 0.92;
+		super.Tick();
+	}
+	States {
+	Spawn:
+		PDEO ABCDEFEDCBA 2;
+		loop;
+	}
+}
+
+class PK_DemonEyesLight : SpotLight {
+	PlayerPawn user;
+	bool isLeft;
+	private double angOfs;
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		color c = "ffd50f";
+		args[0] = c.r;
+		args[1] = c.g;
+		args[2] = c.b;
+		args[3] = 512;
+		SpotInnerAngle = 36;
+		SpotOuterAngle = 38;
+		angOfs = 12 * (isLeft ? 1 : -1);
+	}
+	override void Tick() {
+		if (!user) {
+			Destroy();
+			return;
+		}
+		//Warp(user,zofs:user.player.viewheight,flags:WARPF_COPYPITCH|WARPF_WARPINTERPOLATION|WARPF_COPYVELOCITY);
+		SetOrigin(user.pos+(0,0,user.player.viewheight),true);
+		A_SetAngle(user.angle + angOfs,SPF_INTERPOLATE);
+		A_SetPitch(user.pitch,SPF_INTERPOLATE);
+		super.Tick();
 	}
 }
 
@@ -937,13 +1079,12 @@ Class PK_DemonEyes : PK_PowerupGiver {
 }
 
 Class PK_PowerPentagram : PowerInvulnerable {
-	mixin PK_PowerUp;
+	mixin PK_PowerUpBehavior;
 	Default {
 		deathsound "pickups/powerups/pentagramEnd";
 		inventory.icon "penticon";
 	}
 }
-
 
 Class PK_Pentagram : PK_PowerupGiver {
 	Default {
@@ -984,11 +1125,11 @@ Class PK_Pentagram : PK_PowerupGiver {
 }
 
 Class PK_PowerAntiRad : PowerIronFeet {
-	mixin PK_PowerUp;
+	mixin PK_PowerUpBehavior;
 	Default {
 		deathsound "pickups/powerups/radsuitEnd";
 		Powerup.Color "000000", 0;
-		inventory.icon "HLBOB0";
+		inventory.icon "HLBOA0";
 	}
 }
 
@@ -998,11 +1139,11 @@ Class PK_AntiRadArmor : PK_PowerupGiver {
 		Inventory.PickupMessage "$PKI_ANTIRAD";
 		PK_PowerUpGiver.pickupRingColor "11821c";
 		inventory.pickupsound "pickups/powerups/radsuit";
-		scale 0.4;	
+		scale 0.32;	
 	}
 	States {
 	Spawn:
-		HLBO B -1;
+		HLBO A -1;
 		stop;
 	}
 }	
