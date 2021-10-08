@@ -334,7 +334,7 @@ Class PK_MainHandler : EventHandler {
 		bool gibbed = (mh >= act.SpawnHealth() || (act.gibhealth > 0 && mh >= act.gibhealth));
 		if (gibbed)
 			goldchance = Clamp(goldchance * 3,3,10);
-		double zofs = act.default.health;
+		double zofs = act.default.height;
 		for (int i = goldchance; i > 0; i--) {
 			let gg = Actor.Spawn("PK_GoldCoin",act.pos + (0,0,zofs*frandom[gold](0.8,1.2)));
 			if (gg)
