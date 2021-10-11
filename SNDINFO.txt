@@ -68,6 +68,8 @@ thunderwalk3	"sounds/items/stonewalk3.wav"
 
 /// MENU
 
+//tarot
+
 ui/board/open			"sounds/menu/card-accept.wav"
 ui/board/exit			"sounds/menu/board_close.wav"
 ui/board/placesilver 	"sounds/menu/card-put_off-special_place.wav"
@@ -79,10 +81,14 @@ ui/board/cardburn	 	"sounds/menu/option-cardburn.wav"
 ui/board/cardunlocked	"sounds/menu/card-unlocked.wav"
 ui/board/digitchange	"sounds/menu/money-rollnumbers-loop.wav"
 
-ui/codex/subtabopen	 	"sounds/menu/money-rollnumbers-loop.wav"
-ui/codex/maintabopen	"sounds/menu/option-accept.wav"
-ui/codex/maintabhover	"sounds/menu/wrong_place.wav"
+//codex
+
 ui/codex/subtabhover	"sounds/menu/wrong_place.wav"
+ui/codex/subtabopen	 	"sounds/menu/key-select.wav"
+ui/codex/maintabopen	"sounds/menu/checkbox-click.wav"
+ui/codex/maintabhover	"sounds/menu/back-light-on.wav"
+
+//main menu
 
 ui/menu/accept		"sounds/menu/option-accept.wav"
 ui/menu/back		"sounds/menu/back-accept.wav"
