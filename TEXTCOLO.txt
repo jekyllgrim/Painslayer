@@ -17,3 +17,13 @@ PKGreenText {
 	#000000 #000000	0 1
 	#12e203 #12e203	2 256
 }
+
+PKGoldText {
+	#000000 #000000	0 1
+	#f5b342 #f5b342	2 256
+}
+
+PKSilverText {
+	#000000 #000000	0 1
+	#caedea #caedea	2 256
+}
