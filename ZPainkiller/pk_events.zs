@@ -55,6 +55,7 @@ Class PK_MainHandler : EventHandler {
 	array <Actor> demontargets; //holds all monsters, players and enemy projectiles
 	array <Actor> allenemies; //only monsters
 	array <PK_StakeProjectile> stakes; //stake projectiles
+	array <Inventory> keyitems; //pre-placed weapons and keys, to be displayed when the player picks up a Crystal Ball
 	
 	//By default returns true if ANY of the players has the item.
 	//If 'checkall' argument is true, the function returns true if ALL players have the item.
@@ -100,6 +101,31 @@ Class PK_MainHandler : EventHandler {
 		}
 		return false;
     }
+	
+	
+	void SpawnMapMarkers(PlayerInfo player) {
+		if (!player || player != players[consoleplayer])
+			return;
+		for (int i = 0; i < keyitems.Size(); i++) {
+			let itm = keyitems[i];
+			if (!itm) continue;
+			if (!itm.SpawnState || !itm.SpawnState.sprite) continue;
+			let state = itm.SpawnState;
+			let targetsprite = state.sprite;
+			let spritename = TexMan.GetName(state.GetSpriteTexture(0));
+			if (pk_debugmessages)
+				console.printf("Spawning map marker for %s. Sprite name: %s",itm.GetClassName(),spritename);
+			if (targetsprite && spritename != 'TNT1A0') {
+				let marker = Actor.Spawn("PK_SafeMapMarker",itm.pos);			
+				if (marker) {
+					marker.A_SetScale(itm is "PKWeapon" ? 0.5 : 1.0);
+					marker.sprite = targetsprite;
+					marker.frame = state.frame;
+				}
+			}
+		}
+	}
+	
 	//different messages for PKGOLD cheat:
 	static const string PKCH_GoldMessage[] = {
 		"$PKCH_GIVEGOLD1",
@@ -287,6 +313,11 @@ Class PK_MainHandler : EventHandler {
 		let act = e.thing;		
 		if (!act)
 			return;
+		if (act is "Inventory") {
+			let foo = Inventory(act);
+			if (foo && (foo is  "Key" || (foo is "Weapon" && !foo.bTOSSED)))
+				keyitems.Push(foo);
+		}
 		//record all stake projectiles that exist in the world (see PK_StakeStickHandler)
 		if (act is "PK_StakeProjectile") {
 			let stake = PK_StakeProjectile(act);
@@ -513,6 +544,7 @@ Class PK_ReplacementHandler : EventHandler {
 			
 			case 'Berserk'			: e.Replacement = 'PK_WeaponModifierGiver';  break;
 			case 'Infrared'		: e.Replacement = 'PK_DemonEyes';  break;
+			case 'AllMap'			: e.Replacement = 'PK_AllMap';  break;
 			case 'InvulnerabilitySphere'		: e.Replacement = 'PK_Pentagram';  break;
 			case 'Backpack'		: e.Replacement = 'PK_AmmoPack';  break;
 			case 'RadSuit'			: e.Replacement = 'PK_AntiRadArmor';  break;
