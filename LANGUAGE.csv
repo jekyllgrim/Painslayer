@@ -161,8 +161,8 @@ Showing standard weapon stats,PKC_WM_Off,Codex,Показаны стандарт
 Hold,PKC_Hold,Codex,Зажать
 Tap,PKC_Tap,Codex,Нажать
 then,PKC_then,Codex,затем
-Primary,PKC_Primary,Codex,"""Атака"""
-Secondary,PKC_Secondary,Codex,"""Альт. атака"""
+Primary,PKC_Primary,Codex,Атака
+Secondary,PKC_Secondary,Codex,Альт. атака
 Pain,PKC_Pain,Codex,Pain
 Deal continuous damage with the spinning blades.,PKC_PainDesc,Codex,Наносит непрерывный урон вращающимися клинками.
 "Weapon Modifier effects: Blades spin faster, dealing more damage per second.",PKC_PainDescWM,Codex,"С Модификатором оружия: клинки вращаются быстрее, нанося больше урона."
@@ -203,15 +203,15 @@ Electro,PKC_Electro,Codex,Электро
 Fire a continuous stream of electricity that automatically latches onto enemies within a small radius around your crosshair. Effective at stunlocking.,PKC_ElectroDesc,Codex,"Выпускает постоянный электрический разряд, который цепляется к врагом в небольшом радиусе вокруг перекрестия прицела."
 "Weapon Modifier effects: Upon hitting an enemy, the lightning jumps to other enemies around it.",PKC_ElectroDescWM,Codex,С Модификатором оружия: при попадании во врага разряд перескакивает на других врагов вокруг него.
 Electric Disc,PKC_ElectroDisc,Codex,Электродиск
-"Fire an electrically charged container of shurikens. It sticks into enemies and walls, then starts firing electric bolts at surrounding enemies before exploding after a while.",PKC_ElectroDiscDesc,Codex,"Выпускает заряженный контейнер с сюрикэнами. Он может воткнуться во врага или стену, затем начинает стрелять разрядами в окружающих врагов, а через некоторое время взрывается."
+"Fire an electrically charged container of shurikens. It sticks into enemies and walls, then starts firing electric bolts at surrounding enemies before exploding after a while.",PKC_ElectroDiscDesc,Codex,"Выпускает диск с сюрикэнами. Он втыкается в цель, начинает стрелять разрядами в окружающих врагов, а через некоторое время взрывается."
 Rifle,PKC_Rifle,Codex,Автомат
 Fire the Rifle in bursts of up to 7 successive shots. Deals significant damage and has tight spread.,PKC_RifleDesc,Codex,Стреляет очередями до 7 выстрелов. Отличается хорошим уроном и кучностью.
 Weapon Modifier effects: The rifle fires in full auto and deals more damage.,PKC_RifleDescWM,Codex,С Модификатором оружия: автомат стреляет в полностью автоматическом режиме и наносит больше урона.
 Flamethrower,PKC_Flamer,Codex,Огнемет
-"Fire flamethrower. Sets enemies on fire, dealing damage over time. Flames can fly through enemies, but gradually slow down, resulting in limited range.",PKC_FlamerDesc,Codex,"Выпускает струю огня, которая поджигает врагов, заставляя тех получать отложенный урон. Огонь может проходить сквозь врагов, но быстро теряет скорость, так что дистанция стрельбы невысокая."
+"Fire flamethrower. Sets enemies on fire, dealing damage over time. Flames can fly through enemies, but gradually slow down, resulting in limited range.",PKC_FlamerDesc,Codex,"Выпускает струю огня, поджигающую врагов, нанося периодический урон. Огонь проходит сквозь врагов, но быстро теряет скорость."
 "Weapon Modifier effects: The flames fly faster, increasing the flamethrower's effective range.",PKC_FlamerDescWM,Codex,"С Модификатором оружия: огонь летит с большей скоростью, повышая эффективную дистанцию."
 Fuel tank,PKC_FlameTank,Codex,Выстрел баком
-"Launch the whole fuel tank. The tank explodes when shot, or upon impact with an enemy, or after a short while. Burns surrounding enemies upon exploding.",PKC_FlameTankDesc,Codex,"Выпускает весь топливный бак. Бак взрывается при попадании во врага, либо через некоторое время, либо если по нему выстрелить другим оружием. Поджигает врагов при взрыве."
+"Launch the whole fuel tank. The tank explodes when shot, or upon impact with an enemy, or after a short while. Burns surrounding enemies upon exploding.",PKC_FlameTankDesc,Codex,"Выпускает топливный бак. Тот взрывается при попадании во врага, либо через некоторое время, либо если по нему выстрелить. Поджигает врагов при взрыве."
 Boltgun,PKC_Boltgun,Codex,Болтомет
 Fire 5 steel bolts in quick succession. Bolts fly in a straight line and can pin enemies to walls.,PKC_BoltgunDesc,Codex,Быстро выпускает 5 стальных болтов. Болты летят по прямой и могут пригвоздить врагов к стене.
 "Weapon Modifier effects: Bolts are set on fire, dealing more damage.",PKC_BoltgunDescWM,Codex,"С Модификатором оружия: болты горят, нанося больше урона при попадании."
