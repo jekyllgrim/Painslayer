@@ -116,6 +116,10 @@ Class PainkillerHUD : BaseStatusBar {
 		if (state == HUD_none || automapactive || (isDemon && !pk_debugmessages))
 			return;
 		BeginHUD();
+		//draw invulnerability overlay:
+		if (CPlayer.mo.FindInventory("PowerInvulnerable",true)) {
+			PK_DrawImage("PKHHORNS",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);
+		}
 		if (state == HUD_Fullscreen || state == HUD_AltHud)
 			DrawTopElements();
 		if (state == HUD_StatusBar || state == HUD_Fullscreen)

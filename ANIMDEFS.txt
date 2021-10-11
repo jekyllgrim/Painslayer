@@ -17,3 +17,77 @@ texture PCDXEYES
 	pic PDEYE0 tics 2
 	pic PDEYF0 tics 2
 	pic PDEYG0 tics 2
+	
+texture PKHHORNS
+	pic HORNS_A tics 3
+	pic HORNS_B tics 3
+	pic HORNS_C tics 3
+	pic HORNS_D tics 3
+	pic HORNS_E tics 3
+	pic HORNS_F tics 3
+	pic HORNS_E tics 3
+	pic HORNS_D tics 3
+	pic HORNS_C tics 3
+	pic HORNS_B tics 3
+	
+texture PCDXCORB
+	pic PCY1A tics 6
+	pic PCY1B tics 3
+	pic PCY1C tics 3
+	pic PCY1D tics 3
+	pic PCY1E tics 3
+	pic PCY1F tics 3
+	pic PCY1G tics 3
+	pic PCY1H tics 3
+	pic PCY1I tics 3
+	pic PCY1J tics 3
+	pic PCY1K tics 3
+	pic PCY1L tics 3
+	pic PCY1M tics 6
+	pic PCY1L tics 3
+	pic PCY1K tics 3
+	pic PCY1J tics 3
+	pic PCY1I tics 3
+	pic PCY1H tics 3
+	pic PCY1N tics 3
+	pic PCY1N tics 3
+	pic PCY1O tics 3
+	pic PCY1P tics 3
+	pic PCY1Q tics 3
+	pic PCY1R tics 3
+	pic PCY1S tics 3
+	pic PCY1T tics 3
+	pic PCY1U tics 3
+	pic PCY1V tics 3
+	pic PCY1W tics 3
+	pic PCY1V tics 3
+	pic PCY1U tics 3
+	pic PCY1T tics 3
+	pic PCY1Y tics 3
+	pic PCY1Z tics 3
+	pic PCY1G tics 3
+	pic PCY1H tics 3
+	pic PCY1I tics 3
+	pic PCY1J tics 3
+	pic PCY1K tics 6
+	pic PCY1J tics 3
+	pic PCY1H tics 3
+	pic PCY1I tics 3
+	pic PCY1G tics 3
+	pic PCY1A tics 3
+	pic PCY1B tics 3
+	pic PCY1C tics 3
+	pic PCY1D tics 3
+	pic PCY1E tics 3
+	pic PCY1F tics 3
+	pic PCY1Q tics 3
+	pic PCY1P tics 3
+	pic PCY1O tics 3
+	pic PCY1N tics 3
+	pic PCY1H tics 3
+	pic PCY1G tics 3
+	pic PCY1F tics 3
+	pic PCY1E tics 3
+	pic PCY1D tics 3
+	pic PCY1C tics 3
+	pic PCY1B tics 3
