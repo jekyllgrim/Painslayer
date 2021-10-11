@@ -657,56 +657,6 @@ Class PK_GoldArmor : PK_BronzeArmor  {
 ////////            ////////
 ////////////////////////////
 
-Class PK_PowerupOverlay : CustomInventory {
-	protected PK_PowerPentagram penta;
-	Default {
-		+INVENTORY.UNDROPPABLE;
-		+INVENTORY.UNTOSSABLE;
-		+INVENTORY.PERSISTENTPOWER;
-		+INVENTORY.AUTOACTIVATE;
-		inventory.amount 1;
-		inventory.maxamount 1;
-	}
-	override void Tick() {
-		super.Tick();
-		if (!owner || (owner.player && PK_Mainhandler.IsVoodooDoll(PlayerPawn(owner)))) {
-			Destroy();
-			return;
-		}
-	}
-	States {
-	Use:
-		TNT1 A 1 A_Overlay(PWR_HANDLER,"Handler");
-		fail;
-	Handler:
-		TNT1 A 1 {
-			if (!invoker.penta) {
-				invoker.penta = PK_PowerPentagram(FindInventory("PK_PowerPentagram"));
-				if (invoker.penta)
-					A_Overlay(PWR_PENTA,"Pentagram",nooverride:true);
-			}
-		}
-		loop;
-	Pentagram:
-		PHRN ABCDEFEDCB 5 {
-			if (!invoker.penta)
-				return ResolveState("Null");
-			else if (invoker.penta.isBlinking())
-				return ResolveState("PentagramFast");
-			return ResolveState(null);
-		}
-		loop;
-	PentagramFast:
-		PHRN ABCDEFGHI 4 {
-			if (!invoker.penta)
-				return ResolveState("Null");
-			else if (!invoker.penta.isBlinking())
-				return ResolveState("Pentagram");
-			return ResolveState(null);
-		}
-		loop;
-	}
-}
 
 Class PK_AmmoPack : Backpack {
 	Default {
@@ -927,8 +877,8 @@ Class PK_PowerDemonEyes : PK_Powerup {
 	private PK_DemonEyesLight eyeslight1, eyeslight2;
 	private int lightdir;
 	private array <actor> feartargets;
-	const feardist = 450;
-	const fearangle = 40;
+	const feardist = 512;
+	const fearangle = 48;
 	Default {
 		deathsound "pickups/powerups/lightampEnd";
 		inventory.icon "iconeyes";
@@ -972,8 +922,9 @@ Class PK_PowerDemonEyes : PK_Powerup {
 			if (abs(targetpos.x) > fearangle || abs(targetpos.y) > fearangle)
 				continue;
 			feartargets.Push(next);
-			let marker = Spawn("PK_FearTargetMarker",next.pos + (0,0,next.height * 0.5));
+			let marker = Spawn("PK_FearTargetMarker",next.pos + (0,0,next.height + 6));
 			if (marker) marker.master = next;
+			owner.A_StartSound("pickups/powerups/fear",CHAN_AUTO,CHANF_UI|CHANF_NOPAUSE|CHANF_LOCAL);
 		}
 		for (int i = 0; i < feartargets.Size(); i++) {
 			if (!feartargets[i])
@@ -1019,7 +970,7 @@ class PK_FearTargetMarker : PK_SmallDebris {
 			Destroy();
 			return;
 		}
-		SetOrigin(master.pos + (0,0,master.height * 0.5),true);
+		SetOrigin(master.pos + (0,0,master.height + 6),true);
 		if (scale.x > 0.5)
 			scale *= 0.92;
 		super.Tick();
@@ -1042,9 +993,9 @@ class PK_DemonEyesLight : SpotLight {
 		args[1] = c.g;
 		args[2] = c.b;
 		args[3] = 512;
-		SpotInnerAngle = 36;
-		SpotOuterAngle = 38;
-		angOfs = 12 * (isLeft ? 1 : -1);
+		SpotInnerAngle = 32;
+		SpotOuterAngle = 56;
+		angOfs = 8 * (isLeft ? 1 : -1);
 	}
 	override void Tick() {
 		if (!user) {
@@ -1139,11 +1090,105 @@ Class PK_AntiRadArmor : PK_PowerupGiver {
 		Inventory.PickupMessage "$PKI_ANTIRAD";
 		PK_PowerUpGiver.pickupRingColor "11821c";
 		inventory.pickupsound "pickups/powerups/radsuit";
-		scale 0.32;	
+		xscale 0.38;
+		yscale 0.33;
 	}
 	States {
 	Spawn:
 		HLBO A -1;
 		stop;
 	}
-}	
+}
+
+Class PK_SafeMapMarker : MapMarker {
+	Default {
+		+NOINTERACTION
+		+SYNCHRONIZED
+		+DONTBLAST
+		FloatBobPhase 0;
+	}
+}
+
+class PK_AllMap : AllMap {
+	mixin PK_SpawnPickupRing;
+	Default {
+		scale 0.6;
+		inventory.pickupmessage "$PKI_ALLMAP";
+		PK_AllMap.pickupRingColor "ce73fe";
+	}
+	override bool TryPickup (in out Actor toucher) {
+		bool ret = super.TryPickup(toucher);
+		if (ret) {
+			if (toucher && toucher.player && toucher.player == players[consoleplayer]) {
+				let handler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));
+				handler.SpawnMapMarkers(toucher.player);
+			}
+		}
+		return ret;
+	}			
+	States {
+	Spawn:
+		PCY1 ABCDEFGH 3;
+		PCY1 IJKLMMLKJIH 3;
+		PCY1 NOPQRSTUVW 3;
+		PCY1 VUTYZ 3;
+		PCY2 GHIJKKJHIG 3;
+		PCY2 ABCDEF 3;
+		PCY1 QPONHGFEDCBA 3;
+		loop;
+	}
+}
+
+// The following is handled in the HUD instead
+
+/*
+Class PK_PowerupOverlay : CustomInventory {
+	protected PK_PowerPentagram penta;
+	Default {
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.PERSISTENTPOWER;
+		+INVENTORY.AUTOACTIVATE;
+		inventory.amount 1;
+		inventory.maxamount 1;
+	}
+	override void Tick() {
+		super.Tick();
+		if (!owner || (owner.player && PK_Mainhandler.IsVoodooDoll(PlayerPawn(owner)))) {
+			Destroy();
+			return;
+		}
+	}
+	States {
+	Use:
+		TNT1 A 1 A_Overlay(PWR_HANDLER,"Handler");
+		fail;
+	Handler:
+		TNT1 A 1 {
+			if (!invoker.penta) {
+				invoker.penta = PK_PowerPentagram(FindInventory("PK_PowerPentagram"));
+				if (invoker.penta)
+					A_Overlay(PWR_PENTA,"Pentagram",nooverride:true);
+			}
+		}
+		loop;
+	Pentagram:
+		PHRN ABCDEFEDCB 5 {
+			if (!invoker.penta)
+				return ResolveState("Null");
+			else if (invoker.penta.isBlinking())
+				return ResolveState("PentagramFast");
+			return ResolveState(null);
+		}
+		loop;
+	PentagramFast:
+		PHRN ABCDEFGHI 4 {
+			if (!invoker.penta)
+				return ResolveState("Null");
+			else if (!invoker.penta.isBlinking())
+				return ResolveState("Pentagram");
+			return ResolveState(null);
+		}
+		loop;
+	}
+}*/
