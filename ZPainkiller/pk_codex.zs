@@ -26,7 +26,7 @@ enum PKWeaponTabs {
 	PKCI_WeaponModifier,
 	PKCI_DemonEyes,
 	PKCI_Pentagram,
-	PKCI_Sabatons,
+	PKCI_AntiRad,
 	PKCI_CrystalBall
 };*/
 	
@@ -442,7 +442,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 					"\cD%s %s, %s %s: \cI%s\cJ\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
-					StringTable.Localize("$PKC_Tap"),
+					StringTable.Localize("$PKC_Tap").MakeLower(),
 					fire_name,
 					StringTable.Localize("$PKC_ElectroDisc"),
 					StringTable.Localize("$PKC_ElectroDiscDesc")
@@ -612,48 +612,45 @@ Class PKCodexMenu : PKZFGenericMenu {
 	}
 	
 	static const string powerupTabNames[] = {
-		//"$PKC_Gold",
 		"$PKC_Souls",
 		"$PKC_ChestOfSouls",
 		"$PKC_GoldSoul",
 		"$PKC_MegaSoul",
 		"$PKC_Armor",
 		"$PKC_AmmoPack",
+		"$PKC_AntiRad",
+		"$PKC_CrystalBall",
 		"$PKC_WeaponModifier",
 		"$PKC_DemonEyes",
-		"$PKC_Pentagram",
-		"$PKC_Sabatons",
-		"$PKC_CrystalBall"
+		"$PKC_Pentagram"
 	};
 	
 	static const string powerupTabDescs[] = {
-		//"$PKC_Gold_Desc",
 		"$PKC_Souls_Desc",
 		"$PKC_ChestOfSouls_Desc",
 		"$PKC_GoldSoul_Desc",
 		"$PKC_MegaSoul_Desc",
 		"$PKC_Armor_Desc",
 		"$PKC_AmmoPack_Desc",
+		"$PKC_AntiRad_Desc",
+		"$PKC_CrystalBall_Desc",
 		"$PKC_WeaponModifier_Desc",
 		"$PKC_DemonEyes_Desc",
-		"$PKC_Pentagram_Desc",
-		"$PKC_Sabatons_Desc",
-		"$PKC_CrystalBall_Desc"
+		"$PKC_Pentagram_Desc"
 	};
 	
 	static const string powerupTabImages[] = {
-		//"PCDXGOLD",	//gold
 		"PCDXSOUA",		//souls
 		"PSOCA0",		//chest of souls
 		"GSOUA0",		//gold soul
 		"MSOUA0",		//mega soul
 		"PCDXARMR",		//armors
-		"sprites/pickups/AMPKA0.png", //ammo pack
-		"sprites/pickups/PMODA0.png", //WMod
+		"AMPKA0", 		//ammo pack
+		"HLBOA0",		//protection suit
+		"PCDXCORB",		//full map
+		"PMODA0", 		//WMod
 		"PCDXEYES",		//eyes
-		"",
-		"",
-		""
+		"PCDXPENT"		//pentagram
 	};
 	
 	void PowerupsTabInit() {
@@ -923,7 +920,7 @@ Class PKZFWeaponDescLabel : PKZFLabel {
 	
 	static PKZFWeaponDescLabel create(
 		Vector2 pos, Vector2 size, PKCodexMenu menu, string text = "", string alttext = "", Font fnt = font_times, AlignType alignment = AlignType_TopLeft,
-		bool wrap = true, bool autoSize = false, double textScale = PK_MENUTEXTSCALE*0.85, int textColor = Font.CR_WHITE,
+		bool wrap = true, bool autoSize = true, double textScale = PK_MENUTEXTSCALE*0.85, int textColor = Font.CR_WHITE,
 		double lineSpacing = 0, PKZFElement forElement = NULL
 	) {
 		let ret = new('PKZFWeaponDescLabel');
