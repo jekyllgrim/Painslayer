@@ -203,7 +203,7 @@ Electro,PKC_Electro,Codex,Электро
 Fire a continuous stream of electricity that automatically latches onto enemies within a small radius around your crosshair. Effective at stunlocking.,PKC_ElectroDesc,Codex,"Выпускает постоянный электрический разряд, который цепляется к врагом в небольшом радиусе вокруг перекрестия прицела."
 "Weapon Modifier effects: Upon hitting an enemy, the lightning jumps to other enemies around it.",PKC_ElectroDescWM,Codex,С Модификатором оружия: при попадании во врага разряд перескакивает на других врагов вокруг него.
 Electric Disc,PKC_ElectroDisc,Codex,Электродиск
-"Fire an electrically charged container of shurikens. It sticks into enemies and walls, then starts firing electric bolts at surrounding enemies before exploding after a while.",PKC_ElectroDiscDesc,Codex,"Выпускает диск с сюрикэнами. Он втыкается в цель, начинает стрелять разрядами в окружающих врагов, а через некоторое время взрывается."
+"Fire an electrically charged container of shurikens. It sticks into enemies and walls, then starts firing electric bolts at surrounding enemies before exploding after a while.",PKC_ElectroDiscDesc,Codex,"Выпускает заряженный диск с сюрикэнами. Он втыкается во врага или стену, затем начинает стрелять разрядами в окружающих врагов, а через некоторое время взрывается."
 Rifle,PKC_Rifle,Codex,Автомат
 Fire the Rifle in bursts of up to 7 successive shots. Deals significant damage and has tight spread.,PKC_RifleDesc,Codex,Стреляет очередями до 7 выстрелов. Отличается хорошим уроном и кучностью.
 Weapon Modifier effects: The rifle fires in full auto and deals more damage.,PKC_RifleDescWM,Codex,С Модификатором оружия: автомат стреляет в полностью автоматическом режиме и наносит больше урона.
