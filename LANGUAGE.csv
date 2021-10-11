@@ -84,24 +84,25 @@ Consumed %d health from a soul,PKI_SOUL,Item pickupmessages,Вы поглоти�
 Gold soul!,PKI_GOLDSOUL,Item pickupmessages,Золотая душа!
 Mega soul!,PKI_MEGASOUL,Item pickupmessages,Огромная душа!
 Weapon Modifier!,PKI_WMODIFIER,Item pickupmessages,Модификатор оружия!
-Demon Eyes!,PKI_DEMONEYES,Item pickupmessages,Глаза демона!
+Fear Vision!,PKI_DEMONEYES,Item pickupmessages,Глаза страха!
 Bronze armor,PKI_ARMOR1,Item pickupmessages,Бронзовый доспех
 Silver armor,PKI_ARMOR2,Item pickupmessages,Серебряный доспех
 Gold armor,PKI_ARMOR3,Item pickupmessages,Золотой доспех
 Ammo pack!,PKI_AMMOPACK,Item pickupmessages,Ящик патронов!
+Gained full map of the level,PKI_ALLMAP,Item pickupmessages,Вы получили полную карту уровня
 Protection Suit!,PKI_ANTIRAD,Item pickupmessages,Защитный костюм!
 A Chest of Souls,PKI_CHESTOFSOULS,Item pickupmessages,Сундук с душами
-Picked up shotgun shells.,PKI_SHELLS,Item pickupmessages,Вы подобрали патроны для дробовика.
-Picked up Freezer Ammo.,PKI_FREEZEAMMO,Item pickupmessages,Вы подобрали боеприпасы для охладителя.
-Picked up Stakes.,PKI_STAKEAMMO,Item pickupmessages,Вы подобрали колья.
-Picked up Grenades.,PKI_GRENADEAMMO,Item pickupmessages,Вы подобрали гранаты.
-Picked up Chaingun Bullets.,PKI_MINIGUNAMMO,Item pickupmessages,Вы подобрали патроны для пулемета.
-Picked up Shurikens.,PKI_STARAMMO,Item pickupmessages,Вы подобрали сюрикэны.
-Picked up a Cell Battery.,PKI_ELECTROAMMO,Item pickupmessages,Вы подобрали аккумулятор.
-Picked up Assault Rifle Ammo.,PKI_RIFLEAMMO,Item pickupmessages,Вы подобрали патроны для автомата.
-Picked up Flamethrower Fuel.,PKI_FUELAMMO,Item pickupmessages,Вы подобрали топливо для огнемета.
-Picked up Steel Bolts.,PKI_BOLTAMMO,Item pickupmessages,Вы подобрали стальные болты.
-Picked up Heater Bombs.,PKI_HEATERAMMO,Item pickupmessages,Вы подобрали шаровые бомбы.
+Picked up shotgun shells,PKI_SHELLS,Item pickupmessages,Вы подобрали патроны для дробовика
+Picked up Freezer Ammo,PKI_FREEZEAMMO,Item pickupmessages,Вы подобрали боеприпасы для охладителя
+Picked up Stakes,PKI_STAKEAMMO,Item pickupmessages,Вы подобрали колья
+Picked up Grenades,PKI_GRENADEAMMO,Item pickupmessages,Вы подобрали гранаты
+Picked up Chaingun Bullets,PKI_MINIGUNAMMO,Item pickupmessages,Вы подобрали патроны для пулемета
+Picked up Shurikens,PKI_STARAMMO,Item pickupmessages,Вы подобрали сюрикэны
+Picked up a Cell Battery,PKI_ELECTROAMMO,Item pickupmessages,Вы подобрали аккумулятор
+Picked up Assault Rifle Ammo,PKI_RIFLEAMMO,Item pickupmessages,Вы подобрали патроны для автомата
+Picked up Flamethrower Fuel,PKI_FUELAMMO,Item pickupmessages,Вы подобрали топливо для огнемета
+Picked up Steel Bolts,PKI_BOLTAMMO,Item pickupmessages,Вы подобрали стальные болты
+Picked up Heater Bombs,PKI_HEATERAMMO,Item pickupmessages,Вы подобрали шаровые бомбы
 Picked up Pain/Killer,PKI_PAINKILLER,Item pickupmessages,Вы подобрали Pain/Killer
 Picked up Shotgun/Freezer,PKI_SHOTGUN,Item pickupmessages,Вы подобрали дробовик/охладитель
 Picked up Stakegun/Grenade Launcher,PKI_STAKEGUN,Item pickupmessages,Вы подобрали коломет/гранатомет
@@ -157,18 +158,17 @@ GOLD,PKC_GOLD,Codex,ЗОЛОТО
 TAROT,PKC_TAROT,Codex,КАРТЫ ТАРО
 Showing Weapon Modifier stats,PKC_WM_On,Codex,Показан эффект Модификатора оружия
 Showing standard weapon stats,PKC_WM_Off,Codex,Показаны стандартные значения
-Hold,PKC_Hold,Codex,Удерживать
+Hold,PKC_Hold,Codex,Зажать
 Tap,PKC_Tap,Codex,Нажать
-tap,PKC_Tapl,Codex,нажать
 then,PKC_then,Codex,затем
-Primary,PKC_Primary,Codex,"""атака 1"""
-Secondary,PKC_Secondary,Codex,"""атака 2"""
+Primary,PKC_Primary,Codex,"""Атака"""
+Secondary,PKC_Secondary,Codex,"""Альт. атака"""
 Pain,PKC_Pain,Codex,Pain
 Deal continuous damage with the spinning blades.,PKC_PainDesc,Codex,Наносит непрерывный урон вращающимися клинками.
 "Weapon Modifier effects: Blades spin faster, dealing more damage per second.",PKC_PainDescWM,Codex,"С Модификатором оружия: клинки вращаются быстрее, нанося больше урона."
 Killer,PKC_Killer,Codex,Killer
 "Fire the folded blade unit. The unit can stick into walls and creates a laser beam that burns enemies when you aim at it.
-NOTE: This attack can juggle corpses.",PKC_KillerDesc,Codex,"Выстреливает блоком клинков, который может воткнуться во врага или стену. Если навестись на блок, от него до оружия протянется лазерный луч. ПРИМЕЧАНИЕ: позволяет притягивать трупы."
+NOTE: This attack can juggle corpses.",PKC_KillerDesc,Codex,"Выстреливает блоком клинков, который может воткнуться во врага или стену. Нацельтесь на блок, чтобы выпустить лазерный луч. Позволяет притягивать трупы."
 "Weapon Modifier effects: Laser beam is always active, regardless of where you're aiming.",PKC_KillerDescWM,Codex,"С Модификатором оружия: лазерный луч активен всегда, куда бы вы ни целились."
 Painkiller,PKC_Painkiller,Codex,Painkiller
 Launch the spinning blades forward. This projectile is slow but deals a lot of damage on impact.,PKC_PainkillerDesc,Codex,"Выпускает вращающиеся клинки вперед, создавая медленный, но смертоносный снаряд."
@@ -176,14 +176,14 @@ Shotgun,PKC_Shotgun,Codex,Дробовик
 A fast-firing shotgun with decent damage and spread.,PKC_ShotgunDesc,Codex,Скорострельный дробовик с хорошим уроном и кучностью.
 "Weapon Modifier effects: Shotgun spread tightens, and pellets deal slightly more damage.",PKC_ShotgunDescWM,Codex,"С Модификатором оружия: разброс снижается, а урон немного повышается."
 Freezer,PKC_Freezer,Codex,Охладитель
-"Fire two projectiles that freeze enemies on impact. Frozen enemies receive more damage, especially from the shotgun. Does not work on bosses.",PKC_FreezerDesc,Codex,"Выпускает два снаряда, замораживающих врагов при столкновении. Замороженные враги получают больше урона, особенно от дробовика. Не действует на боссов."
+"Fire two projectiles that freeze enemies on impact. Frozen enemies receive more damage, especially from the shotgun. Does not work on bosses.",PKC_FreezerDesc,Codex,"Выпускает два снаряда, замораживающих врагов. Замороженные враги получают больше урона, особенно от дробовика. Не действует на боссов."
 Weapon Modifier effects: Freeze duration is doubled.,PKC_FreezerDescWM,Codex,С Модификатором оружия: продолжительность заморозки удваивается.
 Shatter,PKC_ShotgunFreezer,Codex,Осколки
 "Fire freezer, then immediately fire shotgun to deal a lot of extra damage and potentially shatter the frozen enemy.",PKC_ShotgunFreezerDesc,Codex,"Выстрелите охладителем, а затем сразу дробовиком, чтобы нанести дополнительный урон и с большой вероятностью разбить врага на осколки."
-Stakegun,PKC_Stakegun,Codex,Коломет
+Stakegun,PKC_Stakegun,Codex,Коломёт
 Fire a powerful projectile that can pin enemies to walls. After 0.34 seconds in flight stakes catch on fire. Burning stakes deal more damage.,PKC_StakegunDesc,Codex,"Выпускает мощный снаряд, который может пригвозить врага к стене. 0,34 сек. спустя летящий кол загорается. Горящие колья наносят больше урона."
 Weapon Modifier effects: Stakes are set on fire immediately and fly in a straight line at an increased speed.,PKC_StakegunDescWM,Codex,С Модификатором оружия: колья загораются в момент выстрела и летят по прямой линии с повышенной скоростью.
-Grenade Launcher,PKC_Grenade,Codex,Гранатомет
+Grenade Launcher,PKC_Grenade,Codex,Гранатомёт
 Fire a bouncing grenade that explodes after a period of time or when hitting an enemy. Shares ammo with the Rocket Launcher.,PKC_GrenadeDesc,Codex,"Выпускает отскакивающий снаряд, который взрывается через некоторое время или при попадании во врага. Использует те же патроны, что и ракетница."
 "Weapon Modifier effects: Grenades spawn flames upon exploding, setting enemies on fire.",PKC_GrenadeDescWM,Codex,С Модификатором оружия: при взрыве гранаты выпускают во все стороны огонь.
 Makeshift Rocket,PKC_StakeGrenade,Codex,Граната-на-палке
@@ -234,142 +234,146 @@ Protection Suit,PKC_Antirad,Codex,Защитный костюм
 Crystal Ball,PKC_CrystalBall,Codex,Хрустальный шар
 "Gold is used to purchase Gold and Silver Cards on the Black Tarot Board. 
 
-Gold comes in 4 varieties: small (\cD+10G\cJ), medium (\cD+25G\cJ), large (\cD+100G\cJ) and very large (\cD+500G\cJ). 
+Gold comes in 4 varieties: small (\c[PKGreenText]+10G\c[PKWhiteText]), medium (\c[PKGreenText]+25G\c[PKWhiteText]), large (\c[PKGreenText]+100G\c[PKWhiteText]) and very large (\c[PKGreenText]+500G\c[PKWhiteText]). 
 
 There are several ways to acquire gold: 
 
-- Dealing \cGexcessive damage \cJto enemies (such as blowing up weaker enemies) makes them drop coins. 
+- Dealing \c[PKRedText]excessive damage \c[PKWhiteText]to enemies (such as blowing up weaker enemies) makes them drop coins. 
 
-- \cGJuggling enemy corpses with Killer\cJ: before a corpse disappears, simply shoot at it with the Killer to grab it and draw it closer. Keep doing it to juggle the corpse every 3rd juggle produces a medium gold piece. 
+- \c[PKRedText]Juggling enemy corpses with Killer\c[PKWhiteText]: before a corpse disappears, simply shoot at it with the Killer to grab it and draw it closer. Keep doing it to juggle the corpse every 3rd juggle produces a medium gold piece. 
 
-- Gold dynamically spawns in \cGsecret areas\cJ in levels. This is the only way to find large and very large gold pieces.",PKC_Gold_Desc,Codex,"Золото используется для покупки золотых и серебряных карт на доске Черного Таро.
+- Gold dynamically spawns in \c[PKRedText]secret areas\c[PKWhiteText] in levels. This is the only way to find large and very large gold pieces.",PKC_Gold_Desc,Codex,"Золото используется для покупки золотых и серебряных карт на доске Черного Таро.
 
-Есть 4 варианта золотых предметов: маленькие (\cD+10 з.\cJ), средние (\cD+25 з.\cJ), большие (\cD+100 з.\cJ) и очень большие (\cD+500 з.\cJ).
+Есть 4 варианта золотых предметов: маленькие (\c[PKGreenText]+10 з.\c[PKWhiteText]), средние (\c[PKGreenText]+25 з.\c[PKWhiteText]), большие (\c[PKGreenText]+100 з.\c[PKWhiteText]) и очень большие (\c[PKGreenText]+500 з.\c[PKWhiteText]).
 
 Получить золото можно несколькими способами:
 
-- Нанося \cGизбыточный урон\cJ врагам (например, взрывая слабых врагов) — это заставляет их ронять монеты.
+- Нанося \c[PKRedText]избыточный урон\c[PKWhiteText] врагам (например, взрывая слабых врагов) — это заставляет их ронять монеты.
 
-- Многократно \cGпритягивая трупы врагов с помощью Killer\cJ: выстрелите в труп, пока он не исчез, чтобы притянуть его. Каждое третье притягивание выбьет из тела золото.
+- Многократно \c[PKRedText]притягивая трупы врагов с помощью Killer\c[PKWhiteText]: выстрелите в труп, пока он не исчез, чтобы притянуть его. Каждое третье притягивание выбьет из тела золото.
 
-- Золото появляется в \cGсекретных областях\cJ карт. Именно в них вы найдете большие и очень большие золотые предметы."
+- Золото появляется в \c[PKRedText]секретных областях\c[PKWhiteText] карт. Именно в них вы найдете большие и очень большие золотые предметы."
 "Killed enemies quickly disintegrate and drop their souls. They have two uses:
 - Souls are your primary way to heal, since there are no medikits in Painslayer.
 - Upon collecting 66 souls you will turn into a demon. 
 
-\cQHEALING\cJ: One soul can give you \cQbetween 1 and 20 HP\cJ, depending on how much health the enemy originally had. If a soul contains 15 or more HP, it turns red. 
+\cQHEALING\c[PKWhiteText]: One soul can give you \cQbetween 1 and 20 HP\c[PKWhiteText], depending on how much health the enemy originally had. If a soul contains 15 or more HP, it turns red. 
 
-\cRDEMON MODE\cJ: When you collect \cR66 souls\cJ you'll turn into a \cRDemon\cJ. As a Demon you are completely invincible and you gain a unique devastating attack.
+\cRDEMON MODE\c[PKWhiteText]: When you collect \cR66 souls\c[PKWhiteText] you'll turn into a \cRDemon\c[PKWhiteText]. As a Demon you are completely invincible and you gain a unique devastating attack.
 - When you are 2 or 1 souls away from becoming a Demon, your screen will briefly flash in demon vision.
-- Equipping the \cZDark Soul\cJ Black Tarot card reduces the required number of souls from 66 to 50. 
+- Equipping the \cZDark Soul\c[PKWhiteText] Black Tarot card reduces the required number of souls from 66 to 50. 
 
-Note: Enemies don't drop souls on \cDTrauma difficulty mode\cJ.",PKC_Souls_Desc,Codex,"Убитые враги быстро исчезают, оставляя после себя души. У душ есть два применения:
+Note: Enemies don't drop souls on \c[PKGreenText]Trauma difficulty mode\c[PKWhiteText].",PKC_Souls_Desc,Codex,"Убитые враги быстро исчезают, оставляя после себя души. У душ есть два применения:
 - Это главный способ лечиться, поскольку в Painslayer нет аптечек.
 - Собрав 66 душ, вы превратитесь в демона.
 
-\cQИСЦЕЛЕНИЕ\cJ. Подняв душу, вы восстановите \cQот 1 до 20 ОЗ\cJ, в зависимости от того, сколько здоровья было у убитого врага. Если в душе 15 ОЗ или больше, она будет красного цвета.
+\cQИСЦЕЛЕНИЕ\c[PKWhiteText]. Подняв душу, вы восстановите \cQот 1 до 20 ОЗ\c[PKWhiteText], в зависимости от того, сколько здоровья было у убитого врага. Если в душе 15 ОЗ или больше, она будет красного цвета.
 
-\cRРЕЖИМ ДЕМОНА\cJ. Собрав \cR66 душ\cJ, вы превратитесь в \cRДемона\cJ. Став Демоном, вы получаете полную неуязвимость и уникальную разрушительную атаку.
+\cRРЕЖИМ ДЕМОНА\c[PKWhiteText]. Собрав \cR66 душ\c[PKWhiteText], вы превратитесь в \cRДемона\c[PKWhiteText]. Став Демоном, вы получаете полную неуязвимость и уникальную разрушительную атаку.
 - Когда вам осталось 2 или 1 душа до превращения, экран кратковременно вспыхнет, сигнализируя о скорой трансформации.
-- Карта Таро \cZТемная душа\cJ снижает требуемое число душ с 66 до 50.
+- Карта Таро \cZТемная душа\c[PKWhiteText] снижает требуемое число душ с 66 до 50.
 
-Примечание: враги не оставляют после себя души \cDна уровне сложности Травма\cJ."
+Примечание: враги не оставляют после себя души \c[PKGreenText]на уровне сложности Травма\c[PKWhiteText]."
 "Chest of Souls has two effects: 
 
-- After picking it up you'll \cQregenerate 1 HP every second\cJ over 20 seconds.
-- Your \cRsoul counter will immediately increase by 20\cJ. As such, collecting Chests of Souls is a very quick way to turn into a \cRDemon\cJ.",PKC_ChestOfSouls_Desc,Codex,"Сундук с душами имеет два эффекта:
+- After picking it up you'll \cQregenerate 1 HP every second\c[PKWhiteText] over 20 seconds.
+- Your \cRsoul counter will immediately increase by 20\c[PKWhiteText]. As such, collecting Chests of Souls is a very quick way to turn into a \cRDemon\c[PKWhiteText].",PKC_ChestOfSouls_Desc,Codex,"Сундук с душами имеет два эффекта:
 
-- Подняв его, вы будете \cQвосстанавливать 1 ОЗ в секунду\cJ в течение 20 сек.
-- Ваш \cRсчетчик душ немедленно возрастет на 20\cJ. Таким образом, сундуки с душами позволяют быстро трансформироваться в \cRДемона\cJ."
-"Gold Soul is a special soul that \cQrestores your HP to 100\cJ. It can't be dropped by enemies, only found on the map.",PKC_GoldSoul_Desc,Codex,"Золотая душа -- это особая душа, которая \cQвосполняет здоровье до 100 ед.\cJ Она не остается после врагов, ее можно только найти на уровне."
-"Mega Soul is a special soul that \cQrestores your HP to 200\cJ and gives you \cN200 armor\cJ. It can't be dropped by enemies, only found on the map.",PKC_MegaSoul_Desc,Codex,"Огромная душа -- это особая душа, которая \cQвосполняет здоровье до 200 ед.\cJ и дает \cN200 ед. брони\cJ. Она не остается после врагов, ее можно только найти на уровне."
+- Подняв его, вы будете \cQвосстанавливать 1 ОЗ в секунду\c[PKWhiteText] в течение 20 сек.
+- Ваш \cRсчетчик душ немедленно возрастет на 20\c[PKWhiteText]. Таким образом, сундуки с душами позволяют быстро трансформироваться в \cRДемона\c[PKWhiteText]."
+"Gold Soul is a special soul that \cQrestores your HP to 100\c[PKWhiteText]. It can't be dropped by enemies, only found on the map.",PKC_GoldSoul_Desc,Codex,"Золотая душа -- это особая душа, которая \cQвосполняет здоровье до 100 ед.\c[PKWhiteText] Она не остается после врагов, ее можно только найти на уровне."
+"Mega Soul is a special soul that \cQrestores your HP to 200\c[PKWhiteText] and gives you \cN200 armor\c[PKWhiteText]. It can't be dropped by enemies, only found on the map.",PKC_MegaSoul_Desc,Codex,"Огромная душа -- это особая душа, которая \cQвосполняет здоровье до 200 ед.\c[PKWhiteText] и дает \cN200 ед. брони\c[PKWhiteText]. Она не остается после врагов, ее можно только найти на уровне."
 "You can find 3 types of armor in Painslayer: 
 
-\cEBronze armor\cJ provides \cN100 points of armor\cJ and absorbs 33.3% of incoming damage. 
+\cEBronze armor\c[PKWhiteText] provides \cN100 points of armor\c[PKWhiteText] and absorbs 33.3% of incoming damage. 
 
-\cZSilver armor\cJ provides \cN150 points of armor\cJ and absorbs 60% of incoming damage. 
+\cZSilver armor\c[PKWhiteText] provides \cN150 points of armor\c[PKWhiteText] and absorbs 60% of incoming damage. 
 
-\cFGold armor\cJ provides \cN200 points of armor\cJ and absorbs 80% of incoming damage.",PKC_Armor_Desc,Codex,"В Painslayer можно найти 3 типа доспехов:
+\c[PKGoldText]Gold armor\c[PKWhiteText] provides \cN200 points of armor\c[PKWhiteText] and absorbs 80% of incoming damage.",PKC_Armor_Desc,Codex,"В Painslayer можно найти 3 типа доспехов:
 
-\cEБронзовый доспех\cJ дает \cN100 ед. брони\cJ и поглощает 33,3% входящего урона.
+\cEБронзовый доспех\c[PKWhiteText] дает \cN100 ед. брони\c[PKWhiteText] и поглощает 33,3% входящего урона.
 
-\cZСеребряный доспех\cJ дает \cN150 ед. брони\cJ и поглощает 60% входящего урона.
+\cZСеребряный доспех\c[PKWhiteText] дает \cN150 ед. брони\c[PKWhiteText] и поглощает 60% входящего урона.
 
-\cFЗолотой доспех\cJ дает \cN200 ед. брони\cJ и поглощает 80% входящего урона."
+\c[PKGoldText]Золотой доспех\c[PKWhiteText] дает \cN200 ед. брони\c[PKWhiteText] и поглощает 80% входящего урона."
 Ammo Pack is a rare pickup that provides a lot of ammo for all weapons.,PKC_AmmoPack_Desc,Codex,"Ящик патронов -- это редкий предмет, который дает много патронов для разного оружия."
 "Weapon Modifier empowers all your weapons for 30 seconds. The effects of the Weapon Modifier are unique for each weapon you can find all the details about its effects on the  WEAPONS tab. 
 
-When on the WEAPONS tab, click the \cDWeapon Modifier icon\cJ to see the information about how it affects specific weapon attacks. 
+When on the WEAPONS tab, click the \c[PKGreenText]Weapon Modifier icon\c[PKWhiteText] to see the information about how it affects specific weapon attacks. 
 
 Weapon Modifier only affects primary and secondary attacks, not combo attacks. 
 
-Weapon Modifier also \cQheals you to 100 HP\cJ when you pick it up.",PKC_WeaponModifier_Desc,Codex,"Модификатор оружия усиливает всё оружие на 30 секунд. Эффект для каждого оружия свой -- подробности вы найдете на вкладке ОРУЖИЕ.
+Weapon Modifier also \cQheals you to 100 HP\c[PKWhiteText] when you pick it up.",PKC_WeaponModifier_Desc,Codex,"Модификатор оружия усиливает всё оружие на 30 секунд. Эффект для каждого оружия свой -- подробности вы найдете на вкладке ОРУЖИЕ.
 
-Открыв вкладку ОРУЖИЕ, щелкните по \cDзначку Модификатора оружия\cJ, чтобы увидеть, как он изменяет характеристики оружия.
+Открыв вкладку ОРУЖИЕ, щелкните по \c[PKGreenText]значку Модификатора оружия\c[PKWhiteText], чтобы увидеть, как он изменяет характеристики оружия.
 
 Модификатор оружия влияет только на основную и вторичную атаку, но не на комбо-атаку.
 
-Также, когда вы подбираете Модификатор оружия, ваше здоровье восполняется до \cQ100 ед.\cJ"
-Demon Eyes description,PKC_DemonEyes_Desc,Codex,
-Pentagram description,PKC_Pentagram_Desc,Codex,
+Также, когда вы подбираете Модификатор оружия, ваше здоровье восполняется до \cQ100 ед.\c[PKWhiteText]"
+"Demon Eyes is a powerup that slightly illuminates the surroundings and makes your eyes glow intensely. It also gives you fear vision: enemies caught in the glow become frightened and will try to move away from you.
+
+Intimidated enemies are marked with an eye icon above them.",PKC_DemonEyes_Desc,Codex,"Глаза демона -- это усилитель, который временно улучшает видимость окружения, а также заставляет ваши глаза ярко светиться. Также они устрашают врагов, попавшиех в область этого свечения: они пугаются и начинают отступать.
+
+Испуганные враги отмечаются значком глаза."
+The Pentagram makes you invincible to all damage for a limited time.,PKC_Pentagram_Desc,Codex,Пентаграмма дает временную неуязвимость ко всем видам урона.
 "Protection suit shields you from acid, lava and other harmful surfaces, and also lets you breathe underwater for a limited time.",PKC_AntiRad_Desc,Codex,"Защитный костюм временно защищает от кислоты, лавы и других опасных поверхностей, а также позволяет дышать под водой."
-Crystal Ball description,PKC_CrystalBall_Desc,Codex,
+"Crystal Ball is a special item that provides you a full map of the current level, and also highlights weapon pickups and keys on it.",PKC_CrystalBall_Desc,Codex,"Хрустальный шар открывает полную карту текущего уровня, а также помечает на ней местоположения оружия и ключей."
 Black Tarot Board,PKC_TAROTBOARD,Codex,Доска Чёрного Таро
 Black Tarot Cards,PKC_CARDTYPES,Codex,Карты Чёрного Таро
 Gold pickups,PKC_GOLDTYPES,Codex,Золотые предметы
 Obtaining gold,PKC_GOLDOBTAIN,Codex,Как получить золото
 "Once a map you can open the Black Tarot Board and equip Black Tarot cards that provide various benefits. 
 
-By default the Board opens automatically at map start. Using \cDMod Settings\cJ you can change this behavior to open the board manually by pressing the \cDOpen Black Tarot (%s)\cJ button. 
+By default the Board opens automatically at map start. Using \c[PKGreenText]Mod Settings\c[PKWhiteText] you can change this behavior to open the board manually by pressing the \c[PKGreenText]Open Black Tarot (%s)\c[PKWhiteText] button. 
 
-Once you close the Board, the active card slots become locked. To equip new cards you have to finish the current level. Alternatively, you can also unlock the slots with \cFGold\cJ.",PKC_TAROTBOARD_DESC,Codex,"Один раз за уровень вы можете открыть доску Черного Таро и на ней снарядить карты Черного Таро, которые дают разные бонусы.
+Once you close the Board, the active card slots become locked. To equip new cards you have to finish the current level. Alternatively, you can also unlock the slots with \c[PKGoldText]Gold\c[PKWhiteText].",PKC_TAROTBOARD_DESC,Codex,"Один раз за уровень вы можете открыть доску Черного Таро и на ней снарядить карты Черного Таро, которые дают разные бонусы.
 
-По умолчанию доска открывается автоматически в начале уровня. Это можно отключить в \cDНастройках мода\cJ: тогда вы сможете открывать доску вручную, нажимая кнопку \cD Открыть доску Таро (%s)\cJ.
+По умолчанию доска открывается автоматически в начале уровня. Это можно отключить в \c[PKGreenText]Настройках мода\c[PKWhiteText]: тогда вы сможете открывать доску вручную, нажимая кнопку \c[PKGreenText] Открыть доску Таро (%s)\c[PKWhiteText].
 
-При закрытии доски ячейки карт блокируются. Чтобы снарядить другие карты, вам придется завершить текущий уровень, либо разблокировать ячейки, заплатив \cFзолото\cJ."
+При закрытии доски ячейки карт блокируются. Чтобы снарядить другие карты, вам придется завершить текущий уровень, либо разблокировать ячейки, заплатив \c[PKGoldText]золото\c[PKWhiteText]."
 "There are two types of Black Tarot Cards: Silver Cards and Golden Cards. 
 
-\cZSilver Cards\cJ provide passive bonuses and are active all the time while equipped. You can equip up to \cD3\cJ Silver Cards. 
+\cZSilver Cards\c[PKWhiteText] provide passive bonuses and are active all the time while equipped. You can equip up to \c[PKGreenText]3\c[PKWhiteText] Silver Cards. 
 
-\cfGolden Cards\cJ have to be activated manually by pressing \cDUse Golden Cards (%s)\cJ button. Golden Cards can be activated once per level (unless you equip a Silver Card that increases that number). You can equip up to \cD2\cJ Golden Cards. 
+\c[PKGoldText]Golden Cards\c[PKWhiteText] have to be activated manually by pressing \c[PKGreenText]Use Golden Cards (%s)\c[PKWhiteText] button. Golden Cards can be activated once per level (unless you equip a Silver Card that increases that number). You can equip up to \c[PKGreenText]2\c[PKWhiteText] Golden Cards. 
 
-By default you will receive 3 random Silver Cards and 2 random Golden Cards as a gift the first time you open the Black Tarot Board in a new game. You can change this behavior using \cDMod Settings > Allow free starting cards\cJ option.",PKC_CARDTYPES_DESC,Codex,"Существует два типа карт Черного Таро: серебряные и золотые.
+By default you will receive 3 random Silver Cards and 2 random Golden Cards as a gift the first time you open the Black Tarot Board in a new game. You can change this behavior using \c[PKGreenText]Mod Settings > Allow free starting cards\c[PKWhiteText] option.",PKC_CARDTYPES_DESC,Codex,"Существует два типа карт Черного Таро: серебряные и золотые.
 
-\cZСеребряные карты\cJ дают пассивные бонусы, которые активны всё время. У вас может быть активно до \cD3\cJ таких карт одновременно.
+\cZСеребряные карты\c[PKWhiteText] дают пассивные бонусы, которые активны всё время. У вас может быть активно до \c[PKGreenText]3\c[PKWhiteText] таких карт одновременно.
 
-\cfЗолотые карты\cJ нужно активровать вручную, нажав кнопку \cDИспользовать золотые карты (%s)\cJ. Золотые карты можно использовать один раз за уровень (хотя есть серебряная карта, которая повышает число активаций). Вы можете снарядить до \cD2\cJ золотых карт.
+\c[PKGoldText]Золотые карты\c[PKWhiteText] нужно активровать вручную, нажав кнопку \c[PKGreenText]Использовать золотые карты (%s)\c[PKWhiteText]. Золотые карты можно использовать один раз за уровень (хотя есть серебряная карта, которая повышает число активаций). Вы можете снарядить до \c[PKGreenText]2\c[PKWhiteText] золотых карт.
 
-По умолчанию вы получаете в подарок случайные карты (3 серебряных и 2 золотых) при первом открытии доски. Это можно отключить: см. \cDНастройки мода > Дарить несколько карт\cJ."
+По умолчанию вы получаете в подарок случайные карты (3 серебряных и 2 золотых) при первом открытии доски. Это можно отключить: см. \c[PKGreenText]Настройки мода > Дарить несколько карт\c[PKWhiteText]."
 "Gold is used to purchase Silver and Golden Cards on the Black Tarot Board. 
 
 Gold comes in 4 varieties:
-- Small (\cF+10G\cJ)
-- Medium (\cF+25G\cJ)
-- Large (\cF+100G\cJ)
-- Very Large (\cF+500G\cJ) 
+- Small (\c[PKGoldText]+10G\c[PKWhiteText])
+- Medium (\c[PKGoldText]+25G\c[PKWhiteText])
+- Large (\c[PKGoldText]+100G\c[PKWhiteText])
+- Very Large (\c[PKGoldText]+500G\c[PKWhiteText]) 
 
-Gold can be found in secret areas or obtained from enemies. See \cDObtaining Gold\cJ tab for details.",PKC_GOLDTYPES_DESC,Codex,"Золото нужно, чтобы покупать серебряные и золотые карты на доске Черного Таро.
+Gold can be found in secret areas or obtained from enemies. See \c[PKGreenText]Obtaining Gold\c[PKWhiteText] tab for details.",PKC_GOLDTYPES_DESC,Codex,"Золото нужно, чтобы покупать серебряные и золотые карты на доске Черного Таро.
 
 Золотые предметы бывают 4 видов:
-- маленькие (\cF+10 з.\cJ)
-- средние (\cF+25 з.\cJ)
-- большие (\cF+100 з.\cJ)
-- очень большие(\cF+500 з.\cJ)
+- маленькие (\c[PKGoldText]+10 з.\c[PKWhiteText])
+- средние (\c[PKGoldText]+25 з.\c[PKWhiteText])
+- большие (\c[PKGoldText]+100 з.\c[PKWhiteText])
+- очень большие(\c[PKGoldText]+500 з.\c[PKWhiteText])
 
-Золото можно найти в секретных областях на уровне или получить из врагов. См. вкладку \cDКак получить золото\cJ для подробностей."
+Золото можно найти в секретных областях на уровне или получить из врагов. См. вкладку \c[PKGreenText]Как получить золото\c[PKWhiteText] для подробностей."
 "There are several ways to acquire gold: 
 
-- Gold will spawn in \cDsecret areas\cJ on any maps you play. Look for them to obtain the largest gold pickups. 
+- Gold will spawn in \c[PKGreenText]secret areas\c[PKWhiteText] on any maps you play. Look for them to obtain the largest gold pickups. 
 
-- Dealing \cGexcessive damage \cJto enemies, such as blowing up/gibbing weaker enemies. This makes them drop coins. 
+- Dealing \c[PKRedText]excessive damage \c[PKWhiteText]to enemies, such as blowing up/gibbing weaker enemies. This makes them drop coins. 
 
-- \cIJuggling enemy corpses with Killer\cJ: before a corpse disappears, simply shoot at it with the Killer. This prevents the corpse from despawning and will push it upwards and closer to you. Keep doing it to juggle the corpse every 3rd juggle produces a medium gold piece.",PKC_GOLDOBTAIN_DESC,Codex,"Получить золото можно несколькими способами:
+- \cIJuggling enemy corpses with Killer\c[PKWhiteText]: before a corpse disappears, simply shoot at it with the Killer. This prevents the corpse from despawning and will push it upwards and closer to you. Keep doing it to juggle the corpse every 3rd juggle produces a medium gold piece.",PKC_GOLDOBTAIN_DESC,Codex,"Получить золото можно несколькими способами:
 
-- Золото появляется в \cDсекретных областях\cJ на любых уровнях. Именно в них вы найдете большие и очень большие золотые предметы.
+- Золото появляется в \c[PKGreenText]секретных областях\c[PKWhiteText] на любых уровнях. Именно в них вы найдете большие и очень большие золотые предметы.
 
-- Нанося \cGизбыточный урон врагам\cJ (например, взрывая слабых врагов) — это заставляет их ронять монеты.
+- Нанося \c[PKRedText]избыточный урон врагам\c[PKWhiteText] (например, взрывая слабых врагов) — это заставляет их ронять монеты.
 
-- Многократно \cIпритягивая трупы врагов с помощью Killer\cJ. Выстрелите в труп, пока он не исчез: тогда он не испарится, а Killer толкнет его вверх и в вашу сторону. Повторяйте это действие, и каждое третье притягивание выбьет из тела золото."
+- Многократно \cIпритягивая трупы врагов с помощью Killer\c[PKWhiteText]. Выстрелите в труп, пока он не исчез: тогда он не испарится, а Killer толкнет его вверх и в вашу сторону. Повторяйте это действие, и каждое третье притягивание выбьет из тела золото."
 Painslayer Settings,PKM_TITLE,Menu,Настройки Painslayer
 Mod Settings,PKM_TITLE_SHORT,Menu,Настройки мода
 CONTROLS,PKM_SUB_CONTROLS,Menu,УПРАВЛЕНИЕ
