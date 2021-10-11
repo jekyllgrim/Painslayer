@@ -56,7 +56,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 		"$PKC_TAROT"
 	};
 
-	PKZFTabButton, PKZFFrame CreateTab(vector2 pos, vector2 size, String text, PKZFRadioController controller, PKZFHandler handler, int value, vector2 framePos, vector2 frameSize, PKZFBoxTextures inactiveTex = null, PKZFBoxTextures activeTex = null, PKZFBoxTextures hoverTex = null, PKZFBoxTextures clickTex = null, double textScale = 1, int textColor = Font.CR_WHITE/*, PKZFElement.AlignType alignment = PKZFElementAlignType_Center*/) {
+	PKZFTabButton, PKZFFrame CreateTab(vector2 pos, vector2 size, String text, PKZFRadioController controller, PKZFHandler handler, int value, vector2 framePos, vector2 frameSize, PKZFBoxTextures inactiveTex = null, PKZFBoxTextures activeTex = null, PKZFBoxTextures hoverTex = null, PKZFBoxTextures clickTex = null, double textScale = 1, int textColor = Font.CR_WHITE, sound hoversound = "ui/codex/subtabhover", sound clicksound = "ui/codex/subtabopen") {
 		let tabButton = PKZFTabButton.Create(
 			pos,
 			size,
@@ -70,7 +70,9 @@ Class PKCodexMenu : PKZFGenericMenu {
 			textscale:PK_MENUTEXTSCALE*textscale,
 			textColor: textColor,
 			//alignment:alignment,
-			cmdhandler:handler
+			cmdhandler:handler,
+			hoversound: hoversound,
+			clicksound: clicksound
 		);
 		let tabContents = PKZFFrame.Create(framePos,frameSize);
 		tabButton.tabframe = tabContents;
@@ -153,7 +155,9 @@ Class PKCodexMenu : PKZFGenericMenu {
 				contentFramePos, contentFrameSize,
 				btnInactiveFrame, btnActiveFrame, btnHoverFrame,
 				textScale: 1.25,
-				textColor: Font.FindFontColor('PKBaseText')
+				textColor: Font.FindFontColor('PKBaseText'), 
+				hoversound: "ui/codex/maintabhover",
+				clicksound: "ui/codex/maintabopen"
 			);
 			nextBtnPos.x += buttonsize.x + buttongap;
 			tab.Pack(mainFrame);
@@ -578,7 +582,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 			
 			//create text for Primary (switch to Secondary if modes are switched)
 			let wtext1 = PKZFWeaponDescLabel.Create(
-				wpnDescPos,wpnDescSize, self, 
+				wpnDescPos,wpnDescSize, self,
 				modeswitch ? text2 : text1, 
 				modeswitch ? alttext2 : alttext1
 			);
@@ -853,37 +857,27 @@ Class PKCodexTabhandler : PKZFHandler {
 		if (!menu)
 			return;
 		if (!caller || !caller.isEnabled())
-			return;  
-		S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+			return; 
+		let btn = PKZFTabButton(caller);
+		if (btn)
+			S_StartSound(btn.clicksound,CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 	}
 	override void elementHoverChanged(PKZFElement caller, string command, bool unhovered) {
 		if (!menu || !caller || !caller.isEnabled())
 			return;
 		let btn = PKZFTabButton(caller);
-		if (!btn) {
-			/*let but = PKZFRadioButton(caller);			
-			if (!unhovered) {
-				but.SetTextColor(Font.FindFontColor('PKRedText'));
-				S_StartSound("ui/menu/hover",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-			}
-			else {
-				but.SetTextColor(Font.CR_WHITE);
-			}*/
+		if (!btn)
 			return;
-		}
-		if (!unhovered) {
-			//btn.SetTextColor(Font.FindFontColor('PKRedText'));
-			S_StartSound("ui/menu/hover",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-		}/*
-		else if (caller.curButtonState != ButtonState_Click) {
-			btn.SetTextColor(btn.baseTextColor);
-		}*/
+		if (!unhovered)
+			S_StartSound(btn.hoversound,CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 	}
 }
 
 Class PKZFTabButton : PKZFRadioButton {
 	PKZFFrame tabframe;
 	int baseTextColor;
+	sound hoversound;
+	sound clicksound;
 	
 	static PKZFTabButton create(
 		Vector2 pos, Vector2 size,
@@ -891,11 +885,12 @@ Class PKZFTabButton : PKZFRadioButton {
 		PKZFBoxTextures inactive = NULL, PKZFBoxTextures hover = NULL,
 		PKZFBoxTextures click = NULL, PKZFBoxTextures disabled = NULL,
 		string text = "", Font fnt = font_times, double textScale = 1, int textColor = Font.CR_WHITE,
-		AlignType alignment = AlignType_Center, PKZFHandler cmdHandler = NULL, string command = ""
-	) {
+		AlignType alignment = AlignType_Center, PKZFHandler cmdHandler = NULL, string command = "", sound hoversound = "", sound clicksound = "") {
 		let ret = new('PKZFTabButton');
 		ret.baseTextColor = textColor;
 		ret.config(variable, value, inactive, hover, click, disabled, text, fnt, textScale, textColor, alignment, cmdHandler, command);
+		ret.hoversound = hoversound;
+		ret.clicksound = clicksound;
 		ret.setBox(pos, size);
 
 		return ret;
@@ -925,6 +920,7 @@ Class PKZFWeaponDescLabel : PKZFLabel {
 	string maintext;
 	string WMText;
 	int baseTextColor;
+	const maxlength = 220;
 	
 	static PKZFWeaponDescLabel create(
 		Vector2 pos, Vector2 size, PKCodexMenu menu, string text = "", string alttext = "", Font fnt = font_times, AlignType alignment = AlignType_TopLeft,
@@ -940,10 +936,10 @@ Class PKZFWeaponDescLabel : PKZFLabel {
 		ret.setBox(pos, size);			
 		ret.config(text, fnt, alignment, wrap, autoSize, textScale, textColor, lineSpacing, forElement);
 
-		/*int stringlength = ret.GetText().Length();
-		if (stringlength > 250)
-			ret.setTextScale(ret.getTextScale() * 250. / double(stringlength));
-		*/
+		int stringlength = ret.GetText().CodePointCount();
+		if (stringlength > maxlength)
+			ret.setTextScale(ret.getTextScale() * double(maxlength) / double(stringlength));
+		
 		return ret;
 	}
 	

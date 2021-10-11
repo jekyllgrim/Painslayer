@@ -79,6 +79,11 @@ ui/board/cardburn	 	"sounds/menu/option-cardburn.wav"
 ui/board/cardunlocked	"sounds/menu/card-unlocked.wav"
 ui/board/digitchange	"sounds/menu/money-rollnumbers-loop.wav"
 
+ui/codex/subtabopen	 	"sounds/menu/money-rollnumbers-loop.wav"
+ui/codex/maintabopen	"sounds/menu/option-accept.wav"
+ui/codex/maintabhover	"sounds/menu/wrong_place.wav"
+ui/codex/subtabhover	"sounds/menu/wrong_place.wav"
+
 ui/menu/accept		"sounds/menu/option-accept.wav"
 ui/menu/back		"sounds/menu/back-accept.wav"
 ui/menu/hover		"sounds/menu/option-light-on.wav"
