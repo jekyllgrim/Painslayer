@@ -86,7 +86,7 @@ Class PK_ElectroDriver : PKWeapon {
 	}
 	states {
 	Spawn:
-		BAL1 A -1;
+		PWIC D -1;
 		stop;
 	Ready:
 		ELDR A 1 {

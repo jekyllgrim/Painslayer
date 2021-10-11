@@ -27,7 +27,7 @@ Class PK_Shotgun : PKWeapon {
 	}
 	states {
 	Spawn:
-		BAL1 A -1;
+		PWIC A -1;
 		stop;
 	SpawnSp:
 		PSHZ ABCDEFGH 4;
@@ -295,10 +295,11 @@ Class PK_FreezeControl : PK_InventoryToken {
 		super.DoEffect();
 		if (level.isFrozen() || !owner)
 			return;
-		owner.A_SetTics(fcounter);
+		owner.A_SetTics(-1);
 		fcounter--;
 		//console.printf("owner: %s, counter: %d",owner.GetclassName(),fcounter);
 		if (fcounter <= 0) {
+			owner.A_SetTics(20);
 			DepleteOrDestroy();
 			return;
 		}

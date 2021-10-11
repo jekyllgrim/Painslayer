@@ -53,7 +53,7 @@ Class PK_Chaingun : PKWeapon {
 	}
 	States {
 	Spawn:
-		BAL1 A -1;
+		PWIC C -1;
 		stop;
 	Deselect:
 		TNT1 A 0 {

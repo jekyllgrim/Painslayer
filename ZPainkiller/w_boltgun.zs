@@ -55,7 +55,7 @@ Class PK_Boltgun : PKWeapon {
 		BGU1 ABCDEFGHIIJKLMNOPQRST 0;
 		BGU2 ABCDEFGHIIJKLMNOPQRST 0;		
 	Spawn:
-		BAL1 A -1;
+		PWIC F -1;
 		stop;
 	Deselect:
 		TNT1 A 0 {

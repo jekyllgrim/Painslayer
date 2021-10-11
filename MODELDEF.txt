@@ -10,7 +10,7 @@ Model PK_Shotgun {
 	rotation-vector 0.1 1 0
 	rotation-speed 0.5
 	
-	FrameIndex BAL1 A 0 0
+	FrameIndex PWIC A 0 0
 }
 Model PK_Stakegun {
 	AngleOffset 90
@@ -24,7 +24,7 @@ Model PK_Stakegun {
 	rotation-vector 0.1 1 0
 	rotation-speed 0.5
 	
-	FrameIndex BAL1 A 0 0
+	FrameIndex PWIC B 0 0
 }
 Model PK_Chaingun {
 	AngleOffset 90
@@ -39,7 +39,7 @@ Model PK_Chaingun {
 	rotation-vector 0.1 1 0
 	rotation-speed 0.5
 	
-	FrameIndex BAL1 A 0 0
+	FrameIndex PWIC C 0 0
 }
 Model PK_Electrodriver {
 	Path "models/Electrodriver"
@@ -52,7 +52,7 @@ Model PK_Electrodriver {
 	rotation-vector 0.1 1 0
 	rotation-speed 0.5
 	
-	FrameIndex BAL1 A 0 0
+	FrameIndex PWIC D 0 0
 }
 Model PK_Rifle {
 	Path "models/Rifle"
@@ -66,7 +66,7 @@ Model PK_Rifle {
 	rotation-vector 0.1 1 0
 	rotation-speed 0.5
 	
-	FrameIndex BAL1 A 0 0
+	FrameIndex PWIC E 0 0
 }
 Model PK_Boltgun {
 	Path "models/Boltgun"
@@ -80,7 +80,7 @@ Model PK_Boltgun {
 	rotation-vector 0.1 1 0
 	rotation-speed 0.5
 	
-	FrameIndex BAL1 A 0 0
+	FrameIndex PWIC F 0 0
 }
 
 Model PK_RicochetBullet {

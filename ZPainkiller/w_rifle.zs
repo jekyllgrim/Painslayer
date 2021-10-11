@@ -127,7 +127,7 @@ Class PK_Rifle : PKWeapon {
 	}
 	states {
 	Spawn:
-		BAL1 A -1;
+		PWIC E -1;
 		stop;
 	Select:
 		TNT1 A 0 {

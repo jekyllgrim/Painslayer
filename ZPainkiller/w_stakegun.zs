@@ -20,7 +20,7 @@ Class PK_Stakegun : PKWeapon {
 		Cache:
 			PSGT AHIJKLMN 0;
 		Spawn:
-			BAL1 A -1;
+			PWIC B -1;
 			stop;
 		Ready:
 			PSGN A 1 {
