@@ -259,35 +259,35 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_PK_1.PNG";
 				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_PK_2.PNG";
 				text1 = String.Format(
-					"\cD%s %s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s %s: \cI%s\c[PKWhiteText]\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					fire_name,
 					StringTable.Localize("$PKC_Pain"),
 					StringTable.Localize("$PKC_PainDesc")
 				);
 				alttext1 = String.Format(
-					"\cD%s %s: \cI%s\cG\n\n%s",
+					"\c[PKGreenText]%s %s: \cI%s\c[PKRedText]\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					fire_name,
 					StringTable.Localize("$PKC_Pain"),
 					StringTable.Localize("$PKC_PainDescWM")
 				);
 				text2 = String.Format(
-					"\cD%s %s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s %s: \cI%s\c[PKWhiteText]\n\n%s",
 					StringTable.Localize("$PKC_Tap"),
 					altfire_name,
 					StringTable.Localize("$PKC_Killer"),
 					StringTable.Localize("$PKC_KillerDesc")
 				);
 				alttext2 = String.Format(
-					"\cD%s %s: \cI%s\cG\n\n%s",
+					"\c[PKGreenText]%s %s: \cI%s\c[PKRedText]\n\n%s",
 					StringTable.Localize("$PKC_Tap"),
 					altfire_name,
 					StringTable.Localize("$PKC_Killer"),
 					StringTable.Localize("$PKC_KillerDescWM")
 				);
 				text3 = String.Format(
-					"\cD%s %s, %s %s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s %s, %s %s: \cI%s\c[PKWhiteText]\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					fire_name,
 					StringTable.Localize("$PKC_Tap").MakeLower(),
@@ -303,31 +303,31 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_SH_1.PNG";
 				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_SH_2.PNG";
 				text1 = String.Format(
-					"\cD%s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s: \cI%s\c[PKWhiteText]\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Shotgun"),
 					StringTable.Localize("$PKC_ShotgunDesc")
 				);
 				alttext1 = String.Format(
-					"\cD%s: \cI%s\cG\n\n%s",
+					"\c[PKGreenText]%s: \cI%s\c[PKRedText]\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Shotgun"),
 					StringTable.Localize("$PKC_ShotgunDescWM")
 				);
 				text2 = String.Format(
-					"\cD%s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s: \cI%s\c[PKWhiteText]\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_Freezer"),
 					StringTable.Localize("$PKC_FreezerDesc")
 				);
 				alttext2 = String.Format(
-					"\cD%s: \cI%s\cG\n\n%s",
+					"\c[PKGreenText]%s: \cI%s\c[PKRedText]\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_Freezer"),
 					StringTable.Localize("$PKC_FreezerDescWM")
 				);
 				text3 = String.Format(
-					"\cD%s, %s %s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s, %s %s: \cI%s\c[PKWhiteText]\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_then"),
 					fire_name,
@@ -342,31 +342,31 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_ST_1.PNG";
 				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_ST_2.PNG";
 				text1 = String.Format(
-					"\cD%s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s: \cI%s\c[PKWhiteText]\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Stakegun"),
 					StringTable.Localize("$PKC_StakegunDesc")
 				);
 				alttext1 = String.Format(
-					"\cD%s: \cI%s\cG\n\n%s",
+					"\c[PKGreenText]%s: \cI%s\c[PKRedText]\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Stakegun"),
 					StringTable.Localize("$PKC_StakegunDescWM")
 				);
 				text2 = String.Format(
-					"\cD%s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s: \cI%s\c[PKWhiteText]\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_Grenade"),
 					StringTable.Localize("$PKC_GrenadeDesc")
 				);
 				alttext2 = String.Format(
-					"\cD%s: \cI%s\cG\n\n%s",
+					"\c[PKGreenText]%s: \cI%s\c[PKRedText]\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_Grenade"),
 					StringTable.Localize("$PKC_GrenadeDescWM")
 				);
 				text3 = String.Format(
-					"\cD%s, %s %s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s, %s %s: \cI%s\c[PKWhiteText]\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_then"),
 					fire_name,
@@ -381,24 +381,24 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_CH_1.PNG";
 				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_CH_2.PNG";
 				text1 = String.Format(
-					"\cD%s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s: \cI%s\c[PKWhiteText]\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_RLauncher"),
 					StringTable.Localize("$PKC_RLauncherDesc")
-				);				alttext1 = String.Format(					"\cD%s: \cI%s\cG\n\n%s",
+				);				alttext1 = String.Format(					"\c[PKGreenText]%s: \cI%s\c[PKRedText]\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_RLauncher"),
 					StringTable.Localize("$PKC_RLauncherDescWM")
 				);
 				text2 = String.Format(
-					"\cD%s %s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s %s: \cI%s\c[PKWhiteText]\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Chaingun"),
 					StringTable.Localize("$PKC_ChaingunDesc")
 				);
 				alttext2 = String.Format(
-					"\cD%s %s: \cI%s\cG\n\n%s",
+					"\c[PKGreenText]%s %s: \cI%s\c[PKRedText]\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Chaingun"),
@@ -413,33 +413,33 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_ED_1.PNG";
 				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_ED_2.PNG";
 				text1 = String.Format(
-					"\cD%s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s: \cI%s\c[PKWhiteText]\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Driver"),
 					StringTable.Localize("$PKC_DriverDesc")
 				);
 				alttext1 = String.Format(
-					"\cD%s: \cI%s\cG\n\n%s",
+					"\c[PKGreenText]%s: \cI%s\c[PKRedText]\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Driver"),
 					StringTable.Localize("$PKC_DriverDescWM")
 				);
 				text2 = String.Format(
-					"\cD%s %s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s %s: \cI%s\c[PKWhiteText]\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Electro"),
 					StringTable.Localize("$PKC_ElectroDesc")
 				);
 				alttext2 = String.Format(
-					"\cD%s %s: \cI%s\cG\n\n%s",
+					"\c[PKGreenText]%s %s: \cI%s\c[PKRedText]\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Electro"),
 					StringTable.Localize("$PKC_ElectroDescWM")
 				);
 				text3 = String.Format(
-					"\cD%s %s, %s %s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s %s, %s %s: \cI%s\c[PKWhiteText]\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Tap").MakeLower(),
@@ -456,35 +456,35 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_RF_2.PNG";
 				
 				text1 = String.Format(
-					"\cD%s %s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s %s: \cI%s\c[PKWhiteText]\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					fire_name,
 					StringTable.Localize("$PKC_Rifle"),
 					StringTable.Localize("$PKC_RifleDesc")
 				);
 				alttext1 = String.Format(
-					"\cD%s %s: \cI%s\cG\n\n%s",
+					"\c[PKGreenText]%s %s: \cI%s\c[PKRedText]\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					fire_name,
 					StringTable.Localize("$PKC_Rifle"),
 					StringTable.Localize("$PKC_RifleDescWM")
 				);
 				text2 = String.Format(
-					"\cD%s %s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s %s: \cI%s\c[PKWhiteText]\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Flamer"),
 					StringTable.Localize("$PKC_FlamerDesc")
 				);
 				alttext2 = String.Format(
-					"\cD%s %s: \cI%s\cG\n\n%s",
+					"\c[PKGreenText]%s %s: \cI%s\c[PKRedText]\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Flamer"),
 					StringTable.Localize("$PKC_FlamerDescWM")
 				);
 				text3 = String.Format(
-					"\cD%s %s, %s %s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s %s, %s %s: \cI%s\c[PKWhiteText]\n\n%s",
 					StringTable.Localize("$PKC_Hold"),
 					altfire_name,
 					StringTable.Localize("$PKC_Tap").MakeLower(),
@@ -500,31 +500,31 @@ Class PKCodexMenu : PKZFGenericMenu {
 				imgpath1wm = "Graphics/HUD/Codex/WMIcons/CODX_BG_1.PNG";
 				imgpath2wm = "Graphics/HUD/Codex/WMIcons/CODX_BG_2.PNG";
 				text1 = String.Format(
-					"\cD%s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s: \cI%s\c[PKWhiteText]\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Boltgun"),
 					StringTable.Localize("$PKC_BoltgunDesc")
 				);
 				alttext1 = String.Format(
-					"\cD%s: \cI%s\cG\n\n%s",
+					"\c[PKGreenText]%s: \cI%s\c[PKRedText]\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_Boltgun"),
 					StringTable.Localize("$PKC_BoltgunDescWM")
 				);
 				text2 = String.Format(
-					"\cD%s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s: \cI%s\c[PKWhiteText]\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_Heater"),
 					StringTable.Localize("$PKC_HeaterDesc")
 				);
 				alttext2 = String.Format(
-					"\cD%s: \cI%s\cG\n\n%s",
+					"\c[PKGreenText]%s: \cI%s\c[PKRedText]\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_Heater"),
 					StringTable.Localize("$PKC_HeaterDescWM")
 				);
 				text3 = String.Format(
-					"\cD%s, %s %s: \cI%s\cJ\n\n%s",
+					"\c[PKGreenText]%s, %s %s: \cI%s\c[PKWhiteText]\n\n%s",
 					altfire_name,
 					StringTable.Localize("$PKC_then"),
 					fire_name,
@@ -577,16 +577,24 @@ Class PKCodexMenu : PKZFGenericMenu {
 			}
 			
 			//create text for Primary (switch to Secondary if modes are switched)
-			let wtext1 = modeswitch ? PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize, self, text2, alttext2) : PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize, self,  text1, alttext1);
+			let wtext1 = PKZFWeaponDescLabel.Create(
+				wpnDescPos,wpnDescSize, self, 
+				modeswitch ? text2 : text1, 
+				modeswitch ? alttext2 : alttext1
+			);
 			wtext1.pack(tabframe);
 			wpnDescPos.y += wpnDescSize.y + wpnInfoYGap;
 			//create text for Secondary (switch to Primary if modes are switched)
-			let wtext2 = modeswitch ? PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize, self, text1, alttext1) : PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize, self,  text2, alttext2);
+			let wtext2 = PKZFWeaponDescLabel.Create(
+				wpnDescPos,wpnDescSize, self, 
+				modeswitch ? text1 : text2, 
+				modeswitch ? alttext1 : alttext2
+			);
 			wtext2.pack(tabframe);
 			wpnDescPos.y += wpnDescSize.y + wpnInfoYGap;
 			//create text for Combo attack (Chaingun doesn't have it)
 			if (text3) {
-				let wtext3 = PKZFWeaponDescLabel.Create(	wpnDescPos,wpnDescSize,self,text3);
+				let wtext3 = PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize,self,text3);
 				wtext3.pack(tabframe);
 			}
 		}
@@ -929,9 +937,13 @@ Class PKZFWeaponDescLabel : PKZFLabel {
 		ret.baseTextColor = textColor;
 		ret.maintext = text;
 		ret.WMText = alttext;
-		ret.setBox(pos, size);
+		ret.setBox(pos, size);			
 		ret.config(text, fnt, alignment, wrap, autoSize, textScale, textColor, lineSpacing, forElement);
 
+		/*int stringlength = ret.GetText().Length();
+		if (stringlength > 250)
+			ret.setTextScale(ret.getTextScale() * 250. / double(stringlength));
+		*/
 		return ret;
 	}
 	
