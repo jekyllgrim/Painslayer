@@ -1,3 +1,17 @@
+Model PK_Painkiller {
+	AngleOffset 90
+	Path "models/painkiller"
+	Model 0 "item_painkiller.obj"
+	ZOffset 16
+	Scale 0.85 0.85 0.85
+	USEACTORROLL
+	USEACTORPITCH
+	ROTATING
+	rotation-vector 0.1 1 0
+	rotation-speed 0.5
+	
+	FrameIndex BAL1 A 0 0
+}
 Model PK_Shotgun {
 	Path "models/shotgun"
 	Model 0 "item_shotgun.obj"

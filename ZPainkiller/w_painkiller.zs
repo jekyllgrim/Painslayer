@@ -14,11 +14,12 @@ Class PK_Painkiller : PKWeapon {
 		inventory.pickupmessage "Picked up Painkiller";
 		inventory.icon "pkxpkill";
 		Tag "$PK_PAINKILLER_TAG";
+		+PKWeapon.NOICON
 	}
 	states {
 		Spawn:
-			MODL A 1;
-			loop;
+			BAL1 A -1;
+			stop;
 		BeamFlare:
 			PKOF A -1 bright {
 				A_OverlayFlags(OverlayID(),PSPF_RENDERSTYLE,true);
@@ -148,7 +149,10 @@ Class PK_Painkiller : PKWeapon {
 				return ResolveState(null);
 			}
 			PKIM ABC 1 A_WeaponOffset(9,3,WOF_ADD);
-			PKIM CCC 1 A_WeaponOffset(0.5,0.3,WOF_ADD);
+			PKIM CCC 1 {
+				A_WeaponOffset(0.5,0.3,WOF_ADD);
+				A_WeaponReady(WRF_NOBOB);
+			}
 			PKIM BBBAAA 1 {
 				A_WeaponReady(WRF_NOBOB);
 				A_WeaponOffset(-5,-1.5,WOF_ADD);
@@ -160,8 +164,14 @@ Class PK_Painkiller : PKWeapon {
 				invoker.killer_fired = false;
 				//A_StartSound("weapons/painkiller/killerback");
 			}
-			PKIM ABC 1 A_WeaponOffset(13.5,4.5,WOF_ADD);
-			PKIM CCC 1 A_WeaponOffset(0.75,0.45,WOF_ADD);
+			PKIM ABC 1 {
+				A_WeaponOffset(13.5,4.5,WOF_ADD);
+				A_WeaponReady(WRF_NOBOB);
+			}
+			PKIM CCC 1 {
+				A_WeaponOffset(0.75,0.45,WOF_ADD);
+				A_WeaponReady(WRF_NOBOB);
+			}
 			PKIM BBB 1 {
 				A_WeaponReady(WRF_NOBOB);
 				A_WeaponOffset(-7.125,-1.65,WOF_ADD);

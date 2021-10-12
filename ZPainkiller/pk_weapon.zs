@@ -9,6 +9,7 @@ Class PKWeapon : Weapon abstract {
 	FlagDef NOAUTOPRIMARY 		: PKWflags, 0; //NOAUTOFIRE analog for primary attack only
 	FlagDef NOAUTOSECONDARY 	: PKWflags, 1; //NOAUTOFIRE analog for secondary attack only
 	FlagDef ALWAYSBOB			: PKWflags, 2; //if true, weapon will bob all the time (currently unused)
+	FlagDef NOICON				: PKWFlags, 3; //do not spawn Weapon Icon above
 	sound emptysound; //clicking sound when trying to fire without ammo
 	property emptysound : emptysound;
 	protected bool hasDexterity; //player has one of dexterity effects/cards
@@ -50,9 +51,11 @@ Class PKWeapon : Weapon abstract {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		let icon = Spawn("PK_WeaponIcon",pos);
-		if (icon)  {
-			icon.master = self;
+		if (!bNOICON) {
+			let icon = Spawn("PK_WeaponIcon",pos);
+			if (icon)  {
+				icon.master = self;
+			}
 		}
 		spitch = frandompick[sfx](-0.1,0.1);
 		s_fire = FindState("Fire");

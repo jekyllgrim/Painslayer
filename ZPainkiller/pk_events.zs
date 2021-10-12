@@ -369,12 +369,12 @@ Class PK_MainHandler : EventHandler {
 		for (int i = goldchance; i > 0; i--) {
 			let gg = Actor.Spawn("PK_GoldCoin",act.pos + (0,0,zofs*frandom[gold](0.8,1.2)));
 			if (gg)
-				gg.vel = (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](2,5));
+				gg.vel = (frandom[goldchance](-3,3),frandom[goldchance](-3,3),frandom[goldchance](2,5));
 		}
 		if (gibbed) {
 			let gg = Actor.Spawn("PK_MedGold",act.pos + (0,0,zofs*frandom[gold](0.8,1.2)));
 			if (gg)
-				gg.vel = (frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](1,4));
+				gg.vel = (frandom[goldchance](-2,2),frandom[goldchance](-2,2),frandom[goldchance](1,4));
 		}
 	}
 	override void WorldThingDestroyed(WorldEvent e) {
@@ -515,6 +515,7 @@ Class PK_ReplacementHandler : EventHandler {
 	override void CheckReplacement (ReplaceEvent e) {
 		switch (e.Replacee.GetClassName()) {
 			case 'Chainsaw' 		: e.Replacement = 'PK_BaseWeaponSpawner_Chainsaw'; 			break;
+			case 'Pistol' 			: e.Replacement = 'PK_Painkiller'; 			break;
 			case 'Shotgun'			: e.Replacement = 'PK_BaseWeaponSpawner_Shotgun'; 			break;
 			case 'SuperShotgun' 	: e.Replacement = 'PK_BaseWeaponSpawner_SuperShotgun';			break;
 			case 'Chaingun' 		: e.Replacement = 'PK_BaseWeaponSpawner_Chaingun'; 			break;
