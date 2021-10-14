@@ -1217,14 +1217,25 @@ Class PKC_StepsOfThunder : PK_BaseGoldenCard {
 		if (owner.Vel.Length() > 4) {
 			cycle++;
 			if (cycle % 10 == 0) {
-				//if for whatever reason owner's PlayerPawn has a target field, record it:
-				actor prevtarget = owner.target ? owner.target : null;
-				//set the PlayerPawn's target to self in order to properly assign kill credit and obituary:
-				owner.target = self;
 				//do the damage:
-				owner.A_Explode(20,256,0,alert:false,fulldamagedistance:128);
-				//set the PlayerPawn's target to whatever it was before, if anything:
-				owner.target = prevtarget;
+				int atkdist = 256;
+				BlockThingsIterator itr = BlockThingsIterator.Create(owner,atkdist);
+				while (itr.next()) {
+					let next = itr.thing;
+					if (!next || next == owner)
+						continue;
+					bool isValid = (next.bSHOOTABLE && (next.bIsMonster ||next.player) && next.health > 0);
+					if (!isValid)
+						continue;
+					double zdiff = abs(owner.pos.z - next.pos.z);
+					if (zdiff > 32)
+						continue;
+					double dist = owner.Distance3D(next);
+					if (dist > atkdist)
+						continue;
+					next.DamageMobj(owner,owner,20,'normal',DMG_THRUSTLESS|DMG_NO_FACTOR);
+					next.vel.z += 4;
+				}
 				owner.A_Quake(2,5,0,32,"");
 				owner.A_StartSound("cards/thunderwalk",15);
 			}
