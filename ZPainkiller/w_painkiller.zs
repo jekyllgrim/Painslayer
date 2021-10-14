@@ -280,7 +280,7 @@ Class PK_Killer : PK_Projectile {
 				returning = true;
 				if (!target || !tracer || GetClassName() != "PK_Killer")
 					return ResolveState(null);
-				if (tracer && (tracer.bKILLED || tracer.GetClassName() == "KillerFlyTarget")) {
+				if (tracer && ((tracer.bKILLED && tracer.bISMONSTER && !tracer.bBOSS) || tracer.GetClassName() == "KillerFlyTarget")) {
 					if (!tracer.target)
 						tracer.target = target;
 					//first, throw the enemy corpse towards the player:
