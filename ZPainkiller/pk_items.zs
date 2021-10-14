@@ -910,7 +910,7 @@ Class PK_PowerDemonEyes : PK_Powerup {
 				continue;
 			if (feartargets.Find(next) != feartargets.Size())
 				continue;
-			bool isValid = (!next.bFRIGHTENED && next.bSHOOTABLE && next.bIsMonster && next.health > 0);
+			bool isValid = (!next.bFRIGHTENED && next.bSHOOTABLE && next.bIsMonster && !next.bBOSS && next.health > 0);
 			if (!isValid)
 				continue;
 			double dist = owner.Distance3D(next);
