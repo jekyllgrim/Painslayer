@@ -280,7 +280,7 @@ Class PK_Killer : PK_Projectile {
 				returning = true;
 				if (!target || !tracer || GetClassName() != "PK_Killer")
 					return ResolveState(null);
-				if (tracer && ((tracer.bKILLED && tracer.bISMONSTER && !tracer.bBOSS) || tracer.GetClassName() == "KillerFlyTarget")) {
+				if (tracer && ((tracer.bKILLED && tracer.bISMONSTER && !tracer.bBOSS) || tracer.GetClassName() == "PK_KillerFlyTarget")) {
 					if (!tracer.target)
 						tracer.target = target;
 					//first, throw the enemy corpse towards the player:
@@ -291,12 +291,17 @@ Class PK_Killer : PK_Projectile {
 						dist -= 32;
 					double vdisp = target.pos.z - tracer.pos.z;		//height difference between corpse and target
 					double ftime = 20;									//desired time of flight
-					double vvel = (vdisp + 0.5 * ftime*ftime) / ftime; //calculate horizontal vel
-					double hvel = (dist / ftime) * -0.8; //calculate vertical vel
-					tracer.VelFromAngle(hvel,angle); //throw the body towards the player
+					double hvel = (dist / ftime) * -0.7 * tracer.gravity;		//calculate horizontal vel
+					double vvel = (vdisp + 0.5 * ftime*ftime) / ftime; //calculate vertical vel
+					//Reduce velocity based on how heavy the monster is:
+					double velMul = Clamp(LinearMap(tracer.mass,300,1000,1.0,0.0), 0.0, 1.0);
+					hvel *= velMul;
+					vvel *= velMul; 
+					//Throw the body towards the player:
+					tracer.VelFromAngle(hvel,angle);
 					tracer.vel.z = vvel;
 					//if we hit a body with a Killer projectile, spawn gold every 3 times Killer hits it:
-					let kft = KillerFlyTarget(tracer);
+					let kft = PK_KillerFlyTarget(tracer);
 					if (kft) {
 						kft.hitcounter++;
 						if (tracer.target && kft.hitcounter % 3 == 0) {
@@ -331,7 +336,7 @@ Class PK_Killer : PK_Projectile {
 			wait;
 		Death:
 			KILR A -1 {
-				if (tracer && tracer.GetClassName() == "KillerFlyTarget")
+				if (tracer && tracer.GetClassName() == "PK_KillerFlyTarget")
 					return ResolveState("XDeath");
 				A_StartSound("weapons/painkiller/stuck",attenuation:2);
 				return ResolveState(null);
@@ -365,7 +370,7 @@ Class PK_KillerFlare : PK_ProjFlare {
 }
 
 
-Class KillerFlyTarget : Actor {
+Class PK_KillerFlyTarget : Actor {
 	int hitcounter;
 	Default {
 		+NODAMAGE
@@ -374,6 +379,7 @@ Class KillerFlyTarget : Actor {
 		+DROPOFF
 		+NOTELEPORT
 		renderstyle 'none';
+		gravity 0.7;
 	}
 	override void Tick() {
 		super.Tick();
