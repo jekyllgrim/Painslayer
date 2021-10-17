@@ -399,7 +399,7 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 			kft = PK_KillerFlyTarget(Spawn("PK_KillerFlyTarget",master.pos));
 			if (kft) {
 				kft.target = master;
-				kft.A_SetSize(master.radius,master.default.height*0.5);
+				kft.A_SetSize(master.radius*1.15,master.default.height*0.6);
 				kft.vel = master.vel;
 				kft.mass = master.mass;
 			}
