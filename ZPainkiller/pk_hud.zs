@@ -15,9 +15,19 @@ Class PainkillerHUD : BaseStatusBar {
 	private int soulscol;
 	private bool isDemon;
 	private PK_Mainhandler mainhandler;
-	protected transient CVar aspectScale;
+	private transient CVar aspectScale;
 	
 	PK_CardControl cardcontrol;
+	
+	private Actor nearestBoss;
+	private Shape2D healthBarShape;
+	private ui double healthBarFraction;
+	private ui double prevHealthBarFraction;
+	private vector2 hpBarScale;
+	private TextureID hpBarBackground;
+	private TextureID hpBartex;
+	private name bossSpriteName;
+	private TextureID bossSprite;
 	
 	void DrawMonsterArrow(vector2 arrowPos = (0,23), vector2 shadowofs = (0,0)) {
 		int fflags = (hudstate == HUD_StatusBar) ? DI_SCREEN_CENTER_BOTTOM : DI_SCREEN_HCENTER;
@@ -101,6 +111,9 @@ Class PainkillerHUD : BaseStatusBar {
 	override void Init() {
 		super.Init();
 		Font fnt = "PKHNUMS";
+		hpBarBackground = TexMan.CheckForTexture("pkxhpbkg");
+		hpBartex = TexMan.CheckForTexture("pkxhpbar");
+		hpBarScale = TexMan.GetScaledSize(hpBartex);
 		mIndexFont = HUDFont.Create(fnt, fnt.GetCharWidth("0"), true,1 ,1);
 		mStatFont = HUDFont.Create(fnt, fnt.GetCharWidth("0"), true,1 ,1);
 	}
@@ -150,38 +163,73 @@ Class PainkillerHUD : BaseStatusBar {
 		//get souls amount:
 		let dmcont = PK_DemonMorphControl(player.FindInventory("PK_DemonMorphControl"));
 		if (dmcont) {
-			soulsnum = dmcont.pk_souls;
+			soulsnum = dmcont.GetSouls();
 			//make souls number red if it's only 3 souls before turning into demon:
-			soulscol = (soulsnum >= dmcont.pk_minsouls) ? Font.CR_RED : Font.CR_UNTRANSLATED;
+			soulscol = (soulsnum >= dmcont.GetMinSouls()) ? Font.CR_RED : Font.CR_UNTRANSLATED;
 		}
 		if (hudstate == HUD_None)
 			return;
-		
+			
 		//get access to the array of all enemies from PK_Mainhandler:
 		if (!mainhandler)
 			mainhandler = PK_Mainhandler(EventHandler.Find("PK_Mainhandler"));
 		if (!mainhandler)
 			return;		
-		int enemies = mainhandler.allenemies.size();
-		if (enemies < 1)
-			return;
-		//check 2D distance to every monster in the array and find the closest one:
-		actor closestact;
-		double closestDist = double.infinity;
-		for (int i = 0; i < enemies; i++) {
-			let act = mainhandler.allenemies[i];
-			if (!act)
-				return;
-			int dist = player.Distance2DSquared(act);
-			if (closestDist > 0 && dist < closestDist) {
-				closestact = act;
-				closestDist = dist;
+
+		int bosses = mainhandler.allbosses.size();
+		if (bosses > 0) {
+			actor bossmonster;
+			double closestDist = 1400;
+			for (int i = 0; i < bosses; i++) {
+				let act = mainhandler.allbosses[i];
+				if (act && act.target) {
+					int dist = player.Distance2D(act);
+					if (closestDist > 0 && dist < closestDist) {
+						bossmonster = act;
+						closestDist = dist;
+					}
+				}
+			}
+			if (bossmonster) {
+				nearestBoss = bossmonster;
+				if (nearestBoss.SpawnState && nearestBoss.SpawnState.sprite) {
+					bossSprite = nearestBoss.SpawnState.GetSpriteTexture(2);
+					bossSpriteName = TexMan.GetName(bossSprite);
+				}
+				prevHealthBarFraction = healthBarFraction;
+				healthBarFraction = bossmonster.health*1. / bossmonster.GetMaxHealth(true);
+				
+				// Only update the shape if the health actually changed
+				if (prevHealthBarFraction != healthBarFraction)
+					UpdateHealthBar(healthBarShape, healthBarFraction);
+			}
+			else {
+				bossSpritename = '';
+				nearestBoss = null;
 			}
 		}
-		//define the angle for the monster compass arrow based on the relative position of the monster:
-		if (closestact) {
-			arrowangle = (Actor.DeltaAngle(player.angle, player.AngleTo(closestact)));
-			//console.printf("%s angle %d",closestact.GetClassName(),arrowangle);
+		if (nearestBoss)
+			return;
+		int enemies = mainhandler.allenemies.size();
+		if (enemies > 0) {
+			//check 2D distance to every monster in the array and find the closest one:
+			actor closestMonst;
+			double closestDist = double.infinity;
+			for (int i = 0; i < enemies; i++) {
+				let act = mainhandler.allenemies[i];
+				if (act) {
+					int dist = player.Distance2DSquared(act);
+					if (closestDist > 0 && dist < closestDist) {
+						closestMonst = act;
+						closestDist = dist;
+					}
+				}
+			}
+			//define the angle for the monster compass arrow based on the relative position of the monster:
+			if (closestMonst) {
+				arrowangle = (Actor.DeltaAngle(player.angle, player.AngleTo(closestMonst)));
+				//console.printf("%s angle %d",closestMonst.GetClassName(),arrowangle);
+			}
 		}
 	}
 	
@@ -269,8 +317,9 @@ Class PainkillerHUD : BaseStatusBar {
 	protected void DrawTopElements() {
 		//draw the compass background:
 		PK_DrawImage("pkxtop0",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);
-		//draw the compass arrow (in 3 layers):
-		DrawMonsterArrow(shadowofs: (3,3));
+		//otherwise draw the compass arrow (in 3 layers):
+		if (!nearestBoss)
+			DrawMonsterArrow(shadowofs: (3,3));
 		
 		//draw the top bar and the compass outline:
 		PK_DrawImage("pkxtop1",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);	//main top
@@ -281,7 +330,84 @@ Class PainkillerHUD : BaseStatusBar {
 		//draw souls and gold values on the top bar:
 		PK_DrawString(mStatFont, String.Format("%05d",goldnum), (-38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_RIGHT,translation:font.CR_UNTRANSLATED);			
 		PK_DrawString(mStatFont, String.Format("%05d",soulsnum), (38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_LEFT,translation:soulscol);
+		//if there's a boss around, draw healthbar for it:
+		if (nearestBoss)
+			DrawBossHealthBar();
 	}
+	
+	protected void DrawBossHealthBar() {
+		if (!nearestBoss)
+			return;
+		vector2 hudscale = GetHUDScale();
+		Vector2 barScale = (hpBarScale.x * hudscale.x, hpBarScale.y * hudscale.y);
+		int posx = Screen.GetWidth() / 2.;
+		int posy = hpBarScale.y / 2 * hudscale.y;
+		Screen.DrawTexture(hpBarBackground, false, posx, posy,
+			DTA_CenterOffset, true,
+			DTA_DestWidthF, barScale.x,
+			DTA_DestHeightF, barScale.y
+		);
+		
+		// Correctly scale the shape and shift it to the health bar background's location:
+		let transform = new("Shape2DTransform");
+		transform.Scale(barScale * 0.5); //for some reason without * 0.5 the healthbar is twice as big
+		transform.Translate((posx,posy));
+		healthBarShape.SetTransform(transform);
+		
+		// Draw health bar:
+		Screen.DrawShape(hpbartex, false, healthBarShape);
+		
+		//Draw boss sprite:
+		Screen.DrawTexture(bossSprite, false, posx, posy,
+			DTA_CenterOffset, true,
+			DTA_TranslationIndex, Translation.GetID('PK_HUDBoss'),
+			DTA_DestWidthF, barScale.x * 0.6,
+			DTA_DestHeightF, barScale.y * 0.8
+		);
+	}
+	
+	void UpdateHealthBar(out Shape2D hb, double frac = 1, uint segments = 100)
+	{
+		// Create the circle if we don't have one yet
+		if (!hb)
+		{
+			hb = new("Shape2D");
+			
+			// What starting angle you use and which direction you go (clockwise or counter clockwise)
+			// will determine where the healthbar starts and which direction it removes segments
+			double angStep = -360. / segments; // + = bar decreases counter clockwise, - = bar decreases clockwise
+			double ang = 270; // 90 = bottom, 270 = top, 0 = right, 180 = left
+			
+			// Anchor a point in the middle
+			hb.PushVertex((0,0));
+			hb.PushCoord((0.5,0.5));
+			
+			// Circumference points
+			for (uint i = 0; i < segments; ++i)
+			{
+				double c = cos(ang);
+				double s = sin(ang);
+				
+				hb.PushVertex((c,s));
+				hb.PushCoord(((c+1)/2, (s+1)/2));
+				
+				ang += angStep;
+			}
+		}
+		
+		// Only draw segments up to a fraction of our total segments based on remaining health
+		hb.Clear(Shape2D.C_Indices);
+		int maxSegments = ceil(segments * frac);
+		for (uint i = 1; i <= maxSegments; ++i)
+		{
+			int next = i+1;
+			if (next > segments)
+				next -= segments;
+			
+			hb.PushTriangle(0, i, next); // Use the middle anchor point
+		}
+	}
+		
 
 	int GetAmmoColor(Inventory ammoclass) {		
 		int ammoColor;
