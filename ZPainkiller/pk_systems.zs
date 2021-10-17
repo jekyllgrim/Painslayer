@@ -96,14 +96,44 @@ Class PK_DemonTargetControl : PK_InventoryToken {
 }
 
 Class PK_DemonMorphControl : PK_InventoryToken {
-	int pk_souls;
-	int pk_minsouls;
-	int pk_fullsouls;
+	//These are private because I want them to be changeable only in a very controlled manner:
+	private int pk_souls;
+	private int pk_minsouls;
+	private int pk_fullsouls;
 	property minsouls : pk_minsouls;
 	property fullsouls : pk_fullsouls;
 	Default {
 		PK_DemonMorphControl.minsouls 64;
 		PK_DemonMorphControl.fullsouls 66;
+	}
+	//Some public methods to manipulate the soul amounts:
+	clearscope int GetSouls() {
+		return pk_souls;
+	}
+	clearscope int GetMinSouls() {
+		return pk_minsouls;
+	}
+	clearscope int GetFullSouls() {
+		return pk_fullsouls;
+	}
+	void ResetSouls() {
+		pk_souls = 0;
+	}
+	void ResetSoulRequirements() {
+		pk_minsouls = default.pk_minsouls;
+		pk_fullsouls = default.pk_fullsouls;
+	}
+	//Dark Soul silver card is the only source allowed to change
+	//the soul requirement for Demon Morph:
+	bool SetSoulRequirements(actor caller, int newmax) {
+		if (!(caller is "PKC_DarkSoul"))
+			return false;
+		pk_fullsouls = newmax;
+		pk_minsouls = pk_fullsouls - 2;
+		return (pk_minsouls == newmax - 2 && pk_fullsouls == newmax);
+	}		
+	clearscope bool CheckDemon() {
+		return pk_souls >= pk_fullsouls;
 	}
 	override void Tick() {}
 	void GiveSoul(int amount = 1) {
@@ -146,9 +176,9 @@ Class PK_DemonWeapon : PKWeapon {
 			owner.A_StopSound(i);
 		//get the "first flash" and "activate demon" numbers of souls (64 and 66 by default)
 		control = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
-		minsouls = control.pk_minsouls;
-		fullsouls = control.pk_fullsouls;
-		cursouls = control.pk_souls;
+		minsouls = control.GetMinSouls();
+		fullsouls = control.GetFullSouls();
+		cursouls = control.GetSouls();
 		dur = 25;
 		owner.A_StartSound("demon/start",CHAN_AUTO,flags:CHANF_LOCAL);		
 		prevweapon = owner.player.readyweapon;
@@ -246,7 +276,7 @@ Class PK_DemonWeapon : PKWeapon {
 			}
 			//and this handles the actual removal of the effect once the duration has passed
 			else if (cursouls >= fullsouls && GetAge() >= 35*dur) {
-				control.pk_souls = Clamp(control.pk_souls - fullsouls,0,fullsouls);
+				control.ResetSouls();
 				owner.player.readyweapon = prevweapon;
 				let psp = owner.player.GetPsprite(PSP_WEAPON);
 				if (psp) {
@@ -306,7 +336,6 @@ Class PK_DemonWeapon : PKWeapon {
 		owner.player.SetPsprite(PSP_DEMON,null);
 		super.DetachFromOwner();
 	}
-	private double wzoom;
 	states {
 	Ready:
 		TNT1 A 1 {
@@ -316,7 +345,7 @@ Class PK_DemonWeapon : PKWeapon {
 			psp.y = WEAPONTOP;
 			A_WeaponOffset(0,0);
 			//don't make the weapon ready for firing if this is just a "demon morph preview":
-			if (invoker.control && invoker.control.pk_souls >= invoker.fullsouls)
+			if (invoker.control && invoker.control.CheckDemon())
 				A_WeaponReady(WRF_NOSWITCH|WRF_NOBOB);
 		}
 		loop;
@@ -328,8 +357,6 @@ Class PK_DemonWeapon : PKWeapon {
 			A_FireBullets(5,5,50,50,"PK_NullPuff",FBF_NORANDOM);
 			invoker.rippleTimer = 0;
 			invoker.runRipple = true;
-			//invoker.wzoom = 1;
-			//A_ZoomFactor(invoker.wzoom,ZOOM_NOSCALETURNING|ZOOM_INSTANT);
 		}
 		goto ready;
 	DemonCross:
@@ -355,7 +382,7 @@ Class PK_DemonWeapon : PKWeapon {
 
 
 Class PK_EnemyDeathControl : PK_BaseActor {
-	KillerFlyTarget kft;
+	PK_KillerFlyTarget kft;
 	private int restcounter;
 	private int restlife;
 	private int maxlife;
@@ -368,11 +395,14 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 		restlife = 45;//random[cont](42,60);
 		maxlife = 35*7;//int(35*frandom[cont](6,10));
 		//spawn a hitbox for the Killer projectile to let the player juggle the corpse:
-		kft = KillerFlyTarget(Spawn("KillerFlyTarget",master.pos));
-		if (kft) {
-			kft.target = master;
-			kft.A_SetSize(master.radius,master.default.height*0.5);
-			kft.vel = master.vel;
+		if (!master.bBOSS) {
+			kft = PK_KillerFlyTarget(Spawn("PK_KillerFlyTarget",master.pos));
+			if (kft) {
+				kft.target = master;
+				kft.A_SetSize(master.radius,master.default.height*0.5);
+				kft.vel = master.vel;
+				kft.mass = master.mass;
+			}
 		}
 	}	
 	override void Tick () {
@@ -396,24 +426,29 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 			smkz = master.height;
 		}
 		//this handles death if killed in Demon Mode:
-		if (master.bKILLED && master.FindInventory("PK_DemonTargetControl")) {
-			for (int i = 40; i > 0; i--) {
-				smkz = master.default.height;
-				let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz)));
-				if (smk) {
-					smk.vel = (frandom[part](-0.4,0.4),frandom[part](-0.4,0.4),frandom[part](0,1));
-					smk.A_SetRenderstyle(1.0,Style_Stencil);
-					smk.SetShade("FF00FF");
-					smk.bBRIGHT = true;
+		if (master && master.bKILLED && master.target && master.target.CountInv("PK_DemonMorphControl")) {
+			//This should only happen if the killer is actually a demon, and not just getting
+			//a brief demon-mode preview:
+			let cont = PK_DemonMorphControl(master.target.FindInventory("PK_DemonMorphControl"));
+			if (cont && cont.CheckDemon()) {
+				for (int i = 40; i > 0; i--) {
+					smkz = master.default.height;
+					let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz)));
+					if (smk) {
+						smk.vel = (frandom[part](-0.4,0.4),frandom[part](-0.4,0.4),frandom[part](0,1));
+						smk.A_SetRenderstyle(1.0,Style_Stencil);
+						smk.SetShade("FF00FF");
+						smk.bBRIGHT = true;
+					}
 				}
+				master.A_NoBlocking();
+				master.destroy();
+				destroy();
+				return;
 			}
-			master.A_NoBlocking();
-			master.destroy();
-			destroy();
-			return;
 		}	
 		//this handles regular death:
-		else if (restcounter >= restlife || age > maxlife) {
+		if (restcounter >= restlife || age > maxlife) {
 			if (kft)
 				kft.destroy();
 			A_StartSound("world/bodypoof",CHAN_AUTO);
@@ -438,20 +473,6 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 				let soul = PK_Soul(Spawn("PK_Soul",pos+(0,0,pz)));
 				if (soul && master) {
 					soul.bearer = master.GetClass();
-					/*//define an amount between 1-20 based on monster's health (linearly mapped between 20-500):
-					double am = Clamp(LinearMap(double(master.SpawnHealth()), 20, 500, 1, 20), 1, 20);
-					soul.amount = am;
-					//slightly change soul's alpha and scale based on the resulting number:
-					soul.alpha = Clamp(LinearMap(am, 1, 20, 0.5, 1.5), 0.5 , 1.5);
-					soul.scale *= Clamp(LinearMap(am, 1, 20, 0.6, 1.15), 0.7, 1.15);
-					//if the amount is over 15, make the soul red:
-					if (am >= 15) {
-						soul.A_SetTranslation("PK_RedSoul");
-						//soul.A_SetRenderstyle(soul.alpha,Style_Shaded);
-						//soul.SetShade("FF0000");
-						soul.pickupsound = "pickups/soul/red";
-					}
-					console.printf("Spawned soul, master: %s, amount: %d",master.GetClassName(),soul.amount);*/
 				}
 			}
 			if (master)
@@ -752,15 +773,13 @@ Class PKC_DarkSoul : PK_BaseSilverCard {
 		let control = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
 		if (!control)
 			return;
-		control.pk_minsouls = 48;
-		control.pk_fullsouls = 50;
+		control.SetSoulRequirements(self,50);
 	}
 	override void RemoveCard() {
 		let control = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
 		if (!control)
 			return;
-		control.pk_minsouls = control.default.pk_minsouls;
-		control.pk_fullsouls = control.default.pk_fullsouls;
+		control.ResetSoulRequirements();
 	}
 }
 

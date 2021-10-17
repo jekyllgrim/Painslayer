@@ -54,6 +54,7 @@ Class PK_MainHandler : EventHandler {
 	
 	array <Actor> demontargets; //holds all monsters, players and enemy projectiles
 	array <Actor> allenemies; //only monsters
+	array <Actor> allbosses; //only boss monsters
 	array <PK_StakeProjectile> stakes; //stake projectiles
 	array <Inventory> keyitems; //pre-placed weapons and keys, to be displayed when the player picks up a Crystal Ball
 	
@@ -329,8 +330,11 @@ Class PK_MainHandler : EventHandler {
 			console.printf("actor at %f,%f,%f is a voodoo doll",act.pos.x,act.pos.y,act.pos.z);
 		}*/
 		//this is only used by the HUD compass:
-		if (act.bISMONSTER && !act.bFRIENDLY)
+		if (act.bISMONSTER && !act.bFRIENDLY) {
 			allenemies.push(act);
+			if (act.bBOSS)
+				allbosses.Push(act);
+		}
 		//monsters, projectiles and players can be subjected to various effects, such as Demon Morph or Haste, so put them in an array:
 		if (act.bISMONSTER || act.bMISSILE || (act.player && !IsVoodooDoll(PlayerPawn(act)))) {
 			demontargets.push(act);
@@ -345,9 +349,11 @@ Class PK_MainHandler : EventHandler {
 	}
 	override void WorldThingrevived(worldevent e) {
 		let act = e.thing;
-		if (!act || !act.bISMONSTER)
-			return;		
-		allenemies.push(act);
+		if (act.bISMONSTER && !act.bFRIENDLY) {
+			allenemies.push(act);
+			if (act.bBOSS)
+				allbosses.Push(act);
+		}
 	}
 	//spawn death effects on monster death and also delete them from the monster array
 	override void WorldThingDied(worldevent e) {
@@ -355,6 +361,8 @@ Class PK_MainHandler : EventHandler {
 		if (!act || !act.bISMONSTER)
 			return;		
 		allenemies.delete(allenemies.Find(act));
+		if (act.bBOSS)
+			allbosses.delete(allbosses.Find(act));
 		let edc = PK_EnemyDeathControl(Actor.Spawn("PK_EnemyDeathControl",act.pos));
 		if (edc)
 			edc.master = act;
@@ -440,9 +448,9 @@ Class PK_MainHandler : EventHandler {
 		let plr = player.mo;
 		let control = PK_DemonMorphControl(plr.FindInventory("PK_DemonMorphControl"));
 		if (control) {
-			control.pk_souls = 0;
+			control.ResetSouls();
 			if (pk_debugmessages)
-				console.printf("Soul count for player %d set to %d",plr.PlayerNumber(),control.pk_souls);
+				console.printf("Soul count for player %d set to %d",plr.PlayerNumber(),control.GetSouls());
 		}
 		if (pk_debugmessages)
 			console.printf("Removing demon weapon from player %d",plr.PlayerNumber());
@@ -549,6 +557,21 @@ Class PK_ReplacementHandler : EventHandler {
 			case 'InvulnerabilitySphere'		: e.Replacement = 'PK_Pentagram';  break;
 			case 'Backpack'		: e.Replacement = 'PK_AmmoPack';  break;
 			case 'RadSuit'			: e.Replacement = 'PK_AntiRadArmor';  break;
+			
+			case 'DeadCacodemon'	: e.Replacement = 'PK_BreakableChest'; break;
+			case 'DeadDemon'	: e.Replacement = 'PK_BreakableChest'; break;
+			case 'DeadDoomImp'	: e.Replacement = 'PK_BreakableChest'; break;
+			case 'DeadLostSoul'	: e.Replacement = 'PK_BreakableChest'; break;
+			case 'DeadMarine'	: e.Replacement = 'PK_BreakableChest'; break;
+			case 'DeadShotgunGuy'	: e.Replacement = 'PK_BreakableChest'; break;
+			case 'DeadZombieMan'	: e.Replacement = 'PK_BreakableChest'; break;
+			case 'GibbedMarine'	: e.Replacement = 'PK_BreakableChest'; break;
+			case 'GibbedMarineExtra'	: e.Replacement = 'PK_BreakableChest'; break;
+			
+			//SmallBloodPool
+			//Gibs
+			//ColonGibs
+			//BrainStem
 		}
 		//e.IsFinal = true;
 	}
