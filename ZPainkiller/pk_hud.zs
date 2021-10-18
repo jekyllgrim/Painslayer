@@ -30,6 +30,8 @@ Class PainkillerHUD : BaseStatusBar {
 	private TextureID bossSprite;
 	
 	void DrawMonsterArrow(vector2 arrowPos = (0,23), vector2 shadowofs = (0,0)) {
+		if (nearestBoss)
+			return;
 		int fflags = (hudstate == HUD_StatusBar) ? DI_SCREEN_CENTER_BOTTOM : DI_SCREEN_HCENTER;
 		vector2 arrowscale = (1, 1);
 		if (hudstate == HUD_StatusBar)
@@ -46,11 +48,8 @@ Class PainkillerHUD : BaseStatusBar {
 		DrawImageRotated("pkharrow", arrowPos, fflags, arrowangle, scale: arrowscale);
 	}
 	
-	/*	My HUD was originally coded using StatusBar's DrawImage, DrawString and DrawInventoryIcon,
-		but later I realized I need to ignore "Preserve HUD aspect ratio" option because it leads to
-		Y-stretching of pixels, which ruins round HUD elements.
-		Since I didn't feel like rewriting the whole HUD, functions below are super-lazy wrappers
-		that simply multiply vertical scale and pos by ~0.83 if "Preserve HUD scale" option is enabled.
+	/*	I originally used these wrappers to counteract Y-stretching but eventually gave up
+		since I couldn't get red of it on rotating elements.
 	*/
 	void PK_DrawImage(String texture, Vector2 pos, int flags = 0, double Alpha = 1., Vector2 box = (-1, -1), Vector2 scale = (1, 1)) {
 		/*if (aspectScale.GetBool() == true) {
@@ -170,12 +169,13 @@ Class PainkillerHUD : BaseStatusBar {
 		if (hudstate == HUD_None)
 			return;
 			
-		//get access to the array of all enemies from PK_Mainhandler:
+		//get pointer to PK_Mainhandler:
 		if (!mainhandler)
 			mainhandler = PK_Mainhandler(EventHandler.Find("PK_Mainhandler"));
 		if (!mainhandler)
 			return;		
 
+		//Find nearest boss, if any:
 		int bosses = mainhandler.allbosses.size();
 		if (bosses > 0) {
 			actor bossmonster;
@@ -210,6 +210,8 @@ Class PainkillerHUD : BaseStatusBar {
 		}
 		if (nearestBoss)
 			return;
+		
+		//If no bosses around, find nearest regular monster:
 		int enemies = mainhandler.allenemies.size();
 		if (enemies > 0) {
 			//check 2D distance to every monster in the array and find the closest one:
@@ -289,6 +291,8 @@ Class PainkillerHUD : BaseStatusBar {
 			//souls counter above ammo:
 			PK_DrawImage("pkhsouls",(-5,-38),DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_CENTER);
 			PK_DrawString(mStatFont, String.Format("%05d",soulsnum), (-10,-43),DI_SCREEN_RIGHT_BOTTOM|DI_TEXT_ALIGN_RIGHT,translation:soulscol);
+			
+			DrawBossHealthBar(true);
 		}		
 		
 		//AMMO
@@ -318,8 +322,7 @@ Class PainkillerHUD : BaseStatusBar {
 		//draw the compass background:
 		PK_DrawImage("pkxtop0",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);
 		//otherwise draw the compass arrow (in 3 layers):
-		if (!nearestBoss)
-			DrawMonsterArrow(shadowofs: (3,3));
+		DrawMonsterArrow(shadowofs: (3,3));
 		
 		//draw the top bar and the compass outline:
 		PK_DrawImage("pkxtop1",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);	//main top
@@ -331,17 +334,18 @@ Class PainkillerHUD : BaseStatusBar {
 		PK_DrawString(mStatFont, String.Format("%05d",goldnum), (-38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_RIGHT,translation:font.CR_UNTRANSLATED);			
 		PK_DrawString(mStatFont, String.Format("%05d",soulsnum), (38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_LEFT,translation:soulscol);
 		//if there's a boss around, draw healthbar for it:
-		if (nearestBoss)
-			DrawBossHealthBar();
+		DrawBossHealthBar();
 	}
 	
-	protected void DrawBossHealthBar() {
+	protected void DrawBossHealthBar(bool bottom = false) {
 		if (!nearestBoss)
 			return;
 		vector2 hudscale = GetHUDScale();
 		Vector2 barScale = (hpBarScale.x * hudscale.x, hpBarScale.y * hudscale.y);
 		int posx = Screen.GetWidth() / 2.;
 		int posy = hpBarScale.y / 2 * hudscale.y;
+		if (bottom)
+			posy = Screen.GetHeight() - posy;
 		Screen.DrawTexture(hpBarBackground, false, posx, posy,
 			DTA_CenterOffset, true,
 			DTA_DestWidthF, barScale.x,
@@ -358,12 +362,21 @@ Class PainkillerHUD : BaseStatusBar {
 		Screen.DrawShape(hpbartex, false, healthBarShape);
 		
 		//Draw boss sprite:
+		vector2 spritescale = ScaleToBox(bossSprite,barScale.x,barScale.y) * 0.65;
 		Screen.DrawTexture(bossSprite, false, posx, posy,
 			DTA_CenterOffset, true,
 			DTA_TranslationIndex, Translation.GetID('PK_HUDBoss'),
-			DTA_DestWidthF, barScale.x * 0.6,
-			DTA_DestHeightF, barScale.y * 0.8
+			DTA_DestWidthF, spritescale.x,
+			DTA_DestHeightF, spritescale.y
 		);
+	}
+	
+	Vector2 ScaleToBox(TextureID tex, int w, int h)
+	{
+	  Vector2 size = TexMan.GetScaledSize(tex);
+	  double ratio = min(w / size.x, h / size.y*1.2);
+	  
+	  return size * ratio;
 	}
 	
 	void UpdateHealthBar(out Shape2D hb, double frac = 1, uint segments = 100)
