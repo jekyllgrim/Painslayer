@@ -1,8 +1,6 @@
 Class PainkillerHUD : BaseStatusBar {
 	const noYStretch = 0.833333;
 	const PWICONSIZE = 18;
-	//const PKHUDwidth = 320;
-	//const PKHUDheight = 200;
 		
 	HUDFont mIndexFont;
 	HUDFont mStatFont;
@@ -41,10 +39,13 @@ Class PainkillerHUD : BaseStatusBar {
 			arrowPos.y *= noYStretch;
 		}*/
 		//draw shadow:
+		//TextureID arrowtex = TexMan.CheckForTexture("pkharrow",TexMan.Type_Any);
 		if (shadowofs != (0,0)) {
+			//DrawTextureRotated(arrowtex, arrowPos+shadowOfs, fflags, arrowangle, scale: arrowscale, col:color(128,0,0,0));	
 			DrawImageRotated("pkharrow", arrowPos+shadowOfs, fflags, arrowangle, scale: arrowscale, col:color(128,0,0,0));	
 		}
 		//draw arrow:
+		//DrawTextureRotated(arrowtex, arrowPos, fflags, arrowangle, scale: arrowscale);
 		DrawImageRotated("pkharrow", arrowPos, fflags, arrowangle, scale: arrowscale);
 	}
 	
@@ -119,9 +120,9 @@ Class PainkillerHUD : BaseStatusBar {
 	
 	override void Draw (int state, double TicFrac) {
 		Super.Draw (state, TicFrac);
-		/*if (aspectScale == null)
+		if (aspectScale == null)
 			aspectScale = CVar.GetCvar('hud_aspectscale',CPlayer);
-		*/
+		
 		hudstate = state;
 		//the hud is completely skipped if automap is active or the player
 		//is in a demon mode and debug messages aren't active:
@@ -139,10 +140,7 @@ Class PainkillerHUD : BaseStatusBar {
 		//DrawEquippedCards();
 		DrawActiveGoldenCards();
 		if (state != HUD_AltHud) {
-			vector2 keyofs = (1920,920);
-			if (state == HUD_StatusBar)
-				keyofs.y -= 40;
-			DrawKeys(keyofs.x,keyofs.y);
+			DrawKeys();
 		}
 		fullscreenOffsets = true;
 	}
@@ -379,7 +377,7 @@ Class PainkillerHUD : BaseStatusBar {
 	  return size * ratio;
 	}
 	
-	void UpdateHealthBar(out Shape2D hb, double frac = 1, uint segments = 100)
+	private void UpdateHealthBar(out Shape2D hb, double frac = 1, uint segments = 100)
 	{
 		// Create the circle if we don't have one yet
 		if (!hb)
@@ -431,86 +429,48 @@ Class PainkillerHUD : BaseStatusBar {
 		return ammoColor;
 	}
 
-	//functions copied from AltHud (with some tweaks):
-	virtual bool DrawOneKey(int xo, int x, int y, in out int c, Key inv)
-	{
-		TextureID icon;
-		
-		if (!inv) return false;
-		
+	//Roughtly copied from AltHUD but returns the texture, not a bool:
+	private TextureID GetKeyTexture(Key inv) {		
+		TextureID icon;	
+		if (!inv) 
+			return icon;
 		TextureID AltIcon = inv.AltHUDIcon;
-		if (!AltIcon.Exists()) return false;	// Setting a non-existent AltIcon hides this key.
+		if (!AltIcon.Exists()) 
+			return icon;	// Setting a non-existent AltIcon hides this key.
 
 		if (AltIcon.isValid()) 
-		{
 			icon = AltIcon;
-		}
-		else if (inv.SpawnState && inv.SpawnState.sprite!=0)
-		{
+		else if (inv.SpawnState && inv.SpawnState.sprite) {
 			let state = inv.SpawnState;
-			if (state != null) icon = state.GetSpriteTexture(0);
-			else icon.SetNull();
+			if (state) 
+				icon = state.GetSpriteTexture(0);
+			else 
+				icon.SetNull();
 		}
 		// missing sprites map to TNT1A0. So if that gets encountered, use the default icon instead.
-		if (icon.isNull() || TexMan.GetName(icon) == 'tnt1a0') icon = inv.Icon; 
+		if (icon.isNull() || TexMan.GetName(icon) == 'tnt1a0') 
+			icon = inv.Icon; 
 
-		if (icon.isValid())
-		{
-			DrawImageToBox(icon, x, y, 20, 26);
-			return true;
-		}
-		return false;
+		return icon;
 	}
 	
-	void DrawKeys(int x, int y) {
-		int yo = y;
-		int xo = x;
-		int i;
-		int c = 0;
-		Key inv;
-		
+	void DrawKeys() {
 		if (deathmatch)
-			return;
+			return;		
+		int hofs = 1;
+		vector2 iconpos = (0, -34);
+		if (hudstate == HUD_StatusBar)
+			iconpos.y -= 10;
+		
 		int count = Key.GetKeyTypeCount();			
-		// Go through the key in reverse order of definition, because we start at the right.
-		for(int i = count-1; i >= 0; i--)	{
-			if ((inv = Key(CPlayer.mo.FindInventory(Key.GetKeyType(i)))) && DrawOneKey(xo, x - 22, y, c, inv)) {
-				x -= 22;
-				if (++c >= 10)	{
-					x = xo;
-					y -= 11;
-					c = 0;
-				}
-			}
+		for(int i = 0; i < count; i++)	{
+			Key inv = Key(CPlayer.mo.FindInventory(Key.GetKeyType(i)));
+			TextureID icon = GetKeyTexture(inv);
+			if (icon.IsNull()) 
+				continue;
+			vector2 iconsize = TexMan.GetScaledSize(icon) * 0.5;
+			DrawTexture(icon, iconpos, flags: DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_RIGHT_BOTTOM, scale: (0.5, 0.5));
+			iconpos.x -= (iconsize.x + hofs);
 		}
-		if (x == xo && y != yo) 
-			y += 11;
-	}
-	
-	void DrawImageToBox(TextureID tex, int x, int y, int w, int h, double trans = 0.75, bool animate = false)	{
-		double scale1, scale2;
-		if (!tex)
-			return;
-		let texsize = TexMan.GetScaledSize(tex);
-		scale1 = w / texsize.X;
-		scale2 = h / texsize.Y;
-
-		/*if (w < texsize.X) scale1 = w / texsize.X;
-		else scale1 = 1.;
-		if (h < texsize.Y) scale2 = h / texsize.Y;
-		else scale2 = 1.;
-		scale1 = min(scale1, scale2);
-		if (scale2 < scale1) scale1=scale2;*/
-
-		x += w >> 1;
-		y += h;
-
-		w = (int)(texsize.X * scale1);
-		h = (int)(texsize.Y * scale1);
-
-		screen.DrawTexture(tex, animate, x, y,
-			DTA_KeepRatio, true,
-			DTA_VirtualWidth, 1920, DTA_VirtualHeight, 1080, DTA_Alpha, trans, 
-			DTA_DestWidth, w, DTA_DestHeight, h, DTA_CenterBottomOffset, 1);
 	}
 }
