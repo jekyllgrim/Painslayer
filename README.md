@@ -189,6 +189,8 @@ All sounds used in Painslayer are owned by People Can Fly and are used under Fai
 
 **Lewisk3**: [StatusBarScreen](https://github.com/Lewisk3/StatusBarScreen)
 
+Boondolr: Boss healthbar code, scripting help
+
 phantombeta, Gutawer: [ZForms](https://gitlab.com/Gutawer/gzdoom-zforms)
 
 Nero: [Tooltips](https://github.com/Saican/Tooltips/tree/master)
