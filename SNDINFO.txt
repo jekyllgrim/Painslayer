@@ -365,6 +365,15 @@ goldvbig1	"sounds/items/gold/item-jewelry-cups.wav"
 goldvbig2	"sounds/items/gold/item-jewelry-cups2.wav"
 
 
+
+// BREAKABLES
+
+$random props/chest/death { breakchest1 breakchest2 breakchest3 }
+breakchest1 "sounds/items/breakables/chest-wood-impact1.wav"
+breakchest2 "sounds/items/breakables/chest-wood-impact2.wav"
+breakchest3 "sounds/items/breakables/chest-wood-impact3.wav"
+
+
 ///SPECIAL\\\
 
 special/demonmorph/start	DEMNSTRT
