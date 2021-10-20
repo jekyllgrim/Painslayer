@@ -12,10 +12,9 @@ Class PK_ElectroDriver : PKWeapon {
 		weapon.ammotype2 "PK_CellAmmo";
 		weapon.ammogive2 40;
 		weapon.ammouse2 1;
-		scale 0.23;
 		inventory.pickupmessage "$PKI_ELECTRODRIVER";
 		inventory.pickupsound "pickups/weapons/eldriver";
-		inventory.icon "PWICD0";
+		inventory.icon "PKWID0";
 		Tag "$PK_ELECTRODRIVER_TAG";
 		Obituary "$PKO_ELECTRO";
 	}
@@ -86,7 +85,7 @@ Class PK_ElectroDriver : PKWeapon {
 	}
 	states {
 	Spawn:
-		PWIC D -1;
+		PKWI D -1;
 		stop;
 	Ready:
 		ELDR A 1 {

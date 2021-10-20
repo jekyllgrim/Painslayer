@@ -21,7 +21,7 @@ Class PK_Rifle : PKWeapon {
 		weapon.ammogive2	100;
 		inventory.pickupmessage "$PKI_RIFLE";
 		inventory.pickupsound "pickups/weapons/rifle";
-		inventory.icon "PWICE0";
+		inventory.icon "PKWIE0";
 		Tag "$PK_RIFLE_TAG";
 		Obituary "$PKO_RIFLE";
 	}
@@ -127,7 +127,7 @@ Class PK_Rifle : PKWeapon {
 	}
 	states {
 	Spawn:
-		PWIC E -1;
+		PKWI E -1;
 		stop;
 	Select:
 		TNT1 A 0 {

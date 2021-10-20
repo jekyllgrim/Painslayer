@@ -10,17 +10,16 @@ Class PK_Stakegun : PKWeapon {
 		weapon.ammotype2	"PK_GrenadeAmmo";
 		weapon.ammogive2	2;
 		weapon.ammouse2		1;
-		scale 0.23;
 		inventory.pickupmessage "$PKI_STAKEGUN";
 		inventory.pickupsound "pickups/weapons/stakegun";
-		inventory.icon "PWICB0";
+		inventory.icon "PKWIB0";
 		Tag "$PK_STAKEGUN_TAG";
 	}
 	states {
 		Cache:
 			PSGT AHIJKLMN 0;
 		Spawn:
-			PWIC B -1;
+			PKWI B -1;
 			stop;
 		Ready:
 			PSGN A 1 {

@@ -12,13 +12,13 @@ Class PK_Painkiller : PKWeapon {
 		Tag "Painkiller";
 		weapon.slotnumber 1;
 		inventory.pickupmessage "Picked up Painkiller";
-		inventory.icon "pkxpkill";
+		inventory.icon "PKWIG0";
 		Tag "$PK_PAINKILLER_TAG";
 		+PKWeapon.NOICON
 	}
 	states {
 		Spawn:
-			BAL1 A -1;
+			PKWI G -1;
 			stop;
 		BeamFlare:
 			PKOF A -1 bright {

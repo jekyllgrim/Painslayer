@@ -10,10 +10,9 @@ Class PK_Shotgun : PKWeapon {
 		weapon.ammotype2 "PK_FreezerAmmo";
 		weapon.ammogive2 5;
 		weapon.ammouse2 1;
-		scale 0.23;
 		inventory.pickupmessage "$PKI_SHOTGUN";
 		inventory.pickupsound "pickups/weapons/shotgun";
-		inventory.icon "PWICA0";
+		inventory.icon "PKWIA0";
 		Tag "$PK_SHOTGUN_TAG";
 		Obituary "$PKO_SHOTGUN";
 	}
@@ -27,7 +26,7 @@ Class PK_Shotgun : PKWeapon {
 	}
 	states {
 	Spawn:
-		PWIC A -1;
+		PKWI A -1;
 		stop;
 	SpawnSp:
 		PSHZ ABCDEFGH 4;

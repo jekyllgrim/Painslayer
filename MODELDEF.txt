@@ -10,35 +10,35 @@ Model PK_Painkiller {
 	rotation-vector 0.1 1 0
 	rotation-speed 0.5
 	
-	FrameIndex BAL1 A 0 0
+	FrameIndex PKWI G 0 0
 }
 Model PK_Shotgun {
 	Path "models/shotgun"
 	Model 0 "item_shotgun.obj"
 	Skin 0 "item_shotgun.png"
-	Scale 3 3 3
-	ZOffset 64
+	Scale 0.85 0.85 0.85
+	ZOffset 16
 	USEACTORROLL
 	USEACTORPITCH
 	ROTATING
 	rotation-vector 0.1 1 0
 	rotation-speed 0.5
 	
-	FrameIndex PWIC A 0 0
+	FrameIndex PKWI A 0 0
 }
 Model PK_Stakegun {
 	AngleOffset 90
 	Path "models/stakegun"
 	Model 0 "item_stakegun.obj"
-	Scale 3 3 3
-	ZOffset 64
+	Scale 0.85 0.85 0.85
+	ZOffset 16
 	USEACTORROLL
 	USEACTORPITCH
 	ROTATING
 	rotation-vector 0.1 1 0
 	rotation-speed 0.5
 	
-	FrameIndex PWIC B 0 0
+	FrameIndex PKWI B 0 0
 }
 Model PK_Chaingun {
 	AngleOffset 90
@@ -53,26 +53,12 @@ Model PK_Chaingun {
 	rotation-vector 0.1 1 0
 	rotation-speed 0.5
 	
-	FrameIndex PWIC C 0 0
+	FrameIndex PKWI C 0 0
 }
 Model PK_Electrodriver {
 	Path "models/Electrodriver"
 	Model 0 "item_Electrodriver.obj"
-	Scale 2.2 2.2 2.2
-	ZOffset 64
-	USEACTORROLL
-	USEACTORPITCH
-	ROTATING
-	rotation-vector 0.1 1 0
-	rotation-speed 0.5
-	
-	FrameIndex PWIC D 0 0
-}
-Model PK_Rifle {
-	Path "models/Rifle"
-	Model 0 "item_Rifle.obj"
-	Skin 0 "item_Rifle.png"
-	Scale 0.5 0.5 0.5
+	Scale 0.7 0.7 0.7
 	ZOffset 16
 	USEACTORROLL
 	USEACTORPITCH
@@ -80,21 +66,35 @@ Model PK_Rifle {
 	rotation-vector 0.1 1 0
 	rotation-speed 0.5
 	
-	FrameIndex PWIC E 0 0
+	FrameIndex PKWI D 0 0
 }
-Model PK_Boltgun {
-	Path "models/Boltgun"
-	Model 0 "item_Boltgun.obj"
-	Skin 0 "item_Boltgun.png"
-	Scale 2.5 2.5 2.5
-	ZOffset 70
+Model PK_Rifle {
+	Path "models/Rifle"
+	Model 0 "item_Rifle.obj"
+	Skin 0 "item_Rifle.png"
+	Scale 0.65 0.65 0.65
+	ZOffset 16
 	USEACTORROLL
 	USEACTORPITCH
 	ROTATING
 	rotation-vector 0.1 1 0
 	rotation-speed 0.5
 	
-	FrameIndex PWIC F 0 0
+	FrameIndex PKWI E 0 0
+}
+Model PK_Boltgun {
+	Path "models/Boltgun"
+	Model 0 "item_Boltgun.obj"
+	Skin 0 "item_Boltgun.png"
+	Scale 0.8 0.8 0.8
+	ZOffset 16
+	USEACTORROLL
+	USEACTORPITCH
+	ROTATING
+	rotation-vector 0.1 1 0
+	rotation-speed 0.5
+	
+	FrameIndex PKWI F 0 0
 }
 
 Model PK_RicochetBullet {

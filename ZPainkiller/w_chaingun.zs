@@ -17,7 +17,7 @@ Class PK_Chaingun : PKWeapon {
 		weapon.ammogive2	100;		
 		inventory.pickupmessage "$PKI_CHAINGUN";
 		inventory.pickupsound "pickups/weapons/chaingun";
-		inventory.icon "PWICC0";
+		inventory.icon "PKWIC0";
 		Tag "$PK_CHAINGUN_TAG";
 		Obituary "$PKO_CHAINGUN";
 	}
@@ -53,7 +53,7 @@ Class PK_Chaingun : PKWeapon {
 	}
 	States {
 	Spawn:
-		PWIC C -1;
+		PKWI C -1;
 		stop;
 	Deselect:
 		TNT1 A 0 {

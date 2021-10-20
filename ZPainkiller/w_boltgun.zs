@@ -16,10 +16,9 @@ Class PK_Boltgun : PKWeapon {
 		weapon.ammotype2	"PK_BombAmmo";
 		weapon.ammogive2	10;
 		weapon.ammouse2		10;
-		scale 0.23;
 		inventory.pickupmessage "$PKI_BOLTGUN";
 		inventory.pickupsound "pickups/weapons/Boltgun";
-		inventory.icon "PWICF0";
+		inventory.icon "PKWIF0";
 		Tag "$PK_BOLTGUN_TAG";
 	}
 	override void DoEffect() {
@@ -55,7 +54,7 @@ Class PK_Boltgun : PKWeapon {
 		BGU1 ABCDEFGHIIJKLMNOPQRST 0;
 		BGU2 ABCDEFGHIIJKLMNOPQRST 0;		
 	Spawn:
-		PWIC F -1;
+		PKWI F -1;
 		stop;
 	Deselect:
 		TNT1 A 0 {
