@@ -209,8 +209,6 @@ Class PK_FrozenChunk : PK_SmallDebris {
 		}
 	}
 	states {
-	Cache:
-		IGIB ABCDEF 0;
 	Spawn:
 		IGIB # 1 {
 			roll += wrot;
@@ -249,6 +247,7 @@ Class PK_FrozenLayer : PK_SmallDebris {
 }
 	
 Class PK_FreezeControl : PK_InventoryToken {
+	protected state freezestate;
 	int fcounter;
 	uint ownertrans;
 	bool grav;
@@ -276,6 +275,8 @@ Class PK_FreezeControl : PK_InventoryToken {
 			owner.bNOGRAVITY = false;
 		owner.bNOPAIN = true;
 		ownertrans = owner.translation;
+		//freezestate = owner.curstate;
+		owner.bFRIENDLY = true;
 		owner.A_SetTranslation("PK_Ice");
 		owner.A_StartSound("weapons/shotgun/freeze");
 		let layer = Spawn("PK_FrozenLayer",owner.pos);
@@ -296,6 +297,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 			return;
 		owner.A_SetTics(-1);
 		fcounter--;
+		//owner.SetState(freezestate);
 		//console.printf("owner: %s, counter: %d",owner.GetclassName(),fcounter);
 		if (fcounter <= 0) {
 			owner.A_SetTics(20);
@@ -327,18 +329,44 @@ Class PK_FreezeControl : PK_InventoryToken {
 			}
 			owner.A_StartSound("weapons/shotgun/freezedeath");
 			owner.gravity = 0.4;
-			//owner.vel = (frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](3,6));
+			owner.A_SetRenderstyle(0,Style_None);
 			owner.vel *= 0.15;
 			owner.A_NoBlocking();
-			owner.A_SetScale(Clamp(owner.radius*0.04,0.1,1));
-			owner.SetOrigin(owner.pos + (0,0,owner.default.height*0.5),false);
-			owner.bSPRITEFLIP = random[sfx](0,1);
-			owner.sprite = GetSpriteIndex("IGIB");
-			owner.frame = 0;
-			owner.A_SetTranslation("PK_IceChunk");
-			owner.A_SetTics(1000);
 			owner.deathsound = "";
 			owner.bDONTTHRUST = true;
+			owner.A_SetTics(-1);
+			owner.vel = (frandom[sfx](-1.3,1.3),frandom[sfx](-1.3,1.3),frandom[sfx](3,4));
+			double ownersize = (owner.radius * owner.default.height) / 8;
+			//standard zombieman size:
+			if (ownersize >= 140) {
+				let icebod = PK_IceCorpse(Spawn("PK_IceCorpse",owner.pos));
+				if (icebod) {
+					icebod.master = owner;
+					icebod.A_SetScale(Clamp(owner.radius*0.05,0.1,1.5));
+					icebod.bSPRITEFLIP = random[sfx](0,1);
+				}
+				let rc = PK_IceRibcage(Spawn("PK_IceRibcage",owner.pos));
+				if (random[sfx](0,1) == 1) {
+					if (rc) {
+						rc.master = owner;
+						rc.A_SetScale(Clamp(owner.radius*0.03,0.1,1));
+						rc.scale *= frandom[sfx](0.7,1.1);
+						rc.bSPRITEFLIP = random[sfx](0,1);
+						rc.vel = (frandom[sfx](-1.7,1.7),frandom[sfx](-1.7,1.7),frandom[sfx](2,4));
+					}
+				}
+			}
+			//large size: spawn another ribcage
+			if (ownersize >= 190) {				
+				let rc = PK_IceRibcage(Spawn("PK_IceRibcage",owner.pos));
+				if (rc) {
+					rc.master = owner;
+					rc.A_SetScale(Clamp(owner.radius*0.03,0.1,1));
+					rc.scale *= frandom[sfx](0.7,1.1);
+					rc.bSPRITEFLIP = random[sfx](0,1);
+					rc.vel = (frandom[sfx](-1.7,1.7),frandom[sfx](-1.7,1.7),frandom[sfx](2,4));
+				}
+			}
 			DepleteOrDestroy();
 			return;
 		}
@@ -347,10 +375,50 @@ Class PK_FreezeControl : PK_InventoryToken {
 		if (!owner)
 			return;
 		owner.bNOPAIN = owner.default.bNOPAIN;
+		owner.bFRIENDLY = owner.default.bFRIENDLY;
 		owner.bNOGRAVITY = grav;
-		if (owner.health > 0)
+		//if (owner.health > 0)
 			owner.translation = ownertrans;
 		super.DetachFromOwner();
+	}
+}
+
+class PK_IceCorpse : PK_FrozenChunk {
+	Default {
+		translation "PK_IceChunk";
+		renderstyle 'Normal';
+		+NOINTERACTION
+	}
+	override void PostBeginPlay() {
+		PK_SmallDebris.PostBeginPlay();
+	}
+	override void Tick() {
+		Super.Tick();
+		if (master)
+			PK_SetOrigin(master.pos);
+	}
+	States {
+	Spawn:
+		IGBZ ABCD 3;
+		IGBZ E -1;
+		stop;
+	Death:
+		stop;
+	}
+}
+
+class PK_IceRibcage : PK_IceCorpse {
+	Default {
+		-NOINTERACTION
+		gravity 0.8;
+	}
+	override void Tick() {
+		PK_FrozenChunk.Tick();
+	}
+	States {
+	Spawn:
+		IGIB A -1;
+		stop;
 	}
 }
 
