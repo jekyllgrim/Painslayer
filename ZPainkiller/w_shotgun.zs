@@ -247,7 +247,6 @@ Class PK_FrozenLayer : PK_SmallDebris {
 }
 	
 Class PK_FreezeControl : PK_InventoryToken {
-	protected state freezestate;
 	int fcounter;
 	uint ownertrans;
 	bool grav;
@@ -275,8 +274,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 			owner.bNOGRAVITY = false;
 		owner.bNOPAIN = true;
 		ownertrans = owner.translation;
-		//freezestate = owner.curstate;
-		owner.bFRIENDLY = true;
+		owner.bInConversation = true; //this actually makes the monster completely frozen AND disable wake-up on damage
 		owner.A_SetTranslation("PK_Ice");
 		owner.A_StartSound("weapons/shotgun/freeze");
 		let layer = Spawn("PK_FrozenLayer",owner.pos);
@@ -285,7 +283,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 			layer.sprite = owner.sprite;
 			layer.frame = owner.frame;
 			layer.angle = owner.angle;
-			layer.scale.x = owner.scale.x*1.32;
+			layer.scale.x = owner.scale.x*1.15;
 			layer.scale.y = owner.scale.y*1.07;
 			layer.bSPRITEFLIP = owner.bSPRITEFLIP;
 			layer.bYFLIP = owner.bYFLIP;
@@ -297,8 +295,6 @@ Class PK_FreezeControl : PK_InventoryToken {
 			return;
 		owner.A_SetTics(-1);
 		fcounter--;
-		//owner.SetState(freezestate);
-		//console.printf("owner: %s, counter: %d",owner.GetclassName(),fcounter);
 		if (fcounter <= 0) {
 			owner.A_SetTics(20);
 			DepleteOrDestroy();
@@ -375,10 +371,9 @@ Class PK_FreezeControl : PK_InventoryToken {
 		if (!owner)
 			return;
 		owner.bNOPAIN = owner.default.bNOPAIN;
-		owner.bFRIENDLY = owner.default.bFRIENDLY;
+		owner.bInConversation = false;
 		owner.bNOGRAVITY = grav;
-		//if (owner.health > 0)
-			owner.translation = ownertrans;
+		owner.translation = ownertrans;
 		super.DetachFromOwner();
 	}
 }
