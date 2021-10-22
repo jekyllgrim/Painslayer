@@ -325,7 +325,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 			}
 			owner.A_StartSound("weapons/shotgun/freezedeath");
 			owner.gravity = 0.4;
-			owner.A_SetRenderstyle(0,Style_None);
+			owner.bINVISIBLE = true;
 			owner.vel *= 0.15;
 			owner.A_NoBlocking();
 			owner.deathsound = "";
