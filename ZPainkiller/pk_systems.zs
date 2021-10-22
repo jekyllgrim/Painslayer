@@ -133,7 +133,7 @@ Class PK_DemonMorphControl : PK_InventoryToken {
 		return (pk_minsouls == newmax - 2 && pk_fullsouls == newmax);
 	}		
 	clearscope bool CheckDemon() {
-		return pk_souls >= pk_fullsouls;
+		return owner.CountInv("PK_DemonWeapon") && pk_souls >= pk_fullsouls;
 	}
 	override void Tick() {}
 	void GiveSoul(int amount = 1) {
