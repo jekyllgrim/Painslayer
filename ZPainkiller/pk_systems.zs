@@ -106,6 +106,7 @@ Class PK_DemonMorphControl : PK_InventoryToken {
 		PK_DemonMorphControl.minsouls 64;
 		PK_DemonMorphControl.fullsouls 66;
 	}
+	override void Tick() {}
 	//Some public methods to manipulate the soul amounts:
 	clearscope int GetSouls() {
 		return pk_souls;
@@ -135,7 +136,6 @@ Class PK_DemonMorphControl : PK_InventoryToken {
 	clearscope bool CheckDemon() {
 		return owner.CountInv("PK_DemonWeapon") && pk_souls >= pk_fullsouls;
 	}
-	override void Tick() {}
 	void GiveSoul(int amount = 1) {
 		pk_souls = Clamp(pk_souls + amount, 0, pk_fullsouls);
 		if (!pk_allowDemonMorph || !owner || !owner.player || !owner.player.readyweapon)
@@ -788,7 +788,7 @@ Class PKC_SoulCatcher : PK_BaseSilverCard {
 	protected int effectDistance;
 	property effectDistance : effectDistance;
 	Default {
-		PKC_SoulCatcher.effectDistance 144;
+		PKC_SoulCatcher.effectDistance 156;
 	}
 	/*	Function adapted by Cherno: returns true if there's a potential path between
 		the calling actor (player) and the target actor (soul or gold pickups).
@@ -810,9 +810,11 @@ Class PKC_SoulCatcher : PK_BaseSilverCard {
 	}
 	override void DoEffect() {
 		super.DoEffect();
+		if (effectDistance <= 0)
+			return;
 		if (!owner || !owner.player)
 			return;
-		if (effectDistance <= 0)
+		if (owner.bNOCLIP || owner.bNOINTERACTION)
 			return;
 		int edist = effectDistance + owner.radius;
 		BlockThingsIterator itr = BlockThingsIterator.Create(owner,edist);
