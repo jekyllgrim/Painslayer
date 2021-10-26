@@ -1,41 +1,16 @@
-enum PKCodexTabs {
-	PKCX_Weapons,
-	PKCX_Powerups,
-	//PKCX_Gold,
-	PKCX_Tarot
-}
-
-enum PKWeaponTabs {
-	PKCW_PainKiller,
-	PKCW_Shotgun,
-	PKCW_Stakegun,
-	PKCW_Chaingun,
-	PKCW_ELD,
-	PKCW_Rifle,
-	PKCW_Boltgun
-}
-
-/*enum PKItemTabs {
-	PKCI_Gold,
-	PKCI_Souls,
-	PKCI_ChestOfSouls,
-	PKCI_GoldSoul,
-	PKCI_MegaSoul,
-	PKCI_Armor,
-	PKCI_AmmoPack,
-	PKCI_WeaponModifier,
-	PKCI_DemonEyes,
-	PKCI_Pentagram,
-	PKCI_AntiRad,
-	PKCI_CrystalBall
-};*/
-	
-
 Class PKCodexMenu : PKZFGenericMenu {
 	
 	vector2 backgroundsize;
 	PKCodexTabhandler tabhandler;
 	PKZFFrame mainTabs[3];
+	PKZFFrame weaponTabs[8];
+	PKZFFrame powerupTabs[11];
+	PKZFFrame tarotTabs[4];
+	
+	PKZFCodexTabController maintabsController;
+	PKZFCodexTabController weapontabsController;
+	PKZFCodexTabController itemTabsController;
+	PKZFCodexTabController tarotTabsController;
 	
 	vector2 contentFramePos;
 	vector2 contentFrameSize;	
@@ -50,13 +25,134 @@ Class PKCodexMenu : PKZFGenericMenu {
 	
 	bool showWMText;
 	
+	enum PKCodexTabs {
+		PKCX_Weapons,
+		PKCX_Powerups,
+		PKCX_Tarot
+	}
+
+	enum PKWeaponTabs {
+		PKCW_PainKiller,
+		PKCW_Shotgun,
+		PKCW_Stakegun,
+		PKCW_Chaingun,
+		PKCW_ElectroDriver,
+		PKCW_Rifle,
+		PKCW_Boltgun
+	}
+
+	enum PKItemTabs {
+		PKCI_Souls,
+		PKCI_ChestOfSouls,
+		PKCI_GoldSoul,
+		PKCI_MegaSoul,
+		PKCI_Armor,
+		PKCI_AmmoPack,
+		PKCI_AntiRad,
+		PKCI_CrystalBall,
+		PKCI_WeaponModifier,
+		PKCI_DemonEyes,
+		PKCI_Pentagram
+	}
+
+	enum PKTarotTabs {
+		PKCT_Board,
+		PKCT_Cards,
+		PKCT_Gold,
+		PKCT_GoldObtaining
+	}
+	
+	//Names of the main tabs:
 	static const string mainTabnames[] = {
 		"$PKC_WEAPONS",
 		"$PKC_POWERUPS",
 		"$PKC_TAROT"
 	};
+	//Weapon names for subtans are pulled from weapon classes:
+	static const Class<Weapon> PK_Weapons[] = {
+		"PK_Painkiller",
+		"PK_Shotgun",
+		"PK_Stakegun",
+		"PK_Chaingun",
+		"PK_ElectroDriver",
+		"PK_Rifle",
+		"PK_Boltgun"
+	};
+	//Fire mode switch CVARs: these switch primary/secondary descriptions
+	//based on the value of the CVAR (since the player can switch around
+	//primary/secondary firing modes for any weapon):
+	static const name PK_ModeCVars[] = {
+		'pk_switch_Painkiller',
+		'pk_switch_ShotgunFreezer',
+		'pk_switch_StakeGrenade',
+		'pk_switch_MinigunRocket',
+		'pk_switch_ElectroDriver',
+		'pk_switch_RifleFlamethrower',
+		'pk_switch_BoltgunHeater'
+	};
+	//Names of the item subtabs:
+	static const string powerupTabNames[] = {
+		"$PKC_Souls",
+		"$PKC_ChestOfSouls",
+		"$PKC_GoldSoul",
+		"$PKC_MegaSoul",
+		"$PKC_Armor",
+		"$PKC_AmmoPack",
+		"$PKC_AntiRad",
+		"$PKC_CrystalBall",
+		"$PKC_WeaponModifier",
+		"$PKC_DemonEyes",
+		"$PKC_Pentagram"
+	};
+	//descriptions of items:
+	static const string powerupTabDescs[] = {
+		"$PKC_Souls_Desc",
+		"$PKC_ChestOfSouls_Desc",
+		"$PKC_GoldSoul_Desc",
+		"$PKC_MegaSoul_Desc",
+		"$PKC_Armor_Desc",
+		"$PKC_AmmoPack_Desc",
+		"$PKC_AntiRad_Desc",
+		"$PKC_CrystalBall_Desc",
+		"$PKC_WeaponModifier_Desc",
+		"$PKC_DemonEyes_Desc",
+		"$PKC_Pentagram_Desc"
+	};
+	//images of items:
+	static const string powerupTabImages[] = {
+		"PCDXSOUA",		//souls
+		"PSOCA0",		//chest of souls
+		"GSOUA0",		//gold soul
+		"MSOUA0",		//mega soul
+		"PCDXARMR",		//armors
+		"AMPKA0", 		//ammo pack
+		"HLBOA0",		//protection suit
+		"PCDXCORB",		//full map
+		"PMODA0", 		//WMod
+		"PCDXEYES",		//eyes
+		"PCDXPENT"		//pentagram
+	};
+	//Tarot section subtab names:
+	static const string tarotTabNames[] = {
+		"$PKC_TAROTBOARD",
+		"$PKC_CARDTYPES",
+		"$PKC_GOLDTYPES",
+		"$PKC_GOLDOBTAIN"
+	};
+	
+	// Descriptions require String.Format since they have
+	// keybinds inserted into them, so they have to be initizlied
+	// in the function itself. See TarotTabInit().
+	
+	//Tarot section subtab images:
+	static const string tarotTabImages[] = {
+		"PCDXBORD",
+		"PCDXTARO",
+		"PCDXGOLD",
+		""
+	};
 
-	PKZFTabButton, PKZFFrame CreateTab(vector2 pos, vector2 size, String text, PKZFRadioController controller, PKZFHandler handler, int value, vector2 framePos, vector2 frameSize, PKZFBoxTextures inactiveTex = null, PKZFBoxTextures activeTex = null, PKZFBoxTextures hoverTex = null, PKZFBoxTextures clickTex = null, double textScale = 1, int textColor = Font.CR_WHITE, sound hoversound = "ui/codex/subtabhover", sound clicksound = "ui/codex/subtabopen") {
+	PKZFTabButton, PKZFFrame CreateTab(vector2 pos, vector2 size, String text, PKZFCodexTabController controller, PKZFHandler handler, int value, vector2 framePos, vector2 frameSize, PKZFBoxTextures inactiveTex = null, PKZFBoxTextures activeTex = null, PKZFBoxTextures hoverTex = null, PKZFBoxTextures clickTex = null, double textScale = 1, int textColor = Font.CR_WHITE, sound hoversound = "ui/codex/subtabhover", sound clicksound = "ui/codex/subtabopen") {
 		let tabButton = PKZFTabButton.Create(
 			pos,
 			size,
@@ -123,7 +219,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 		);
 		
 		//create tab buttons:
-		let tabController = new("PKZFRadioController");	
+		maintabsController = new("PKZFCodexTabController");
 		//hover, inactive and active button frames:
 		let btnInactiveFrame = darkFrame;
 		let btnHoverFrame = lightFrame;	
@@ -143,13 +239,13 @@ Class PKCodexMenu : PKZFGenericMenu {
 		
 		//create main tabs:
 		vector2 nextBtnPos = buttonpos;
-		for (int i = 0; i < mainTabs.Size(); i++) {
+		for (int i = 0; i < mainTabnames.Size(); i++) {
 			PKZFTabButton tab; PKZFFrame tabframe;
 			[tab, tabframe] = CreateTab(
 				nextBtnPos, 
 				buttonsize, 
 				StringTable.Localize(mainTabnames[i]),
-				tabController, 
+				maintabsController, 
 				tabhandler, 
 				i,
 				contentFramePos, contentFrameSize,
@@ -188,31 +284,81 @@ Class PKCodexMenu : PKZFGenericMenu {
 		PowerupsTabInit();
 		//Create TAROT tab:
 		TarotTabInit();
-	}
 		
-	static const Class<Weapon> PK_Weapons[] = {
-		"PK_Painkiller",
-		"PK_Shotgun",
-		"PK_Stakegun",
-		"PK_Chaingun",
-		"PK_ElectroDriver",
-		"PK_Rifle",
-		"PK_Boltgun"
-	};
+		let irc = PK_InvReplacementControl(players[consoleplayer].mo.FindInventory("PK_InvReplacementControl"));
+		if (irc) {
+			FocusRelevantTab(irc.latestPickup);
+		}
+	}
 	
-	static const name PK_ModeCVars[] = {
-		'pk_switch_Painkiller',
-		'pk_switch_ShotgunFreezer',
-		'pk_switch_StakeGrenade',
-		'pk_switch_MinigunRocket',
-		'pk_switch_ElectroDriver',
-		'pk_switch_RifleFlamethrower',
-		'pk_switch_BoltgunHeater'
-	};
+	/*	This function automatically opens a relevant tab describing
+		an item that was recently picked up by the player 
+		for the first time.
+		See PKZFCodexTabController for details.
+	*/	
+	void FocusRelevantTab(class<Inventory> item) {
+		if (!item)
+			return;
+		PKZFCodexTabController focustab; //pointer to controller
+		int focusVal = -1; //pointer to controller's CurVal
+		//Determine whether we need the controller for weapons, gold or other items:
+		//this is a weapon:
+		if (item is "PKWeapon")
+			focustab = weapontabsController;
+		//this is gold:
+		else if (item is "PK_GoldPickup") {
+			focustab = tarotTabsController;
+			//if it's a coin, point to the general "Gold" subtab:
+			if (item == "PK_GoldCoin")
+				focusVal = PKCT_Gold;
+			//if it's a bigger pickup, point to "Gold Obtaining" subtab:
+			else
+				focusVal = PKCT_GoldObtaining;
+		}
+		//otherwise this is some other item:
+		else
+			focustab = itemTabsController;
+		//check which item and define curval based on that:
+		if (focusVal == -1) {
+			switch (item.GetClassName()) {
+				case 'PK_Painkiller' : focusVal = PKCW_PainKiller; break;
+				case 'PK_Shotgun' : focusVal = PKCW_Shotgun; break;
+				case 'PK_Stakegun' : focusVal = PKCW_Stakegun; break;
+				case 'PK_Chaingun' : focusVal = PKCW_Chaingun; break;
+				case 'PK_ElectroDriver' : focusVal = PKCW_ElectroDriver; break;
+				case 'PK_Rifle' : focusVal = PKCW_Rifle; break;
+				case 'PK_Boltgun' : focusVal = PKCW_Boltgun; break;
+				
+				case 'PK_Soul' : focusVal = PKCI_Souls; break;
+				case 'PK_GoldSoul' : focusVal = PKCI_GoldSoul; break;
+				case 'PK_MegaSoul' : focusVal = PKCI_MegaSoul; break;
+				case 'PK_BronzeArmor' : focusVal = PKCI_Armor; break;
+				case 'PK_SilverArmor' : focusVal = PKCI_Armor; break;
+				case 'PK_GoldArmor' : focusVal = PKCI_Armor; break;
+				case 'PK_AmmoPack' : focusVal = PKCI_AmmoPack; break;
+				case 'PK_PowerAntiRad' : focusVal = PKCI_AntiRad; break;
+				case 'PK_AllMap' : focusVal = PKCI_CrystalBall; break;
+				case 'PowerChestOfSoulsRegen' : focusVal = PKCI_ChestOfSouls; break;
+				case 'PK_WeaponModifier' : focusVal = PKCI_WeaponModifier; break;
+				case 'PK_PowerDemonEyes' : focusVal = PKCI_DemonEyes; break;
+				case 'PK_PowerPentagram' : focusVal = PKCI_Pentagram; break;
+			}
+		}
+		//Check if the pointer and the value are valid, then activate the right tab:
+		if (focustab && focusVal > -1) {
+			if (focustab.masterController)
+				focustab.masterController.curval = focustab.masterVal;
+			focustab.curval = focusVal;
+		}
+	}
+				
+			
 	
 	//Create weapons tabs and a frame:
 	void WeaponsTabInit() {		
-		let tabcntrl = new("PKZFRadioController"); //define a new controller
+		weapontabsController = new("PKZFCodexTabController"); //define a new controller
+		weapontabsController.masterController = maintabsController;
+		weapontabsController.masterVal = PKCX_Weapons;
 		vector2 btnPos = subTabLabelPos; //button positon
 		double tabLabelGap = 24;
 			
@@ -223,7 +369,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 				btnPos, 
 				subTabLabelSize,
 				GetDefaultByType(PK_Weapons[i]).GetTag(), //use weapon's tag as the button's name
-				tabcntrl,
+				weapontabsController,
 				tabhandler,				
 				i,
 				infoAreaPos, infoAreaSize,
@@ -231,9 +377,9 @@ Class PKCodexMenu : PKZFGenericMenu {
 			);			
 			btnPos.y += (subTabLabelSize.y + tabLabelGap);
 			tab.Pack(mainTabs[PKCX_Weapons]);
-			tabframe.Pack(mainTabs[PKCX_Weapons]);
+			tabframe.Pack(mainTabs[PKCX_Weapons]);			
 			tab.setAlignment(PKZFElement.AlignType_CenterLeft);
-			//weaponTabElements[i] = tabframe;		
+			weaponTabs[i] = tabframe;
 			
 			//these will hold attack icons and descriptions
 			string imgpath1;
@@ -410,7 +556,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 				);
 				text3 = "";
 			}
-			if (i == PKCW_ELD) {
+			if (i == PKCW_ElectroDriver) {
 				imgpath1 = "Graphics/HUD/Codex/CODX_ED_1.PNG";
 				imgpath2 = "Graphics/HUD/Codex/CODX_ED_2.PNG";
 				imgpath3 = "Graphics/HUD/Codex/CODX_ED_3.PNG";
@@ -623,50 +769,10 @@ Class PKCodexMenu : PKZFGenericMenu {
 		WMbtnDesc.Pack(mainTabs[PKCX_Weapons]);
 	}
 	
-	static const string powerupTabNames[] = {
-		"$PKC_Souls",
-		"$PKC_ChestOfSouls",
-		"$PKC_GoldSoul",
-		"$PKC_MegaSoul",
-		"$PKC_Armor",
-		"$PKC_AmmoPack",
-		"$PKC_AntiRad",
-		"$PKC_CrystalBall",
-		"$PKC_WeaponModifier",
-		"$PKC_DemonEyes",
-		"$PKC_Pentagram"
-	};
-	
-	static const string powerupTabDescs[] = {
-		"$PKC_Souls_Desc",
-		"$PKC_ChestOfSouls_Desc",
-		"$PKC_GoldSoul_Desc",
-		"$PKC_MegaSoul_Desc",
-		"$PKC_Armor_Desc",
-		"$PKC_AmmoPack_Desc",
-		"$PKC_AntiRad_Desc",
-		"$PKC_CrystalBall_Desc",
-		"$PKC_WeaponModifier_Desc",
-		"$PKC_DemonEyes_Desc",
-		"$PKC_Pentagram_Desc"
-	};
-	
-	static const string powerupTabImages[] = {
-		"PCDXSOUA",		//souls
-		"PSOCA0",		//chest of souls
-		"GSOUA0",		//gold soul
-		"MSOUA0",		//mega soul
-		"PCDXARMR",		//armors
-		"AMPKA0", 		//ammo pack
-		"HLBOA0",		//protection suit
-		"PCDXCORB",		//full map
-		"PMODA0", 		//WMod
-		"PCDXEYES",		//eyes
-		"PCDXPENT"		//pentagram
-	};
-	
 	void PowerupsTabInit() {
-		let tabcntrl = new("PKZFRadioController"); //define a new controller
+		itemTabsController = new("PKZFCodexTabController"); //define a new controller
+		itemTabsController.masterController = maintabsController;
+		itemTabsController.masterVal = PKCX_Powerups;
 		vector2 btnPos = subTabLabelPos; //button positon
 		double tabLabelGap = 3; //vertical gap between buttons
 		
@@ -694,7 +800,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 				btnPos, 
 				subTabLabelSize,
 				powerupTabNames[i],
-				tabcntrl,
+				itemTabsController,
 				tabhandler,				
 				i,
 				infoAreaPos, infoAreaSize,
@@ -704,6 +810,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 			tab.Pack(mainTabs[PKCX_Powerups]);
 			tabframe.Pack(mainTabs[PKCX_Powerups]);
 			tab.setAlignment(PKZFElement.AlignType_CenterLeft);
+			powerupTabs[i] = tabframe;
 			
 			//backgrounds for the item graphic and description:
 			let itemIconbkg = PKZFBoxImage.Create(itemBkgPos,itemBkgSize,darkFrame);
@@ -721,29 +828,10 @@ Class PKCodexMenu : PKZFGenericMenu {
 		}
 	}
 	
-	static const string tarotTabNames[] = {
-		"$PKC_TAROTBOARD",
-		"$PKC_CARDTYPES",
-		"$PKC_GOLDTYPES",
-		"$PKC_GOLDOBTAIN"
-	};
-	
-	/*static const string tarotTabDescs[] = {
-		"$PKC_TAROTBOARD_DESC",
-		"$PKC_CARDTYPES_DESC",
-		"$PKC_GOLDTYPES_DESC",
-		"$PKC_GOLDOBTAIN_DESC"
-	};*/
-	
-	static const string tarotTabImages[] = {
-		"PCDXBORD",
-		"PCDXTARO",
-		"PCDXGOLD",
-		""
-	};
-	
 	void TarotTabInit() {
-		let tabcntrl = new("PKZFRadioController"); //define a new controller
+		tarotTabsController = new("PKZFCodexTabController"); //define a new controller
+		tarotTabsController.masterController = maintabsController;
+		tarotTabsController.masterVal = PKCX_Tarot;
 		vector2 btnPos = subTabLabelPos; //button positon
 		double tabLabelGap = 6; //vertical gap between buttons
 		
@@ -779,7 +867,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 				btnPos, 
 				subTabLabelSize,
 				tarotTabNames[i],
-				tabcntrl,
+				tarotTabsController,
 				tabhandler,				
 				i,
 				infoAreaPos, infoAreaSize,
@@ -789,6 +877,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 			tab.Pack(mainTabs[PKCX_Tarot]);
 			tabframe.Pack(mainTabs[PKCX_Tarot]);
 			tab.setAlignment(PKZFElement.AlignType_CenterLeft);
+			tarotTabs[i] = tabframe;
 			
 			//backgrounds for the item graphic and description:
 			let itemIconbkg = PKZFBoxImage.Create(itemBkgPos,itemBkgSize,darkFrame);
@@ -805,6 +894,11 @@ Class PKCodexMenu : PKZFGenericMenu {
 			desc.Pack(tabframe);
 		}
 	}
+}
+
+Class PKZFCodexTabController : PKZFRadioController {
+	PKZFCodexTabController masterController;
+	int masterVal;
 }
 
 Class PKZFWMImage : PKZFImage {
@@ -881,7 +975,7 @@ Class PKZFTabButton : PKZFRadioButton {
 	
 	static PKZFTabButton create(
 		Vector2 pos, Vector2 size,
-		PKZFRadioController variable, int value,
+		PKZFCodexTabController variable, int value,
 		PKZFBoxTextures inactive = NULL, PKZFBoxTextures hover = NULL,
 		PKZFBoxTextures click = NULL, PKZFBoxTextures disabled = NULL,
 		string text = "", Font fnt = font_times, double textScale = 1, int textColor = Font.CR_WHITE,
@@ -900,8 +994,10 @@ Class PKZFTabButton : PKZFRadioButton {
 		Super.Drawer();
 		if (curButtonState == ButtonState_Disabled || curButtonState == ButtonState_Inactive)
 			SetTextColor(baseTextColor);
-		else
+		else if (curButtonState == ButtonState_Click)
 			SetTextColor(Font.FindFontColor('PKRedText'));
+		else if (curButtonState == ButtonState_Hover)
+			SetTextColor(Font.FindFontColor('PKGoldText'));
 		if (tabframe) {
 			if (curButtonState == ButtonState_Click) {
 				tabframe.Show();
@@ -912,7 +1008,17 @@ Class PKZFTabButton : PKZFRadioButton {
 				//tabframe.Disable();
 			}
 		}
-	}	
+	}
+	
+	/*override bool onNavEvent(PKZFNavEventType type, bool fromController) {
+		bool ret = super.onNavEvent(type, fromController);
+		if (ret) {
+			let cont = PKZFCodexTabController(variable);
+			if (cont && cont.masterController)
+				cont.masterController.CurVal = cont.masterControllerValue;
+		}
+		return ret;
+	}*/
 }
 
 Class PKZFWeaponDescLabel : PKZFLabel {

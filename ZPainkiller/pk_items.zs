@@ -20,6 +20,8 @@ Class PK_InventoryToken : Inventory abstract {
 }
 
 Class PK_InvReplacementControl : Inventory {
+	Class<Inventory> latestPickup; //keep track of the latest pickup
+	protected array < Class<Inventory> > lastPickups;
 	Default {
 		+INVENTORY.UNDROPPABLE
 		+INVENTORY.UNTOSSABLE
@@ -90,15 +92,6 @@ Class PK_InvReplacementControl : Inventory {
 			if (pk_debugmessages) console.printf("Exchanging %s for %s",oldweap.GetClassName(),newweap.GetClassName());
 			if (!owner.CountInv(newweap)) {
 				owner.A_GiveInventory(newweap,1);
-				/*
-				//create a copy that won't give any ammo and attach it to the player
-				let wp = Weapon(Spawn(newweap));
-				if (wp) {
-					wp.ammogive1 = 0;
-					wp.ammogive2 = 0;
-					wp.AttachToOwner(owner);
-					//console.printf("Giving %s",wp.GetClassName());
-				}*/
 			}
 		}		
 		//select the corresponding new weapon if an old weapon was selected:
@@ -113,7 +106,8 @@ Class PK_InvReplacementControl : Inventory {
 		changeweapons.Clear();
 	}
     override bool HandlePickup (Inventory item) {
-        let oldItemClass = item.GetClassName();
+		bool ret = false;
+		let oldItemClass = item.GetClassName();
         Class<Inventory> replacement =  null;
 		for (int i = 0; i < vanillaWeapons.Size(); i++) {
 			if (pkWeapons[i] && oldItemClass == vanillaWeapons[i]) {
@@ -130,16 +124,41 @@ Class PK_InvReplacementControl : Inventory {
         if (!replacement) {
 			if (pk_debugmessages > 1)
 				console.printf("%s doesn't need replacing, giving as is",oldItemClass);
-			return super.HandlePickup(item);
+			ret = super.HandlePickup(item);
 		}
-		int r_amount = GetDefaultByType(replacement).amount;
-        item.bPickupGood = true;
-        owner.A_GiveInventory(replacement,r_amount);
-		if (pk_debugmessages) {
-			console.printf("Replacing %s with %s (amount: %d)",oldItemClass,replacement.GetClassName(),r_amount);
-		}
-        return true;
+		else {
+			int r_amount = GetDefaultByType(replacement).amount;
+			item.bPickupGood = true;
+			owner.A_GiveInventory(replacement,r_amount);
+			if (pk_debugmessages) {
+				console.printf("Replacing %s with %s (amount: %d)",oldItemClass,replacement.GetClassName(),r_amount);
+			}
+			ret = true;
+		}		
+		RecordLastPickup(replacement ? replacement : item.GetClass());
+        return ret;
     }
+	
+	/*	This function records the latest item the player has picked up
+		for the first time. Used by the Codex to display the tab
+		for that item (if available). See pk_codex.zs.
+	*/	
+	void RecordLastPickup(class<Inventory> toRecord) {
+		if (!toRecord || !owner)
+			return;
+		/*	We use a dynamic array to check that the player hasn't
+			picked up this item before, because CountInv won't catch
+			the items that don't actually get placed in the inventory,
+			such as armor.
+		*/
+		if (!owner.CountInv(toRecord) && lastPickups.Find(toRecord) == lastPickups.Size()) {
+			lastPickups.Push(toRecord);
+			latestPickup = toRecord;
+			if (pk_debugmessages) {
+				console.printf("Latest pickup is %s",latestPickup.GetClassName());
+			}
+		}
+	}
 }
 
 Mixin Class PK_PickupSound {
@@ -175,27 +194,27 @@ Class PK_Inventory : Inventory abstract {
 Class PK_GoldPickup : PK_Inventory abstract {
 	protected PK_GoldGleam gleam;
 	Default {
-		+INVENTORY.NEVERRESPAWN;
+		+INVENTORY.NEVERRESPAWN
+		+INVENTORY.AUTOACTIVATE
 		+BRIGHT
 		xscale 0.5;
 		yscale 0.415;
 		inventory.amount 1;
 		inventory.pickupmessage "";
 	}
-	/*override void PostBeginPlay() {
-		super.PostBeginPlay();
-		if (bDROPPED)
-			A_StartSound(pickupsound);
-	}*/
 	override bool TryPickup (in out Actor other) {
 		if (!(other is "PlayerPawn"))
 			return false;
-		let cont = PK_CardControl(other.FindInventory("PK_CardControl"));
+		return super.TryPickup(other);
+	}
+	override bool Use (bool pickup) {
+		if (!owner)
+			return true;
+		let cont = PK_CardControl(owner.FindInventory("PK_CardControl"));
 		if (cont) {
-			int goldmul = (other.FindInventory("PKC_Greed")) ? 2 : 1;
+			int goldmul = (owner.FindInventory("PKC_Greed")) ? 2 : 1;
 			cont.pk_gold = Clamp(cont.pk_gold + (amount*goldmul), 0, 99990);
 		}
-		GoAwayAndDie();
 		return true;
 	}
 	override void Tick() {
@@ -381,15 +400,14 @@ Class PK_Soul : PK_Inventory {
 	Class<Actor> bearer;
 	Default {
 		+INVENTORY.NEVERRESPAWN
+		+INVENTORY.AUTOACTIVATE
 		+BRIGHT
-		+DONTGIB
+		+DONTGIB		
 		PK_Soul.maxage 350;
 		inventory.pickupmessage "$PKI_SOUL";
 		inventory.amount 2;
 		inventory.maxamount 100;
 		renderstyle 'Add';
-		//stencilcolor "00FF00";
-		//+NOGRAVITY;
 		gravity 0.025;
 		alpha 1;
 		xscale 0.3;
@@ -403,7 +421,10 @@ Class PK_Soul : PK_Inventory {
 		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
 		if (bearer) {
 			//define an amount between 1-20 based on monster's health (linearly mapped between 20-500):
-			double am = Clamp(LinearMap(double(GetDefaultByType(bearer).health), 20, 500, 1, 20), 1, 20);
+			double am = LinearMap(double(GetDefaultByType(bearer).health), 20, 500, 1, 20);
+			//the amount is clamped to 20 unless the monster is a boss:
+			if (!GetDefaultByType(bearer).bBOSS)
+				am = Clamp(am, 1, 20);
 			amount = am;
 			//slightly change soul's alpha and scale based on the resulting number:
 			alpha = Clamp(LinearMap(am, 1, 20, 0.5, 1.5), 0.5 , 1.5);
@@ -454,24 +475,28 @@ Class PK_Soul : PK_Inventory {
 	override bool TryPickup (in out Actor other) {
 		if (!(other is "PlayerPawn"))
 			return false;
-		let cont = PK_DemonMorphControl(other.FindInventory("PK_DemonMorphControl"));
+		return super.TryPickup(other);
+	}
+	override bool Use (bool pickup) { 
+		if (!owner)
+			return true;
+		let cont = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
 		if (cont)
 			cont.GiveSoul();
-		if (other.FindInventory("PKC_SoulRedeemer"))
+		if (owner.FindInventory("PKC_SoulRedeemer"))
 			amount *= 2;
-		other.GiveBody(Amount, MaxAmount);
-		//Console.Printf("Consumed %d health from a soul",amount);
-		GoAwayAndDie();
-		return true;
+		owner.GiveBody(Amount, MaxAmount);
+		return true; 
 	}
 	states {
 	Spawn:
 		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
+	Idle:
 		DSOU ABCDEFGHIJKLMNOPQRSTU 2 {
 			if (age > maxage)
 				A_FadeOut(0.05);
 		}
-		goto spawn+1;
+		loop;
 	}
 }
 
@@ -538,14 +563,13 @@ Class PK_GoldSoul : Health {
 		inventory.maxamount 100;
 		inventory.pickupsound "";
 		renderstyle 'Add';
-		+NOGRAVITY;
+		+NOGRAVITY
 		alpha 0.9;
 		xscale 0.4;
 		yscale 0.332;
 		inventory.pickupsound "pickups/soul/gold";
 		+COUNTITEM
-		+BRIGHT;
-		+RANDOMIZE;
+		+BRIGHT
 	}
 	override void Tick() {
 		super.Tick();
@@ -561,8 +585,18 @@ Class PK_GoldSoul : Health {
 				angle:frandom[part](0,359)
 			);
 	}
+	override bool TryPickup(in out actor toucher) {
+		if (toucher && toucher.player) {
+			let irc = PK_InvReplacementControl(toucher.FindInventory("PK_InvReplacementControl"));
+			if (irc)
+				irc.RecordLastPickup(self.GetClass());
+		}
+		return super.TryPickup(toucher);
+	}
 	states {
 	Spawn:
+		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
+	Idle:
 		GSOU ABCDEFGHIJKLMNOPQRSTU 2;
 		loop;
 	}
@@ -594,6 +628,8 @@ Class PK_MegaSoul : PK_GoldSoul {
 	}
 	states {
 	Spawn:
+		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
+	Idle:
 		MSOU ABCDEFGHIJKLMNOPQRSTU 2;
 		loop;
 	}
@@ -664,6 +700,19 @@ Class PK_AmmoPack : Backpack {
 		inventory.pickupmessage "$PKI_AMMOPACK";
 		xscale 0.42;
 		yscale 0.38;
+	}
+	/*	Sometimes for some reason this item doesn't call
+		HandlePickup on PK_InvReplacementControl, so I had to added
+		this manual call so it gets registered as "latest pickup"
+		properly.
+	*/
+	override bool TryPickup(in out actor toucher) {
+		if (toucher && toucher.player) {
+			let irc = PK_InvReplacementControl(toucher.FindInventory("PK_InvReplacementControl"));
+			if (irc)
+				irc.RecordLastPickup(self.GetClass());
+		}
+		return super.TryPickup(toucher);
 	}
 	states {
 	Spawn:
@@ -1123,6 +1172,9 @@ class PK_AllMap : AllMap {
 				let handler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));
 				handler.SpawnMapMarkers(toucher.player);
 			}
+			let irc = PK_InvReplacementControl(toucher.FindInventory("PK_InvReplacementControl"));
+			if (irc)
+				irc.RecordLastPickup(self.GetClass());
 		}
 		return ret;
 	}			
