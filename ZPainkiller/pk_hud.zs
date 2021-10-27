@@ -3,29 +3,37 @@ Class PainkillerHUD : BaseStatusBar {
 	const PWICONSIZE = 18;
 		
 	HUDFont mIndexFont;
-	HUDFont mStatFont;
+	HUDFont mNotifFont;
+	//HUDFont mStatFont;
+	protected class<Inventory> prevLatestPickup;
+	protected class<Inventory> curLatestPickup;
+	protected double notifAlpha;
+	protected double notifAlphaMod;
+	protected int notifDur;
+	protected CVar notifsCvar;
 	
-	private int hudstate;
-	private int arrowangle;
-	private int checktic;
-	private int goldnum;
-	private int soulsnum;
-	private int soulscol;
-	private bool isDemon;
-	private PK_Mainhandler mainhandler;
-	private transient CVar aspectScale;
+	protected int hudstate;
+	protected int arrowangle;
+	protected int checktic;
+	protected int goldnum;
+	protected int soulsnum;
+	protected int soulscol;
+	protected bool isDemon;
+	protected PK_Mainhandler mainhandler;
+	protected PK_InvReplacementControl invcontrol;
+	protected transient CVar aspectScale;
 	
 	PK_CardControl cardcontrol;
 	
-	private Actor nearestBoss;
-	private Shape2D healthBarShape;
-	private ui double healthBarFraction;
-	private ui double prevHealthBarFraction;
-	private vector2 hpBarScale;
-	private TextureID hpBarBackground;
-	private TextureID hpBartex;
-	private name bossSpriteName;
-	private TextureID bossSprite;
+	protected Actor nearestBoss;
+	protected Shape2D healthBarShape;
+	protected ui double healthBarFraction;
+	protected ui double prevHealthBarFraction;
+	protected vector2 hpBarScale;
+	protected TextureID hpBarBackground;
+	protected TextureID hpBartex;
+	protected name bossSpriteName;
+	protected TextureID bossSprite;
 	
 	void DrawMonsterArrow(vector2 arrowPos = (0,23), vector2 shadowofs = (0,0)) {
 		if (nearestBoss)
@@ -111,11 +119,14 @@ Class PainkillerHUD : BaseStatusBar {
 	override void Init() {
 		super.Init();
 		Font fnt = "PKHNUMS";
+		Font times = font_times;
+		mIndexFont = HUDFont.Create(fnt, fnt.GetCharWidth("0"), true, 1, 1);
+		mNotifFont = HUDFont.Create("consolefont");
+		notifAlpha = 0.6;
+		notifAlphaMod = 0.05;
 		hpBarBackground = TexMan.CheckForTexture("pkxhpbkg");
 		hpBartex = TexMan.CheckForTexture("pkxhpbar");
 		hpBarScale = TexMan.GetScaledSize(hpBartex);
-		mIndexFont = HUDFont.Create(fnt, fnt.GetCharWidth("0"), true,1 ,1);
-		mStatFont = HUDFont.Create(fnt, fnt.GetCharWidth("0"), true,1 ,1);
 	}
 	
 	override void Draw (int state, double TicFrac) {
@@ -126,7 +137,7 @@ Class PainkillerHUD : BaseStatusBar {
 		hudstate = state;
 		//the hud is completely skipped if automap is active or the player
 		//is in a demon mode and debug messages aren't active:
-		if (state == HUD_none || automapactive || (isDemon && !pk_debugmessages))
+		if (state == HUD_none || automapactive || (isDemon /*&& !pk_debugmessages*/))
 			return;
 		BeginHUD();
 		//draw invulnerability overlay:
@@ -138,6 +149,7 @@ Class PainkillerHUD : BaseStatusBar {
 		if (state == HUD_StatusBar || state == HUD_Fullscreen)
 			DrawBottomElements();
 		//DrawEquippedCards();
+		DrawCodexNotif();
 		DrawActiveGoldenCards();
 		if (state != HUD_AltHud) {
 			DrawKeys();
@@ -150,12 +162,18 @@ Class PainkillerHUD : BaseStatusBar {
 		let player = CPlayer.mo;
 		if (!player)
 			return;
-		//check if player is demon (cheaper to do it here than in Draw, fewer calls)
+		/*	check if player is demon (cheaper to do it here than in Draw, fewer calls)
+			This is supposed to be true whenever the player has a demon weapon,
+			not only when they're actually a demon, since seeing a "demon preview"
+			is also supposed to disable the HUD.
+		*/
 		isDemon = player.CountInv("PK_DemonWeapon");
+		if (isDemon || hudstate == HUD_None)
+			return;
 		//get gold amount:
 		if (!cardcontrol)
 			cardcontrol = PK_CardControl(player.FindInventory("PK_CardControl"));
-		else
+		if (cardcontrol)
 			goldnum = cardcontrol.pk_gold;
 		//get souls amount:
 		let dmcont = PK_DemonMorphControl(player.FindInventory("PK_DemonMorphControl"));
@@ -164,9 +182,14 @@ Class PainkillerHUD : BaseStatusBar {
 			//make souls number red if it's only 3 souls before turning into demon:
 			soulscol = (soulsnum >= dmcont.GetMinSouls()) ? Font.CR_RED : Font.CR_UNTRANSLATED;
 		}
-		if (hudstate == HUD_None)
+		UpdateCodexNotif();
+		UpdateMonsterCompass();
+	}
+
+	protected void UpdateMonsterCompass() {		
+		let player = CPlayer.mo;
+		if (!player)
 			return;
-			
 		//get pointer to PK_Mainhandler:
 		if (!mainhandler)
 			mainhandler = PK_Mainhandler(EventHandler.Find("PK_Mainhandler"));
@@ -233,7 +256,68 @@ Class PainkillerHUD : BaseStatusBar {
 		}
 	}
 	
-	//draws currently equipped cards (not present in the original game):
+	protected void DrawCodexNotif() {
+		if (!notifsCvar || notifsCvar.GetBool() == false)
+			return;
+		if (!invcontrol || !invcontrol.latestPickup)
+			return;		
+		string weapname = StringTable.Localize(invcontrol.latestPickupName);
+		vector2 pos1 = (-112, -6);
+		vector2 pos2 = (pos1.x, pos1.y + 10);
+		//PK_DrawString(mNotifFont, String.Format("notifAlpha: %f | notifAlphaMod: %f", notifAlpha, notifAlphaMod), (0,0), alpha: notifAlpha);
+		/*vector2 hudscale = GetHUDScale();
+		int posx = 0;
+		int posy = Screen.GetHeight() - (42 * hudscale.y);
+		Screen.DrawText(
+			font_times, Font.CR_UNTRANSLATED, 
+			posx, 42, 
+			String.Format("New Codex entry: %s", weapname)
+		);*/
+		string codexKey = PK_Keybinds.getKeyboard("netevent PKCOpenCodex");
+		PK_DrawString(mNotifFont, String.Format(StringTable.Localize("$PKC_NEWENTRY"),codexKey), pos1, DI_SCREEN_RIGHT_TOP | DI_TEXT_ALIGN_CENTER, Font.CR_Gold, alpha: notifAlpha);
+		PK_DrawString(mNotifFont, String.Format("%s", weapname), pos2, DI_SCREEN_RIGHT_TOP | DI_TEXT_ALIGN_CENTER, Font.CR_Gold, alpha: notifAlpha);
+	}
+	
+	protected void UpdateCodexNotif() {
+		let player = CPlayer.mo;
+		if (!player)
+			return;
+		if (!notifsCvar)
+			notifsCvar = CVar.GetCVar('pk_CodexNotifs', CPlayer);
+		if (notifsCvar.GetBool() == false)
+			return;
+		if (!invcontrol)
+			invcontrol = PK_InvReplacementControl(player.FindInventory("PK_InvReplacementControl"));
+		if (!invcontrol.latestPickup)
+			return;
+		curLatestPickup = invcontrol.latestPickup;
+		double targetMod;
+		vector2 notifAlphaLimits;
+		if (prevLatestPickup && prevLatestPickup == curLatestPickup) {
+			if (notifDur > 0) {
+				notifDur--;
+				notifAlphaLimits = (0.5, 1);
+				targetMod = 0.05;
+			}
+			else {
+				notifAlphaLimits = (0.1, 0.25);
+				targetMod = 0.005;
+			}
+			if (abs(notifAlphaMod) != targetMod)
+				notifAlphaMod = targetMod;
+			notifAlpha = Clamp(notifAlpha + notifAlphaMod, notifAlphaLimits.x, notifAlphaLimits.y);
+			if (notifAlpha <= notifAlphaLimits.x || notifAlpha >= notifAlphaLimits.y)
+				notifAlphaMod *= -1;
+			return;
+		}
+		else {
+			notifDur = 175;
+			prevLatestPickup = curLatestPickup;
+		}
+	}
+	
+	// Draws currently equipped cards (not present in the original game)
+	// Currently unusued.
 	protected void DrawEquippedCards() {
 		if (!cardcontrol)
 			return;
@@ -285,10 +369,10 @@ Class PainkillerHUD : BaseStatusBar {
 		
 			//gold counter above health:
 			PK_DrawImage("pkhgold",(5,-38),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER);
-			PK_DrawString(mStatFont, String.Format("%05d",goldnum), (10, -43),DI_SCREEN_LEFT_BOTTOM|DI_TEXT_ALIGN_LEFT,translation:font.CR_UNTRANSLATED);			
+			PK_DrawString(mIndexFont, String.Format("%05d",goldnum), (10, -43),DI_SCREEN_LEFT_BOTTOM|DI_TEXT_ALIGN_LEFT,translation:font.CR_UNTRANSLATED);			
 			//souls counter above ammo:
 			PK_DrawImage("pkhsouls",(-5,-38),DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_CENTER);
-			PK_DrawString(mStatFont, String.Format("%05d",soulsnum), (-10,-43),DI_SCREEN_RIGHT_BOTTOM|DI_TEXT_ALIGN_RIGHT,translation:soulscol);
+			PK_DrawString(mIndexFont, String.Format("%05d",soulsnum), (-10,-43),DI_SCREEN_RIGHT_BOTTOM|DI_TEXT_ALIGN_RIGHT,translation:soulscol);
 			
 			DrawBossHealthBar(true);
 		}		
@@ -315,6 +399,7 @@ Class PainkillerHUD : BaseStatusBar {
 			PK_DrawString(mIndexFont, String.Format("%03d",ammotype2.amount),(-19,-15),DI_SCREEN_RIGHT_BOTTOM|DI_TEXT_ALIGN_RIGHT,translation:GetAmmoColor(ammotype2));
 		}
 	}
+	
 	//top bar, compass, and souls and gold counters:
 	protected void DrawTopElements() {
 		//draw the compass background:
@@ -329,12 +414,16 @@ Class PainkillerHUD : BaseStatusBar {
 		PK_DrawImage("pkhgold",(-31,11),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_CENTER);
 		PK_DrawImage("pkhsouls",(31,11),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_CENTER);
 		//draw souls and gold values on the top bar:
-		PK_DrawString(mStatFont, String.Format("%05d",goldnum), (-38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_RIGHT,translation:font.CR_UNTRANSLATED);			
-		PK_DrawString(mStatFont, String.Format("%05d",soulsnum), (38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_LEFT,translation:soulscol);
+		PK_DrawString(mIndexFont, String.Format("%05d",goldnum), (-38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_RIGHT,translation:font.CR_UNTRANSLATED);			
+		PK_DrawString(mIndexFont, String.Format("%05d",soulsnum), (38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_LEFT,translation:soulscol);
 		//if there's a boss around, draw healthbar for it:
 		DrawBossHealthBar();
 	}
 	
+	// Draws circular boss health bar around the compass.
+	// The healthbar becomes active if there's a boss relatively close
+	// and they're active (has a target).
+	// Written by Boondorl, adapted to HUD by me.
 	protected void DrawBossHealthBar(bool bottom = false) {
 		if (!nearestBoss)
 			return;
@@ -369,15 +458,15 @@ Class PainkillerHUD : BaseStatusBar {
 		);
 	}
 	
-	Vector2 ScaleToBox(TextureID tex, int w, int h)
-	{
+	// Scales an image to box keeping its ratio:
+	vector2 ScaleToBox(TextureID tex, int w, int h) {
 	  Vector2 size = TexMan.GetScaledSize(tex);
 	  double ratio = min(w / size.x, h / size.y*1.2);
 	  
 	  return size * ratio;
 	}
 	
-	private void UpdateHealthBar(out Shape2D hb, double frac = 1, uint segments = 100)
+	protected void UpdateHealthBar(out Shape2D hb, double frac = 1, uint segments = 100)
 	{
 		// Create the circle if we don't have one yet
 		if (!hb)
@@ -430,7 +519,7 @@ Class PainkillerHUD : BaseStatusBar {
 	}
 
 	//Roughtly copied from AltHUD but returns the texture, not a bool:
-	private TextureID GetKeyTexture(Key inv) {		
+	protected TextureID GetKeyTexture(Key inv) {		
 		TextureID icon;	
 		if (!inv) 
 			return icon;
@@ -454,6 +543,8 @@ Class PainkillerHUD : BaseStatusBar {
 		return icon;
 	}
 	
+	// Draws keys in a horizontal bar, similarly to how AltHUD
+	// does it, but does NOT ignore HUD scale:
 	void DrawKeys() {
 		if (deathmatch)
 			return;		

@@ -154,7 +154,6 @@ Heater        /  Boltgun,PK_BOLTGUN_ISLOT,Switched weapon modes for menu,Шар�
 not bound,PKC_NOTBOUND,Codex,не назначено
 WEAPONS,PKC_WEAPONS,Codex,ОРУЖИЕ
 ITEMS,PKC_POWERUPS,Codex,ПРЕДМЕТЫ
-GOLD,PKC_GOLD,Codex,ЗОЛОТО
 TAROT,PKC_TAROT,Codex,КАРТЫ ТАРО
 Showing Weapon Modifier stats,PKC_WM_On,Codex,Показан эффект Модификатора оружия
 Showing standard weapon stats,PKC_WM_Off,Codex,Показаны стандартные значения
@@ -374,6 +373,7 @@ Gold can be found in secret areas or obtained from enemies. See \c[PKGreenText]O
 - Нанося \c[PKRedText]избыточный урон врагам\c[PKWhiteText] (например, взрывая слабых врагов) — это заставляет их ронять монеты.
 
 - Многократно \cIпритягивая трупы врагов с помощью Killer\c[PKWhiteText]. Выстрелите в труп, пока он не исчез: тогда он не испарится, а Killer толкнет его вверх и в вашу сторону. Повторяйте это действие, и каждое третье притягивание выбьет из тела золото."
+Codex (%s) updated:,PKC_NEWENTRY,Codex,Обновление Кодекса (%s)
 Painslayer Settings,PKM_TITLE,Menu,Настройки Painslayer
 Mod Settings,PKM_TITLE_SHORT,Menu,Настройки мода
 CONTROLS,PKM_SUB_CONTROLS,Menu,УПРАВЛЕНИЕ
@@ -408,6 +408,10 @@ you will receive a few cards for free.
 This option lets you change that behavior.",PKM_GIFTCARRDS_DESC,Menu,"По умолчанию, когда вы открываете доску Таро в первый раз,
 вы получаете несколько карт в подарок.
 Эта настройка позволяет изменить это."
+Show Codex Notifications,PKM_ShowCodexNotifs,,Показывать оповещения Кодекса
+"Show notifications for Codex updates in the top right corner
+after you pick up a new item for the first time.",PKM_ShowCodexNotifs_Desc,,"Показывать оповещения об обновлении Кодекса в верхнем правом
+углу экрана, когда вы впервые подбираете новый предмет."
 Open Black Tarot,PKM_OpenTarot,Menu,Открыть доску Таро
 Black Tarot Board lets you purchase and equip cards,PKM_OpenTarot_Desc,Menu,На доске Черного Таро можно покупать и снаряжать карты
 Use Golden Cards,PKM_UseCards,Menu,Использовать золотые карты

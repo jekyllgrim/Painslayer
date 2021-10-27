@@ -63,6 +63,7 @@ Optionmenu "PK_Settings" {
 	PKTLTPScaleSlider "$PKM_QOLCATCHER",	"$PKM_QOLCATCHER_Desc", "White", "pk_QoLCatcherDistance", 0, 96, 8, "$OPTVAL_OFF"
 	PKTLTPOption "$PKM_ALLOWDEMON", "$PKM_ALLOWDEMON_DESC", "White", "pk_allowDemonMorph", "OnOff"
 	PKTLTPOption "$PKM_GIFTCARRDS", "$PKM_GIFTCARRDS_DESC", "White", "pk_allowFreeCards", "OnOff"
+	PKTLTPOption "$PKM_ShowCodexNotifs", "$PKM_ShowCodexNotifs_Desc", "White", "pk_CodexNotifs", "OnOff"
 	StaticText ""
 	StaticText "$PKM_FIREMODES", yellow
 	PKTLTPOption "$CNTRLMNU_SLOT1", "$PKM_FIREMODES_DESC", "White", "pk_switch_Painkiller", 			"PKIL_MODES"

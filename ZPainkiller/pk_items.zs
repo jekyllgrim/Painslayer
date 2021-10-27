@@ -21,6 +21,7 @@ Class PK_InventoryToken : Inventory abstract {
 
 Class PK_InvReplacementControl : Inventory {
 	Class<Inventory> latestPickup; //keep track of the latest pickup
+	string latestPickupName; //the tag of the latest pickup
 	protected array < Class<Inventory> > lastPickups;
 	Default {
 		+INVENTORY.UNDROPPABLE
@@ -154,6 +155,7 @@ Class PK_InvReplacementControl : Inventory {
 		if (!owner.CountInv(toRecord) && lastPickups.Find(toRecord) == lastPickups.Size()) {
 			lastPickups.Push(toRecord);
 			latestPickup = toRecord;
+			latestPickupName = GetDefaultByType(toRecord).GetTag();
 			if (pk_debugmessages) {
 				console.printf("Latest pickup is %s",latestPickup.GetClassName());
 			}
@@ -308,6 +310,7 @@ Class PK_GoldCoin : PK_GoldPickup {
 		+ROLLCENTER
 		xscale 0.4;
 		yscale 0.44;
+		Tag "$PKC_Gold";
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -415,6 +418,7 @@ Class PK_Soul : PK_Inventory {
 		radius 16;
 		height 20;
 		inventory.pickupsound "pickups/soul";
+		Tag "$PKC_Souls";
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -540,19 +544,9 @@ Class PowerChestOfSoulsRegen : PowerRegeneration {
 	Default {
 		Powerup.Duration -20;
 		Powerup.Strength 1;
+		Tag "$PKC_ChestOfSouls";
 	}
 }
-
-/*Class PK_RedSoul : PK_Soul {
-	Default {
-		inventory.amount 15;
-		PK_Soul.maxage 450;
-		translation "0:255=%[0.00,0.00,0.00]:[2.00,0.00,0.00]";
-		alpha 0.85;
-		inventory.pickupsound "pickups/soul/red";
-	}
-}*/
-
 
 Class PK_GoldSoul : Health {
 	mixin PK_PlayerSightCheck;
@@ -570,6 +564,7 @@ Class PK_GoldSoul : Health {
 		inventory.pickupsound "pickups/soul/gold";
 		+COUNTITEM
 		+BRIGHT
+		Tag "$PKC_GoldSoul";
 	}
 	override void Tick() {
 		super.Tick();
@@ -622,6 +617,7 @@ Class PK_MegaSoul : PK_GoldSoul {
 		xscale 0.3;
 		yscale 0.25;
 		alpha 2.5;
+		Tag "$PKC_MegaSoul";
 	}
 	override void Tick() {
 		Actor.Tick();
@@ -649,6 +645,7 @@ Class PK_BronzeArmor : GreenArmor  {
 		Armor.SaveAmount 100;
 		scale 0.65;
 		inventory.icon "pkharm1";
+		Tag "$PKC_Armor";
 	}
 	states {
 	Spawn:
@@ -700,6 +697,7 @@ Class PK_AmmoPack : Backpack {
 		inventory.pickupmessage "$PKI_AMMOPACK";
 		xscale 0.42;
 		yscale 0.38;
+		Tag "$PKC_AmmoPack";
 	}
 	/*	Sometimes for some reason this item doesn't call
 		HandlePickup on PK_InvReplacementControl, so I had to added
@@ -875,6 +873,7 @@ Class PK_WeaponModifier : PK_Powerup {
 	Default {
 		deathsound "pickups/wmod/end";
 		inventory.icon "wmodicon";
+		Tag "$PKC_WeaponModifier";
 	}
 }		
 
@@ -931,6 +930,7 @@ Class PK_PowerDemonEyes : PK_Powerup {
 	Default {
 		deathsound "pickups/powerups/lightampEnd";
 		inventory.icon "iconeyes";
+		Tag "$PKC_DemonEyes";
 	}
 	override void InitEffect() {
 		super.InitEffect();
@@ -1083,6 +1083,7 @@ Class PK_PowerPentagram : PowerInvulnerable {
 	Default {
 		deathsound "pickups/powerups/pentagramEnd";
 		inventory.icon "penticon";
+		Tag "$PKC_Pentagram";
 	}
 }
 
@@ -1130,6 +1131,7 @@ Class PK_PowerAntiRad : PowerIronFeet {
 		deathsound "pickups/powerups/radsuitEnd";
 		Powerup.Color "000000", 0;
 		inventory.icon "HLBOA0";
+		Tag "$PKC_Antirad";
 	}
 }
 
@@ -1164,6 +1166,7 @@ class PK_AllMap : AllMap {
 		scale 0.6;
 		inventory.pickupmessage "$PKI_ALLMAP";
 		PK_AllMap.pickupRingColor "ce73fe";
+		Tag "$PKC_CrystalBall";
 	}
 	override bool TryPickup (in out Actor toucher) {
 		bool ret = super.TryPickup(toucher);

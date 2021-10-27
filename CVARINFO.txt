@@ -3,6 +3,7 @@ server int pk_QoLCatcherDistance = 0;
 server bool pk_autoOpenBoard = true;
 server bool pk_allowDemonMorph = true;
 server bool pk_allowFreeCards = true;
+user bool pk_CodexNotifs = true;
 
 // Weapon Primary/Secondary fire settings
 

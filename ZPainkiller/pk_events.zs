@@ -1,46 +1,4 @@
-Class PK_MainHandler : EventHandler {
-	//debug function
-	/*ui void Test_CheckWeaponInInventory(Class<Weapon> weap, double x, double y) {
-		if (!weap)
-			return;
-		let plr = players[consoleplayer].mo;
-		if (!plr)
-			return;
-		let wweap = plr.FindInventory(weap);
-		bool has = wweap ? true : false;
-		int amt = wweap ? wweap.amount : -1;
-		string wname = weap.GetClassName();
-		if (wweap && wweap.GetTag()) wname = wweap.GetTag();
-		double xofs = x;
-		Screen.DrawText(bigfont,Font.CR_Red,xofs,y,wname);
-		xofs += 240;
-		if (has) {
-			Screen.DrawText(bigfont,Font.CR_Green,xofs,y," in inventory"); xofs += 144;
-			Screen.DrawText(bigfont,Font.CR_White,xofs,y," | amount: "); xofs += 128;
-			Screen.DrawText(bigfont,Font.CR_Green,xofs,y,String.Format("%d",amt));
-		}
-		else
-			Screen.DrawText(bigfont,Font.CR_White,xofs,y," none");
-	}
-	override void RenderOverlay(renderEvent e) {
-		if (!pk_debugmessages)	
-			return;
-		let plr = players[consoleplayer].mo;
-		let goldcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
-		string str = String.Format("Remaining card uses: %d | Total uses: %d",goldcontrol.goldUses,goldcontrol.GetTotalGoldUses());
-		Screen.DrawText(bigfont,Font.CR_Green,1800,800,str);
-		double tx = 2000;
-		double ty = 200;
-		double parag = 16;
-		Test_CheckWeaponInInventory("PK_Painkiller",tx,ty); ty += parag;
-		Test_CheckWeaponInInventory("PK_Shotgun",tx,ty); ty += parag;
-		Test_CheckWeaponInInventory("PK_Stakegun",tx,ty); ty += parag;
-		Test_CheckWeaponInInventory("PK_Boltgun",tx,ty); ty += parag;
-		Test_CheckWeaponInInventory("PK_Chaingun",tx,ty); ty += parag;
-		Test_CheckWeaponInInventory("PK_Rifle",tx,ty); ty += parag;
-		Test_CheckWeaponInInventory("PK_Electrodriver",tx,ty); ty += parag;
-	}*/
-	
+Class PK_MainHandler : EventHandler {	
 	override void RenderOverlay(renderEvent e) {
 		PlayerInfo plr = players[consoleplayer];
 		if (plr && plr.readyweapon is "PK_Boltgun") {			
@@ -57,6 +15,7 @@ Class PK_MainHandler : EventHandler {
 	array <Actor> allbosses; //only boss monsters
 	array <PK_StakeProjectile> stakes; //stake projectiles
 	array <Inventory> keyitems; //pre-placed weapons and keys, to be displayed when the player picks up a Crystal Ball
+	array <PK_GoldContainer> goldcontainers;
 	
 	//By default returns true if ANY of the players has the item.
 	//If 'checkall' argument is true, the function returns true if ALL players have the item.
@@ -114,7 +73,7 @@ Class PK_MainHandler : EventHandler {
 			let state = itm.SpawnState;
 			let targetsprite = state.sprite;
 			let spritename = TexMan.GetName(state.GetSpriteTexture(0));
-			if (pk_debugmessages)
+			if (pk_debugmessages > 1)
 				console.printf("Spawning map marker for %s. Sprite name: %s",itm.GetClassName(),spritename);
 			if (targetsprite && spritename != 'TNT1A0') {
 				let marker = Actor.Spawn("PK_SafeMapMarker",itm.pos);			
@@ -314,6 +273,9 @@ Class PK_MainHandler : EventHandler {
 		let act = e.thing;		
 		if (!act)
 			return;
+		if (act is "PK_GoldContainer") {
+			goldcontainers.Push(PK_GoldContainer(act));
+		}
 		if (act is "Inventory") {
 			let foo = Inventory(act);
 			if (foo && (foo is  "Key" || (foo is "Weapon" && !foo.bTOSSED)))
@@ -478,6 +440,47 @@ Class PK_MainHandler : EventHandler {
 			StopPlayerDemonMorph(plr);
 		}
 	}
+	//debug function
+	/*ui void Test_CheckWeaponInInventory(Class<Weapon> weap, double x, double y) {
+		if (!weap)
+			return;
+		let plr = players[consoleplayer].mo;
+		if (!plr)
+			return;
+		let wweap = plr.FindInventory(weap);
+		bool has = wweap ? true : false;
+		int amt = wweap ? wweap.amount : -1;
+		string wname = weap.GetClassName();
+		if (wweap && wweap.GetTag()) wname = wweap.GetTag();
+		double xofs = x;
+		Screen.DrawText(bigfont,Font.CR_Red,xofs,y,wname);
+		xofs += 240;
+		if (has) {
+			Screen.DrawText(bigfont,Font.CR_Green,xofs,y," in inventory"); xofs += 144;
+			Screen.DrawText(bigfont,Font.CR_White,xofs,y," | amount: "); xofs += 128;
+			Screen.DrawText(bigfont,Font.CR_Green,xofs,y,String.Format("%d",amt));
+		}
+		else
+			Screen.DrawText(bigfont,Font.CR_White,xofs,y," none");
+	}
+	override void RenderOverlay(renderEvent e) {
+		if (!pk_debugmessages)	
+			return;
+		let plr = players[consoleplayer].mo;
+		let goldcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		string str = String.Format("Remaining card uses: %d | Total uses: %d",goldcontrol.goldUses,goldcontrol.GetTotalGoldUses());
+		Screen.DrawText(bigfont,Font.CR_Green,1800,800,str);
+		double tx = 2000;
+		double ty = 200;
+		double parag = 16;
+		Test_CheckWeaponInInventory("PK_Painkiller",tx,ty); ty += parag;
+		Test_CheckWeaponInInventory("PK_Shotgun",tx,ty); ty += parag;
+		Test_CheckWeaponInInventory("PK_Stakegun",tx,ty); ty += parag;
+		Test_CheckWeaponInInventory("PK_Boltgun",tx,ty); ty += parag;
+		Test_CheckWeaponInInventory("PK_Chaingun",tx,ty); ty += parag;
+		Test_CheckWeaponInInventory("PK_Rifle",tx,ty); ty += parag;
+		Test_CheckWeaponInInventory("PK_Electrodriver",tx,ty); ty += parag;
+	}*/
 }
 
 Class PK_ShaderHandler : StaticEventHandler {
@@ -542,7 +545,12 @@ Class PK_ReplacementHandler : EventHandler {
 
 			case 'Stimpack' 		: e.Replacement = 'PK_AmmoSpawner_Stimpack';	break;
 			case 'Medikit' 		: e.Replacement = 'PK_AmmoSpawner_Stimpack';	break;
-			case 'HealthBonus' 	: e.Replacement = 'PK_GoldCoin';	break;
+			case 'HealthBonus' 	: 
+				if (random[propspawn](1,10) >= 9)
+					e.Replacement = 'PK_BreakableChest';
+				else
+					e.Replacement = 'PK_NullActor';
+				break;
 			case 'ArmorBonus' 		: e.Replacement = 'PK_GoldCoin';	break;
 			
 			case 'SoulSphere' 		: e.Replacement = 'PK_GoldSoul';	break;
@@ -562,11 +570,11 @@ Class PK_ReplacementHandler : EventHandler {
 			case 'DeadDemon'	: e.Replacement = 'PK_BreakableChest'; break;
 			case 'DeadDoomImp'	: e.Replacement = 'PK_BreakableChest'; break;
 			case 'DeadLostSoul'	: e.Replacement = 'PK_BreakableChest'; break;
-			case 'DeadMarine'	: e.Replacement = 'PK_BreakableChest'; break;
 			case 'DeadShotgunGuy'	: e.Replacement = 'PK_BreakableChest'; break;
 			case 'DeadZombieMan'	: e.Replacement = 'PK_BreakableChest'; break;
-			case 'GibbedMarine'	: e.Replacement = 'PK_BreakableChest'; break;
-			case 'GibbedMarineExtra'	: e.Replacement = 'PK_BreakableChest'; break;
+			//case 'DeadMarine'	: e.Replacement = 'PK_BreakableChest'; break;
+			//case 'GibbedMarine'	: e.Replacement = 'PK_BreakableChest'; break;
+			//case 'GibbedMarineExtra'	: e.Replacement = 'PK_BreakableChest'; break;
 			
 			//SmallBloodPool
 			//Gibs
