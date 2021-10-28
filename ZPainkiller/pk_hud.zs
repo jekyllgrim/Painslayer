@@ -259,7 +259,7 @@ Class PainkillerHUD : BaseStatusBar {
 	protected void DrawCodexNotif() {
 		if (!notifsCvar || notifsCvar.GetBool() == false)
 			return;
-		if (!invcontrol || !invcontrol.latestPickup)
+		if (!invcontrol || !invcontrol.latestPickup || invcontrol.codexOpened)
 			return;		
 		string weapname = StringTable.Localize(invcontrol.latestPickupName);
 		vector2 pos1 = (-112, -6);
@@ -288,7 +288,7 @@ Class PainkillerHUD : BaseStatusBar {
 			return;
 		if (!invcontrol)
 			invcontrol = PK_InvReplacementControl(player.FindInventory("PK_InvReplacementControl"));
-		if (!invcontrol.latestPickup)
+		if (!invcontrol || !invcontrol.latestPickup || invcontrol.codexOpened)
 			return;
 		curLatestPickup = invcontrol.latestPickup;
 		double targetMod;

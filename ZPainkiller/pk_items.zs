@@ -22,7 +22,7 @@ Class PK_InventoryToken : Inventory abstract {
 Class PK_InvReplacementControl : Inventory {
 	Class<Inventory> latestPickup; //keep track of the latest pickup
 	string latestPickupName; //the tag of the latest pickup
-	protected array < Class<Inventory> > lastPickups;
+	bool codexOpened;
 	Default {
 		+INVENTORY.UNDROPPABLE
 		+INVENTORY.UNTOSSABLE
@@ -145,22 +145,52 @@ Class PK_InvReplacementControl : Inventory {
 		for that item (if available). See pk_codex.zs.
 	*/	
 	void RecordLastPickup(class<Inventory> toRecord) {
-		if (!toRecord || !owner)
+		if (!toRecord || !owner || !owner.player)
 			return;
+		int pnum = owner.PlayerNumber();
+		if (pnum < 0)
+		  return;
+
+		let it = ThinkerIterator.Create("PK_PickupsTracker", STAT_STATIC);	
+		let tracker = PK_PickupsTracker(it.Next());
+		if (!tracker) {
+			if (pk_debugmessages)
+				console.printf("Item track Thinker not found");
+			return;
+		}
+		
+
 		/*	We use a dynamic array to check that the player hasn't
 			picked up this item before, because CountInv won't catch
 			the items that don't actually get placed in the inventory,
 			such as armor.
 		*/
-		if (!owner.CountInv(toRecord) && lastPickups.Find(toRecord) == lastPickups.Size()) {
-			lastPickups.Push(toRecord);
+		if (tracker.pickups[pnum].pickups.Find(toRecord) == tracker.pickups[pnum].pickups.Size()) {
+			tracker.pickups[pnum].pickups.Push(toRecord);
 			latestPickup = toRecord;
 			latestPickupName = GetDefaultByType(toRecord).GetTag();
+			codexOpened = false;
 			if (pk_debugmessages) {
 				console.printf("Latest pickup is %s",latestPickup.GetClassName());
 			}
 		}
 	}
+}
+
+struct PK_PlayerItems
+{
+    Array<class<Inventory> > pickups;
+}
+
+class PK_PickupsTracker : Thinker
+{
+    PK_PlayerItems pickups[MAXPLAYERS];
+	
+	PK_PickupsTracker Init(void)
+    {
+        ChangeStatNum(STAT_STATIC);
+		return self;
+    }
 }
 
 Mixin Class PK_PickupSound {

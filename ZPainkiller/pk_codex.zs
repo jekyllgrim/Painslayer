@@ -184,7 +184,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 	override void Init (Menu parent) {
 		super.Init(parent);
 		S_StartSound("ui/board/open",CHAN_VOICE,CHANF_UI,volume:snd_menuvolume);
-		
+		EventHandler.SendNetworkEvent("PKCCodexOpened");
 		//first create the background (always 4:3, never stretched)
 		backgroundsize = (PK_BOARD_WIDTH,PK_BOARD_HEIGHT);	
 		SetBaseResolution(backgroundsize);	

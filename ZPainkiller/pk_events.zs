@@ -197,6 +197,13 @@ Class PK_MainHandler : EventHandler {
 	override void WorldLoaded(WorldEvent e) {
 		if (level.Mapname == "TITLEMAP")
 			return;
+		let it = ThinkerIterator.Create("PK_PickupsTracker", Thinker.STAT_STATIC);
+		let tracker = PK_PickupsTracker(it.Next());
+		if (!tracker) {
+			if (pk_debugmessages)
+				console.printf("Item track Thinker created");
+			new("PK_PickupsTracker").Init();
+		}
 		if (e.IsSaveGame || e.isReopen)
 			return;
 		for (int pn = 0; pn < MAXPLAYERS; pn++) {
@@ -595,6 +602,7 @@ Class PK_ReplacementHandler : EventHandler {
 
 Class PK_BoardEventHandler : EventHandler {
 	ui bool boardOpened; //whether the Black Tarot board has been opened on this map
+	ui bool CodexOpened;
 	bool SoulKeeper;
 	
 	override void WorldThingDamaged(worldevent e) {
@@ -623,6 +631,12 @@ Class PK_BoardEventHandler : EventHandler {
 		let plr = players[e.Player].mo;
 		if (!plr)
 			return;
+		if (e.name == 'PKCCodexOpened') {
+			let irc = PK_InvReplacementControl(plr.FindInventory("PK_InvReplacementControl"));
+			if (irc) {
+				irc.codexOpened = true;
+			}
+		}
 		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (!cardcontrol)
 			return;
