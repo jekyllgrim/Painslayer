@@ -1,4 +1,4 @@
-Class PK_BreakablePropBase : Actor abstract {
+Class PK_GoldContainer : PK_BaseActor abstract {
 	color debriscolor;
 	property debriscolor : debriscolor;
 	Default {
@@ -9,8 +9,17 @@ Class PK_BreakablePropBase : Actor abstract {
 		health 100;
 		radius 20;
 		height 24;
-		scale 0.65;
-		PK_BreakablePropBase.debriscolor "3a2B19";
+		scale 0.6;
+		PK_GoldContainer.debriscolor "3a2B19";
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		//Check if there's enough space to spawn the prop (no more than 32 times):
+		for (int i = 32; i > 0; i--) {
+			SetOrigin(FindRandomPosAround(pos, 96),false);
+			if (CheckClippingLines(radius*1.5))
+				break;
+		}
 	}
 	override void Die(Actor source, Actor inflictor, int dmgflags, Name MeansOfDeath) {
 		double zofs = default.height;
@@ -55,17 +64,17 @@ Class PK_PropDebris : PK_RandomDebris {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		if (target && target is "PK_BreakablePropBase") {
+		if (target && target is "PK_GoldContainer") {
 			double targetAngle = -AngleTo(target) + frandom[debris](-40,40);
 			VelFromAngle(frandom[debris](1,2),targetAngle);
 			vel.z = frandom[debris](2,4);
-			let prop = PK_BreakablePropBase(target);
+			let prop = PK_GoldContainer(target);
 			SetShade(prop.debriscolor);
 		}
 	}
 }
 	
-Class PK_BreakableChest : PK_BreakablePropBase {
+Class PK_BreakableChest : PK_GoldContainer {
 	Default {
 		deathsound "props/chest/death";
 	}
