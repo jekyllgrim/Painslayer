@@ -425,7 +425,7 @@ Class PK_ShotgunPuff : PK_BulletPuff {
 	states {
 	Spawn:
 		TNT1 A 1 NoDelay {		
-			if (target && tracer && tracer.bISMONSTER && !tracer.bDONTTHRUST && !tracer.bBOSS && tracer.mass <= 400 && tracer.health <= 0 && !tracer.FindInventory("PK_PushAwayControl") && !tracer.FindInventory("PK_FreezeControl")) {
+			if (target && tracer && tracer.bISMONSTER && !tracer.bDONTTHRUST && !tracer.bBOSS && !tracer.bFLOAT && tracer.mass <= 400 && tracer.health <= 0 && tracer.Distance3D(target) <= 200 && !tracer.FindInventory("PK_PushAwayControl") && !tracer.FindInventory("PK_FreezeControl")) {
 				tracer.GiveInventory("PK_PushAwayControl",1);
 				let pac = PK_PushAwayControl(tracer.FindInventory("PK_PushAwayControl"));
 				if (pac) {
