@@ -558,12 +558,16 @@ Class PK_ReplacementHandler : EventHandler {
 				else
 					e.Replacement = 'PK_NullActor';
 				break;
-			case 'ArmorBonus' 		: e.Replacement = 'PK_GoldCoin';	break;
-			
+			case 'ArmorBonus' 		: 
+				if (random[propspawn](1,10) > 8)
+					e.Replacement = 'PK_BronzeArmor';
+				else
+					e.Replacement = 'PK_NullActor';
+				break;			
 			case 'SoulSphere' 		: e.Replacement = 'PK_GoldSoul';	break;
 			case 'MegaSphere' 		: e.Replacement = 'PK_MegaSoul';	break;
 			case 'BlurSphere' 		: e.Replacement = 'PK_ChestOfSouls';	break;
-			case 'GreenArmor' 		: e.Replacement = (random[repl](1,100) > 60) ? 'PK_SilverArmor' : 'PK_BronzeArmor';	break;
+			case 'GreenArmor' 		: e.Replacement = 'PK_SilverArmor';	break;
 			Case 'BlueArmor'		: e.Replacement = 'PK_GoldArmor'; break;
 			
 			case 'Berserk'			: e.Replacement = 'PK_WeaponModifierGiver';  break;
