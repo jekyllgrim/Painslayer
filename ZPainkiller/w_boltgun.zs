@@ -410,7 +410,10 @@ Class PK_Bomb : PK_Projectile {
 	}
 	override void Tick() {
 		if (!isFrozen()) {
-			if (bounces >= 1) {
+			//GetAge() check makes sure bombs don't start spawning smoke
+			//while still "inside" the player, since that can cause
+			//significant slowdowns.
+			if (bounces >= 1 && GetAge() > 6) {
 				let smk = PK_WhiteSmoke(Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-0.3,0.3),frandom[sfx](-0.3,0.3),frandom[sfx](-0.3,0.3))));
 				if (smk) {
 					smk.vel = (frandom[sfx](-1.2,1.2),frandom[sfx](-1.2,1.2),frandom[sfx](1.2,1.2));
