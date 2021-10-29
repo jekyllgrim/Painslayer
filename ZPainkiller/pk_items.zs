@@ -455,10 +455,9 @@ Class PK_Soul : PK_Inventory {
 		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
 		if (bearer) {
 			//define an amount between 1-20 based on monster's health (linearly mapped between 20-500):
-			double am = LinearMap(double(GetDefaultByType(bearer).health), 20, 500, 1, 20);
-			//the amount is clamped to 20 unless the monster is a boss:
-			if (!GetDefaultByType(bearer).bBOSS)
-				am = Clamp(am, 1, 20);
+			//the amount is clamped to 20 (or to 80 if the monster is a boss)
+			int maxAmt = GetDefaultByType(bearer).bBOSS ? 80 : 20;
+			double am = Clamp(LinearMap(double(GetDefaultByType(bearer).health), 20, 500, 1, 20), 1, maxAmt);
 			amount = am;
 			//slightly change soul's alpha and scale based on the resulting number:
 			alpha = Clamp(LinearMap(am, 1, 20, 0.5, 1.5), 0.5 , 1.5);
