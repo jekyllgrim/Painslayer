@@ -147,6 +147,15 @@ Class PK_InvReplacementControl : Inventory {
 	void RecordLastPickup(class<Inventory> toRecord) {
 		if (!toRecord || !owner || !owner.player)
 			return;
+		bool isInCodex = false;
+		for (int i = 0; i < CodexCoveredClasses.Size(); i++) {
+			if (toRecord == CodexCoveredClasses[i]) {
+				isInCodex = true;
+				break;
+			}
+		}
+		if (!isInCodex)
+			return;
 		int pnum = owner.PlayerNumber();
 		if (pnum < 0)
 		  return;
@@ -175,6 +184,29 @@ Class PK_InvReplacementControl : Inventory {
 			}
 		}
 	}
+	
+	static const Class<Actor> CodexCoveredClasses[] = {
+		'PK_Painkiller',
+		'PK_Shotgun',
+		'PK_Stakegun',
+		'PK_Chaingun',
+		'PK_ElectroDriver',
+		'PK_Rifle',
+		'PK_Boltgun',
+		'PK_Soul',
+		'PK_GoldSoul',
+		'PK_MegaSoul',
+		'PK_BronzeArmor',
+		'PK_SilverArmor',
+		'PK_GoldArmor',
+		'PK_AmmoPack',
+		'PK_PowerAntiRad',
+		'PK_AllMap',
+		'PowerChestOfSoulsRegen',
+		'PK_WeaponModifier',
+		'PK_PowerDemonEyes',
+		'PK_PowerPentagram'
+	};
 }
 
 struct PK_PlayerItems
