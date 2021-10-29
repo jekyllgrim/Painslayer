@@ -233,6 +233,7 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		yscale 0.415;
 		inventory.amount 1;
 		inventory.pickupmessage "";
+		Tag "$PKC_GOLDOBTAIN";
 	}
 	override bool TryPickup (in out Actor other) {
 		if (!(other is "PlayerPawn"))
@@ -340,7 +341,7 @@ Class PK_GoldCoin : PK_GoldPickup {
 		+ROLLCENTER
 		xscale 0.4;
 		yscale 0.44;
-		Tag "$PKC_Gold";
+		Tag "$PKC_GOLDTYPES";
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
