@@ -747,6 +747,15 @@ Class PKCodexMenu : PKZFGenericMenu {
 				let wtext3 = PKZFWeaponDescLabel.Create(wpnDescPos,wpnDescSize,self,text3);
 				wtext3.pack(tabframe);
 			}
+			
+			// Boltgun has a special note below all other descriptions
+			// about using +zoom to activate its optical scope:
+			if (i == PKCW_Boltgun) {
+				wpnDescPos.y += wpnDescSize.y + (wpnInfoYGap / 2.);
+				string scopeTxt = String.Format(StringTable.Localize("$PKC_BoltgunNote"), PK_Keybinds.getKeyboard("+zoom"));
+				let scopeNote = PKZFWeaponDescLabel.Create((wpnImgPos.x, wpnDescPos.y), wpnInfoBorderSize, self, scopeTxt, textScale: PK_MENUTEXTSCALE*0.7, textcolor: Font.FindFontColor('PKGreenText'));
+				scopeNote.Pack(tabframe);
+			}
 		}
 		//Define Weapon Modifier button:
 		let WMtexOff = PKZFBoxTextures.CreateSingleTexture("Graphics/HUD/Codex/CODX_WM0.png",true);
