@@ -272,8 +272,8 @@ Class PK_GoldPickup : PK_Inventory abstract {
 	protected PK_GoldGleam gleam;
 	Default {
 		+INVENTORY.NEVERRESPAWN
-		+INVENTORY.AUTOACTIVATE
-		+INVENTORY.ALWAYSPICKUP
+		//+INVENTORY.AUTOACTIVATE
+		//+INVENTORY.ALWAYSPICKUP
 		+BRIGHT
 		+NOTELEPORT
 		xscale 0.5;
@@ -282,14 +282,18 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		inventory.pickupmessage "";
 		Tag "$PKC_GOLDOBTAIN";
 	}
-	override bool Use (bool pickup) {
-		if (!owner)
-			return true;
-		let cont = PK_CardControl(owner.FindInventory("PK_CardControl"));
+	override bool TryPickup (in out Actor toucher) {
+		if (!toucher || !toucher.player)
+			return false;
+		let cont = PK_CardControl(toucher.FindInventory("PK_CardControl"));
 		if (cont) {
-			int goldmul = (owner.FindInventory("PKC_Greed")) ? 2 : 1;
+			int goldmul = (toucher.FindInventory("PKC_Greed")) ? 2 : 1;
 			cont.pk_gold = Clamp(cont.pk_gold + (amount*goldmul), 0, 99990);
 		}
+		let irc = PK_InvReplacementControl(toucher.FindInventory("PK_InvReplacementControl"));
+		if (irc)
+			irc.RecordLastPickup(self.GetClass());
+		GoAwayAndDie();
 		return true;
 	}
 	override void Tick() {
@@ -303,17 +307,18 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		//Soul Catcher effect:
 		if (tracer && tracer.player) {
 			vel = Vec3To(tracer).Unit() * 10.5;
-			bNOINTERACTION = true;
+			bNOCLIP = true;
+			bNOGRAVITY = true;
 			if (Distance3D(tracer) < 32) {
-				bool picked;
-				[picked, tracer] = CallTryPickup(tracer);
-				if (picked)
-					PlayPickupSound(tracer);		
+				PlayPickupSound(tracer);
+				CallTryPickup(tracer);
 				tracer = null;
 			}
 		}
-		else if (bNOINTERACTION)
-			bNOINTERACTION = false;
+		else if (bNOCLIP) {
+			bNOCLIP = false;
+			bNOGRAVITY = false;
+		}
 		if (GetAge() % 10 == 0) {
 			if (CheckPlayerSights() && !gleam && frandom[sfx](1,10) > 9) {
 				gleam = PK_GoldGleam(Spawn("PK_GoldGleam",pos+(0,0,frandom(2,height))));
@@ -497,6 +502,7 @@ Class PK_Soul : PK_Inventory {
 		inventory.pickupsound "pickups/soul";
 		Tag "$PKC_Souls";
 	}
+	
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
@@ -530,6 +536,35 @@ Class PK_Soul : PK_Inventory {
 			console.printf("Spawned soul, bearer: %s, amount: %d",str,amount);
 		}
 	}
+	
+	override bool TryPickup (in out Actor toucher) {
+		if (!toucher || !toucher.player)
+			return false;
+		let cont = PK_DemonMorphControl(toucher.FindInventory("PK_DemonMorphControl"));
+		if (cont)
+			cont.GiveSoul();
+		if (toucher.FindInventory("PKC_SoulRedeemer"))
+			amount *= 2;
+		toucher.GiveBody(Amount, MaxAmount);
+		let irc = PK_InvReplacementControl(toucher.FindInventory("PK_InvReplacementControl"));
+		if (irc)
+			irc.RecordLastPickup(self.GetClass());
+		GoAwayAndDie();
+		return true;
+	}
+	
+	/*override bool Use (bool pickup) { 
+		if (!owner)
+			return true;
+		let cont = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
+		if (cont)
+			cont.GiveSoul();
+		if (owner.FindInventory("PKC_SoulRedeemer"))
+			amount *= 2;
+		owner.GiveBody(Amount, MaxAmount);
+		return true; 
+	}*/
+	
 	override void Tick() {
 		super.Tick();
 		if (isFrozen())
@@ -541,47 +576,20 @@ Class PK_Soul : PK_Inventory {
 			vel = Vec3To(tracer).Unit() * 10.5;
 			bNOINTERACTION = true;
 			if (Distance3D(tracer) < 32) {
-				bool picked;
-				[picked, tracer] = CallTryPickup(tracer);
-				if (picked) {
-					CallTryPickup(tracer);
-					PlayPickupSound(tracer);
-					PrintPickupMessage(tracer.CheckLocalView(), PickupMessage ());
-				}
+				PlayPickupSound(tracer);
+				PrintPickupMessage(tracer.CheckLocalView(), PickupMessage ());
+				CallTryPickup(tracer);
 				tracer = null;
 			}
 		}
 		else if (bNOINTERACTION)
 			bNOINTERACTION = false;
 	}
+	
 	override string PickupMessage () {
 		return String.Format(StringTable.Localize(PickupMsg),actualAmount);
 	}
-	/*override bool TryPickup (in out Actor other) {
-		if (!(other is "PlayerPawn"))
-			return false;
-		let cont = PK_DemonMorphControl(other.FindInventory("PK_DemonMorphControl"));
-		if (cont)
-			cont.GiveSoul();
-		if (other.FindInventory("PKC_SoulRedeemer"))
-			amount *= 2;
-		other.GiveBody(Amount, MaxAmount);
-		//Console.Printf("Consumed %d health from a soul",amount);
-		GoAwayAndDie();
-		return true;
-	}*/
 	
-	override bool Use (bool pickup) { 
-		if (!owner)
-			return true;
-		let cont = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
-		if (cont)
-			cont.GiveSoul();
-		if (owner.FindInventory("PKC_SoulRedeemer"))
-			amount *= 2;
-		owner.GiveBody(Amount, MaxAmount);
-		return true; 
-	}
 	states {
 	Spawn:
 		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
