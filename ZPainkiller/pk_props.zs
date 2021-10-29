@@ -4,6 +4,7 @@ Class PK_GoldContainer : PK_BaseActor abstract {
 	Default {
 		+SHOOTABLE
 		+VULNERABLE
+		+NOBLOODDECALS
 		bloodtype "PK_PropDebris";
 		mass 1000;
 		health 100;
@@ -15,10 +16,18 @@ Class PK_GoldContainer : PK_BaseActor abstract {
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		//Check if there's enough space to spawn the prop (no more than 32 times):
+		bool posValid = false;
 		for (int i = 32; i > 0; i--) {
 			SetOrigin(FindRandomPosAround(pos, 96),false);
-			if (CheckClippingLines(radius*1.5))
+			if (!CheckClippingLines(radius*2)) {
+				posValid = true;
 				break;
+			}
+		}
+		if (!posValid) {
+			if (pk_debugmessages > 1)
+				Console.Printf("No valid position for chest at %d:%d:%d. Destroying.",pos.x,pos.y,pos.z);
+			Destroy();
 		}
 	}
 	override void Die(Actor source, Actor inflictor, int dmgflags, Name MeansOfDeath) {
