@@ -346,13 +346,8 @@ Class PainkillerHUD : BaseStatusBar {
 		
 		//draw armor icon:
 		let armor = BasicArmor(CPlayer.mo.FindInventory("BasicArmor"));
-		if (armor && armor.amount > 0) {
-			//this is for cheaters: if "give all" was used, forcefully display gold armor icon, otherwise gzdoom will display BlueArmor icon			
-			if (armor.amount >= 200 && armor.ArmorType != "PK_BronzeArmor" && armor.ArmorType != "PK_SilverArmor" && armor.ArmorType != "PK_GoldArmor")
-				PK_DrawImage("pkharm3",(11,-11),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER,0.8);
-			else
-				PK_DrawInventoryIcon(armor, (11, -11),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER);
-		}
+		if (armor && armor.amount > 0)
+			PK_DrawInventoryIcon(armor, (11, -11),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER);
 		else
 			PK_DrawImage("pkharm0",(11,-11),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER,0.8);
 		

@@ -53,10 +53,12 @@ Class PK_InvReplacementControl : Inventory {
 	};
 	static const Class<Inventory> vanillaItems[] = {
 		"GreenArmor",
-		"BlueArmor"
+		"BlueArmor",
+		"BasicArmorPickup"
 	};
 	static const Class<Inventory> pkItems[] = {
 		"PK_SilverArmor",
+		"PK_GoldArmor",
 		"PK_GoldArmor"
 	};
 	//here we make sure that the player will never have vanilla weapons in their inventory:
