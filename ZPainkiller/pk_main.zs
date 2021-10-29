@@ -1,16 +1,112 @@
 Mixin class PK_Math {	
+	
 	int Sign (double i) {
 		if (i >= 0)
 			return 1;
 		return -1;
 	}
+	
 	clearscope double LinearMap(double val, double o_min, double o_max, double n_min, double n_max) {
 		return (val - o_min) * (n_max - n_min) / (o_max - o_min) + n_min;
 	}
+	
+	//Utility functions by Marisa Kirisame
+	
+	//Checks which side of a lindef the actor is on:
 	clearscope int PointOnLineSide( Vector2 p, Line l ) {
 		if ( !l ) return 0;
 		return (((p.y-l.v1.p.y)*l.delta.x+(l.v1.p.x-p.x)*l.delta.y) > double.epsilon);
     }
+	
+	//Returns -1 if the box (normally an actor's radius) intersects a linedef:
+    int BoxOnLineSide( double top, double bottom, double left, double right, Line l ) {
+		if ( !l ) return 0;
+		int p1, p2;
+		if ( l.delta.x == 0 ) {
+			// ST_VERTICAL:
+			p1 = (right < l.v1.p.x);
+			p2 = (left < l.v1.p.x);
+			if ( l.delta.y < 0 ) {
+				p1 ^= 1;
+				p2 ^= 1;
+			}
+		}
+		else if ( l.delta.y == 0 )	{
+			// ST_HORIZONTAL:
+			p1 = (top > l.v1.p.y);
+			p2 = (bottom > l.v1.p.y);
+			if ( l.delta.x < 0 )		{
+				p1 ^= 1;
+				p2 ^= 1;
+			}
+		}
+		else if ( (l.delta.x*l.delta.y) >= 0 )	{
+			// ST_POSITIVE:
+			p1 = PointOnLineSide((left,top),l);
+			p2 = PointOnLineSide((right,bottom),l);
+		}
+		else {
+			// ST_NEGATIVE:
+			p1 = PointOnLineSide((right,top),l);
+			p2 = PointOnLineSide((left,bottom),l);
+		}
+		return (p1==p2)?p1:-1;
+	}
+	
+	bool CheckClippingLines(double size) {
+		BlockLinesIterator it = BlockLinesIterator.Create(self, size);
+		while (it.Next()) {
+			let lline = it.CurLine;
+			if (!lline || !(lline.Flags & Line.ML_BLOCKING))
+				continue;
+			if (BoxOnLineSide(size,size,size,size,lline) == -1)
+				return true;
+		}
+		return false;
+	}
+	
+	//Find a random position within the specified spot in a grid of the specified size:
+	vector3 FindRandomPosAround(vector3 actorpos, double gridrad = 128, double step = 16) {
+		if (!level.IsPointInLevel(actorpos))
+			return actorpos;
+		//because zscript doesn't support vector3 arrays I have to do this
+		//UGH
+		array <double> tposX;
+		array <double> tposY;
+		array <double> tposZ;
+		//establish grid corners (top left and bottom right)
+		vector3 startpos = actorpos - (gridrad, gridrad, 0);
+		vector3 endpos = actorpos + (gridrad, gridrad, 0);
+		//get sector of the actorpos:
+		Sector actorsector = Level.PointInSector(actorpos.xy);
+		//start at top left:
+		vector3 curpos = startpos;
+		while (true) {
+			//save the coordinates if they're not in void and within this sector:
+			if (Level.IsPointInLevel(curpos) && Level.PointInSector(curpos.xy) == actorsector) {
+				//let itr = BlockLinesIterator.Create(self,
+				tposX.Push(curpos.x);
+				tposY.Push(curpos.y);
+				tposZ.Push(curpos.z);
+			}
+			//move one step horizontally:
+			curpos.x += step;
+			//if we're too far, reset horizontal and move one step down:
+			if (curpos.x > endpos.x) {
+				curpos.x = startpos.x;
+				curpos.y += step;
+			}
+			//if we're too far down too, stop iterating:
+			if (curpos.y > endpos.y)
+				break;
+		}
+		//in case array sizes are not equal for some reason:
+		int foo = min(tposX.Size(), tposY.Size(), tposZ.Size()) - 1;
+		//return a random position:
+		int i = random[findpos](0,foo);
+		vector3 finalpos = (tposX[i], tposY[i], tposZ[i]);
+		return finalpos;
+	}			
 }
 
 mixin class PK_PlayerSightCheck {
@@ -22,6 +118,20 @@ mixin class PK_PlayerSightCheck {
 				return true;
 		}
 		return false;
+	}
+}
+
+class PK_NullActor : Actor {
+	Default {
+		+NOINTERACTION
+		+SYNCHRONIZED
+		+DONTBLAST
+		radius 1;
+		height 1;
+		FloatBobPhase 0;
+	}
+	override void PostBeginPlay() {
+		Destroy();
 	}
 }
 
