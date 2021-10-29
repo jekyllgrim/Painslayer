@@ -431,6 +431,7 @@ Class PK_Soul : PK_Inventory {
 	PK_BoardEventHandler event;
 	protected int age;
 	protected int maxage;
+	protected int actualAmount;
 	property maxage : maxage;
 	Class<Actor> bearer;
 	Default {
@@ -459,8 +460,9 @@ Class PK_Soul : PK_Inventory {
 			//define an amount between 1-20 based on monster's health (linearly mapped between 20-500):
 			//the amount is clamped to 20 (or to 80 if the monster is a boss)
 			int maxAmt = GetDefaultByType(bearer).bBOSS ? 80 : 20;
-			double am = Clamp(LinearMap(double(GetDefaultByType(bearer).health), 20, 500, 1, 20), 1, maxAmt);
-			amount = am;
+			double am = LinearMap(double(GetDefaultByType(bearer).health), 20, 500, 1, 20);
+			amount = Clamp(am, 1, maxAmt);
+			actualAmount = amount;
 			//slightly change soul's alpha and scale based on the resulting number:
 			alpha = Clamp(LinearMap(am, 1, 20, 0.5, 1.5), 0.5 , 1.5);
 			scale *= Clamp(LinearMap(am, 1, 20, 0.6, 1.15), 0.7, 1.15);
@@ -505,12 +507,7 @@ Class PK_Soul : PK_Inventory {
 			bNOINTERACTION = false;
 	}
 	override string PickupMessage () {
-		return String.Format(StringTable.Localize(PickupMsg),amount);
-	}
-	override bool TryPickup (in out Actor other) {
-		if (!(other is "PlayerPawn"))
-			return false;
-		return super.TryPickup(other);
+		return String.Format(StringTable.Localize(PickupMsg),actualAmount);
 	}
 	override bool Use (bool pickup) { 
 		if (!owner)
