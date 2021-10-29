@@ -229,6 +229,7 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		+INVENTORY.NEVERRESPAWN
 		+INVENTORY.AUTOACTIVATE
 		+BRIGHT
+		+NOTELEPORT
 		xscale 0.5;
 		yscale 0.415;
 		inventory.amount 1;
