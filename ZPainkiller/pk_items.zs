@@ -260,6 +260,7 @@ Class PK_GoldPickup : PK_Inventory abstract {
 	Default {
 		+INVENTORY.NEVERRESPAWN
 		+INVENTORY.AUTOACTIVATE
+		+INVENTORY.ALWAYSPICKUP
 		+BRIGHT
 		+NOTELEPORT
 		xscale 0.5;
@@ -267,11 +268,6 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		inventory.amount 1;
 		inventory.pickupmessage "";
 		Tag "$PKC_GOLDOBTAIN";
-	}
-	override bool TryPickup (in out Actor other) {
-		if (!(other is "PlayerPawn"))
-			return false;
-		return super.TryPickup(other);
 	}
 	override bool Use (bool pickup) {
 		if (!owner)
@@ -296,8 +292,10 @@ Class PK_GoldPickup : PK_Inventory abstract {
 			vel = Vec3To(tracer).Unit() * 10.5;
 			bNOINTERACTION = true;
 			if (Distance3D(tracer) < 32) {
-				CallTryPickup(tracer);
-				PlayPickupSound(tracer);
+				bool picked;
+				[picked, tracer] = CallTryPickup(tracer);
+				if (picked)
+					PlayPickupSound(tracer);		
 				tracer = null;
 			}
 		}
@@ -469,6 +467,7 @@ Class PK_Soul : PK_Inventory {
 	Default {
 		+INVENTORY.NEVERRESPAWN
 		+INVENTORY.AUTOACTIVATE
+		+INVENTORY.ALWAYSPICKUP
 		+BRIGHT
 		+DONTGIB		
 		PK_Soul.maxage 350;
@@ -529,9 +528,13 @@ Class PK_Soul : PK_Inventory {
 			vel = Vec3To(tracer).Unit() * 10.5;
 			bNOINTERACTION = true;
 			if (Distance3D(tracer) < 32) {
-				CallTryPickup(tracer);
-				PlayPickupSound(tracer);
-				PrintPickupMessage(tracer.CheckLocalView(), PickupMessage ());
+				bool picked;
+				[picked, tracer] = CallTryPickup(tracer);
+				if (picked) {
+					CallTryPickup(tracer);
+					PlayPickupSound(tracer);
+					PrintPickupMessage(tracer.CheckLocalView(), PickupMessage ());
+				}
 				tracer = null;
 			}
 		}
@@ -541,6 +544,20 @@ Class PK_Soul : PK_Inventory {
 	override string PickupMessage () {
 		return String.Format(StringTable.Localize(PickupMsg),actualAmount);
 	}
+	/*override bool TryPickup (in out Actor other) {
+		if (!(other is "PlayerPawn"))
+			return false;
+		let cont = PK_DemonMorphControl(other.FindInventory("PK_DemonMorphControl"));
+		if (cont)
+			cont.GiveSoul();
+		if (other.FindInventory("PKC_SoulRedeemer"))
+			amount *= 2;
+		other.GiveBody(Amount, MaxAmount);
+		//Console.Printf("Consumed %d health from a soul",amount);
+		GoAwayAndDie();
+		return true;
+	}*/
+	
 	override bool Use (bool pickup) { 
 		if (!owner)
 			return true;
