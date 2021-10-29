@@ -160,8 +160,8 @@ Showing standard weapon stats,PKC_WM_Off,Codex,Показаны стандарт
 Hold,PKC_Hold,Codex,Зажать
 Tap,PKC_Tap,Codex,Нажать
 then,PKC_then,Codex,затем
-Primary,PKC_Primary,Codex,Атака
-Secondary,PKC_Secondary,Codex,Альт. атака
+Primary,PKC_Primary,Codex,Атака 1
+Secondary,PKC_Secondary,Codex,Атака 2
 Pain,PKC_Pain,Codex,Pain
 Deal continuous damage with the spinning blades.,PKC_PainDesc,Codex,Наносит непрерывный урон вращающимися клинками.
 "Weapon Modifier effects: Blades spin faster, dealing more damage per second.",PKC_PainDescWM,Codex,"С Модификатором оружия: клинки вращаются быстрее, нанося больше урона."
@@ -172,15 +172,15 @@ NOTE: This attack can juggle corpses.",PKC_KillerDesc,Codex,"Выстрелив�
 Painkiller,PKC_Painkiller,Codex,Painkiller
 Launch the spinning blades forward. This projectile is slow but deals a lot of damage on impact.,PKC_PainkillerDesc,Codex,"Выпускает вращающиеся клинки вперед, создавая медленный, но смертоносный снаряд."
 Shotgun,PKC_Shotgun,Codex,Дробовик
-A fast-firing shotgun with decent damage and spread.,PKC_ShotgunDesc,Codex,Скорострельный дробовик с хорошим уроном и кучностью.
+A fast-firing shotgun with decent damage and spread.,PKC_ShotgunDesc,Codex,Скорострельный дробовик с хорошими уроном и кучностью.
 "Weapon Modifier effects: Shotgun spread tightens, and pellets deal slightly more damage.",PKC_ShotgunDescWM,Codex,"С Модификатором оружия: разброс снижается, а урон немного повышается."
 Freezer,PKC_Freezer,Codex,Охладитель
 "Fire two projectiles that freeze enemies on impact. Frozen enemies receive more damage, especially from the shotgun. Does not work on bosses.",PKC_FreezerDesc,Codex,"Выпускает два снаряда, замораживающих врагов. Замороженные враги получают больше урона, особенно от дробовика. Не действует на боссов."
 Weapon Modifier effects: Freeze duration is doubled.,PKC_FreezerDescWM,Codex,С Модификатором оружия: продолжительность заморозки удваивается.
 Shatter,PKC_ShotgunFreezer,Codex,Осколки
-"Fire freezer, then immediately fire shotgun to deal a lot of extra damage and potentially shatter the frozen enemy.",PKC_ShotgunFreezerDesc,Codex,"Выстрелите охладителем, а затем сразу дробовиком, чтобы нанести дополнительный урон и с большой вероятностью разбить врага на осколки."
+"Fire freezer, then immediately fire shotgun to deal a lot of extra damage. Shatters weaker enemies.",PKC_ShotgunFreezerDesc,Codex,"Выстрелите охладителем, а затем сразу дробовиком, чтобы нанести дополнительный урон. Слабые враги разбиваются на осколки."
 Stakegun,PKC_Stakegun,Codex,Коломёт
-Fire a powerful projectile that can pin enemies to walls. After 0.34 seconds in flight stakes catch on fire. Burning stakes deal more damage.,PKC_StakegunDesc,Codex,"Выпускает мощный снаряд, который может пригвозить врага к стене. 0,34 сек. спустя летящий кол загорается. Горящие колья наносят больше урона."
+Fire a powerful projectile that can pin enemies to walls. After 0.34 seconds in flight stakes catch on fire. Burning stakes deal more damage.,PKC_StakegunDesc,Codex,"Выпускает мощный снаряд, который может пригвозить врага к стене. 0,34 сек. спустя летящий кол загорается: горящие колья наносят больше урона."
 Weapon Modifier effects: Stakes are set on fire immediately and fly in a straight line at an increased speed.,PKC_StakegunDescWM,Codex,С Модификатором оружия: колья загораются в момент выстрела и летят по прямой линии с повышенной скоростью.
 Grenade Launcher,PKC_Grenade,Codex,Гранатомёт
 Fire a bouncing grenade that explodes after a period of time or when hitting an enemy. Shares ammo with the Rocket Launcher.,PKC_GrenadeDesc,Codex,"Выпускает отскакивающий снаряд, который взрывается через некоторое время или при попадании во врага. Использует те же патроны, что и ракетница."
@@ -199,7 +199,7 @@ Driver,PKC_Driver,Codex,Драйвер
 Fire shurikens at high speed. After 0.5 seconds in flight shurikens explode: catch enemies in the explosion for a lot of extra damage.,PKC_DriverDesc,Codex,"Быстро стреляет сюрикэнами. Через 0,5 сек. полета сюрикэны взрываются: если удастся зацепить взрывом врага, тот получит большой урон."
 "Weapon Modifier effects: Explosion damage is reduced, but shurikens always explode on impact.",PKC_DriverDescWM,Codex,"С Модификатором оружия: сила взрыва ослабляется, но сюрикэны взрываются при попадании."
 Electro,PKC_Electro,Codex,Электро
-Fire a continuous stream of electricity that automatically latches onto enemies within a small radius around your crosshair. Effective at stunlocking.,PKC_ElectroDesc,Codex,"Выпускает постоянный электрический разряд, который цепляется к врагом в небольшом радиусе вокруг перекрестия прицела."
+Fire a continuous stream of electricity that latches onto the closest target within a small radius around your crosshair. Effective at stunlocking.,PKC_ElectroDesc,Codex,"Выпускает постоянный электрический разряд, который наводится на врага в небольшом радиусе вокруг перекрестия прицела."
 "Weapon Modifier effects: Upon hitting an enemy, the lightning jumps to other enemies around it.",PKC_ElectroDescWM,Codex,С Модификатором оружия: при попадании во врага разряд перескакивает на других врагов вокруг него.
 Electric Disc,PKC_ElectroDisc,Codex,Электродиск
 "Fire an electrically charged container of shurikens. It sticks into enemies and walls, then starts firing electric bolts at surrounding enemies before exploding after a while.",PKC_ElectroDiscDesc,Codex,"Выпускает заряженный диск с сюрикэнами. Он втыкается во врага или стену, затем начинает стрелять разрядами в окружающих врагов, а через некоторое время взрывается."
@@ -214,6 +214,7 @@ Fuel tank,PKC_FlameTank,Codex,Выстрел баком
 Boltgun,PKC_Boltgun,Codex,Болтомет
 Fire 5 steel bolts in quick succession. Bolts fly in a straight line and can pin enemies to walls.,PKC_BoltgunDesc,Codex,Быстро выпускает 5 стальных болтов. Болты летят по прямой и могут пригвоздить врагов к стене.
 "Weapon Modifier effects: Bolts are set on fire, dealing more damage.",PKC_BoltgunDescWM,Codex,"С Модификатором оружия: болты горят, нанося больше урона при попадании."
+Press Zoom (%s) to activate sniper scope.,PKC_BoltgunNote,Codex,"Нажмите Приближение (%s), чтобы активировать оптический прицел."
 Heater,PKC_Heater,Codex,Шаромет
 "Fire 10 bouncing bombs that explode when impacting enemies, or bounce off a surface once and explode on the next impact.",PKC_HeaterDesc,Codex,"Выпускает 10 бомб, которые отскакивают от поверхности один раз, а при следующем столкновении взрываются. Также взрываются при попадании во врагов."
 Weapon Modifier effects: Bombs are launched further and explode on impact without bouncing.,PKC_HeaterDescWM,Codex,"С Модификатором оружия: бомбы летят дальше и взрываются при столкновении с чем угодно, не отскакивая."
@@ -256,9 +257,9 @@ There are several ways to acquire gold:
 - Souls are your primary way to heal, since there are no medikits in Painslayer.
 - Upon collecting 66 souls you will turn into a demon. 
 
-\cQHEALING\c[PKWhiteText]: One soul can give you \cQbetween 1 and 20 HP\c[PKWhiteText], depending on how much health the enemy originally had. If a soul contains 15 or more HP, it turns red. 
+\cQHEALING\c[PKWhiteText]: One soul can give you \cQbetween 1 and 20 HP\c[PKWhiteText], depending on how much health the enemy originally had. If a soul contains \cR15 or more HP, it turns red\c[PKWhiteText]. 
 
-\cRDEMON MODE\c[PKWhiteText]: When you collect \cR66 souls\c[PKWhiteText] you'll turn into a \cRDemon\c[PKWhiteText]. As a Demon you are completely invincible and you gain a unique devastating attack.
+\c[PKRedText]DEMON MODE\c[PKWhiteText]: When you collect \c[PKRedText]66 souls\c[PKWhiteText] you'll turn into a \c[PKRedText]Demon\c[PKWhiteText]. As a Demon you are completely invincible and you gain a unique devastating attack.
 - When you are 2 or 1 souls away from becoming a Demon, your screen will briefly flash in demon vision.
 - Equipping the \cZDark Soul\c[PKWhiteText] Black Tarot card reduces the required number of souls from 66 to 50. 
 
@@ -266,9 +267,9 @@ Note: Enemies don't drop souls on \c[PKGreenText]Trauma difficulty mode\c[PKWhit
 - Это главный способ лечиться, поскольку в Painslayer нет аптечек.
 - Собрав 66 душ, вы превратитесь в демона.
 
-\cQИСЦЕЛЕНИЕ\c[PKWhiteText]. Подняв душу, вы восстановите \cQот 1 до 20 ОЗ\c[PKWhiteText], в зависимости от того, сколько здоровья было у убитого врага. Если в душе 15 ОЗ или больше, она будет красного цвета.
+\cQИСЦЕЛЕНИЕ\c[PKWhiteText]. Подняв душу, вы восстановите \cQот 1 до 20 ОЗ\c[PKWhiteText], в зависимости от того, сколько здоровья было у убитого врага. Если в душе \cR15 ОЗ или больше, она будет красного цвета\c[PKWhiteText].
 
-\cRРЕЖИМ ДЕМОНА\c[PKWhiteText]. Собрав \cR66 душ\c[PKWhiteText], вы превратитесь в \cRДемона\c[PKWhiteText]. Став Демоном, вы получаете полную неуязвимость и уникальную разрушительную атаку.
+\c[PKRedText]РЕЖИМ ДЕМОНА\c[PKWhiteText]. Собрав \c[PKRedText]66 душ\c[PKWhiteText], вы превратитесь в \c[PKRedText]Демона\c[PKWhiteText]. Став Демоном, вы получаете полную неуязвимость и уникальную разрушительную атаку.
 - Когда вам осталось 2 или 1 душа до превращения, экран кратковременно вспыхнет, сигнализируя о скорой трансформации.
 - Карта Таро \cZТемная душа\c[PKWhiteText] снижает требуемое число душ с 66 до 50.
 
@@ -276,10 +277,10 @@ Note: Enemies don't drop souls on \c[PKGreenText]Trauma difficulty mode\c[PKWhit
 "Chest of Souls has two effects: 
 
 - After picking it up you'll \cQregenerate 1 HP every second\c[PKWhiteText] over 20 seconds.
-- Your \cRsoul counter will immediately increase by 20\c[PKWhiteText]. As such, collecting Chests of Souls is a very quick way to turn into a \cRDemon\c[PKWhiteText].",PKC_ChestOfSouls_Desc,Codex,"Сундук с душами имеет два эффекта:
+- Your \c[PKRedText]soul counter will immediately increase by 20\c[PKWhiteText]. As such, collecting Chests of Souls is a very quick way to turn into a \c[PKRedText]Demon\c[PKWhiteText].",PKC_ChestOfSouls_Desc,Codex,"Сундук с душами имеет два эффекта:
 
 - Подняв его, вы будете \cQвосстанавливать 1 ОЗ в секунду\c[PKWhiteText] в течение 20 сек.
-- Ваш \cRсчетчик душ немедленно возрастет на 20\c[PKWhiteText]. Таким образом, сундуки с душами позволяют быстро трансформироваться в \cRДемона\c[PKWhiteText]."
+- Ваш \c[PKRedText]счетчик душ немедленно возрастет на 20\c[PKWhiteText]. Таким образом, сундуки с душами позволяют быстро трансформироваться в \c[PKRedText]Демона\c[PKWhiteText]."
 "Gold Soul is a special soul that \cQrestores your HP to 100\c[PKWhiteText]. It can't be dropped by enemies, only found on the map.",PKC_GoldSoul_Desc,Codex,"Золотая душа -- это особая душа, которая \cQвосполняет здоровье до 100 ед.\c[PKWhiteText] Она не остается после врагов, ее можно только найти на уровне."
 "Mega Soul is a special soul that \cQrestores your HP to 200\c[PKWhiteText] and gives you \cN200 armor\c[PKWhiteText]. It can't be dropped by enemies, only found on the map.",PKC_MegaSoul_Desc,Codex,"Огромная душа -- это особая душа, которая \cQвосполняет здоровье до 200 ед.\c[PKWhiteText] и дает \cN200 ед. брони\c[PKWhiteText]. Она не остается после врагов, ее можно только найти на уровне."
 "You can find 3 types of armor in Painslayer: 
@@ -295,25 +296,29 @@ Note: Enemies don't drop souls on \c[PKGreenText]Trauma difficulty mode\c[PKWhit
 \cZСеребряный доспех\c[PKWhiteText] дает \cN150 ед. брони\c[PKWhiteText] и поглощает 60% входящего урона.
 
 \c[PKGoldText]Золотой доспех\c[PKWhiteText] дает \cN200 ед. брони\c[PKWhiteText] и поглощает 80% входящего урона."
-Ammo Pack is a rare pickup that provides a lot of ammo for all weapons.,PKC_AmmoPack_Desc,Codex,"Ящик патронов -- это редкий предмет, который дает много патронов для разного оружия."
-"Weapon Modifier empowers all your weapons for 30 seconds. The effects of the Weapon Modifier are unique for each weapon you can find all the details about its effects on the  WEAPONS tab. 
+Ammo Pack is a rare pickup that provides a lot of ammo for all weapons.,PKC_AmmoPack_Desc,Codex,"Ящик патронов -- это редкий предмет, который дает много патронов для всех видов оружия."
+"Weapon Modifier empowers all your weapons for 30 seconds. The effects of the Weapon Modifier are unique for each weapon: you can find all the details about its effects on the \c[PKGreenText]WEAPONS tab\c[PKWhiteText]. 
 
 When on the WEAPONS tab, click the \c[PKGreenText]Weapon Modifier icon\c[PKWhiteText] to see the information about how it affects specific weapon attacks. 
 
 Weapon Modifier only affects primary and secondary attacks, not combo attacks. 
 
-Weapon Modifier also \cQheals you to 100 HP\c[PKWhiteText] when you pick it up.",PKC_WeaponModifier_Desc,Codex,"Модификатор оружия усиливает всё оружие на 30 секунд. Эффект для каждого оружия свой -- подробности вы найдете на вкладке ОРУЖИЕ.
+Weapon Modifier also \cQheals you to 100 HP\c[PKWhiteText] when you pick it up.",PKC_WeaponModifier_Desc,Codex,"Модификатор оружия усиливает всё оружие на 30 секунд. Эффект для каждого оружия свой -- подробности вы найдете на вкладке \c[PKGreenText]ОРУЖИЕ\c[PKWhiteText].
 
 Открыв вкладку ОРУЖИЕ, щелкните по \c[PKGreenText]значку Модификатора оружия\c[PKWhiteText], чтобы увидеть, как он изменяет характеристики оружия.
 
 Модификатор оружия влияет только на основную и вторичную атаку, но не на комбо-атаку.
 
 Также, когда вы подбираете Модификатор оружия, ваше здоровье восполняется до \cQ100 ед.\c[PKWhiteText]"
-"Demon Eyes is a powerup that slightly illuminates the surroundings and makes your eyes glow intensely. It also gives you fear vision: enemies caught in the glow become frightened and will try to move away from you.
+"Demon Eyes is a power-up that slightly illuminates the surroundings and makes your eyes glow intensely. It also gives you fear vision: enemies caught in the glow become frightened and will try to move away from you.
 
-Intimidated enemies are marked with an eye icon above them.",PKC_DemonEyes_Desc,Codex,"Глаза демона -- это усилитель, который временно улучшает видимость окружения, а также заставляет ваши глаза ярко светиться. Также они устрашают врагов, попавшиех в область этого свечения: они пугаются и начинают отступать.
+Intimidated enemies are marked with an eye icon above them.
 
-Испуганные враги отмечаются значком глаза."
+Bosses can't be intimidated.",PKC_DemonEyes_Desc,Codex,"Глаза демона -- это усилитель, который временно улучшает видимость окружения, а также заставляет ваши глаза ярко светиться. Также они устрашают врагов, попавшиех в область этого свечения: они пугаются и начинают отступать.
+
+Испуганные враги отмечаются значком глаза.
+
+Боссы невосприимчивы к устрашению."
 The Pentagram makes you invincible to all damage for a limited time.,PKC_Pentagram_Desc,Codex,Пентаграмма дает временную неуязвимость ко всем видам урона.
 "Protection suit shields you from acid, lava and other harmful surfaces, and also lets you breathe underwater for a limited time.",PKC_AntiRad_Desc,Codex,"Защитный костюм временно защищает от кислоты, лавы и других опасных поверхностей, а также позволяет дышать под водой."
 "Crystal Ball is a special item that provides you a full map of the current level, and also highlights weapon pickups and keys on it.",PKC_CrystalBall_Desc,Codex,"Хрустальный шар открывает полную карту текущего уровня, а также помечает на ней местоположения оружия и ключей."
@@ -334,7 +339,7 @@ Once you close the Board, the active card slots become locked. To equip new card
 
 \cZSilver Cards\c[PKWhiteText] provide passive bonuses and are active all the time while equipped. You can equip up to \c[PKGreenText]3\c[PKWhiteText] Silver Cards. 
 
-\c[PKGoldText]Golden Cards\c[PKWhiteText] have to be activated manually by pressing \c[PKGreenText]Use Golden Cards (%s)\c[PKWhiteText] button. Golden Cards can be activated once per level (unless you equip a Silver Card that increases that number). You can equip up to \c[PKGreenText]2\c[PKWhiteText] Golden Cards. 
+\c[PKGoldText]Golden Cards\c[PKWhiteText] have to be activated manually by pressing the \c[PKGreenText]Use Golden Cards (%s)\c[PKWhiteText] button. Golden Cards can be activated once per level (unless you equip a Silver Card that increases that number). You can equip up to \c[PKGreenText]2\c[PKWhiteText] Golden Cards. 
 
 By default you will receive 3 random Silver Cards and 2 random Golden Cards as a gift the first time you open the Black Tarot Board in a new game. You can change this behavior using \c[PKGreenText]Mod Settings > Allow free starting cards\c[PKWhiteText] option.",PKC_CARDTYPES_DESC,Codex,"Существует два типа карт Черного Таро: серебряные и золотые.
 
@@ -362,13 +367,17 @@ Gold can be found in secret areas or obtained from enemies. See \c[PKGreenText]O
 Золото можно найти в секретных областях на уровне или получить из врагов. См. вкладку \c[PKGreenText]Как получить золото\c[PKWhiteText] для подробностей."
 "There are several ways to acquire gold: 
 
-- Gold will spawn in \c[PKGreenText]secret areas\c[PKWhiteText] on any maps you play. Look for them to obtain the largest gold pickups. 
+- Gold will spawn in \c[PKGreenText]secret areas\c[PKWhiteText] on any maps you play. Look for them to obtain the largest gold pickups.
+
+- You will occasionally find \cEwooden chests\c[PKWhiteText] on the map. They contain gold; destroy them to get it.
 
 - Dealing \c[PKRedText]excessive damage \c[PKWhiteText]to enemies, such as blowing up/gibbing weaker enemies. This makes them drop coins. 
 
 - \cIJuggling enemy corpses with Killer\c[PKWhiteText]: before a corpse disappears, simply shoot at it with the Killer. This prevents the corpse from despawning and will push it upwards and closer to you. Keep doing it to juggle the corpse every 3rd juggle produces a medium gold piece.",PKC_GOLDOBTAIN_DESC,Codex,"Получить золото можно несколькими способами:
 
 - Золото появляется в \c[PKGreenText]секретных областях\c[PKWhiteText] на любых уровнях. Именно в них вы найдете большие и очень большие золотые предметы.
+
+- На уровне можно найти \cEдеревянные сундуки\c[PKWhiteText]. Уничтожьте их, чтобы получить золото.
 
 - Нанося \c[PKRedText]избыточный урон врагам\c[PKWhiteText] (например, взрывая слабых врагов) — это заставляет их ронять монеты.
 
