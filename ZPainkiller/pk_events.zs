@@ -553,7 +553,7 @@ Class PK_ReplacementHandler : EventHandler {
 			case 'Stimpack' 		: e.Replacement = 'PK_AmmoSpawner_Stimpack';	break;
 			case 'Medikit' 		: e.Replacement = 'PK_AmmoSpawner_Stimpack';	break;
 			case 'HealthBonus' 	: 
-				if (random[propspawn](1,10) >= 9)
+				if (random[propspawn](1,10) > 9)
 					e.Replacement = 'PK_BreakableChest';
 				else
 					e.Replacement = 'PK_NullActor';
