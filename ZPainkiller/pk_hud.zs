@@ -357,7 +357,8 @@ Class PainkillerHUD : BaseStatusBar {
 			PK_DrawImage("pkharm0",(11,-11),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER,0.8);
 		
 		//draw health and armor amounts:
-		PK_DrawString(mIndexFont, String.Format("%03d",CPlayer.health), (19, -28),DI_SCREEN_LEFT_BOTTOM,translation:font.CR_UNTRANSLATED);
+		int healthColor = CPlayer.Health <= 20 ? Font.CR_Red : Font.CR_UNTRANSLATED;
+		PK_DrawString(mIndexFont, String.Format("%03d",CPlayer.health), (19, -28),DI_SCREEN_LEFT_BOTTOM,translation:healthColor);
 		PK_DrawString(mIndexFont, String.Format("%03d",GetArmorAmount()), (19, -16),DI_SCREEN_LEFT_BOTTOM,translation:font.CR_UNTRANSLATED);
 		
 		//if using statusbar, we don't draw the top bar at all and we draw souls/gold counters as well as compass at the bottom:
