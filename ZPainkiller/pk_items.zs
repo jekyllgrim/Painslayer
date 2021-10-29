@@ -151,7 +151,7 @@ Class PK_InvReplacementControl : Inventory {
 			return;
 		bool isInCodex = false;
 		for (int i = 0; i < CodexCoveredClasses.Size(); i++) {
-			if (toRecord == CodexCoveredClasses[i]) {
+			if (toRecord is CodexCoveredClasses[i]) {
 				isInCodex = true;
 				break;
 			}
@@ -176,7 +176,17 @@ Class PK_InvReplacementControl : Inventory {
 			the items that don't actually get placed in the inventory,
 			such as armor.
 		*/
-		if (tracker.pickups[pnum].pickups.Find(toRecord) == tracker.pickups[pnum].pickups.Size()) {
+		if (toRecord is "PK_GoldPickup" && tracker.pickups[pnum].pickups.Find((class<Inventory>)("PK_GoldPickup")) == tracker.pickups[pnum].pickups.Size()) {
+			tracker.pickups[pnum].pickups.Push((class<Inventory>)("PK_GoldPickup"));
+			latestPickup = toRecord;
+			latestPickupName = GetDefaultByType(toRecord).GetTag();
+			codexOpened = false;
+			if (pk_debugmessages) {
+				console.printf("Latest pickup is %s",latestPickup.GetClassName());
+			}
+		}
+		
+		else if (tracker.pickups[pnum].pickups.Find(toRecord) == tracker.pickups[pnum].pickups.Size()) {
 			tracker.pickups[pnum].pickups.Push(toRecord);
 			latestPickup = toRecord;
 			latestPickupName = GetDefaultByType(toRecord).GetTag();
@@ -207,7 +217,8 @@ Class PK_InvReplacementControl : Inventory {
 		'PowerChestOfSoulsRegen',
 		'PK_WeaponModifier',
 		'PK_PowerDemonEyes',
-		'PK_PowerPentagram'
+		'PK_PowerPentagram',
+		'PK_GoldPickup'
 	};
 }
 
