@@ -151,10 +151,13 @@ Class PK_FreezerProjectile : PK_Projectile {
 				tracer.GiveInventory("PK_FreezeControl",1);
 				let frz = PK_FreezeControl(tracer.FindInventory("PK_FreezeControl"));
 				if (frz) {
-					frz.fcounter+=64;
-					//double freeze duration if player has Weapon Modifier:
+					int frzdur = 64; //basic freeze duration
 					if (mod)
-						frz.fcounter+=64;
+						frzdur *= 2; //double it with Weapon Modifier
+					if (tracer.player)
+						frzdur / 2; //reduce it by 50% if the target is a player
+					frz.fcounter = frzdur;
+					tracer.A_SetBlend("0080FF",0.5,frz.fcounter);
 				}
 			}
 			for (int i = random[sfx](10,15); i > 0; i--) {
