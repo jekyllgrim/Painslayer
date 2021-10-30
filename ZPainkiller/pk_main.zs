@@ -335,6 +335,9 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 		bouncecount 8;
 		+MOVEWITHSECTOR
 		-NOBLOCKMAP
+		+SYNCHRONIZED
+		+DONTBLAST
+		FloatBobPhase 0;
 	}
 	
 	override void BeginPlay() {
