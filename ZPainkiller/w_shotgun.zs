@@ -248,8 +248,10 @@ Class PK_FrozenLayer : PK_SmallDebris {
 	
 Class PK_FreezeControl : PK_InventoryToken {
 	int fcounter;
-	uint ownertrans;
-	bool grav;
+	protected uint prevTrans;
+	protected double prevSpeed;
+	protected bool prevGrav;
+	
 	override void ModifyDamage (int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
 		if (damage > 0 && inflictor && owner && passive) {
 			//reduces fire damage:
@@ -263,32 +265,48 @@ Class PK_FreezeControl : PK_InventoryToken {
 				newdamage = damage*1.25;
 		}
 	}
+	
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);
 		if (!owner)
 			return;
 		if (owner.FindInventory("PK_BurnControl"))
 			owner.TakeInventory("PK_BurnControl",1);
-		grav = owner.bNOGRAVITY;
-		if (grav)
+		//record previous translation, gravity and speed values:
+		prevTrans = owner.translation;
+		prevGrav = owner.bNOGRAVITY;
+		prevSpeed = owner.speed;
+		//if the actor had NOGRAVITY, disable it:
+		if (prevGrav)
 			owner.bNOGRAVITY = false;
+		//disable pain, modify visuals, play the sound:
 		owner.bNOPAIN = true;
-		ownertrans = owner.translation;
-		owner.bInConversation = true; //this actually makes the monster completely frozen AND disable wake-up on damage
 		owner.A_SetTranslation("PK_Ice");
 		owner.A_StartSound("weapons/shotgun/freeze");
-		let layer = Spawn("PK_FrozenLayer",owner.pos);
-		if (layer) {
-			layer.master = owner;
-			layer.sprite = owner.sprite;
-			layer.frame = owner.frame;
-			layer.angle = owner.angle;
-			layer.scale.x = owner.scale.x*1.15;
-			layer.scale.y = owner.scale.y*1.07;
-			layer.bSPRITEFLIP = owner.bSPRITEFLIP;
-			layer.bYFLIP = owner.bYFLIP;
+		owner.speed = 0;
+		//different methods to freeze based on whether it's a player or a monster:
+		if (owner.player)
+			owner.player.cheats |= CF_TOTALLYFROZEN;
+		else
+			//setting this flag actually completely freezes monsters
+			//and completely disables wake-up damage:
+			owner.bInConversation = true;
+		//Don't spawn the frozen layer for the player who's being frozen:
+		if (!owner.player || owner.player != players[consoleplayer]) {
+			let layer = Spawn("PK_FrozenLayer",owner.pos);
+			if (layer) {
+				layer.master = owner;
+				layer.sprite = owner.sprite;
+				layer.frame = owner.frame;
+				layer.angle = owner.angle;
+				layer.scale.x = owner.scale.x*1.15;
+				layer.scale.y = owner.scale.y*1.07;
+				layer.bSPRITEFLIP = owner.bSPRITEFLIP;
+				layer.bYFLIP = owner.bYFLIP;
+			}
 		}
 	}
+	
 	override void DoEffect() {
 		super.DoEffect();
 		if (level.isFrozen() || !owner)
@@ -367,13 +385,18 @@ Class PK_FreezeControl : PK_InventoryToken {
 			return;
 		}
 	}
+	
 	override void DetachFromOwner() {
 		if (!owner)
 			return;
 		owner.bNOPAIN = owner.default.bNOPAIN;
 		owner.bInConversation = false;
-		owner.bNOGRAVITY = grav;
-		owner.translation = ownertrans;
+		owner.bNOGRAVITY = prevGrav;
+		owner.translation = prevTrans;
+		owner.speed = prevSpeed;
+		if (owner.player) {
+			owner.player.cheats &= !CF_TOTALLYFROZEN;
+		}
 		super.DetachFromOwner();
 	}
 }
