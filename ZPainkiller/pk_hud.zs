@@ -42,18 +42,14 @@ Class PainkillerHUD : BaseStatusBar {
 		vector2 arrowscale = (1, 1);
 		if (hudstate == HUD_StatusBar)
 			arrowscale *= 1.2;
-		/*if (aspectScale.GetBool() == true) {
-			arrowscale.y *= noYStretch;
+		if (aspectScale.GetBool() == true) {
+			arrowscale.y /= noYStretch;
 			arrowPos.y *= noYStretch;
-		}*/
-		//draw shadow:
-		//TextureID arrowtex = TexMan.CheckForTexture("pkharrow",TexMan.Type_Any);
+			shadowOfs.y *= noYStretch;
+		}
 		if (shadowofs != (0,0)) {
-			//DrawTextureRotated(arrowtex, arrowPos+shadowOfs, fflags, arrowangle, scale: arrowscale, col:color(128,0,0,0));	
 			DrawImageRotated("pkharrow", arrowPos+shadowOfs, fflags, arrowangle, scale: arrowscale, col:color(128,0,0,0));	
 		}
-		//draw arrow:
-		//DrawTextureRotated(arrowtex, arrowPos, fflags, arrowangle, scale: arrowscale);
 		DrawImageRotated("pkharrow", arrowPos, fflags, arrowangle, scale: arrowscale);
 	}
 	
@@ -61,26 +57,26 @@ Class PainkillerHUD : BaseStatusBar {
 		since I couldn't get red of it on rotating elements.
 	*/
 	void PK_DrawImage(String texture, Vector2 pos, int flags = 0, double Alpha = 1., Vector2 box = (-1, -1), Vector2 scale = (1, 1)) {
-		/*if (aspectScale.GetBool() == true) {
+		if (aspectScale.GetBool() == true) {
 			scale.y *= noYStretch;
 			pos.y *= noYStretch;
-		}*/
+		}
 		DrawImage(texture, pos, flags, Alpha, box, scale);
 	}
 	
 	void PK_DrawString(HUDFont font, String string, Vector2 pos, int flags = 0, int translation = Font.CR_UNTRANSLATED, double Alpha = 1., int wrapwidth = -1, int linespacing = 4, Vector2 scale = (1, 1)) {
-		/*if (aspectScale.GetBool() == true) {
+		if (aspectScale.GetBool() == true) {
 			scale.y *= noYStretch;
 			pos.y *= noYStretch;
-		}*/
+		}
 		DrawString(font, string, pos, flags, translation, Alpha, wrapwidth, linespacing, scale);
 	}
 	
 	void PK_DrawInventoryIcon(Inventory item, Vector2 pos, int flags = 0, double alpha = 1.0, Vector2 boxsize = (-1, -1), Vector2 scale = (1.,1.)) {
-		/*if (aspectScale.GetBool() == true) {
+		if (aspectScale.GetBool() == true) {
 			scale.y *= noYStretch;
 			pos.y *= noYStretch;
-		}*/
+		}
 		DrawInventoryIcon(item, pos, flags, alpha, boxsize, scale);
 	}
 	
