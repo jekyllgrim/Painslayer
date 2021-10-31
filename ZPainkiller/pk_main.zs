@@ -150,6 +150,7 @@ Class PK_BaseActor : Actor abstract {
 	protected double pi;
 	protected name bcolor;
 	protected int age;
+	protected transient CVar s_particles;
 	mixin PK_Math;
 	
 	bool CheckLandingSize (double cradius = 0, bool checkceiling = false) {

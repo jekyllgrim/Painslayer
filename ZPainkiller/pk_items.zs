@@ -1,5 +1,6 @@
 Class PK_InventoryToken : Inventory abstract {
 	protected int age;
+	protected transient CVar s_particles;
 	Default {
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNTOSSABLE;
@@ -266,6 +267,7 @@ Class PK_Inventory : Inventory abstract {
 	mixin PK_PlayerSightCheck;
 	mixin PK_PickupSound;
 	mixin PK_Math;
+	protected transient CVar s_particles;
 }
 
 Class PK_GoldPickup : PK_Inventory abstract {
@@ -319,6 +321,10 @@ Class PK_GoldPickup : PK_Inventory abstract {
 			bNOCLIP = false;
 			bNOGRAVITY = false;
 		}
+		if (!s_particles)
+			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+		if (s_particles.GetInt() < 2)
+			return;
 		if (GetAge() % 10 == 0) {
 			if (CheckPlayerSights() && !gleam && frandom[sfx](1,10) > 9) {
 				gleam = PK_GoldGleam(Spawn("PK_GoldGleam",pos+(0,0,frandom(2,height))));
@@ -649,6 +655,7 @@ Class PowerChestOfSoulsRegen : PowerRegeneration {
 Class PK_GoldSoul : Health {
 	mixin PK_PlayerSightCheck;
 	mixin PK_PickupSound;
+	protected transient CVar s_particles;
 	Default {
 		inventory.pickupmessage "$PKI_GOLDSOUL";
 		inventory.amount 100;
@@ -666,6 +673,10 @@ Class PK_GoldSoul : Health {
 	}
 	override void Tick() {
 		super.Tick();
+		if (!s_particles)
+			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+		if (s_particles.GetInt() < 2)
+			return;
 		if (isFrozen())
 			return;	
 		if (GetAge() % 10 == 0)
@@ -863,6 +874,7 @@ Class PK_PowerupGiver : PowerupGiver {
 	mixin PK_PlayerSightCheck;
 	color pickupRingColor;
 	property pickupRingColor : pickupRingColor;
+	protected transient CVar s_particles;
 	override void BeginPlay() {
 		super.BeginPlay();
 		if (!pickupRingColor)
@@ -989,6 +1001,10 @@ Class PK_WeaponModifierGiver : PK_PowerUpGiver {
 	}
 	override void Tick() {
 		super.Tick();
+		if (!s_particles)
+			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+		if (s_particles.GetInt() < 2)
+			return;
 		if (isFrozen() || owner)
 			return;
 		if (GetAge() % 10 == 0)
@@ -1200,6 +1216,10 @@ Class PK_Pentagram : PK_PowerupGiver {
 	}
 	override void Tick() {
 		super.Tick();
+		if (!s_particles)
+			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+		if (s_particles.GetInt() < 2)
+			return;
 		if (isFrozen())
 			return;	
 		if (GetAge() % 10 == 0)

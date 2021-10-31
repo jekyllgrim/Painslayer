@@ -365,12 +365,16 @@ Class PK_ExplosiveBolt : PK_Projectile {
 			A_SetScale(frandom[sfx](0.4,0.47));
 			bSPRITEFLIP = randompick[sfx](0,1);
 			roll = random[sfx](0,359);
-			for (int i = random[sfx](5,8); i > 0; i--) {
-				let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
-				if (debris) {
-					double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](6,14);
-					debris.vel = (frandom[sfx](-9,9),frandom[sfx](-9,9),zvel);
-					debris.A_SetScale(0.5);
+			if (!s_particles)
+				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+			if (s_particles.GetInt() >= 2) {
+				for (int i = random[sfx](5,8); i > 0; i--) {
+					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
+					if (debris) {
+						double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](6,14);
+						debris.vel = (frandom[sfx](-9,9),frandom[sfx](-9,9),zvel);
+						debris.A_SetScale(0.5);
+					}
 				}
 			}
 			A_AttachLight('Bomb',DynamicLight.PulseLight,"FFAA00",0,32,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF,param:1.2);
@@ -409,7 +413,9 @@ Class PK_Bomb : PK_Projectile {
 		scale 0.17;
 	}
 	override void Tick() {
-		if (!isFrozen()) {
+		if (!s_particles)
+			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+		if (s_particles.GetInt() >= 2 && !isFrozen()) {
 			//GetAge() check makes sure bombs don't start spawning smoke
 			//while still "inside" the player, since that can cause
 			//significant slowdowns.
@@ -422,9 +428,9 @@ Class PK_Bomb : PK_Projectile {
 					smk.fade = 0.02;
 				}
 			}
-			A_SetRoll(roll += rollOfs,SPF_INTERPOLATE);
-			A_SetPitch(pitch += 20,SPF_INTERPOLATE);
 		}
+		A_SetRoll(roll += rollOfs,SPF_INTERPOLATE);
+		A_SetPitch(pitch += 20,SPF_INTERPOLATE);
 		super.Tick();
 	}
 	override void PostBeginPlay() {
@@ -483,12 +489,16 @@ Class PK_Bomb : PK_Projectile {
 			A_SetScale(frandom[sfx](0.25,0.3));
 			bSPRITEFLIP = randompick[sfx](0,1);
 			roll = random[sfx](0,359);
-			for (int i = random[sfx](3,6); i > 0; i--) {
-				let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
-				if (debris) {
-					double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
-					debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
-					debris.A_SetScale(0.5);
+			if (!s_particles)
+				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+			if (s_particles.GetInt() >= 2) {
+				for (int i = random[sfx](3,6); i > 0; i--) {
+					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
+					if (debris) {
+						double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
+						debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
+						debris.A_SetScale(0.5);
+					}
 				}
 			}
 			A_AttachLight('Bomb',DynamicLight.PulseLight,"FFAA00",0,18,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF,param:0.7);

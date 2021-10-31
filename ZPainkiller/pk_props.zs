@@ -93,4 +93,15 @@ Class PK_BreakableChest : PK_GoldContainer {
 		stop;
 	}
 }
+
+class PK_ExplosiveBarrel : ExplosiveBarrel {
+	Default {
+		scale 0.5;
+	}
 	
+	States {
+	Spawn:
+		PBAR A -1;
+		stop;
+	}
+}

@@ -160,14 +160,18 @@ Class PK_FreezerProjectile : PK_Projectile {
 					tracer.A_SetBlend("0080FF",0.5,frz.fcounter);
 				}
 			}
-			for (int i = random[sfx](10,15); i > 0; i--) {
-				let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
-				if (debris) {
-					double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
-					debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
-					debris.A_SetScale(frandom[sfx](0.12,0.25));
-					debris.A_SetRenderstyle(0.65,Style_AddShaded);
-					debris.SetShade("08caed");
+			if (!s_particles)
+				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+			if (s_particles.GetInt() >= 1) {
+				for (int i = random[sfx](10,15); i > 0; i--) {
+					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
+					if (debris) {
+						double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
+						debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
+						debris.A_SetScale(frandom[sfx](0.12,0.25));
+						debris.A_SetRenderstyle(0.65,Style_AddShaded);
+						debris.SetShade("08caed");
+					}
 				}
 			}
 		}
@@ -325,23 +329,27 @@ Class PK_FreezeControl : PK_InventoryToken {
 			for (int i = 7; i >= 0; i--)
 				owner.A_SoundVolume(i,0);
 			int rad = owner.radius;
-			for (int i = random[sfx](5,8); i > 0; i--) {
-				let ice = Spawn("PK_FrozenChunk",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
-				if (ice) {
-					ice.vel = (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](2,6));
-					ice.master = owner;
-					ice.gravity = 0.7;
+			if (!s_particles)
+				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+			if (s_particles.GetInt() >= 2) {
+				for (int i = random[sfx](5,8); i > 0; i--) {
+					let ice = Spawn("PK_FrozenChunk",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
+					if (ice) {
+						ice.vel = (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](2,6));
+						ice.master = owner;
+						ice.gravity = 0.7;
+					}
 				}
-			}
-			for (int i = random[sfx](12,16); i > 0; i--) {
-				let ice = Spawn("PK_RandomDebris",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
-				if (ice) {
-					ice.vel = (frandom[sfx](-3.5,3.5),frandom[sfx](-3.5,3.5),frandom[sfx](3,7));
-					ice.master = owner;
-					ice.gravity = 0.5;
-					ice.A_SetRenderstyle(1.0,Style_AddShaded);
-					ice.SetShade("08caed");
-					ice.A_SetScale(frandom[sfx](0.4,0.75));
+				for (int i = random[sfx](12,16); i > 0; i--) {
+					let ice = Spawn("PK_RandomDebris",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
+					if (ice) {
+						ice.vel = (frandom[sfx](-3.5,3.5),frandom[sfx](-3.5,3.5),frandom[sfx](3,7));
+						ice.master = owner;
+						ice.gravity = 0.5;
+						ice.A_SetRenderstyle(1.0,Style_AddShaded);
+						ice.SetShade("08caed");
+						ice.A_SetScale(frandom[sfx](0.4,0.75));
+					}
 				}
 			}
 			owner.A_StartSound("weapons/shotgun/freezedeath");

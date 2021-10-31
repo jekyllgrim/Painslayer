@@ -138,17 +138,21 @@ Class PK_Stake : PK_StakeProjectile {
 		deathsound "weapons/stakegun/stakewall";
 		decal "Stakedecal";
 	}
-	override void StakeBreak() {
-		for (int i = random[sfx](3,5); i > 0; i--) {
-			let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,pos.z)));
-			if (deb) {
-				deb.spritename = "PSDE";
-				deb.frame = i;
-				deb.A_SetScale(0.15);
-				double vz = frandom[sfx](-1,-4);
-				if (pos.z <= botz)
-					vz = frandom[sfx](3,6);
-				deb.vel = (frandom[sfx](-5,5),frandom[sfx](-5,5),vz);
+	override void StakeBreak() {		
+		if (!s_particles)
+			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+		if (s_particles.GetInt() > 2) {			
+			for (int i = random[sfx](3,5); i > 0; i--) {
+				let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,pos.z)));
+				if (deb) {
+					deb.spritename = "PSDE";
+					deb.frame = i;
+					deb.A_SetScale(0.15);
+					double vz = frandom[sfx](-1,-4);
+					if (pos.z <= botz)
+						vz = frandom[sfx](3,6);
+					deb.vel = (frandom[sfx](-5,5),frandom[sfx](-5,5),vz);
+				}
 			}
 		}
 		A_StartSound("weapons/stakegun/stakebreak",volume:0.8, attenuation:3);
@@ -540,11 +544,15 @@ Class PK_Grenade : PK_Projectile {
 			}
 			if (pos.z <= floorz+4) {
 				pitch+= 15;
-				let smk = Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
-				if (smk) {
-					smk.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
-					smk.A_SetScale(0.15);
-					smk.alpha = 0.35;
+				if (!s_particles)
+					s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+				if (s_particles.GetInt() > 0) {
+					let smk = Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
+					if (smk) {
+						smk.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
+						smk.A_SetScale(0.15);
+						smk.alpha = 0.35;
+					}
 				}
 			}
 			else

@@ -253,6 +253,10 @@ Class PK_Rocket : PK_Grenade {
 	override void Tick () {
 		Vector3 oldPos = self.pos;		
 		PK_Projectile.Tick();
+		if (!s_particles)
+			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+		if (s_particles.GetInt() < 2)
+			return;
 		if (!farenough)
 			return;
 		Vector3 path = level.vec3Diff( self.pos, oldPos );

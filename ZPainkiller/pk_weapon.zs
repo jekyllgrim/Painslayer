@@ -484,7 +484,7 @@ Class PKWeapon : Weapon abstract {
 	}
 }
 
-Class PKPuff : Actor abstract {
+Class PKPuff : PK_BaseActor abstract {
 	mixin PK_Math;
 	Default {
 		+NOBLOCKMAP
@@ -553,6 +553,10 @@ Class PK_BulletPuff : PKPuff {
 	states {
 	Crash:
 		TNT1 A 0 {
+			if (!s_particles)
+				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+			if (s_particles.GetInt() < 1)
+				return resolveState(null);
 			if (target) {
 				angle = target.angle;
 				pitch = target.pitch;
@@ -565,6 +569,8 @@ Class PK_BulletPuff : PKPuff {
 				smok.alpha = 0.85;
 				smok.fade = 0.025;
 			}
+			if (s_particles.GetInt() < 2)
+				return resolveState(null);
 			let deb = Spawn("PK_RandomDebris",puffdata.Hitlocation + (0,0,debrisOfz));
 			if (deb)
 				deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
@@ -583,6 +589,7 @@ Class PK_BulletPuff : PKPuff {
 					}
 				}
 			}
+			return resolveState(null);
 		}
 		FLAR B 1 bright A_FadeOut(0.1);
 		wait;
@@ -667,8 +674,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 	protected bool mod; //affteced by Weapon Modifier
 	mixin PK_Math;
 	protected vector3 spawnpos;
-	protected bool farenough;
-	
+	protected bool farenough;	
 	color flarecolor;
 	double flarescale;
 	double flarealpha;
@@ -734,7 +740,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 		return (victim.bSHOOTABLE && !victim.bNONSHOOTABLE && !victim.bNOCLIP && !victim.bNOINTERACTION && !victim.bINVULNERABLE && !victim.bDORMANT && !victim.bNODAMAGE  && !victim.bSPECTRAL);
 	}
 	override void PostBeginPlay() {
-		super.PostBeginPlay();
+		super.PostBeginPlay();		
 		mod = target && PKWeapon.CheckWmod(target);
 		if (trailcolor)
 			spawnpos = pos;
@@ -751,7 +757,11 @@ Class PK_Projectile : PK_BaseActor abstract {
 	//An override initially by Arctangent that spawns trails like FastProjectile does it:
 	override void Tick () {
 		Vector3 oldPos = self.pos;		
-		Super.Tick();	
+		Super.Tick();
+		if (!s_particles)
+			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+		if (s_particles.GetInt() < 1)
+			return;	
 		if (!trailcolor)
 			return;		
 		if (!farenough) {
@@ -1034,6 +1044,9 @@ Class PK_GenericExplosion : PK_SmallDebris {
 		A_SetScale(rs);
 		roll = random[sfx](0,359);
 		A_Quake(quakeintensity,quakeduration,0,quakeradius,"");
+		CVar s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+		if (s_particles.GetInt() < 2)
+			return;
 		if (randomdebris > 0) {
 			for (int i = randomdebris*frandom[sfx](0.7,1.3); i > 0; i--) {
 				let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
@@ -1044,6 +1057,8 @@ Class PK_GenericExplosion : PK_SmallDebris {
 				}
 			}
 		}
+		if (s_particles.GetInt() < 1)
+			return;
 		if (smokingdebris > 0) {
 			for (int i = smokingdebris*frandom[sfx](0.7,1.3); i > 0; i--) {
 				let debris = Spawn("PK_SmokingDebris",pos + (frandom[sfx](-12,12),frandom[sfx](-12,12),frandom[sfx](-12,12)));

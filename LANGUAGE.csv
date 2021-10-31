@@ -417,9 +417,9 @@ you will receive a few cards for free.
 This option lets you change that behavior.",PKM_GIFTCARRDS_DESC,Menu,"По умолчанию, когда вы открываете доску Таро в первый раз,
 вы получаете несколько карт в подарок.
 Эта настройка позволяет изменить это."
-Show Codex Notifications,PKM_ShowCodexNotifs,,Показывать оповещения Кодекса
+Show Codex Notifications,PKM_ShowCodexNotifs,Menu,Показывать оповещения Кодекса
 "Show notifications for Codex updates in the top right corner
-after you pick up a new item for the first time.",PKM_ShowCodexNotifs_Desc,,"Показывать оповещения об обновлении Кодекса в верхнем правом
+after you pick up a new item for the first time.",PKM_ShowCodexNotifs_Desc,Menu,"Показывать оповещения об обновлении Кодекса в верхнем правом
 углу экрана, когда вы впервые подбираете новый предмет."
 Open Black Tarot,PKM_OpenTarot,Menu,Открыть доску Таро
 Black Tarot Board lets you purchase and equip cards,PKM_OpenTarot_Desc,Menu,На доске Черного Таро можно покупать и снаряжать карты
@@ -437,6 +437,14 @@ to change that behavior.",PKM_AutoOpenTarot_Desc,Menu,"Когда вы перв�
 покупать и снаряжать карты бесплатно (затем ячейки блокируются).
 По умолчанию доска открывается в начале уровня автоматически.
 Эта настройка позволяет изменить это."
+Performance,PKM_Sub_Performance,Menu,Производительность
+Particles,PKM_ParticlesAmount,Menu,Частицы
+"Amount of particles spawned by projectiles, explosions,
+certain items and SFX objects. May affect performance.",PKM_ParticlesAmount_Desc,Menu,"Количество частиц, создаваемое снарядами, взрывами,
+предметами и визуальными эффектами.
+Влияет на производительность."
+Full,PKM_Full,Menu,Полное количество
+Reduced,PKM_Reduced,Menu,Уменьшенное количество
 Weapon fire modes,PKM_FIREMODES,Menu,Настройка режимов стрельбы
 Switch primary/secondary fire modes,PKM_FIREMODES_DESC,Menu,Позволяет переключить основной/альтернативный режим огня
 Slumber,PKM_SKILL0,Menu,Грёзы

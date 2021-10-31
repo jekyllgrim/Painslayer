@@ -435,12 +435,16 @@ Class PK_BurnControl : PK_InventoryToken {
 		if (owner.health <= 0) {
 			owner.A_SetTRanslation("Scorched");
 		}
-		double rad = owner.radius*0.75;
-		let part = Spawn("PK_FlameParticle",owner.pos + (frandom[sfx](-rad,rad), frandom[sfx](-rad,rad), frandom[sfx](owner.pos.z,owner.height*0.75)));
-		if (part) {
-			part.vel = (frandom[sfx](-0.7,0.7), frandom[sfx](-0.7,0.7), frandom[sfx](0.8,1.8));
-			part.scale *= 2;
-			part.alpha = 0.5;
+		double rad = owner.radius*0.75;		
+		if (!s_particles)
+			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+		if (s_particles.GetInt() >= 1) {
+			let part = Spawn("PK_FlameParticle",owner.pos + (frandom[sfx](-rad,rad), frandom[sfx](-rad,rad), frandom[sfx](owner.pos.z,owner.height*0.75)));
+			if (part) {
+				part.vel = (frandom[sfx](-0.7,0.7), frandom[sfx](-0.7,0.7), frandom[sfx](0.8,1.8));
+				part.scale *= 2;
+				part.alpha = 0.5;
+			}
 		}
 	}
 	override void DetachFromOwner() {
@@ -565,13 +569,17 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 	Death:
 		TNT1 A 0 A_Stop();
 		TNT1 AAAAAAAAAAAAAA random(3,6) {
-			A_SpawnItemEx(
-				"PK_FlameParticle",
-				xvel:frandom[sfx](-0.6,0.6),
-				yvel:frandom[sfx](-0.6,0.6),
-				zvel:frandom[sfx](0.4,1.5),
-				failchance: 80
-			);
+			if (!s_particles)
+				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+			if (s_particles.GetInt() >= 2) {
+				A_SpawnItemEx(
+					"PK_FlameParticle",
+					xvel:frandom[sfx](-0.6,0.6),
+					yvel:frandom[sfx](-0.6,0.6),
+					zvel:frandom[sfx](0.4,1.5),
+					failchance: 80
+				);
+			}
 		}
 		stop;
 	}
@@ -640,18 +648,24 @@ Class PK_FlamerTank : PK_Projectile {
 		if (isFrozen())
 			return;
 		if (!tankmodel)
-			return;
-		let part = Spawn("PK_FlameParticle", tankmodel.pos + (frandom[sfx](-3,3), frandom[sfx](-3,3), frandom[sfx](-2,5)));
-		if (part) {
-			part.vel = (frandom[sfx](-0.7,0.7), frandom[sfx](-0.7,0.7), frandom[sfx](0.8,1.8));
-			part.scale *= 1.2;
-			part.alpha = 0.4;
+			return;			
+		if (!s_particles)
+			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+		if (s_particles.GetInt() >= 1) {
+			let part = Spawn("PK_FlameParticle", tankmodel.pos + (frandom[sfx](-3,3), frandom[sfx](-3,3), frandom[sfx](-2,5)));
+			if (part) {
+				part.vel = (frandom[sfx](-0.7,0.7), frandom[sfx](-0.7,0.7), frandom[sfx](0.8,1.8));
+				part.scale *= 1.2;
+				part.alpha = 0.4;
+			}
 		}
-		let smk = Spawn("PK_BlackSmoke", tankmodel.pos + (frandom[sfx](-6,6), frandom[sfx](-6,6), frandom[sfx](10,14)));
-		if (smk) {
-			smk.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](1,1.2));
-			smk.alpha = 0.35;
-			smk.scale *= 0.8;
+		if (s_particles.GetInt() >= 2) {
+			let smk = Spawn("PK_BlackSmoke", tankmodel.pos + (frandom[sfx](-6,6), frandom[sfx](-6,6), frandom[sfx](10,14)));
+			if (smk) {
+				smk.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](1,1.2));
+				smk.alpha = 0.35;
+				smk.scale *= 0.8;
+			}
 		}
 		if (!landed) {
 			//tankmodel.A_SetRoll(tankmodel.roll+10, SPF_INTERPOLATE);
@@ -720,18 +734,24 @@ Class PK_FlamerTank : PK_Projectile {
 				ex.quakeduration = 16;
 				ex.quakeradius = 400;
 			}
-			for (int i = 4; i >= 0; i--) {
-				let debris = Spawn("PK_FlamerDebris",pos + (frandom[sfx](-6,6),frandom[sfx](-6,6),frandom[sfx](2,6)));
-				if (debris) {
-					double zvel = (pos.z > floorz) ? frandom[sfx](-2,6) : frandom[sfx](4,8);
-					debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
-					debris.frame = i;
+			if (!s_particles)
+				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+			if (s_particles.GetInt() >= 1) {
+				for (int i = 4; i >= 0; i--) {
+					let debris = Spawn("PK_FlamerDebris",pos + (frandom[sfx](-6,6),frandom[sfx](-6,6),frandom[sfx](2,6)));
+					if (debris) {
+						double zvel = (pos.z > floorz) ? frandom[sfx](-2,6) : frandom[sfx](4,8);
+						debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
+						debris.frame = i;
+					}
 				}
 			}
-			for (int i = 15; i > 0; i--) {
-				let part = Spawn("PK_FlameTankParticle", tankmodel.pos + (frandom[sfx](-6,6), frandom[sfx](-6,6), frandom[sfx](4,12)));
-				if (part) {
-					part.vel = (frandom[sfx](-0.3,0.3), frandom[sfx](-0.3,0.3), frandom[sfx](6,14));
+			if (s_particles.GetInt() >= 2) {
+				for (int i = 15; i > 0; i--) {
+					let part = Spawn("PK_FlameTankParticle", tankmodel.pos + (frandom[sfx](-6,6), frandom[sfx](-6,6), frandom[sfx](4,12)));
+					if (part) {
+						part.vel = (frandom[sfx](-0.3,0.3), frandom[sfx](-0.3,0.3), frandom[sfx](6,14));
+					}
 				}
 			}
 			if (tankmodel)
@@ -823,11 +843,15 @@ Class PK_FlamerDebris : PK_RandomDebris {
 			return;
 		if (GetAge() % 3 != 0)
 			return;
-		let fir = Spawn("PK_FlameParticle",pos+(frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](0,4)));
-		if (fir) {
-			fir.A_SetScale(0.2);
-			fir.vel = (frandom[sfx](-0.6,0.6),frandom[sfx](-0.6,0.6),frandom[sfx](1,2.2));
-			fir.alpha = alpha * 0.5;
+		if (!s_particles)
+			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+		if (s_particles.GetInt() >= 2) {
+			let fir = Spawn("PK_FlameParticle",pos+(frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](0,4)));
+			if (fir) {
+				fir.A_SetScale(0.2);
+				fir.vel = (frandom[sfx](-0.6,0.6),frandom[sfx](-0.6,0.6),frandom[sfx](1,2.2));
+				fir.alpha = alpha * 0.5;
+			}
 		}
 	}
 	states {
