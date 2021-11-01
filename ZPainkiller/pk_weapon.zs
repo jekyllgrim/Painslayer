@@ -1045,7 +1045,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 		roll = random[sfx](0,359);
 		A_Quake(quakeintensity,quakeduration,0,quakeradius,"");
 		CVar s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-		if (s_particles.GetInt() < 2)
+		if (s_particles.GetInt() < 1)
 			return;
 		if (randomdebris > 0) {
 			for (int i = randomdebris*frandom[sfx](0.7,1.3); i > 0; i--) {
@@ -1057,7 +1057,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 				}
 			}
 		}
-		if (s_particles.GetInt() < 1)
+		if (s_particles.GetInt() < 2)
 			return;
 		if (smokingdebris > 0) {
 			for (int i = smokingdebris*frandom[sfx](0.7,1.3); i > 0; i--) {
