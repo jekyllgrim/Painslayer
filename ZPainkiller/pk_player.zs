@@ -120,7 +120,14 @@ Class PK_PainkillerPlayer : DoomPlayer
 	Default
     {
 		Player.DisplayName "Painkiller Player";
-        PainChance 255;
+		Player.Startitem "PK_Painkiller";
+		Player.WeaponSlot 1, "PK_Painkiller";
+		Player.WeaponSlot 2, "PK_Shotgun";
+		Player.WeaponSlot 3, "PK_Stakegun";
+		Player.WeaponSlot 4, "PK_Chaingun";	
+		Player.WeaponSlot 5, "PK_ElectroDriver";
+		Player.WeaponSlot 6, "PK_Rifle";
+		Player.WeaponSlot 7, "PK_Boltgun";
     }
 	
 	
