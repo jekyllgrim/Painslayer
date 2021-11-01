@@ -582,11 +582,17 @@ Class PK_RicochetSpark : PK_SmallDebris {
 
 Class PK_RandomDebris : PK_SmallDebris {
 	name spritename;
+	double rotstep;
+	property rotation : wrot;
 	property spritename : spritename;
+	bool randomroll;
+	property randomroll : randomroll;
 	Default {
 		PK_RandomDebris.spritename 'PDEB';
 		PK_SmallDebris.removeonliquid true;
 		PK_SmallDebris.dbrake 0.8;
+		PK_RandomDebris.rotation 17;
+		PK_RandomDebris.randomroll true;
 		+BOUNCEONWALLS
 		+ROLLCENTER
 		wallbouncefactor 0.5;
@@ -595,9 +601,10 @@ Class PK_RandomDebris : PK_SmallDebris {
 		scale 0.2;
 	}
 	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		wrot = random[sfx](14,20)*randompick(-1,1);
-		roll = random[sfx](0,359);
+		super.PostBeginPlay();		
+		if (randomroll)
+			roll = random[sfx](0,359);
+		wrot = (wrot * frandom[sfx](0.8,1.2))*randompick[sfx](-1,1);
 		scale *= frandom[sfx](0.75,1.2);
 		bSPRITEFLIP = randompick[sfx](0,1);
 		sprite = GetSpriteIndex(spritename);
