@@ -149,7 +149,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 		"PCDXBORD",
 		"PCDXTARO",
 		"PCDXGOLD",
-		""
+		"PCDXGOBT"
 	};
 
 	PKZFTabButton, PKZFFrame CreateTab(vector2 pos, vector2 size, String text, PKZFCodexTabController controller, PKZFHandler handler, int value, vector2 framePos, vector2 frameSize, PKZFBoxTextures inactiveTex = null, PKZFBoxTextures activeTex = null, PKZFBoxTextures hoverTex = null, PKZFBoxTextures clickTex = null, double textScale = 1, int textColor = Font.CR_WHITE, sound hoversound = "ui/codex/subtabhover", sound clicksound = "ui/codex/subtabopen") {
