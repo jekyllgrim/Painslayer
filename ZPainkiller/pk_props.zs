@@ -154,7 +154,10 @@ class PK_ExplosiveBarrel : ExplosiveBarrel {
 				}
 			}
 		}
-		PBAR # 1065 A_Explode;
+		PBAR # 1065 {
+			A_Explode();
+			A_Noblocking();
+		}
 		TNT1 A 5 {
 			if (multiplayer && sv_barrelrespawn)
 				A_Respawn();
