@@ -577,20 +577,14 @@ Class PK_ReplacementHandler : EventHandler {
 			case 'Backpack'		: e.Replacement = 'PK_AmmoPack';  break;
 			case 'RadSuit'			: e.Replacement = 'PK_AntiRadArmor';  break;
 			
+			case 'ExplosiveBarrel': e.Replacement = 'PK_ExplosiveBarrel';  break;
+			
 			case 'DeadCacodemon'	: e.Replacement = 'PK_BreakableChest'; break;
 			case 'DeadDemon'	: e.Replacement = 'PK_BreakableChest'; break;
 			case 'DeadDoomImp'	: e.Replacement = 'PK_BreakableChest'; break;
 			case 'DeadLostSoul'	: e.Replacement = 'PK_BreakableChest'; break;
 			case 'DeadShotgunGuy'	: e.Replacement = 'PK_BreakableChest'; break;
 			case 'DeadZombieMan'	: e.Replacement = 'PK_BreakableChest'; break;
-			//case 'DeadMarine'	: e.Replacement = 'PK_BreakableChest'; break;
-			//case 'GibbedMarine'	: e.Replacement = 'PK_BreakableChest'; break;
-			//case 'GibbedMarineExtra'	: e.Replacement = 'PK_BreakableChest'; break;
-			
-			//SmallBloodPool
-			//Gibs
-			//ColonGibs
-			//BrainStem
 		}
 		//e.IsFinal = true;
 	}

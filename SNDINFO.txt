@@ -373,6 +373,9 @@ breakchest1 "sounds/items/breakables/chest-wood-impact1.wav"
 breakchest2 "sounds/items/breakables/chest-wood-impact2.wav"
 breakchest3 "sounds/items/breakables/chest-wood-impact3.wav"
 
+props/barrelExplode "sounds/items/barrel-metal-explode.wav"
+$limit props/barrelExplode 10
+
 
 ///SPECIAL\\\
 
