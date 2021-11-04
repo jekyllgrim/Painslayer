@@ -410,9 +410,12 @@ Class PK_Bomb : PK_Projectile {
 		bouncesound "weapons/boltgun/bounce";
 		speed 15;		
 		damage (10);
-		scale 0.17;
+		scale 0.3;
 	}
 	override void Tick() {
+		super.Tick();
+		if (isFrozen())
+			return;
 		if (!s_particles)
 			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
 		if (s_particles.GetInt() >= 2 && !isFrozen()) {
@@ -431,7 +434,6 @@ Class PK_Bomb : PK_Projectile {
 		}
 		A_SetRoll(roll += rollOfs,SPF_INTERPOLATE);
 		A_SetPitch(pitch += 20,SPF_INTERPOLATE);
-		super.Tick();
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();

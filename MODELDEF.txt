@@ -201,7 +201,8 @@ Model PK_Bomb {
 	Path "Models/boltgun"
 	Model 0 "heater_bomb.obj"
 	Skin 0 "boltgun_projectiles.png"
-	Scale 2 2 2
+	Scale 1 1 1
+	ZOffset -8
 	USEACTORROLL
 	USEACTORPITCH
 	
