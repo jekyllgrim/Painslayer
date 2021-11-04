@@ -642,14 +642,14 @@ Class PK_BoardEventHandler : EventHandler {
 		if (e.name.IndexOf("PKCBuyCard") >= 0) {
 			Array <String> cardname;
 			e.name.split(cardname, ":");
-			if (cardname.Size() == 0)
-				return;
-			//apparently, dynamic arrays are iffy, that's why we need int(name
-			cardcontrol.UnlockedTarotCards.Push(int(name(cardname[1])));
-			int cost = e.args[0];
-			cardcontrol.pk_gold = Clamp(cardcontrol.pk_gold - cost,0,99990);
-			if (pk_debugmessages)
-				console.printf("buying card %s at %d",name(cardname[1]),cost);
+			if (cardname.Size() != 0) {
+				//apparently, dynamic arrays are iffy, that's why we need int(name
+				cardcontrol.UnlockedTarotCards.Push(int(name(cardname[1])));
+				int cost = e.args[0];
+				cardcontrol.pk_gold = Clamp(cardcontrol.pk_gold - cost,0,99990);
+				if (pk_debugmessages)
+					console.printf("buying card %s at %d",name(cardname[1]),cost);
+			}
 		}
 		if (e.name == 'PKCTakeGold') {
 			int cost = e.args[0];
@@ -659,10 +659,10 @@ Class PK_BoardEventHandler : EventHandler {
 		if (e.name.IndexOf("PKCCardToSlot") >= 0) {
 			Array <String> cardname;
 			e.name.split(cardname, ":");
-			if (cardname.Size() == 0)
-				return;
-			int slotID = e.args[0];
-			cardcontrol.EquippedSlots[slotID] = cardname[1];
+			if (cardname.Size() != 0) {
+				int slotID = e.args[0];
+				cardcontrol.EquippedSlots[slotID] = cardname[1];
+			}
 		}
 		//remove card from slot
 		if (e.name == 'PKCClearSlot') {
