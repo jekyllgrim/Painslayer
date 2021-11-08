@@ -243,34 +243,14 @@ Class PK_Rocket : PK_Grenade {
 		+NOGRAVITY
 		bouncetype 'none';
 		Obituary "$PKO_ROCKET";
+		PK_Projectile.trailactor "PK_RocketSmoke";
+		PK_Projectile.trailvel 1;
 	}
 	override void PostBeginplay() {
 		PK_Projectile.PostBeginplay();
 		A_StartSound("weapons/chaingun/rocketfly",CHAN_5,flags:CHANF_LOOPING,volume:0.8,attenuation:4);
 		if (mod)
 			vel *= 1.5;
-	}
-	override void Tick () {
-		Vector3 oldPos = self.pos;		
-		PK_Projectile.Tick();
-		if (!s_particles)
-			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-		if (s_particles.GetInt() < 2)
-			return;
-		if (!farenough)
-			return;
-		Vector3 path = level.vec3Diff( self.pos, oldPos );
-		double distance = path.length() / clamp(int(trailscale * 50),1,8); //this determines how far apart the particles are
-		Vector3 direction = path / distance;
-		int steps = int( distance );
-		
-		for( int i = 0; i < steps; i++ )  {
-			let smk = Spawn("PK_RocketSmoke",oldPos+(frandom[smk](-4,4),frandom[smk](-4,4),frandom[smk](-4,4)));
-			if (smk) {
-				smk.vel = (frandom[smk](-1,1),frandom[smk](-1,1),frandom[smk](-1,1));
-			}
-			oldPos = level.vec3Offset( oldPos, direction );
-		}
 	}
 	states {
 	Spawn:

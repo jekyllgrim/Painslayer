@@ -686,7 +686,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 	double trailz;
 	double trailshrink;
 	
-	class<PK_BaseFlare> trailactor;
+	class<Actor> trailactor;
 	property trailactor : trailactor;
 	class<PK_ProjFlare> flareactor;	
 	property flareactor : flareactor;
@@ -744,7 +744,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 		mod = target && PKWeapon.CheckWmod(target);
 		if (trailcolor)
 			spawnpos = pos;
-		if (!flarecolor)
+		if (!flarecolor || !flareactor)
 			return;
 		let fl = PK_ProjFlare( Spawn(flareactor,pos) );
 		if (fl) {
@@ -758,12 +758,12 @@ Class PK_Projectile : PK_BaseActor abstract {
 	override void Tick () {
 		Vector3 oldPos = self.pos;		
 		Super.Tick();
+		if (!trailcolor || !trailactor)
+			return;		
 		if (!s_particles)
 			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
 		if (s_particles.GetInt() < 1)
 			return;	
-		if (!trailcolor)
-			return;		
 		if (!farenough) {
 			if (level.Vec3Diff(pos,spawnpos).length() < 80)
 				return;
@@ -776,18 +776,21 @@ Class PK_Projectile : PK_BaseActor abstract {
 		
 		for( int i = 0; i < steps; i++ )  {
 		
-			let trl = PK_BaseFlare( Spawn(trailactor,oldPos+(0,0,trailz)) );
+			let trl = Spawn(trailactor,oldPos+(0,0,trailz));
 			if (trl) {
 				trl.master = self;
-				trl.fcolor = trailcolor;
-				trl.fscale = trailscale;
-				trl.falpha = trailalpha;
-				if (trailactor.GetClassName() == "PK_BaseFlare")
-					trl.A_SetRenderstyle(alpha,Style_Shaded);
-				if (trailfade != 0)
-					trl.fade = trailfade;
-				if (trailshrink != 0)
-					trl.shrink = trailshrink;
+				let trlflr = PK_BaseFlare(trl);
+				if (trlflr) {
+					trlflr.fcolor = trailcolor;
+					trlflr.fscale = trailscale;
+					trlflr.falpha = trailalpha;
+					if (trailactor.GetClassName() == "PK_BaseFlare")
+						trlflr.A_SetRenderstyle(alpha,Style_Shaded);
+					if (trailfade != 0)
+						trlflr.fade = trailfade;
+					if (trailshrink != 0)
+						trlflr.shrink = trailshrink;
+				}
 				if (trailvel != 0)
 					trl.vel = (frandom(-trailvel,trailvel),frandom(-trailvel,trailvel),frandom(-trailvel,trailvel));
 			}
