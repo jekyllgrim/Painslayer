@@ -559,10 +559,10 @@ Class PK_ReplacementHandler : EventHandler {
 					e.Replacement = 'PK_NullActor';
 				break;
 			case 'ArmorBonus' 		: 
-				if (random[propspawn](1,10) > 8)
+				//if (random[propspawn](1,10) > 8)
 					e.Replacement = 'PK_BronzeArmor';
-				else
-					e.Replacement = 'PK_NullActor';
+				//else
+					//e.Replacement = 'PK_NullActor';
 				break;			
 			case 'SoulSphere' 		: e.Replacement = 'PK_GoldSoul';	break;
 			case 'MegaSphere' 		: e.Replacement = 'PK_MegaSoul';	break;
@@ -589,13 +589,20 @@ Class PK_ReplacementHandler : EventHandler {
 		//e.IsFinal = true;
 	}
 	
-	/*override void WorldThingSpawned(WorldEvent e) {
-		if (e.thing && e.thing is "Weapon") {
-			Class<Weapon> weap = (Class<Weapon>)(e.thing.GetClass());
-			if (weap && mapWeaponClasses.Find(weap) != mapWeaponClasses.Size())
-				mapWeaponClasses.Push(e.thing);
+	override void WorldThingSpawned(WorldEvent e) {
+		let act = e.thing;
+		if (!act || act.GetClass() != "PK_BronzeArmor")
+			return;
+		double checkdist = 1200;
+		let itr = BlockThingsIterator.Create(act, checkdist);
+		while (itr.Next()) {
+			let arm = PK_BronzeArmor(itr.thing);
+			if (arm && arm != act && act.GetClass() == "PK_BronzeArmor" && act.Distance3D(arm) <= checkdist) {
+				act.Destroy();
+				return;
+			}
 		}
-	}*/
+	}
 }
 
 Class PK_BoardEventHandler : EventHandler {
