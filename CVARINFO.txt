@@ -5,6 +5,7 @@ server bool pk_allowDemonMorph = true;
 server bool pk_allowFreeCards = true;
 user bool pk_CodexNotifs = true;
 user int pk_particles = 2;
+user int pk_maxdebris = 800;
 
 // Weapon Primary/Secondary fire settings
 

@@ -15,9 +15,9 @@ Class PK_MainHandler : EventHandler {
 	array <Actor> allbosses; //only boss monsters
 	array <PK_StakeProjectile> stakes; //stake projectiles
 	array <Inventory> keyitems; //pre-placed weapons and keys, to be displayed when the player picks up a Crystal Ball
-	array <PK_SmallDebris> debris;
-	//array CVar maxdebris;	
-	const maxdebris = 1000; //shouldn't need more than this
+	protected array <PK_SmallDebris> debris;
+	protected CVar maxdebrisCvar;
+	//const maxdebris = 1000; //shouldn't need more than this
 	
 	//By default returns true if ANY of the players has the item.
 	//If 'checkall' argument is true, the function returns true if ALL players have the item.
@@ -199,7 +199,7 @@ Class PK_MainHandler : EventHandler {
 	override void WorldLoaded(WorldEvent e) {
 		if (level.Mapname == "TITLEMAP")
 			return;
-		//maxdebris = Cvar.GetCvar('pk_debrisnum', players[consoleplayer]);
+		maxdebrisCvar = Cvar.GetCvar('pk_maxdebris', players[consoleplayer]);
 		let it = ThinkerIterator.Create("PK_PickupsTracker", Thinker.STAT_STATIC);
 		let tracker = PK_PickupsTracker(it.Next());
 		if (!tracker) {
@@ -283,7 +283,8 @@ Class PK_MainHandler : EventHandler {
 		let act = e.thing;		
 		if (!act)
 			return;
-		if (act is "PK_SmallDebris" /*&& maxdebris*/) {
+		if (act is "PK_SmallDebris" && maxdebrisCvar) {
+			int maxdebris = maxdebrisCvar.GetInt();
 			let deb = PK_SmallDebris(act);
 			if (deb) {
 				debris.Push(deb);

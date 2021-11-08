@@ -68,6 +68,7 @@ Optionmenu "PK_Settings" {
 	StaticText "$PKM_Sub_Performance", yellow
 	StaticText ""
 	PKTLTPOption "$PKM_ParticlesAmount", "$PKM_ParticlesAmount_Desc", "White", "pk_particles", "ParticlesAmount"
+	PKTLTPScaleSlider "$PKM_DebrisNumber", "$PKM_DebrisNumber_Desc", "white", "pk_maxdebris", 100, 3000, 100, ""
 	StaticText ""
 	StaticText "$PKM_FIREMODES", yellow
 	StaticText ""

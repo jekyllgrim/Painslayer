@@ -438,13 +438,20 @@ to change that behavior.",PKM_AutoOpenTarot_Desc,Menu,"Когда вы перв�
 По умолчанию доска открывается в начале уровня автоматически.
 Эта настройка позволяет изменить это."
 Performance,PKM_Sub_Performance,Menu,Производительность
-Particles,PKM_ParticlesAmount,Menu,Частицы
-"Amount of particles spawned by projectiles, explosions,
-certain items and SFX objects. May affect performance.",PKM_ParticlesAmount_Desc,Menu,"Количество частиц, создаваемое снарядами, взрывами,
-предметами и визуальными эффектами.
-Влияет на производительность."
-Full,PKM_Full,Menu,Полное количество
-Reduced,PKM_Reduced,Menu,Уменьшенное количество
+Particles intensity,PKM_ParticlesAmount,Menu,Насыщенность частиц
+"Fidelity of the particles spawned by projectiles, explosions,
+certain items and SFX objects. At 'Reduced' some of the secondary
+effects, such as smoke trails, are disabled.",PKM_ParticlesAmount_Desc,Menu,"Интенсивность частиц, создаваемых снарядами, взрывами, предметами
+и визуальными эффектами. На настройке ""Уменьшенная"" не отображаются
+некоторые вторичные частицы (например, дымовые следы)."
+Max. number of particles,PKM_DebrisNumber,,Макс. количество частиц
+"The absolute maximum of particles that can exist at the same time.
+May affect performance, especially when multiple special effects
+such as explosions appear at the same time.",PKM_DebrisNumber_Desc,,"Максимальное количество частиц, которые могут существовать одновременно.
+Может повлиять на производительность, особенно когда на карте появляется
+много спецэффектов, вроде взрывов."
+Full,PKM_Full,Menu,Полная
+Reduced,PKM_Reduced,Menu,Уменьшенная
 Weapon fire modes,PKM_FIREMODES,Menu,Настройка режимов стрельбы
 Switch primary/secondary fire modes,PKM_FIREMODES_DESC,Menu,Позволяет переключить основной/альтернативный режим огня
 Slumber,PKM_SKILL0,Menu,Грёзы
