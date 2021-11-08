@@ -95,6 +95,7 @@ Class PK_BreakableChest : PK_GoldContainer {
 }
 
 class PK_ExplosiveBarrel : ExplosiveBarrel {
+	mixin PK_PlayerSightCheck;
 	protected transient CVar s_particles;
 	Default {
 		scale 0.5;
@@ -125,6 +126,8 @@ class PK_ExplosiveBarrel : ExplosiveBarrel {
 			A_Quake(2,12,0,220,"");
 			if (random[bar](0,1) == 1)
 				frame++;
+			if (!CheckPlayerSights())
+				return null;
 			if (!s_particles)
 				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
 			if (s_particles.GetInt() >= 1) {
@@ -153,6 +156,7 @@ class PK_ExplosiveBarrel : ExplosiveBarrel {
 					}
 				}
 			}
+			return null;
 		}
 		PBAR # 1065 {
 			A_Explode();
@@ -177,8 +181,12 @@ class PK_ExplosiveBarrelTop : PK_SmallDebris {
 		PBAR F -1;
 		stop;
 	Death:
-		PBAR G -1;
-		stop;
+		PBAR G 20;
+		TNT1 A 0 A_SetRenderStyle(1, Style_Translucent);
+		PBAR G 1 {
+			A_FadeOut(0.025);
+		}
+		wait;
 	}
 }
 

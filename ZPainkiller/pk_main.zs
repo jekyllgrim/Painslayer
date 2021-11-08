@@ -152,6 +152,7 @@ Class PK_BaseActor : Actor abstract {
 	protected int age;
 	protected transient CVar s_particles;
 	mixin PK_Math;
+	mixin PK_PlayerSightCheck;
 	
 	bool CheckLandingSize (double cradius = 0, bool checkceiling = false) {
 		if (checkceiling) {

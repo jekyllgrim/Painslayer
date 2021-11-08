@@ -1044,6 +1044,8 @@ Class PK_GenericExplosion : PK_SmallDebris {
 		A_SetScale(rs);
 		roll = random[sfx](0,359);
 		A_Quake(quakeintensity,quakeduration,0,quakeradius,"");
+		if (!CheckPlayerSights())
+			return;
 		CVar s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
 		if (s_particles.GetInt() < 1)
 			return;
