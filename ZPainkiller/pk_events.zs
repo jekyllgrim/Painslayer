@@ -15,7 +15,6 @@ Class PK_MainHandler : EventHandler {
 	array <Actor> allbosses; //only boss monsters
 	array <PK_StakeProjectile> stakes; //stake projectiles
 	array <Inventory> keyitems; //pre-placed weapons and keys, to be displayed when the player picks up a Crystal Ball
-	array <PK_GoldContainer> goldcontainers;
 	
 	//By default returns true if ANY of the players has the item.
 	//If 'checkall' argument is true, the function returns true if ALL players have the item.
@@ -280,8 +279,6 @@ Class PK_MainHandler : EventHandler {
 		let act = e.thing;		
 		if (!act)
 			return;
-		if (act is "PK_GoldContainer") {
-			goldcontainers.Push(PK_GoldContainer(act));
 		}
 		if (act is "Inventory") {
 			let foo = Inventory(act);
