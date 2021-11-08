@@ -24,7 +24,7 @@ Yes,TAROT_YES,Black Tarot Board,Да
 No,TAROT_NO,Black Tarot Board,Нет
 OK,TAROT_CLOSE,Black Tarot Board,ОК
 g,TAROT_GOLDABR,Black Tarot Board,з.
-Black Tarot isn not available on the easiest difficulty,TAROT_LOWSKILL,Black Tarot Board,Карты Таро недоступны на самой низкой сложности
+Black Tarot is not available on the easiest difficulty,TAROT_LOWSKILL,Black Tarot Board,Карты Таро недоступны на самой низкой сложности
 Take only half the damage.,PK_ENDURANCE_DESC,Tarot Cards,Вы получаете вдвое меньше урона.
 Move faster.,PK_SPEED_DESC,Tarot Cards,Вы двигаетесь быстрее.
 Golden Cards last 15 seconds longer.,PK_TIMEBONUS_DESC,Tarot Cards,Золотые карты действуют на 15 сек. дольше.
@@ -132,7 +132,7 @@ Electro       /  Driver,PK_ELECTRODRIVER_ISLOT,Switched weapon modes for menu,Э
 Flamethrower  /  Assault Rifle,PK_RIFLE_ISLOT,Switched weapon modes for menu,Огнемет / автомат
 Heater        /  Boltgun,PK_BOLTGUN_ISLOT,Switched weapon modes for menu,Шаромет / болтомет
 %o was ripped apart with %k's Pain,PKO_PAIN,Obituaries,%k разрывает игрока %o на части с помощью Pain
-%o coudn't dodge %k's Killer,PKO_KILLER,Obituaries,Игроку %o не удалось увернуться от Killer игрока %k
+%o couldn't dodge %k's Killer,PKO_KILLER,Obituaries,Игроку %o не удалось увернуться от Killer игрока %k
 %o was slowly burnt by %k's Killer Beam,PKO_KILLERBEAM,Obituaries,%k медленно сжигает игрока %o лучом Killer
 %k ripped %o to shreds with Painkiller,PKO_PAINKILLER,Obituaries,%k разрывает игрока %o на части с помощью Painkiller
 %o was blown away by %k's shotgun,PKO_SHOTGUN,Obituaries,%k отбрасывает игрока %o дробовиком
@@ -180,7 +180,7 @@ Weapon Modifier effects: Freeze duration is doubled.,PKC_FreezerDescWM,Codex,С 
 Shatter,PKC_ShotgunFreezer,Codex,Осколки
 "Fire freezer, then immediately fire shotgun to deal a lot of extra damage. Shatters weaker enemies.",PKC_ShotgunFreezerDesc,Codex,"Выстрелите охладителем, а затем сразу дробовиком, чтобы нанести дополнительный урон. Слабые враги разбиваются на осколки."
 Stakegun,PKC_Stakegun,Codex,Коломёт
-Fire a powerful projectile that can pin enemies to walls. After 0.34 seconds in flight stakes catch on fire. Burning stakes deal more damage.,PKC_StakegunDesc,Codex,"Выпускает мощный снаряд, который может пригвозить врага к стене. 0,34 сек. спустя летящий кол загорается: горящие колья наносят больше урона."
+Fire a powerful projectile that can pin enemies to walls. After 0.34 seconds in flight stakes catch on fire. Burning stakes deal more damage.,PKC_StakegunDesc,Codex,"Выпускает мощный снаряд, который может пригвоздить врага к стене. 0,34 сек. спустя летящий кол загорается: горящие колья наносят больше урона."
 Weapon Modifier effects: Stakes are set on fire immediately and fly in a straight line at an increased speed.,PKC_StakegunDescWM,Codex,С Модификатором оружия: колья загораются в момент выстрела и летят по прямой линии с повышенной скоростью.
 Grenade Launcher,PKC_Grenade,Codex,Гранатомёт
 Fire a bouncing grenade that explodes after a period of time or when hitting an enemy. Shares ammo with the Rocket Launcher.,PKC_GrenadeDesc,Codex,"Выпускает отскакивающий снаряд, который взрывается через некоторое время или при попадании во врага. Использует те же патроны, что и ракетница."
@@ -254,7 +254,7 @@ There are several ways to acquire gold:
 
 - Золото появляется в \c[PKRedText]секретных областях\c[PKWhiteText] карт. Именно в них вы найдете большие и очень большие золотые предметы."
 "Killed enemies quickly disintegrate and drop their souls. They have two uses:
-- Souls are your primary way to heal, since there are no medikits in Painslayer.
+- Souls are your primary way to heal, since there are no medkits in Painslayer.
 - Upon collecting 66 souls you will turn into a demon. 
 
 \cQHEALING\c[PKWhiteText]: One soul can give you \cQbetween 1 and 20 HP\c[PKWhiteText], depending on how much health the enemy originally had. If a soul contains \cR15 or more HP, it turns red\c[PKWhiteText]. 
@@ -314,7 +314,7 @@ Weapon Modifier also \cQheals you to 100 HP\c[PKWhiteText] when you pick it up."
 
 Intimidated enemies are marked with an eye icon above them.
 
-Bosses can't be intimidated.",PKC_DemonEyes_Desc,Codex,"Глаза демона -- это усилитель, который временно улучшает видимость окружения, а также заставляет ваши глаза ярко светиться. Также они устрашают врагов, попавшиех в область этого свечения: они пугаются и начинают отступать.
+Bosses can't be intimidated.",PKC_DemonEyes_Desc,Codex,"Глаза демона -- это усилитель, который временно улучшает видимость окружения, а также заставляет ваши глаза ярко светиться. Также они устрашают врагов, попавших в область этого свечения: они пугаются и начинают отступать.
 
 Испуганные враги отмечаются значком глаза.
 
@@ -328,11 +328,11 @@ Gold pickups,PKC_GOLDTYPES,Codex,Золотые предметы
 Obtaining gold,PKC_GOLDOBTAIN,Codex,Как получить золото
 "Once a map you can open the Black Tarot Board and equip Black Tarot cards that provide various benefits. 
 
-By default the Board opens automatically at map start. Using \c[PKGreenText]Mod Settings\c[PKWhiteText] you can change this behavior to open the board manually by pressing the \c[PKGreenText]Open Black Tarot (%s)\c[PKWhiteText] button. 
+By default, the Board opens automatically at map start. Using \c[PKGreenText]Mod Settings\c[PKWhiteText], you can change this behavior to open the board manually by pressing the \c[PKGreenText]Open Black Tarot (%s)\c[PKWhiteText] button. 
 
-Once you close the Board, the active card slots become locked. To equip new cards you have to finish the current level. Alternatively, you can also unlock the slots with \c[PKGoldText]Gold\c[PKWhiteText].",PKC_TAROTBOARD_DESC,Codex,"Один раз за уровень вы можете открыть доску Черного Таро и на ней снарядить карты Черного Таро, которые дают разные бонусы.
+Once you close the Board, the active card slots become locked. To equip new cards, you have to finish the current level. Alternatively, you can also unlock the slots with \c[PKGoldText]Gold\c[PKWhiteText].",PKC_TAROTBOARD_DESC,Codex,"Один раз за уровень вы можете открыть доску Черного Таро и на ней снарядить карты Черного Таро, которые дают разные бонусы.
 
-По умолчанию доска открывается автоматически в начале уровня. Это можно отключить в \c[PKGreenText]Настройках мода\c[PKWhiteText]: тогда вы сможете открывать доску вручную, нажимая кнопку \c[PKGreenText] Открыть доску Таро (%s)\c[PKWhiteText].
+По умолчанию доска открывается автоматически в начале уровня. Это можно отключить в \c[PKGreenText]Настройках мода\c[PKWhiteText]: тогда вы сможете открывать доску вручную, нажимая кнопку \c[PKGreenText]Открыть доску Таро (%s)\c[PKWhiteText].
 
 При закрытии доски ячейки карт блокируются. Чтобы снарядить другие карты, вам придется завершить текущий уровень, либо разблокировать ячейки, заплатив \c[PKGoldText]золото\c[PKWhiteText]."
 "There are two types of Black Tarot Cards: Silver Cards and Golden Cards. 
@@ -341,11 +341,11 @@ Once you close the Board, the active card slots become locked. To equip new card
 
 \c[PKGoldText]Golden Cards\c[PKWhiteText] have to be activated manually by pressing the \c[PKGreenText]Use Golden Cards (%s)\c[PKWhiteText] button. Golden Cards can be activated once per level (unless you equip a Silver Card that increases that number). You can equip up to \c[PKGreenText]2\c[PKWhiteText] Golden Cards. 
 
-By default you will receive 3 random Silver Cards and 2 random Golden Cards as a gift the first time you open the Black Tarot Board in a new game. You can change this behavior using \c[PKGreenText]Mod Settings > Allow free starting cards\c[PKWhiteText] option.",PKC_CARDTYPES_DESC,Codex,"Существует два типа карт Черного Таро: серебряные и золотые.
+By default, you will receive 3 random Silver Cards and 2 random Golden Cards as a gift the first time you open the Black Tarot Board in a new game. You can change this behavior using \c[PKGreenText]Mod Settings > Allow free starting cards\c[PKWhiteText] option.",PKC_CARDTYPES_DESC,Codex,"Существует два типа карт Черного Таро: серебряные и золотые.
 
 \cZСеребряные карты\c[PKWhiteText] дают пассивные бонусы, которые активны всё время. У вас может быть активно до \c[PKGreenText]3\c[PKWhiteText] таких карт одновременно.
 
-\c[PKGoldText]Золотые карты\c[PKWhiteText] нужно активровать вручную, нажав кнопку \c[PKGreenText]Использовать золотые карты (%s)\c[PKWhiteText]. Золотые карты можно использовать один раз за уровень (хотя есть серебряная карта, которая повышает число активаций). Вы можете снарядить до \c[PKGreenText]2\c[PKWhiteText] золотых карт.
+\c[PKGoldText]Золотые карты\c[PKWhiteText] нужно активировать вручную, нажав кнопку \c[PKGreenText]Использовать золотые карты (%s)\c[PKWhiteText]. Золотые карты можно использовать один раз за уровень (хотя есть серебряная карта, которая повышает число активаций). Вы можете снарядить до \c[PKGreenText]2\c[PKWhiteText] золотых карт.
 
 По умолчанию вы получаете в подарок случайные карты (3 серебряных и 2 золотых) при первом открытии доски. Это можно отключить: см. \c[PKGreenText]Настройки мода > Дарить несколько карт\c[PKWhiteText]."
 "Gold is used to purchase Silver and Golden Cards on the Black Tarot Board. 
@@ -362,7 +362,7 @@ Gold can be found in secret areas or obtained from enemies. See \c[PKGreenText]O
 - маленькие (\c[PKGoldText]+10 з.\c[PKWhiteText])
 - средние (\c[PKGoldText]+25 з.\c[PKWhiteText])
 - большие (\c[PKGoldText]+100 з.\c[PKWhiteText])
-- очень большие(\c[PKGoldText]+500 з.\c[PKWhiteText])
+- очень большие (\c[PKGoldText]+500 з.\c[PKWhiteText])
 
 Золото можно найти в секретных областях на уровне или получить из врагов. См. вкладку \c[PKGreenText]Как получить золото\c[PKWhiteText] для подробностей."
 "There are several ways to acquire gold: 
@@ -394,7 +394,7 @@ Doesn't work with custom player classes.",PKM_PKMovement_Desc,Menu,"Включи
 Эта настройка влияет на трение, ускорение и прыжки.
 Не работает с нестандартными классами игрока."
 Allow auto-jumping,PKM_PKMAutoJump,Menu,Разрешить автопрыжок
-"By default when using Painkiller movement you have to
+"By default, when using Painkiller movement, you have to
 press 'jump' every time you want to jump.
 If you enable this option, you will be able to jump
 continuously by holding 'jump', like in Doom.",PKM_PKMAutoJump_Desc,Menu,"По умолчанию при использовании физики движения из Painkiller
@@ -402,7 +402,7 @@ continuously by holding 'jump', like in Doom.",PKM_PKMAutoJump_Desc,Menu,"По �
 Включение этой настройки позволяет прыгать постоянно, просто зажав
 клавишу прыжка - как в Doom."
 Allow Demon Mode,PKM_ALLOWDEMON,Menu,Разрешить превращение в демона
-"By default upon collecting 66 soulds you will turn into Demon.
+"By default, upon collecting 66 souls you will turn into Demon.
 This option lets you completely disable that feature.",PKM_ALLOWDEMON_DESC,Menu,"По умолчанию, собрав 66 душ, вы превращаетесь в демона.
 Эта настройка позволяет полностью отключить такую возможность."
 Auto-attract souls/gold distance,PKM_QOLCATCHER,Menu,Дистанция автопритягивания золота/душ
@@ -412,7 +412,7 @@ the maximum distance is smaller.",PKM_QOLCATCHER_Desc,Menu,"Эта функци�
 притягивая их. Работает так же, как карта \Ловец душ\"",
 только максимальная дистанция притягивания меньше."""
 Allow free starting cards,PKM_GIFTCARRDS,Menu,Дарить несколько карт
-"By default when you open Black Tarot board for the first time,
+"By default, when you open Black Tarot board for the first time,
 you will receive a few cards for free.
 This option lets you change that behavior.",PKM_GIFTCARRDS_DESC,Menu,"По умолчанию, когда вы открываете доску Таро в первый раз,
 вы получаете несколько карт в подарок.
@@ -432,7 +432,7 @@ and various in-game mechanics.",PKM_OpenCodex_Desc,Menu,"В кодексе мо�
 Open Black Tarot board at map start,PKM_AutoOpenTarot,Menu,Открывать доску Таро в начале уровня
 "When you open Black Tarot board for the first time in a map,
 you can equip cards for free (after that they'll be locked).
-By default this happens at map start. This option allows you
+By default, this happens at map start. This option allows you
 to change that behavior.",PKM_AutoOpenTarot_Desc,Menu,"Когда вы первый раз открываете доску Таро на уровне, вы можете
 покупать и снаряжать карты бесплатно (затем ячейки блокируются).
 По умолчанию доска открывается в начале уровня автоматически.
