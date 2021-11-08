@@ -1052,7 +1052,7 @@ Class PKCMenuHandler : PKZFHandler {
 		}
 		//card slot: if you have a card picked and click the slot, the card will be placed in it and scaled up to its size:
 		if (command == "CardSlot") {
-			console.printf("trying to click slot");
+			//console.printf("trying to click slot");
 			let cardslot = PKCCardSlot(Caller);
 			//check if there's a selected card
 			if (menu.SelectedCard) {
