@@ -216,7 +216,7 @@ Fire 5 steel bolts in quick succession. Bolts fly in a straight line and can pin
 "Weapon Modifier effects: Bolts are set on fire, dealing more damage.",PKC_BoltgunDescWM,Codex,"С Модификатором оружия: болты горят, нанося больше урона при попадании."
 Press Zoom (%s) to activate sniper scope.,PKC_BoltgunNote,Codex,"Нажмите Приближение (%s), чтобы активировать оптический прицел."
 Heater,PKC_Heater,Codex,Шаромет
-"Fire 10 bouncing bombs that explode when impacting enemies, or bounce off a surface once and explode on the next impact.",PKC_HeaterDesc,Codex,"Выпускает 10 бомб, которые отскакивают от поверхности один раз, а при следующем столкновении взрываются. Также взрываются при попадании во врагов."
+"Fire 10 bouncing bombs that explode when impacting enemies, or bounce off a surface twice and then explode on the 3rd impact.",PKC_HeaterDesc,Codex,"Выпускает 10 бомб, которые отскакивают от поверхности дважды, а при третьем столкновении взрываются. При попадании во врагов взрываются сразу."
 Weapon Modifier effects: Bombs are launched further and explode on impact without bouncing.,PKC_HeaterDescWM,Codex,"С Модификатором оружия: бомбы летят дальше и взрываются при столкновении с чем угодно, не отскакивая."
 Heater Rockets,PKC_HeaterBolts,Codex,Шароболты
 "Fire bombs, then try to hit them with bolts to create makeshift heater rockets. They deal a lot of damage, but this attack is difficult to pull off.",PKC_HeaterBoltsDesc,Codex,"Выпустите бомбы, затем выстрелите в них болтами, чтобы насадить на них бомбы и получить подобие ракет. Они наносят большой урон, но выполнить эту атаку сложно."
