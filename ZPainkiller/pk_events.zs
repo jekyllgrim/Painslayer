@@ -16,7 +16,7 @@ Class PK_MainHandler : EventHandler {
 	array <PK_StakeProjectile> stakes; //stake projectiles
 	array <Inventory> keyitems; //pre-placed weapons and keys, to be displayed when the player picks up a Crystal Ball
 	protected array <PK_SmallDebris> debris;
-	protected CVar maxdebrisCvar;
+	protected transient CVar maxdebrisCvar;
 	//const maxdebris = 1000; //shouldn't need more than this
 	
 	//By default returns true if ANY of the players has the item.
