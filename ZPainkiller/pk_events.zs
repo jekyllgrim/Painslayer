@@ -283,7 +283,7 @@ Class PK_MainHandler : EventHandler {
 		let act = e.thing;		
 		if (!act)
 			return;
-		if (act is "PK_SmallDebris" && maxdebrisCvar) {
+		if (act is "PK_SmallDebris" && !(act is "PK_ProjFlare") && maxdebrisCvar) {
 			int maxdebris = maxdebrisCvar.GetInt();
 			let deb = PK_SmallDebris(act);
 			if (deb) {
