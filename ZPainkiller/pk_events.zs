@@ -446,7 +446,8 @@ Class PK_MainHandler : EventHandler {
 			for (int i = -1000; i < 0; i++)
 				player.SetPSprite(i,null);
 		}
-		player.mo.A_StartSound("world/gameover",CH_PKUI,CHANF_UI|CHANF_LOCAL);
+		if (!multiplayer)
+			player.mo.A_StartSound("world/gameover",CH_PKUI,CHANF_UI|CHANF_LOCAL);
 	}
 	override void WorldUnloaded (WorldEvent e) {
 		if (level.Mapname == "TITLEMAP")
