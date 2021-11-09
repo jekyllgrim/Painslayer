@@ -313,7 +313,7 @@ Class PK_Rifle : PKWeapon {
 			A_OverlayRenderstyle(OverlayID(),Style_Add);
 		}
 		PRFM B 2 bright {
-			if (waterlevel > 1)
+			if (waterlevel > 1 || !PK_CheckAmmo(secondary:true))
 				return ResolveState("Null");
 			A_OverlayAlpha(OverlayID(),frandom[sfx](0.35,0.6));
 			return ResolveState(null);
