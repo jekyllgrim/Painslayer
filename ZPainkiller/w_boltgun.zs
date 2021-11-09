@@ -76,7 +76,7 @@ Class PK_Boltgun : PKWeapon {
 			if (invoker.scoped)
 				wofs += (invoker.scopeOfs,invoker.scopeOfs) * 3;
 			A_WeaponOffset(wofs.x,wofs.y);
-			if (!PK_CheckAmmo(true,10)) {
+			if (!PK_CheckAmmo(true)) {
 				let psp = player.FindPSprite(OverlayID());
 				if (psp)
 					psp.frame = 1;
@@ -168,7 +168,7 @@ Class PK_Boltgun : PKWeapon {
 			if (psp)
 				invoker.prevOfs = (psp.x,psp.y);
 			A_ClearOverlays(PSP_OVERGUN,PSP_OVERGUN);
-			if (PK_CheckAmmo(true,10)) {
+			if (!PK_CheckAmmo(true)) {
 				let psp = player.FindPSprite(OverlayID());
 				if (psp)
 					psp.sprite = GetSpriteIndex("BGU2");
