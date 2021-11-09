@@ -446,6 +446,7 @@ Class PKWeapon : Weapon abstract {
 		TNT1 A 0 {
 			A_StopSound(CH_LOOP);
 			A_RemoveLight('PKWeaponlight');
+			A_ClearOverlays(-1000,1000);
 			invoker.blockFireOnSelect = false;
 		}
 		//instant weapon switch:
