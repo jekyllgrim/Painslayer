@@ -386,12 +386,17 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 	private int restcounter;
 	private int restlife;
 	private int maxlife;
+	private bool isBoss;
+	private bool queueDeath;
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		if (!master) {
-			//destroy();
+		if (!master || master.health > 0) {
+			destroy();
 			return;
 		}
+		if (pk_debugmessages)
+			sprite = GetSpriteIndex("BAL1");
+		isBoss = master.bBOSS || master.bBOSSDEATH;
 		restlife = 45;//random[cont](42,60);
 		maxlife = 35*7;//int(35*frandom[cont](6,10));
 		//spawn a hitbox for the Killer projectile to let the player juggle the corpse:
@@ -409,6 +414,14 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 		if (!master || master.health > 0) {
 			Destroy();
 			return;
+		}		
+		if (queueDeath) {
+			for (int i = 0; i <= 7; i++)
+				master.A_SoundVolume(i,0);
+			master.bINVISIBLE = true;
+			if (master.tics == -1)
+				master.Destroy();
+			return;
 		}
 		SetOrigin(master.pos,true);
 		if (!master.isFrozen())
@@ -419,14 +432,10 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 			restcounter++;
 		else
 			restcounter = 0;
-		double rad = 8;
-		double smkz = 20;
-		if (master) {
-			rad = master.radius;
-			smkz = master.height;
-		}
+		double rad = master.radius;
+		double smkz = master.height;
 		//this handles death if killed in Demon Mode:
-		if (master && master.bKILLED && master.target && master.target.CountInv("PK_DemonMorphControl")) {
+		if (master.bKILLED && master.target && master.target.CountInv("PK_DemonMorphControl")) {
 			//This should only happen if the killer is actually a demon, and not just getting
 			//a brief demon-mode preview:
 			let cont = PK_DemonMorphControl(master.target.FindInventory("PK_DemonMorphControl"));
@@ -441,9 +450,10 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 						smk.bBRIGHT = true;
 					}
 				}
-				master.A_NoBlocking();
-				master.destroy();
-				destroy();
+				//master.A_NoBlocking();
+				//master.destroy();
+				//destroy();
+				queueDeath = true;
 				return;
 			}
 		}	
@@ -475,11 +485,17 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 					soul.bearer = master.GetClass();
 				}
 			}
-			if (master)
-				master.destroy();
-			destroy();
+			//if (master)
+				//master.destroy();
+			//destroy();
+			queueDeath = true;
 			return;
 		}
+	}
+	States {
+	Spawn:
+		TNT1 A -1;
+		stop;
 	}
 }
 
