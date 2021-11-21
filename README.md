@@ -23,10 +23,10 @@
 Releases aren't always super-stable or bug-free, but they should be playable. Some releases are development versions which don't have all the planned features implemented yet.
 
 1. Navigate to the "Releases" tab at the top or following this URL: https://github.com/jekyllgrim/Painslayer/releases
-2. Download the attached PK3 file. Run it as you'd run any .wad or .pk3:
+2. Download the attached PK3 file. Run it as you'd run any .wad or .pk3. For example, in the command line it shoud look as follows:
 
 ```
-gzdoom.exe -file Painslayer.###.pk3
+gzdoom.exe -file Painslayer###.pk3
 ```
 
 (`###` in the example above stand for the version number, e.g. 085.)
