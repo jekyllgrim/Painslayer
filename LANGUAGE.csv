@@ -232,27 +232,6 @@ Demon Eyes,PKC_DemonEyes,Codex,Глаза демона
 Pentagram,PKC_Pentagram,Codex,Пентаграмма
 Protection Suit,PKC_Antirad,Codex,Защитный костюм
 Crystal Ball,PKC_CrystalBall,Codex,Хрустальный шар
-"Gold is used to purchase Gold and Silver Cards on the Black Tarot Board. 
-
-Gold comes in 4 varieties: small (\c[PKGreenText]+10G\c[PKWhiteText]), medium (\c[PKGreenText]+25G\c[PKWhiteText]), large (\c[PKGreenText]+100G\c[PKWhiteText]) and very large (\c[PKGreenText]+500G\c[PKWhiteText]). 
-
-There are several ways to acquire gold: 
-
-- Dealing \c[PKRedText]excessive damage \c[PKWhiteText]to enemies (such as blowing up weaker enemies) makes them drop coins. 
-
-- \c[PKRedText]Juggling enemy corpses with Killer\c[PKWhiteText]: before a corpse disappears, simply shoot at it with the Killer to grab it and draw it closer. Keep doing it to juggle the corpse every 3rd juggle produces a medium gold piece. 
-
-- Gold dynamically spawns in \c[PKRedText]secret areas\c[PKWhiteText] in levels. This is the only way to find large and very large gold pieces.",PKC_Gold_Desc,Codex,"Золото используется для покупки золотых и серебряных карт на доске Черного Таро.
-
-Есть 4 варианта золотых предметов: маленькие (\c[PKGreenText]+10 з.\c[PKWhiteText]), средние (\c[PKGreenText]+25 з.\c[PKWhiteText]), большие (\c[PKGreenText]+100 з.\c[PKWhiteText]) и очень большие (\c[PKGreenText]+500 з.\c[PKWhiteText]).
-
-Получить золото можно несколькими способами:
-
-- Нанося \c[PKRedText]избыточный урон\c[PKWhiteText] врагам (например, взрывая слабых врагов) — это заставляет их ронять монеты.
-
-- Многократно \c[PKRedText]притягивая трупы врагов с помощью Killer\c[PKWhiteText]: выстрелите в труп, пока он не исчез, чтобы притянуть его. Каждое третье притягивание выбьет из тела золото.
-
-- Золото появляется в \c[PKRedText]секретных областях\c[PKWhiteText] карт. Именно в них вы найдете большие и очень большие золотые предметы."
 "Killed enemies quickly disintegrate and drop their souls. They have two uses:
 - Souls are your primary way to heal, since there are no medkits in Painslayer.
 - Upon collecting 66 souls you will turn into a demon. 
@@ -337,15 +316,15 @@ Once you close the Board, the active card slots become locked. To equip new card
 При закрытии доски ячейки карт блокируются. Чтобы снарядить другие карты, вам придется завершить текущий уровень, либо разблокировать ячейки, заплатив \c[PKGoldText]золото\c[PKWhiteText]."
 "There are two types of Black Tarot Cards: Silver Cards and Golden Cards. 
 
-\cZSilver Cards\c[PKWhiteText] provide passive bonuses and are active all the time while equipped. You can equip up to \c[PKGreenText]3\c[PKWhiteText] Silver Cards. 
+\cZSilver Cards\c[PKWhiteText] provide passive bonuses and are active all the time while equipped. You can equip up to \c[PKGreenText]2\c[PKWhiteText] Silver Cards. 
 
-\c[PKGoldText]Golden Cards\c[PKWhiteText] have to be activated manually by pressing the \c[PKGreenText]Use Golden Cards (%s)\c[PKWhiteText] button. Golden Cards can be activated once per level (unless you equip a Silver Card that increases that number). You can equip up to \c[PKGreenText]2\c[PKWhiteText] Golden Cards. 
+\c[PKGoldText]Golden Cards\c[PKWhiteText] have to be activated manually by pressing the \c[PKGreenText]Use Golden Cards (%s)\c[PKWhiteText] button. Golden Cards can be activated once per level (unless you equip a Silver Card that increases that number). You can equip up to \c[PKGreenText]3\c[PKWhiteText] Golden Cards. 
 
 By default, you will receive 3 random Silver Cards and 2 random Golden Cards as a gift the first time you open the Black Tarot Board in a new game. You can change this behavior using \c[PKGreenText]Mod Settings > Allow free starting cards\c[PKWhiteText] option.",PKC_CARDTYPES_DESC,Codex,"Существует два типа карт Черного Таро: серебряные и золотые.
 
-\cZСеребряные карты\c[PKWhiteText] дают пассивные бонусы, которые активны всё время. У вас может быть активно до \c[PKGreenText]3\c[PKWhiteText] таких карт одновременно.
+\cZСеребряные карты\c[PKWhiteText] дают пассивные бонусы, которые активны всё время. У вас может быть активно до \c[PKGreenText]2\c[PKWhiteText] таких карт одновременно.
 
-\c[PKGoldText]Золотые карты\c[PKWhiteText] нужно активировать вручную, нажав кнопку \c[PKGreenText]Использовать золотые карты (%s)\c[PKWhiteText]. Золотые карты можно использовать один раз за уровень (хотя есть серебряная карта, которая повышает число активаций). Вы можете снарядить до \c[PKGreenText]2\c[PKWhiteText] золотых карт.
+\c[PKGoldText]Золотые карты\c[PKWhiteText] нужно активировать вручную, нажав кнопку \c[PKGreenText]Использовать золотые карты (%s)\c[PKWhiteText]. Золотые карты можно использовать один раз за уровень (хотя есть серебряная карта, которая повышает число активаций). Вы можете снарядить до \c[PKGreenText]3\c[PKWhiteText] золотых карт.
 
 По умолчанию вы получаете в подарок случайные карты (3 серебряных и 2 золотых) при первом открытии доски. Это можно отключить: см. \c[PKGreenText]Настройки мода > Дарить несколько карт\c[PKWhiteText]."
 "Gold is used to purchase Silver and Golden Cards on the Black Tarot Board. 
