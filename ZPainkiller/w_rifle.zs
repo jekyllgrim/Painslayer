@@ -746,7 +746,7 @@ Class PK_FlamerTank : PK_Projectile {
 					}
 				}
 			}
-			if (s_particles.GetInt() >= 2) {
+			if (s_particles.GetInt() >= 2 && tankmodel) {
 				for (int i = 15; i > 0; i--) {
 					let part = Spawn("PK_FlameTankParticle", tankmodel.pos + (frandom[sfx](-6,6), frandom[sfx](-6,6), frandom[sfx](4,12)));
 					if (part) {
