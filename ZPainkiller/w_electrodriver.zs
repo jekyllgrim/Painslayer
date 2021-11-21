@@ -280,6 +280,11 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 			}
 		}
 		if (owner.health <= 0) {
+			if (!owner.bISMONSTER || owner.bBOSS) {
+				owner.A_StopSound(CH_LOOP);
+				DepleteOrDestroy();
+				return;
+			}
 			if (isFlesh)
 				owner.A_SetTRanslation("Scorched");
 			owner.SetOrigin(owner.pos + (frandom[eld](-1,1),frandom[eld](-1,1),frandom[eld](0.5,1.5)),false);
