@@ -359,7 +359,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 			owner.bINVISIBLE = true;
 			owner.vel *= 0.15;
 			owner.bDONTTHRUST = true;
-			owner.A_SetTics(-1);
+			owner.A_SetTics(1);
 			owner.vel = (frandom[sfx](-1.3,1.3),frandom[sfx](-1.3,1.3),frandom[sfx](3,4));
 			double ownersize = (owner.radius * owner.default.height) / 8;
 			//standard zombieman size:
