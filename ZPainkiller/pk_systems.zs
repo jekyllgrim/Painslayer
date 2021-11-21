@@ -453,6 +453,7 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 				//master.A_NoBlocking();
 				//master.destroy();
 				//destroy();
+				A_ChangeLinkFlags(true,true);
 				queueDeath = true;
 				return;
 			}
@@ -488,6 +489,7 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 			//if (master)
 				//master.destroy();
 			//destroy();
+			A_ChangeLinkFlags(true,true);
 			queueDeath = true;
 			return;
 		}
