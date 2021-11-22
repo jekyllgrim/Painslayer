@@ -54,7 +54,7 @@ Class PK_ElectroDriver : PKWeapon {
 		}
 		int dmg = invoker.hasDexterity ? 8 : 4;
 		int fflags = DMG_THRUSTLESS|DMG_PLAYERATTACK;
-		if (frandom[eld](1,3) > 2)
+		if (frandom[felt](1,3) > 2)
 			fflags |= DMG_NO_PAIN;
 		ltarget.DamageMobj(self,self,dmg,'normal',flags:fflags);
 		if (invoker.hasWmod) {
@@ -98,7 +98,7 @@ Class PK_ElectroDriver : PKWeapon {
 		TNT1 A 0 {
 			PK_AttackSound("weapons/edriver/starshot");
 			A_FireProjectile("PK_Shuriken",spawnofs_xy:5);
-			A_WeaponOffset(2+frandom[eld](-0.5,0.5),34+frandom[eld](-0.5,0.5));
+			A_WeaponOffset(2+frandom[sfx](-0.5,0.5),34+frandom[sfx](-0.5,0.5));
 		}
 		ELDR BC 1 A_WeaponOffset(-0.5,-0.5,WOF_ADD);
 		ELDR D 1 {
@@ -173,7 +173,7 @@ Class PK_ElectroDriver : PKWeapon {
 			A_FireProjectile("PK_DiskProjectile",spawnofs_xy:2,spawnheight:5);
 		}
 		ELDR EEE 2 A_WeaponOffset(3.2,2.4,WOF_ADD);
-		ELDR FFE 2 A_WeaponOffset(frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),WOF_ADD);
+		ELDR FFE 2 A_WeaponOffset(frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),WOF_ADD);
 		ELDR EE 2 A_WeaponOffset(-3.2,-2.4,WOF_ADD);
 		ELDR GGGHHHIIIJJJKKK 1 A_WeaponOffset(-1.2,-1,WOF_ADD);
 		ELDR A 1 A_WeaponOffset(0,32);
@@ -191,7 +191,7 @@ Class PK_ElectroDriver : PKWeapon {
 			A_Overlay(PSP_HIGHLIGHTS,'ReadyLight',nooverride:true);
 			let psp = player.FindPSprite(overlayID());
 			if (psp)
-				psp.frame = random[eld](0,4);
+				psp.frame = random[sfx](0,4);
 			double alph = frandom[sfx](0.5,1);
 			A_OverlayAlpha(OverlayID(),alph);	
 			A_OverlayAlpha(PSP_HIGHLIGHTS,frandom[sfx](0.1,alph));	
@@ -253,11 +253,11 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 			return;
 		isFlesh = (owner.bISMONSTER || owner is "PlayerPawn");
 		owner.A_StartSound("weapons/edriver/shockloop",CH_LOOP,CHANF_LOOPING,attenuation:3);
-		deadtics = 35*random[eld](3,5);
+		deadtics = 35*random[etc](3,5);
 		for (int i = 3; i > 0; i--) {
 			let etarget = Spawn("PK_ElectroTarget",owner.pos + (0,0,owner.height*0.5));
 			if (etarget) {
-				etarget.pitch = frandom[eld](10,120)*randompick[eld](-1,1);
+				etarget.pitch = frandom[etc](10,120)*randompick[etc](-1,1);
 				etarget.tracer = owner;
 				etarget.master = self;
 			}
@@ -274,9 +274,9 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 		if (!s_particles)
 			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
 		if (isFlesh && s_particles.GetInt() >= 2) {
-			let smk = Spawn("PK_BlackSmoke",owner.pos+(frandom[eld](-8,8),frandom[eld](-8,8),owner.height*0.5 + frandom[eld](-4,12)));
+			let smk = Spawn("PK_BlackSmoke",owner.pos+(frandom[etc](-8,8),frandom[etc](-8,8),owner.height*0.5 + frandom[etc](-4,12)));
 			if (smk) {
-				smk.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](0.6,0.9));
+				smk.vel = (frandom[etc](-0.5,0.5),frandom[etc](-0.5,0.5),frandom[etc](0.6,0.9));
 			}
 		}
 		if (owner.health <= 0) {
@@ -287,7 +287,7 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 			}
 			if (isFlesh)
 				owner.A_SetTRanslation("Scorched");
-			owner.SetOrigin(owner.pos + (frandom[eld](-1,1),frandom[eld](-1,1),frandom[eld](0.5,1.5)),false);
+			owner.SetOrigin(owner.pos + (frandom[etc](-1,1),frandom[etc](-1,1),frandom[etc](0.5,1.5)),false);
 			deadage++;
 			if (deadage > deadtics){
 				owner.A_StopSound(CH_LOOP);
@@ -316,19 +316,19 @@ Class PK_ElectroTarget : PK_BaseFlare {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		deadtics = 35*random[eld](3,5);
+		deadtics = 35*random[ett](3,5);
 		if (tracer)
 			sscale = 0.014 * tracer.radius;
-		bangle = frandom[eld](10,25)*randompick[eld](-1,1);
+		bangle = frandom[ett](10,25)*randompick[ett](-1,1);
 	}
 	states {
 	Cache:
 		ELTE ABCDEFGHIJKL 0;
 	Spawn:
 		ELTE # 1 {
-			frame = random[eld](0,11);
-			alpha = frandom[eld](0.1,0.9);
-			A_SetScale(sscale * frandom[eld](0.75,1.0));
+			frame = random[sfx](0,11);
+			alpha = frandom[sfx](0.1,0.9);
+			A_SetScale(sscale * frandom[ett](0.75,1.0));
 			if (!tracer || !master) {
 				return ResolveState("End");				
 			}
