@@ -157,7 +157,7 @@ Class PK_FreezerProjectile : PK_Projectile {
 					if (tracer.player)
 						frzdur / 2; //reduce it by 50% if the target is a player
 					frz.fcounter = frzdur;
-					tracer.A_SetBlend("0080FF",0.5,frz.fcounter);
+					tracer.A_SetBlend("0080FF",0.6,frz.fcounter * 1.5);
 				}
 			}
 			if (!s_particles)
