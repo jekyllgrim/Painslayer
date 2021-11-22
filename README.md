@@ -57,6 +57,20 @@ It's possible to play the version that is currently in the repository but hasn't
 
 6. Enjoy!
 
+## How to play Painslayer with Beautiful Doom
+
+1. Download a fresh release of Beautiful Doom: https://github.com/jekyllgrim/Beautiful-Doom/releases
+
+2. Run the game so that Painslayer is placed *after* Beautiful Doom in the load order. For example:
+
+    ```
+    gzdoom.exe -file Beautiful_Doom_715.pk3 Painslayer102.pk3
+    ```
+
+3. In the Main Menu, before starting the game, navigate to **Options** > **Beautiful Doom Settings** > scroll down, find **Beautiful Doom Weapons** > set to **Disabled**.
+
+4. Play the game, and you'll have Beautiful Doom visuals with Painslayer weapons and mechanics!
+
 # Copyright information and permissions
 
 Painslayer gameplay modification for GZDoom engine ("Painslayer") by Agent_Ash also known as Jekyll Grim Payne ("the Author") is based on the Painkiller game series by People Can Fly and consists of several components that are subject to different licenses and permissions.
