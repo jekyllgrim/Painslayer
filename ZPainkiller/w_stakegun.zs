@@ -235,7 +235,8 @@ Class PK_Stake : PK_StakeProjectile {
 					}
 				}
 			}
-			else { // If the victim is not dead and hit by a stake, spawn fake stake that gets "stuck" in it while it's alive
+			// If the victim is not dead and hit by a stake, spawn fake stake that gets "stuck" in it while it's alive
+			else {
 				let stuck = PK_StakeStuck(Spawn("PK_StakeStuck",victim.pos + (frandom(-5,5),frandom(-5,5),victim.height * 0.65 + frandom(-5,5))));
 				if (stuck) {
 					stuck.master = victim;
@@ -245,8 +246,10 @@ Class PK_Stake : PK_StakeProjectile {
 					stuck.stuckangle = DeltaAngle(angle,victim.angle);
 					stuck.stuckpos = stuck.pos - victim.pos;
 					stuck.sprite = sprite;
+					if (victim.player && victim.player == players[consoleplayer])
+						stuck.bINVISIBLE = true;
 				}
-				if (victim.CountInv("PK_StakeStuckCounter") < 1)
+				if (!victim.CountInv("PK_StakeStuckCounter"))
 					victim.GiveInventory("PK_StakeStuckCounter",1);
 				let ct = PK_StakeStuckCounter(victim.FindInventory("PK_StakeStuckCounter"));
 				if (ct && stuck)
@@ -317,7 +320,7 @@ Class PK_StakeFlame : PK_BaseFlare {
 }
 
 //Decorative stake stuck in a living monster
-Class PK_StakeStuck : PK_BaseActor {
+Class PK_StakeStuck : PK_SmallDebris {
 	state mmissile;
 	state mmelee;
 	double stuckangle;
@@ -335,7 +338,7 @@ Class PK_StakeStuck : PK_BaseActor {
 	}
 	override void Tick () {
 		super.Tick();
-		if (!isFrozen() && age > 160) {
+		if (GetAge() > 160) {
 			A_SetRenderStyle(alpha,Style_Translucent);
 			A_FadeOut(0.05);
 		}
