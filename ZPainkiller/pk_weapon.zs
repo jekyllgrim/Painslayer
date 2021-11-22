@@ -397,8 +397,8 @@ Class PKWeapon : Weapon abstract {
 		numbullets = abs(numbullets);
 		//fire bullets with explicit angle and simply pass the offsets to the projectiles instead of using AimBulletMissile at puffs (because puffs don't always spawn!)
 		for (int i = 0; i < numbullets; i++) {			
-			double hspread = held ? frandom(-spread_horz,spread_horz) : 0;
-			double vspread = held ? frandom(-spread_vert,spread_vert) : 0;	
+			double hspread = held ? frandom[pkfb](-spread_horz,spread_horz) : 0;
+			double vspread = held ? frandom[pkfb](-spread_vert,spread_vert) : 0;	
 			A_FireProjectile("PK_BulletTracer",hspread,useammo:false,spawnofs_xy:spawnofs,spawnheight:spawnheight,pitch:vspread);
 			A_FireBullets (hspread, vspread, -1, damage, pufftype,flags:FBF_NORANDOMPUFFZ|FBF_EXPLICITANGLE|FBF_NORANDOM);
 		}
