@@ -410,7 +410,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 			owner.SetState(owner.FindState("See"));
 		}
 		if (owner.player) {
-			owner.player.cheats &= !CF_TOTALLYFROZEN;
+			owner.player.cheats &= ~CF_TOTALLYFROZEN;
 		}
 		super.DetachFromOwner();
 	}
