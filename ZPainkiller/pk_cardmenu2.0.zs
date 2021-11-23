@@ -153,15 +153,27 @@ Class PKCardsMenu : PKZFGenericMenu {
 		goldcounter.Pack(boardElements);
 	}
 	
+	//card slots aren't evenly spaced, so I define their positions explicitly:
+	static const int PKCSlotXPos[] = {  58, 231, 489, 660, 829 };
+	static const int PKCSlotYPos[] = { 179, 179, 364, 364, 364 };
+	//array of slots; filled on slots' initialization
+	PKCCardSlot cardslots[5];
+	
+	const equipSlotSizeX = 138;
+	const equipSlotSizeY = 227;
+	
+	//Initialize slot-related pop-up tips:
 	private void SlotInfoInit() {
 		double bkgalpha = 0.7;
-		vector2 silverSlotSize = (280,80);
-		silverSlotsInfo = PKZFFrame.Create((75,255),silverSlotSize);
+		
+		//silver slots tip:
+		vector2 silverTipSize = (280,80);
+		silverSlotsInfo = PKZFFrame.Create((75,255),silverTipSize);
 		silverSlotsInfo.Pack(boardElements);
 		silverSlotsInfo.setDontBlockMouse(true);
 		let silverSlotBkg = PKZFImage.Create(
 			(0,0),
-			silverSlotSize,
+			silverTipSize,
 			"graphics/HUD/Tarot/tooltip_bg.png",
 			imagescale:(1.6,1.6),
 			tiled:true
@@ -183,13 +195,14 @@ Class PKCardsMenu : PKZFGenericMenu {
 		silverSlotText.setDontBlockMouse(true);
 		silverSlotsInfo.Hide();
 
-		vector2 goldSlotSize = (360,80);
-		goldSlotsInfo = PKZFFrame.Create((560,440),goldSlotSize);
+		//gold slots tip:
+		vector2 goldTipSize = (360,80);
+		goldSlotsInfo = PKZFFrame.Create((560,440),goldTipSize);
 		goldSlotsInfo.Pack(boardElements);
 		goldSlotsInfo.setDontBlockMouse(true);
 		let goldSlotBkg = PKZFImage.Create(
 			(0,0),
-			goldSlotSize,
+			goldTipSize,
 			"graphics/HUD/Tarot/tooltip_bg.png",
 			imagescale:(1.6,1.6),
 			tiled:true
@@ -210,18 +223,24 @@ Class PKCardsMenu : PKZFGenericMenu {
 		goldSlotText.Pack(goldSlotsInfo);
 		goldSlotText.setDontBlockMouse(true);
 		goldSlotsInfo.Hide();
+		
+		//sizes and positions of the ares that you need to hover in order to see the tips:
+		/*vector2 silverTipAreaPos = (PKCSlotXPos[0], PKCSlotYPos[0]);
+		vector2 silverTipAreaSize = (PKCSlotXPos[1] + equipSlotSizeX, PKCSlotYPos[0] + equipSlotSizeY);
+		let silverTipArea = PKZFTipFrame.Create(silverTipAreaPos, silverTipAreaSize, handler, "SilverTip");
+		silverTipArea.setDontBlockMouse(true);
+		vector2 goldTipAreaPos = (PKCSlotXPos[2], PKCSlotYPos[2]);
+		vector2 goldTipAreaSize = (PKCSlotXPos[4] + equipSlotSizeX, PKCSlotYPos[2] + equipSlotSizeY);
+		let goldTipArea = PKZFTipFrame.Create(silverTipAreaPos, silverTipAreaSize, handler, "GoldTip");
+		goldTipArea.setDontBlockMouse(true);
+		*/
 	}
 	
-	//horizontal positions of slots
-	static const int PKCSlotXPos[] = { 58, 231, 489, 660, 829 };
-	//array of slots; filled on slots' initialization
-	PKCCardSlot cardslots[5];
-	
+	//Initialize slots the cards can be equipped to:
 	private void SlotsInit() {
-		vector2 slotsize = (138,227);	
-		for (int i = 0; i < 5; i++) {			
-			double slotY = (i < 2) ? 179 : 364;
-			vector2 slotpos = (PKCSlotXPos[i],slotY);
+		vector2 slotsize = (equipSlotSizeX,equipSlotSizeY);	
+		for (int i = 0; i < 5; i++) {
+			vector2 slotpos = (PKCSlotXPos[i],PKCSlotYPos[i]);
 			let cardslot = PKCCardSlot.Create(
 				slotpos,
 				slotsize,
@@ -232,6 +251,7 @@ Class PKCardsMenu : PKZFGenericMenu {
 			cardslot.slotsize = slotsize;
 			cardslot.slottype = (i < 2) ? false : true;
 			cardslot.slotID = i;
+			cardslot.setDontBlockMouse(false);
 			cardslots[i] = cardslot;
 			cardslot.Pack(boardelements);
 		}
@@ -667,6 +687,8 @@ Class PKCardsMenu : PKZFGenericMenu {
 	}
 	
 	override void Ticker() {
+		//vector2 mpos = boardelements.screenToRel(GetMousePos());
+		//Screen.DrawText(font_times, Font.CR_WHITE, 8, 8, String.Format("x: %f | y: %f", mpos.x, mpos. y));
 		if (queueForClose) {
 			Close();
 			return;
@@ -731,6 +753,22 @@ Class PKCardsMenu : PKZFGenericMenu {
 			exitbutton.SetAlpha( (exitbutton.isHovered() && !SelectedCard) ? 1.0 : Clamp(exitbutton.GetAlpha()+0.05*ExitAlphaDir,0.25,1.0) );
 		}
 		super.Ticker();
+	}
+}
+
+Class PKZFTipFrame : PKZFFrame {
+	void config(PKZFHandler cmdHandler = NULL, string command = "") {
+		cmdHandler = cmdHandler;
+		command = command;
+	}
+	static PKZFTipFrame create(Vector2 pos, Vector2 size, PKZFHandler cmdHandler = null, string command = "") {
+		let ret = new('PKZFTipFrame');
+
+		ret.setBox(pos, size);
+		ret.alpha = 1;
+		ret.config(cmdHandler, command);
+
+		return ret;
 	}
 }
 
@@ -1072,6 +1110,8 @@ Class PKCMenuHandler : PKZFHandler {
 			return;
 		//exit button - works if you don't have a picked card:
 		if (command == "BoardButton" && !menu.SelectedCard) {
+			if (pk_debugmessages)
+				Console.Printf("Pressing Close button");
 			//if board opened for the first time in the map, show a yes/no prompt:
 			if (menu.firstUse)
 				menu.ShowExitPopup();	
@@ -1081,16 +1121,21 @@ Class PKCMenuHandler : PKZFHandler {
 			}
 			return;
 		}
-		if (menu.promptPopup && menu.promptPopup.isEnabled())
+		if (menu.promptPopup && menu.promptPopup.isEnabled()) {
+			if (pk_debugmessages)
+				Console.Printf("Prompt active: do nothing");
 			return;
+		}
 		if (command == "CloseFirstUse" && menu.firstUsePopup) {
 			S_StartSound("ui/menu/open",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			menu.firstUsePopup.Unpack();
 			menu.firstUsePopup.Destroy();
 		}
 		//card slot: if you have a card picked and click the slot, the card will be placed in it and scaled up to its size:
+		
 		if (command == "CardSlot") {
-			//console.printf("trying to click slot");
+			if (pk_debugmessages)
+				Console.Printf("Clicking card equip slot");
 			let cardslot = PKCCardSlot(Caller);
 			//check if there's a selected card
 			if (menu.SelectedCard) {
@@ -1100,26 +1145,15 @@ Class PKCMenuHandler : PKZFHandler {
 				PKCTarotCard placedcard = (cardslot.placedcard) ? PKCTarotCard(cardslot.placedcard) : null;
 				//proceed if slot type matches card type (silver/gold) and there's no placed card OR there is one but it's not locked:
 				if (card.slottype == cardslot.slottype && (!placedcard || !placedcard.cardlocked)) {
-					card.SetBox(cardslot.slotpos, cardslot.slotsize);
-					card.buttonscale = (1,1);
-					menu.SelectedCard = null; //detach from cursor
-					//if there was a card placed in the slot, move that card back to its default pos before placing this one
-					if (placedcard) {
-						placedcard.SetBox(placedcard.defaultpos, placedcard.defaultsize);
-						placedcard.buttonscale = placedcard.defaultscale;
-					}
-					//attach the card to slot
-					cardslot.placedcard = card;
+					ReturnCard(placedcard);
+					EquipCard(card, cardslot);
 					sound snd = (cardslot.slottype) ? "ui/board/placegold" : "ui/board/placesilver";
 					S_StartSound(snd,CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-					string eventname = String.Format("PKCCardToSlot:%s",card.cardID);
-					EventHandler.SendNetworkEvent(eventname,cardslot.slotID);
 				}
 				//otherwise do nothing:
 				else {
 					S_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 				}
-				return;
 			}
 			//otherwise check if there's a card in the slot; if there is, pick it up and attach to mouse pointer
 			else if (cardslot.placedcard) {
@@ -1151,9 +1185,6 @@ Class PKCMenuHandler : PKZFHandler {
 			}
 			//don't do anything if you're hovering over a valid slot: we don't want placing into slot and clicking the card to happen at the same time
 			if (hoveredslot) {
-				//if clicking over incorrect slot color, don't jump back but instead play "wrong slot" sound
-				if(hoveredslot.slottype != card.slottype)
-					S_StartSound("ui/board/wrongplace",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 				return;
 			}
 			//if not hovering over slot, take card and attach it to the mouse pointer
@@ -1162,6 +1193,7 @@ Class PKCMenuHandler : PKZFHandler {
 				menu.SelectedCard = card;
 				//move it to the top of the elements array so that it's rendered on the top layer:
 				menu.boardelements.moveElement(menu.boardelements.indexOfElement(card), menu.boardelements.elementCount() - 1);
+				//card.setDontBlockMouse(true);
 			}
 			//if we already have a card, put it back
 			else {
@@ -1175,9 +1207,9 @@ Class PKCMenuHandler : PKZFHandler {
 	override void elementHoverChanged(PKZFElement caller, string command, bool unhovered) {
 		if (!menu)
 			return;
-		if (!caller || !caller.isEnabled())
-			return;
 		if (menu.promptPopup)
+			return;
+		if (!caller || !caller.isEnabled())
 			return;
 		//play sound of hovering over the exit button:
 		if (command == "BoardButton" && !menu.SelectedCard) {
@@ -1185,35 +1217,102 @@ Class PKCMenuHandler : PKZFHandler {
 				S_StartSound("ui/menu/hover",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			}
 		}
-		//keep track of slots we're hovering over:
+		
+		//hovered over equip slots:
 		if (command == "CardSlot") {
 			if (!unhovered) {
-				hoveredslot = PKCCardSlot(Caller);
+				if (pk_debugmessages)
+					Console.Printf("Hovering over equip slot");
+				hoveredslot = PKCCardSlot(Caller); //record covered slot
+				//show gold info:
 				if (hoveredslot.slottype == 1) {
 					if (menu.goldSlotsInfo && menu.goldSlotsInfo.isHidden())
 						menu.goldSlotsInfo.Show();
 					menu.boardelements.moveElement(menu.boardelements.indexOfElement(menu.goldSlotsInfo), menu.boardelements.elementCount() - 1);
 				}
+				//show silver info:
 				else {
 					if (menu.silverSlotsInfo && menu.silverSlotsInfo.isHidden())
 						menu.silverSlotsInfo.Show();
 					menu.boardelements.moveElement(menu.boardelements.indexOfElement(menu.silverSlotsInfo), menu.boardelements.elementCount() - 1);
 				}
 			}
+			//hide info tips:
 			else {
-				hoveredslot = null;
+				if (pk_debugmessages)
+					Console.Printf("No longer hovering over equip slot");
+				hoveredslot = null; //no hovered slot
 				if (menu.goldSlotsInfo)
 					menu.goldSlotsInfo.Hide();
 				if (menu.silverSlotsInfo)
 					menu.silverSlotsInfo.Hide();
 			}
 		}
+		
+		//keep track of the cards we're hovering:
 		if (command == "HandleCard") {
 			let card = PKCTarotCard(Caller);
-			if (!unhovered)
+			if (!unhovered) {
+				if (pk_debugmessages)
+					Console.Printf("Hovering over %s",card.cardname);
 				menu.HoveredCard = card;
-			else
+			}
+			else {
+				if (pk_debugmessages)
+					Console.Printf("No longer hovering over %s",card.cardname);
 				menu.HoveredCard = null;
+			}
 		}
+	}
+	
+	void ReturnCard(PKCTarotCard card) {
+		if (!card)
+			return;
+		if (pk_debugmessages)
+			Console.Printf("Returning %s to its default slot", card.cardname);
+		card.SetBox(card.defaultpos, card.defaultsize);
+		card.buttonscale = card.defaultscale;
+		//card.setDontBlockMouse(false);
+	}
+	
+	void EquipCard(PKCTarotCard card, PKCCardSlot cardslot) {		
+		if (!card || !cardslot)
+			return;
+		if (pk_debugmessages)
+			Console.Printf("Equipping %s into a slot", card.cardname);
+		card.SetBox(cardslot.slotpos, cardslot.slotsize);
+		card.buttonscale = (1,1);
+		//card.setDontBlockMouse(false);
+		cardslot.placedcard = card;
+		string eventname = String.Format("PKCCardToSlot:%s",card.cardID);
+		EventHandler.SendNetworkEvent(eventname,cardslot.slotID);
+		if (menu) {
+			menu.SelectedCard = null; //detach from cursor
+		}
+	}
+	
+	// If for some reason the card ends up not in its default slot and not in any of the equip slots, reset it:
+	void ResetCardPos(PKCTarotCard card) {
+		if (!menu)
+			return;
+		//get pos and size:
+		vector2 pos = card.GetPos();
+		vector2 size = card.GetSize();
+		//do nothing if the card is in its default position:
+		if (pos == card.defaultpos && size == card.defaultsize)
+			return;
+		//iterate through slots and check if the card is in any of them:
+		for (int i = 0; i < menu.cardslots.Size(); i++) {
+			if (menu.cardslots[i]) {
+				let placedcard = menu.cardslots[i].placedcard;
+				if (placedcard && placedcard == card) {
+					card.SetBox(menu.cardslots[i].slotpos, menu.cardslots[i].slotsize);
+					card.buttonscale = (1,1);					
+					return;
+				}
+			}
+		}
+		card.SetBox(card.defaultpos, card.defaultsize);
+		card.buttonscale = card.defaultscale;
 	}
 }
