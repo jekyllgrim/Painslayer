@@ -109,7 +109,7 @@ Class PK_MainHandler : EventHandler {
 		if (!cardcontrol)
 			return;
 		//open black tarot board
-		if (e.name == "PKCOpenBoard") {
+		if (e.name == "PKCOpenBoard" && e.player == consoleplayer) {
 			if (pk_debugmessages)
 				console.printf("Trying to open board");
 			if (skill < 1) {
@@ -132,7 +132,7 @@ Class PK_MainHandler : EventHandler {
 			}
 			Menu.SetMenu("PKCardsMenu");
 		}
-		if (e.name == "PKCOpenCodex") {
+		if (e.name == "PKCOpenCodex" && e.player == consoleplayer) {
 			Menu.SetMenu("PKCodexMenu");
 		}
 		if (e.name == "PK_UseGoldenCards") {
