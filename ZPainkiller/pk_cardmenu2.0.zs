@@ -940,6 +940,44 @@ Class PKCTarotCard : PKZFButton {
 			}
 		}
 	}
+
+	override void Ticker() {
+		super.Ticker();
+		/*	The purpose if this block is to make *absolutely sure*
+			that every card *never* ends up stuck somewhere on the board
+			outside of any slots.
+			The chances of this happening are very small, but I had
+			some elusive glitches where the card would sometimes not
+			equip to a slot properly, and I haven't found a way to
+			solve it for 100% of cases, so I made this.
+		*/
+		if (!menu)
+			return;
+		//do nothing if this card is being dragged, that's the only case when we allow all positions
+		if (menu.selectedCard == self)
+			return;
+		//get pos and size:
+		vector2 pos = GetPos();
+		vector2 size = GetSize();
+		//do nothing if the card is in its default position:
+		if (pos == defaultpos && size == defaultsize)
+			return;
+		//iterate through slots and check if the card is in any of them:
+		for (int i = 0; i < menu.cardslots.Size(); i++) {
+			if (menu.cardslots[i]) {
+				let placedcard = menu.cardslots[i].placedcard;
+				//if it's placed, make sure the size and pos are correct:
+				if (placedcard && placedcard == self) {
+					SetBox(menu.cardslots[i].slotpos, menu.cardslots[i].slotsize);
+					buttonscale = (1,1);					
+					return;
+				}
+			}
+		}
+		//if all of the above fail, return the card to its default position:
+		SetBox(defaultpos, defaultsize);
+		buttonscale = defaultscale;
+	}
 	
 	static PKCTarotCard create(Vector2 pos, Vector2 size, string text = "", PKZFHandler cmdHandler = NULL, string command = "",
 	               PKZFBoxTextures inactive = NULL, PKZFBoxTextures hover = NULL, PKZFBoxTextures click = NULL,
