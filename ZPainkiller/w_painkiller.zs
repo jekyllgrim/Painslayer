@@ -379,6 +379,7 @@ Class PK_KillerFlare : PK_ProjFlare {
 
 Class PK_KillerFlyTarget : Actor {
 	int hitcounter;
+	PK_EnemyDeathControl edc;
 	Default {
 		+NODAMAGE
 		+SOLID
@@ -401,6 +402,8 @@ Class PK_KillerFlyTarget : Actor {
 			//console.printf("hitcounter %d",hitcounter);
 			//if (hitcounter % 3 == 0 && target)
 				//target.A_NoBlocking();
+			if (edc)
+				edc.ResetRestCounter();
 			return true;
 		}
 		return false;

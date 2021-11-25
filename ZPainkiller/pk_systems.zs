@@ -387,117 +387,168 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 	private int restlife;
 	private int maxlife;
 	private bool isBoss;
-	private bool queueDeath;
+	private bool queueSilentDeath;
+	private class<Actor> masterclass;
+	
+	
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		if (!master || master.health > 0) {
 			destroy();
 			return;
 		}
-		if (pk_debugmessages)
-			sprite = GetSpriteIndex("BAL1");
+		masterclass = master.GetClass();
 		isBoss = master.bBOSS || master.bBOSSDEATH;
-		restlife = 45;//random[cont](42,60);
-		maxlife = 35*7;//int(35*frandom[cont](6,10));
+		restlife = 40;
+		maxlife = 35*7;
 		//spawn a hitbox for the Killer projectile to let the player juggle the corpse:
 		if (!master.bBOSS) {
 			kft = PK_KillerFlyTarget(Spawn("PK_KillerFlyTarget",master.pos));
 			if (kft) {
 				kft.target = master;
+				kft.edc = PK_EnemyDeathControl(self);
 				kft.A_SetSize(master.radius*1.15,master.default.height*0.6);
 				kft.vel = master.vel;
 				kft.mass = master.mass;
 			}
 		}
 	}	
+	
 	override void Tick () {
-		if (!master || master.health > 0) {
+		//do nothing if for some reason the monster is alive:
+		if (master && master.health > 0) {
+			//console.printf("The monster is alive: destroying controller");
 			Destroy();
 			return;
-		}		
-		if (queueDeath) {
-			for (int i = 0; i <= 7; i++)
-				master.A_SoundVolume(i,0);
-			master.bINVISIBLE = true;
-			if (master.tics == -1)
-				master.Destroy();
+		}
+		//The monster plays its death animation but makes no sound and
+		//disappears once it's done:
+		if (queueSilentDeath) {
+			if (master) {
+				for (int i = 0; i <= 7; i++)
+					master.A_SoundVolume(i,0);
+				if (master.tics == -1) {
+					//console.printf("Destroying monster corpse");
+					master.Destroy();
+				}
+			}
+			if (!master) {
+				//console.printf("No more monster corpse: destroying controller");
+				Destroy();
+			}
 			return;
 		}
+		//if the monster disappeared, spawn death smoke and a soul
+		//(this should cover cases with disappearing monsters like Lost Souls)
+		if (!master) {
+			//console.printf("The monster disappered, poofing the body");
+			BodyPoof();
+			Destroy();
+			return;
+		}
+		
+		//Sync with master, increment age, set Killer target vel
 		SetOrigin(master.pos,true);
 		if (!master.isFrozen())
 			age++;
 		if (GetAge() == 1 && kft)
-			kft.vel = master.vel;	
-		if  (master.vel.length() < 0.02)
+			kft.vel = master.vel;
+			
+		//if the monster's death animation has finished, increment restcounter
+		if (master.tics == -1) {
 			restcounter++;
-		else
-			restcounter = 0;
-		double rad = master.radius;
-		double smkz = master.height;
+		}
+		//console.printf("Restcounter: %d / %d || Age: %d / %d", restcounter, restlife, age, maxlife);
+		
 		//this handles death if killed in Demon Mode:
-		if (master.bKILLED && master.target && master.target.CountInv("PK_DemonMorphControl")) {
-			//This should only happen if the killer is actually a demon, and not just getting
-			//a brief demon-mode preview:
-			let cont = PK_DemonMorphControl(master.target.FindInventory("PK_DemonMorphControl"));
-			if (cont && cont.CheckDemon()) {
-				for (int i = 40; i > 0; i--) {
-					smkz = master.default.height;
-					let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz)));
-					if (smk) {
-						smk.vel = (frandom[part](-0.4,0.4),frandom[part](-0.4,0.4),frandom[part](0,1));
-						smk.A_SetRenderstyle(1.0,Style_Stencil);
-						smk.SetShade("FF00FF");
-						smk.bBRIGHT = true;
-					}
-				}
-				//master.A_NoBlocking();
-				//master.destroy();
-				//destroy();
-				A_ChangeLinkFlags(true,true);
-				queueDeath = true;
-				return;
-			}
-		}	
+		if (!isBoss && CheckKillerIsDemon()) {
+			//If the killer is a demon, spawn some red smoke
+			//and immediately remove the monster
+			//(Actually continues its Death animation but quietly)
+			DemonModeDeath();
+			//console.printf("Monster killed by a Demon");
+			return;
+		}
 		//this handles regular death:
-		if (restcounter >= restlife || age > maxlife) {
-			if (kft)
-				kft.destroy();
-			A_StartSound("world/bodypoof",CHAN_AUTO);
-			for (int i = 26; i > 0; i--) {
-				let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz*1.5)));
-				if (smk)
-					smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
-			}
-			for (int i = 8; i > 0; i--) {
-				let smk = Spawn("PK_WhiteDeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](pos.z,smkz)));
-				if (smk) {
-					smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
-					smk.A_SetScale(0.4);
-					smk.alpha = 0.5;
-				}
-			}
-			//Class<Inventory> soul = (master && master.default.health >= 500) ? "PK_RedSoul" : "PK_Soul";			
-			double pz = (pos.z ~== floorz) ? frandom[soul](8,14) : 0;
-						
-			// Spawn soul. In contrast to Painkiller, here soul healing amount is based on the monster's health:
-			if (skill < 4) {
-				let soul = PK_Soul(Spawn("PK_Soul",pos+(0,0,pz)));
-				if (soul && master) {
-					soul.bearer = master.GetClass();
-				}
-			}
-			//if (master)
-				//master.destroy();
-			//destroy();
-			A_ChangeLinkFlags(true,true);
-			queueDeath = true;
+		if (restcounter >= restlife || age >= maxlife) {
+			//console.printf("Resting for too long: poofing the body");
+			BodyPoof();
+			Destroy();
 			return;
 		}
 	}
-	States {
-	Spawn:
-		TNT1 A -1;
-		stop;
+	
+	//Check that the killer is a Demon, not getting a Demon-mode preview:
+	bool CheckKillerIsDemon() {
+		if (!master || !master.target || !master.target.CountInv("PK_DemonMorphControl"))
+			return false;
+		let cont = PK_DemonMorphControl(master.target.FindInventory("PK_DemonMorphControl"));
+		return cont && cont.CheckDemon();
+	}
+		
+	//Reset counter (used by Killer)
+	void ResetRestCounter() {
+		restcounter = 0;
+	}
+	
+	//Standard body-poofing function (spawns a soul)
+	void BodyPoof() {
+		if (kft)
+			kft.destroy();
+		A_StartSound("world/bodypoof",CHAN_AUTO);
+		
+		double smkz = GetDefaultByType(masterclass).height;
+		double rad = GetDefaultByType(masterclass).radius;
+		if (master) {
+			smkz = master.height;
+			rad = master.radius;
+		}
+		for (int i = 26; i > 0; i--) {
+			let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz*1.5)));
+			if (smk)
+				smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
+		}
+		for (int i = 8; i > 0; i--) {
+			let smk = Spawn("PK_WhiteDeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](pos.z,smkz)));
+			if (smk) {
+				smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
+				smk.A_SetScale(0.4);
+				smk.alpha = 0.5;
+			}
+		}
+		double pz = (pos.z <= floorz) ? frandom[soul](8,14) : 0;
+					
+		// Spawn soul if difficulty is below Trauma, and tell it what monster spawned it:
+		if (skill < 4) {
+			let soul = PK_Soul(Spawn("PK_Soul",pos+(0,0,pz)));
+			if (soul && masterclass) {
+				soul.bearer = masterclass;
+			}
+		}
+		if (master)
+			master.Destroy();
+	}
+	
+	//Death effect when killed by a demon (spawns no souls)
+	void DemonModeDeath() {
+		if (!master)
+			return;
+		double smkz = master.default.height;
+		double rad = master.radius;
+		for (int i = random[sfx](30,40); i > 0; i--) {
+			let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz)));
+			if (smk) {
+				smk.vel = (frandom[part](-0.4,0.4),frandom[part](-0.4,0.4),frandom[part](0,1));
+				smk.A_SetRenderstyle(1.0,Style_Stencil);
+				smk.SetShade("FF00FF");
+				smk.bBRIGHT = true;
+			}
+		}
+		//Make the controller noninteractive, the body invisible
+		//and queue for death (the body plays its death animation silently)
+		A_ChangeLinkFlags(true,true);
+		master.bINVISIBLE = true;
+		queueSilentDeath = true;
 	}
 }
 
