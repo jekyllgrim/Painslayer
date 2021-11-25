@@ -147,7 +147,7 @@ Class PK_FreezerProjectile : PK_Projectile {
 			A_Stop();
 			A_AttachLight('frez', DynamicLight.RandomFlickerLight, "75edff", 32, 52, flags: DYNAMICLIGHT.LF_ATTENUATE);
 			roll = random(0,359); 
-			if (tracer && (tracer.bISMONSTER || tracer.player) && !tracer.bBOSS) {
+			if (tracer && (tracer.bISMONSTER || tracer.player) && !tracer.bBOSS && !tracer.bNOICEDEATH) {
 				tracer.GiveInventory("PK_FreezeControl",1);
 				let frz = PK_FreezeControl(tracer.FindInventory("PK_FreezeControl"));
 				if (frz) {
@@ -189,10 +189,7 @@ Class PK_FreezerProjectile : PK_Projectile {
 Class PK_FrozenChunk : PK_SmallDebris {
 	Default {
 		PK_SmallDebris.dbrake 0.9;
-		//renderstyle 'Shaded';
-		//stencilcolor "08caed";
 		renderstyle 'Translucent';
-		//Translation "PK_IceChunk";
 		alpha 0.8;
 		scale 0.5;
 		gravity 0.3;
@@ -244,7 +241,7 @@ Class PK_FrozenLayer : PK_SmallDebris {
 			SetOrigin(master.pos,true);
 		}
 		else
-			destroy();
+			Destroy();
 	}
 	states {
 	Spawn:
@@ -254,10 +251,13 @@ Class PK_FrozenLayer : PK_SmallDebris {
 }
 	
 Class PK_FreezeControl : PK_InventoryToken {
+	PK_FrozenLayer icelayer;
 	int fcounter;
 	protected uint prevTrans;
 	protected double prevSpeed;
 	protected bool prevGrav;
+	protected bool queueForDestroy;
+	protected int restcounter;
 	
 	override void ModifyDamage (int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
 		if (damage > 0 && inflictor && owner && passive) {
@@ -301,16 +301,16 @@ Class PK_FreezeControl : PK_InventoryToken {
 			owner.bInConversation = true;
 		//Don't spawn the frozen layer for the player who's being frozen:
 		if (!owner.player || owner.player != players[consoleplayer]) {
-			let layer = Spawn("PK_FrozenLayer",owner.pos);
-			if (layer) {
-				layer.master = owner;
-				layer.sprite = owner.sprite;
-				layer.frame = owner.frame;
-				layer.angle = owner.angle;
-				layer.scale.x = owner.scale.x*1.15;
-				layer.scale.y = owner.scale.y*1.07;
-				layer.bSPRITEFLIP = owner.bSPRITEFLIP;
-				layer.bYFLIP = owner.bYFLIP;
+			icelayer = PK_Frozenlayer(Spawn("PK_Frozenlayer",owner.pos));
+			if (icelayer) {
+				icelayer.master = owner;
+				icelayer.sprite = owner.sprite;
+				icelayer.frame = owner.frame;
+				icelayer.angle = owner.angle;
+				icelayer.scale.x = owner.scale.x*1.15;
+				icelayer.scale.y = owner.scale.y*1.07;
+				icelayer.bSPRITEFLIP = owner.bSPRITEFLIP;
+				icelayer.bYFLIP = owner.bYFLIP;
 			}
 		}
 	}
@@ -320,14 +320,23 @@ Class PK_FreezeControl : PK_InventoryToken {
 		if (level.isFrozen() || !owner)
 			return;
 		owner.A_SetTics(-1);
+		if (queueForDestroy) {
+			for (int i = 7; i >= 0; i--)
+				owner.A_SoundVolume(i,0);
+			restcounter--;
+			if (restcounter <= 0) {
+				owner.Destroy();
+				Destroy();
+			}
+			return;
+		}
 		fcounter--;
 		if (fcounter <= 0) {
 			DepleteOrDestroy();
 			return;
 		}
 		if (owner.health <= 0) {
-			for (int i = 7; i >= 0; i--)
-				owner.A_SoundVolume(i,0);
+			//spawn ice shards:
 			int rad = owner.radius;
 			if (!s_particles)
 				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
@@ -335,8 +344,8 @@ Class PK_FreezeControl : PK_InventoryToken {
 				for (int i = random[sfx](5,8); i > 0; i--) {
 					let ice = Spawn("PK_FrozenChunk",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
 					if (ice) {
-						ice.vel = (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](2,6));
 						ice.master = owner;
+						ice.vel = (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](2,6));
 						ice.gravity = 0.7;
 					}
 				}
@@ -345,8 +354,8 @@ Class PK_FreezeControl : PK_InventoryToken {
 				for (int i = random[sfx](12,16); i > 0; i--) {
 					let ice = Spawn("PK_RandomDebris",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
 					if (ice) {
-						ice.vel = (frandom[sfx](-3.5,3.5),frandom[sfx](-3.5,3.5),frandom[sfx](3,7));
 						ice.master = owner;
+						ice.vel = (frandom[sfx](-3.5,3.5),frandom[sfx](-3.5,3.5),frandom[sfx](3,7));
 						ice.gravity = 0.5;
 						ice.A_SetRenderstyle(1.0,Style_AddShaded);
 						ice.SetShade("08caed");
@@ -354,22 +363,19 @@ Class PK_FreezeControl : PK_InventoryToken {
 					}
 				}
 			}
-			owner.A_StartSound("weapons/shotgun/freezedeath");
-			owner.gravity = 0.4;
-			owner.bINVISIBLE = true;
-			owner.vel *= 0.15;
-			owner.bDONTTHRUST = true;
-			owner.A_SetTics(1);
-			owner.vel = (frandom[sfx](-1.3,1.3),frandom[sfx](-1.3,1.3),frandom[sfx](3,4));
+			//spawn ice corpse:
 			double ownersize = (owner.radius * owner.default.height) / 8;
-			//standard zombieman size:
-			if (ownersize >= 140) {
+			//standard zombieman size (or is player; players are actually smaller):
+			if (owner.player || ownersize >= 140) {
 				let icebod = PK_IceCorpse(Spawn("PK_IceCorpse",owner.pos));
 				if (icebod) {
 					icebod.master = owner;
 					icebod.A_SetScale(Clamp(owner.radius*0.05,0.1,1.5));
 					icebod.bSPRITEFLIP = random[sfx](0,1);
+					icebod.gravity = 0.4;
+					icebod.vel = (frandom[sfx](-1.3,1.3),frandom[sfx](-1.3,1.3),frandom[sfx](3,4));					
 				}
+				//"ice ribcage" is a chunky-looking piece of frozen meat:
 				let rc = PK_IceRibcage(Spawn("PK_IceRibcage",owner.pos));
 				if (random[sfx](0,1) == 1) {
 					if (rc) {
@@ -381,7 +387,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 					}
 				}
 			}
-			//large size: spawn another ribcage
+			//large size: spawn another "ribcage"
 			if (ownersize >= 190) {				
 				let rc = PK_IceRibcage(Spawn("PK_IceRibcage",owner.pos));
 				if (rc) {
@@ -392,14 +398,41 @@ Class PK_FreezeControl : PK_InventoryToken {
 					rc.vel = (frandom[sfx](-1.7,1.7),frandom[sfx](-1.7,1.7),frandom[sfx](2,4));
 				}
 			}
-			DepleteOrDestroy();
-			return;
+			DestroyOwner();
 		}
+	}
+	
+	/*	In contrast to regular death, where PK_DeathControl
+		doesn't remove the monster but instead lets them play their
+		death animation to the end, freeze death destroys the
+		monster immediately, first making sure it drops the items
+		and does other necessary stuff.
+	*/
+	void DestroyOwner() {
+		if (!owner)
+			return;		
+		owner.A_StartSound("weapons/shotgun/freezedeath", 8);
+		//the corpse doesn't disappear immediately, so we hide it
+		owner.bINVISIBLE = true;
+		//these two are largely to make the previously spawned ice corpse follow this
+		owner.gravity = 0.4;
+		owner.vel = (frandom[sfx](-1.3,1.3),frandom[sfx](-1.3,1.3),frandom[sfx](3,4));
+		//drop the items
+		owner.A_NoBlocking();
+		// In case the victim doesn't have bBOSS but does have bBOSSDEATH:
+		if (owner.bBOSS || owner.bBOSSDEATH)
+			owner.A_BossDeath();
+		queueForDestroy = true;
+		restcounter = 100;
+		//don't forget to destroy the frozen layer
+		if (icelayer)
+			icelayer.Destroy();
 	}
 	
 	override void DetachFromOwner() {
 		if (!owner)
 			return;
+		owner.A_StartSound("weapons/shotgun/freezedeath", 8);
 		owner.bNOPAIN = owner.default.bNOPAIN;
 		owner.bInConversation = false;
 		owner.bNOGRAVITY = prevGrav;
@@ -440,13 +473,13 @@ class PK_IceCorpse : PK_FrozenChunk {
 	}
 }
 
-class PK_IceRibcage : PK_IceCorpse {
+class PK_IceRibcage : PK_FrozenChunk {
 	Default {
-		-NOINTERACTION
-		gravity 0.8;
+		translation "PK_IceChunk";
+		renderstyle 'Normal';
 	}
-	override void Tick() {
-		PK_FrozenChunk.Tick();
+	override void PostBeginPlay() {
+		PK_SmallDebris.PostBeginPlay();
 	}
 	States {
 	Spawn:
@@ -463,7 +496,7 @@ Class PK_ShotgunPuff : PK_BulletPuff {
 	states {
 	Spawn:
 		TNT1 A 1 NoDelay {		
-			if (target && tracer && tracer.bISMONSTER && !tracer.bDONTTHRUST && !tracer.bBOSS && !tracer.bFLOAT && tracer.mass <= 400 && tracer.health <= 0 && tracer.Distance3D(target) <= 200 && !tracer.FindInventory("PK_PushAwayControl") && !tracer.FindInventory("PK_FreezeControl")) {
+			if (target && tracer && tracer.bISMONSTER && !tracer.bDONTTHRUST && !tracer.bBOSS && !tracer.bFLOAT && tracer.mass <= 400 && tracer.health <= 0 && tracer.Distance3D(target) <= 200 && !tracer.CountInv("PK_PushAwayControl") && !tracer.CountInv("PK_FreezeControl")) {
 				tracer.GiveInventory("PK_PushAwayControl",1);
 				let pac = PK_PushAwayControl(tracer.FindInventory("PK_PushAwayControl"));
 				if (pac) {
