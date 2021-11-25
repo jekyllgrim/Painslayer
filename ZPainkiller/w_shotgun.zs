@@ -520,7 +520,10 @@ Class PK_ShotgunPuff : PK_BulletPuff {
 						tracer.gravity *= 0.75;
 						pac.broll = frandom[sfx](2,5) * randompick[sfx](-1,1) * (18 / pushspeed);						
 						tracer.bROLLSPRITE = true;
-						//with a 15% chance we'll yeet the monster with high force just for lulz:
+						/*	With a 15% chance we'll yeet the monster with high force just for lulz
+							But before we do that, fire a checker that confirms there's enough space
+							for the monster to fly that far. If not, don't do it because it looks bad.
+						*/
 						if (random[hiroller](0,100) >= 85) {
 							tracer.bROLLCENTER = true;
 							tracer.A_SetTics(500);
@@ -558,7 +561,9 @@ Class PK_PushAwayControl : PK_InventoryToken {
 			destroy();
 			return;
 		}
-		owner.roll += broll;//= Clamp(owner.roll + broll,-45,45);
+		double vvel = owner.vel.length();
+		double rollmod = LinearMap(vvel, 0, 16, 0, 1);
+		owner.roll += (broll * rollmod);
 		if (!owner.bNOBLOOD && random[sfx](1,3) == 3)
 			owner.SpawnBlood(owner.pos,0,1);
 		broll *= 0.95;

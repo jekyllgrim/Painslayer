@@ -1,4 +1,5 @@
 Class PK_InventoryToken : Inventory abstract {
+	mixin PK_Math;
 	protected int age;
 	protected transient CVar s_particles;
 	Default {
