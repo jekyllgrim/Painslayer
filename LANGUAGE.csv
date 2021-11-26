@@ -320,13 +320,13 @@ Once you close the Board, the active card slots become locked. To equip new card
 
 \c[PKGoldText]Golden Cards\c[PKWhiteText] have to be activated manually by pressing the \c[PKGreenText]Use Golden Cards (%s)\c[PKWhiteText] button. Golden Cards can be activated once per level (unless you equip a Silver Card that increases that number). You can equip up to \c[PKGreenText]3\c[PKWhiteText] Golden Cards. 
 
-By default, you will receive 3 random Silver Cards and 2 random Golden Cards as a gift the first time you open the Black Tarot Board in a new game. You can change this behavior using \c[PKGreenText]Mod Settings > Allow free starting cards\c[PKWhiteText] option.",PKC_CARDTYPES_DESC,Codex,"Существует два типа карт Черного Таро: серебряные и золотые.
+By default, you will receive 2 random Silver Cards and 3 random Golden Cards as a gift the first time you open the Black Tarot Board in a new game. You can change this behavior using \c[PKGreenText]Mod Settings > Allow free starting cards\c[PKWhiteText] option.",PKC_CARDTYPES_DESC,Codex,"Существует два типа карт Черного Таро: серебряные и золотые.
 
 \cZСеребряные карты\c[PKWhiteText] дают пассивные бонусы, которые активны всё время. У вас может быть активно до \c[PKGreenText]2\c[PKWhiteText] таких карт одновременно.
 
 \c[PKGoldText]Золотые карты\c[PKWhiteText] нужно активировать вручную, нажав кнопку \c[PKGreenText]Использовать золотые карты (%s)\c[PKWhiteText]. Золотые карты можно использовать один раз за уровень (хотя есть серебряная карта, которая повышает число активаций). Вы можете снарядить до \c[PKGreenText]3\c[PKWhiteText] золотых карт.
 
-По умолчанию вы получаете в подарок случайные карты (3 серебряных и 2 золотых) при первом открытии доски. Это можно отключить: см. \c[PKGreenText]Настройки мода > Дарить несколько карт\c[PKWhiteText]."
+По умолчанию вы получаете в подарок случайные карты (2 серебряных и 3 золотых) при первом открытии доски. Это можно отключить: см. \c[PKGreenText]Настройки мода > Дарить несколько карт\c[PKWhiteText]."
 "Gold is used to purchase Silver and Golden Cards on the Black Tarot Board. 
 
 Gold comes in 4 varieties:
