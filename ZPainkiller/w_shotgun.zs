@@ -151,7 +151,7 @@ Class PK_FreezerProjectile : PK_Projectile {
 				tracer.GiveInventory("PK_FreezeControl",1);
 				let frz = PK_FreezeControl(tracer.FindInventory("PK_FreezeControl"));
 				if (frz) {
-					int frzdur = 64; //basic freeze duration
+					int frzdur = 70; //basic freeze duration
 					if (mod)
 						frzdur *= 2; //double it with Weapon Modifier
 					if (tracer.player)
@@ -230,19 +230,34 @@ Class PK_FrozenChunk : PK_SmallDebris {
 	}
 }
 
-Class PK_FrozenLayer : PK_SmallDebris {
+Class PK_FrozenLayer : PK_BaseActor {
 	Default {
 		+NOINTERACTION
+		+SHOOTABLE
+		radius 1;
+		height 1;
+		health 100;
 		renderstyle 'shaded';
 		stencilcolor "08caed";
 	}
+	
 	override void Tick() {
 		if (master && master.FindInventory("PK_FreezeControl")) {
 			SetOrigin(master.pos,true);
 		}
-		else
+		else {
 			Destroy();
-	}
+			return;
+		}
+		if (health > 0) {
+			alpha = health / 100.0;
+		}
+		else {
+			Destroy();
+			return;
+		}
+	}	
+	
 	states {
 	Spawn:
 		#### # -1;
@@ -262,8 +277,12 @@ Class PK_FreezeControl : PK_InventoryToken {
 	override void ModifyDamage (int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
 		if (damage > 0 && inflictor && owner && passive) {
 			//reduces fire damage:
-			if (damagetype == 'Fire')
-				newdamage = damage * 0.5;
+			if (damagetype == 'Fire') {
+				newdamage = damage * 0.1;
+				if (icelayer) {
+					icelayer.DamageMobj(inflictor, source, damage, 'normal');
+				}
+			}
 			//x1.5 damage if hitting with a shotgun blast:
 			else if (source && source.player && source.player.readyweapon && source.player.readyweapon is "PK_Shotgun")
 				newdamage = damage * 1.5;
@@ -299,26 +318,28 @@ Class PK_FreezeControl : PK_InventoryToken {
 			//setting this flag actually completely freezes monsters
 			//and completely disables wake-up damage:
 			owner.bInConversation = true;
-		//Don't spawn the frozen layer for the player who's being frozen:
-		if (!owner.player || owner.player != players[consoleplayer]) {
-			icelayer = PK_Frozenlayer(Spawn("PK_Frozenlayer",owner.pos));
-			if (icelayer) {
-				icelayer.master = owner;
-				icelayer.sprite = owner.sprite;
-				icelayer.frame = owner.frame;
-				icelayer.angle = owner.angle;
-				icelayer.scale.x = owner.scale.x*1.15;
-				icelayer.scale.y = owner.scale.y*1.07;
-				icelayer.bSPRITEFLIP = owner.bSPRITEFLIP;
-				icelayer.bYFLIP = owner.bYFLIP;
+		icelayer = PK_Frozenlayer(Spawn("PK_Frozenlayer",owner.pos));
+		if (icelayer) {
+			icelayer.master = owner;
+			icelayer.angle = owner.angle;
+			CopyAppearances(icelayer, owner, false);
+			icelayer.scale.x = owner.scale.x*1.15;
+			icelayer.scale.y = owner.scale.y*1.07;
+			// When freezing a player, they shouldn't see their own frozen layer:
+			if (owner.player && owner.player == players[consoleplayer]) {
+				icelayer.A_SetRenderstyle(1.0, Style_None);
 			}
 		}
-	}
+	}	
 	
 	override void DoEffect() {
 		super.DoEffect();
 		if (level.isFrozen() || !owner)
 			return;
+		if (!icelayer) {
+			DepleteOrDestroy();
+			return;
+		}
 		owner.A_SetTics(-1);
 		if (queueForDestroy) {
 			for (int i = 7; i >= 0; i--)
@@ -432,7 +453,6 @@ Class PK_FreezeControl : PK_InventoryToken {
 	override void DetachFromOwner() {
 		if (!owner)
 			return;
-		owner.A_StartSound("weapons/shotgun/freezedeath", 8);
 		owner.bNOPAIN = owner.default.bNOPAIN;
 		owner.bInConversation = false;
 		owner.bNOGRAVITY = prevGrav;

@@ -411,8 +411,8 @@ Class PK_BurnControl : PK_InventoryToken {
 		if (!owner)
 			return;
 		ResetTimer();
-		if (owner.FindInventory("PK_FreezeControl"))
-			owner.TakeInventory("PK_FreezeControl",1);
+		//if (owner.FindInventory("PK_FreezeControl"))
+			//owner.TakeInventory("PK_FreezeControl",1);
 		owner.A_AttachLight('PKBurn', DynamicLight.RandomFlickerLight, "ffb30f", 48, 40, flags: DYNAMICLIGHT.LF_ATTENUATE);
 	}
 	override void DoEffect() {
@@ -489,7 +489,7 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 				ripdepth -= victim.health;
 				int fl = (random[burn](1,3) == 1) ? 0 : DMG_NO_PAIN;
 				victim.DamageMobj(self,target,8,"Fire",flags:DMG_THRUSTLESS|fl);
-				if (!victim.FindInventory("PK_BurnControl")) {
+				if (!victim.FindInventory("PK_BurnControl") && !victim.FindInventory("PK_FreezeControl")) {
 					victim.GiveInventory("PK_BurnControl",1);
 					let control = PK_BurnControl(victim.FindInventory("PK_BurnControl"));
 					if (control && target)
