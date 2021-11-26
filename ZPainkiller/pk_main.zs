@@ -106,7 +106,24 @@ Mixin class PK_Math {
 		int i = random[findpos](0,foo);
 		vector3 finalpos = (tposX[i], tposY[i], tposZ[i]);
 		return finalpos;
-	}			
+	}	
+	
+	void CopyAppearances(Actor to, Actor from, bool style = true, bool size = false) {
+		if (!to || !from)
+			return;
+		to.sprite = from.sprite;
+		to.frame = from.frame;
+		to.scale = from.scale;
+		to.bSPRITEFLIP = from.bSPRITEFLIP;
+		to.bXFLIP = from.bXFLIP;
+		to.bYFLIP = from.bYFLIP;
+		if (size)
+			to.A_SetSize(from.height, from.radius);
+		if (style) {
+			to.A_SetRenderstyle(from.alpha, from.GetRenderstyle());
+			to.translation = from.translation;
+		}
+	}	
 }
 
 mixin class PK_PlayerSightCheck {
@@ -177,6 +194,7 @@ Class PK_BaseActor : Actor abstract {
 	static const string PK_LiquidFlats[] = { 
 		"BLOOD", "LAVA", "NUKAGE", "SLIME01", "SLIME02", "SLIME03", "SLIME04", "SLIME05", "SLIME06", "SLIME07", "SLIME08", "BDT_"
 	};
+	
 	//water check by Boondorl
 	double GetWaterTop()
 	{
@@ -214,7 +232,8 @@ Class PK_BaseActor : Actor abstract {
 			}
 		}			
 		return 0;
-	}
+	}	
+	
 	bool CheckLiquidFlat() {
 		if (!self)
 			return false;
@@ -232,11 +251,13 @@ Class PK_BaseActor : Actor abstract {
 		super.BeginPlay();
 		pi = 3.141592653589793;
 	}	
+	
 	override void Tick() {
 		super.Tick();
 		if (!isFrozen())
 			age++;
 	}
+	
 	States {
 	Loadsprites:
 		LENR A 0;
