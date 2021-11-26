@@ -429,13 +429,14 @@ Class PK_Shuriken : PK_StakeProjectile {
 		TNT1 A 0 {
 			A_StartSound("weapons/edriver/starboom");
 			A_Stop();
-			A_SetScale(0.6);
 			A_SetRenderstyle(1,STYLE_Add);
 			roll = random[star](0,359);
 			A_AttachLight('PKExplodingStar', DynamicLight.RandomFlickerLight, "ffAA00", 32, 44, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF);
 			//when using weapon modifier, this explosion is way too strong, so we have to tone it down
-			if (mod)
+			if (mod) {
+				A_SetScale(0.6);
 				A_Explode(32,32);
+			}
 			//otherwise it's so hard to make it useful, it should at least be powerful
 			else
 				A_Explode(40,128,fulldamagedistance:64);
