@@ -406,7 +406,7 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 		}
 		masterclass = master.GetClass();
 		isBoss = master.bBOSS || master.bBOSSDEATH;
-		restlife = 40;
+		restlife = 55;
 		maxlife = 35*7;
 		//spawn a hitbox for the Killer projectile to let the player juggle the corpse:
 		if (!master.bBOSS) {
