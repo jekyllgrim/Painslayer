@@ -119,7 +119,13 @@ only one victim and fly through others if they exist. For that we employ a few t
 Class PK_Stake : PK_StakeProjectile {
 	protected int basedmg;
 	protected bool onFire;
-	actor hitvictim; //Stores the first monster hit. Allows us to deal damage only once and to only one victim
+	//Stores the first monster hit. Allows us to deal damage only once and to only one victim
+	actor hitvictim; 
+	//the victim the stake is stuck in and carries with it:
+	actor stickvictim;
+	protected double victimOfsZ;
+	protected int victimDestroyTimer;
+	
 	Default {
 		PK_Projectile.trailcolor "f4f4f4";
 		PK_Projectile.trailscale 0.012;
@@ -138,6 +144,7 @@ Class PK_Stake : PK_StakeProjectile {
 		deathsound "weapons/stakegun/stakewall";
 		decal "Stakedecal";
 	}
+	
 	override void StakeBreak() {		
 		if (!s_particles)
 			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
@@ -155,28 +162,40 @@ Class PK_Stake : PK_StakeProjectile {
 				}
 			}
 		}
+		if (stickvictim)
+			DetachVictim();
 		A_StartSound("weapons/stakegun/stakebreak",volume:0.8, attenuation:3);
 		super.StakeBreak();
 	}
+	
 	override void StickToWall() { 
 		super.StickToWall();
 		A_RemoveLight('PKBurningStake');
 		onFire = true;
-		if (pinvictim) {
-			pinvictim.A_Stop();
-			pinvictim.SetOrigin((pos.x,pos.y,pinvictim.pos.z),false);	//make sure the fake corpse is at the middle of the stake
-			if (blockingline)	{		//if we hit an actual wall (not a solid obstacle actor), flatten the fake corpse against the wall
-				pinvictim.bWALLSPRITE = true;
-				pinvictim.angle = atan2(blockingline.delta.y, blockingline.delta.x) - 90;
+		if (stickvictim) {
+			// If the stake is too close to the floor, detach the victim:
+			if ((pos.z - floorz) <= stickvictim.height) {
+				stickvictim.SetZ(floorz);
+				DetachVictim();
+			}
+			// Otherwise stop the corpse:
+			else {
+				stickvictim.A_Stop();
+				victimDestroyTimer = 80; //this queues destroying the corpse
+				// If we hit an actual wall (not a solid obstacle actor 				
+				// or a ceiling), flatten the corpse against the wall:
+				if (blockingline)	{
+					stickvictim.bWALLSPRITE = true;			
+					stickvictim.bDONTFALL = true;
+					stickvictim.angle = atan2(blockingline.delta.y, blockingline.delta.x) - 90;
+				}
 			}
 		}
-		if (pinvictim && hitvictim && !blockingline && pos.z <= floorz+4) { //remove the pinned corpse completely if the stake is basically on the floor
-			pinvictim.destroy();
-			//hitvictim.TakeInventory("PK_PinToWall",1);
-		}
 	}
+	
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
+		victimDestroyTimer = -1;
 		basedmg = 160;
 		if (target) {
 			pitch = target.pitch; //In case it's fired at a floor or ceiling at point-blank range, the Spawn state won't be used and the stake won't receive proper pitch. So, we do this.
@@ -187,6 +206,7 @@ Class PK_Stake : PK_StakeProjectile {
 		}
 		sprite = GetSpriteIndex("STAK");
 	}
+	
 	override void Tick () {
 		super.Tick();
 		if (!onFire && (mod || age >= 12)) {
@@ -195,75 +215,106 @@ Class PK_Stake : PK_StakeProjectile {
 			A_AttachLight('PKBurningStake', DynamicLight.RandomFlickerLight, "ffb30f", 40, 44, flags: DYNAMICLIGHT.LF_ATTENUATE);
 			onFire = true;
 		}
-	}
-	override int SpecialMissileHit (Actor victim) {
-		if (victim && (victim.bisMonster || victim.player) && victim != target && !hitvictim) { //We only do the following block if the actor hit by the stake exists, isn't the shooter, and the stake has never hit anyone yet
-			if (mod || (self.GetClassName() == "PK_Stake" && age >= 12))
-				basedmg *= 1.5;
-			victim.DamageMobj (self, target, basedmg, 'normal');
-			deathsound = "";
-			A_StartSound("weapons/stakegun/hit",volume:0.7,attenuation:3);
-			hitvictim = victim; //store the victim hit; when this is non-null, stake won't deal damage to anyone else
-			if (!victim.bBOSS && victim.health <= 0 && victim.mass <= 400) { //we do the "pin to the wall" effect only if the victim is dead, not a boss and not huge
-				pinvictim = PK_PinVictim(Spawn("PK_PinVictim",victim.pos)); //spawn fake corpse and give it appearance identical to the monster
-				if (pinvictim) {
-					victimofz = pinvictim.pos.z - pos.z;
-					pinvictim.target = victim;
-					pinvictim.master = self;
-					pinvictim.angle = victim.angle;
-					//pinvictim.A_SetSize(victim.default.radius, victim.default.height);
-					pinvictim.sprite = victim.sprite;
-					pinvictim.frame = victim.frame;
-					pinvictim.translation = victim.translation;
-					pinvictim.scale = victim.scale;
-					pinvictim.A_SetRenderstyle(victim.alpha,victim.GetRenderstyle());
-				}
-				//the dummy item that makes the ACTUAL killed monster follow the stake (so that the fake and real corpse are synced in position — this is important for item drops, Arch-Vile ressurrect and anything else that may interact with the monster's corpse):
-				victim.GiveInventory("PK_PinToWall",1);	
-				let pin = victim.FindInventory("PK_PinToWall");
-				if (pin)
-					pin.master = self;
-				if (pinvictim) {
-					// This item contains an array of all visual stakes stuck in the victim:
-					let ct = PK_StakeStuckCounter(victim.FindInventory("PK_StakeStuckCounter"));
-					// this is needed because we need to move those stakes to the pinvictim when it spawns:
-					if (ct && ct.stuckstakes.Size() > 0) {
-						for (int i = ct.stuckstakes.Size()-1; i >= 0; i--) {
-							if (ct.stuckstakes[i])
-								ct.stuckstakes[i].master = pinvictim;
-						}
-					}
-				}
-			}
-			// If the victim is not dead and hit by a stake, spawn fake stake that gets "stuck" in it while it's alive
-			else {
-				let stuck = PK_StakeStuck(Spawn("PK_StakeStuck",victim.pos + (frandom(-5,5),frandom(-5,5),victim.height * 0.65 + frandom(-5,5))));
-				if (stuck) {
-					stuck.master = victim;
-					stuck.tracer = self;
-					stuck.pitch = pitch;
-					stuck.angle = angle;
-					stuck.stuckangle = DeltaAngle(angle,victim.angle);
-					stuck.stuckpos = stuck.pos - victim.pos;
-					stuck.sprite = sprite;
-					if (victim.player && victim.player == players[consoleplayer])
-						stuck.bINVISIBLE = true;
-				}
-				if (!victim.CountInv("PK_StakeStuckCounter"))
-					victim.GiveInventory("PK_StakeStuckCounter",1);
-				let ct = PK_StakeStuckCounter(victim.FindInventory("PK_StakeStuckCounter"));
-				if (ct && stuck)
-					ct.stuckstakes.Push(stuck);
-				return -1;
+		
+		if (stickvictim) {				
+			//console.printf("Stake pos: %d, %d, %d | Victim pos: %d, %d, %d | victim vel: %d, %d, %d", pos.x, pos.y, pos.z, stickvictim.pos.x, stickvictim.pos.y, stickvictim.pos.z, stickvictim.vel.x, stickvictim.vel.y, stickvictim.vel.z);
+			// Make sure the attached corpse sticks to the stake
+			// (with the stake in the middle of the corpse):
+			stickvictim.SetOrigin(pos - (0,0, victimOfsZ), true);	
+			// Check if the attached corpse can continue moving.
+			// If not, detach it and let it play its death animation.
+			// This is necessary to prevent (perhaps edge) cases when the stake
+			// flies through a hole where the stake itself fits but the corpse doesn't.
+			/*vector2 newpos = stickvictim.pos.xy + vel.xy;
+			if (!stickvictim.CheckMove(newpos)) {
+				DetachVictim();
+				return;
+			}*/
+			if (victimDestroyTimer > 0)
+				victimDestroyTimer--;
+			else if (victimDestroyTimer == 0) {
+				KillActorSilent(stickvictim);
 			}
 		}
-		if (!victim.bISMONSTER && (victim.bSOLID || victim.bSHOOTABLE)) {
+	}
+	
+	void DetachVictim() {
+		if (!stickvictim)
+			return;
+		stickvictim.bWALLSPRITE = stickvictim.default.bWALLSPRITE;
+		stickvictim.A_SetTics(1);
+		stickvictim.bNOGRAVITY = false;
+		stickvictim = null;
+	}
+	
+	override int SpecialMissileHit (Actor victim) {
+		
+		//if the victim is not valid or is the shooter, fly through:
+		if (!victim || (target && victim == target))
+			return 1;		
+		
+		//collision with damageable non-monster objects:
+		if (!(victim.bISMONSTER || victim.player) && (victim.bSOLID || victim.bSHOOTABLE)) {
 			victim.DamageMobj (self, target, basedmg, 'normal');
-			stickobject = victim;
+			stickobject = victim; //if the object moves, the stake will follow it
 			return -1;
+		}
+		
+		//if previously hit a victim, or carrying a corpse, pass through:
+		if (stickvictim || victim == stickvictim)
+			return 1;
+		//Do the damage (increased by 50% with wmod)
+		if (mod || (self.GetClassName() == "PK_Stake" && age >= 12))
+			basedmg *= 1.5;
+		victim.DamageMobj (self, target, basedmg, 'normal');
+		deathsound = "";
+		A_StartSound("weapons/stakegun/hit",volume:0.7,attenuation:3);
+		
+		//if the victim is alive, insert a fake stake in its body:
+		if (victim.health > 0) {
+			let stuck = PK_StakeStuck(Spawn("PK_StakeStuck",victim.pos + (frandom(-5,5),frandom(-5,5),victim.height * 0.65 + frandom(-5,5))));
+			if (stuck) {
+				stuck.master = victim;
+				stuck.tracer = self;
+				stuck.pitch = pitch;
+				stuck.angle = angle;
+				stuck.stuckangle = DeltaAngle(angle,victim.angle);
+				stuck.stuckpos = stuck.pos - victim.pos;
+				stuck.sprite = sprite;
+				if (victim.player && victim.player == players[consoleplayer])
+					stuck.bINVISIBLE = true;
+			}
+			if (!victim.CountInv("PK_StakeStuckCounter"))
+				victim.GiveInventory("PK_StakeStuckCounter",1);
+			let ct = PK_StakeStuckCounter(victim.FindInventory("PK_StakeStuckCounter"));
+			if (ct && stuck)
+				ct.stuckstakes.Push(stuck);
+			return -1;
+		}
+		//if the victim is a boss or too large, destroy the stake:
+		if (victim.bBOSS || victim.mass > 400) {
+			StakeBreak();
+			return -1;
+		}
+		
+		//otherwise proceed:
+		//record the pointer to the pierced victim
+		stickvictim = victim;
+		if (stickvictim) {
+			console.printf("pinned %s", stickvictim.GetClassName());
+			victimOfsZ = victim.default.height * 0.5;
+			stickvictim.A_Stop();
+			stickvictim.A_Scream();
+			stickvictim.deathsound = "";
+			stickvictim.bNOGRAVITY = true;
+			stickvictim.bTHRUACTORS = true;
+			stickvictim.bSHOOTABLE = false;			
+			//stickvictim.bNOINTERACTION = true;
+			stickvictim.A_SetTics(9000);
 		}
 		return 1;
 	}
+	
 	states {
 	Cache:
 		STAK A 0;
@@ -428,36 +479,25 @@ Class PK_PinToWall : PK_InventoryToken {
 	}
 }
 	
-Class PK_PinVictim : Actor {		//the fake corpse (receives its visuals from the stake)
+//the fake corpse (receives its visuals from the stake)
+Class PK_PinVictim : PK_BaseActor {
 	Default {
-		+NOBLOCKMAP
-		+THRUACTORS
-		+NOGRAVITY
-		//+WALLSPRITE
-		radius 2;
+		+NOINTERACTION
+		radius 1;
+		height 1;
 	}
 	override void Tick(){
 		super.Tick();
 		//if the target is alive or doesn't exist, remove fake corpse
-		if (!target || !target.bKILLED) {
-			destroy();
+		if (!master || master.health > 0) {
+			Destroy();
 			return;
 		}
-		//if the stake disappeared, stop affecting the target and go away
-		if (!master) {
-			if (target) {
-				target.A_TakeInventory("PK_PinToWall");
-				target.A_Stop();
-			}
-			destroy();
-			return;
-		}
-		target.SetOrigin(pos,true);
 	}
 	states {
-		Spawn:
-			#### # 1;
-			loop;
+	Spawn:
+		#### # -1;
+		stop;
 	}
 }
 
