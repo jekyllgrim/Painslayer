@@ -141,7 +141,7 @@ Class PK_Stake : PK_StakeProjectile {
 	override void StakeBreak() {		
 		if (!s_particles)
 			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-		if (s_particles.GetInt() > 2) {			
+		if (s_particles.GetInt() >= 2) {
 			for (int i = random[sfx](3,5); i > 0; i--) {
 				let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,pos.z)));
 				if (deb) {
