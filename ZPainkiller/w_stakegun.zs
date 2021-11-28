@@ -174,7 +174,9 @@ Class PK_Stake : PK_StakeProjectile {
 		onFire = true;
 		if (stickvictim) {
 			// If the stake is too close to the floor, detach the victim:
-			if ((pos.z - floorz) <= stickvictim.height) {
+			if (stickvictim.player)
+				DetachVictim();
+			else if ((pos.z - floorz) <= stickvictim.height) {
 				stickvictim.SetZ(floorz);
 				DetachVictim();
 			}
