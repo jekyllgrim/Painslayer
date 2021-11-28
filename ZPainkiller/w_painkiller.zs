@@ -252,6 +252,7 @@ Class PK_Killer : PK_Projectile {
 		radius 2;
 		height 2;
 	}
+	
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		if (self.GetClassName() != "PK_Killer" || !target) {
@@ -267,6 +268,7 @@ Class PK_Killer : PK_Projectile {
 			//console.printf("killer pitch %d", pitch);
 		}
 	}
+	
 	override void Tick() {
 		super.Tick();
 		if (isFrozen() || !target)
@@ -274,6 +276,31 @@ Class PK_Killer : PK_Projectile {
 		if (target.player.readyweapon && !(target.player.readyweapon is "PK_Painkiller") && !InStateSequence(curstate,FindState("XDeath")))
 			SetStateLabel("XDeath");
 	}
+	
+	void ThrowBody(Actor body) {
+		if (!body || !target)
+			return;
+		// Throw the corpse towards the player:
+		body.A_FaceTarget();
+		double dist = body.Distance2D(target);			//horizontal distance to target
+		//make some room:
+		if (dist > 32)
+			dist -= 32;
+		double vdisp = target.pos.z - body.pos.z;		//height difference between body and target
+		double ftime = 20;									//desired time of flight
+		double hvel = (dist / ftime) * -0.7 * body.gravity;		//calculate horizontal vel
+		double vvel = (vdisp + 0.5 * ftime*ftime) / ftime; //calculate vertical vel
+		//Reduce velocity based on how heavy the monster is:
+		double velMul = Clamp(LinearMap(body.mass,300,1000,1.0,0.0), 0.0, 1.0);
+		hvel *= velMul;
+		vvel *= velMul; 
+		//Throw the body towards the player:
+		body.VelFromAngle(hvel,angle);
+		body.vel.z = vvel;
+		// Finally, reduce the monster's gravity:
+		body.gravity = 0.7;
+	}
+	
 	states {
 		Spawn:
 			KILR A 1;
@@ -285,33 +312,38 @@ Class PK_Killer : PK_Projectile {
 				A_Stop();
 				bNOCLIP = true;
 				returning = true;
+				// The following should only execute for Killer, not for 
+				// combo projectile, so return if this isn't called from
+				// PK_Killer:
 				if (!target || !tracer || GetClassName() != "PK_Killer")
-					return ResolveState(null);
-				if (tracer && ((tracer.bKILLED && tracer.bISMONSTER && !tracer.bBOSS) || tracer.GetClassName() == "PK_KillerFlyTarget")) {
-					if (!tracer.target)
-						tracer.target = target;
-					//first, throw the enemy corpse towards the player:
-					tracer.A_FaceTarget();
-					double dist = tracer.Distance2D(target);			//horizontal distance to target
-					//make some room:
-					if (dist > 32)
-						dist -= 32;
-					double vdisp = target.pos.z - tracer.pos.z;		//height difference between corpse and target
-					double ftime = 20;									//desired time of flight
-					double hvel = (dist / ftime) * -0.7 * tracer.gravity;		//calculate horizontal vel
-					double vvel = (vdisp + 0.5 * ftime*ftime) / ftime; //calculate vertical vel
-					//Reduce velocity based on how heavy the monster is:
-					double velMul = Clamp(LinearMap(tracer.mass,300,1000,1.0,0.0), 0.0, 1.0);
-					hvel *= velMul;
-					vvel *= velMul; 
-					//Throw the body towards the player:
-					tracer.VelFromAngle(hvel,angle);
-					tracer.vel.z = vvel;
-					//if we hit a body with a Killer projectile, spawn gold every 3 times Killer hits it:
+					return null;
+					
+				// If Killer kills a monster, immediately throw that monster
+				// towards the player (PK_KillerFlyTarget hasn't spawned yet,
+				// so at this point we interact directly with the monster):
+				if (tracer && tracer.health <= 0 && tracer.bISMONSTER && !tracer.bBOSS) {
+					ThrowBody(tracer);
+					return null;
+				}
+				
+				// The following will drag the body if the Killer projectile
+				// hits a PK_KillerFlyTarget, which is a "hitbox" actor
+				// (this is to drag corpses that are already on the floor);
+				if (tracer && tracer.GetClass() == "PK_KillerFlyTarget") {
+					// Get a pointer to the hitbox:
 					let kft = PK_KillerFlyTarget(tracer);
-					if (kft) {
+					// The hitbox's target is a corpse it's attached to.
+					// Double-check it's valid:
+					if (kft && kft.target) {
+						// Get a pointer to the corpse:
+						let body = kft.target;
+						if (!body)
+							return null;
+						ThrowBody(body);
+					
+						// If we hit a body with a Killer projectile, spawn gold every 3 times Killer hits it:
 						kft.hitcounter++;
-						if (tracer.target && kft.hitcounter % 3 == 0) {
+						if (kft.hitcounter % 3 == 0) {
 							Class<PK_GoldPickup> gold = "PK_SmallGold";
 							//add a chance to spawn medium gold piece after a few hits:
 							if (kft.hitcounter > random[gold](6,13))
@@ -320,9 +352,14 @@ Class PK_Killer : PK_Projectile {
 							if (goldspawn)
 								goldspawn.A_StartSound(goldspawn.pickupsound);
 						}
+						// PK_KillerFlyTarget is attached to PK_DeathControl.
+						// Call ResetRestCounter() on PK_DeathControl in order to reset
+						// the corpse's disappearing counter:
+						if (kft.edc)
+							kft.edc.ResetRestCounter();
 					}
 				}
-				return ResolveState(null);
+				return null;
 			}
 			#### # 1 {
 				if (target) {
@@ -335,7 +372,7 @@ Class PK_Killer : PK_Projectile {
 						let pk = PK_Painkiller(target.FindInventory("PK_Painkiller"));
 						if (pk && target.player && target.player.readyweapon && target.player.readyweapon != pk)
 							pk.killer_fired = false;
-						destroy();
+						Destroy();
 						return;
 					}
 				}
@@ -381,33 +418,33 @@ Class PK_KillerFlyTarget : Actor {
 	int hitcounter;
 	PK_EnemyDeathControl edc;
 	Default {
-		+NODAMAGE
 		+SOLID
 		+CANPASS
 		+DROPOFF
 		+NOTELEPORT
 		renderstyle 'none';
-		gravity 0.7;
+		//gravity 0.7;
+		+NOGRAVITY
 	}
+	
 	override void Tick() {
 		super.Tick();
 		if (!target) {
-			destroy();
+			Destroy();
 			return;
 		}
-		target.SetOrigin(pos,true);
+		SetOrigin(target.pos,true);
+		if (target.vel ~== (0,0,0))
+			target.gravity = target.default.gravity;
 	}
+	
 	override bool CanCollideWith (Actor other, bool passive) {
 		if (other.GetClassName() == "PK_Killer" && passive) {
-			//console.printf("hitcounter %d",hitcounter);
-			//if (hitcounter % 3 == 0 && target)
-				//target.A_NoBlocking();
-			if (edc)
-				edc.ResetRestCounter();
 			return true;
 		}
 		return false;
 	}
+	
 	states {
 	Spawn:
 		BAL1 A -1;

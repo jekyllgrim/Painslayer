@@ -390,6 +390,13 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 	private bool queueSilentDeath;
 	private class<Actor> masterclass;
 	
+	Default {
+		+NOINTERACTION
+		+NOSECTOR
+		+SYNCHRONIZED
+		+DONTBLAST
+		FloatBobPhase 0;
+	}
 	
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -546,7 +553,6 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 		}
 		//Make the controller noninteractive, the body invisible
 		//and queue for death (the body plays its death animation silently)
-		A_ChangeLinkFlags(true,true);
 		master.bINVISIBLE = true;
 		queueSilentDeath = true;
 	}
