@@ -274,7 +274,7 @@ Class PK_BaseActor : Actor abstract {
 		//call A_BossDeath if necessary
 		if (victim.bBOSS || victim.bBOSSDEATH)
 			victim.A_BossDeath();
-		if (remove)
+		if (remove && !victim.player)
 			victim.Destroy();
 	}
 	
