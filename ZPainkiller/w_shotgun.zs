@@ -272,7 +272,9 @@ Class PK_FreezeControl : PK_InventoryToken {
 	protected double prevSpeed;
 	protected bool prevGrav;
 	protected bool queueForDestroy;
-	protected int restcounter;
+	// Separate counter for destroy queue isn't necessary
+	// because it's handled already by PK_DeathControl
+	//protected int restcounter;
 	
 	override void ModifyDamage (int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
 		if (damage > 0 && inflictor && owner && passive) {
@@ -344,11 +346,11 @@ Class PK_FreezeControl : PK_InventoryToken {
 		if (queueForDestroy) {
 			for (int i = 7; i >= 0; i--)
 				owner.A_SoundVolume(i,0);
-			restcounter--;
+			/*restcounter--;
 			if (restcounter <= 0) {
 				owner.Destroy();
 				Destroy();
-			}
+			}*/
 			return;
 		}
 		fcounter--;
@@ -395,6 +397,8 @@ Class PK_FreezeControl : PK_InventoryToken {
 					icebod.bSPRITEFLIP = random[sfx](0,1);
 					icebod.gravity = 0.4;
 					icebod.vel = (frandom[sfx](-1.3,1.3),frandom[sfx](-1.3,1.3),frandom[sfx](3,4));					
+					if (owner.player && owner.player == players[consoleplayer])
+						icebod.A_SetRenderstyle(0,Style_none);
 				}
 				//"ice ribcage" is a chunky-looking piece of frozen meat:
 				let rc = PK_IceRibcage(Spawn("PK_IceRibcage",owner.pos));
@@ -438,7 +442,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 		owner.gravity = 0.4;
 		owner.vel = (frandom[sfx](-1.3,1.3),frandom[sfx](-1.3,1.3),frandom[sfx](3,4));
 		queueForDestroy = true;
-		restcounter = 100;
+		//restcounter = 100;
 		//don't forget to destroy the frozen layer
 		if (icelayer)
 			icelayer.Destroy();
@@ -474,8 +478,11 @@ class PK_IceCorpse : PK_FrozenChunk {
 	}
 	override void Tick() {
 		Super.Tick();
-		if (master)
-			PK_SetOrigin(master.pos);
+		if (!master || master.health > 0) {
+			Destroy();
+			return;
+		}
+		PK_SetOrigin(master.pos);
 	}
 	States {
 	Spawn:
