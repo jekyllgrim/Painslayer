@@ -288,8 +288,8 @@ Class PK_Killer : PK_Projectile {
 			dist -= 32;
 		double vdisp = target.pos.z - body.pos.z;		//height difference between body and target
 		double ftime = 20;									//desired time of flight
-		double hvel = (dist / ftime) * -0.7 * body.gravity;		//calculate horizontal vel
-		double vvel = (vdisp + 0.5 * ftime*ftime) / ftime; //calculate vertical vel
+		double hvel = (dist / ftime) * -0.5 * body.gravity;		//calculate horizontal vel
+		double vvel = body.bNOGRAVITY ? 0 : (vdisp + 0.5 * ftime*ftime) / ftime; //calculate vertical vel
 		//Reduce velocity based on how heavy the monster is:
 		double velMul = Clamp(LinearMap(body.mass,300,1000,1.0,0.0), 0.0, 1.0);
 		hvel *= velMul;
