@@ -108,7 +108,7 @@ Mixin class PK_Math {
 		return finalpos;
 	}	
 	
-	void CopyAppearances(Actor to, Actor from, bool style = true, bool size = false) {
+	void CopyAppearance(Actor to, Actor from, bool style = true, bool size = false) {
 		if (!to || !from)
 			return;
 		to.sprite = from.sprite;
@@ -256,6 +256,26 @@ Class PK_BaseActor : Actor abstract {
 		super.Tick();
 		if (!isFrozen())
 			age++;
+	}
+	
+	/*	Make the given actor invisible, have it drop its items
+		and call A_BossDeath if necessary.
+		If 'remove' is true, also destroy it; otherwise it's implied
+		that it's queued for destruction to be destroyed later by
+		the caller.
+	*/	
+	static void KillActorSilent(actor victim, bool remove = true) {
+		if (!victim)
+			return;
+		//hide the corpse
+		victim.bINVISIBLE = true;
+		//drop the items
+		victim.A_NoBlocking();
+		//call A_BossDeath if necessary
+		if (victim.bBOSS || victim.bBOSSDEATH)
+			victim.A_BossDeath();
+		if (remove)
+			victim.Destroy();
 	}
 	
 	States {

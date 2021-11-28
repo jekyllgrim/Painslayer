@@ -233,7 +233,7 @@ Class PK_FrozenChunk : PK_SmallDebris {
 Class PK_FrozenLayer : PK_BaseActor {
 	Default {
 		+NOINTERACTION
-		+SHOOTABLE
+		+SHOOTABLE //this lets it be affected by DamageMobj calls
 		radius 1;
 		height 1;
 		health 100;
@@ -322,7 +322,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 		if (icelayer) {
 			icelayer.master = owner;
 			icelayer.angle = owner.angle;
-			CopyAppearances(icelayer, owner, false);
+			CopyAppearance(icelayer, owner, false);
 			icelayer.scale.x = owner.scale.x*1.15;
 			icelayer.scale.y = owner.scale.y*1.07;
 			// When freezing a player, they shouldn't see their own frozen layer:
@@ -432,17 +432,11 @@ Class PK_FreezeControl : PK_InventoryToken {
 	void DestroyOwner() {
 		if (!owner)
 			return;		
+		PK_BaseActor.KillActorSilent(owner, remove: false);
 		owner.A_StartSound("weapons/shotgun/freezedeath", 8);
-		//the corpse doesn't disappear immediately, so we hide it
-		owner.bINVISIBLE = true;
 		//these two are largely to make the previously spawned ice corpse follow this
 		owner.gravity = 0.4;
 		owner.vel = (frandom[sfx](-1.3,1.3),frandom[sfx](-1.3,1.3),frandom[sfx](3,4));
-		//drop the items
-		owner.A_NoBlocking();
-		// In case the victim doesn't have bBOSS but does have bBOSSDEATH:
-		if (owner.bBOSS || owner.bBOSSDEATH)
-			owner.A_BossDeath();
 		queueForDestroy = true;
 		restcounter = 100;
 		//don't forget to destroy the frozen layer
@@ -561,6 +555,26 @@ Class PK_ShotgunPuff : PK_BulletPuff {
 		stop;
 	}
 }
+
+/*
+Class PK_PushAwayChecker : PK_BaseActor {
+	vector3 spawnspot;
+	vector3 endspot;
+	Default {
+		projectile;
+		+NOGRAVITY
+		damage 0;
+	}
+	override void PostBeginPlay() {
+		super.PostBeginPlay();
+		spawnspot = pos;
+	}
+	override void Tick() {
+		if (!bDESTROYED) {			
+			super.Tick();
+		}
+		else {
+			endspot = */
 
 Class PK_PushAwayControl : PK_InventoryToken {
 	double broll;
