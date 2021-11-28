@@ -303,7 +303,7 @@ Class PK_Stake : PK_StakeProjectile {
 		//record the pointer to the pierced victim
 		stickvictim = victim;
 		if (stickvictim) {
-			console.printf("pinned %s", stickvictim.GetClassName());
+			//console.printf("pinned %s", stickvictim.GetClassName());
 			victimOfsZ = victim.default.height * 0.5;
 			stickvictim.A_Stop();
 			stickvictim.A_Scream();
