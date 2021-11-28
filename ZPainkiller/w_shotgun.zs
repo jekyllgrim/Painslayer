@@ -531,9 +531,9 @@ Class PK_ShotgunPuff : PK_BulletPuff {
 					tracer.vel.z += pushz;
 					//if the push is strong enough and the monster is light enough, we'll also rotate it while it's flying:
 					if (pushmod > 0.7 && !tracer.bFLOAT && tracer.mass < 300) {
-						tracer.gravity *= 0.75;
-						pac.broll = frandom[sfx](2,5) * randompick[sfx](-1,1) * (18 / pushspeed);						
 						tracer.bROLLSPRITE = true;
+						tracer.gravity *= 0.75;
+						pac.broll = frandom[sfx](2,5) * randompick[sfx](-1,1) * (18 / pushspeed);	
 						/*	With a 15% chance we'll yeet the monster with high force just for lulz
 							But before we do that, fire a checker that confirms there's enough space
 							for the monster to fly that far. If not, don't do it because it looks bad.
@@ -578,6 +578,7 @@ Class PK_PushAwayChecker : PK_BaseActor {
 
 Class PK_PushAwayControl : PK_InventoryToken {
 	double broll;
+	
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner) {
@@ -586,7 +587,7 @@ Class PK_PushAwayControl : PK_InventoryToken {
 		}
 		if (owner.isFrozen() || !owner.bROLLSPRITE)
 			return;
-		if (owner.pos.z <= owner.floorz || age > 80) {
+		if (GetAge() > 1 && owner.pos.z <= owner.floorz || age > 80) {
 			owner.roll = owner.default.roll;
 			owner.bROLLSPRITE = owner.default.bROLLSPRITE;
 			if (owner.bROLLCENTER)
