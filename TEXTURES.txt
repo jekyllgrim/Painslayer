@@ -649,6 +649,41 @@ Sprite "MIGND0", 213, 95
 	Patch "MIGN03", 0, 0
 }
 
+Sprite "MIGRA0", 213, 95
+{
+	YScale 1.200
+	Offset -180, -107
+	Patch "MIGR00", 0, 0
+}
+
+Sprite "MIGRB0", 213, 95
+{
+	YScale 1.200
+	Offset -180, -107
+	Patch "MIGR01", 0, 0
+}
+
+Sprite "MIGRC0", 213, 95
+{
+	YScale 1.200
+	Offset -180, -107
+	Patch "MIGR02", 0, 0
+}
+
+Sprite "MIGRD0", 213, 95
+{
+	YScale 1.200
+	Offset -180, -107
+	Patch "MIGR03", 0, 0
+}
+
+Sprite "MIGRE0", 213, 95
+{
+	YScale 1.200
+	Offset -180, -107
+	Patch "MIGR04", 0, 0
+}
+
 Sprite "MIGFA0", 213, 95
 {
 	YScale 1.200
