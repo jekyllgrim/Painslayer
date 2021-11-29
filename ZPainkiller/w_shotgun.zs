@@ -308,18 +308,20 @@ Class PK_FreezeControl : PK_InventoryToken {
 		if (prevGrav)
 			owner.bNOGRAVITY = false;
 		//disable pain, modify visuals, play the sound:
-		owner.bNOPAIN = true;
 		owner.A_SetTranslation("PK_Ice");
 		owner.A_StartSound("weapons/shotgun/freeze");
-		owner.speed = 0;
-		owner.SetState(owner.FindState("Pain"));
 		//different methods to freeze based on whether it's a player or a monster:
-		if (owner.player)
+		if (owner.player) {
 			owner.player.cheats |= CF_TOTALLYFROZEN;
-		else
+		}
+		else {
 			//setting this flag actually completely freezes monsters
 			//and completely disables wake-up damage:
 			owner.bInConversation = true;
+			owner.speed = 0;
+			owner.SetState(owner.FindState("Pain"));
+			//owner.bNOPAIN = true;
+		}
 		icelayer = PK_Frozenlayer(Spawn("PK_Frozenlayer",owner.pos));
 		if (icelayer) {
 			icelayer.master = owner;
@@ -346,6 +348,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 		if (queueForDestroy) {
 			for (int i = 7; i >= 0; i--)
 				owner.A_SoundVolume(i,0);
+			// This isn't necessary, PK_DeathControl takes care of poofing
 			/*restcounter--;
 			if (restcounter <= 0) {
 				owner.Destroy();
@@ -439,8 +442,10 @@ Class PK_FreezeControl : PK_InventoryToken {
 		PK_BaseActor.KillActorSilent(owner, remove: false);
 		owner.A_StartSound("weapons/shotgun/freezedeath", 8);
 		//these two are largely to make the previously spawned ice corpse follow this
-		owner.gravity = 0.4;
-		owner.vel = (frandom[sfx](-1.3,1.3),frandom[sfx](-1.3,1.3),frandom[sfx](3,4));
+		if (!owner.player) {
+			owner.gravity = 0.4;
+			owner.vel = (frandom[sfx](-1.3,1.3),frandom[sfx](-1.3,1.3),frandom[sfx](3,4));
+		}
 		queueForDestroy = true;
 		//restcounter = 100;
 		//don't forget to destroy the frozen layer
@@ -451,17 +456,19 @@ Class PK_FreezeControl : PK_InventoryToken {
 	override void DetachFromOwner() {
 		if (!owner)
 			return;
-		owner.bNOPAIN = owner.default.bNOPAIN;
-		owner.bInConversation = false;
-		owner.bNOGRAVITY = prevGrav;
 		owner.translation = prevTrans;
-		owner.speed = prevSpeed;
-		if (owner.health > 0) {
-			owner.A_SetTics(20);
-			owner.SetState(owner.FindState("See"));
-		}
 		if (owner.player) {
 			owner.player.cheats &= ~CF_TOTALLYFROZEN;
+		}
+		else {
+			//owner.bNOPAIN = owner.default.bNOPAIN;
+			owner.bInConversation = false;
+			owner.bNOGRAVITY = prevGrav;
+			owner.speed = prevSpeed;
+			if (owner.health > 0) {
+				owner.A_SetTics(20);
+				owner.SetState(owner.FindState("See"));
+			}
 		}
 		super.DetachFromOwner();
 	}
