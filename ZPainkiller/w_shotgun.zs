@@ -286,7 +286,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 				}
 			}
 			//x1.5 damage if hitting with a shotgun blast:
-			else if (source && source.player && source.player.readyweapon && source.player.readyweapon is "PK_Shotgun")
+			else if (inflictor && inflictor.GetClass() == "PK_ShotgunPuff")
 				newdamage = damage * 1.5;
 			//for all other weapons x1.25 damage:
 			else
