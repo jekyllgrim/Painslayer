@@ -37,6 +37,13 @@ version "4.6.0"
 #include "ZPainkiller/ZForms2.0/TextInput.zsc"
 #include "ZPainkiller/ZForms2.0/ToggleButton.zsc"
 #include "ZPainkiller/ZForms2.0/UiEvent.zsc"
+//Guatamatics
+#include "ZPainkiller/PK_Gutamatics/GlobalMaths.zsc"
+#include "ZPainkiller/PK_Gutamatics/Matrix.zsc"
+#include "ZPainkiller/PK_Gutamatics/Matrix4.zsc"
+#include "ZPainkiller/PK_Gutamatics/Quaternion.zsc"
+#include "ZPainkiller/PK_Gutamatics/VectorUtil.zsc"
+
 
 //Painslayer:
 #include "ZPainkiller/pk_player.zs"
