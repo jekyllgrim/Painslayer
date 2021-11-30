@@ -291,9 +291,9 @@ Class PK_Killer : PK_Projectile {
 		double hvel = (dist / ftime) * -0.5 * body.gravity;		//calculate horizontal vel
 		double vvel = body.bNOGRAVITY ? 0 : (vdisp + 0.5 * ftime*ftime) / ftime; //calculate vertical vel
 		//Reduce velocity based on how heavy the monster is:
-		double velMul = Clamp(LinearMap(body.mass,300,1000,1.0,0.0), 0.0, 1.0);
+		double velMul = Clamp(LinearMap(body.mass,300,1000,1.0,0.5), 0.5, 1.0);
 		hvel *= velMul;
-		vvel *= velMul; 
+		//vvel *= velMul; 
 		//Throw the body towards the player:
 		body.VelFromAngle(hvel,angle);
 		body.vel.z = vvel;
