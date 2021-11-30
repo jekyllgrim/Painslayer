@@ -944,5 +944,28 @@ Class PK_DeathSmoke : PK_BaseSmoke {
 	}
 }
 
-
-//Shader.SetEnabled( players[consoleplayer], "DemonMode", true);
+Class PK_DebugSpot : Actor {	
+	Default {
+		+NOINTERACTION
+		+SYNCHRONIZED
+		+DONTBLAST
+		+BRIGHT
+		+FORCEXYBILLBOARD
+		xscale 0.35;
+		yscale 0.292;
+		FloatBobPhase 0;
+		health 3;
+		translation "1:255=%[0.00,1.01,0.00]:[1.02,2.00,0.00]";
+	}
+	
+	override void Tick() {
+		if (GetAge() > 35 * default.health)
+			Destroy();
+	}
+	
+	states {
+	Spawn:
+		AMRK A -1;
+		stop;
+	}
+}

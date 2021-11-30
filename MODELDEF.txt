@@ -138,6 +138,17 @@ Model PK_Stake {
 	Frame STAK A 0 0
 }
 
+Model PK_DebugStake {
+	AngleOffset 90
+	path "Models/Stakegun"
+	Model 0 "PKstake.obj"
+	Skin 0 "grenadestake.png"
+	Scale 1 1 1
+	USEACTORPITCH
+	
+	Frame AMRK A 0 0
+}
+
 Model PK_ExplosiveBolt {
 	path "Models/Boltgun"
 	Model 0 "explosive_bolt.obj"

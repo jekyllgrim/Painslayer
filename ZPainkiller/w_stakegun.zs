@@ -356,6 +356,33 @@ Class PK_Stake : PK_StakeProjectile {
 	}
 }
 
+Class PK_DebugStake : Actor {
+	vector3 deathspot;
+	Default {
+		Projectile;
+		speed 50;
+		radius 1;
+		height 1;
+		damage (100);
+		+DONTTHRUST
+		deathsound "weapons/stakegun/stakewall";
+	}
+	States {
+	Spawn:
+		AMRK A -1;
+		stop;
+	Death:
+		TNT1 A 0 {
+			A_SetRenderStyle(1.0, Style_Translucent);
+			A_Stop();
+			SetOrigin(deathspot,true);
+		}
+		AMRK A 1 A_FadeOut(0.05);
+		wait;
+	}
+}
+		
+
 Class PK_StakeFlame : PK_BaseFlare {
 	Default {
 		scale 0.05;
