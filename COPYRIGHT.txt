@@ -104,6 +104,10 @@ iv.  StatusBarScreen library by Lewisk3
 v.   MK_Matrix library by Marisa Kirisame
      License: GNU GPL
      Location: "ZPainkiller/mk_matrix/"
+	 
+vi.  Gutamatics library by Gutawer
+     License: MIT License
+	 Location: "ZPainkiller/PK_Gutamatics/"
 
 Refer to the aforementioned code locations for license information on each code component.
 

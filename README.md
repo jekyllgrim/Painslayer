@@ -201,11 +201,13 @@ All sounds used in Painslayer are owned by People Can Fly and are used under Fai
 
 **Cherno**: Demon Morph shaders
 
-**Lewisk3**: [StatusBarScreen](https://github.com/Lewisk3/StatusBarScreen)
+**Lewisk3**: [StatusBarScreen](https://github.com/Lewisk3/StatusBarScreen), scripting help
 
 Boondolr: Boss healthbar code, scripting help
 
 phantombeta, Gutawer: [ZForms](https://gitlab.com/Gutawer/gzdoom-zforms)
+
+Gutawer: [Gutamatics](https://gitlab.com/Gutawer/gzdoom-gutamatics/)
 
 Nero: [Tooltips](https://github.com/Saican/Tooltips/tree/master)
 
