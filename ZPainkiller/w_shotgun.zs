@@ -147,7 +147,7 @@ Class PK_FreezerProjectile : PK_Projectile {
 			A_Stop();
 			A_AttachLight('frez', DynamicLight.RandomFlickerLight, "75edff", 32, 52, flags: DYNAMICLIGHT.LF_ATTENUATE);
 			roll = random(0,359); 
-			if (tracer && (tracer.bISMONSTER || tracer.player) && !tracer.bBOSS && !tracer.bNOICEDEATH) {
+			if (tracer && (tracer.bISMONSTER || tracer.player) && !tracer.bBOSS && !tracer.bNOICEDEATH && !(tracer is "ArchVile")) {
 				tracer.GiveInventory("PK_FreezeControl",1);
 				let frz = PK_FreezeControl(tracer.FindInventory("PK_FreezeControl"));
 				if (frz) {
