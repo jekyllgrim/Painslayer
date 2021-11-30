@@ -414,7 +414,7 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 			if (kft) {
 				kft.target = master;
 				kft.edc = PK_EnemyDeathControl(self);
-				kft.A_SetSize(master.radius*1.15,master.default.height*0.6);
+				kft.A_SetSize(master.radius*1.15,master.default.height*0.35);
 				kft.vel = master.vel;
 				kft.mass = master.mass;
 			}
