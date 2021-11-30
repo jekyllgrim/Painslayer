@@ -362,7 +362,8 @@ Class PK_FreezeControl : PK_InventoryToken {
 			return;
 		}
 		if (owner.health <= 0) {
-			//spawn ice shards:
+			owner.bNOGRAVITY = false;
+			//spawn ice shards:			
 			int rad = owner.radius;
 			if (!s_particles)
 				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
@@ -478,7 +479,6 @@ class PK_IceCorpse : PK_FrozenChunk {
 	Default {
 		translation "PK_IceChunk";
 		renderstyle 'Normal';
-		+NOINTERACTION
 	}
 	override void PostBeginPlay() {
 		PK_SmallDebris.PostBeginPlay();
@@ -524,7 +524,7 @@ Class PK_ShotgunPuff : PK_BulletPuff {
 	states {
 	Spawn:
 		TNT1 A 1 NoDelay {		
-			if (target && tracer && tracer.bISMONSTER && !tracer.bDONTTHRUST && !tracer.bBOSS && !tracer.bFLOAT && tracer.mass <= 400 && tracer.health <= 0 && tracer.Distance3D(target) <= 200 && !tracer.CountInv("PK_PushAwayControl") && !tracer.CountInv("PK_FreezeControl")) {
+			if (target && tracer && tracer.bISMONSTER && !tracer.bDONTTHRUST && !tracer.bBOSS && !tracer.bNOGRAVITY && !tracer.bFLOAT && tracer.mass <= 400 && tracer.health <= 0 && tracer.Distance3D(target) <= 200 && !tracer.CountInv("PK_PushAwayControl") && !tracer.CountInv("PK_FreezeControl")) {
 				tracer.GiveInventory("PK_PushAwayControl",1);
 				let pac = PK_PushAwayControl(tracer.FindInventory("PK_PushAwayControl"));
 				if (pac) {
