@@ -28,7 +28,6 @@ i.   Original artwork created by the Author (usually inspired by works of People
      "graphics/ShotgunFreezer/"
      "graphics/StakeGun/"
      "sprites/debris/"
-     "sprites/DemonEyes/"
      "sprites/electro/"
      "sprites/gold/"
      "sprites/Painkiller/"
@@ -38,11 +37,7 @@ i.   Original artwork created by the Author (usually inspired by works of People
 ii.  Graphics, originally created by People Can Fly, modified in various ways, including but not limited to rescaling, color correction and partial redrawing
      Permissions: these assets is used under the Fair Use doctrine. The Author does not own this artwork or any licenses to it. This artwork may be removed from Painslayer, should People Can Fly request it. You may use this artwork, as long as your use still falls under the Fair Use doctrine.
      Locations:
-     "graphics/HUD/ammo/"
-     "graphics/HUD/icons/"
-     "graphics/HUD/numbers/"
-     "graphics/HUD/Tarot/"
-     "graphics/HUD/DCRHA.png"
+     "graphics/HUD/"
      "models/boltgun/"
      "models/chaingun/"
      "models/electrodriver/"
@@ -64,6 +59,7 @@ iii. Open-source assets
      "graphics/PKIMARK4.png"
      "graphics/XHAIRB99.IMGZ"
      "graphics/XHAIRS99.IMGZ"
+	 "graphics/FrozenGibs/"
      "models/penta/"
      "models/CrossSectionPrimitive.obj"
      "models/flatbeam.obj"
