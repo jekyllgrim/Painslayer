@@ -73,7 +73,8 @@ Class PK_Chaingun : PKWeapon {
 			A_WeaponOffset(0,32,WOF_INTERPOLATE);
 			A_Quake(1,9,0,32,"");
 			PK_AttackSound();
-			A_FireProjectile("PK_Rocket",spawnofs_xy:3.2,spawnheight:-2);
+			//A_FireProjectile("PK_Rocket",spawnofs_xy:3.2,spawnheight:-2);
+			Fire3DProjectile("PK_Rocket", leftright:8, updown:-8, crosshairConverge: True);
 			A_ZoomFactor(0.98,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			A_OverlayPivot(OverlayID(),0.1,1.0);
 		}
