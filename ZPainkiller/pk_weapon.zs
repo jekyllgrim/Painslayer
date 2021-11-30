@@ -469,6 +469,8 @@ Class PKWeapon : Weapon abstract {
 			proj.roll = r;
 			proj.vel = projVel;
 			proj.target = self;
+			if (proj.seesound)
+				proj.A_StartSound(proj.seesound);
 			
 			/*
 			let dbs = PK_StakeProjectile(proj);
