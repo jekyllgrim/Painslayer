@@ -175,30 +175,35 @@ Class PK_Boltgun : PKWeapon {
 			}
 		}
 		#### A 4 {
-			PK_DepleteAmmo(amount:1);
 			double xofs = invoker.scoped ? 0 : 3;
-			double yofs = invoker.scoped ? 11 : 5;
-			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
+			double yofs = invoker.scoped ? 1 : -2;
+			Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: xofs, updown: yofs);
+			PK_DepleteAmmo(amount:1);
+			//A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
 			PK_AttackSound("weapons/boltgun/fire1",CHAN_5);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
 		#### B 4 {
+			double xofs = invoker.scoped ? -3 : 0;
+			double yofs = invoker.scoped ? 0 : -3;
 			PK_DepleteAmmo(amount:2);
-			double xofs = invoker.scoped ? -1.5 : 0;
-			double yofs = invoker.scoped ? 10 : 3;
-			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
-			xofs = invoker.scoped ? 1.5 : 6;
-			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
+			Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: xofs, updown: yofs);
+			//A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
+			xofs = invoker.scoped ? 3 : 6;
+			Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: xofs, updown: yofs);
+			//A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
 			A_StartSound("weapons/boltgun/fire2",CHAN_6);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
 		#### C 2 {
+			double xofs = invoker.scoped ? -6 : -3;
+			double yofs = invoker.scoped ? -1 : -4;
 			PK_DepleteAmmo(amount:2);
-			double xofs = invoker.scoped ? -3 : -3;
-			double yofs = invoker.scoped ? 9 : 1;
-			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
-			xofs = invoker.scoped ? 3 : 9;
-			A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
+			Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: xofs, updown: yofs);
+			//A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
+			xofs = invoker.scoped ? 5 : 9;
+			Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: xofs, updown: yofs);
+			//A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
 			A_StartSound("weapons/boltgun/fire3",CHAN_7);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}

@@ -417,6 +417,91 @@ Class PKWeapon : Weapon abstract {
 		return A_FireProjectile(missiletype, angle, useammo, spawnofs_xy, spawnheight, flags, pitchOfs);
 	}
 	
+	/*	Function by Lewisk3 using Gutamatics to fire stake projectiles.
+		Used in most cases instead of PK_FireArchingProjectile above
+		since it produces a more accurate movement.
+	*/
+	action Actor Fire3DProjectile(class<Actor> proj, bool useammo = true, double forward = 0, double leftright = 0, double updown = 0, bool crosshairConverge = false, double angleoffs = 0, double pitchoffs = 0)
+	{
+		let weapon = player.ReadyWeapon;
+		if (useammo && weapon && stateinfo && stateinfo.mStateType == STATE_Psprite)
+		{
+			if (!weapon.DepleteAmmo(weapon.bAltFire, true))
+				return null;
+		}		
+		double a = angle + angleoffs;
+		double p = Clamp(pitch + pitchoffs, -90, 90);
+		double r = roll;
+		let mat = PK_GM_Matrix.fromEulerAngles(a, p, r);
+		mat = mat.multiplyVector3((forward, -leftright, updown));
+		vector3 offsetPos = mat.asVector3(false);
+		
+		vector3 shooterPos = (pos.xy, pos.z + height * 0.5);
+		if(player) shooterPos.z = player.viewz;
+		offsetPos = level.vec3offset(offsetPos, shooterPos);
+		
+		// Get velocity
+		vector3 aimpos;
+		if(player && crosshairConverge)
+		{
+			FLineTraceData lt;
+			LineTrace(a, 1024*1024, p, 0, player.viewz-pos.z, 0, data:lt);
+			aimPos = lt.HitLocation;
+			//Spawn("PK_DebugSpot", aimPos);
+		
+			vector3 aimAngles = level.SphericalCoords(offsetPos, aimPos, (a, p));
+			
+			a -= aimAngles.x;
+			p -= aimAngles.y;
+		}
+		
+		mat = PK_GM_Matrix.fromEulerAngles(a, p, r);
+		mat = mat.multiplyVector3((1.0,0,0));
+		
+		vector3 projVel = mat.asVector3(false) * GetDefaultByType(proj).Speed;
+		
+		// Spawn projectile
+		let proj = Spawn(proj, offsetPos);
+		if(proj)
+		{
+			proj.angle = a;
+			proj.pitch = p;
+			proj.roll = r;
+			proj.vel = projVel;
+			proj.target = self;
+			
+			/*
+			let dbs = PK_StakeProjectile(proj);
+			if (dbs) {
+				let dumpr = PK_DummyProjectile(Spawn ("PK_DummyProjectile", offsetPos));
+				dumpr.A_SetSize(proj.radius, proj.height);
+				dumpr.angle = proj.angle;
+				dumpr.pitch = proj.pitch;
+				dumpr.roll = proj.roll;
+				dumpr.vel = proj.vel;
+				dumpr.gravity = proj.gravity;
+				dumpr.target = self;
+				while (true) 
+				{
+					vector2 nextpos = dumpr.pos.xy + dumpr.vel.xy;
+					if (dumpr.CheckMove(nextpos))
+					{
+						//dumpr.SetOrigin(dumpr.pos + dumpr.vel, false);
+						//dumpr.FaceMovementDirection();
+						dumpr.Tick();
+						continue;
+					}
+					else 
+					{
+						Spawn("PK_DebugSpot", (nextpos, dumpr.pos.z));
+						break;
+					}
+				}
+			}*/
+		}
+		return proj;
+	}
+	
 	/*	This function staggers an overlay offset change over a few tics, so that
 		I can randomize layer offsets but make it smoother than if it were called
 		every tic. Used by Electro and Flamethrower.
@@ -701,6 +786,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 	property trailshrink : trailshrink;
 	property trailvel : trailvel;
 	property trailz : trailz;
+	
 	Default {
 		projectile;
 		height 6;
@@ -713,6 +799,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 		PK_Projectile.flareactor "PK_ProjFlare";
 		PK_Projectile.trailactor "PK_BaseFlare";
 	}
+	
 	/*
 		For whatever reason the fancy pitch offset calculation used in arching projectiles 
 		like grenades (see PK_FireArchingProjectile) screws up the projectiles' collision, 
@@ -727,6 +814,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 			return false;
 		return super.CanCollideWith(other, passive);
 	}
+	
 	//This is just to make sure the projectile doesn't collide with certain
 	//non-collidable actors. Used by stuff like stakes.
 	static bool CheckVulnerable(actor victim, actor missile = null) {
@@ -740,6 +828,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 		}*/
 		return (victim.bSHOOTABLE && !victim.bNONSHOOTABLE && !victim.bNOCLIP && !victim.bNOINTERACTION && !victim.bINVULNERABLE && !victim.bDORMANT && !victim.bNODAMAGE  && !victim.bSPECTRAL);
 	}
+	
 	override void PostBeginPlay() {
 		super.PostBeginPlay();		
 		mod = target && PKWeapon.CheckWmod(target);
@@ -755,6 +844,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 			fl.falpha = flarealpha;
 		}
 	}
+	
 	//An override initially by Arctangent that spawns trails like FastProjectile does it:
 	override void Tick () {
 		Vector3 oldPos = self.pos;		
@@ -805,6 +895,9 @@ Class PK_Projectile : PK_BaseActor abstract {
 	Base for stakes, bolts and shurikens.
 */
 Class PK_StakeProjectile : PK_Projectile {
+	protected vector3 endspot;
+	protected F3DFloor hit_3dfloor;
+	protected Line hit_line;
 	protected int hitplane; //0: none, 1: floor, 2: ceiling
 	protected actor stickobject; //a non-monster object that was hit
 	protected transient SecPlane stickplane; //a plane to stick to (has to be transient, can't be recorded into savegames)
@@ -816,9 +909,14 @@ Class PK_StakeProjectile : PK_Projectile {
 	protected double victimofz; //the offset from the center of the stake to the victim's corpse center
 	protected state sspawn; //pointer to Spawn label
 	bool stuckToSecPlane; //a non-transient way to record whether it stuck to a wall. Used by PK_StakeStickHandler
+	
 	Default {
 		+MOVEWITHSECTOR
 		+NOEXTREMEDEATH
+	}
+	
+	void SetEndSpot(vector3 spot) {
+		endspot = spot;
 	}
 	
 	//this function is called when the projectile dies and checks if it hit something
@@ -827,6 +925,8 @@ Class PK_StakeProjectile : PK_Projectile {
 		bTHRUACTORS = true;
 		bNOGRAVITY = true;
 		A_Stop();
+		if (endspot != (0,0,0))
+			SetOrigin(endspot, false);
 		
 		if (stickobject) {
 			stickoffset = pos.z - stickobject.pos.z;
@@ -837,8 +937,15 @@ Class PK_StakeProjectile : PK_Projectile {
 		
 		//use linetrace to get information about what we hit
 		FLineTraceData trac;
-		LineTrace(angle,radius+64,pitch,TRF_NOSKY|TRF_THRUACTORS|TRF_BLOCKSELF,data:trac);
-		sticklocation = trac.HitLocation.xy;
+		LineTrace(angle,64,pitch,TRF_NOSKY|TRF_THRUACTORS|TRF_BLOCKSELF,data:trac);
+		//if (!hit_3dfloor)
+			hit_3dfloor = trac.Hit3DFloor;
+		//if (!hit_Line)
+			hit_Line = trac.HitLine;		
+		//if (endspot != (0,0,0))
+			//sticklocation = endspot.xy;
+		//else
+			sticklocation = trac.HitLocation.xy;
 		topz = CurSector.ceilingplane.ZatPoint(sticklocation);
 		botz = CurSector.floorplane.ZatPoint(sticklocation);
 		
@@ -857,7 +964,7 @@ Class PK_StakeProjectile : PK_Projectile {
 			return;
 			
 		//3D floor is easiest, so we start with it:
-		if (trac.Hit3DFloor) {
+		if (hit_3dfloor) {
 			stuckToSecPlane = true;
 			//we simply attach the stake to the 3D floor's top plane, nothing else
 			F3DFloor flr = trac.Hit3DFloor;
@@ -868,9 +975,9 @@ Class PK_StakeProjectile : PK_Projectile {
 			return;
 		}
 		//otherwise see if we hit a line:
-		if (trac.HitLine) {
+		if (hit_Line) {
 			//check if the line is two-sided first:
-			let tline = trac.HitLine;
+			let tline = hit_Line;
 			//if it's one-sided, it can't be a door/lift, so don't do anything else:
 			if (!tline.backsector) {
 				if (pk_debugmessages > 2)
@@ -902,6 +1009,7 @@ Class PK_StakeProjectile : PK_Projectile {
 				console.printf("%s hit the %s %s part of the line at %d,%d,%d",myclass,secpart,sside,pos.x,pos.y,pos.z);
 		}
 	}
+	
 	//record a non-monster solid object the stake runs into if there is one:
 	override int SpecialMissileHit (Actor victim) {
 		if (!victim.bISMONSTER && victim.bSOLID) {
@@ -909,6 +1017,7 @@ Class PK_StakeProjectile : PK_Projectile {
 		}
 		return -1;
 	}
+	
 	//virtual for breaking apart; child actors override it to add debris spawning and such:
 	virtual void StakeBreak() {
 		if (pk_debugmessages > 2)
@@ -916,15 +1025,26 @@ Class PK_StakeProjectile : PK_Projectile {
 		if (self)
 			Destroy();
 	}
+	
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		sspawn = FindState("Spawn");
 	}
+	
 	override void Tick () {
 		super.Tick();
 		//all stake-like projectiles need to face their movement direction while in Spawn sequence:
-		if (!isFrozen() && sspawn && InStateSequence(curstate,sspawn))
+		if (!isFrozen() && sspawn && InStateSequence(curstate,sspawn)) {
 			A_FaceMovementDirection(flags:FMDF_INTERPOLATE );
+			/*FLineTraceData hit;
+			LineTrace(angle, radius + vel.length(), pitch, TRF_NOSKY|TRF_BLOCKSELF, data: hit);
+			if (hit.Hitline)
+				hit_line = hit.HitLine;
+			if (hit.Hit3DFloor)
+				hit_3dfloor = hit.Hit3DFloor;
+			if (hit.HitType == TRACE_HitFloor || hit.HitType == TRACE_HitCeiling || hit.HitType == TRACE_HitWall)
+				endspot = hit.Hitlocation;*/
+		}
 		//otherwise stake is dead, so we'll move it alongside the object/plane it's supposed to be attached to:
 		if (bTHRUACTORS) {
 			topz = CurSector.ceilingplane.ZAtPoint(pos.xy);
@@ -955,6 +1075,22 @@ Class PK_StakeProjectile : PK_Projectile {
 			if (pinvictim)
 				pinvictim.SetZ(pos.z + victimofz);
 		}
+	}
+}
+
+Class PK_DummyProjectile : PK_BaseActor {
+	Default {
+		projectile;
+		damage 0;
+		+INVISIBLE
+	}
+	States {
+	Spawn:
+		TNT1 A -1;
+		stop;
+	Death:
+		TNT1 A 1;
+		stop;
 	}
 }
 

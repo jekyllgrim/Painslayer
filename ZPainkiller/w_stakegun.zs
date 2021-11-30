@@ -36,7 +36,7 @@ Class PK_Stakegun : PKWeapon {
 				PK_AttackSound("weapons/stakegun/fire");
 				A_WeaponOffset(11,9,WOF_ADD);
 				double pofs = (invoker.hasWmod) ? 0 : -2.5;
-				PK_FireArchingProjectile("PK_Stake",spawnofs_xy:2,spawnheight:5,flags:FPF_NOAUTOAIM,pitch:pofs);
+				Fire3DProjectile("PK_Stake", forward: 1, leftright: 2, updown: -2, crosshairConverge: (!invoker.hasWmod), pitchoffs: pofs);
 				A_OverlayPivot(OverlayID(),0.2,1.0);
 			}
 			PSGN BBBBB 1 {
@@ -134,16 +134,17 @@ Class PK_Stake : PK_StakeProjectile {
 		ProjectileKickBack 50;
 		-NOGRAVITY
 		+NOEXTREMEDEATH
+		+NODECAL
 		speed 60;
 		gravity 0.45;
 		radius 2;
 		height 2;
 		damage 0;
-		decal "";
 		obituary "$PKO_STAKE";
 		deathsound "weapons/stakegun/stakewall";
 		decal "Stakedecal";
 	}
+	
 	
 	override void StakeBreak() {		
 		if (!s_particles)
@@ -199,9 +200,13 @@ Class PK_Stake : PK_StakeProjectile {
 		super.PostBeginPlay();
 		victimDestroyTimer = -1;
 		basedmg = 160;
-		if (target) {
-			pitch = target.pitch; //In case it's fired at a floor or ceiling at point-blank range, the Spawn state won't be used and the stake won't receive proper pitch. So, we do this.
-		}
+		/*if (target) {
+			// In case it's fired at a floor or ceiling at 
+			// point-blank range, the Spawn state won't be
+			// used and the stake won't receive proper 
+			// pitch. So, we do this:
+			pitch = target.pitch; 
+		}*/
 		if (mod) {
 			bNOGRAVITY = true;
 			vel = vel.unit() * speed * 1.3;
