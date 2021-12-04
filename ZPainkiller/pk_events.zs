@@ -400,19 +400,20 @@ Class PK_MainHandler : EventHandler {
 			Menu.SetMenu("PKCardsMenu");
 		}
 		
-		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		/*let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (cardcontrol) {
 			int i = cardcontrol.RefreshCards();
 			if (pk_debugmessages)
 				console.printf("New map start: Refreshing cards for player %d. Gold Uses left: %d",e.PlayerNumber,i);
-		}
+		}*/
 		
-		/*for (let iitem = plr.Inv; iitem != NULL; iitem = iitem.Inv) {
+		// Make sure all Silver cards are present *and* active:		
+		for (let iitem = plr.Inv; iitem != NULL; iitem = iitem.Inv) {
 			let scard = PK_BaseSilverCard(iitem);
 			if (scard) {
 				scard.GetCard();
 			}
-		}*/
+		}
 	}
 	void StopPlayerGoldenCards(PlayerInfo player) {
 		if (!player || !player.mo)

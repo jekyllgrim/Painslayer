@@ -768,8 +768,6 @@ Class PK_CardControl : PK_InventoryToken {
 
 Class PK_BaseSilverCard : PK_InventoryToken abstract {
 	protected PK_CardControl control;
-	virtual void GetCard() {}
-	virtual void RemoveCard() {}
 	PK_BoardEventHandler event;
 	
 	override void AttachToOwner(actor other) {
@@ -794,6 +792,14 @@ Class PK_BaseSilverCard : PK_InventoryToken abstract {
 		RemoveCard();
 		super.DetachFromOwner();
 	}
+	
+	virtual void GetCard() {
+		if (!event)
+			event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
+		if (!control)
+			control = PK_CardControl(owner.FindInventory("PK_CardControl"));
+	}
+	virtual void RemoveCard() {}
 }
 
 //flips a global bool. While true, souls don't disappear (PK_Soul age variable doesn't increase)
@@ -802,6 +808,7 @@ Class PKC_SoulKeeper : PK_BaseSilverCard {
 		tag "SoulKeeper";
 	}	
 	override void GetCard() {
+		super.GetCard();
 		if (event) {
 			event.SoulKeeper = true;
 			if (pk_debugmessages)
@@ -824,6 +831,7 @@ Class PKC_Blessing : PK_BaseSilverCard {
 		tag "Blessing";
 	}	
 	override void GetCard() {
+		super.GetCard();
 		curHealth = owner.health;
 		let plr = owner.player.mo;
 		//plr.BonusHealth = 50;
@@ -858,6 +866,7 @@ Class PKC_DarkSoul : PK_BaseSilverCard {
 		tag "DarkSoul";
 	}
 	override void GetCard() {
+		super.GetCard();
 		let control = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
 		if (!control)
 			return;
@@ -936,6 +945,7 @@ Class PKC_Forgiveness : PK_BaseSilverCard {
 		tag "Forgiveness";
 	}
 	override void GetCard() {
+		super.GetCard();
 		//only increase gold uses if the cards have been used no more than once in total
 		if (control && control.GetTotalGoldUses() < 2)
 			control.SetGoldUses( control.GetGoldUses() + 1 );
@@ -1067,6 +1077,7 @@ Class PKC_666Ammo : PK_BaseSilverCard {
 	private array < Class<Ammo> > modifiedAmmo;
 	private array <int> prevAmmoAmount;
 	override void GetCard() {
+		super.GetCard();
 		//give mod ammo types if there is none
 		for (int i = 0; i < PKAmmoTypes.Size(); i++) {
 			let am = PKAmmoTypes[i];
