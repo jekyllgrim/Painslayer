@@ -571,7 +571,7 @@ Class PK_CardControl : PK_InventoryToken {
 	Class<Inventory> EquippedCards[5]; //holds classes of currently equipped cards (reinitialized when closing the board)	
 	bool goldActive;
 	private int dryUseTimer; //> 0 you try to use gold cards when you're out of uses
-	int goldUses;
+	private int goldUses;
 	private int totalGoldUses;
 	int goldDuration;
 	property goldUses : goldUses;
@@ -596,14 +596,27 @@ Class PK_CardControl : PK_InventoryToken {
 		return totalGoldUses;
 	}
 	
+	clearscope int GetGoldUses() {
+		return goldUses;
+	}
+	
+	int SetGoldUses (int i) {
+		goldUses = Clamp(i,0,2);
+		return goldUses;
+	}
+	
 	//called to reset everything that needs resetting when starting a new map (or with PKREFRESH cheat):
-	void RefreshCards() {
+	int RefreshCards() {
 		totalGoldUses = 0;
 		goldUses = 1;
-		if (FindInventory("PKC_Forgiveness"))
-			goldUses++;
+		if (owner.CountInv("PKC_Forgiveness")) {
+			goldUses += 1;
+			if (pk_debugmessages)
+				console.printf("Gold uses %d due to Forgiveness in inventory", goldUses);
+		}
 		if (pk_debugmessages)
-			console.printf("Gold activations refreshed (remaining: %d)",goldUses);
+			console.printf("Gold activations refreshed (remaining: %d | total: %d)", goldUses, totalGoldUses);
+		return goldUses;
 	}
 	
 	void UseGoldenCards() {
@@ -755,8 +768,8 @@ Class PK_CardControl : PK_InventoryToken {
 
 Class PK_BaseSilverCard : PK_InventoryToken abstract {
 	protected PK_CardControl control;
-	protected virtual void GetCard() {}
-	protected virtual void RemoveCard() {}
+	virtual void GetCard() {}
+	virtual void RemoveCard() {}
 	PK_BoardEventHandler event;
 	
 	override void AttachToOwner(actor other) {
@@ -925,13 +938,14 @@ Class PKC_Forgiveness : PK_BaseSilverCard {
 	override void GetCard() {
 		//only increase gold uses if the cards have been used no more than once in total
 		if (control && control.GetTotalGoldUses() < 2)
-			control.goldUses = Clamp(control.goldUses + 1,0,2);
+			control.SetGoldUses( control.GetGoldUses() + 1 );
 		if (pk_debugmessages)
 			console.printf("Giving Forgiveness");
 	}
+	
 	override void RemoveCard() {
 		if (control)
-			control.goldUses = Clamp(control.goldUses - 1,0,1);
+			control.SetGoldUses( control.GetGoldUses() - 1 );
 		if (pk_debugmessages)
 			console.printf("Removing Forgiveness");
 	}

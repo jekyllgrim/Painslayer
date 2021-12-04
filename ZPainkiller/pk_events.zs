@@ -209,19 +209,7 @@ Class PK_MainHandler : EventHandler {
 		}
 		if (e.IsSaveGame || e.isReopen)
 			return;
-		for (int pn = 0; pn < MAXPLAYERS; pn++) {
-			if (!playerInGame[pn])
-				continue;
-			PlayerInfo plr = players[pn];
-			if (!plr || !plr.mo)
-				continue;
-			let cardcontrol = PK_CardControl(plr.mo.FindInventory("PK_CardControl"));
-			if (cardcontrol) {
-				cardcontrol.RefreshCards();
-				if (pk_debugmessages)
-					console.printf("New map start: Refreshing cards for player %d. Gold Uses left: %d",pn,cardcontrol.goldUses);
-			}
-		}		
+			
 		//spawn gold randomly in secret areas:
 		//iterate throguh sectors:
 		for (int i = 0; i < level.Sectors.Size(); i++) {
@@ -400,8 +388,6 @@ Class PK_MainHandler : EventHandler {
 	}
 	//open Black Tarot at map start:
 	override void PlayerEntered(PlayerEvent e) {
-		if (!pk_autoOpenBoard)
-			return;
 		if (level.Mapname == "TITLEMAP")
 			return;
 		if (!PlayerInGame[e.PlayerNumber])
@@ -409,8 +395,24 @@ Class PK_MainHandler : EventHandler {
 		let plr = players[e.PlayerNumber].mo;
 		if (!plr)
 			return;
-		if (e.PlayerNumber == consoleplayer)
+		
+		if (pk_autoOpenBoard && e.PlayerNumber == consoleplayer) {
 			Menu.SetMenu("PKCardsMenu");
+		}
+		
+		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		if (cardcontrol) {
+			int i = cardcontrol.RefreshCards();
+			if (pk_debugmessages)
+				console.printf("New map start: Refreshing cards for player %d. Gold Uses left: %d",e.PlayerNumber,i);
+		}
+		
+		/*for (let iitem = plr.Inv; iitem != NULL; iitem = iitem.Inv) {
+			let scard = PK_BaseSilverCard(iitem);
+			if (scard) {
+				scard.GetCard();
+			}
+		}*/
 	}
 	void StopPlayerGoldenCards(PlayerInfo player) {
 		if (!player || !player.mo)
