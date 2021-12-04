@@ -898,7 +898,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 */
 Class PK_StakeProjectile : PK_Projectile {
 	protected vector3 endspot;
-	protected F3DFloor hit_3dfloor;
+	protected transient F3DFloor hit_3dfloor;
 	protected Line hit_line;
 	protected int hitplane; //0: none, 1: floor, 2: ceiling
 	protected actor stickobject; //a non-monster object that was hit
