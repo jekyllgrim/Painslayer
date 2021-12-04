@@ -1041,10 +1041,14 @@ Class PKC_666Ammo : PK_BaseSilverCard {
 		'PK_Shells',
 		'PK_FreezerAmmo',
 		'PK_StakeAmmo',
-		'PK_BombAmmo',
+		'PK_GrenadeAmmo',
 		'PK_BulletAmmo',
 		'PK_ShurikenAmmo',
-		'PK_CellAmmo'
+		'PK_CellAmmo',
+		'PK_RifleBullets',
+		'PK_FuelAmmo',
+		'PK_BoltAmmo',
+		'PK_BombAmmo'
 	};
 	private array < Class<Ammo> > modifiedAmmo;
 	private array <int> prevAmmoAmount;
@@ -1052,7 +1056,7 @@ Class PKC_666Ammo : PK_BaseSilverCard {
 		//give mod ammo types if there is none
 		for (int i = 0; i < PKAmmoTypes.Size(); i++) {
 			let am = PKAmmoTypes[i];
-			if (owner.CountInv(am) < 1)
+			if (!owner.FindInventory(am)
 				owner.GiveInventory(am,0); //we only need the pointers, no ammount increase
 		}
 		modifiedAmmo.Clear();
