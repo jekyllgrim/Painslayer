@@ -398,9 +398,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 				if (icebod) {
 					icebod.master = owner;
 					icebod.A_SetScale(Clamp(owner.radius*0.05,0.1,1.5));
-					icebod.bSPRITEFLIP = random[sfx](0,1);
-					icebod.gravity = 0.4;
-					icebod.vel = (frandom[sfx](-1.3,1.3),frandom[sfx](-1.3,1.3),frandom[sfx](3,4));					
+					icebod.bSPRITEFLIP = random[sfx](0,1);			
 					if (owner.player && owner.player == players[consoleplayer])
 						icebod.A_SetRenderstyle(0,Style_none);
 				}
@@ -464,9 +462,9 @@ Class PK_FreezeControl : PK_InventoryToken {
 		else {
 			//owner.bNOPAIN = owner.default.bNOPAIN;
 			owner.bInConversation = false;
-			owner.bNOGRAVITY = prevGrav;
 			owner.speed = prevSpeed;
 			if (owner.health > 0) {
+				owner.bNOGRAVITY = prevGrav;
 				owner.A_SetTics(20);
 				owner.SetState(owner.FindState("See"));
 			}
