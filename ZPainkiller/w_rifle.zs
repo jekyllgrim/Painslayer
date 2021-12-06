@@ -489,13 +489,13 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 				ripdepth -= victim.health;
 				int fl = (random[burn](1,3) == 1) ? 0 : DMG_NO_PAIN;
 				victim.DamageMobj(self,target,8,"Fire",flags:DMG_THRUSTLESS|fl);
-				if (!victim.FindInventory("PK_BurnControl") && !victim.FindInventory("PK_FreezeControl")) {
+				if (victim && !victim.FindInventory("PK_BurnControl") && !victim.FindInventory("PK_FreezeControl")) {
 					victim.GiveInventory("PK_BurnControl",1);
 					let control = PK_BurnControl(victim.FindInventory("PK_BurnControl"));
 					if (control && target)
 						control.target = target;
 				}
-				else {
+				else if (victim) {
 					let control = PK_BurnControl(victim.FindInventory("PK_BurnControl"));
 					if (control)
 						control.ResetTimer();
@@ -521,8 +521,10 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 	}
 	override void Tick() {
 		super.Tick();
-		if (waterlevel > 1)
-			destroy();
+		if (waterlevel > 1) {
+			Destroy();
+			return;
+		}
 		if (!isFrozen()) {
 			A_SetScale(Clamp(scale.x * scaleMul, 0.08, 0.7));
 			scaleMul = Clamp(scaleMul * 1.01, 1.02, 1.08);
