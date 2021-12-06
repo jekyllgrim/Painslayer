@@ -418,13 +418,13 @@ Class PK_BurnControl : PK_InventoryToken {
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner || !target || owner.waterlevel > 1) {
-			Destroy();
+			DepleteOrDestroy();
 			return;
 		}
 		if (owner.isFrozen())
 			return;
 		if (timer <= 0) {
-			Destroy();
+			DepleteOrDestroy();
 			return;
 		}
 		timer--;
@@ -489,7 +489,7 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 				ripdepth -= victim.health;
 				int fl = (random[burn](1,3) == 1) ? 0 : DMG_NO_PAIN;
 				victim.DamageMobj(self,target,8,"Fire",flags:DMG_THRUSTLESS|fl);
-				if (victim && !victim.FindInventory("PK_BurnControl") && !victim.FindInventory("PK_FreezeControl")) {
+				if (victim.health > 0 && !victim.CountInv("PK_BurnControl") && !victim.CountInv("PK_FreezeControl")) {
 					victim.GiveInventory("PK_BurnControl",1);
 					let control = PK_BurnControl(victim.FindInventory("PK_BurnControl"));
 					if (control && target)
