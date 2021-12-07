@@ -153,7 +153,7 @@ Class PK_MainHandler : EventHandler {
 			}
 		}
 		//PKREFRESH cheat (reset golden card uses)
-		if (e.name == "PK_RefreshCards") {		
+		if (e.name == "PK_RefreshCards") {
 			cardcontrol.RefreshCards();
 		}
 		if (e.name == "PK_GiveSouls") {
@@ -400,12 +400,12 @@ Class PK_MainHandler : EventHandler {
 			Menu.SetMenu("PKCardsMenu");
 		}
 		
-		/*let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (cardcontrol) {
 			int i = cardcontrol.RefreshCards();
 			if (pk_debugmessages)
 				console.printf("New map start: Refreshing cards for player %d. Gold Uses left: %d",e.PlayerNumber,i);
-		}*/
+		}
 		
 		// Make sure all Silver cards are present *and* active:		
 		for (let iitem = plr.Inv; iitem != NULL; iitem = iitem.Inv) {
