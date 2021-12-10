@@ -75,11 +75,11 @@ Class PK_ElectroDriver : PKWeapon {
 					continue;
 				PK_TrackingBeam.MakeBeam("PK_Lightning",ltarget,radius:32,hitpoint:next.pos+(0,0,next.height*0.5),masterOffset:(0,0,ltarget.height*0.5),style:STYLE_ADD);
 				next.DamageMobj(self,self,dmg * 0.75,'normal',flags:DMG_THRUSTLESS|DMG_NO_PAIN|DMG_PLAYERATTACK);
-				if (!next.FindInventory("PK_ElectroTargetControl"))
+				if (next.health > 0 && !next.CountInv("PK_ElectroTargetControl"))
 					next.GiveInventory("PK_ElectroTargetControl",1);
 			}
 		}
-		if (!ltarget.FindInventory("PK_ElectroTargetControl"))
+		if (ltarget.health > 0 && !ltarget.CountInv("PK_ElectroTargetControl"))
 			ltarget.GiveInventory("PK_ElectroTargetControl",1);
 		return ltarget.pos+(0,0,ltarget.height*0.5);
 	}
