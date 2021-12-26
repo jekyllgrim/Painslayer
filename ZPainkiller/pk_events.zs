@@ -354,13 +354,24 @@ Class PK_MainHandler : EventHandler {
 	}
 	override void WorldThingDestroyed(WorldEvent e) {
 		let act = e.thing;
-		if (act && demontargets.Find(act)) {
+		if (!act)
+			return;
+		if (act.bISMONSTER) {
 			demontargets.delete(demontargets.Find(act));
 			allenemies.delete(allenemies.Find(act));
+			if (act.bBOSS)
+				allbosses.delete(allbosses.Find(act));
 			//console.printf("Deleting %s from demontargets",act.GetClassName());
 		}
+		
 		if (act is "PK_SmallDebris")
 			debris.Delete(debris.Find(act));
+			
+		if (act is "PK_StakeProjectile")
+			stakes.delete(stakes.Find(act));
+			
+		if (act is "Inventory")
+			keyitems.delete(keyitems.Find(act));
 	}
 	
 	void GiveStartingPlayerItems(int pnumber) {
