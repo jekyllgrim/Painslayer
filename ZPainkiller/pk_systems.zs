@@ -1196,7 +1196,8 @@ Class PKC_Confusion : PK_BaseGoldenCard {
 		for (int i = 0; i < handler.demontargets.Size(); i++) {
 			if (handler.demontargets[i]) {
 				handler.demontargets[i].GiveInventory("PK_ConfusionControl",1);				
-				console.printf("Giving ConfusionControl to %s",handler.demontargets[i].GetClassName());
+				if (pk_debugmessages > 1)
+					console.printf("Giving ConfusionControl to %s",handler.demontargets[i].GetClassName());
 			}
 		}
 	}
