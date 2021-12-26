@@ -661,7 +661,6 @@ Class PK_GoldSoul : Health {
 		inventory.pickupmessage "$PKI_GOLDSOUL";
 		inventory.amount 100;
 		inventory.maxamount 100;
-		inventory.pickupsound "";
 		renderstyle 'Add';
 		+NOGRAVITY
 		alpha 0.9;
@@ -718,6 +717,28 @@ Class PK_GoldSoulparticle : PK_BaseFlare {
 	}
 }
 
+/*Class PK_MegaSoul : CustomInventory {
+	mixin PK_PickupSound;
+	Default {
+		renderstyle 'Add';
+		+NOGRAVITY
+		+COUNTITEM
+		+BRIGHT
+		inventory.pickupsound "pickups/soul/mega";
+		inventory.pickupmessage "$PKI_MEGASOUL";
+		xscale 0.3;
+		yscale 0.25;
+		alpha 2.5;
+		Tag "$PKC_MegaSoul";
+	}
+
+Class PK_MegaSoulHealth : Health {
+	Default {
+		inventory.amount 200;
+		inventory.maxamount 200;
+	}
+}*/
+
 Class PK_MegaSoul : PK_GoldSoul {
 	Default {
 		inventory.amount 200;
@@ -731,6 +752,12 @@ Class PK_MegaSoul : PK_GoldSoul {
 	}
 	override void Tick() {
 		Actor.Tick();
+	}
+	override bool TryPickup(in out actor toucher) {
+		if (toucher && toucher.player) {
+			toucher.GiveInventory("PK_GoldArmor", 1);
+		}
+		return super.TryPickup(toucher);
 	}
 	states {
 	Spawn:
