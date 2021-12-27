@@ -32,3 +32,48 @@ class ListMenuItemPKDrawMenuBackground : ListMenuItemStaticPatch {
 		PK_StatusBarScreen.DrawTexture(mTexture, (960,540));
 	}
 }
+
+
+class OptionMenuItemPKCrosshairOption : OptionMenuItemOption 
+{
+	CVar xhair;
+	
+	OptionMenuItemPKCrosshairOption Init(String label, Name command)
+	{
+		Super.Init(label, command, "Crosshairs", null, 0);
+		xhair = Cvar.FindCvar('Crosshair');
+		return self;
+	}
+	
+	override int Draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
+	{
+		if (mCenter)
+		{
+			indent = (screen.GetWidth() / 2);
+		}
+		drawLabel(indent, y, selected? OptionMenuSettings.mFontColorSelection : OptionMenuSettings.mFontColor, isGrayed());
+
+		if (!xhair)
+			return indent;
+		string texname = String.Format("XHAIRB%d", xhair.GetInt());
+		TextureID tex = TexMan.CheckForTexture(texname, TexMan.Type_Any);
+		if (!tex)
+			return indent;
+		vector2 texsize = TexMan.GetScaledSize(tex);
+			
+		String label = Stringtable.Localize(mLabel);
+		int wd = Menu.OptionWidth(label);
+		int x = (screen.GetWidth() + wd) / 2;
+		int w = screen.GetWidth();
+		int h = screen.GetHeight();
+		Screen.DrawTexture(
+			tex, true, 
+			x, y, 
+			DTA_VirtualWidth, w, 
+			DTA_VirtualHeight, h, 
+			DTA_FullscreenScale, FSMode_ScaleToFit43,
+			DTA_LegacyRenderStyle, Style_Add
+		);
+		return indent;
+	}
+}

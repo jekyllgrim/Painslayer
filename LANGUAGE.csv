@@ -366,6 +366,7 @@ Painslayer Settings,PKM_TITLE,Menu,Настройки Painslayer
 Mod Settings,PKM_TITLE_SHORT,Menu,Настройки мода
 CONTROLS,PKM_SUB_CONTROLS,Menu,УПРАВЛЕНИЕ
 GAMEPLAY,PKM_SUB_GAMEPLAY,Menu,ИГРОВОЙ ПРОЦЕСС
+HUD,PKM_SUB_HUD,Menu,ИНТЕРФЕЙС
 Painkiller movement physics,PKM_PKMovement,Menu,Физика движения из Painkiller
 "Enables Painkiller movement instead of Doom movement.
 This involves different friction, momentum and jumping.
@@ -400,6 +401,12 @@ Show Codex Notifications,PKM_ShowCodexNotifs,Menu,Показывать опов�
 "Show notifications for Codex updates in the top right corner
 after you pick up a new item for the first time.",PKM_ShowCodexNotifs_Desc,Menu,"Показывать оповещения об обновлении Кодекса в верхнем правом
 углу экрана, когда вы впервые подбираете новый предмет."
+Show Equipped Cards in the HUD,PKM_ShowCardsInHUD,Menu,Показывать используемые карты в интерфейсе
+"Show icons of the currently equipped Black Tarot cards
+in the top-left corner of the HUD. Disable this if
+they seem to add clutter.",PKM_ShowCardsInHUD_Desc,Menu,"Показывать используемые карты Черного Таро в верхем левом
+углу интерфейса. Эту настройку можно отключить, если вы
+предпочитаете, чтобы экран был посвободнее."
 Open Black Tarot,PKM_OpenTarot,Menu,Открыть доску Таро
 Black Tarot Board lets you purchase and equip cards,PKM_OpenTarot_Desc,Menu,На доске Черного Таро можно покупать и снаряжать карты
 Use Golden Cards,PKM_UseCards,Menu,Использовать золотые карты

@@ -49,12 +49,14 @@ Optionmenu "PK_Settings" {
 	Class "PKTLTPOptionsMenu"
 	Title "$PKM_TITLE"
 	StaticText ""
+	// mod controls:
 	StaticText "$PKM_SUB_CONTROLS", yellow
 	StaticText ""
 	PKTLTPControl "$PKM_UseCards", "$PKM_UseCards_Desc", "White", "netevent PK_UseGoldenCards"
 	PKTLTPControl "$PKM_OpenTarot", "$PKM_OpenTarot_Desc", "White", "netevent PKCOpenBoard"
 	PKTLTPControl "$PKM_OpenCodex", "$PKM_OpenCodex_Desc", "White", "netevent PKCOpenCodex"	
 	StaticText ""
+	// gameplay options:
 	StaticText "$PKM_SUB_GAMEPLAY", yellow
 	StaticText ""
 	PKTLTPOption "$PKM_PKMovement", "$PKM_PKMovement_Desc", "White", "pk_movement", "OnOff"
@@ -63,14 +65,22 @@ Optionmenu "PK_Settings" {
 	PKTLTPScaleSlider "$PKM_QOLCATCHER",	"$PKM_QOLCATCHER_Desc", "White", "pk_QoLCatcherDistance", 0, 96, 8, "$OPTVAL_OFF"
 	PKTLTPOption "$PKM_ALLOWDEMON", "$PKM_ALLOWDEMON_DESC", "White", "pk_allowDemonMorph", "OnOff"
 	PKTLTPOption "$PKM_GIFTCARRDS", "$PKM_GIFTCARRDS_DESC", "White", "pk_allowFreeCards", "OnOff"
-	PKTLTPOption "$PKM_ShowCodexNotifs", "$PKM_ShowCodexNotifs_Desc", "White", "pk_CodexNotifs", "OnOff"
-	Option "$HUDMNU_CROSSHAIRON", "crosshair", "Crosshairs"
 	StaticText ""
+	// HUD options:
+	StaticText "$PKM_SUB_HUD", yellow
+	StaticText ""
+	PKCrosshairOption "$HUDMNU_CROSSHAIRON", "crosshair"
+	PKTLTPOption "$PKM_ShowCodexNotifs", "$PKM_ShowCodexNotifs_Desc", "White", "pk_CodexNotifs", "OnOff"
+	PKTLTPOption "$PKM_ShowCardsInHUD", "$PKM_ShowCardsInHUD_Desc", "White", "pk_ShowCardsInHUD", "OnOff"
+	StaticText ""
+	// performance options:
 	StaticText "$PKM_Sub_Performance", yellow
 	StaticText ""
 	PKTLTPOption "$PKM_ParticlesAmount", "$PKM_ParticlesAmount_Desc", "White", "pk_particles", "ParticlesAmount"
 	PKTLTPScaleSlider "$PKM_DebrisNumber", "$PKM_DebrisNumber_Desc", "white", "pk_maxdebris", 100, 3000, 100, ""
 	StaticText ""
+	// a section where you can switch primary/secondary
+	// fire modes for any weapon:
 	StaticText "$PKM_FIREMODES", yellow
 	StaticText ""
 	PKTLTPOption "$CNTRLMNU_SLOT1", "$PKM_FIREMODES_DESC", "White", "pk_switch_Painkiller", 			"PKIL_MODES"
@@ -84,6 +94,7 @@ Optionmenu "PK_Settings" {
 	StaticText ""
 	StaticText ""
 	StaticText ""
+	// tooltips options:
 	StaticText "$TLTPTOOLTIPMNU_VERSION", "yellow"
 	Submenu "$OPTMNU_TLTPTOOLTIP", "PKTooltipOptionsMenu"
 }
