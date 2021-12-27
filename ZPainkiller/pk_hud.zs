@@ -11,6 +11,7 @@ Class PainkillerHUD : BaseStatusBar {
 	protected double notifAlphaMod;
 	protected int notifDur;
 	protected CVar notifsCvar;
+	protected CVar showCards;
 	
 	protected int hudstate;
 	protected int arrowangle;
@@ -362,6 +363,10 @@ Class PainkillerHUD : BaseStatusBar {
 	// Draws currently equipped cards (not present in the original game)
 	protected void DrawEquippedCards() {
 		if (!cardcontrol)
+			return;
+		if (!showCards)
+			showCards = CVar.GetCVar('pk_ShowCardsInHUD', CPlayer);
+		if (!showCards || !showCards.GetBool())
 			return;
 		int cwidth = 19; //card width
 		int xpos = 2;
