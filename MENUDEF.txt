@@ -64,6 +64,7 @@ Optionmenu "PK_Settings" {
 	PKTLTPOption "$PKM_ALLOWDEMON", "$PKM_ALLOWDEMON_DESC", "White", "pk_allowDemonMorph", "OnOff"
 	PKTLTPOption "$PKM_GIFTCARRDS", "$PKM_GIFTCARRDS_DESC", "White", "pk_allowFreeCards", "OnOff"
 	PKTLTPOption "$PKM_ShowCodexNotifs", "$PKM_ShowCodexNotifs_Desc", "White", "pk_CodexNotifs", "OnOff"
+	Option "$HUDMNU_CROSSHAIRON", "crosshair", "Crosshairs"
 	StaticText ""
 	StaticText "$PKM_Sub_Performance", yellow
 	StaticText ""
