@@ -25,6 +25,8 @@ Class PainkillerHUD : BaseStatusBar {
 	
 	PK_CardControl cardcontrol;
 	
+	protected vector2 cardTexSize;
+	
 	protected Actor nearestBoss;
 	protected Shape2D healthBarShape;
 	protected ui double healthBarFraction;
@@ -34,7 +36,46 @@ Class PainkillerHUD : BaseStatusBar {
 	protected TextureID hpBartex;
 	protected name bossSpriteName;
 	protected TextureID bossSprite;
+		
+	/*	
+		I'm using these wrappers to counteract Doom's native vertical
+		pixel stretch. I could also counteract it by using a forcescaled
+		HUD, but that would disable user-side HUD scaling, and I wanted
+		to let the players change the size of the HUD no matter what,
+		so I ended up using this simple HUD.
+		It checks for the value of the hud_aspectscale CVAR that 
+		determines whether HUD stretching is used, and if true,
+		simply multiplies vertical position and scale of all elements by
+		0.83... which effectively gets rid of all stretching.
+	*/
+	void PK_DrawImage(String texture, Vector2 pos, int flags = 0, double Alpha = 1., Vector2 box = (-1, -1), Vector2 scale = (1, 1)) {
+		if (aspectScale.GetBool() == true) {
+			scale.y *= noYStretch;
+			pos.y *= noYStretch;
+		}
+		DrawImage(texture, pos, flags, Alpha, box, scale);
+	}
 	
+	// Same as above but for strings
+	void PK_DrawString(HUDFont font, String string, Vector2 pos, int flags = 0, int translation = Font.CR_UNTRANSLATED, double Alpha = 1., int wrapwidth = -1, int linespacing = 4, Vector2 scale = (1, 1)) {
+		if (aspectScale.GetBool() == true) {
+			scale.y *= noYStretch;
+			pos.y *= noYStretch;
+		}
+		DrawString(font, string, pos, flags, translation, Alpha, wrapwidth, linespacing, scale);
+	}
+	
+	// Same as above but for inventory icons
+	void PK_DrawInventoryIcon(Inventory item, Vector2 pos, int flags = 0, double alpha = 1.0, Vector2 boxsize = (-1, -1), Vector2 scale = (1.,1.)) {
+		if (aspectScale.GetBool() == true) {
+			scale.y *= noYStretch;
+			pos.y *= noYStretch;
+		}
+		DrawInventoryIcon(item, pos, flags, alpha, boxsize, scale);
+	}	
+	
+	// Draws arrow for the compass pointing at the nearest monster.
+	// Incorporates no-vertical-stretch effect from the above.
 	void DrawMonsterArrow(vector2 arrowPos = (0,23), vector2 shadowofs = (0,0)) {
 		if (nearestBoss)
 			return;
@@ -51,33 +92,6 @@ Class PainkillerHUD : BaseStatusBar {
 			DrawImageRotated("pkharrow", arrowPos+shadowOfs, fflags, arrowangle, scale: arrowscale, col:color(128,0,0,0));	
 		}
 		DrawImageRotated("pkharrow", arrowPos, fflags, arrowangle, scale: arrowscale);
-	}
-	
-	/*	I originally used these wrappers to counteract Y-stretching but eventually gave up
-		since I couldn't get red of it on rotating elements.
-	*/
-	void PK_DrawImage(String texture, Vector2 pos, int flags = 0, double Alpha = 1., Vector2 box = (-1, -1), Vector2 scale = (1, 1)) {
-		if (aspectScale.GetBool() == true) {
-			scale.y *= noYStretch;
-			pos.y *= noYStretch;
-		}
-		DrawImage(texture, pos, flags, Alpha, box, scale);
-	}
-	
-	void PK_DrawString(HUDFont font, String string, Vector2 pos, int flags = 0, int translation = Font.CR_UNTRANSLATED, double Alpha = 1., int wrapwidth = -1, int linespacing = 4, Vector2 scale = (1, 1)) {
-		if (aspectScale.GetBool() == true) {
-			scale.y *= noYStretch;
-			pos.y *= noYStretch;
-		}
-		DrawString(font, string, pos, flags, translation, Alpha, wrapwidth, linespacing, scale);
-	}
-	
-	void PK_DrawInventoryIcon(Inventory item, Vector2 pos, int flags = 0, double alpha = 1.0, Vector2 boxsize = (-1, -1), Vector2 scale = (1.,1.)) {
-		if (aspectScale.GetBool() == true) {
-			scale.y *= noYStretch;
-			pos.y *= noYStretch;
-		}
-		DrawInventoryIcon(item, pos, flags, alpha, boxsize, scale);
 	}
 	
 	//show 3 active golden cards at the lower center of the screen
@@ -97,6 +111,10 @@ Class PainkillerHUD : BaseStatusBar {
 		}
 	}
 	
+	// A very basic function that draws icons for the active power-ups
+	// vertically, at the right side of the screen.
+	// It also makes sure to not move the icons up and down when a specific
+	// icon is blinking, as opposed to the similar vanilla function.
 	override void DrawPowerUps() {
 		Vector2 pos = (-PWICONSIZE / 2, -49);
 		for (let iitem = CPlayer.mo.Inv; iitem != NULL; iitem = iitem.Inv) {
@@ -114,15 +132,19 @@ Class PainkillerHUD : BaseStatusBar {
 	
 	override void Init() {
 		super.Init();
-		Font fnt = "PKHNUMS";
-		Font times = font_times;
+		Font fnt = "PKHNUMS"; //font with numbers 
+		Font times = font_times; //Times font used in other places too
 		mIndexFont = HUDFont.Create(fnt, fnt.GetCharWidth("0"), true, 1, 1);
 		mNotifFont = HUDFont.Create("consolefont");
+		// Base values for the Codex notif pop-up:
 		notifAlpha = 0.6;
 		notifAlphaMod = 0.05;
+		// Values for the circilar boss health bar:
 		hpBarBackground = TexMan.CheckForTexture("pkxhpbkg");
 		hpBartex = TexMan.CheckForTexture("pkxhpbar");
 		hpBarScale = TexMan.GetScaledSize(hpBartex);
+		//dimensions of a card texture:
+		cardTexSize = TexMan.GetScaledSize(TexMan.CheckForTexture("graphics/HUD/Tarot/cards/UsedCard.png"));
 	}
 	
 	override void Draw (int state, double TicFrac) {
@@ -140,17 +162,25 @@ Class PainkillerHUD : BaseStatusBar {
 		if (CPlayer.mo.FindInventory("PowerInvulnerable",true)) {
 			PK_DrawImage("PKHHORNS",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);
 		}
+		// Top elements draw in Fullscreen and Alt Hud
+		// These include mosnter compass, gold and soul counters, and keys:
 		if (state == HUD_Fullscreen || state == HUD_AltHud)
 			DrawTopElements();
+		// Health, armor, ammo, etc.
+		// In statusbar mode it also moves the monster compass,
+		// keys, gold and soul counters to the bottom
 		if (state == HUD_StatusBar || state == HUD_Fullscreen)
 			DrawBottomElements();
-		//DrawEquippedCards();
+		DrawEquippedCards();
+		DrawCardUses();
 		DrawCodexNotif();
 		DrawActiveGoldenCards();
+		// Keys are already present in the AltHud:
 		if (state != HUD_AltHud) {
 			DrawKeys();
 		}
 		fullscreenOffsets = true;
+		
 	}
 	
 	override void Tick() {
@@ -181,7 +211,9 @@ Class PainkillerHUD : BaseStatusBar {
 		UpdateCodexNotif();
 		UpdateMonsterCompass();
 	}
-
+	
+	// Update information for the monster compass to determine
+	// where the arrow is going to point:
 	protected void UpdateMonsterCompass() {		
 		let player = CPlayer.mo;
 		if (!player)
@@ -252,60 +284,75 @@ Class PainkillerHUD : BaseStatusBar {
 		}
 	}
 	
+	// Draw notification pop-up for a new Codex entry.
+	// This happens when you pick up a weapon, or item that haven't been 
+	// picked up before, as well as in some specific cases, such as
+	// opening the Tarot for the first time, getting gold, etc.
+	// (All of those are handled manually in those places.)
 	protected void DrawCodexNotif() {
+		// Do nothing if the player disabled Codex notifs:
 		if (!notifsCvar || notifsCvar.GetBool() == false)
 			return;
+		// Do nothing if there's no recorded last pickup:
 		if (!invcontrol || !invcontrol.latestPickup || invcontrol.codexOpened)
-			return;		
+			return;
+		// Get the name of the pickup (not necessarily weapon):
 		string weapname = StringTable.Localize(invcontrol.latestPickupName);
-		vector2 pos1 = (-112, -6);
-		vector2 pos2 = (pos1.x, pos1.y + 10);
-		//PK_DrawString(mNotifFont, String.Format("notifAlpha: %f | notifAlphaMod: %f", notifAlpha, notifAlphaMod), (0,0), alpha: notifAlpha);
-		/*vector2 hudscale = GetHUDScale();
-		int posx = 0;
-		int posy = Screen.GetHeight() - (42 * hudscale.y);
-		Screen.DrawText(
-			font_times, Font.CR_UNTRANSLATED, 
-			posx, 42, 
-			String.Format("New Codex entry: %s", weapname)
-		);*/
+		// Get the binding for opening the Codex:
 		string codexKey = PK_Keybinds.getKeyboard("netevent PKCOpenCodex");
-		PK_DrawString(mNotifFont, String.Format(StringTable.Localize("$PKC_NEWENTRY"),codexKey), pos1, DI_SCREEN_RIGHT_TOP | DI_TEXT_ALIGN_CENTER, Font.CR_Gold, alpha: notifAlpha);
-		PK_DrawString(mNotifFont, String.Format("%s", weapname), pos2, DI_SCREEN_RIGHT_TOP | DI_TEXT_ALIGN_CENTER, Font.CR_Gold, alpha: notifAlpha);
+		// Draw the notification:
+		// "Codex updated"
+		vector2 pos1 = (-4, 0);
+		PK_DrawString(mNotifFont, String.Format(StringTable.Localize("$PKC_NEWENTRY"),codexKey), pos1, DI_SCREEN_RIGHT_TOP|DI_TEXT_ALIGN_RIGHT, Font.CR_Gold, alpha: notifAlpha);
+		// Codex tab name:
+		vector2 pos2 = (pos1.x, pos1.y + 10);
+		PK_DrawString(mNotifFont, weapname, pos2, DI_SCREEN_RIGHT_TOP|DI_TEXT_ALIGN_RIGHT, Font.CR_Gold, alpha: notifAlpha);
 	}
 	
+	// Handle the Codex notif display:
 	protected void UpdateCodexNotif() {
 		let player = CPlayer.mo;
 		if (!player)
 			return;
+		// Cache the "allow notifs" CVAR:
 		if (!notifsCvar)
 			notifsCvar = CVar.GetCVar('pk_CodexNotifs', CPlayer);
 		if (notifsCvar.GetBool() == false)
 			return;
 		if (!invcontrol)
 			invcontrol = PK_InvReplacementControl(player.FindInventory("PK_InvReplacementControl"));
+		// Do nothing if there's no recorded last pickup:
 		if (!invcontrol || !invcontrol.latestPickup || invcontrol.codexOpened)
 			return;
 		curLatestPickup = invcontrol.latestPickup;
 		double targetMod;
 		vector2 notifAlphaLimits;
+		// Keep displaying the same notif as long as we haven't picked up
+		// anythign new:
 		if (prevLatestPickup && prevLatestPickup == curLatestPickup) {
+			// The notif has a limited duration. If it's above 0,
+			// the notif flashes between 0.5 and 1.0 alpha:
 			if (notifDur > 0) {
-				notifDur--;
+				notifDur--; //decrement duration
 				notifAlphaLimits = (0.5, 1);
-				targetMod = 0.05;
+				targetMod = 0.05; //alpha step
 			}
+			// Otherwise the notif doesn't disappear but instead
+			// flashes between 0.1 and 0.25 alpha with lower speed:
 			else {
 				notifAlphaLimits = (0.1, 0.25);
-				targetMod = 0.005;
+				targetMod = 0.005; //alpha step
 			}
+			// double-check the alpha step is correct:
 			if (abs(notifAlphaMod) != targetMod)
 				notifAlphaMod = targetMod;
 			notifAlpha = Clamp(notifAlpha + notifAlphaMod, notifAlphaLimits.x, notifAlphaLimits.y);
+			// invert alpha step if the alpha reaches the top/bottom limit:
 			if (notifAlpha <= notifAlphaLimits.x || notifAlpha >= notifAlphaLimits.y)
 				notifAlphaMod *= -1;
 			return;
 		}
+		// Set the initial duration to 175:
 		else {
 			notifDur = 175;
 			prevLatestPickup = curLatestPickup;
@@ -313,22 +360,51 @@ Class PainkillerHUD : BaseStatusBar {
 	}
 	
 	// Draws currently equipped cards (not present in the original game)
-	// Currently unusued.
 	protected void DrawEquippedCards() {
 		if (!cardcontrol)
 			return;
-		for (int i = 0; i < 5; i++) {
-			if (cardcontrol.EquippedSlots[i]) {
-				string texpath = String.Format("graphics/Tarot/cards/%s.png",cardcontrol.EquippedSlots[i]);
-				PK_DrawImage(texpath,((4 + i*18),2),DI_SCREEN_LEFT_TOP|DI_ITEM_LEFT_TOP,scale:(0.12,0.12));
-			}
-			string framepath;
-			if (i < 2)
-				framepath = "graphics/Tarot/cards/FrameSilver.png";
-			else
-				framepath = "graphics/Tarot/cards/FrameGold.png";
-			PK_DrawImage(framepath,((4 + i*18),2),DI_SCREEN_LEFT_TOP|DI_ITEM_LEFT_TOP,scale:(0.12,0.12));
-		}
+		int cwidth = 19; //card width
+		int xpos = 2;
+		vector2 sscale = (0.13, 0.13);
+		int fflags = DI_SCREEN_LEFT_TOP|DI_ITEM_LEFT_TOP;
+		for (int slot = 0; slot < 5; slot++) {
+			if (!cardcontrol.EquippedSlots[slot])
+				continue;			
+			string tex = String.Format("graphics/HUD/Tarot/cards/%s.png",cardcontrol.EquippedSlots[slot]);
+			vector2 pos = (xpos + cwidth * slot, 1);
+			PK_DrawImage(tex, pos, fflags, scale: sscale);
+			if (slot >= 2 && !cardcontrol.goldActive && cardcontrol.GetGoldUses() <= 0)
+				PK_DrawImage("graphics/HUD/Tarot/cards/UsedCard.png", pos, fflags, alpha: 0.7, scale: sscale);
+		}	
+	}	
+	
+	// Draws a small indicator with a number of remaining
+	// golden cards activations (not present in the original
+	// game):
+	protected void DrawCardUses() {
+		if (!cardcontrol)
+			return;
+		// Check if any gold cards are equipped:
+		if (!cardcontrol.EquippedSlots[2] && !cardcontrol.EquippedSlots[3] && !cardcontrol.EquippedSlots[4])
+			return;
+		// Draw to the left of the top bar by default:
+		int fflags = DI_SCREEN_TOP|DI_SCREEN_HCENTER;		
+		vector2 ppos = (-94, 24);
+		// For statusbar mode, draw next to the bottom
+		// left panel with health/armor:
+		if (hudstate == HUD_StatusBar) {
+			fflags = DI_SCREEN_LEFT_BOTTOM;
+			ppos = (69, -14);
+		}				
+		// Draw the indicator and the number of uses:
+		PK_DrawImage("pkxuses", ppos, (fflags |= DI_ITEM_RIGHT));
+		PK_DrawString(
+			mIndexFont, 
+			String.Format("%d", cardcontrol.GetGoldUses()), 
+			ppos - (7.4, 17), 
+			(fflags |= DI_TEXT_ALIGN_LEFT),
+			scale: (0.8, 0.8)
+		);
 	}
 	
 	//draw all bottom elements (health/armor/ammo)
@@ -352,7 +428,8 @@ Class PainkillerHUD : BaseStatusBar {
 		PK_DrawString(mIndexFont, String.Format("%03d",CPlayer.health), (19, -28),DI_SCREEN_LEFT_BOTTOM,translation:healthColor);
 		PK_DrawString(mIndexFont, String.Format("%03d",GetArmorAmount()), (19, -16),DI_SCREEN_LEFT_BOTTOM,translation:font.CR_UNTRANSLATED);
 		
-		//if using statusbar, we don't draw the top bar at all and we draw souls/gold counters as well as compass at the bottom:
+		// Ff using statusbar, we don't draw the top bar at all 
+		// and we draw souls/gold counters as well as compass at the bottom:
 		if (hudstate == HUD_StatusBar) {		
 			//draw compass at bottom center
 			PK_DrawImage("pkxtop0",(0,4),DI_SCREEN_BOTTOM|DI_SCREEN_HCENTER|DI_ITEM_BOTTOM);
@@ -371,7 +448,8 @@ Class PainkillerHUD : BaseStatusBar {
 		
 		//AMMO
 		let weap = CPlayer.readyweapon;
-		//if Painkiller is selected, explicitly draw painkiller blade/projectile icons and an infinity symbol next to them:
+		// If Painkiller is selected, explicitly draw painkiller blade/projectile
+		// icons and an infinity symbol next to them:
 		if (weap && weap.GetClassName() == "PK_Painkiller") {
 			PK_DrawImage("pkhpkill",(-13,-11),DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_CENTER);
 			PK_DrawImage("pkhblade",(-13,-23),DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_CENTER);
@@ -379,7 +457,7 @@ Class PainkillerHUD : BaseStatusBar {
 			PK_DrawImage("pkhinfin",(-30,-23),DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_CENTER);
 			return; //and do nothing else
 		}
-		//otherwise draw the proper ammo
+		// Otherwise draw the proper ammo icons and amounts:
 		Inventory ammotype1, ammotype2;
 		[ammotype1, ammotype2] = GetCurrentAmmo();
 		if (ammotype1) {
@@ -465,9 +543,10 @@ Class PainkillerHUD : BaseStatusBar {
 		{
 			hb = new("Shape2D");
 			
-			// What starting angle you use and which direction you go (clockwise or counter clockwise)
-			// will determine where the healthbar starts and which direction it removes segments
-			double angStep = -360. / segments; // + = bar decreases counter clockwise, - = bar decreases clockwise
+			// What starting angle you use and which direction you go 
+			// (clockwise or counter clockwise) will determine where 
+			// the healthbar starts and which direction it removes segments:
+			double angStep = -360. / segments; // - decreases clockwise, + decreases counter clockwise
 			double ang = 270; // 90 = bottom, 270 = top, 0 = right, 180 = left
 			
 			// Anchor a point in the middle
@@ -500,7 +579,7 @@ Class PainkillerHUD : BaseStatusBar {
 		}
 	}
 		
-
+	// Ammo counter is red if we have 25% or fewer ammo:
 	int GetAmmoColor(Inventory ammoclass) {		
 		int ammoColor;
 		if	(ammoclass.amount > ammoclass.default.maxamount * 0.25) 
