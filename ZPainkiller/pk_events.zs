@@ -154,7 +154,7 @@ Class PK_MainHandler : EventHandler {
 		}
 		//PKREFRESH cheat (reset golden card uses)
 		if (e.name == "PK_RefreshCards") {
-			cardcontrol.RefreshCards();
+			cardcontrol.RefreshGoldActivations();
 		}
 		if (e.name == "PK_GiveSouls") {
 			int amt = (e.args[0] == 0) ? 1 : e.args[0];
@@ -413,7 +413,7 @@ Class PK_MainHandler : EventHandler {
 		
 		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (cardcontrol) {
-			int i = cardcontrol.RefreshCards();
+			int i = cardcontrol.RefreshGoldActivations();
 			if (pk_debugmessages)
 				console.printf("New map start: Refreshing cards for player %d. Gold Uses left: %d",e.PlayerNumber,i);
 		}

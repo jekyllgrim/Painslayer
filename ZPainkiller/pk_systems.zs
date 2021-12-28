@@ -606,7 +606,7 @@ Class PK_CardControl : PK_InventoryToken {
 	}
 	
 	//called to reset everything that needs resetting when starting a new map (or with PKREFRESH cheat):
-	int RefreshCards() {
+	int RefreshGoldActivations() {
 		totalGoldUses = 0;
 		goldUses = 1;
 		if (owner.CountInv("PKC_Forgiveness")) {
