@@ -1,4 +1,5 @@
-//same as vanilla ListMenuTextItem, but centered like ListMenuItemStaticPatchCentered
+// Same as vanilla ListMenuTextItem, but 
+// centered like ListMenuItemStaticPatchCentered
 class ListMenuItemPKTextItemCentered : ListMenuItemTextItem {
 	
 	override void Draw(bool selected, ListMenuDescriptor desc)	{
@@ -20,8 +21,9 @@ class ListMenuItemPKTextItemCentered : ListMenuItemTextItem {
 	}
 }
 
-//a dedicated element that will draw fullscreen background for the main menu
-//but only if we're not in a map (only intro screen and titlemap qualify)
+// A dedicated element that will draw fullscreen 
+// background for the main menu but only if we're 
+// not in a map (only intro screen and titlemap qualify)
 class ListMenuItemPKDrawMenuBackground : ListMenuItemStaticPatch {
 	override void Draw(bool selected, ListMenuDescriptor desc) {
 		if (gamestate == GS_LEVEL)
@@ -51,19 +53,32 @@ class OptionMenuItemPKCrosshairOption : OptionMenuItemOption
 		{
 			indent = (screen.GetWidth() / 2);
 		}
+		// Draw the option item label:
 		drawLabel(indent, y, selected? OptionMenuSettings.mFontColorSelection : OptionMenuSettings.mFontColor, isGrayed());
-
+		
+		// Get the texture of the crosshair
+		// from the value of 'crosshair' cvar:
 		if (!xhair)
 			return indent;
 		string texname = String.Format("XHAIRB%d", xhair.GetInt());
 		TextureID tex = TexMan.CheckForTexture(texname, TexMan.Type_Any);
 		if (!tex)
 			return indent;
-		vector2 texsize = TexMan.GetScaledSize(tex);
 			
+		// Get the size of the menu item:
 		String label = Stringtable.Localize(mLabel);
-		int wd = Menu.OptionWidth(label);
-		int x = (screen.GetWidth() + wd) / 2;
+		int labelW = Menu.OptionWidth(label) * 1.2;
+		int labelH = Menu.Optionheight();		
+		// Define graphic's offsets based
+		// on the size of the label:
+		int x = (screen.GetWidth() + labelW) / 2;
+		y += labelH; // this centers the graphic next to the label
+		
+		// Get the graphic size and scale it down
+		// by the font's height:
+		vector2 texsize = TexMan.GetScaledSize(tex);
+		double texScale = texsize.y / labelH / 2;
+		
 		int w = screen.GetWidth();
 		int h = screen.GetHeight();
 		Screen.DrawTexture(
@@ -72,7 +87,9 @@ class OptionMenuItemPKCrosshairOption : OptionMenuItemOption
 			DTA_VirtualWidth, w, 
 			DTA_VirtualHeight, h, 
 			DTA_FullscreenScale, FSMode_ScaleToFit43,
-			DTA_LegacyRenderStyle, Style_Add
+			DTA_LegacyRenderStyle, Style_Add/*,
+			DTA_ScaleX, texScale,
+			DTA_ScaleY, texScale*/
 		);
 		return indent;
 	}
