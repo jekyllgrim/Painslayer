@@ -1,18 +1,18 @@
 default,identifier,remarks,ru
-"Currently the Black Tarot Board can't be used without the mouse. Navigate to '%s > %s > %s' to enable mouse in menus, then try opening the Board again.",TAROT_NEEDMOUSE,Black Tarot Board,"Для использования карт Таро необходима мышь. Включите использование мыши в меню с помощью '%s > %s > %s', затем откройте доску повторно."
+"Currently the Black Tarot Board can't be used without the mouse. Navigate to \c[PKGreenText]%s > %s > %s\c[PKBaseText] to enable mouse in menus, then try opening the Board again.",TAROT_NEEDMOUSE,Black Tarot Board,"Для использования карт Таро необходима мышь. Включите использование мыши в меню с помощью \c[PKGreenText]%s > %s > %s\c[PKBaseText], затем откройте доску повторно."
 (Press Esc to close this window),TAROT_PRESSESC,,"(Нажмите Esc, чтобы закрыть это окно)"
-Spend %d gold to buy this card?,TAROT_PURCHASE,Black Tarot Board,Купить эту карту за %d золота?
+Spend \c[PKGreenText]%d gold\c[PKBaseText] to buy this card?,TAROT_PURCHASE,Black Tarot Board,Купить эту карту за \c[PKGreenText]%d золота\c[PKBaseText]?
 You don't have enough gold to buy this card.,TAROT_CANTPURCHASE,Black Tarot Board,Недостаточно золота для покупки карты.
 "This card is already equipped and locked in the slot.
 You don't have enough gold to unlock this card.",TAROT_CANTUNEQUIP,Black Tarot Board,"Эта карта размещена в ячейке и заблокирована.
 У вас недостаточно золота, чтобы разблокировать ее."
-"This card is already equipped and locked in the slot. Will you spend %d gold to unlock it?
+"This card is already equipped and locked in the slot. Will you spend \c[PKGreenText]%d gold\c[PKBaseText] to unlock it?
 
-(Reach next map to re-equip cards for free.)",TAROT_PAYTOUNEQUIP,Black Tarot Board,"Эта карта размещена в ячейке и заблокирована. Разблокировать ее за %d золота?
+(Reach next map to re-equip cards for free.)",TAROT_PAYTOUNEQUIP,Black Tarot Board,"Эта карта размещена в ячейке и заблокирована. Разблокировать ее за \c[PKGreenText]%d золота\c[PKBaseText]?
 (В начале следующего уровня это можно будет сделать бесплатно.)"
 "Welcome to the Black Tarot.
 
- As a one-time gift you will now receive some random cards.",TAROT_FIRSTUSE,Black Tarot Board,"Черные карты Таро приветствуют вас.
+As a one-time gift you will now receive some random cards.",TAROT_FIRSTUSE,Black Tarot Board,"Черные карты Таро приветствуют вас.
 
 В качестве первого и последнего подарка вы сейчас получите несколько карт."
 "Are you sure you want to close the Black Tarot Board? 
@@ -24,6 +24,18 @@ Yes,TAROT_YES,Black Tarot Board,Да
 No,TAROT_NO,Black Tarot Board,Нет
 OK,TAROT_CLOSE,Black Tarot Board,ОК
 g,TAROT_GOLDABR,Black Tarot Board,з.
+Golden Cards can only be activated a limited number of times per map. This button allows you to refresh activations for gold.,TAROT_REFRESH_TIP,,Золотые карты можно активировать ограниченное число раз за уровень. Эта кнопка позволяет обновить число активаций после использования.
+"\c[PKGreenText]%d\c[PKBaseText] Golden Cards activations remaining.
+Do you want to spend \c[PKGreenText]%d gold\c[PKBaseText] to refresh the number of activations back to \c[PKGreenText]%d\c[PKBaseText]?
+
+(Reach next map to refresh for free.)",TAROT_REFRESH_REMAINING,,"Осталось активаций: \c[PKGreenText]%d\c[PKBaseText].
+Вы хотите потратить \c[PKGreenText]%d золота\c[PKBaseText] и обновить число активаций Золотых карт до \c[PKGreenText]%d\c[PKBaseText]?
+
+(В начале следующего уровня это произойдет бесплатно.)"
+"\c[PKGreenText]%d\c[PKBaseText] Golden Cards activations remaining.
+You need \c[PKGreenText]%d gold\c[PKBaseText] to refresh the number of activations. Make more gold or reach next map to refresh for free.",TAROT_REFRESH_NEEDGOLD,,"Осталось активаций: \c[PKGreenText]%d\c[PKBaseText].
+Вам нужно \c[PKGreenText]%d золота\c[PKBaseText], чтобы обновить число активаций Золотых карт. Добудьте больше золота, либо доберитесь до следующего уровня, чтобы обновить активации бесплатно."
+"\c[PKGreenText]%d\c[PKBaseText] is the maximum number of Gold Cards activations. Once you've used the cards in a map, you can come back to refresh the activation for gold.",TAROT_REFRESH_MAX,,"\c[PKGreenText]%d\c[PKBaseText] - это максимальное число активаций Золотых карт. Используйте Золотые карты на уровне, после чего вы сможете вернуться, чтобы обновить число активаций за золото."
 Black Tarot is not available on the easiest difficulty,TAROT_LOWSKILL,Black Tarot Board,Карты Таро недоступны на самой низкой сложности
 Take only half the damage.,PK_ENDURANCE_DESC,Tarot Cards,Вы получаете вдвое меньше урона.
 Move faster.,PK_SPEED_DESC,Tarot Cards,Вы двигаетесь быстрее.
@@ -352,7 +364,7 @@ Gold can be found in secret areas or obtained from enemies. See \c[PKGreenText]O
 
 - Dealing \c[PKRedText]excessive damage \c[PKWhiteText]to enemies, such as blowing up/gibbing weaker enemies. This makes them drop coins. 
 
-- \cIJuggling enemy corpses with Killer\c[PKWhiteText]: before a corpse disappears, simply shoot at it with the Killer. This prevents the corpse from despawning and will push it upwards and closer to you. Keep doing it to juggle the corpse every 3rd juggle produces a medium gold piece.",PKC_GOLDOBTAIN_DESC,Codex,"Получить золото можно несколькими способами:
+- \cIJuggling enemy corpses with Killer\c[PKWhiteText]: before a corpse disappears, simply shoot at it with the Killer. This prevents the corpse from despawning and will push it upwards and closer to you. Keep doing it to juggle the corpse; every 3rd juggle produces a medium gold piece.",PKC_GOLDOBTAIN_DESC,Codex,"Получить золото можно несколькими способами:
 
 - Золото появляется в \c[PKGreenText]секретных областях\c[PKWhiteText] на любых уровнях. Именно в них вы найдете большие и очень большие золотые предметы.
 

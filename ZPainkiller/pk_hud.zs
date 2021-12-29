@@ -201,7 +201,7 @@ Class PainkillerHUD : BaseStatusBar {
 		if (!cardcontrol)
 			cardcontrol = PK_CardControl(player.FindInventory("PK_CardControl"));
 		if (cardcontrol)
-			goldnum = cardcontrol.pk_gold;
+			goldnum = cardcontrol.GetGoldAmount();
 		//get souls amount:
 		let dmcont = PK_DemonMorphControl(player.FindInventory("PK_DemonMorphControl"));
 		if (dmcont) {

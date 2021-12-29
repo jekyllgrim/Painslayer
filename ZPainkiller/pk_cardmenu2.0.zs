@@ -38,6 +38,9 @@ Class PKCardsMenu : PKZFGenericMenu {
 	PKCBoardMessage needMousePopup;	//need mouse notification
 	int firstUsePopupDur;				//first use notification display duration
 	int needMousePopupDur;			//need mouse notification display duration
+	PKZFLabel goldUsesCounter; //shows the number of remaining gold cards activations
+	int goldUses;
+	int refreshcost;
 	
 	PKZFButton exitbutton;			//big round flashing menu close button
 	bool ExitHovered;				//whether it's hovered
@@ -104,6 +107,8 @@ Class PKCardsMenu : PKZFGenericMenu {
 		handler = new("PKCMenuHandler");
 		handler.menu = self;		
 		
+		GoldActivationsInit(); //gold uses counter and refresh button
+		
 		//clicking anywhere on the board is supposed to close the First Use popup:
 		let closeFirstUseBtn = PKZFButton.Create(
 			(0,0),
@@ -151,7 +156,46 @@ Class PKCardsMenu : PKZFGenericMenu {
 			(170,50)
 		);		
 		goldcounter.Pack(boardElements);
+		
 	}
+	
+	protected void GoldActivationsInit() {
+		vector2 counterPos = (435, 365);
+		vector2 counterSize = (47,47);
+		let counter = PKZFImage.Create(
+			counterpos,
+			counterSize,
+			"graphics/HUD/Tarot/board_numberbox.png"
+		);
+		
+		goldUsesCounter = PKZFLabel.Create(
+			counterpos,
+			counterSize,
+			"0",
+			"PKHNUMS",
+			alignment: PKZFElement.AlignType_Center,
+			textscale:PK_MENUTEXTSCALE * 2
+		);
+		
+		vector2 buttonPos = (431, 410);
+		let refreshButtonTex = PKZFBoxTextures.CreateSingleTexture("graphics/HUD/Tarot/board_refresh.png",false);
+		let refreshButtonTexHL = PKZFBoxTextures.CreateSingleTexture("graphics/HUD/Tarot/board_refresh_hover.png",false);
+		let refreshButton = PKZFButton.Create(
+			buttonPos,
+			(53, 53),
+			cmdhandler: handler,
+			command: "ShowRefreshPopup",
+			inactive:refreshButtonTex,
+			hover:refreshButtonTexHL,
+			click:refreshButtonTexHL,
+			disabled:refreshButtonTex
+		);
+		
+		counter.Pack(mainFrame);
+		goldUsesCounter.Pack(mainFrame);
+		refreshButton.Pack(mainFrame);
+	}
+		
 	
 	//card slots aren't evenly spaced, so I define their positions explicitly:
 	static const int PKCSlotXPos[] = {  58, 231, 489, 660, 829 };
@@ -515,7 +559,7 @@ Class PKCardsMenu : PKZFGenericMenu {
 		
 		int gold;
 		if (goldcontrol)
-			gold = goldcontrol.pk_gold;
+			gold = goldcontrol.GetGoldAmount();
 		
 		string purchaseLine;
 		if (!unequip)
@@ -555,6 +599,96 @@ Class PKCardsMenu : PKZFGenericMenu {
 			);
 			yesButton.pack(promptPopup);
 			
+		
+			//create No button:
+			let noButton = PKZFButton.Create(
+				(440,160),
+				buttonsize,
+				text:Stringtable.Localize("$TAROT_NO"),
+				cmdhandler:promptHandler,
+				command:"CancelPrompt",
+				fnt:font_times,
+				textscale:PK_MENUTEXTSCALE*1.5,
+				textColor:Font.FindFontColor('PKBaseText')
+			);
+			noButton.pack(promptPopup);
+		}
+		
+		else {		
+			//create Close button:
+			let okButton = PKZFButton.Create(
+				(265,160),
+				buttonsize,
+				text:Stringtable.Localize("$TAROT_CLOSE"),
+				cmdhandler:promptHandler,
+				command:"CancelPrompt",
+				fnt:font_times,
+				textscale:PK_MENUTEXTSCALE*1.5,
+				textColor:Font.FindFontColor('PKBaseText')
+			);
+			okButton.pack(promptPopup);
+		}			
+	}
+	
+	void ShowRefreshPopup() {
+		if (!boardElements || !goldcontrol)
+			return;
+			
+		S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+		vector2 popuppos = (192,160);
+		vector2 popupsize = (640,260);
+		
+		refreshCost = 0;
+		for (int i = 2; i < 5; i++) {
+			let slot = cardslots[i];
+			if (slot && slot.placedcard) {
+				PKCTarotCard card = cardslots[i].placedcard;
+				refreshCost += card.cardcost;
+			}
+		}				
+		
+		int maxUses = 1;
+		if (goldcontrol.EquippedSlots[0] == "Forgiveness" || goldcontrol.EquippedSlots[1] == "Forgiveness")
+			maxUses = 2;
+		string refresh_spend = String.Format(Stringtable.Localize("$TAROT_REFRESH_REMAINING"), goldUses, refreshCost, maxUses);
+		string refresh_needgold = String.Format(Stringtable.Localize("$TAROT_REFRESH_NEEDGOLD"), goldUses, refreshCost);
+		string refresh_atmax = String.Format(Stringtable.Localize("$TAROT_REFRESH_MAX"), goldUses);
+		
+		string refreshMsg;
+		if (goldUses >= maxUses) 
+			refreshMsg = refresh_atmax;
+		else if (goldcontrol.GetGoldAmount() >= refreshCost)
+			refreshMsg = refresh_spend;
+		else
+			refreshMsg = refresh_needgold;
+		
+		promptPopup = PKCBoardMessage.Create(
+			popuppos,
+			popupsize,
+			refreshMsg,
+			textscale:PK_MENUTEXTSCALE* 1,
+			alignment: PKZFElement.AlignType_HCenter
+		);
+		promptPopup.pack(mainFrame);		
+		
+		let promptHandler = PKCPromptHandler(new("PKCPromptHandler"));
+		promptHandler.menu = self;	
+		
+		vector2 buttonsize = (100,60);
+		
+		if (refreshMsg == refresh_spend) {		
+			//create Yes button:
+			let yesButton = PKZFButton.Create(
+				(100,160),
+				buttonsize,
+				text:Stringtable.Localize("$TAROT_YES"),
+				cmdhandler:promptHandler,
+				command:"RefreshUses",
+				fnt:font_times,
+				textscale:PK_MENUTEXTSCALE*1.5,
+				textColor:Font.FindFontColor('PKBaseText')
+			);
+			yesButton.pack(promptPopup);			
 		
 			//create No button:
 			let noButton = PKZFButton.Create(
@@ -655,24 +789,15 @@ Class PKCardsMenu : PKZFGenericMenu {
 			super.HandleBack();
 			return;
 		}
-		if  (firstUse) {
-			//if first use prompt is active, hitting Esc will close the popup, not the menu:
-			/*if (firstUsePopup) {
-				S_StartSound("ui/menu/open",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-				firstUsePopup.Unpack();
-				firstUsePopup.destroy();
-				return;
-			}*/			
-			//if exit prompt is active, hitting Esc will close the popup, not the menu:
-			if (promptPopup && promptPopup.isEnabled()) {
-				S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-				promptPopup.Hide();
-				promptPopup.Disable();
-			}
-			//otherwise draw a Yes/No exit prompt:
-			else
-				ShowExitPopup();
-			return;
+		//if exit prompt is active, hitting Esc will close the popup, not the menu:
+		if (promptPopup && promptPopup.isEnabled()) {
+			S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+			promptPopup.Hide();
+			promptPopup.Disable();
+		}
+		//otherwise draw a Yes/No exit prompt:
+		else if (firstUse) {
+			ShowExitPopup();
 		}
 		//if not first use, just close the board with the right sound
 		else {
@@ -752,6 +877,46 @@ Class PKCardsMenu : PKZFGenericMenu {
 				ExitAlphaDir = -1;
 			exitbutton.SetAlpha( (exitbutton.isHovered() && !SelectedCard) ? 1.0 : Clamp(exitbutton.GetAlpha()+0.05*ExitAlphaDir,0.25,1.0) );
 		}
+		
+		// Track the number of remaining Golden Card activations:
+		if (goldcontrol) {
+			goldUses = goldcontrol.GetGoldUses();
+			/*// I had to do the following to handle the Forgiveness card.
+			
+			// Forgiveness increases uses by 1, but that only happens when
+			// the player receives the actual card *item* (PKC_Forgiveness),
+			// and the player only gets the items when they close the board,
+			// not when they put the card into a slot on the board.
+			// Since I didn't want to rewrite that system, instead I'm simply
+			// checking whether the player has Forgiveness in the slot and
+			// whether they have PKC_Forgiveness in their actual inventory.
+			
+			// If the player has Forgiveness in a slot but does not yet have
+			// PKC_Forgiveness in the inventory, that means they just equipped
+			// Forgiveness but haven't closed the board yet. So, manually add
+			// 1 to the current number of uses to reflect the effect of
+			// Forgiveness immediately:
+			if ((goldcontrol.EquippedSlots[0] == "Forgiveness" || goldcontrol.EquippedSlots[1] == "Forgiveness") && goldcontrol.EquippedCards[0] != "PKC_Forgiveness" && goldcontrol.EquippedCards[1] != "PKC_Forgiveness")
+				goldUses++;
+			
+			// Conversely, if the player has PKC_Forgiveness in their inventory
+			// yet doesn't have it in any of the slots, that means they've just
+			// removed it from the slot but haven't yet closed the board. If so,
+			// decrement the number immediately:
+			else if (golduses > 0 && (goldcontrol.EquippedCards[0] == "PKC_Forgiveness" || goldcontrol.EquippedCards[1] == "PKC_Forgiveness") && goldcontrol.EquippedSlots[0] != "Forgiveness" && goldcontrol.EquippedSlots[1] != "Forgiveness")
+				goldUses--;
+			
+			// In any other case (the player has already closed the board after
+			// equipping/unequipping Forgiveness) we don't need to do anything
+			// special with the number, it simply should be equal to the
+			// remaining number of gold activations (obtained above with GetGoldUses())
+			// which is stored in the goldcontrol inventory token.
+			*/
+			// Update the value of the visual counter:
+			if (goldUsesCounter)
+				goldUsesCounter.setText(String.Format("%d", goldUses));
+		}
+		
 		super.Ticker();
 	}
 }
@@ -872,7 +1037,7 @@ Class PKCGoldCounter : PKZFFrame {
 		super.ticker();
 		if (!goldcontrol)
 			return;		
-		int gold = goldcontrol.pk_gold; //check how much gold we have
+		int gold = goldcontrol.GetGoldAmount(); //check how much gold we have
 		vector2 digitsize = (32,640);	//digit size is fixed
 		//iterate through digits, right to left:
 		//we don't modify the rightmost one, so it's > 0, not >= 0:
@@ -919,7 +1084,7 @@ Class PKCGoldCounter : PKZFFrame {
 Class PKCCardSlot : PKZFButton {
 	vector2 slotpos;
 	vector2 slotsize;
-	PKZFButton placedcard;
+	PKCTarotCard placedcard;
 	bool slottype;
 	int slotID;
 
@@ -1047,6 +1212,7 @@ Class PKCPromptHandler : PKZFHandler {
 			menu.PKCCloseBoard();
 			return;
 		}
+		// Card purchase popup: yes, buy the card
 		if (command == "BuyCard" && card) {
 			if (card.cardlocked) {
 				S_StartSound("ui/menu/open",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
@@ -1061,20 +1227,28 @@ Class PKCPromptHandler : PKZFHandler {
 				EventHandler.SendNetworkEvent(eventname,card.cardcost);
 				//console.printf("buying card %s at %d",card.cardID,card.cardcost);
 			}
-			let popup = menu.promptPopup;
-			if (popup) {
-				popup.Hide();
-				popup.Disable();
-			}
+			CloseMenuPopup();
 		}
+		// Refresh Uses popup: yes, refresh them
+		if (command == "RefreshUses") {
+			EventHandler.SendNetworkEvent("PKCRefreshUses", menu.refreshCost);
+			S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
+			CloseMenuPopup();
+		}		
 		//No: close the popup
 		if (command == "CancelPrompt") {
 			S_StartSound("ui/menu/back",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-			let popup = menu.promptPopup;
-			if (popup) {
-				popup.Hide();
-				popup.Disable();
-			}
+			CloseMenuPopup();
+		}
+	}
+	
+	void CloseMenuPopup() {
+		if (!menu)
+			return;
+		let popup = menu.promptPopup;
+		if (popup) {
+			popup.Hide();
+			popup.Disable();
 		}
 	}
 	
@@ -1109,7 +1283,12 @@ Class PKCMenuHandler : PKZFHandler {
 		if (!caller || !caller.isEnabled())
 			return;
 		//exit button - works if you don't have a picked card:
-		if (command == "BoardButton" && !menu.SelectedCard) {
+		if (command == "BoardButton") {
+			if (menu.SelectedCard) {
+				if (pk_debugmessages)
+					Console.Printf("Pressing Close button but a selected card blocks it");
+				return;
+			}
 			if (pk_debugmessages)
 				Console.Printf("Pressing Close button");
 			//if board opened for the first time in the map, show a yes/no prompt:
@@ -1131,8 +1310,12 @@ Class PKCMenuHandler : PKZFHandler {
 			menu.firstUsePopup.Unpack();
 			menu.firstUsePopup.Destroy();
 		}
-		//card slot: if you have a card picked and click the slot, the card will be placed in it and scaled up to its size:
 		
+		if (command == "ShowRefreshPopup") {
+			menu.ShowRefreshPopup();
+		}
+		
+		//card slot: if you have a card picked and click the slot, the card will be placed in it and scaled up to its size:		
 		if (command == "CardSlot") {
 			if (pk_debugmessages)
 				Console.Printf("Clicking card equip slot");
@@ -1221,7 +1404,7 @@ Class PKCMenuHandler : PKZFHandler {
 		//hovered over equip slots:
 		if (command == "CardSlot") {
 			if (!unhovered) {
-				if (pk_debugmessages)
+				if (pk_debugmessages > 1)
 					Console.Printf("Hovering over equip slot");
 				hoveredslot = PKCCardSlot(Caller); //record covered slot
 				//show gold info:
@@ -1239,7 +1422,7 @@ Class PKCMenuHandler : PKZFHandler {
 			}
 			//hide info tips:
 			else {
-				if (pk_debugmessages)
+				if (pk_debugmessages > 1)
 					Console.Printf("No longer hovering over equip slot");
 				hoveredslot = null; //no hovered slot
 				if (menu.goldSlotsInfo)
@@ -1253,12 +1436,12 @@ Class PKCMenuHandler : PKZFHandler {
 		if (command == "HandleCard") {
 			let card = PKCTarotCard(Caller);
 			if (!unhovered) {
-				if (pk_debugmessages)
+				if (pk_debugmessages > 1)
 					Console.Printf("Hovering over %s",card.cardname);
 				menu.HoveredCard = card;
 			}
 			else {
-				if (pk_debugmessages)
+				if (pk_debugmessages > 1)
 					Console.Printf("No longer hovering over %s",card.cardname);
 				menu.HoveredCard = null;
 			}

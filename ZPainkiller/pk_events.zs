@@ -145,7 +145,7 @@ Class PK_MainHandler : EventHandler {
 		if (e.name == "PK_GiveGold") {
 			//gives a specified number of gold, or max gold if no number is specified:
 			int amt = (e.args[0] == 0) ? 99990 : e.args[0];
-			cardcontrol.pk_gold = Clamp(cardcontrol.pk_gold + amt, 0, 99990);
+			cardcontrol.GiveGoldAmount(amt);
 			if (e.player == consoleplayer) {				
 				string str = (amt > 0) ? Stringtable.Localize(PKCH_GoldMessage[random(0,3)]) : Stringtable.Localize(PKCH_GoldMessage[random(4,5)]);
 				console.printf(str);
@@ -173,6 +173,10 @@ Class PK_MainHandler : EventHandler {
 			else if (dmc) {
 				dmc.GiveSoul(66);
 			}
+		}
+		//PKSTOPCARDS cheat: ends the golden cards effect (mostly for debug)
+		if (e.name == "PK_StopCards") {
+			cardcontrol.StopGoldenCards();
 		}
 	}
 	
@@ -678,17 +682,18 @@ Class PK_BoardEventHandler : EventHandler {
 			Array <String> cardname;
 			e.name.split(cardname, ":");
 			if (cardname.Size() != 0) {
+				name thiscard = name(cardname[1]);
 				//apparently, dynamic arrays are iffy, that's why we need int(name
-				cardcontrol.UnlockedTarotCards.Push(int(name(cardname[1])));
+				cardcontrol.UnlockedTarotCards.Push(int(thiscard));
 				int cost = e.args[0];
-				cardcontrol.pk_gold = Clamp(cardcontrol.pk_gold - cost,0,99990);
+				cardcontrol.GiveGoldAmount(-cost);
 				if (pk_debugmessages)
-					console.printf("buying card %s at %d",name(cardname[1]),cost);
+					console.printf("buying card %s at %d",thiscard,cost);
 			}
 		}
 		if (e.name == 'PKCTakeGold') {
 			int cost = e.args[0];
-			cardcontrol.pk_gold = Clamp(cardcontrol.pk_gold - cost,0,99990);
+			cardcontrol.GiveGoldAmount(-cost);
 		}
 		//equip card into a slot
 		if (e.name.IndexOf("PKCCardToSlot") >= 0) {
@@ -696,12 +701,37 @@ Class PK_BoardEventHandler : EventHandler {
 			e.name.split(cardname, ":");
 			if (cardname.Size() != 0) {
 				int slotID = e.args[0];
-				cardcontrol.EquippedSlots[slotID] = cardname[1];
+				name card = cardname[1];
+				cardcontrol.EquippedSlots[slotID] = card;
+				// Forgiveness card needs special handling: it increases/decreases 
+				// maximum gold cards activations, and those changes need to be
+				// displayed immediately, on the board, not when the card item is
+				// given to the player (which only happens when the board is closed).
+				// Also because gold activations can be refreshed on the board.
+				// Forgiveness handling: increase gold card activations:
+				if (card == 'Forgiveness') {
+					if (cardcontrol.GetTotalGoldUses() < 2)
+						cardcontrol.SetGoldUses( cardcontrol.GetGoldUses() + 1);
+					if (pk_debugmessages)
+						console.printf("Giving Forgiveness. Remaining gold activations: %d", cardcontrol.GetGoldUses());
+				}
 			}
+		}
+		// Refresh golden card activations:
+		if (e.name == 'PKCRefreshUses') {
+			int refreshcost = e.args[0];
+			cardcontrol.RefreshGoldActivations();
+			cardcontrol.GiveGoldAmount(-refreshcost);
 		}
 		//remove card from slot
 		if (e.name == 'PKCClearSlot') {
 			int slotID = e.args[0];
+			// Forgiveness handling: decrease gold card activations:
+			if (cardcontrol.EquippedSlots[slotID] == 'Forgiveness') {
+				cardcontrol.SetGoldUses( cardcontrol.GetGoldUses() - 1);
+				if (pk_debugmessages)
+					console.printf("Removing Forgiveness. Remaining gold activations: %d", cardcontrol.GetGoldUses());
+			}
 			cardcontrol.EquippedSlots[slotID] = '';
 		}
 		if (e.name == 'PKCCloseBoard') {

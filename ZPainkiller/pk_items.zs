@@ -291,7 +291,7 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		let cont = PK_CardControl(toucher.FindInventory("PK_CardControl"));
 		if (cont) {
 			int goldmul = (toucher.FindInventory("PKC_Greed")) ? 2 : 1;
-			cont.pk_gold = Clamp(cont.pk_gold + (amount*goldmul), 0, 99990);
+			cont.GiveGoldAmount(amount*goldmul);
 		}
 		let irc = PK_InvReplacementControl(toucher.FindInventory("PK_InvReplacementControl"));
 		if (irc)
