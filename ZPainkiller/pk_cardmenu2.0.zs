@@ -881,37 +881,6 @@ Class PKCardsMenu : PKZFGenericMenu {
 		// Track the number of remaining Golden Card activations:
 		if (goldcontrol) {
 			goldUses = goldcontrol.GetGoldUses();
-			/*// I had to do the following to handle the Forgiveness card.
-			
-			// Forgiveness increases uses by 1, but that only happens when
-			// the player receives the actual card *item* (PKC_Forgiveness),
-			// and the player only gets the items when they close the board,
-			// not when they put the card into a slot on the board.
-			// Since I didn't want to rewrite that system, instead I'm simply
-			// checking whether the player has Forgiveness in the slot and
-			// whether they have PKC_Forgiveness in their actual inventory.
-			
-			// If the player has Forgiveness in a slot but does not yet have
-			// PKC_Forgiveness in the inventory, that means they just equipped
-			// Forgiveness but haven't closed the board yet. So, manually add
-			// 1 to the current number of uses to reflect the effect of
-			// Forgiveness immediately:
-			if ((goldcontrol.EquippedSlots[0] == "Forgiveness" || goldcontrol.EquippedSlots[1] == "Forgiveness") && goldcontrol.EquippedCards[0] != "PKC_Forgiveness" && goldcontrol.EquippedCards[1] != "PKC_Forgiveness")
-				goldUses++;
-			
-			// Conversely, if the player has PKC_Forgiveness in their inventory
-			// yet doesn't have it in any of the slots, that means they've just
-			// removed it from the slot but haven't yet closed the board. If so,
-			// decrement the number immediately:
-			else if (golduses > 0 && (goldcontrol.EquippedCards[0] == "PKC_Forgiveness" || goldcontrol.EquippedCards[1] == "PKC_Forgiveness") && goldcontrol.EquippedSlots[0] != "Forgiveness" && goldcontrol.EquippedSlots[1] != "Forgiveness")
-				goldUses--;
-			
-			// In any other case (the player has already closed the board after
-			// equipping/unequipping Forgiveness) we don't need to do anything
-			// special with the number, it simply should be equal to the
-			// remaining number of gold activations (obtained above with GetGoldUses())
-			// which is stored in the goldcontrol inventory token.
-			*/
 			// Update the value of the visual counter:
 			if (goldUsesCounter)
 				goldUsesCounter.setText(String.Format("%d", goldUses));
