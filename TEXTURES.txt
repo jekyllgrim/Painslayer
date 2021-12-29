@@ -1729,27 +1729,6 @@ Graphic "PKCNUMS", 32, 640
 	Patch "PKCNUM9", 0, 576
 }
 
-Sprite "KULKA0", 32, 32
-{
-	YScale 1.200
-	Offset 16, 16
-	Patch "KULKA", 0, 0
-}
-
-Sprite "KULKB0", 32, 32
-{
-	YScale 1.200
-	Offset 16, 16
-	Patch "KULKB", 0, 0
-}
-
-Sprite "KULKC0", 32, 32
-{
-	YScale 1.200
-	Offset 16, 16
-	Patch "KULKC", 0, 0
-}
-
 Sprite "PRFMA0", 119, 82
 {
 	YScale 1.200
