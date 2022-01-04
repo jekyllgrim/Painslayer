@@ -1,2 +1,2 @@
-STARTUPTITLE="Painslayer 1.1.1 © 2020-2021 Jekyll Grim Payne"
+STARTUPTITLE="Painslayer 1.2.0 © 2020-2022 Jekyll Grim Payne"
 STARTUPCOLORS="CC0000","000000"
