@@ -61,12 +61,7 @@ Class PK_ElectroDriver : PKWeapon {
 			return hit.HitLocation;
 		}
 		int dmg = invoker.hasDexterity ? 8 : 4;
-		// Define damage flags. Randomly add NOPAIN:
-		int fflags = DMG_THRUSTLESS|DMG_PLAYERATTACK;
-		if (frandom[felt](1,3) > 2)
-			fflags |= DMG_NO_PAIN;
-		// Deal the damage:
-		ltarget.DamageMobj(self,self,dmg,'normal',flags:fflags);
+		PK_ElectroTargetControl.DealElectroDamage(ltarget, self, self, dmg, DMG_THRUSTLESS|DMG_PLAYERATTACK, delay:12);
 		// If the player has Weapon Modifier, the beam
 		// is supposed to split from the main target to
 		// monsters around it. So, we need another 
@@ -95,13 +90,9 @@ Class PK_ElectroDriver : PKWeapon {
 				PK_TrackingBeam.MakeBeam("PK_Lightning",ltarget,radius:32,hitpoint:next.pos+(0,0,next.height*0.5),masterOffset:(0,0,ltarget.height*0.5),style:STYLE_ADD);
 				// The secondary damage is 75% of the base beam damage
 				// and never causes pain:
-				next.DamageMobj(self,self,dmg * 0.75,'normal',flags:DMG_THRUSTLESS|DMG_NO_PAIN|DMG_PLAYERATTACK);
-				if (next.health > 0 && !next.CountInv("PK_ElectroTargetControl"))
-					next.GiveInventory("PK_ElectroTargetControl",1);
+				PK_ElectroTargetControl.DealElectroDamage(next, self, self, dmg * 0.75, DMG_NO_PAIN|DMG_THRUSTLESS|DMG_PLAYERATTACK);
 			}
 		}
-		if (ltarget.health > 0 && !ltarget.CountInv("PK_ElectroTargetControl"))
-			ltarget.GiveInventory("PK_ElectroTargetControl",1);
 		return ltarget.pos+(0,0,ltarget.height*0.5);
 	}
 	states {
@@ -264,10 +255,50 @@ Class PK_ElectricPuff : PKPuff {
 }
 			
 
-Class PK_ElectroTargetControl : PK_InventoryToken {
+Class PK_ElectroTargetControl : PK_InventoryToken {	
+	int noPainTics;
 	protected int deadtics;
 	protected int deadage;
 	protected bool isFlesh;
+	
+	// A universal wrapper for dealing Electro damage. Used by
+	// Electro, Electric Disk and secondary Electro beams.
+	static int DealElectroDamage(actor victim, actor inflictor, actor source, int damage, int flags, int delay = 19) {
+		if (!victim || damage <= 0)
+			return 0;
+		if (victim.health > 0 && delay > 0) {
+			let control = victim.FindInventory("PK_ElectroTargetControl");
+			if (!control)
+				victim.GiveInventory("PK_ElectroTargetControl",1);
+			// If the target already has the control item in their
+			// inventory, then we make sure that they can't be pain'ed
+			// again if the item has been in their inventory for
+			// a period smaller than 'delay' (to reduce excessive 
+			// stunlocking).
+			else if (control.GetAge() < delay)
+				flags |= DMG_NO_PAIN;
+		}
+		for (int i = random[sfx](2,4); i > 0; i--) {
+			double ang = frandom[sfx](0,359);
+			double hvel = frandom[sfx](2,4);
+			double vvel = frandom[sfx](3,7);
+			victim.A_SpawnParticle(
+				"CCCCFF",
+				SPF_FULLBRIGHT|SPF_RELATIVE,
+				lifetime: 30,
+				size: 3,
+				angle: ang + frandom[sfx](-40,40),
+				zoff: victim.height * 0.5,
+				velx: hvel,
+				velz: vvel,
+				accelx: -(hvel / 30.),
+				accelz: -0.75,
+				sizestep: -0.05
+			);
+		}
+		return victim.DamageMobj(inflictor, source, damage, 'Electricity', flags);
+	}	
+	
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);
 		if (!owner)
@@ -284,6 +315,7 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 			}
 		}
 	}
+	
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner) {
@@ -299,6 +331,10 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 			if (smk) {
 				smk.vel = (frandom[etc](-0.5,0.5),frandom[etc](-0.5,0.5),frandom[etc](0.6,0.9));
 			}
+		}
+		if (noPainTics > 0)
+		{
+			noPainTics--;
 		}
 		if (owner.health <= 0) {
 			if (!owner.bISMONSTER || owner.bBOSS) {
@@ -580,12 +616,7 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 						disktargets.delete(i);					
 					else {
 						PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:trg.pos+(0,0,trg.height*0.5),style:STYLE_ADD);
-						int fflags = DMG_THRUSTLESS;
-						if (random[eld](0,2) < 2)
-							fflags |= DMG_NO_PAIN;
-						trg.DamageMobj(self,target,2,'normal',flags:fflags);
-						if (!trg.FindInventory("PK_ElectroTargetControl"))
-							trg.GiveInventory("PK_ElectroTargetControl",1);
+						PK_ElectroTargetControl.DealElectroDamage(trg, self, target, 2, DMG_THRUSTLESS, delay: 17);
 						if (!CheckSight(trg,SF_IGNOREWATERBOUNDARY)) {
 							//Console.printf("LOF check failed");
 							trg.TakeInventory("PK_ElectroTargetControl",1);
