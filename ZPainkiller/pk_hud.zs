@@ -65,7 +65,7 @@ Class PainkillerHUD : BaseStatusBar {
 		}
 		DrawString(font, string, pos, flags, translation, Alpha, wrapwidth, linespacing, scale);
 	}
-	
+
 	// Same as above but for inventory icons
 	void PK_DrawInventoryIcon(Inventory item, Vector2 pos, int flags = 0, double alpha = 1.0, Vector2 boxsize = (-1, -1), Vector2 scale = (1.,1.)) {
 		if (aspectScale.GetBool() == true) {
@@ -73,6 +73,57 @@ Class PainkillerHUD : BaseStatusBar {
 			pos.y *= noYStretch;
 		}
 		DrawInventoryIcon(item, pos, flags, alpha, boxsize, scale);
+	}
+	
+	override void Init() {
+		super.Init();
+		Font fnt = "PKHNUMS"; //font with numbers 
+		Font times = font_times; //Times font used in other places too
+		mIndexFont = HUDFont.Create(fnt, fnt.GetCharWidth("0"), true, 1, 1);
+		mNotifFont = HUDFont.Create("consolefont");
+		// Base values for the Codex notif pop-up:
+		notifAlpha = 0.6;
+		notifAlphaMod = 0.05;
+		// Values for the circular boss health bar:
+		hpBarBackground = TexMan.CheckForTexture("pkxhpbkg");
+		hpBartex = TexMan.CheckForTexture("pkxhpbar");
+		hpBarScale = TexMan.GetScaledSize(hpBartex);
+		//dimensions of a card texture:
+		cardTexSize = TexMan.GetScaledSize(TexMan.CheckForTexture("graphics/HUD/Tarot/cards/UsedCard.png"));
+	}
+	
+	override void Draw (int state, double TicFrac) {
+		Super.Draw (state, TicFrac);
+		if (aspectScale == null)
+			aspectScale = CVar.GetCvar('hud_aspectscale',CPlayer);
+		
+		hudstate = state;
+		//the hud is completely skipped if automap is active or the player
+		//is in a demon mode and debug messages aren't active:
+		if (state == HUD_none || automapactive || (isDemon /*&& !pk_debugmessages*/))
+			return;
+		BeginHUD();
+		//draw invulnerability overlay:
+		if (CPlayer.mo.FindInventory("PowerInvulnerable",true)) {
+			PK_DrawImage("PKHHORNS",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);
+		}
+		// Top elements draw in Fullscreen and Alt Hud
+		// These include mosnter compass, gold and soul counters, and keys:
+		if (state == HUD_Fullscreen || state == HUD_AltHud)
+			DrawTopElements();
+		// Health, armor, ammo, etc.
+		// In statusbar mode it also moves the monster compass,
+		// keys, gold and soul counters to the bottom
+		if (state == HUD_StatusBar || state == HUD_Fullscreen)
+			DrawBottomElements();
+		DrawEquippedCards();
+		DrawCardUses();
+		DrawCodexNotif();
+		DrawActiveGoldenCards();
+		// Keys are already present in the AltHud:
+		if (state != HUD_AltHud) {
+			DrawKeys();
+		}		
 	}	
 	
 	// Draws arrow for the compass pointing at the nearest monster.
@@ -130,60 +181,7 @@ Class PainkillerHUD : BaseStatusBar {
 			}
 		}
 	}
-	
-	override void Init() {
-		super.Init();
-		Font fnt = "PKHNUMS"; //font with numbers 
-		Font times = font_times; //Times font used in other places too
-		mIndexFont = HUDFont.Create(fnt, fnt.GetCharWidth("0"), true, 1, 1);
-		mNotifFont = HUDFont.Create("consolefont");
-		// Base values for the Codex notif pop-up:
-		notifAlpha = 0.6;
-		notifAlphaMod = 0.05;
-		// Values for the circilar boss health bar:
-		hpBarBackground = TexMan.CheckForTexture("pkxhpbkg");
-		hpBartex = TexMan.CheckForTexture("pkxhpbar");
-		hpBarScale = TexMan.GetScaledSize(hpBartex);
-		//dimensions of a card texture:
-		cardTexSize = TexMan.GetScaledSize(TexMan.CheckForTexture("graphics/HUD/Tarot/cards/UsedCard.png"));
-	}
-	
-	override void Draw (int state, double TicFrac) {
-		Super.Draw (state, TicFrac);
-		if (aspectScale == null)
-			aspectScale = CVar.GetCvar('hud_aspectscale',CPlayer);
-		
-		hudstate = state;
-		//the hud is completely skipped if automap is active or the player
-		//is in a demon mode and debug messages aren't active:
-		if (state == HUD_none || automapactive || (isDemon /*&& !pk_debugmessages*/))
-			return;
-		BeginHUD();
-		//draw invulnerability overlay:
-		if (CPlayer.mo.FindInventory("PowerInvulnerable",true)) {
-			PK_DrawImage("PKHHORNS",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);
-		}
-		// Top elements draw in Fullscreen and Alt Hud
-		// These include mosnter compass, gold and soul counters, and keys:
-		if (state == HUD_Fullscreen || state == HUD_AltHud)
-			DrawTopElements();
-		// Health, armor, ammo, etc.
-		// In statusbar mode it also moves the monster compass,
-		// keys, gold and soul counters to the bottom
-		if (state == HUD_StatusBar || state == HUD_Fullscreen)
-			DrawBottomElements();
-		DrawEquippedCards();
-		DrawCardUses();
-		DrawCodexNotif();
-		DrawActiveGoldenCards();
-		// Keys are already present in the AltHud:
-		if (state != HUD_AltHud) {
-			DrawKeys();
-		}
-		fullscreenOffsets = true;
-		
-	}
-	
+
 	override void Tick() {
 		super.Tick();
 		let player = CPlayer.mo;
