@@ -120,6 +120,7 @@ graphics/HUD/icons/
 graphics/HUD/numbers/
 graphics/HUD/Tarot/
 graphics/HUD/DCRHA.png
+graphics/crosshairs/
 models/boltgun/
 models/chaingun/
 models/electrodriver/
@@ -186,6 +187,9 @@ The code libraries, their license types and their locations are as follows:
 5. *MK_Matrix* library by Marisa Kirisame  
     **License**: GNU GPL  
     **Location**: `ZPainkiller/mk_matrix/`
+6. Gutamatics library by Gutawer
+    **License**: MIT License
+    **Location**: `ZPainkiller/PK_Gutamatics/`
 
 Refer to the aforementioned code locations for license information on each code component.
 
