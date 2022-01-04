@@ -21,6 +21,7 @@ Class PK_ElectroDriver : PKWeapon {
 	action vector3 FindElectroTarget(int atkdist = 280) {
 		actor ltarget;			
 		double closestDist = double.infinity;
+		// First, find potential targets close the the shooter:
 		BlockThingsIterator itr = BlockThingsIterator.Create(self,atkdist);
 		while (itr.next()) {
 			let next = itr.thing;
@@ -36,14 +37,21 @@ Class PK_ElectroDriver : PKWeapon {
 				closestDist = dist;
 			if (!CheckSight(next,SF_IGNOREWATERBOUNDARY))
 				continue;
+			// Get spherical coords to the potential target
+			// to make sure they're close to our crosshair:
 			vector3 targetpos = LevelLocals.SphericalCoords((pos.x,pos.y,player.viewz),next.pos+(0,0,next.default.height*0.5),(angle,pitch));	
 			if (abs(targetpos.x) > 15 || abs(targetpos.y) > 15) {
 				//console.printf("%s found but out of range",next.Getclassname());
 				continue;
 			}
+			// Cache the target if successful:
 			ltarget = next;
 			//console.printf("Target found: %s, (%d, %d, %d)",ltarget.Getclassname(),ltarget.pos.x,ltarget.pos.y,ltarget.pos.z);
 		}
+		// If we couldn't find any potential targets,
+		// aim the beam at whatever wall/plane we've hit,
+		// spawn the puff there and return the coordinates
+		// to that point:
 		if (!ltarget) {
 			FLineTraceData hit;
 			LineTrace(angle,atkdist,pitch,TRF_ABSPOSITION|TRF_SOLIDACTORS,player.viewz,pos.x,pos.y,data:hit);
@@ -53,20 +61,31 @@ Class PK_ElectroDriver : PKWeapon {
 			return hit.HitLocation;
 		}
 		int dmg = invoker.hasDexterity ? 8 : 4;
+		// Define damage flags. Randomly add NOPAIN:
 		int fflags = DMG_THRUSTLESS|DMG_PLAYERATTACK;
 		if (frandom[felt](1,3) > 2)
 			fflags |= DMG_NO_PAIN;
+		// Deal the damage:
 		ltarget.DamageMobj(self,self,dmg,'normal',flags:fflags);
+		// If the player has Weapon Modifier, the beam
+		// is supposed to split from the main target to
+		// monsters around it. So, we need another 
+		// BlockThingsIterator to find more targets:
 		if (invoker.hasWmod) {
 			double closestDist = double.infinity;
-			BlockThingsIterator itr = BlockThingsIterator.Create(self,atkdist);
+			// Remember that this iterator should be created
+			// around the original monster, not around the player!
+			BlockThingsIterator itr = BlockThingsIterator.Create(ltarget,atkdist);
 			while (itr.next()) {
 				let next = itr.thing;
 				if (!next || next == self)
 					continue; 
-				if (next == ltarget || next.health <= 0 || !next.bShootable || !(next.bIsMonster || (next is "PlayerPawn")) || !self.IsHostile (next) || self.bKILLED)
+				// Perform the usual set of checks to make sure
+				// it's a valid target:
+				if (next == ltarget || next.health <= 0 || !next.bShootable || !(next.bIsMonster || (next is "PlayerPawn")) || !next.IsHostile (self) || self.bKILLED)
 					continue;
-				double cdist = Distance3D(next);
+				// Make sure it's the closest possible target:
+				double cdist = ltarget.Distance3D(next);
 				if (cdist > 180)
 					continue;
 				if (cdist < closestDist)
@@ -74,6 +93,8 @@ Class PK_ElectroDriver : PKWeapon {
 				if (!CheckSight(next,SF_IGNOREWATERBOUNDARY))
 					continue;
 				PK_TrackingBeam.MakeBeam("PK_Lightning",ltarget,radius:32,hitpoint:next.pos+(0,0,next.height*0.5),masterOffset:(0,0,ltarget.height*0.5),style:STYLE_ADD);
+				// The secondary damage is 75% of the base beam damage
+				// and never causes pain:
 				next.DamageMobj(self,self,dmg * 0.75,'normal',flags:DMG_THRUSTLESS|DMG_NO_PAIN|DMG_PLAYERATTACK);
 				if (next.health > 0 && !next.CountInv("PK_ElectroTargetControl"))
 					next.GiveInventory("PK_ElectroTargetControl",1);
