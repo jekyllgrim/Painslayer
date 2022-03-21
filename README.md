@@ -11,11 +11,12 @@
 - [How to play](#how-to-play)
   * [How to play the latest stable release](#how-to-play-the-latest-stable-release)
   * [How to play the freshest dev build](#how-to-play-the-freshest-dev-build)
+  * [How to play Painslayer with Beautiful Doom](#how-to-play-painslayer-with-beautiful-doom)
 - [Copyright information and permissions](#copyright-information-and-permissions)
   + [Short summary of the permissions (not equivalent to the full text):](#short-summary-of-the-permissions--not-equivalent-to-the-full-text--)
-  * [The Artwork](#the-artwork)
-  * [The Code](#the-code)
-  * [The Audio](#the-audio)
+    * [The Artwork](#the-artwork)
+    * [The Code](#the-code)
+    * [The Audio](#the-audio)
 - [Credits](#credits)
 
 # How to play
@@ -44,16 +45,16 @@ It's possible to play the version that is currently in the repository but hasn't
 3. (Optional) Rename the downloaded **.zip** to **.pk3** to remember that you don't need to unpack it.
 
 4. Run the archive as you would run any mod; from command line or a bat file in the GZDoom directory:
-
-    ```
-    gzdoom.exe -file Painslayer-master.zip 
-    ```
-
+   
+   ```
+   gzdoom.exe -file Painslayer-master.zip 
+   ```
+   
     Or, if you renamed it: 
-
-    ```
-    gzdoom.exe -file Painslayer-master.pk3
-    ```
+   
+   ```
+   gzdoom.exe -file Painslayer-master.pk3
+   ```
 
 5. If you're getting errors, try running it with the latest [development build of GZDoom](https://devbuilds.drdteam.org/gzdoom/). Github builds may contain features that haven't made it into a stable GZDoom release yet.
 
@@ -64,10 +65,10 @@ It's possible to play the version that is currently in the repository but hasn't
 1. Download a fresh release of Beautiful Doom: https://github.com/jekyllgrim/Beautiful-Doom/releases
 
 2. Run the game so that Painslayer is placed *after* Beautiful Doom in the load order. For example:
-
-    ```
-    gzdoom.exe -file Beautiful_Doom_715.pk3 Painslayer102.pk3
-    ```
+   
+   ```
+   gzdoom.exe -file Beautiful_Doom_715.pk3 Painslayer102.pk3
+   ```
 
 3. In the Main Menu, before starting the game, navigate to **Options** > **Beautiful Doom Settings** > scroll down, find **Beautiful Doom Weapons** > set to **Disabled**.
 
@@ -157,8 +158,6 @@ models/tracer.md3
 models/tracer.png
 sprites/SFX/
 ```
-
-
 
 ## The Code
 
