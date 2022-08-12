@@ -4,7 +4,7 @@
 
 *Painslayer* requires [GZDoom 4.7.0](https://zdoom.org/downloads).
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/D1D27F686)
+
 
 # Contents
 
@@ -186,7 +186,7 @@ The code libraries, their license types and their locations are as follows:
 5. *MK_Matrix* library by Marisa Kirisame  
     **License**: GNU GPL  
     **Location**: `ZPainkiller/mk_matrix/`
-6. Gutamatics library by Gutawer
+6. *Gutamatics* library by Gutawer
     **License**: MIT License
     **Location**: `ZPainkiller/PK_Gutamatics/`
 
