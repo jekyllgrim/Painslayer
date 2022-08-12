@@ -53,17 +53,26 @@ Mixin class PK_Math {
 		return (p1==p2)?p1:-1;
 	}
 	
-	bool CheckClippingLines(double size) {
+    bool CheckClippingLines(double size) {
 		BlockLinesIterator it = BlockLinesIterator.Create(self, size);
+		double tbox[4];
+		// top, bottom, left, right
+		tbox[0] = pos.y+size;
+		tbox[1] = pos.y-size;
+		tbox[2] = pos.x-size;
+		tbox[3] = pos.x+size;
 		while (it.Next()) {
-			let lline = it.CurLine;
-			if (!lline || !(lline.Flags & Line.ML_BLOCKING))
-				continue;
-			if (BoxOnLineSide(size,size,size,size,lline) == -1)
+		    let l = it.CurLine;
+		    if ( !l ) continue;
+		    if ( tbox[2] > l.bbox[3] ) continue;
+		    if ( tbox[3] < l.bbox[2] ) continue;
+		    if ( tbox[0] < l.bbox[1] ) continue;
+		    if ( tbox[1] > l.bbox[0] ) continue;
+		    if (BoxOnLineSide(tbox[0],tbox[1],tbox[2],tbox[3],l) == -1 ) 
 				return true;
 		}
 		return false;
-	}
+    }
 	
 	//Find a random position within the specified spot in a grid of the specified size:
 	vector3 FindRandomPosAround(vector3 actorpos, double gridrad = 128, double step = 16) {
@@ -954,6 +963,7 @@ Class PK_DebugSpot : Actor {
 		xscale 0.35;
 		yscale 0.292;
 		FloatBobPhase 0;
+		alpha 2;
 		health 3;
 		translation "1:255=%[0.00,1.01,0.00]:[1.02,2.00,0.00]";
 	}

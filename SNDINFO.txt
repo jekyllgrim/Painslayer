@@ -46,13 +46,14 @@ pkpland1 "sounds/player/hero-jump_end1.wav"
 pkpland2 "sounds/player/hero-jump_end2.wav"
 
 $playeralias		player	male	*death		pkplayer/death
-$playeralias		player	male	*xdeath	pkplayer/xdeath
-$playeralias		player	male	*gibbed	pkplayer/xdeath
+$playeralias		player	male	*xdeath		pkplayer/xdeath
+$playeralias		player	male	*gibbed		pkplayer/xdeath
 $playeralias		player	male	*pain100	pkplayer/pain1
-$playeralias		player	male	*pain75	pkplayer/pain1
-$playeralias		player	male	*pain50	pkplayer/pain2
-$playeralias		player	male	*pain25	pkplayer/pain2
-$playeralias		player	male	*land		pkplayer/land
+$playeralias		player	male	*pain75		pkplayer/pain1
+$playeralias		player	male	*pain50		pkplayer/pain2
+$playeralias		player	male	*pain25		pkplayer/pain2
+$playeralias		player	male	*grunt		pkplayer/land
+$playeralias		player	male	*land		dsempty
 $playeralias		player	male	*jump		pkplayer/jump
 
 //cards:

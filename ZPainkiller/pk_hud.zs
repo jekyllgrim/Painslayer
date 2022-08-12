@@ -533,10 +533,10 @@ Class PainkillerHUD : BaseStatusBar {
 	
 	// Scales an image to box keeping its ratio:
 	vector2 ScaleToBox(TextureID tex, int w, int h) {
-	  Vector2 size = TexMan.GetScaledSize(tex);
-	  double ratio = min(w / size.x, h / size.y*1.2);
-	  
-	  return size * ratio;
+		Vector2 size = TexMan.GetScaledSize(tex);
+		double ratio = min(w / size.x, h / size.y*1.2);
+
+		return size * ratio;
 	}
 	
 	protected void UpdateHealthBar(out Shape2D hb, double frac = 1, uint segments = 100)
@@ -584,10 +584,8 @@ Class PainkillerHUD : BaseStatusBar {
 		
 	// Ammo counter is red if we have 25% or fewer ammo:
 	int GetAmmoColor(Inventory ammoclass) {		
-		int ammoColor;
-		if	(ammoclass.amount > ammoclass.default.maxamount * 0.25) 
-			ammoColor = FONT.CR_UNTRANSLATED;
-		else
+		int ammoColor = FONT.CR_UNTRANSLATED;
+		if (ammoclass.amount <= ammoclass.default.maxamount * 0.25) 
 			ammoColor = FONT.CR_RED;			
 		return ammoColor;
 	}

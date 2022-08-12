@@ -1479,6 +1479,13 @@ Class PKC_Haste : PK_BaseGoldenCard {
 }
 
 Class PK_HasteControl : PK_InventoryToken {
+	enum HC_Ownertypes {
+		HC_Monster = 0,
+		HC_MonsterProj = 1,
+		HC_PlayerProj = 2,
+		HC_Player = 3
+	};
+	
 	private double p_gravity;
 	private double p_speed;
 	private state slowstate;
@@ -1498,15 +1505,15 @@ Class PK_HasteControl : PK_InventoryToken {
 		if (!owner)
 			return;
 		if (owner.bISMONSTER)
-			ownerType = 0;
+			ownerType = HC_Monster;
 		else if (owner.bMISSILE) {
 			if (owner.target && owner.target.player)
-				ownerType = 2;
+				ownerType = HC_PlayerProj;
 			else
-				ownerType = 1;
+				ownerType = HC_MonsterProj;
 		}
 		else if (owner.player) {
-			ownerType = 3;
+			ownerType = HC_Player;
 			owner.player.mo.viewbob = 0.5;
 		}
 		else {
@@ -1519,7 +1526,7 @@ Class PK_HasteControl : PK_InventoryToken {
 		//monsters and monster projectiles are slowed down most:
 		double slowfactor = 0.4;
 		//player projectiles are slowed down moderately
-		if (ownerType == 2) 
+		if (ownerType == HC_PlayerProj) 
 			slowfactor = 0.6;
 		//players are only slowed down a bit
 		else 
@@ -1533,7 +1540,7 @@ Class PK_HasteControl : PK_InventoryToken {
 		if (!owner)
 			return;
 		//monsters:
-		if (ownerType == 0) {
+		if (ownerType == HC_Monster) {
 			for (int i = CH_END; i > 0; i--)
 				owner.A_SoundPitch(i,0.6);
 			if (owner.CurState != slowstate) {
@@ -1550,13 +1557,13 @@ Class PK_HasteControl : PK_InventoryToken {
 			}
 		}
 		//monster projectiles:
-		else if (ownerType == 1) {
+		else if (ownerType == HC_MonsterProj) {
 			for (int i = CH_END; i > 0; i--)
 				owner.A_SoundPitch(i,0.6);
 		}
 		else {
 			//player projectiles and players
-			if (ownerType == 2)  {
+			if (ownerType == HC_PlayerProj)  {
 				for (int i = CH_END; i > 0; i--)
 					owner.A_SoundPitch(i,0.8);
 				if (owner.CurState != slowstate) {
@@ -1565,7 +1572,7 @@ Class PK_HasteControl : PK_InventoryToken {
 				}				
 			}
 			//players (having Dexterity neutralizes the effect)
-			if (ownerType == 3 && !owner.FindInventory("PKC_Dexterity")) {
+			if (ownerType == HC_Player && !owner.FindInventory("PKC_Dexterity")) {
 				for (int i = CH_END; i > 0; i--)
 					owner.A_SoundPitch(i,0.8);
 				let weap = owner.player.readyweapon;
@@ -1581,17 +1588,17 @@ Class PK_HasteControl : PK_InventoryToken {
 					ps0.tics = Clamp(double(ps0.tics*fac),2,5);
 					wstate0 = ps0.curstate;
 				}
-				let ps1 = owner.player.FindPSprite(-1);
+				let ps1 = owner.player.FindPSprite(PSP_UNDERGUN);
 				if (ps1 && ps1.curstate != wstate1) {					
 					ps1.tics = Clamp(double(ps1.tics*fac),2,5);
 					wstate1 = ps1.curstate;
 				}		
-				let ps2 = owner.player.FindPSprite(2);
+				let ps2 = owner.player.FindPSprite(PSP_OVERGUN);
 				if (ps2 && ps2.curstate != wstate2) {					
 					ps2.tics = Clamp(double(ps2.tics*fac),2,5);
 					wstate2 = ps2.curstate;
 				}		
-				let ps3 = owner.player.FindPSprite(-100);
+				let ps3 = owner.player.FindPSprite(PSP_PFLASH);
 				if (ps3 && ps3.curstate != wstate3) {					
 					ps3.tics = Clamp(double(ps3.tics*fac),2,5);
 					wstate3 = ps3.curstate;

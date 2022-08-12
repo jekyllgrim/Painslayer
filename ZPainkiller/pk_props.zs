@@ -19,7 +19,7 @@ Class PK_GoldContainer : PK_BaseActor abstract {
 		bool posValid = false;
 		for (int i = 32; i > 0; i--) {
 			SetOrigin(FindRandomPosAround(pos, 96),false);
-			if (!CheckClippingLines(radius*2)) {
+			if (!CheckClippingLines(radius*1.5)) {
 				posValid = true;
 				break;
 			}
