@@ -446,7 +446,9 @@ Class PKWeapon : Weapon abstract {
 		{
 			FLineTraceData lt;
 			LineTrace(a, 1024*1024, p, 0, player.viewz-pos.z, 0, data:lt);
-			aimPos = lt.HitLocation;
+			double projrad = GetDefaultByType(proj).radius;			
+			aimPos = (lt.HitLocation.xy - lt.HitDir.xy*projrad, lt.HitLocation.z);
+			
 			//Spawn("PK_DebugSpot", aimPos);
 		
 			vector3 aimAngles = level.SphericalCoords(offsetPos, aimPos, (a, p));
