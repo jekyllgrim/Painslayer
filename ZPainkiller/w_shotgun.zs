@@ -614,5 +614,18 @@ Class PK_PushAwayControl : PK_InventoryToken {
 		if (!owner.bNOBLOOD && random[sfx](1,3) == 3)
 			owner.SpawnBlood(owner.pos,0,1);
 		broll *= 0.95;
+		
+		FLineTraceData hit;
+		owner.LineTrace(owner.angle,owner.radius+owner.vel.length(),1,flags:TRF_THRUACTORS|TRF_NOSKY,data:hit);
+		if (hit.HitLine && hit.hittype == TRACE_HITWALL) 
+		{
+			let wallnormal = (-hit.HitLine.delta.y,hit.HitLine.delta.x).unit();
+			let wallpos = hit.HitLocation;
+			if (!hit.LineSide)
+				wallnormal *= -1;
+			owner.vel = owner.vel - (wallnormal,0) * 2 * (owner.vel dot (wallnormal,0));
+			owner.vel *= 0.3;
+			owner.A_FaceMovementDirection();
+		}
 	}
 }
