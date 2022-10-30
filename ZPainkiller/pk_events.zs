@@ -246,22 +246,29 @@ Class PK_MainHandler : EventHandler {
 					gold = "PK_BigGold";
 				else
 					gold = "PK_VeryBigGold";
+				if (!gold)
+					continue;
 				actor goldPickup = actor.Spawn(gold,cCenter);
 				if (!goldpickup)
-					continue;
+					break;
 				//throw gold around randomly
 				goldPickup.VelFromAngle(frandom[gold](1,3),random[gold](0,359));
 				goldpickup.bCOUNTITEM = true;
 				//console.printf("goldpickup bDROPPED: %d",goldpickup.bDROPPED);
 			}
+			
 			//spawn some extra small gold:
 			for (int i = random[moregold](1,4); i > 0; i--) {
 				actor goldPickup = actor.Spawn("PK_SmallGold",cCenter);
+				if (!goldpickup)
+					break;
 				goldPickup.VelFromAngle(frandom[gold](4,8),random[gold](0,359));
 			}
 			//throw in some coins too:
 			for (int i = random[moregold](5,20); i > 0; i--) {
 				actor goldPickup = actor.Spawn("PK_GoldCoin",cCenter+(0,0,4));
+				if (!goldpickup)
+					break;
 				goldpickup.bMISSILE = false;
 				goldPickup.VelFromAngle(frandom[gold](1,5),random[gold](0,359));
 				goldpickup.SetStateLabel("Death");
