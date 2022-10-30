@@ -166,7 +166,7 @@ Class PK_Painkiller : PKWeapon {
 			}
 			PKIM ABC 1 {
 				A_WeaponOffset(13.5,4.5,WOF_ADD);
-				A_WeaponReady(WRF_NOBOB);
+				//A_WeaponReady(WRF_NOBOB);
 			}
 			PKIM CCC 1 {
 				A_WeaponOffset(0.75,0.45,WOF_ADD);
