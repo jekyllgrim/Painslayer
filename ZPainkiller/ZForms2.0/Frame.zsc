@@ -2,7 +2,8 @@
 /// for easy subpositioning.
 class PKZFFrame : PKZFElementContainer {
 	uint elementCount() { return elements.size(); }
-	uint indexOfElement(PKZFElement elem) { return elements.find(elem); }
+
+	int indexOfElement(PKZFElement elem) { return elements.find(elem); }
 	void swapElements(uint index0, uint index1) {
 		let tmp = elements[index0];
 		elements[index0] = elements[index1];
