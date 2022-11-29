@@ -431,7 +431,7 @@ Class PainkillerHUD : BaseStatusBar {
 		PK_DrawString(mIndexFont, String.Format("%03d",CPlayer.health), (19, -28),DI_SCREEN_LEFT_BOTTOM,translation:healthColor);
 		PK_DrawString(mIndexFont, String.Format("%03d",GetArmorAmount()), (19, -16),DI_SCREEN_LEFT_BOTTOM,translation:font.CR_UNTRANSLATED);
 		
-		// Ff using statusbar, we don't draw the top bar at all 
+		// If using statusbar, we don't draw the top bar at all 
 		// and we draw souls/gold counters as well as compass at the bottom:
 		if (hudstate == HUD_StatusBar) {		
 			//draw compass at bottom center
