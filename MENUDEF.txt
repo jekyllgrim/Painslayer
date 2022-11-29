@@ -41,8 +41,13 @@ ListMenu "SkillMenu" {
 	centermenu
 }*/
 
-AddOptionMenu "OptionsMenu" {
+AddOptionMenu "OptionsMenu" before "CustomizeControls" {
 	Submenu "$PKM_TITLE", "PK_Settings"
+}
+
+AddOptionMenu "OptionsMenuSimple" before "CustomizeControls" {
+	Submenu "$PKM_TITLE", "PK_Settings"
+	StaticText ""
 }
 
 Optionmenu "PK_Settings" {
