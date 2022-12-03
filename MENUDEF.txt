@@ -8,13 +8,7 @@ ListMenu "MainMenu" {
 	size 1920, 1080
 	PKDrawMenuBackground 0, 0, "P_MENU"
 	LineSpacing 92
-	StaticPatchCentered 960, 339, "P_mnublk"
-	StaticPatchCentered 960, 431, "P_mnublk"
-	StaticPatchCentered 960, 523, "P_mnublk"
-	StaticPatchCentered 960, 615, "P_mnublk"
-	StaticPatchCentered 960, 707, "P_mnublk"
-	StaticPatchCentered 960, 799, "P_mnublk"
-	
+
 	Position 960, 360
 	PKTextItemCentered  "$MNU_NEWGAME", "", "PlayerclassMenu"
 	PKTextItemCentered  "$MNU_OPTIONS", "", "OptionsMenu"
@@ -25,21 +19,11 @@ ListMenu "MainMenu" {
 }
 
 ListMenu "SkillMenu" {
-	PKDrawMenuBackground 0, 0, "P_MENU"
-	Font "BigFont", "White", "DarkRed"
-	StaticText 74, 16, "$MNU_CHOOSESKILL"
-	Position 200, 56
-	centerMenu
-}
-
-/*ListMenu "SkillMenu" {
+	class "PKSkillMenu"
 	size 1920, 1080
-	StaticPatchCentered 960, 0, "P_MENU"
-	//LineSpacing 32
-	//StaticTextCentered 960, 260, "$MNU_CHOOSESKILL"	
-	Position 300, 199
-	centermenu
-}*/
+	Position 0, -2147483648
+	Linespacing 0
+}
 
 AddOptionMenu "OptionsMenu" before "CustomizeControls" {
 	Submenu "$PKM_TITLE", "PK_Settings"
