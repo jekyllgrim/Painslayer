@@ -97,6 +97,7 @@ ui/menu/hover		"sounds/menu/option-light-on.wav"
 ui/menu/open		"sounds/menu/option-light-on_main3.wav"
 ui/menu/logo		"sounds/menu/option-sign_pact_alt.wav"//"sounds/menu/painkiller-mainlogo.wav"
 ui/menu/startgame	"sounds/menu/option-sign_pact_alt.wav"
+$volume ui/menu/startgame 0.5
 
 $alias menu/clear		ui/menu/back		// Close 
 $alias menu/cursor		ui/menu/hover		// Move cursor up/down
