@@ -2,11 +2,11 @@ Gameinfo {
 	PlayerClasses = "PK_PainkillerPlayer"
 	AddEventHandlers = "PK_Mainhandler", "PK_StakeStickHandler", "PK_ShaderHandler", "PK_ReplacementHandler", "PK_BoardEventHandler"
 	StatusBarClass = "PainkillerHUD"
+	ArmorIcons = "pkharm2", 0.5, "pkharm3"
 	CursorPic = "pkmcur"
 }
 
-skill baby
-{
+skill baby {
 	AutoUseHealth
 	AmmoFactor = 2
 	DamageFactor = 0.25
@@ -17,8 +17,7 @@ skill baby
 	MustConfirm = "$PKM_SKILL0_Desc"
 }
 
-skill easy
-{
+skill easy {
 	AmmoFactor = 1.2
 	EasyBossBrain
 	DamageFactor = 0.5
@@ -27,16 +26,14 @@ skill easy
 	MustConfirm = "$PKM_SKILL1_Desc"
 }
 
-skill normal
-{
+skill normal {
 	SpawnFilter = Normal
 	Name = "$PKM_SKILL2"
 	DefaultSkill
 	MustConfirm = "$PKM_SKILL2_Desc"
 }
 
-skill hard
-{
+skill hard {
 	AmmoFactor = 0.8
 	Aggressiveness = 0.75
 	SpawnFilter = Hard
@@ -44,8 +41,7 @@ skill hard
 	MustConfirm = "$PKM_SKILL3_Desc"
 }
 
-skill nightmare
-{
+skill nightmare {
 	AmmoFactor = 0.6
 	DisableCheats
 	Aggressiveness = 1.0
