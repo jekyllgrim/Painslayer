@@ -417,15 +417,32 @@ Class PKWeapon : Weapon abstract {
 		return A_FireProjectile(missiletype, angle, useammo, spawnofs_xy, spawnheight, flags, pitchOfs);
 	}
 	
+	// Returns exact height of player attack:
+	static double GetPlayerAtkHeight(PlayerPawn ppawn, bool absolute = false) {
+		if (!ppawn)
+			return 0;
+		
+		let player = ppawn.player;
+		if (!player)
+			return 0;
+		
+		double h = ppawn.height * 0.5 - ppawn.floorclip + ppawn.AttackZOffset*player.crouchFactor;
+		if (absolute)
+			h += ppawn.pos.z;
+		
+		return h;
+	}
+	
 	/*	Function by Lewisk3 using Gutamatics to fire stake projectiles.
 		Used in most cases instead of PK_FireArchingProjectile above
 		since it produces a more accurate movement.
 	*/
-	action Actor Fire3DProjectile(class<Actor> proj, bool useammo = true, double forward = 0, double leftright = 0, double updown = 0, bool crosshairConverge = false, double angleoffs = 0, double pitchoffs = 0)
-	{
+	action Actor Fire3DProjectile(class<Actor> proj, bool useammo = true, double forward = 0, double leftright = 0, double updown = 0, bool crosshairConverge = false, double angleoffs = 0, double pitchoffs = 0) {
+		if (!player || !player.mo)
+			return null;
+		
 		let weapon = player.ReadyWeapon;
-		if (useammo && weapon && stateinfo && stateinfo.mStateType == STATE_Psprite)
-		{
+		if (useammo && weapon && stateinfo && stateinfo.mStateType == STATE_Psprite) {
 			if (!weapon.DepleteAmmo(weapon.bAltFire, true))
 				return null;
 		}		
@@ -436,16 +453,14 @@ Class PKWeapon : Weapon abstract {
 		mat = mat.multiplyVector3((forward, -leftright, updown));
 		vector3 offsetPos = mat.asVector3(false);
 		
-		vector3 shooterPos = (pos.xy, pos.z + height * 0.5);
-		if(player) shooterPos.z = player.viewz;
+		vector3 shooterPos = (pos.xy, GetPlayerAtkHeight(player.mo, absolute:true));
 		offsetPos = level.vec3offset(offsetPos, shooterPos);
 		
 		// Get velocity
 		vector3 aimpos;
-		if(player && crosshairConverge)
-		{
+		if(crosshairConverge) {
 			FLineTraceData lt;
-			LineTrace(a, 1024*1024, p, 0, player.viewz-pos.z, 0, data:lt);
+			LineTrace(a, PLAYERMISSILERANGE, p, 0, GetPlayerAtkHeight(player.mo), 0, data:lt);
 			double projrad = GetDefaultByType(proj).radius;			
 			aimPos = (lt.HitLocation.xy - lt.HitDir.xy*projrad, lt.HitLocation.z);
 			
@@ -464,8 +479,7 @@ Class PKWeapon : Weapon abstract {
 		
 		// Spawn projectile
 		let proj = Spawn(proj, offsetPos);
-		if(proj)
-		{
+		if(proj) {
 			proj.angle = a;
 			proj.pitch = p;
 			proj.roll = r;
@@ -473,35 +487,6 @@ Class PKWeapon : Weapon abstract {
 			proj.target = self;
 			if (proj.seesound)
 				proj.A_StartSound(proj.seesound);
-			
-			/*
-			let dbs = PK_StakeProjectile(proj);
-			if (dbs) {
-				let dumpr = PK_DummyProjectile(Spawn ("PK_DummyProjectile", offsetPos));
-				dumpr.A_SetSize(proj.radius, proj.height);
-				dumpr.angle = proj.angle;
-				dumpr.pitch = proj.pitch;
-				dumpr.roll = proj.roll;
-				dumpr.vel = proj.vel;
-				dumpr.gravity = proj.gravity;
-				dumpr.target = self;
-				while (true) 
-				{
-					vector2 nextpos = dumpr.pos.xy + dumpr.vel.xy;
-					if (dumpr.CheckMove(nextpos))
-					{
-						//dumpr.SetOrigin(dumpr.pos + dumpr.vel, false);
-						//dumpr.FaceMovementDirection();
-						dumpr.Tick();
-						continue;
-					}
-					else 
-					{
-						Spawn("PK_DebugSpot", (nextpos, dumpr.pos.z));
-						break;
-					}
-				}
-			}*/
 		}
 		return proj;
 	}

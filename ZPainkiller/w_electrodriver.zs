@@ -19,6 +19,9 @@ Class PK_ElectroDriver : PKWeapon {
 		Obituary "$PKO_ELECTRO";
 	}
 	action vector3 FindElectroTarget(int atkdist = 280) {
+		if (!player || !player.mo)
+			return (0,0,0);
+		
 		actor ltarget;			
 		double closestDist = double.infinity;
 		// First, find potential targets close the the shooter:
@@ -39,7 +42,7 @@ Class PK_ElectroDriver : PKWeapon {
 				continue;
 			// Get spherical coords to the potential target
 			// to make sure they're close to our crosshair:
-			vector3 targetpos = LevelLocals.SphericalCoords((pos.x,pos.y,player.viewz),next.pos+(0,0,next.default.height*0.5),(angle,pitch));	
+			vector3 targetpos = LevelLocals.SphericalCoords((pos.x,pos.y,GetPlayerAtkHeight(player.mo, true)),next.pos+(0,0,next.default.height*0.5),(angle,pitch));	
 			if (abs(targetpos.x) > 15 || abs(targetpos.y) > 15) {
 				//console.printf("%s found but out of range",next.Getclassname());
 				continue;
@@ -54,7 +57,7 @@ Class PK_ElectroDriver : PKWeapon {
 		// to that point:
 		if (!ltarget) {
 			FLineTraceData hit;
-			LineTrace(angle,atkdist,pitch,TRF_ABSPOSITION|TRF_SOLIDACTORS,player.viewz,pos.x,pos.y,data:hit);
+			LineTrace(angle,atkdist,pitch,TRF_ABSPOSITION|TRF_SOLIDACTORS, GetPlayerAtkHeight(player.mo, true),pos.x,pos.y,data:hit);
 			if (hit.HitType != TRACE_HitNone && hit.HitType != TRACE_HitSky) {
 				Spawn("PK_ElectricPuff",hit.HitLocation);
 			}
