@@ -245,6 +245,10 @@ Class PK_InvReplacementControl : Inventory {
 	};
 }
 
+struct PK_PlayerItems {
+    Array<class<Inventory> > pickups;
+}
+
 class PK_PickupsTracker : Thinker {
     PK_PlayerItems pickups[MAXPLAYERS];
 	

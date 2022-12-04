@@ -741,7 +741,7 @@ Class PK_ReplacementHandler : EventHandler {
 			e.Replacement = 'PK_EquipmentSpawner_ClipBox';
 			break;
 		case 'PhoenixRodAmmo':
-			e.Replacement = 'PK_EquipmentSpawner_Rocket';
+			e.Replacement = 'PK_EquipmentSpawner_RocketAmmo';
 			break;
 		case 'PhoenixRodHefty':
 			e.Replacement = 'PK_EquipmentSpawner_RocketBox';
