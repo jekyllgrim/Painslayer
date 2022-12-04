@@ -255,7 +255,7 @@ Class PK_Rocket : PK_Grenade {
 	}
 	states {
 	Spawn:
-		MODL A 1 NoDelay A_FaceMovementDirection(flags:FMDF_INTERPOLATE);
+		M000 A 1 NoDelay A_FaceMovementDirection(flags:FMDF_INTERPOLATE);
 		loop;
 	}
 }

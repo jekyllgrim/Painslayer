@@ -211,7 +211,7 @@ Class PK_Stake : PK_StakeProjectile {
 			bNOGRAVITY = true;
 			vel = vel.unit() * speed * 1.3;
 		}
-		sprite = GetSpriteIndex("STAK");
+		sprite = GetSpriteIndex("M000");
 	}
 	
 	override void Tick () {
@@ -324,9 +324,9 @@ Class PK_Stake : PK_StakeProjectile {
 	
 	states {
 	Cache:
-		STAK A 0;
-		BOLT A 0;
-		PSDE A 0;
+		M000 A 0; //stake
+		M001 A 0; //bolt
+		PSDE A 0; //stake debris
 	Spawn:
 		#### A 1 {
 			if (pinvictim) {
@@ -615,7 +615,7 @@ Class PK_Grenade : PK_Projectile {
 	}
 	states {
 	Spawn:
-		MODL A 1 {
+		M000 A 1 {
 			if (vel.length() < 3) {
 				bMISSILE = false;
 			}
@@ -720,7 +720,7 @@ Class PK_ExplosiveStake : PK_Projectile {
 	}
 	states {
 	Spawn:
-		MODL A 1;
+		M000 A 1;
 		loop;
 	Death:
 		TNT1 A 1 { 

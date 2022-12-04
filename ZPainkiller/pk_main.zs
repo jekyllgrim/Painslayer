@@ -719,7 +719,7 @@ Class PK_Tracer : FastProjectile {
 			TNT1 A 2 NoDelay {
 				vel = vel.unit() * 256;
 			}
-			MODL A 1 bright;
+			M000 A 1 bright;
 			wait;
 		Xdeath:
 			TNT1 A 1;

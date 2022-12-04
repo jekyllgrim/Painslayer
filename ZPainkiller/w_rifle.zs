@@ -827,7 +827,7 @@ Class PK_FlamerTankModel : Actor {
 	}
 	States {
 	Spawn:
-		MODL A -1;
+		M000 A -1;
 		stop;
 	}
 }

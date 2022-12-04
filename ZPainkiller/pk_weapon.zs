@@ -1122,7 +1122,7 @@ Class PK_BulletTracer : FastProjectile {
 	}
 	states {
 	Spawn:
-		MODL A -1;
+		M000 A -1;
 		stop;
 	Death:
 		TNT1 A 1;
@@ -1150,7 +1150,7 @@ Class PK_RicochetBullet : PK_SmallDebris {
 	}
 	states {
 	Spawn:
-		MODL A 1 A_FadeOut(0.035);
+		M000 A 1 A_FadeOut(0.035);
 		loop;
 	}
 }

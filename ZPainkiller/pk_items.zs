@@ -893,7 +893,7 @@ Class PK_PickupRing : Actor {
 	}
 	States {
 	Spawn:
-		BAL1 A -1;
+		M000 A -1;
 		stop;
 	}
 }
@@ -1265,8 +1265,8 @@ Class PK_Pentagram : PK_PowerupGiver {
 	}
 	States {
 	Spawn:
-		BAL1 ABCDEFGHIJKLMNOPQRSTUVWXYZ 5;
-		BAL2 ABCDEFGHIJKLMNOPQRSTUV 5;
+		M000 ABCDEFGHIJKLMNOPQRSTUVWXYZ 5;
+		M001 ABCDEFGHIJKLMNOPQRSTUV 5;
 		loop;
 	}
 }

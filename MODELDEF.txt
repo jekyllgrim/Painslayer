@@ -12,6 +12,7 @@ Model PK_Painkiller {
 	
 	FrameIndex PKWI G 0 0
 }
+
 Model PK_Shotgun {
 	Path "models/shotgun"
 	Model 0 "item_shotgun.obj"
@@ -26,6 +27,7 @@ Model PK_Shotgun {
 	
 	FrameIndex PKWI A 0 0
 }
+
 Model PK_Stakegun {
 	AngleOffset 90
 	Path "models/stakegun"
@@ -40,6 +42,7 @@ Model PK_Stakegun {
 	
 	FrameIndex PKWI B 0 0
 }
+
 Model PK_Chaingun {
 	AngleOffset 90
 	Path "models/Chaingun"
@@ -55,6 +58,7 @@ Model PK_Chaingun {
 	
 	FrameIndex PKWI C 0 0
 }
+
 Model PK_Electrodriver {
 	Path "models/Electrodriver"
 	Model 0 "item_Electrodriver.obj"
@@ -68,6 +72,7 @@ Model PK_Electrodriver {
 	
 	FrameIndex PKWI D 0 0
 }
+
 Model PK_Rifle {
 	Path "models/Rifle"
 	Model 0 "item_Rifle.obj"
@@ -82,6 +87,7 @@ Model PK_Rifle {
 	
 	FrameIndex PKWI E 0 0
 }
+
 Model PK_Boltgun {
 	Path "models/Boltgun"
 	Model 0 "item_Boltgun.obj"
@@ -104,7 +110,7 @@ Model PK_RicochetBullet {
 	Scale 0.4 0.6 0.6
 	PITCHFROMMOMENTUM
 	
-	FrameIndex MODL A 0 0
+	FrameIndex M000 A 0 0
 }
 
 Model PK_BulletTracer {
@@ -114,7 +120,7 @@ Model PK_BulletTracer {
 	Scale 1.4 1.4 1.5
 	PITCHFROMMOMENTUM
 	
-	FrameIndex MODL A 0 0
+	FrameIndex M000 A 0 0
 }
 
 model "PK_TrackingBeam" {
@@ -124,7 +130,7 @@ model "PK_TrackingBeam" {
 	USEACTORPITCH
 	DONTCULLBACKFACES //the model has only two planes
 	
-	FrameIndex MODL A 0 0
+	FrameIndex M000 A 0 0
 }
 
 Model PK_Stake {
@@ -135,7 +141,7 @@ Model PK_Stake {
 	Scale 1 1 1
 	USEACTORPITCH
 	
-	Frame STAK A 0 0
+	Frame M000 A 0 0
 }
 
 Model PK_DebugStake {
@@ -157,7 +163,7 @@ Model PK_ExplosiveBolt {
 	AngleOffset 90
 	USEACTORPITCH
 	
-	Frame BOLT A 0 0
+	Frame M001 A 0 0
 }
 
 Model PK_Bolt {
@@ -168,7 +174,7 @@ Model PK_Bolt {
 	AngleOffset 90
 	USEACTORPITCH
 	
-	Frame BOLT A 0 0
+	Frame M001 A 0 0
 }
 
 Model PK_StakeStuck {
@@ -180,15 +186,16 @@ Model PK_StakeStuck {
 	Model 0 "PKstake.obj"
 	Skin 0 "grenadestake.png"
 	
-	Frame STAK A 0 0
+	Frame M000 A 0 0
 	
 	path "Models/Boltgun"
 	Model 0 "bolt_metal.obj"
 	Skin 0 "boltgun_projectiles.png"
 	Scale 0.4 0.4 0.4
 	
-	Frame BOLT A 0 0
+	Frame M001 A 0 0
 }
+
 Model PK_Tracer {
 	Path "models"
 	Model 0 "tracer.md3"
@@ -196,7 +203,7 @@ Model PK_Tracer {
 	Scale 1.0 1.0 1.0
 	PITCHFROMMOMENTUM
 	
-	FrameIndex MODL A 0 0
+	FrameIndex M000 A 0 0
 }
 
 Model PK_Grenade {
@@ -205,7 +212,7 @@ Model PK_Grenade {
 	Skin 0 "grenadestake.png"
 	Scale 1 1 1
 	USEACTORPITCH
-	FrameIndex MODL A 0 0
+	FrameIndex M000 A 0 0
 }
 
 Model PK_Bomb {
@@ -217,7 +224,7 @@ Model PK_Bomb {
 	USEACTORROLL
 	USEACTORPITCH
 	
-	FrameIndex MODL A 0 0
+	FrameIndex M000 A 0 0
 }
 
 Model PK_FlamerTankModel {
@@ -227,7 +234,7 @@ Model PK_FlamerTankModel {
 	Scale 10 10 10
 	USEACTORROLL
 	USEACTORPITCH
-	FrameIndex MODL A 0 0
+	FrameIndex M000 A 0 0
 }
 
 Model PK_Killer {
@@ -247,7 +254,7 @@ Model PK_ExplosiveStake {
 	Scale 1 1 1	
 	AngleOffset 90
 	USEACTORPITCH
-	FrameIndex MODL A 0 0
+	FrameIndex M000 A 0 0
 }
 
 Model PK_Rocket {
@@ -256,7 +263,7 @@ Model PK_Rocket {
 	Skin 0 "grenadestake.png"
 	Scale 1 1 1
 	USEACTORPITCH
-	FrameIndex MODL A 0 0
+	FrameIndex M000 A 0 0
 }
 
 Model PK_Shuriken {
@@ -266,10 +273,10 @@ Model PK_Shuriken {
 	Scale 5.0 5.0 6.02
 	
 	PITCHFROMMOMENTUM
-	FrameIndex MODL A 0 0
+	FrameIndex M000 A 0 0
 	
 	USEACTORPITCH
-	FrameIndex MODL B 0 0
+	FrameIndex M000 B 0 0
 }
 
 Model PK_DiskProjectile {
@@ -280,10 +287,10 @@ Model PK_DiskProjectile {
 	DONTCULLBACKFACES
 	
 	PITCHFROMMOMENTUM
-	FrameIndex MODL A 0 0
+	FrameIndex M000 A 0 0
 	
 	USEACTORPITCH
-	FrameIndex MODL B 0 0
+	FrameIndex M000 B 0 0
 }
 
 Model PK_Lightning {
@@ -295,43 +302,43 @@ Model PK_Lightning {
 	
 	AngleOffset 45
 	SurfaceSkin 0 0 "lightning/electrobolt_01.png"
-	FrameIndex MODL A 0 0
+	FrameIndex M000 A 0 0
 	
 	AngleOffset 50
 	SurfaceSkin 0 0 "lightning/electrobolt_02.png"	
-	FrameIndex MODL B 0 0
+	FrameIndex M000 B 0 0
 	
 	AngleOffset 55
 	SurfaceSkin 0 0 "lightning/electrobolt_03.png"	
-	FrameIndex MODL C 0 0
+	FrameIndex M000 C 0 0
 	
 	AngleOffset 60
 	SurfaceSkin 0 0 "lightning/electrobolt_04.png"	
-	FrameIndex MODL D 0 0
+	FrameIndex M000 D 0 0
 	
 	AngleOffset 65
 	SurfaceSkin 0 0 "lightning/electrobolt_05.png"	
-	FrameIndex MODL E 0 0
+	FrameIndex M000 E 0 0
 	
 	AngleOffset 60
 	SurfaceSkin 0 0 "lightning/electrobolt_06.png"	
-	FrameIndex MODL F 0 0
+	FrameIndex M000 F 0 0
 	
 	AngleOffset 55
 	SurfaceSkin 0 0 "lightning/electrobolt_07.png"	
-	FrameIndex MODL G 0 0
+	FrameIndex M000 G 0 0
 	
 	AngleOffset 50
 	SurfaceSkin 0 0 "lightning/electrobolt_08.png"	
-	FrameIndex MODL H 0 0
+	FrameIndex M000 H 0 0
 	
 	AngleOffset 45
 	SurfaceSkin 0 0 "lightning/electrobolt_09.png"	
-	FrameIndex MODL I 0 0
+	FrameIndex M000 I 0 0
 	
 	AngleOffset 50
 	SurfaceSkin 0 0 "lightning/electrobolt_10.png"	
-	FrameIndex MODL J 0 0
+	FrameIndex M000 J 0 0
 }
 	
 	
@@ -344,43 +351,43 @@ Model PK_Lightning2 {
 	
 	AngleOffset -15
 	SurfaceSkin 0 0 "lightning/electrobolt_01.png"
-	FrameIndex MODL A 0 0
+	FrameIndex M000 A 0 0
 	
 	AngleOffset -10
 	SurfaceSkin 0 0 "lightning/electrobolt_02.png"	
-	FrameIndex MODL B 0 0
+	FrameIndex M000 B 0 0
 	
 	AngleOffset 5
 	SurfaceSkin 0 0 "lightning/electrobolt_03.png"	
-	FrameIndex MODL C 0 0
+	FrameIndex M000 C 0 0
 	
 	AngleOffset 0
 	SurfaceSkin 0 0 "lightning/electrobolt_04.png"	
-	FrameIndex MODL D 0 0
+	FrameIndex M000 D 0 0
 	
 	AngleOffset 5
 	SurfaceSkin 0 0 "lightning/electrobolt_05.png"	
-	FrameIndex MODL E 0 0
+	FrameIndex M000 E 0 0
 	
 	AngleOffset 10
 	SurfaceSkin 0 0 "lightning/electrobolt_06.png"	
-	FrameIndex MODL F 0 0
+	FrameIndex M000 F 0 0
 	
 	AngleOffset 15
 	SurfaceSkin 0 0 "lightning/electrobolt_07.png"	
-	FrameIndex MODL G 0 0
+	FrameIndex M000 G 0 0
 	
 	AngleOffset 10
 	SurfaceSkin 0 0 "lightning/electrobolt_08.png"	
-	FrameIndex MODL H 0 0
+	FrameIndex M000 H 0 0
 	
 	AngleOffset 5
 	SurfaceSkin 0 0 "lightning/electrobolt_09.png"	
-	FrameIndex MODL I 0 0
+	FrameIndex M000 I 0 0
 	
 	AngleOffset 0
 	SurfaceSkin 0 0 "lightning/electrobolt_10.png"	
-	FrameIndex MODL J 0 0
+	FrameIndex M000 J 0 0
 }
 
 Model PK_Pentagram {
@@ -390,57 +397,56 @@ Model PK_Pentagram {
 	INTERPOLATEDOUBLEDFRAMES
 	ZOffset 10
 	
-	FrameIndex	BAL1	A	0	0
-	FrameIndex	BAL1	B	0	1
-	FrameIndex	BAL1	C	0	2
-	FrameIndex	BAL1	D	0	3
-	FrameIndex	BAL1	E	0	4
-	FrameIndex	BAL1	F	0	5
-	FrameIndex	BAL1	G	0	6
-	FrameIndex	BAL1	H	0	7
-	FrameIndex	BAL1	I	0	8
-	FrameIndex	BAL1	J	0	9
-	FrameIndex	BAL1	K	0	10
-	FrameIndex	BAL1	L	0	11
-	FrameIndex	BAL1	M	0	12
-	FrameIndex	BAL1	N	0	13
-	FrameIndex	BAL1	O	0	14
-	FrameIndex	BAL1	P	0	15
-	FrameIndex	BAL1	Q	0	16
-	FrameIndex	BAL1	R	0	17
-	FrameIndex	BAL1	S	0	18
-	FrameIndex	BAL1	T	0	19
-	FrameIndex	BAL1	U	0	20
-	FrameIndex	BAL1	V	0	21
-	FrameIndex	BAL1	W	0	22
-	FrameIndex	BAL1	X	0	23
-	FrameIndex	BAL1	Y	0	24
-	FrameIndex	BAL1	Z	0	25
-	FrameIndex	BAL2	A	0	26
-	FrameIndex	BAL2	B	0	27
-	FrameIndex	BAL2	C	0	28
-	FrameIndex	BAL2	D	0	29
-	FrameIndex	BAL2	E	0	30
-	FrameIndex	BAL2	F	0	31
-	FrameIndex	BAL2	G	0	32
-	FrameIndex	BAL2	H	0	33
-	FrameIndex	BAL2	I	0	34
-	FrameIndex	BAL2	J	0	35
-	FrameIndex	BAL2	K	0	36
-	FrameIndex	BAL2	L	0	37
-	FrameIndex	BAL2	M	0	38
-	FrameIndex	BAL2	N	0	39
-	FrameIndex	BAL2	O	0	40
-	FrameIndex	BAL2	P	0	41
-	FrameIndex	BAL2	Q	0	42
-	FrameIndex	BAL2	R	0	43
-	FrameIndex	BAL2	S	0	44
-	FrameIndex	BAL2	T	0	45
-	FrameIndex	BAL2	U	0	46
-	FrameIndex	BAL2	V	0	47
+	FrameIndex	M000	A	0	0
+	FrameIndex	M000	B	0	1
+	FrameIndex	M000	C	0	2
+	FrameIndex	M000	D	0	3
+	FrameIndex	M000	E	0	4
+	FrameIndex	M000	F	0	5
+	FrameIndex	M000	G	0	6
+	FrameIndex	M000	H	0	7
+	FrameIndex	M000	I	0	8
+	FrameIndex	M000	J	0	9
+	FrameIndex	M000	K	0	10
+	FrameIndex	M000	L	0	11
+	FrameIndex	M000	M	0	12
+	FrameIndex	M000	N	0	13
+	FrameIndex	M000	O	0	14
+	FrameIndex	M000	P	0	15
+	FrameIndex	M000	Q	0	16
+	FrameIndex	M000	R	0	17
+	FrameIndex	M000	S	0	18
+	FrameIndex	M000	T	0	19
+	FrameIndex	M000	U	0	20
+	FrameIndex	M000	V	0	21
+	FrameIndex	M000	W	0	22
+	FrameIndex	M000	X	0	23
+	FrameIndex	M000	Y	0	24
+	FrameIndex	M000	Z	0	25
+	FrameIndex	M001	A	0	26
+	FrameIndex	M001	B	0	27
+	FrameIndex	M001	C	0	28
+	FrameIndex	M001	D	0	29
+	FrameIndex	M001	E	0	30
+	FrameIndex	M001	F	0	31
+	FrameIndex	M001	G	0	32
+	FrameIndex	M001	H	0	33
+	FrameIndex	M001	I	0	34
+	FrameIndex	M001	J	0	35
+	FrameIndex	M001	K	0	36
+	FrameIndex	M001	L	0	37
+	FrameIndex	M001	M	0	38
+	FrameIndex	M001	N	0	39
+	FrameIndex	M001	O	0	40
+	FrameIndex	M001	P	0	41
+	FrameIndex	M001	Q	0	42
+	FrameIndex	M001	R	0	43
+	FrameIndex	M001	S	0	44
+	FrameIndex	M001	T	0	45
+	FrameIndex	M001	U	0	46
+	FrameIndex	M001	V	0	47
 }
 	
-
 Model PK_PickupRing {
 	Path "models"
 	Model 0 "pickup_ring.obj"
@@ -449,5 +455,5 @@ Model PK_PickupRing {
 	Rotation-Speed 0.65
 	Scale 3 3 3
 	ZOffset 0.1
-	FrameIndex BAL1 A 0 0
+	FrameIndex M000 A 0 0
 }

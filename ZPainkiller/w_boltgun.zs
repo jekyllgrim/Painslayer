@@ -466,7 +466,7 @@ Class PK_Bomb : PK_Projectile {
 	}
 	states {
 	Spawn:
-		MODL A -1;
+		M000 A -1;
 		stop;
 		//KULK ABC 2;
 		//loop;
