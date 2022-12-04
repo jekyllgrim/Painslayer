@@ -240,6 +240,17 @@ Class PK_EquipmentSpawner : Inventory {
 	property secondaryChance2 : secondaryChance2;
 	property twoPickupsChance : twoPickupsChance;
 	property dropChance : dropChance;
+	
+	static const class<Weapon> pkWeapons[] = {
+		"PK_Painkiller",
+		"PK_Shotgun",
+		"PK_Stakegun",
+		"PK_Boltgun",
+		"PK_Chaingun",
+		"PK_Rifle",
+		"PK_ElectroDriver"
+	};
+	
 	Default {
 		+NOBLOCKMAP
 		-SPECIAL
@@ -273,6 +284,7 @@ Class PK_EquipmentSpawner : Inventory {
 		ammoSpawnOfs,
 		ammoSpawnOfs
 	};	
+	
 	vector3 FindSpawnPosition() {
 		vector3 spawnpos = (0,0,0);
 		for (int i = 0; i < AmmoSpawnPos.Size()-1; i++) {
@@ -424,31 +436,44 @@ Class PK_EquipmentSpawner_CellPack : PK_EquipmentSpawner_Cell {
 	and will randomly spawn any ammo for any weapon the player has.
 */
 
-Class PK_AmmoSpawner_Stimpack : PK_EquipmentSpawner {
+Class PK_AmmoSpawner_RandomAmmo : PK_EquipmentSpawner {
 	override void PostBeginPlay() {
-		array < Class<Weapon> > wweapons; //this will hold all weapons that at least one player has
+		//this will hold all weapons that at least one player has:
+		array < Class<Weapon> > wweapons;
 		//iterate over a static array of all weapon classes in the mod (see pk_items.zs):
-		for (int i = 0; i < PK_InvReplacementControl.pkWeapons.Size(); i++) {
-			Class<Weapon> weap = PK_InvReplacementControl.pkWeapons[i];
-			//if at least one player has that weapon class or it exists on a map, and that weapon uses ammo, push it in the wweapons array:
-			if (weap && GetDefaultByType(weap).ammotype1 && GetDefaultByType(weap).ammotype2 && (CheckExistingWeapons(weap)) && wweapons.Find(weap) == wweapons.Size())
+		for (int i = 0; i < PK_EquipmentSpawner.pkWeapons.Size(); i++) {
+			Class<Weapon> weap = PK_EquipmentSpawner.pkWeapons[i];
+			// if at least one player has that weapon class or it 
+			// exists on a map, and that weapon uses ammo, push it 
+			// in the wweapons array:
+			if (
+				weap && 
+				GetDefaultByType(weap).ammotype1 && 
+				GetDefaultByType(weap).ammotype2 && 
+				(CheckExistingWeapons(weap)) && 
+				wweapons.Find(weap) == wweapons.Size()
+			)
 				wweapons.Push(weap);
 		}
+		
 		//if the array size is zero (no ammo-using weapons in the inventory OR on the map), destroy this:
 		if (wweapons.Size() <= 0) {
 			Destroy();
 			return;
 		}
+		
 		//randomly choose a weapon to spawn ammo for:
 		int toSpawn = random[ammoSpawn](0,wweapons.Size() - 1);
 		if (!wweapons[tospawn]) {
 			Destroy();
 			return;
 		}
+		
 		weapon1 = wweapons[tospawn];
 		super.PostBeginPlay();
 	}
 }
+
 
 /////////////////////////
 // WEAPON PICKUPS
