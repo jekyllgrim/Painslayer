@@ -571,61 +571,223 @@ Class PK_ReplacementHandler : EventHandler {
 	
 	override void CheckReplacement (ReplaceEvent e) {
 		switch (e.Replacee.GetClassName()) {
-			case 'Chainsaw' 		: e.Replacement = 'PK_BaseWeaponSpawner_Chainsaw'; 			break;
-			case 'Pistol' 			: e.Replacement = 'PK_Painkiller'; 			break;
-			case 'Shotgun'			: e.Replacement = 'PK_BaseWeaponSpawner_Shotgun'; 			break;
-			case 'SuperShotgun' 	: e.Replacement = 'PK_BaseWeaponSpawner_SuperShotgun';			break;
-			case 'Chaingun' 		: e.Replacement = 'PK_BaseWeaponSpawner_Chaingun'; 			break;
-			case 'RocketLauncher'	: e.Replacement = 'PK_BaseWeaponSpawner_RocketLauncher'; 			break;
-			case 'PlasmaRifle' 	: e.Replacement = 'PK_BaseWeaponSpawner_PlasmaRifle';				break;
-			case 'BFG9000' 		: e.Replacement = 'PK_BaseWeaponSpawner_BFG9000';		break;
+		//// DOOM
+		// Doom weapons:
+		case 'Chainsaw':
+			e.Replacement = 'PK_BaseWeaponSpawner_Chainsaw';
+			break;
+		case 'Pistol':
+			e.Replacement = 'PK_Painkiller';
+			break;
+		case 'Shotgun':
+			e.Replacement = 'PK_BaseWeaponSpawner_Shotgun';
+			break;
+		case 'SuperShotgun':
+			e.Replacement = 'PK_BaseWeaponSpawner_SuperShotgun';
+			break;
+		case 'Chaingun':
+			e.Replacement = 'PK_BaseWeaponSpawner_Chaingun';
+			break;
+		case 'RocketLauncher':
+			e.Replacement = 'PK_BaseWeaponSpawner_RocketLauncher';
+			break;
+		case 'PlasmaRifle':
+			e.Replacement = 'PK_BaseWeaponSpawner_PlasmaRifle';
+			break;
+		case 'BFG9000':
+			e.Replacement = 'PK_BaseWeaponSpawner_BFG9000';
+			break;
+		// Doom ammo:
+		case 'Clip':
+			e.Replacement = 'PK_EquipmentSpawner_Clip';
+			break;
+		case 'ClipBox':
+			e.Replacement = 'PK_EquipmentSpawner_ClipBox';
+			break;
+		case 'Shell':
+			e.Replacement = 'PK_EquipmentSpawner_Shell';
+			break;
+		case 'ShellBox':
+			e.Replacement = 'PK_EquipmentSpawner_ShellBox';
+			break;
+		case 'RocketAmmo':
+			e.Replacement = 'PK_EquipmentSpawner_RocketAmmo';
+			break;
+		case 'RocketBox':
+			e.Replacement = 'PK_EquipmentSpawner_RocketBox';
+			break;
+		case 'Cell':
+			e.Replacement = 'PK_EquipmentSpawner_Cell';
+			break;
+		case 'CellPack':
+			e.Replacement = 'PK_EquipmentSpawner_CellPack';
+			break;
+		// Doom items:
+		case 'Stimpack':
+		case 'Medikit':
+			e.Replacement = 'PK_AmmoSpawner_RandomAmmo';
+			break;
+		case 'HealthBonus':
+			if (random[propspawn](1,10) > 9)
+				e.Replacement = 'PK_BreakableChest';
+			else
+				e.Replacement = 'PK_NullActor';
+			break;
+		case 'ArmorBonus':
+			e.Replacement = 'PK_BronzeArmor';
+			break; 
+		case 'SoulSphere':
+			e.Replacement = 'PK_GoldSoul';
+			break;
+		case 'MegaSphere':
+			e.Replacement = 'PK_MegaSoul';
+			break;
+		case 'BlurSphere':
+			e.Replacement = 'PK_ChestOfSouls';
+			break;
+		case 'GreenArmor':
+			e.Replacement = 'PK_SilverArmor';
+			break;
+		Case 'BlueArmor':
+			e.Replacement = 'PK_GoldArmor';
+			break;
+		// Doom artifacts:
+		case 'Berserk':
+			e.Replacement = 'PK_WeaponModifierGiver';
+			break;
+		case 'Infrared':
+			e.Replacement = 'PK_DemonEyes';
+			break;
+		case 'AllMap':
+			e.Replacement = 'PK_AllMap';
+			break;
+		case 'InvulnerabilitySphere':
+			e.Replacement = 'PK_Pentagram';
+			break;
+		case 'Backpack':
+			e.Replacement = 'PK_AmmoPack';
+			break;
+		case 'RadSuit':
+			e.Replacement = 'PK_AntiRadArmor';
+			break;
+		// Doom explosive barrel:
+		case 'ExplosiveBarrel':
+			e.Replacement = 'PK_ExplosiveBarrel';
+			break;
+		// Doom decorative corpses (replaced with chests):
+		case 'DeadCacodemon':
+			e.Replacement = 'PK_BreakableChest';
+			break;
+		case 'DeadDemon':
+			e.Replacement = 'PK_BreakableChest';
+			break;
+		case 'DeadDoomImp':
+			e.Replacement = 'PK_BreakableChest';
+			break;
+		case 'DeadLostSoul':
+			e.Replacement = 'PK_BreakableChest';
+			break;
+		case 'DeadShotgunGuy':
+			e.Replacement = 'PK_BreakableChest';
+			break;
+		case 'DeadZombieMan':
+			e.Replacement = 'PK_BreakableChest';
+			break;
+		
+		//// HERETIC
+		// Heretic weapons:
+		case 'Gauntlets':
+			e.Replacement = 'PK_BaseWeaponSpawner_Chainsaw';
+			break;
+		case 'Staff':
+			e.Replacement = 'PK_Painkiller';
+			break;
+		case 'Goldwand':
+			e.Replacement = 'PK_Painkiller';
+			break;
+		case 'Crossbow':
+			e.Replacement = 'PK_BaseWeaponSpawner_Shotgun';
+			break;
+		case 'Blaster':
+			e.Replacement = 'PK_BaseWeaponSpawner_Chaingun';
+			break;
+		case 'PhoenixRod':
+			e.Replacement = 'PK_BaseWeaponSpawner_RocketLauncher';
+			break;
+		case 'SkullRod':
+			e.Replacement = 'PK_BaseWeaponSpawner_PlasmaRifle';
+			break;
+		case 'Mace':
+			e.Replacement = 'PK_BaseWeaponSpawner_BFG9000';
+			break;
 			
-			case 'Clip' 			: e.Replacement = 'PK_EquipmentSpawner_Clip';			break;
-			case 'ClipBox' 		: e.Replacement = 'PK_EquipmentSpawner_ClipBox';		break;
-			case 'Shell' 			: e.Replacement = 'PK_EquipmentSpawner_Shell';		break;
-			case 'ShellBox' 		: e.Replacement = 'PK_EquipmentSpawner_ShellBox';		break;
-			case 'RocketAmmo' 		: e.Replacement = 'PK_EquipmentSpawner_RocketAmmo';		break;
-			case 'RocketBox' 		: e.Replacement = 'PK_EquipmentSpawner_RocketBox';		break;
-			case 'Cell' 			: e.Replacement = 'PK_EquipmentSpawner_Cell';		break;
-			case 'CellPack' 		: e.Replacement = 'PK_EquipmentSpawner_CellPack';	break;
-
-			case 'Stimpack' 		: e.Replacement = 'PK_AmmoSpawner_Stimpack';	break;
-			case 'Medikit' 		: e.Replacement = 'PK_AmmoSpawner_Stimpack';	break;
-			case 'HealthBonus' 	: 
-				if (random[propspawn](1,10) > 9)
-					e.Replacement = 'PK_BreakableChest';
-				else
-					e.Replacement = 'PK_NullActor';
-				break;
-			case 'ArmorBonus' 		: 
-				//if (random[propspawn](1,10) > 8)
-					e.Replacement = 'PK_BronzeArmor';
-				//else
-					//e.Replacement = 'PK_NullActor';
-				break;			
-			case 'SoulSphere' 		: e.Replacement = 'PK_GoldSoul';	break;
-			case 'MegaSphere' 		: e.Replacement = 'PK_MegaSoul';	break;
-			case 'BlurSphere' 		: e.Replacement = 'PK_ChestOfSouls';	break;
-			case 'GreenArmor' 		: e.Replacement = 'PK_SilverArmor';	break;
-			Case 'BlueArmor'		: e.Replacement = 'PK_GoldArmor'; break;
-			
-			case 'Berserk'			: e.Replacement = 'PK_WeaponModifierGiver';  break;
-			case 'Infrared'		: e.Replacement = 'PK_DemonEyes';  break;
-			case 'AllMap'			: e.Replacement = 'PK_AllMap';  break;
-			case 'InvulnerabilitySphere'		: e.Replacement = 'PK_Pentagram';  break;
-			case 'Backpack'		: e.Replacement = 'PK_AmmoPack';  break;
-			case 'RadSuit'			: e.Replacement = 'PK_AntiRadArmor';  break;
-			
-			case 'ExplosiveBarrel': e.Replacement = 'PK_ExplosiveBarrel';  break;
-			
-			case 'DeadCacodemon'	: e.Replacement = 'PK_BreakableChest'; break;
-			case 'DeadDemon'	: e.Replacement = 'PK_BreakableChest'; break;
-			case 'DeadDoomImp'	: e.Replacement = 'PK_BreakableChest'; break;
-			case 'DeadLostSoul'	: e.Replacement = 'PK_BreakableChest'; break;
-			case 'DeadShotgunGuy'	: e.Replacement = 'PK_BreakableChest'; break;
-			case 'DeadZombieMan'	: e.Replacement = 'PK_BreakableChest'; break;
+		// We simply destroy gold wand ammo completely because it's replaced
+		// by Pain/Killer which doesn't use ammo, and in contrast to Doom,
+		// this ammo isn't used for anything else:
+		case 'GoldWandAmmo':
+		case 'GoldWandHefty':
+			e.Replacement = 'PK_NullActor';
+			break;
+		case 'CrossbowAmmo':
+			e.Replacement = 'PK_EquipmentSpawner_Shell';
+			break;
+		case 'CrossbowHefty':
+			e.Replacement = 'PK_EquipmentSpawner_ShellBox';
+			break;
+		case 'BlasterAmmo':
+			e.Replacement = 'PK_EquipmentSpawner_Clip';
+			break;
+		case 'BlasterHefty':
+			e.Replacement = 'PK_EquipmentSpawner_ClipBox';
+			break;
+		case 'PhoenixRodAmmo':
+			e.Replacement = 'PK_EquipmentSpawner_Rocket';
+			break;
+		case 'PhoenixRodHefty':
+			e.Replacement = 'PK_EquipmentSpawner_RocketBox';
+			break;
+		case 'SkullRodAmmo':
+		case 'MaceAmmo':
+			e.Replacement = 'PK_EquipmentSpawner_Cell';
+			break;
+		case 'SkullRodHefty':
+		case 'MaceHefty':
+			e.Replacement = 'PK_EquipmentSpawner_CellPack';
+			break;
+		
+		// Heretic items:
+		case 'BagOfHolding':
+			e.Replacement = 'PK_AmmoPack';
+			break;
+		case 'ArtiHealth':
+		case 'CrystalVial':
+			e.Replacement = 'PK_AmmoSpawner_RandomAmmo';
+			break;
+		case 'SilverShield':
+			e.Replacement = 'PK_SilverArmor';
+			break;
+		case 'EnchantedShield':
+			e.Replacement = 'PK_GoldArmor';
+			break;
+		case 'SuperMap':
+			e.Replacement = 'PK_AllMap';
+			break;
+		case 'ArtiSuperHealth':
+			e.Replacement = 'PK_GoldSoul';
+			break;
+		case 'ArtiInvisibility':
+			e.Replacement = 'PK_ChestOfSouls';
+			break;
+		case 'ArtiInvulnerability':
+			e.Replacement = 'PK_Pentagram';
+			break;
+		case 'ArtiTorch':
+			e.Replacement = 'PK_DemonEyes';
+			break;
+		case 'ArtiTomeOfPower':
+			e.Replacement = 'PK_WeaponModifierGiver';
+			break;
 		}
-		//e.IsFinal = true;
 	}
 	
 	override void WorldThingSpawned(WorldEvent e) {
@@ -652,7 +814,9 @@ Class PK_BoardEventHandler : EventHandler {
 	override void WorldThingDamaged(worldevent e) {
 		if (!e.thing)
 			return;
+		
 		let enm = e.thing;
+		
 		if (enm.bISMONSTER && e.DamageSource && e.DamageSource.FindInventory("PKC_HealthStealer") && enm.isHostile(e.DamageSource)) {
 			if (pk_debugmessages)
 				console.printf("%s dealt %d damage to %s",e.DamageSource.GetClassName(),e.damage,enm.GetClassName());
@@ -661,6 +825,7 @@ Class PK_BoardEventHandler : EventHandler {
 			if (card)
 				card.drainedHP += drain;
 		}
+		
 		if ((enm.player || enm.bISMONSTER) && 	e.Inflictor && e.Inflictor is "PK_FlamerTank" && e.DamageSource && !enm.FindInventory("PK_BurnControl")) {
 			enm.GiveInventory("PK_BurnControl",1);
 			let control = enm.FindInventory("PK_BurnControl");
@@ -672,25 +837,32 @@ Class PK_BoardEventHandler : EventHandler {
 	override void NetworkProcess(consoleevent e) {
 		if (e.isManual || e.Player < 0)
 			return;
+		if (!PlayerInGame[e.Player])
+			return;
+		
 		let plr = players[e.Player].mo;
 		if (!plr)
 			return;
+		
 		if (e.name == 'PKCCodexOpened') {
 			let irc = PK_InvReplacementControl(plr.FindInventory("PK_InvReplacementControl"));
 			if (irc) {
 				irc.codexOpened = true;
 			}
 		}
+		
 		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (!cardcontrol)
 			return;
+		
 		//card purchase: push the card into array, reduce current gold
 		if (e.name.IndexOf("PKCBuyCard") >= 0) {
 			Array <String> cardname;
 			e.name.split(cardname, ":");
-			if (cardname.Size() != 0) {
+			// if split successfully:
+			if (cardname.Size() == 2) {
 				name thiscard = name(cardname[1]);
-				//apparently, dynamic arrays are iffy, that's why we need int(name
+				// apparently, dynamic arrays are iffy, se we need int(name):
 				cardcontrol.UnlockedTarotCards.Push(int(thiscard));
 				int cost = e.args[0];
 				cardcontrol.GiveGoldAmount(-cost);
@@ -698,22 +870,26 @@ Class PK_BoardEventHandler : EventHandler {
 					console.printf("buying card %s at %d",thiscard,cost);
 			}
 		}
+		
 		if (e.name == 'PKCTakeGold') {
 			int cost = e.args[0];
 			cardcontrol.GiveGoldAmount(-cost);
 		}
+		
 		//equip card into a slot
 		if (e.name.IndexOf("PKCCardToSlot") >= 0) {
 			Array <String> cardname;
 			e.name.split(cardname, ":");
-			if (cardname.Size() != 0) {
+			// if split successfully:
+			if (cardname.Size() == 2) {
 				int slotID = e.args[0];
 				name card = cardname[1];
 				cardcontrol.EquippedSlots[slotID] = card;
 				// Forgiveness card needs special handling: it increases/decreases 
 				// maximum gold cards activations, and those changes need to be
 				// displayed immediately, on the board, not when the card item is
-				// given to the player (which only happens when the board is closed).
+				// given to the player (which only happens when the board 
+				// is closed).
 				// Also because gold activations can be refreshed on the board.
 				// Forgiveness handling: increase gold card activations:
 				if (card == 'Forgiveness') {
@@ -724,12 +900,14 @@ Class PK_BoardEventHandler : EventHandler {
 				}
 			}
 		}
+		
 		// Refresh golden card activations:
 		if (e.name == 'PKCRefreshUses') {
 			int refreshcost = e.args[0];
 			cardcontrol.RefreshGoldActivations();
 			cardcontrol.GiveGoldAmount(-refreshcost);
 		}
+		
 		//remove card from slot
 		if (e.name == 'PKCClearSlot') {
 			int slotID = e.args[0];
@@ -741,6 +919,7 @@ Class PK_BoardEventHandler : EventHandler {
 			}
 			cardcontrol.EquippedSlots[slotID] = '';
 		}
+		
 		if (e.name == 'PKCCloseBoard') {
 			//console.printf("trying to initalize card slots");
 			cardcontrol.PK_EquipCards();

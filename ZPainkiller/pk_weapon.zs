@@ -35,6 +35,9 @@ Class PKWeapon : Weapon abstract {
 	protected state s_altfire;
 	protected state s_althold;
 	
+	protected double idlescale;
+	protected int idleScaleDir;
+	
 	Default {
 		+PKWeapon.ALWAYSBOB
 		weapon.BobStyle "InverseSmooth";
@@ -68,9 +71,20 @@ Class PKWeapon : Weapon abstract {
 		if (!owner || !owner.player)
 			return;		
 		SwitchAmmoTypes();
-		let weap = owner.player.readyweapon;
+		/*let weap = owner.player.readyweapon;
 		if (!weap)
 			return;
+		if (weap == self) {
+			let psp = owner.player.FindPSprite(PSP_WEAPON);
+			if (psp && InStateSequence(psp.curstate, FindState("Ready"))) {
+				if (abs(idleScaleDir) != 1)
+					idleScaleDir = 1;
+				double change = 0.0025 * idleScaleDir;
+				psp.scale += (change, change);
+				if (psp.scale.x < 1. || psp.scale.x > 1.08)
+					idleScaleDir *= -1;
+			}
+		}*/
 		//if (bALWAYSBOB && weap == self)
 			//owner.player.WeaponState |= WF_WEAPONBOBBING;
 		hasDexterity = owner.FindInventory("PowerDoubleFiringSpeed",subclass:true);
