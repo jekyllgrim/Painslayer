@@ -25,112 +25,130 @@ Class PK_InvReplacementControl : Inventory {
 	Class<Inventory> latestPickup; //keep track of the latest pickup
 	string latestPickupName; //the tag of the latest pickup
 	bool codexOpened;
+	
 	Default {
 		+INVENTORY.UNDROPPABLE
 		+INVENTORY.UNTOSSABLE
 		+INVENTORY.PERSISTENTPOWER
 		inventory.maxamount 1;
 	}
-	static const Class<Weapon> vanillaWeapons[] = {
-		"Fist",
-		"Chainsaw",
-		"Pistol",
-		"Shotgun",
-		"SuperShotgun",
-		"Chaingun",
-		"RocketLauncher",
-		"PlasmaRifle",
-		"BFG9000"
+	
+	static const name ReplacementPairs[] = {
+		//Doom:
+		"Fist:PK_Painkiller",
+		"Chainsaw:PK_Painkiller",
+		"Pistol:PK_Painkiller",
+		"Shotgun:PK_Shotgun",
+		"SuperShotgun:PK_Stakegun",
+		"Chaingun:PK_Chaingun",
+		"RocketLauncher:PK_Boltgun",
+		"PlasmaRifle:PK_Rifle",
+		"BFG9000:PK_ElectroDriver",
+		"GreenArmor:PK_SilverArmor",
+		"BlueArmor:PK_GoldArmor",
+		//Heretic:
+		"Staff:PK_Painkiller", //fist
+		"Gauntlets:PK_Painkiller", //chainsaw
+		"Goldwand:PK_Painkiller", //pistol
+		"Crossbow:PK_Shotgun", //shotgun
+		"Blaster:PK_Chaingun", //chaingun
+		"PhoenixRod:PK_Stakegun", //rocket launcher
+		"SkullRod:PK_Rifle", // plasma rifle
+		"Mace:PK_ElectroDriver" //bfg
 	};
-	static const Class<Weapon> pkWeapons[] = {
-		"PK_Painkiller",
-		"PK_Painkiller",
-		"PK_Painkiller",
-		"PK_Shotgun",
-		"PK_Stakegun",
-		"PK_Chaingun",
-		"PK_Boltgun",
-		"PK_Rifle",
-		"PK_Electrodriver"
-	};
-	static const Class<Inventory> vanillaItems[] = {
-		"GreenArmor",
-		"BlueArmor",
-		"BasicArmorPickup"
-	};
-	static const Class<Inventory> pkItems[] = {
-		"PK_SilverArmor",
-		"PK_GoldArmor",
-		"PK_GoldArmor"
-	};
-	//here we make sure that the player will never have vanilla weapons in their inventory:
+
+	// This checks the player's inventory for illegal (vanilla) weapons
+	// continuously. This helps to account for starting items too,
+	// in case Painslayer is played with a project that overrides the 
+	// player class, so they don't start with a pistol.
+	// It also makes sure to select the replacement weapon that matches
+	// the vanilla weapon that was selected:
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner || !owner.player)
 			return;
+		
 		let plr = owner.player;
-		array < int > changeweapons; //stores all weapons that need to be exchanged
-		int selweap = -1; //will store readyweapon
-		//record all weapons that need to be replaced
-		for (int i = 0; i < vanillaWeapons.Size(); i++) {
-			//if a weapon is found, cache its position in the array:
-			Class<Weapon> oldweap = vanillaWeapons[i];
-			if (owner.CountInv(oldweap) >= 1) {
-				if (pk_debugmessages)  console.printf("found %s that shouldn't be here",oldweap.GetClassName());
-				changeweapons.Push(i);
-			}
-			//also, if it was seleted, cache its number separately:
-			if (owner.player.readyweapon && owner.player.readyweapon.GetClass() == oldweap)
-				selweap = i;
-		}
-		//if no old weapons were found, do nothing else:
-		if (changeweapons.Size() <= 0)
-			return;
-		for (int i = 0; i < vanillaWeapons.Size(); i++) {
-			//do nothing if this weapon wasn't cached:
-			if (changeweapons.Find(i) == changeweapons.Size())
+		
+		// We'll store the weapon that the player should switch to here:
+		class<Weapon> toSwitch;
+		Weapon readyweapon = owner.player.readyweapon;
+		
+		for (int i = 0; i < ReplacementPairs.Size(); i++) {
+			// Split the entry to get the replacement
+			// an the replacee:
+			array<string> classes;
+			string str = ReplacementPairs[i];
+			str.Split(classes, ":");
+			
+			// If the split didn't work for some reason,
+			// skip this one:
+			if (classes.Size() < 2)
 				continue;
-			Class<Weapon> oldweap = vanillaWeapons[i];
-			Class<Weapon> newweap = pkWeapons[i];
-			//remove old weapon
-			owner.A_TakeInventory(oldweap);
-			if (pk_debugmessages) console.printf("Exchanging %s for %s",oldweap.GetClassName(),newweap.GetClassName());
-			if (!owner.CountInv(newweap)) {
-				owner.A_GiveInventory(newweap,1);
+			
+			// Check the class is valid and is a weapon:
+			class<Weapon> oldweapon = classes[0];
+			if (!oldweapon)
+				continue;
+			
+			// Check the player has it:
+			if (owner.CountInv(oldweapon))
+			{
+				// Remove the original and give the replacement:
+				owner.TakeInventory(oldweapon, owner.CountInv(oldweapon));
+				owner.GiveInventory(classes[1], 1);
+				// If the original weapon was selected, tell the player 
+				// to switch to the replacement:
+				if (readyweapon && readyweapon.GetClass() == oldweapon)
+				{
+					toSwitch = classes[1];
+				}
 			}
-		}		
-		//select the corresponding new weapon if an old weapon was selected:
-		if (selweap != -1) {
-			Class<Weapon> newsel = pkWeapons[selweap];
-			let wp = Weapon(owner.FindInventory(newsel));
-			if (wp) {
-				if (pk_debugmessages) console.printf("Selecting %s", wp.GetClassName());
-				owner.player.pendingweapon = wp;
+			
+			// Switch to the new weapon:
+			if (toSwitch && toswitch is 'Weapon')
+			{
+				owner.player.pendingweapon = Weapon(owner.FindInventory(toSwitch));
 			}
 		}
-		changeweapons.Clear();
 	}
-    override bool HandlePickup (Inventory item) {
-		bool ret = false;
+	
+	// This overrides the player's ability to receive vanilla weapons
+	// to account for cheats and GiveInventory ACS scripts:
+    override bool HandlePickup (Inventory item) {	
 		let oldItemClass = item.GetClassName();
-        Class<Inventory> replacement =  null;
-		for (int i = 0; i < vanillaWeapons.Size(); i++) {
-			if (pkWeapons[i] && oldItemClass == vanillaWeapons[i]) {
-				replacement = pkWeapons[i];
+        Class<Inventory> replacement = null;
+		
+		// Iterate through the array:
+		for (int i = 0; i < ReplacementPairs.Size(); i++) {
+			// Split the entry to get the replacement
+			// an the replacee:
+			array<string> classes;
+			string str = ReplacementPairs[i];
+			str.Split(classes, ":");
+			
+			// If the split didn't work for some reason,
+			// skip this one:
+			if (classes.Size() < 2)
+				continue;
+			
+			// Otherwise, check against the original class name,
+			// and if it matches, replace with the new one:
+			if (oldItemClass == classes[0]) {
+				replacement = classes[1];
 				break;
 			}
 		}
-		for (int i = 0; i < vanillaItems.Size(); i++) {
-			if (pkItems[i] && oldItemClass == vanillaItems[i]) {
-				replacement = pkItems[i];
-				break;
-			}
-		}
-        if (!replacement) {
+		
+		// If the item class is not in the replacement array,
+		// give it as is:
+		if (!replacement) {
 			if (pk_debugmessages > 1)
 				console.printf("%s doesn't need replacing, giving as is",oldItemClass);
-			ret = super.HandlePickup(item);
+			return false;
 		}
+		
+		// Otherwise give the replacement instead:
 		else {
 			int r_amount = GetDefaultByType(replacement).amount;
 			item.bPickupGood = true;
@@ -138,10 +156,11 @@ Class PK_InvReplacementControl : Inventory {
 			if (pk_debugmessages) {
 				console.printf("Replacing %s with %s (amount: %d)",oldItemClass,replacement.GetClassName(),r_amount);
 			}
-			ret = true;
+			RecordLastPickup(replacement ? replacement : item.GetClass());
+			return true;
 		}		
-		RecordLastPickup(replacement ? replacement : item.GetClass());
-        return ret;
+		
+        return false;
     }
 	
 	/*	This function records the latest item the player has picked up
@@ -151,6 +170,7 @@ Class PK_InvReplacementControl : Inventory {
 	void RecordLastPickup(class<Inventory> toRecord) {
 		if (!toRecord || !owner || !owner.player)
 			return;
+		
 		bool isInCodex = false;
 		for (int i = 0; i < CodexCoveredClasses.Size(); i++) {
 			if (toRecord is CodexCoveredClasses[i]) {
@@ -158,8 +178,10 @@ Class PK_InvReplacementControl : Inventory {
 				break;
 			}
 		}
+		
 		if (!isInCodex)
 			return;
+		
 		int pnum = owner.PlayerNumber();
 		if (pnum < 0)
 		  return;
@@ -171,7 +193,6 @@ Class PK_InvReplacementControl : Inventory {
 				console.printf("Item track Thinker not found");
 			return;
 		}
-		
 
 		/*	We use a dynamic array to check that the player hasn't
 			picked up this item before, because CountInv won't catch
@@ -224,17 +245,10 @@ Class PK_InvReplacementControl : Inventory {
 	};
 }
 
-struct PK_PlayerItems
-{
-    Array<class<Inventory> > pickups;
-}
-
-class PK_PickupsTracker : Thinker
-{
+class PK_PickupsTracker : Thinker {
     PK_PlayerItems pickups[MAXPLAYERS];
 	
-	PK_PickupsTracker Init(void)
-    {
+	PK_PickupsTracker Init(void) {
         ChangeStatNum(STAT_STATIC);
 		return self;
     }
@@ -251,6 +265,7 @@ Mixin Class PK_PickupSound {
 			atten = ATTN_NONE;
 		else
 			atten = ATTN_NORM;
+			
 		if (toucher != NULL && toucher.CheckLocalView()) {
 			chan = CHAN_ITEM;
 			flags = CHANF_NOPAUSE | CHANF_MAYBE_LOCAL | CHANF_OVERLAP;
