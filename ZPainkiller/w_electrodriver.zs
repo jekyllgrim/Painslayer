@@ -410,10 +410,10 @@ Class PK_ElectroTarget : PK_BaseFlare {
 Class PK_Lightning : PK_TrackingBeam {
 	States	{
 		cache:
-			MODL ABCDEFGHIJ 0;
+			M000 ABCDEFGHIJ 0;
 		Spawn:
 			TNT1 A 0;
-			MODL A 1 bright {
+			M000 A 1 bright {
 				lifetimer--;
 				frame = random[lit](0,9);
 			}
@@ -468,14 +468,14 @@ Class PK_Shuriken : PK_StakeProjectile {
 	}
 	states {
 	Spawn:
-		MODL A 1 NoDelay {
+		M000 A 1 NoDelay {
 			spriterotation += 10;
 			if (age > 16)
 				SetStateLabel("Boom");				
 		}
 		loop;
 	Death:
-		MODL B 100 {
+		M000 B 100 {
 			if (target && PKWeapon.CheckWmod(target))
 				return ResolveState("Boom");
 			StickToWall();
@@ -642,7 +642,7 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 	}
 	states {
 	Spawn:
-		MODL A 1 {
+		M000 A 1 {
 			A_FaceMovementDirection(flags:FMDF_INTERPOLATE );
 			spriterotation += 10;			
 		}
@@ -657,7 +657,7 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 			A_StartSound("weapons/edriver/starwall",attenuation:2);
 			A_StartSound("weapons/edriver/shockloop",CHAN_VOICE,CHANF_LOOPING);
 		}
-		MODL B 3 {
+		M000 B 3 {
 			if (!s_particles)
 				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
 			if (s_particles.GetInt() >= 2) {
