@@ -24,27 +24,43 @@ Class PK_MainHandler : EventHandler {
 	static bool CheckPlayersHave(Class<Inventory> itm, bool checkall = false) {
 		if(!itm)
 			return false;
+		
+		// Check all: start with a TRUE; as soon as somebody is found
+		// to NOT have the item, flip to false and break.
+		// Otherwise: start with FALSE; as soon as somebody is found
+		// to HAVE the item, flip to true and break.
+		bool found = checkall;
 		for (int pn = 0; pn < MAXPLAYERS; pn++) {
 			if (!playerInGame[pn])
 				continue;
+			
 			PlayerInfo plr = players[pn];
 			if (!plr || !plr.mo)
 				continue;
-			bool found = plr.mo.CountInv(itm);
-			if (checkall && !found) {
-				if (pk_debugmessages > 1)
-					console.printf("Player %d doesn't have %s",plr.mo.PlayerNumber(),itm.GetClassName());
-				return false;
-				break;
+				
+			bool hasItem = plr.mo.CountInv(itm);
+			
+			// If we're checking anyone, as soon as somebody is found
+			// to have the item, return true:
+			if (!checkall) {
+				if (hasItem) {
+					if (pk_debugmessages > 1)
+						console.printf("Player %d has %s",plr.mo.PlayerNumber(),itm.GetClassName());
+					found = true;
+					break;
+				}
 			}
-			else if (found) {
+			
+			// If we're checking everyone, as soon as somebody is found
+			// to NOT have the item, return false:
+			else if (!hasItem) {
 				if (pk_debugmessages > 1)
-					console.printf("Player %d has %s",plr.mo.PlayerNumber(),itm.GetClassName());
-				return true;
+					console.printf("Player %d doesn't have %s.",plr.mo.PlayerNumber(),itm.GetClassName());
+				found = false;
 				break;
 			}
 		}
-		return false;
+		return found;
 	}
 	
 	static bool IsVoodooDoll(PlayerPawn mo) {
