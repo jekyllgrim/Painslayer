@@ -327,7 +327,7 @@ Class PK_Bolt : PK_Stake {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		sprite = GetSpriteIndex("BOLT");
+		sprite = GetSpriteIndex("M001");
 		basedmg = mod ? 70 : 53;
 		onFire = true; //this prevents it from spawning the fire trail that the stake would spawn after 12 tics
 		if (mod)
@@ -349,7 +349,7 @@ Class PK_Bolt : PK_Stake {
 	}
 }
 
-Class PK_ExplosiveBolt : PK_Projectile {
+Class PK_ExplosiveBolt : PK_ExplosiveStake {
 	Default {
 		PK_Projectile.trailcolor "ff7538";
 		PK_Projectile.trailscale 0.024;
@@ -362,7 +362,9 @@ Class PK_ExplosiveBolt : PK_Projectile {
 	}
 	states {
 	Death:
-		TNT1 A 1 { 
+		TNT1 A 0 { 
+			bNOGRAVITY = true;
+			bFORCEXYBILLBOARD = true;
 			A_Quake(1,6,0,160,"");
 			A_StartSound("weapons/boltgun/explosion",attenuation:1);
 			A_Explode(32,80);				
