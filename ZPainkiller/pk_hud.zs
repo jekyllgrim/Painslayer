@@ -4,6 +4,8 @@ Class PainkillerHUD : BaseStatusBar {
 		
 	HUDFont mIndexFont;
 	HUDFont mNotifFont;
+	HUDFont mHUDFont; //used only by inv bar
+	InventoryBarState diparms;
 	//HUDFont mStatFont;
 	protected class<Inventory> prevLatestPickup;
 	protected class<Inventory> curLatestPickup;
@@ -77,10 +79,12 @@ Class PainkillerHUD : BaseStatusBar {
 	
 	override void Init() {
 		super.Init();
-		Font fnt = "PKHNUMS"; //font with numbers 
-		Font times = font_times; //Times font used in other places too
-		mIndexFont = HUDFont.Create(fnt, fnt.GetCharWidth("0"), true, 1, 1);
+		Font ifnt = "PKHNUMS"; //font with numbers 
+		mIndexFont = HUDFont.Create(ifnt, ifnt.GetCharWidth("0"), true, 1, 1);
+		Font hfnt = "HUDFONT_DOOM"; //for inv bar numbers
+		mHUDFont = HUDFont.Create(hfnt, hfnt.GetCharWidth("0"), Mono_CellLeft, 1, 1);
 		mNotifFont = HUDFont.Create("consolefont");
+		diparms = InventoryBarState.Create();
 		// Base values for the Codex notif pop-up:
 		notifAlpha = 0.6;
 		notifAlphaMod = 0.05;
@@ -102,28 +106,63 @@ Class PainkillerHUD : BaseStatusBar {
 		//is in a demon mode and debug messages aren't active:
 		if (state == HUD_none || automapactive || (isDemon /*&& !pk_debugmessages*/))
 			return;
+		
 		BeginHUD();
 		//draw invulnerability overlay:
 		if (CPlayer.mo.FindInventory("PowerInvulnerable",true)) {
 			PK_DrawImage("PKHHORNS",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);
 		}
+		
 		// Top elements draw in Fullscreen and Alt Hud
 		// These include mosnter compass, gold and soul counters, and keys:
 		if (state == HUD_Fullscreen || state == HUD_AltHud)
 			DrawTopElements();
+		
 		// Health, armor, ammo, etc.
 		// In statusbar mode it also moves the monster compass,
 		// keys, gold and soul counters to the bottom
 		if (state == HUD_StatusBar || state == HUD_Fullscreen)
 			DrawBottomElements();
+		
 		DrawEquippedCards();
 		DrawCardUses();
 		DrawCodexNotif();
 		DrawActiveGoldenCards();
-		// Keys are already present in the AltHud:
+		
+		// Keys and inv bar are already present in the AltHud:
 		if (state != HUD_AltHud) {
 			DrawKeys();
-		}		
+
+			// Draw selected item:
+			if (!isInventoryBarVisible() && !Level.NoInventoryBar && CPlayer.mo.InvSel != null) {
+				vector2 box = (32, 32);
+				double ihofs = 48;
+				// I'm forcefully scaling it to 1.2 vertically because this function
+				// is only used for inventory items that exist outside of the mod,
+				// such as Heretic-specific pickups, and they were drawn with pixelstretch
+				// in mind, so I want them to always look correct:
+				PK_DrawInventoryIcon(
+					CPlayer.mo.InvSel, 
+					(ihofs, -4), 
+					DI_SCREEN_LEFT_BOTTOM|DI_ITEM_LEFT_BOTTOM|DI_DIMDEPLETED, 
+					boxsize: box,
+					scale: (1, 1.2)
+				);
+				PK_DrawString(
+					mNotifFont, 
+					FormatNumber(CPlayer.mo.InvSel.Amount, 3), 
+					(ihofs + (box.x * 0.9), -7), 
+					DI_SCREEN_LEFT_BOTTOM|DI_TEXT_ALIGN_RIGHT, 
+					translation: Font.CR_GOLD,
+					scale: (0.75, 0.85)
+				);
+			}
+			// Draw inventory bar:
+			if (isInventoryBarVisible()) {
+				int iflags = state == HUD_StatusBar ? DI_SCREEN_CENTER_TOP : DI_SCREEN_CENTER_BOTTOM;
+				DrawInventoryBar(diparms, (0, 0), 7, iflags, HX_SHADOW);
+			}
+		}
 	}	
 	
 	// Draws arrow for the compass pointing at the nearest monster.
