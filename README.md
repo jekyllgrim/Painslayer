@@ -190,8 +190,6 @@ The code libraries, their license types and their locations are as follows:
     **License**: MIT License
     **Location**: `ZPainkiller/PK_Gutamatics/`
 
-
-
 Refer to the aforementioned code locations for license information on each code component.
 
 ## The Audio

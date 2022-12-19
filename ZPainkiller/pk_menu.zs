@@ -95,8 +95,7 @@ class PKSkillMenu : ListMenu {
 			
 			// Set vertical collision for mouse selection:
 			let sItem = ListMenuItemSelectable(item);
-			if (sItem)
-			{
+			if (sItem) {
 				sItem.SetY(y);
 				sItem.mHeight = mDesc.mLinespacing;
 			}
