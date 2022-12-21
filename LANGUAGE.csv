@@ -9,10 +9,11 @@ You don't have enough gold to unlock this card.",TAROT_CANTUNEQUIP,Black Tarot B
 "This card is already equipped and locked in the slot. Will you spend \c[PKGreenText]%d gold\c[PKBaseText] to unlock it?
 
 (Reach next map to re-equip cards for free.)",TAROT_PAYTOUNEQUIP,Black Tarot Board,"Эта карта размещена в ячейке и заблокирована. Разблокировать ее за \c[PKGreenText]%d золота\c[PKBaseText]?
+
 (В начале следующего уровня это можно будет сделать бесплатно.)"
 "Welcome to the Black Tarot.
 
-As a one-time gift you will now receive some random cards.",TAROT_FIRSTUSE,Black Tarot Board,"Черные карты Таро приветствуют вас.
+As a one-time gift you will now receive some random cards.",TAROT_FIRSTUSE,Black Tarot Board,"Чёрное Таро приветствует вас.
 
 В качестве первого и последнего подарка вы сейчас получите несколько карт."
 "Are you sure you want to close the Black Tarot Board? 
@@ -29,7 +30,7 @@ Golden Cards can only be activated a limited number of times per map. This butto
 Do you want to spend \c[PKGreenText]%d gold\c[PKBaseText] to refresh the number of activations back to \c[PKGreenText]%d\c[PKBaseText]?
 
 (Reach next map to refresh for free.)",TAROT_REFRESH_REMAINING,,"Осталось активаций: \c[PKGreenText]%d\c[PKBaseText].
-Вы хотите потратить \c[PKGreenText]%d золота\c[PKBaseText] и обновить число активаций Золотых карт до \c[PKGreenText]%d\c[PKBaseText]?
+Вы хотите потратить \c[PKGreenText]%d золота\c[PKBaseText], чтобы обновить число активаций Золотых карт до \c[PKGreenText]%d\c[PKBaseText]?
 
 (В начале следующего уровня это произойдет бесплатно.)"
 "\c[PKGreenText]%d\c[PKBaseText] Golden Cards activations remaining.
@@ -63,31 +64,31 @@ Regenerate Armor 10 sec after taking the last damage.,PK_HELLISHARMOR_DESC,Tarot
 Start the map with 666 ammo of every type.,PK_666AMMO_DESC,Tarot Cards,В начале уровня вы получаете 666 боеприпасов для каждого оружия.
 Endurance,PK_ENDURANCE_NAME,Tarot Cards,Выносливость
 Speed,PK_SPEED_NAME,Tarot Cards,Скорость
-Time Bonus,PK_TIMEBONUS_NAME,Tarot Cards,Больше времени
+Time Bonus,PK_TIMEBONUS_NAME,Tarot Cards,Продление
 Rebirth,PK_REBIRTH_NAME,Tarot Cards,Перерождение
 Confusion,PK_CONFUSION_NAME,Tarot Cards,Замешательство
 Dexterity,PK_DEXTERITY_NAME,Tarot Cards,Ловкость
 Weapon Modifier,PK_WMODIFIER_NAME,Tarot Cards,Модификатор
-Steps of Thunder,PK_SOT_NAME,Tarot Cards,Поступь грома
+Steps of Thunder,PK_SOT_NAME,Tarot Cards,Поступь Грома
 Rage,PK_RAGE_NAME,Tarot Cards,Гнев
-Magic Gun,PK_MAGICGUN_NAME,Tarot Cards,Волшебное оружие
-Iron Will,PK_IRONWILL_NAME,Tarot Cards,Железная воля
-Haste,PK_HASTE_NAME,Tarot Cards,Спешка
-Soul Keeper,PK_SOULKEEPER_NAME,Tarot Cards,Хранитель душ
+Magic Gun,PK_MAGICGUN_NAME,Tarot Cards,Волшебное Оружие
+Iron Will,PK_IRONWILL_NAME,Tarot Cards,Железная Воля
+Haste,PK_HASTE_NAME,Tarot Cards,Поспешность
+Soul Keeper,PK_SOULKEEPER_NAME,Tarot Cards,Хранитель Душ
 Blessing,PK_BLESSING_NAME,Tarot Cards,Благословение
 Replenish,PK_REPLENISH_NAME,Tarot Cards,Восполнение
-Dark Soul,PK_DARKSOUL_NAME,Tarot Cards,Тёмная душа
-Soul Catcher,PK_SOULCATCHER_NAME,Tarot Cards,Ловец душ
+Dark Soul,PK_DARKSOUL_NAME,Tarot Cards,Тёмная Душа
+Soul Catcher,PK_SOULCATCHER_NAME,Tarot Cards,Ловец Душ
 Forgiveness,PK_FORGIVENESS_NAME,Tarot Cards,Прощение
 Greed,PK_GREED_NAME,Tarot Cards,Алчность
-Soul Redeemer,PK_SOULREDEEMER_NAME,Tarot Cards,Искупление души
+Soul Redeemer,PK_SOULREDEEMER_NAME,Tarot Cards,Искупление Души
 Regeneration,PK_REGENERATION_NAME,Tarot Cards,Регенерация
-Health Stealer,PK_HEALTHSTEALER_NAME,Tarot Cards,Вампир
-Hellish Armor,PK_HELLISHARMOR_NAME,Tarot Cards,Адская броня
-666 Ammo,PK_666AMMO_NAME,Tarot Cards,666 патронов
+Health Stealer,PK_HEALTHSTEALER_NAME,Tarot Cards,Вампиризм
+Hellish Armor,PK_HELLISHARMOR_NAME,Tarot Cards,Адская Броня
+666 Ammo,PK_666AMMO_NAME,Tarot Cards,666 Патронов
 Giving lots and lots of gold.,PKCH_GIVEGOLD1,Cheats,Вы получаете много-много золота.
 "Glittering gold, trinkets and baubles... paid for in blood.",PKCH_GIVEGOLD2,Cheats,"Блестящее золото, безделицы побрякушки... купленные кровью."
-Even with all these coins the old man on the boat won't take you back.,PKCH_GIVEGOLD3,Cheats,Даже за все это золото старик на лодке не отвезет тебя обратно.
+Even with all these coins the old man on the boat won't take you back.,PKCH_GIVEGOLD3,Cheats,Даже за всё это золото старик на лодке не отвезет тебя обратно.
 Avarice! Definitely my favorite sin.,PKCH_GIVEGOLD4,Cheats,"Алчность! Однозначно, мой любимый грех."
 Don't forget to donate to the foundation for mortally challenged!,PKCH_GIVEGOLD5,Cheats,Не забудьте пожертвовать денег фонду преодолевающих трудности перед смертью!
 Let's lighten your pockets...,PKCH_TAKEGOLD1,Cheats,Облегчим-ка твои карманы...
@@ -104,11 +105,11 @@ Ammo pack!,PKI_AMMOPACK,Item pickupmessages,Ящик патронов!
 Gained full map of the level,PKI_ALLMAP,Item pickupmessages,Вы получили полную карту уровня
 Protection Suit!,PKI_ANTIRAD,Item pickupmessages,Защитный костюм!
 A Chest of Souls,PKI_CHESTOFSOULS,Item pickupmessages,Сундук с душами
-Picked up shotgun shells,PKI_SHELLS,Item pickupmessages,Вы подобрали патроны для дробовика
+Picked up Shotgun Shells,PKI_SHELLS,Item pickupmessages,Вы подобрали патроны для дробовика
 Picked up Freezer Ammo,PKI_FREEZEAMMO,Item pickupmessages,Вы подобрали боеприпасы для охладителя
 Picked up Stakes,PKI_STAKEAMMO,Item pickupmessages,Вы подобрали колья
 Picked up Grenades,PKI_GRENADEAMMO,Item pickupmessages,Вы подобрали гранаты
-Picked up Chaingun Bullets,PKI_MINIGUNAMMO,Item pickupmessages,Вы подобрали патроны для пулемета
+Picked up Chaingun Bullets,PKI_MINIGUNAMMO,Item pickupmessages,Вы подобрали патроны для пулемёта
 Picked up Shurikens,PKI_STARAMMO,Item pickupmessages,Вы подобрали сюрикэны
 Picked up a Cell Battery,PKI_ELECTROAMMO,Item pickupmessages,Вы подобрали аккумулятор
 Picked up Assault Rifle Ammo,PKI_RIFLEAMMO,Item pickupmessages,Вы подобрали патроны для автомата
@@ -117,32 +118,32 @@ Picked up Steel Bolts,PKI_BOLTAMMO,Item pickupmessages,Вы подобрали �
 Picked up Heater Bombs,PKI_HEATERAMMO,Item pickupmessages,Вы подобрали шаровые бомбы
 Picked up Pain/Killer,PKI_PAINKILLER,Item pickupmessages,Вы подобрали Pain/Killer
 Picked up Shotgun/Freezer,PKI_SHOTGUN,Item pickupmessages,Вы подобрали дробовик/охладитель
-Picked up Stakegun/Grenade Launcher,PKI_STAKEGUN,Item pickupmessages,Вы подобрали коломет/гранатомет
-Picked up Rocket Launcher/Chaingun,PKI_CHAINGUN,Item pickupmessages,Вы подобрали ракетницу/пулемет
-Picked up Electro/Driver,PKI_ELECTRODRIVER,Item pickupmessages,Вы подобрали электро/драйвер
-Picked up Boltgun/Heater,PKI_BOLTGUN,Item pickupmessages,Вы подобрали болтомет/шаромет
-Picked up Assault Rifle/Flamethrower,PKI_RIFLE,Item pickupmessages,Вы подобрали автомат/огнемет
+Picked up Stakegun/Grenade Launcher,PKI_STAKEGUN,Item pickupmessages,Вы подобрали коломёт/гранатомёт
+Picked up Rocket Launcher/Chaingun,PKI_CHAINGUN,Item pickupmessages,Вы подобрали ракетницу/пулемёт
+Picked up Electro/Driver,PKI_ELECTRODRIVER,Item pickupmessages,Вы подобрали электро/привод
+Picked up Boltgun/Heater,PKI_BOLTGUN,Item pickupmessages,Вы подобрали болтомёт/шаромёт
+Picked up Assault Rifle/Flamethrower,PKI_RIFLE,Item pickupmessages,Вы подобрали автомат/огнемёт
 Pain/Killer,PK_PAINKILLER_TAG,Weapon names,Pain/Killer
 Shotgun/Freezer,PK_SHOTGUN_TAG,Weapon names,Дробовик/охладитель
-Stakegun/Grenade Launcher,PK_STAKEGUN_TAG,Weapon names,Коломет/гранатомет
-Rocket Launcher/Chaingun,PK_CHAINGUN_TAG,Weapon names,Ракетница/пулемет
-Electro/Driver,PK_ELECTRODRIVER_TAG,Weapon names,Электро/драйвер
+Stakegun/Grenade Launcher,PK_STAKEGUN_TAG,Weapon names,Коломёт/гранатомёт
+Rocket Launcher/Chaingun,PK_CHAINGUN_TAG,Weapon names,Ракетница/пулемёт
+Electro/Driver,PK_ELECTRODRIVER_TAG,Weapon names,Электро/привод
 Assault Rifle/Flamethrower,PK_RIFLE_TAG,Weapon names,Автомат/огнемет
-Boltgun/Heater,PK_BOLTGUN_TAG,Weapon names,Болтомет/шаромет
+Boltgun/Heater,PK_BOLTGUN_TAG,Weapon names,Болтомёт/шаромёт
 Pain	         /  Killer,PK_PAINKILLER_SLOT,Weapon modes for menu,Pain / Killer
 Shotgun       /  Freezer,PK_SHOTGUN_SLOT,Weapon modes for menu,Дробовик / охладитель
-Stakegun      /  G. Launcher,PK_STAKEGUN_SLOT,Weapon modes for menu,Коломет / гранатомет
-R. Launcher   /  Chaingun,PK_CHAINGUN_SLOT,Weapon modes for menu,Ракетница / пулемет
-Driver        /  Electro,PK_ELECTRODRIVER_SLOT,Weapon modes for menu,Драйвер / электро
+Stakegun      /  G. Launcher,PK_STAKEGUN_SLOT,Weapon modes for menu,Коломёт / гранатомёт
+R. Launcher   /  Chaingun,PK_CHAINGUN_SLOT,Weapon modes for menu,Ракетница / пулемёт
+Driver        /  Electro,PK_ELECTRODRIVER_SLOT,Weapon modes for menu,Привод / электро
 Assault Rifle /  Flamethrower,PK_RIFLE_SLOT,Weapon modes for menu,Автомат / огнемет
-Boltgun       /  Heater,PK_BOLTGUN_SLOT,Weapon modes for menu,Болтомет / шаромет
+Boltgun       /  Heater,PK_BOLTGUN_SLOT,Weapon modes for menu,Болтомёт / шаромёт
 Killer        /  Pain,PK_PAINKILLER_ISLOT,Switched weapon modes for menu,Killer / Pain
 Freezer       /  Shotgun,PK_SHOTGUN_ISLOT,Switched weapon modes for menu,Охладитель / дробовик
-G. Launcher   /  Stakegun,PK_STAKEGUN_ISLOT,Switched weapon modes for menu,Гранатомет / коломет
-Chaingun      /  R. Launcher,PK_CHAINGUN_ISLOT,Switched weapon modes for menu,Пулемет / ракетница
-Electro       /  Driver,PK_ELECTRODRIVER_ISLOT,Switched weapon modes for menu,Электро / драйвер
+G. Launcher   /  Stakegun,PK_STAKEGUN_ISLOT,Switched weapon modes for menu,Гранатомёт / коломёт
+Chaingun      /  R. Launcher,PK_CHAINGUN_ISLOT,Switched weapon modes for menu,Пулемёт / ракетница
+Electro       /  Driver,PK_ELECTRODRIVER_ISLOT,Switched weapon modes for menu,Электро / привод
 Flamethrower  /  Assault Rifle,PK_RIFLE_ISLOT,Switched weapon modes for menu,Огнемет / автомат
-Heater        /  Boltgun,PK_BOLTGUN_ISLOT,Switched weapon modes for menu,Шаромет / болтомет
+Heater        /  Boltgun,PK_BOLTGUN_ISLOT,Switched weapon modes for menu,Шаромёт / болтомёт
 %o was ripped apart with %k's Pain,PKO_PAIN,Obituaries,%k разрывает игрока %o на части с помощью Pain
 %o couldn't dodge %k's Killer,PKO_KILLER,Obituaries,Игроку %o не удалось увернуться от Killer игрока %k
 %o was slowly burnt by %k's Killer Beam,PKO_KILLERBEAM,Obituaries,%k медленно сжигает игрока %o лучом Killer
@@ -151,7 +152,7 @@ Heater        /  Boltgun,PK_BOLTGUN_ISLOT,Switched weapon modes for menu,Шар�
 %k pinned %o to the wall,PKO_STAKE,Obituaries,%k пригвождает игрока %o к стене
 %k managed to hit %o with a grenade-on-a-stick,PKO_EXSTAKE,Obituaries,%k попадает в игрока %o гранатой на палке
 %o stood too close to %k's grenade,PKO_GRENADE,Obituaries,%o не успевает отойти от гранаты игрока %k
-%k mowed %o down with a minigun,PKO_CHAINGUN,Obituaries,%k прошивает игрока %o пулеметным огнем
+%k mowed %o down with a minigun,PKO_CHAINGUN,Obituaries,%k прошивает игрока %o пулемётным огнем
 %o was blown up by %k's rockets,PKO_ROCKET,Obituaries,%o подрывается на ракетах игрока %k
 %o was electrocuted by %k,PKO_ELECTRO,Obituaries,%k убивает игрока %o током
 %o was pinned by %k's shurikens,PKO_DRIVER,Obituaries,%k пригвождает игрока %o сюрикэнами
@@ -167,7 +168,7 @@ not bound,PKC_NOTBOUND,Codex,не назначено
 WEAPONS,PKC_WEAPONS,Codex,ОРУЖИЕ
 ITEMS,PKC_POWERUPS,Codex,ПРЕДМЕТЫ
 TAROT,PKC_TAROT,Codex,КАРТЫ ТАРО
-Showing Weapon Modifier stats,PKC_WM_On,Codex,Показан эффект Модификатора оружия
+Showing Weapon Modifier stats,PKC_WM_On,Codex,Показаны эффекты модификатора оружия
 Showing standard weapon stats,PKC_WM_Off,Codex,Показаны стандартные значения
 Hold,PKC_Hold,Codex,Зажать
 Tap,PKC_Tap,Codex,Нажать
@@ -176,60 +177,60 @@ Primary,PKC_Primary,Codex,Атака 1
 Secondary,PKC_Secondary,Codex,Атака 2
 Pain,PKC_Pain,Codex,Pain
 Deal continuous damage with the spinning blades.,PKC_PainDesc,Codex,Наносит непрерывный урон вращающимися клинками.
-"Weapon Modifier effects: Blades spin faster, dealing more damage per second.",PKC_PainDescWM,Codex,"С Модификатором оружия: клинки вращаются быстрее, нанося больше урона."
+"Weapon Modifier effects: Blades spin faster, dealing more damage per second.",PKC_PainDescWM,Codex,"С модификатором оружия: клинки вращаются быстрее, нанося больше урона."
 Killer,PKC_Killer,Codex,Killer
 "Fire the folded blade unit. The unit can stick into walls and creates a laser beam that burns enemies when you aim at it.
 NOTE: This attack can juggle corpses.",PKC_KillerDesc,Codex,"Выстреливает блоком клинков, который может воткнуться во врага или стену. Нацельтесь на блок, чтобы выпустить лазерный луч. Позволяет притягивать трупы."
-"Weapon Modifier effects: Laser beam is always active, regardless of where you're aiming.",PKC_KillerDescWM,Codex,"С Модификатором оружия: лазерный луч активен всегда, куда бы вы ни целились."
+"Weapon Modifier effects: Laser beam is always active, regardless of where you're aiming.",PKC_KillerDescWM,Codex,"С модификатором оружия: лазерный луч активен всегда, куда бы вы ни целились."
 Painkiller,PKC_Painkiller,Codex,Painkiller
-Launch the spinning blades forward. This projectile is slow but deals a lot of damage on impact.,PKC_PainkillerDesc,Codex,"Выпускает вращающиеся клинки вперед, создавая медленный, но смертоносный снаряд."
+Fire the spinning blades forward. This projectile is slow but deals a lot of damage on impact.,PKC_PainkillerDesc,Codex,"Выстреливает блоком вращающихся клинков, создавая медленный, но смертоносный снаряд."
 Shotgun,PKC_Shotgun,Codex,Дробовик
 A fast-firing shotgun with decent damage and spread.,PKC_ShotgunDesc,Codex,Скорострельный дробовик с хорошими уроном и кучностью.
-"Weapon Modifier effects: Shotgun spread tightens, and pellets deal slightly more damage.",PKC_ShotgunDescWM,Codex,"С Модификатором оружия: разброс снижается, а урон немного повышается."
+"Weapon Modifier effects: Shotgun spread tightens, and pellets deal slightly more damage.",PKC_ShotgunDescWM,Codex,"С модификатором оружия: разброс снижается, а урон немного повышается."
 Freezer,PKC_Freezer,Codex,Охладитель
 "Fire two projectiles that freeze enemies on impact. Frozen enemies receive more damage, especially from the shotgun. Does not work on bosses.",PKC_FreezerDesc,Codex,"Выпускает два снаряда, замораживающих врагов. Замороженные враги получают больше урона, особенно от дробовика. Не действует на боссов."
-Weapon Modifier effects: Freeze duration is doubled.,PKC_FreezerDescWM,Codex,С Модификатором оружия: продолжительность заморозки удваивается.
+Weapon Modifier effects: Freeze duration is doubled.,PKC_FreezerDescWM,Codex,С модификатором оружия: продолжительность заморозки удваивается.
 Shatter,PKC_ShotgunFreezer,Codex,Осколки
 "Fire freezer, then immediately fire shotgun to deal a lot of extra damage. Shatters weaker enemies.",PKC_ShotgunFreezerDesc,Codex,"Выстрелите охладителем, а затем сразу дробовиком, чтобы нанести дополнительный урон. Слабые враги разбиваются на осколки."
 Stakegun,PKC_Stakegun,Codex,Коломёт
-Fire a powerful projectile that can pin enemies to walls. After 0.34 seconds in flight stakes catch on fire. Burning stakes deal more damage.,PKC_StakegunDesc,Codex,"Выпускает мощный снаряд, который может пригвоздить врага к стене. 0,34 сек. спустя летящий кол загорается: горящие колья наносят больше урона."
-Weapon Modifier effects: Stakes are set on fire immediately and fly in a straight line at an increased speed.,PKC_StakegunDescWM,Codex,С Модификатором оружия: колья загораются в момент выстрела и летят по прямой линии с повышенной скоростью.
+Fire a powerful projectile that can pin enemies to walls. After 0.34 seconds in flight stakes catch on fire. Burning stakes deal more damage.,PKC_StakegunDesc,Codex,"Выпускает мощный снаряд, который может пригвоздить врага к стене. 0,34 сек. спустя летящий кол загорается, а урон от него возрастает."
+Weapon Modifier effects: Stakes are set on fire immediately and fly in a straight line at an increased speed.,PKC_StakegunDescWM,Codex,С модификатором оружия: колья загораются в момент выстрела и летят по прямой линии с повышенной скоростью.
 Grenade Launcher,PKC_Grenade,Codex,Гранатомёт
 Fire a bouncing grenade that explodes after a period of time or when hitting an enemy. Shares ammo with the Rocket Launcher.,PKC_GrenadeDesc,Codex,"Выпускает отскакивающий снаряд, который взрывается через некоторое время или при попадании во врага. Использует те же патроны, что и ракетница."
-"Weapon Modifier effects: Grenades spawn flames upon exploding, setting enemies on fire.",PKC_GrenadeDescWM,Codex,С Модификатором оружия: при взрыве гранаты выпускают во все стороны огонь.
-Makeshift Rocket,PKC_StakeGrenade,Codex,Граната-на-палке
+"Weapon Modifier effects: Grenades spawn flames upon exploding, setting enemies on fire.",PKC_GrenadeDescWM,Codex,С модификатором оружия: при взрыве гранаты выпускают во все стороны огонь.
+Makeshift Rocket,PKC_StakeGrenade,Codex,Граната на палке
 "Launch a grenade, then fire a stake at it to create a powerful makeshift rocket. Deals more damage than Rocket Launcher rockets.",PKC_StakeGrenadeDesc,Codex,"Выпустите гранату, затем выстрелите в нее колом, чтобы создать подобие ракеты. Этот снаряд наносит больше урона, чем снаряды ракетницы."
 Rocket Launcher,PKC_RLauncher,Codex,Ракетница
-Fire a rocket. Don't stand too close! Shares ammo with the Grenade Launcher.,PKC_RLauncherDesc,Codex,"Стреляет ракетами. Не стойте слишком близко! Использует те же патроны, что и гранатомет."
-"Weapon Modifier effects: Rockets spawn flames upon exploding, setting enemies on fire.",PKC_RLauncherDescWM,Codex,С Модификатором оружия: при взрыве ракеты выпускают во все стороны огонь.
-Minigun,PKC_Chaingun,Codex,Пулемет
+Fire a rocket. Don't stand too close! Shares ammo with the Grenade Launcher.,PKC_RLauncherDesc,Codex,"Стреляет ракетами. Не стойте слишком близко! Использует те же патроны, что и гранатомёт."
+"Weapon Modifier effects: Rockets spawn flames upon exploding, setting enemies on fire.",PKC_RLauncherDescWM,Codex,С модификатором оружия: при взрыве ракеты выпускают во все стороны огонь.
+Minigun,PKC_Chaingun,Codex,Пулемёт
 "Rapid-fire minigun. Needs some time to spin up before it can start firing.
-Note: The gun's spread will increase as you keep firing.",PKC_ChaingunDesc,Codex,"Скорострельный пулемет. Перед началом стрельбы ему нужно раскрутиться.
+Note: The gun's spread will increase as you keep firing.",PKC_ChaingunDesc,Codex,"Скорострельный пулемёт. Перед началом стрельбы ему нужно раскрутиться.
 Примечание: разброс возрастает, пока вы продолжаете стрелять."
-"Weapon Modifier effects: Minigun spread is significantly reduced, and damage is slightly increased.",PKC_ChaingunDescWM,Codex,"С Модификатором оружия: разброс пулемета существенно снижается, а урон немного возрастает."
-Driver,PKC_Driver,Codex,Драйвер
+"Weapon Modifier effects: Minigun spread is significantly reduced, and damage is slightly increased.",PKC_ChaingunDescWM,Codex,"С модификатором оружия: разброс пулемёта существенно снижается, а урон немного возрастает."
+Driver,PKC_Driver,Codex,Привод
 Fire shurikens at high speed. After 0.5 seconds in flight shurikens explode: catch enemies in the explosion for a lot of extra damage.,PKC_DriverDesc,Codex,"Быстро стреляет сюрикэнами. Через 0,5 сек. полета сюрикэны взрываются: если удастся зацепить взрывом врага, тот получит большой урон."
-"Weapon Modifier effects: Explosion damage is reduced, but shurikens always explode on impact.",PKC_DriverDescWM,Codex,"С Модификатором оружия: сила взрыва ослабляется, но сюрикэны взрываются при попадании."
+"Weapon Modifier effects: Explosion damage is reduced, but shurikens always explode on impact.",PKC_DriverDescWM,Codex,"С модификатором оружия: сила взрыва уменьшается, но сюрикэны взрываются при попадании."
 Electro,PKC_Electro,Codex,Электро
 Fire a continuous stream of electricity that latches onto the closest target within a small radius around your crosshair. Effective at stunlocking.,PKC_ElectroDesc,Codex,"Выпускает постоянный электрический разряд, который наводится на врага в небольшом радиусе вокруг перекрестия прицела."
-"Weapon Modifier effects: Upon hitting an enemy, the lightning jumps to other enemies around it.",PKC_ElectroDescWM,Codex,С Модификатором оружия: при попадании во врага разряд перескакивает на других врагов вокруг него.
+"Weapon Modifier effects: Upon hitting an enemy, the lightning jumps to other enemies around it.",PKC_ElectroDescWM,Codex,С модификатором оружия: при попадании во врага разряд перескакивает на других врагов вокруг него.
 Electric Disc,PKC_ElectroDisc,Codex,Электродиск
 "Fire an electrically charged container of shurikens. It sticks into enemies and walls, then starts firing electric bolts at surrounding enemies before exploding after a while.",PKC_ElectroDiscDesc,Codex,"Выпускает заряженный диск с сюрикэнами. Он втыкается во врага или стену, затем начинает стрелять разрядами в окружающих врагов, а через некоторое время взрывается."
 Rifle,PKC_Rifle,Codex,Автомат
 Fire the Rifle in bursts of up to 7 successive shots. Deals significant damage and has tight spread.,PKC_RifleDesc,Codex,Стреляет очередями до 7 выстрелов. Отличается хорошим уроном и кучностью.
-Weapon Modifier effects: The rifle fires in full auto and deals more damage.,PKC_RifleDescWM,Codex,С Модификатором оружия: автомат стреляет в полностью автоматическом режиме и наносит больше урона.
+Weapon Modifier effects: The rifle fires in full auto and deals more damage.,PKC_RifleDescWM,Codex,С модификатором оружия: автомат стреляет в полностью автоматическом режиме и наносит больше урона.
 Flamethrower,PKC_Flamer,Codex,Огнемет
 "Fire flamethrower. Sets enemies on fire, dealing damage over time. Flames can fly through enemies, but gradually slow down, resulting in limited range.",PKC_FlamerDesc,Codex,"Выпускает струю огня, поджигающую врагов, нанося периодический урон. Огонь проходит сквозь врагов, но быстро теряет скорость."
-"Weapon Modifier effects: The flames fly faster, increasing the flamethrower's effective range.",PKC_FlamerDescWM,Codex,"С Модификатором оружия: огонь летит с большей скоростью, повышая эффективную дистанцию."
+"Weapon Modifier effects: The flames fly faster, increasing the flamethrower's effective range.",PKC_FlamerDescWM,Codex,"С модификатором оружия: огонь летит с большей скоростью, повышая эффективную дистанцию."
 Fuel tank,PKC_FlameTank,Codex,Выстрел баком
 "Launch the whole fuel tank. The tank explodes when shot, or upon impact with an enemy, or after a short while. Burns surrounding enemies upon exploding.",PKC_FlameTankDesc,Codex,"Выпускает топливный бак. Тот взрывается при попадании во врага, либо через некоторое время, либо если по нему выстрелить. Поджигает врагов при взрыве."
-Boltgun,PKC_Boltgun,Codex,Болтомет
+Boltgun,PKC_Boltgun,Codex,Болтомёт
 Fire 5 steel bolts in quick succession. Bolts fly in a straight line and can pin enemies to walls.,PKC_BoltgunDesc,Codex,Быстро выпускает 5 стальных болтов. Болты летят по прямой и могут пригвоздить врагов к стене.
-"Weapon Modifier effects: Bolts are set on fire, dealing more damage.",PKC_BoltgunDescWM,Codex,"С Модификатором оружия: болты горят, нанося больше урона при попадании."
-Press Zoom (%s) to activate sniper scope.,PKC_BoltgunNote,Codex,"Нажмите Приближение (%s), чтобы активировать оптический прицел."
-Heater,PKC_Heater,Codex,Шаромет
+"Weapon Modifier effects: Bolts are set on fire, dealing more damage.",PKC_BoltgunDescWM,Codex,"С модификатором оружия: болты горят, нанося больше урона при попадании."
+Press Zoom (%s) to activate sniper scope.,PKC_BoltgunNote,Codex,"Нажмите \""Приближение\"" (%s), чтобы активировать оптический прицел."
+Heater,PKC_Heater,Codex,Шаромёт
 "Fire 10 bouncing bombs that explode when impacting enemies, or bounce off a surface twice and then explode on the 3rd impact.",PKC_HeaterDesc,Codex,"Выпускает 10 бомб, которые отскакивают от поверхности дважды, а при третьем столкновении взрываются. При попадании во врагов взрываются сразу."
-Weapon Modifier effects: Bombs are launched further and explode on impact without bouncing.,PKC_HeaterDescWM,Codex,"С Модификатором оружия: бомбы летят дальше и взрываются при столкновении с чем угодно, не отскакивая."
+Weapon Modifier effects: Bombs are launched further and explode on impact without bouncing.,PKC_HeaterDescWM,Codex,"С модификатором оружия: бомбы летят дальше и взрываются при столкновении с чем угодно, не отскакивая."
 Heater Rockets,PKC_HeaterBolts,Codex,Шароболты
 "Fire bombs, then try to hit them with bolts to create makeshift heater rockets. They deal a lot of damage, but this attack is difficult to pull off.",PKC_HeaterBoltsDesc,Codex,"Выпустите бомбы, затем выстрелите в них болтами, чтобы насадить на них бомбы и получить подобие ракет. Они наносят большой урон, но выполнить эту атаку сложно."
 Gold,PKC_Gold,Codex,Золото
@@ -240,7 +241,7 @@ Mega Soul,PKC_MegaSoul,Codex,Огромная душа
 Armor,PKC_Armor,Codex,Доспехи
 Ammo Pack,PKC_AmmoPack,Codex,Ящик патронов
 Weapon Modifier,PKC_WeaponModifier,Codex,Модификатор оружия
-Demon Eyes,PKC_DemonEyes,Codex,Глаза демона
+Demon Eyes,PKC_DemonEyes,Codex,Глаза Демона
 Pentagram,PKC_Pentagram,Codex,Пентаграмма
 Protection Suit,PKC_Antirad,Codex,Защитный костюм
 Crystal Ball,PKC_CrystalBall,Codex,Хрустальный шар
@@ -260,9 +261,9 @@ Note: Enemies don't drop souls on \c[PKGreenText]Trauma difficulty mode\c[PKWhit
 
 \cQИСЦЕЛЕНИЕ\c[PKWhiteText]. Подняв душу, вы восстановите \cQот 1 до 20 ОЗ\c[PKWhiteText], в зависимости от того, сколько здоровья было у убитого врага. Если в душе \cR15 ОЗ или больше, она будет красного цвета\c[PKWhiteText].
 
-\c[PKRedText]РЕЖИМ ДЕМОНА\c[PKWhiteText]. Собрав \c[PKRedText]66 душ\c[PKWhiteText], вы превратитесь в \c[PKRedText]Демона\c[PKWhiteText]. Став Демоном, вы получаете полную неуязвимость и уникальную разрушительную атаку.
+\c[PKRedText]РЕЖИМ ДЕМОНА\c[PKWhiteText]. Собрав \c[PKRedText]66 душ\c[PKWhiteText], вы превратитесь в \c[PKRedText]демона\c[PKWhiteText]. Став демоном, вы получаете полную неуязвимость и уникальную разрушительную атаку.
 - Когда вам осталось 2 или 1 душа до превращения, экран кратковременно вспыхнет, сигнализируя о скорой трансформации.
-- Карта Таро \cZТемная душа\c[PKWhiteText] снижает требуемое число душ с 66 до 50.
+- Карта Таро \cZТёмная Душа\c[PKWhiteText] снижает требуемое число душ с 66 до 50.
 
 Примечание: враги не оставляют после себя души \c[PKGreenText]на уровне сложности Травма\c[PKWhiteText]."
 "Chest of Souls has two effects: 
@@ -271,7 +272,7 @@ Note: Enemies don't drop souls on \c[PKGreenText]Trauma difficulty mode\c[PKWhit
 - Your \c[PKRedText]soul counter will immediately increase by 20\c[PKWhiteText]. As such, collecting Chests of Souls is a very quick way to turn into a \c[PKRedText]Demon\c[PKWhiteText].",PKC_ChestOfSouls_Desc,Codex,"Сундук с душами имеет два эффекта:
 
 - Подняв его, вы будете \cQвосстанавливать 1 ОЗ в секунду\c[PKWhiteText] в течение 20 сек.
-- Ваш \c[PKRedText]счетчик душ немедленно возрастет на 20\c[PKWhiteText]. Таким образом, сундуки с душами позволяют быстро трансформироваться в \c[PKRedText]Демона\c[PKWhiteText]."
+- Ваш \c[PKRedText]счетчик душ немедленно возрастет на 20\c[PKWhiteText]. Таким образом, сундуки с душами позволяют быстро трансформироваться в \c[PKRedText]демона\c[PKWhiteText]."
 "Gold Soul is a special soul that \cQrestores your HP to 100\c[PKWhiteText]. It can't be dropped by enemies, only found on the map.",PKC_GoldSoul_Desc,Codex,"Золотая душа -- это особая душа, которая \cQвосполняет здоровье до 100 ед.\c[PKWhiteText] Она не остается после врагов, ее можно только найти на уровне."
 "Mega Soul is a special soul that \cQrestores your HP to 200\c[PKWhiteText] and gives you \cN200 armor\c[PKWhiteText]. It can't be dropped by enemies, only found on the map.",PKC_MegaSoul_Desc,Codex,"Огромная душа -- это особая душа, которая \cQвосполняет здоровье до 200 ед.\c[PKWhiteText] и дает \cN200 ед. брони\c[PKWhiteText]. Она не остается после врагов, ее можно только найти на уровне."
 "You can find 3 types of armor in Painslayer: 
@@ -296,16 +297,16 @@ Weapon Modifier only affects primary and secondary attacks, not combo attacks.
 
 Weapon Modifier also \cQheals you to 100 HP\c[PKWhiteText] when you pick it up.",PKC_WeaponModifier_Desc,Codex,"Модификатор оружия усиливает всё оружие на 30 секунд. Эффект для каждого оружия свой -- подробности вы найдете на вкладке \c[PKGreenText]ОРУЖИЕ\c[PKWhiteText].
 
-Открыв вкладку ОРУЖИЕ, щелкните по \c[PKGreenText]значку Модификатора оружия\c[PKWhiteText], чтобы увидеть, как он изменяет характеристики оружия.
+Открыв вкладку ОРУЖИЕ, щелкните по \c[PKGreenText]значку модификатора оружия\c[PKWhiteText], чтобы увидеть, как он изменяет характеристики оружия.
 
 Модификатор оружия влияет только на основную и вторичную атаку, но не на комбо-атаку.
 
-Также, когда вы подбираете Модификатор оружия, ваше здоровье восполняется до \cQ100 ед.\c[PKWhiteText]"
+Также, когда вы подбираете модификатор оружия, ваше здоровье восполняется до \cQ100 ед.\c[PKWhiteText]"
 "Demon Eyes is a power-up that slightly illuminates the surroundings and makes your eyes glow intensely. It also gives you fear vision: enemies caught in the glow become frightened and will try to move away from you.
 
 Intimidated enemies are marked with an eye icon above them.
 
-Bosses can't be intimidated.",PKC_DemonEyes_Desc,Codex,"Глаза демона -- это усилитель, который временно улучшает видимость окружения, а также заставляет ваши глаза ярко светиться. Также они устрашают врагов, попавших в область этого свечения: они пугаются и начинают отступать.
+Bosses can't be intimidated.",PKC_DemonEyes_Desc,Codex,"Глаза Демона -- это усилитель, который временно улучшает видимость окружения, а также заставляет ваши глаза ярко светиться. Этот свечение устрашает врагов, попавших в его область, заставляя их отступать.
 
 Испуганные враги отмечаются значком глаза.
 
@@ -321,7 +322,7 @@ Obtaining gold,PKC_GOLDOBTAIN,Codex,Как получить золото
 
 By default, the Board opens automatically at map start. Using \c[PKGreenText]Mod Settings\c[PKWhiteText], you can change this behavior to open the board manually by pressing the \c[PKGreenText]Open Black Tarot (%s)\c[PKWhiteText] button. 
 
-Once you close the Board, the active card slots become locked. To equip new cards, you have to finish the current level. Alternatively, you can also unlock the slots with \c[PKGoldText]Gold\c[PKWhiteText].",PKC_TAROTBOARD_DESC,Codex,"Один раз за уровень вы можете открыть доску Черного Таро и на ней снарядить карты Черного Таро, которые дают разные бонусы.
+Once you close the Board, the active card slots become locked. To equip new cards, you have to finish the current level. Alternatively, you can also unlock the slots with \c[PKGoldText]Gold\c[PKWhiteText].",PKC_TAROTBOARD_DESC,Codex,"Один раз за уровень вы можете открыть доску Чёрного Таро и на ней снарядить карты Чёрного Таро, которые дают разные бонусы.
 
 По умолчанию доска открывается автоматически в начале уровня. Это можно отключить в \c[PKGreenText]Настройках мода\c[PKWhiteText]: тогда вы сможете открывать доску вручную, нажимая кнопку \c[PKGreenText]Открыть доску Таро (%s)\c[PKWhiteText].
 
@@ -330,13 +331,13 @@ Once you close the Board, the active card slots become locked. To equip new card
 
 \cZSilver Cards\c[PKWhiteText] provide passive bonuses and are active all the time while equipped. You can equip up to \c[PKGreenText]2\c[PKWhiteText] Silver Cards. 
 
-\c[PKGoldText]Golden Cards\c[PKWhiteText] have to be activated manually by pressing the \c[PKGreenText]Use Golden Cards (%s)\c[PKWhiteText] button. Golden Cards can be activated once per level (unless you equip a Silver Card that increases that number). You can equip up to \c[PKGreenText]3\c[PKWhiteText] Golden Cards. 
+\c[PKGoldText]Golden Cards\c[PKWhiteText] have to be activated manually by pressing the \c[PKGreenText]Use Golden Cards (%s)\c[PKWhiteText] button. Golden Cards can be activated once per level (the \cZForgiveness\c[PKWhiteText] card increases that number to two). You can equip up to \c[PKGreenText]3\c[PKWhiteText] Golden Cards. 
 
-By default, you will receive 2 random Silver Cards and 3 random Golden Cards as a gift the first time you open the Black Tarot Board in a new game. You can change this behavior using \c[PKGreenText]Mod Settings > Allow free starting cards\c[PKWhiteText] option.",PKC_CARDTYPES_DESC,Codex,"Существует два типа карт Черного Таро: серебряные и золотые.
+By default, you will receive 2 random Silver Cards and 3 random Golden Cards as a gift the first time you open the Black Tarot Board in a new game. You can change this behavior using \c[PKGreenText]Mod Settings > Allow free starting cards\c[PKWhiteText] option.",PKC_CARDTYPES_DESC,Codex,"Существует два типа карт Чёрного Таро: серебряные и золотые.
 
 \cZСеребряные карты\c[PKWhiteText] дают пассивные бонусы, которые активны всё время. У вас может быть активно до \c[PKGreenText]2\c[PKWhiteText] таких карт одновременно.
 
-\c[PKGoldText]Золотые карты\c[PKWhiteText] нужно активировать вручную, нажав кнопку \c[PKGreenText]Использовать золотые карты (%s)\c[PKWhiteText]. Золотые карты можно использовать один раз за уровень (хотя есть серебряная карта, которая повышает число активаций). Вы можете снарядить до \c[PKGreenText]3\c[PKWhiteText] золотых карт.
+\c[PKGoldText]Золотые карты\c[PKWhiteText] нужно активировать вручную, нажав кнопку \c[PKGreenText]Использовать золотые карты (%s)\c[PKWhiteText]. Золотые карты можно использовать один раз за уровень (карта \cZПрощение\c[PKWhiteText] увеличивает число активаций до двух). Вы можете снарядить до \c[PKGreenText]3\c[PKWhiteText] золотых карт.
 
 По умолчанию вы получаете в подарок случайные карты (2 серебряных и 3 золотых) при первом открытии доски. Это можно отключить: см. \c[PKGreenText]Настройки мода > Дарить несколько карт\c[PKWhiteText]."
 "Gold is used to purchase Silver and Golden Cards on the Black Tarot Board. 
@@ -347,7 +348,7 @@ Gold comes in 4 varieties:
 - Large (\c[PKGoldText]+100G\c[PKWhiteText])
 - Very Large (\c[PKGoldText]+500G\c[PKWhiteText]) 
 
-Gold can be found in secret areas or obtained from enemies. See \c[PKGreenText]Obtaining Gold\c[PKWhiteText] tab for details.",PKC_GOLDTYPES_DESC,Codex,"Золото нужно, чтобы покупать серебряные и золотые карты на доске Черного Таро.
+Gold can be found in secret areas or obtained from enemies. See \c[PKGreenText]Obtaining Gold\c[PKWhiteText] tab for details.",PKC_GOLDTYPES_DESC,Codex,"Золото позволяет покупать серебряные и золотые карты на доске Чёрного Таро.
 
 Золотые предметы бывают 4 видов:
 - маленькие (\c[PKGoldText]+10 з.\c[PKWhiteText])
@@ -370,7 +371,7 @@ Gold can be found in secret areas or obtained from enemies. See \c[PKGreenText]O
 
 - На уровне можно найти \cEдеревянные сундуки\c[PKWhiteText]. Уничтожьте их, чтобы получить золото.
 
-- Нанося \c[PKRedText]избыточный урон врагам\c[PKWhiteText] (например, взрывая слабых врагов) — это заставляет их ронять монеты.
+- Нанося \c[PKRedText]избыточный урон врагам\c[PKWhiteText] (например, взрывая слабых врагов) -- это заставляет их ронять монеты.
 
 - Многократно \cIпритягивая трупы врагов с помощью Killer\c[PKWhiteText]. Выстрелите в труп, пока он не исчез: тогда он не испарится, а Killer толкнет его вверх и в вашу сторону. Повторяйте это действие, и каждое третье притягивание выбьет из тела золото."
 Codex (%s) updated:,PKC_NEWENTRY,Codex,Обновление Кодекса (%s)
@@ -392,7 +393,7 @@ If you enable this option, you will be able to jump
 continuously by holding 'jump', like in Doom.",PKM_PKMAutoJump_Desc,Menu,"По умолчанию при использовании физики движения из Painkiller
 нужно нажимать клавишу прыжка всякий раз, когда вы хотите прыгнуть.
 Включение этой настройки позволяет прыгать постоянно, просто зажав
-клавишу прыжка - как в Doom."
+клавишу прыжка -- как в Doom."
 Allow Demon Mode,PKM_ALLOWDEMON,Menu,Разрешить превращение в демона
 "By default, upon collecting 66 souls you will turn into Demon.
 This option lets you completely disable that feature.",PKM_ALLOWDEMON_DESC,Menu,"По умолчанию, собрав 66 душ, вы превращаетесь в демона.
@@ -401,8 +402,8 @@ Auto-attract souls/gold distance,PKM_QOLCATCHER,Menu,Дистанция авто
 "A quality-of-life feature: attracts souls/gold from a distance.
 Works the same way as the Soul Catcher card, except
 the maximum distance is smaller.",PKM_QOLCATCHER_Desc,Menu,"Эта функция позволяет облегчить подбирание душ и золота,
-притягивая их. Работает так же, как карта \Ловец душ\"",
-только максимальная дистанция притягивания меньше."""
+притягивая их. Работает так же, как карта \""Ловец душ\"",
+только максимальная дистанция притягивания меньше."
 Allow free starting cards,PKM_GIFTCARRDS,Menu,Дарить несколько карт
 "By default, when you open Black Tarot board for the first time,
 you will receive a few cards for free.
@@ -416,11 +417,11 @@ after you pick up a new item for the first time.",PKM_ShowCodexNotifs_Desc,Menu,
 Show Equipped Cards in the HUD,PKM_ShowCardsInHUD,Menu,Показывать используемые карты в интерфейсе
 "Show icons of the currently equipped Black Tarot cards
 in the top-left corner of the HUD. Disable this if
-they seem to add clutter.",PKM_ShowCardsInHUD_Desc,Menu,"Показывать используемые карты Черного Таро в верхем левом
-углу интерфейса. Эту настройку можно отключить, если вы
-предпочитаете, чтобы экран был посвободнее."
+they seem to add clutter.",PKM_ShowCardsInHUD_Desc,Menu,"Показывать используемые карты Чёрного Таро в верхем левом
+углу интерфейса. Эту функцию можно отключить, если вы
+предпочитаете более чистый интерфейс."
 Open Black Tarot,PKM_OpenTarot,Menu,Открыть доску Таро
-Black Tarot Board lets you purchase and equip cards,PKM_OpenTarot_Desc,Menu,На доске Черного Таро можно покупать и снаряжать карты
+Black Tarot Board lets you purchase and equip cards,PKM_OpenTarot_Desc,Menu,На доске Чёрного Таро можно покупать и снаряжать карты
 Use Golden Cards,PKM_UseCards,Menu,Использовать золотые карты
 Activate currently equipped Golden Tarot Cards,PKM_UseCards_Desc,Menu,Активировать снаряженные золотые карты Таро
 Open Codex,PKM_OpenCodex,Menu,Открыть Кодекс
@@ -435,18 +436,18 @@ to change that behavior.",PKM_AutoOpenTarot_Desc,Menu,"Когда вы перв�
 покупать и снаряжать карты бесплатно (затем ячейки блокируются).
 По умолчанию доска открывается в начале уровня автоматически.
 Эта настройка позволяет изменить это."
-Performance,PKM_Sub_Performance,Menu,Производительность
-Particles intensity,PKM_ParticlesAmount,Menu,Насыщенность частиц
+PERFORMANCE,PKM_Sub_Performance,Menu,ПРОИЗВОДИТЕЛЬНОСТЬ
+Particles intensity,PKM_ParticlesAmount,Menu,Интенсивность частиц
 "Fidelity of the particles spawned by projectiles, explosions,
 certain items and SFX objects. At 'Reduced' some of the secondary
 effects, such as smoke trails, are disabled.",PKM_ParticlesAmount_Desc,Menu,"Интенсивность частиц, создаваемых снарядами, взрывами, предметами
-и визуальными эффектами. На настройке ""Уменьшенная"" не отображаются
+и визуальными эффектами. На настройке \""Уменьшенная\"" не отображаются
 некоторые вторичные частицы (например, дымовые следы)."
 Max. number of particles,PKM_DebrisNumber,,Макс. количество частиц
 "The absolute maximum of particles that can exist at the same time.
 May affect performance, especially when multiple special effects
 such as explosions appear at the same time.",PKM_DebrisNumber_Desc,,"Максимальное количество частиц, которые могут существовать одновременно.
-Может повлиять на производительность, особенно когда на карте появляется
+Может влиять на производительность, особенно когда на карте появляется
 много спецэффектов, вроде взрывов."
 Full,PKM_Full,Menu,Полная
 Reduced,PKM_Reduced,Menu,Уменьшенная
@@ -457,7 +458,7 @@ Slumber,PKM_SKILL0,Menu,Грёзы
 You receive 200% ammo from pickups.
 Enemies deal 25% damage and have 50% health.
 You can't use Black Tarot cards in this mode.",PKM_SKILL0_Desc,Menu,"Очень низкая сложность.
-Вы получаете 200% патронов из коробок. Враги наносят 25% урона, у них 50% здоровья. В этом режиме нельзя использовать Черное Таро."
+Вы получаете 200% патронов из коробок. Враги наносят 25% урона, у них 50% здоровья. В этом режиме нельзя использовать Чёрное Таро."
 Daydream,PKM_SKILL1,Menu,Дрёма
 "Low difficulty.
 You receive 120% ammo from pickups.
@@ -476,7 +477,7 @@ Trauma,PKM_SKILL4,Menu,Травма
 "Very high difficulty.
 You receive 60% of ammo from pickups.
 Enemies are very aggressive and don't drop any souls.",PKM_SKILL4_Desc,Menu,"Очень высокая сложность.
-Вы получаете 60% патронов из коробок, враги более агрессивны и не оставляют после себя душ."
+Вы получаете 60% патронов из коробок, враги значительно более агрессивны и не оставляют после себя душ."
 Tooltips Settings,OPTMNU_TLTPTOOLTIP,,
 Tooltips Options,TLTPTOOLTIPMNU_TITLE,,
 Tooltips - The Ultimate Menu Helper Mod v0.3.2.1,TLTPTOOLTIPMNU_VERSION,,
