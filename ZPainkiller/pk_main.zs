@@ -74,8 +74,52 @@ Mixin class PK_Math {
 		return false;
     }
 	
-	//Find a random position within the specified spot in a grid of the specified size:
-	vector3 FindRandomPosAround(vector3 actorpos, double gridrad = 128, double step = 16) {
+	// Find a random position around the specified position within the specified radius
+	// (backported from Alice)
+	vector3 FindRandomPosAround(vector3 actorpos, double rad = 512, double mindist = 16, double fovlimit = 0, double viewangle = 0, bool checkheight = false)
+	{
+		if (!level.IsPointInLevel(actorpos))
+			return actorpos;
+		
+		vector3 finalpos = actorpos;
+		double ofs = rad * 0.5;
+		// 64 iterations should be enough...
+		for (int i = 64; i > 0; i--)
+		{
+			// Pick a random position:
+			vector3 ppos = actorpos + (frandom[frpa](-ofs, ofs), frandom[frpa](-ofs, ofs), 0);
+			// Get the sector and distance to the point:
+			let sec = Level.PointinSector(ppos.xy);
+			double secfz = sec.NextLowestFloorAt(ppos.x, ppos.y, ppos.z);
+			let diff = LevelLocals.Vec2Diff(actorpos.xy, ppos.xy);
+			
+			// Check FOV, if necessary:
+			bool inFOV = true;
+			if (fovlimit > 0)
+			{
+				double ang = atan2(diff.y, diff.x);
+				if (AbsAngle(viewangle, ang) > fovlimit)
+					inFOV = false;
+			}			
+			
+			// We found suitable position if it's in the map,
+			// in view (optionally), on the same elevation
+			// (optionally) and not closer than necessary
+			// (optionally):
+			if (inFOV && Level.IsPointInLevel(ppos) && (!checkheight || secfz == actorpos.z) && (mindist <= 0 || diff.Length() >= mindist))
+			{
+				finalpos = ppos;
+				//console.printf("Final pos: %.1f,%.1f,%.1f", finalpos.x,finalpos.y,finalpos.z);
+				break;
+			}
+		}
+		return finalpos;
+	}
+	
+	// This is an over-optimized version, no longer in use. Finding a random position
+	// is most of the time more efficient than iterating through a grid.
+	
+	/*vector3 FindRandomPosAround(vector3 actorpos, double gridrad = 128, double step = 16) {
 		if (!level.IsPointInLevel(actorpos))
 			return actorpos;
 		//because zscript doesn't support vector3 arrays I have to do this
@@ -115,7 +159,7 @@ Mixin class PK_Math {
 		int i = random[findpos](0,foo);
 		vector3 finalpos = (tposX[i], tposY[i], tposZ[i]);
 		return finalpos;
-	}	
+	}*/
 	
 	void CopyAppearance(Actor to, Actor from, bool style = true, bool size = false) {
 		if (!to || !from)

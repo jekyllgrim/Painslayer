@@ -15,10 +15,11 @@ Class PK_GoldContainer : PK_BaseActor abstract {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		//Check if there's enough space to spawn the prop (no more than 32 times):
+		// Change the chest's position randomly, then check
+		// if it's not crossing any lines:
 		bool posValid = false;
 		for (int i = 32; i > 0; i--) {
-			SetOrigin(FindRandomPosAround(pos, 96),false);
+			SetOrigin(FindRandomPosAround(pos, 128, mindist: 0),false);
 			if (!CheckClippingLines(radius*1.5)) {
 				posValid = true;
 				break;
