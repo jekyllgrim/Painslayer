@@ -106,7 +106,7 @@ Class PK_InvReplacementControl : Inventory {
 			}
 			
 			// Switch to the new weapon:
-			if (toSwitch && toswitch is 'Weapon')
+			if (toSwitch)
 			{
 				owner.player.pendingweapon = Weapon(owner.FindInventory(toSwitch));
 			}
@@ -294,8 +294,6 @@ Class PK_GoldPickup : PK_Inventory abstract {
 	protected PK_GoldGleam gleam;
 	Default {
 		+INVENTORY.NEVERRESPAWN
-		//+INVENTORY.AUTOACTIVATE
-		//+INVENTORY.ALWAYSPICKUP
 		+BRIGHT
 		+NOTELEPORT
 		xscale 0.5;
@@ -324,8 +322,12 @@ Class PK_GoldPickup : PK_Inventory abstract {
 			return;
 		if (isFrozen())
 			return;
+		// Soul catcher shouldn't affect secret/pre-placed items,
+		// so that the player can't cheese them by just dragging
+		// them from out of difficult-to-access places:
 		if (bCOUNTITEM)
 			return;
+		
 		//Soul Catcher effect:
 		if (tracer && tracer.player) {
 			vel = Vec3To(tracer).Unit() * 10.5;
@@ -337,10 +339,12 @@ Class PK_GoldPickup : PK_Inventory abstract {
 				tracer = null;
 			}
 		}
+		
 		else if (bNOCLIP) {
 			bNOCLIP = false;
 			bNOGRAVITY = false;
 		}
+		
 		if (!s_particles)
 			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
 		if (s_particles.GetInt() < 2)
@@ -598,8 +602,10 @@ Class PK_Soul : PK_Inventory {
 		super.Tick();
 		if (isFrozen())
 			return;
+		// Increase age unless Soul Keeper is in effect:
 		if (!event || !event.SoulKeeper)
 			age++;
+		
 		//Soul Catcher effect:
 		if (tracer && tracer.player) {
 			vel = Vec3To(tracer).Unit() * 10.5;
@@ -615,6 +621,7 @@ Class PK_Soul : PK_Inventory {
 			bNOINTERACTION = false;
 	}
 	
+	// The amount healed is printed in the pickup message:
 	override string PickupMessage () {
 		return String.Format(StringTable.Localize(PickupMsg),actualAmount);
 	}
@@ -631,6 +638,8 @@ Class PK_Soul : PK_Inventory {
 	}
 }
 
+// Invisibility replacement. Adds a bit of temporary regeneration
+// and increases soul counter by 20 instantly:
 Class PK_ChestOfSouls : Inventory {
 	mixin PK_PickupSound;
 	Default {
@@ -675,6 +684,7 @@ Class PowerChestOfSoulsRegen : PowerRegeneration {
 	}
 }
 
+// Soulsphere replacement. Can't be dropped by monsters.
 Class PK_GoldSoul : Health {
 	mixin PK_PlayerSightCheck;
 	mixin PK_PickupSound;
@@ -711,6 +721,7 @@ Class PK_GoldSoul : Health {
 				angle:frandom[part](0,359)
 			);
 	}
+	
 	override bool TryPickup(in out actor toucher) {
 		if (toucher && toucher.player) {
 			let irc = PK_InvReplacementControl(toucher.FindInventory("PK_InvReplacementControl"));
@@ -719,6 +730,7 @@ Class PK_GoldSoul : Health {
 		}
 		return super.TryPickup(toucher);
 	}
+	
 	states {
 	Spawn:
 		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
@@ -739,28 +751,8 @@ Class PK_GoldSoulparticle : PK_BaseFlare {
 	}
 }
 
-/*Class PK_MegaSoul : CustomInventory {
-	mixin PK_PickupSound;
-	Default {
-		renderstyle 'Add';
-		+NOGRAVITY
-		+COUNTITEM
-		+BRIGHT
-		inventory.pickupsound "pickups/soul/mega";
-		inventory.pickupmessage "$PKI_MEGASOUL";
-		xscale 0.3;
-		yscale 0.25;
-		alpha 2.5;
-		Tag "$PKC_MegaSoul";
-	}
-
-Class PK_MegaSoulHealth : Health {
-	Default {
-		inventory.amount 200;
-		inventory.maxamount 200;
-	}
-}*/
-
+// Megasphere replacement. Can't be dropped by monsters.
+// Gives 200 health and armor.
 Class PK_MegaSoul : PK_GoldSoul {
 	Default {
 		inventory.amount 200;
@@ -772,16 +764,19 @@ Class PK_MegaSoul : PK_GoldSoul {
 		alpha 2.5;
 		Tag "$PKC_MegaSoul";
 	}
+	
 	override void Tick() {
 		Actor.Tick();
 	}
+	
 	override bool TryPickup(in out actor toucher) {
 		if (toucher && toucher.player) {
 			toucher.GiveInventory("PK_GoldArmor", 1);
 		}
 		return super.TryPickup(toucher);
 	}
-	states {
+	
+	States {
 	Spawn:
 		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
 	Idle:
@@ -859,9 +854,9 @@ Class PK_AmmoPack : Backpack {
 		Tag "$PKC_AmmoPack";
 	}
 	/*	Sometimes for some reason this item doesn't call
-		HandlePickup on PK_InvReplacementControl, so I had to added
+		HandlePickup on PK_InvReplacementControl, so I had to add
 		this manual call so it gets registered as "latest pickup"
-		properly.
+		properly:
 	*/
 	override bool TryPickup(in out actor toucher) {
 		if (toucher && toucher.player) {
@@ -878,6 +873,8 @@ Class PK_AmmoPack : Backpack {
 	}
 }
 
+// This mixin spawns a 3D ring on the floor to better highlight
+// special pickups (akin to items in RE4):
 Mixin Class PK_SpawnPickupRing {
 	color pickupRingColor;
 	property pickupRingColor : pickupRingColor;
@@ -905,6 +902,7 @@ Class PK_PickupRing : Actor {
 			Destroy();
 			return;
 		}
+		
 		let mmaster = Inventory(master);
 		if (!mmaster || mmaster.owner) {
 			Destroy();
@@ -1331,6 +1329,8 @@ Class PK_AntiRadArmor : PK_PowerupGiver {
 	}
 }
 
+// A version of map marker than can be safely spawned per player
+// and won't desync the game:
 Class PK_SafeMapMarker : MapMarker {
 	Default {
 		+NOINTERACTION

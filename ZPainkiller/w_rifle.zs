@@ -460,11 +460,13 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 	protected double rollOfs; //randomized roll
 	protected double scaleMul;
 	/*
-	if fired while moving, it gets some vel from the shooter
-	this bonus vel is then quickly scaled down so that it's brought back in sync
-	with what it vel would be if it were shot while standing still
-	'realspeed' is used both to define its actual base speed, and to keep track of
-	its bonus vel, they're continuously compared against each other 
+		If fired while moving, it gets some vel from the shooter.
+		This bonus vel is then quickly scaled down so that it's brought 
+		back in sync with what it would be if it were shot while standing 
+		still.
+		'realspeed' is used both to define its actual base speed, and to 
+		keep track of its bonus vel, they're continuously compared against 
+		each other .
 	*/
 	double realSpeed;
 	bool addvel;
@@ -483,7 +485,7 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 		Obituary "$PKO_FLAME";
 	}
 	override int SpecialMissileHit(actor victim) {
-		if (victim && (!target || victim != target || age > 10) && victim.health > 0 && CheckVulnerable(victim)) {
+		if (victim && target && victim != target && victim.health > 0 && CheckVulnerable(victim)) {
 			if (victim != hitvictim) {
 				hitvictim = victim;
 				ripdepth -= victim.health;

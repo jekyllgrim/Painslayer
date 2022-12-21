@@ -486,7 +486,9 @@ Class PK_Bomb : PK_Projectile {
 	Death:
 	XDeath:
 		TNT1 A 0 {
-			bUSEBOUNCESTATE = false; //without this it'll glitch on sloped 3D floors (those be damned): it'll continuously jump into Bounce state and then into XDeath, in cycle
+			// Without setting this to false, it'll glitch on sloped 3D floors (those be damned): 
+			// it'll continuously jump into Bounce state and then into XDeath over and over:
+			bUSEBOUNCESTATE = false; 
 			A_Stop();
 			bNOGRAVITY = true;
 			A_RemoveChildren(1,RMVF_EVERYTHING);

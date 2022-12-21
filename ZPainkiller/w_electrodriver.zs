@@ -23,7 +23,7 @@ Class PK_ElectroDriver : PKWeapon {
 			return (0,0,0);
 		
 		actor ltarget;			
-		double closestDist = double.infinity;
+		double closestDist = atkdist;
 		// First, find potential targets close the the shooter:
 		BlockThingsIterator itr = BlockThingsIterator.Create(self,atkdist);
 		while (itr.next()) {
@@ -132,7 +132,6 @@ Class PK_ElectroDriver : PKWeapon {
 		}
 	AltHold:
 		ELDR A 1 {
-			bool infin = CheckInfiniteAmmo();
 			if (PressingAttackButton() && PK_CheckAmmo(secondary:true, 80)) {
 				A_WeaponOffset(0,32);
 				PK_DepleteAmmo(secondary:true,80);
@@ -140,16 +139,16 @@ Class PK_ElectroDriver : PKWeapon {
 				A_StopSound(CH_LOOP);
 				return ResolveState("DiskFire");
 			}
-			//if (!infin) {
-				invoker.celldepleterate++;
-				int req = invoker.hasDexterity ? 1 : 2;
-				if (invoker.celldepleterate > req) {				
-					invoker.celldepleterate = 0;
-					if (!PK_CheckAmmo(secondary:true))
-						return ResolveState("AltHoldEnd");
-					PK_DepleteAmmo(secondary:true);
-				}
-			//}
+			
+			invoker.celldepleterate++;
+			int req = invoker.hasDexterity ? 1 : 2;
+			if (invoker.celldepleterate > req) {				
+				invoker.celldepleterate = 0;
+				if (!PK_CheckAmmo(secondary:true))
+					return ResolveState("AltHoldEnd");
+				PK_DepleteAmmo(secondary:true);
+			}
+
 			A_StartSound("weapons/edriver/electroloop",CH_LOOP,CHANF_LOOPING);
 			vector3 atkpos = FindElectroTarget();
 			PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);

@@ -180,11 +180,11 @@ Class PKWeapon : Weapon abstract {
 	action void PK_DepleteAmmo(bool secondary = false, int amount = -1) {
 		if (CheckInfiniteAmmo())
 			return;
-		let tAmmo = secondary ? invoker.ammo2 : invoker.ammo1;
+		/*let tAmmo = secondary ? invoker.ammo2 : invoker.ammo1;
 		if (invoker.switchmodes)
 			tAmmo = secondary ? invoker.ammo1 : invoker.ammo2;
 		if (!tAmmo)
-			return;
+			return;*/
 		let tAmmoType = secondary ? invoker.AmmoType2 : invoker.AmmoType1;
 		if (invoker.switchmodes)
 			tAmmoType = secondary ? invoker.AmmoType1 : invoker.AmmoType2;

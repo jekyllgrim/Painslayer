@@ -614,8 +614,11 @@ Class PK_CardControl : PK_InventoryToken {
 	}
 	
 	bool HasForgiveness() {
-		if (EquippedSlots[0] == 'Forgiveness' || EquippedSlots[1] == 'Forgiveness')
-			return true;
+		for (int i = 0; i < EquippedSlots.Size(); i++)
+		{
+			if (EquippedSlots[i] == 'Forgiveness')
+				return true;
+		}
 		return false;
 	}
 	
