@@ -907,7 +907,15 @@ Class PK_PickupRing : Actor {
 			Destroy();
 			return;
 		}
-		if (!isFrozen())
+		
+		// Multiplayer compatibility for respawnable pickups
+		// that don't disappear when picked up:
+		if (!bNOSECTOR && master.bNOSECTOR)
+			A_ChangeLinkFlags(FLAG_NO_CHANGE, true);
+		if (bNOSECTOR && !master.bNOSECTOR)
+			A_ChangeLinkFlags(FLAG_NO_CHANGE, false);
+		
+		if (!isFrozen() && !bNOSECTOR)
 			SetOrigin(master.pos,true);
 	}
 	States {
