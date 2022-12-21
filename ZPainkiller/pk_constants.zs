@@ -38,7 +38,7 @@ enum PK_SoundChannels {
 		that should be affected by A_SoundPitch 
 		call in Haste and simialr effects:
 	*/
-	CH_END		= 14,
+	CH_END		= 12,
 	//	Demon Morph looping sound will play on this channel:
 	CH_HELL	= 66,
 	CH_PKUI 	= 67
