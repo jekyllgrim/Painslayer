@@ -11,7 +11,7 @@ Class PK_Painkiller : PKWeapon {
 		Obituary "$PKO_PAIN";
 		Tag "Painkiller";
 		weapon.slotnumber 1;
-		inventory.pickupmessage "Picked up Painkiller";
+		inventory.pickupmessage "$PKI_PAINKILLER";
 		inventory.icon "PKWIG0";
 		Tag "$PK_PAINKILLER_TAG";
 		+PKWeapon.NOICON
