@@ -178,7 +178,6 @@ Class PK_DemonWeapon : PKWeapon {
 		control = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
 		minsouls = control.GetMinSouls();
 		fullsouls = control.GetFullSouls();
-		cursouls = control.GetSouls();
 		dur = 25;
 		owner.A_StartSound("demon/start",CHAN_AUTO,flags:CHANF_LOCAL);		
 		prevweapon = owner.player.readyweapon;
@@ -255,14 +254,21 @@ Class PK_DemonWeapon : PKWeapon {
 	}
 	override void DoEffect() {
 		super.DoEffect();
+		// The current soul amount check should happen here, in case
+		// the player picks up a new soul and reaches the full amount
+		// while seeing demon preview from picking up the previous
+		// soul:
+		cursouls = control.GetSouls();
 		if (!owner || !owner.player || owner.bKILLED || !control || cursouls < minsouls) {
 			Destroy();
 			return;
 		}
 		if (control) {
-			//if we have 2 or 1 souls shy of the required number, show a short "demon preview flash" but do nothing after that
+			// If we have 2 or 1 souls shy of the required number, show 
+			// a short "demon preview flash" but do nothing after that:
 			if (cursouls >= minsouls && cursouls < fullsouls) {
-				//the preview lasts 20 tics, then switches you INSTANTLY back to previous weapon
+				// The preview lasts 20 tics, then switches you INSTANTLY 
+				// back to previous weapon:
 				if (GetAge() >= 20) {
 					owner.player.readyweapon = prevweapon;
 					let psp = owner.player.GetPsprite(PSP_WEAPON);
@@ -274,7 +280,8 @@ Class PK_DemonWeapon : PKWeapon {
 					return;
 				}
 			}
-			//and this handles the actual removal of the effect once the duration has passed
+			// This handles the actual removal of the full effect
+			// once the duration has passed
 			else if (cursouls >= fullsouls && GetAge() >= 35*dur) {
 				control.ResetSouls();
 				owner.player.readyweapon = prevweapon;
