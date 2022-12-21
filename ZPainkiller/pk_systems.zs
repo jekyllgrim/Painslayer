@@ -1114,11 +1114,18 @@ Class PKC_666Ammo : PK_BaseSilverCard {
 		}		
 	}
 	override void RemoveCard() {
-		//restore original ammo amount using the two arrays we recorded earlier
+		// restore original ammo amount using the two arrays we recorded earlier
 		if (modifiedAmmo.Size() < 1 || prevAmmoAmount.Size() < 1 || modifiedAmmo.Size() != prevAmmoAmount.Size())
 			return;
-		for (int i = 0; i < modifiedAmmo.Size(); i++)
-			owner.A_SetInventory(modifiedAmmo[i],prevAmmoAmount[i]);
+		// only restore if the amount is larger than maxamount:
+		for (int i = 0; i < modifiedAmmo.Size(); i++) {
+			if (!owner.FindInventory(modifiedAmmo[i]))
+				continue;
+			int amt = owner.CountInv(modifiedAmmo[i]);
+			int maxamt = GetDefaultByType(modifiedAmmo[i]).maxAmount;
+			if (amt > maxamt)
+				owner.A_SetInventory(modifiedAmmo[i],prevAmmoAmount[i]);
+		}
 	}
 }
 
