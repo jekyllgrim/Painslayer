@@ -1115,6 +1115,10 @@ Class PK_PowerDemonEyes : PK_Powerup {
 	}
 	override void DoEffect() {
 		super.DoEffect();
+		if (!owner) {
+			Destroy();
+			return;
+		}
 		/*if (level.time % 3 == 0 && owner && owner.player) {
 			let plr = owner.player;
 			plr.extralight += lightdir;
@@ -1128,7 +1132,7 @@ Class PK_PowerDemonEyes : PK_Powerup {
 				continue;
 			if (feartargets.Find(next) != feartargets.Size())
 				continue;
-			bool isValid = (!next.bFRIGHTENED && next.bSHOOTABLE && next.bIsMonster && !next.bBOSS && next.health > 0);
+			bool isValid = (!next.bFRIGHTENED && next.bSHOOTABLE && next.bIsMonster && !next.bBOSS && next.health > 0 && !next.IsFriend(owner));
 			if (!isValid)
 				continue;
 			double dist = owner.Distance3D(next);
@@ -1148,7 +1152,7 @@ Class PK_PowerDemonEyes : PK_Powerup {
 			if (!feartargets[i])
 				continue;
 			let trg = feartargets[i];
-			if (trg.health <= 0 || owner.Distance3D(trg) > feardist || !owner.CheckSight(trg,SF_IGNOREWATERBOUNDARY)) {
+			if (trg.health <= 0 || trg.isFriend(owner) || owner.Distance3D(trg) > feardist || !owner.CheckSight(trg,SF_IGNOREWATERBOUNDARY)) {
 				trg.bFRIGHTENED = trg.default.bFRIGHTENED;
 				feartargets.Delete(i);
 				continue;
