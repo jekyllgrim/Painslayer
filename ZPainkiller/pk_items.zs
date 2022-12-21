@@ -515,7 +515,8 @@ Class PK_Soul : PK_Inventory {
 		+INVENTORY.AUTOACTIVATE
 		+INVENTORY.ALWAYSPICKUP
 		+BRIGHT
-		+DONTGIB		
+		+DONTGIB
+		+FORCEXYBILLBOARD
 		PK_Soul.maxage 350;
 		inventory.pickupmessage "$PKI_SOUL";
 		inventory.amount 2;
