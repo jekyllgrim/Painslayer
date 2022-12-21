@@ -42,7 +42,7 @@ Class PK_Chaingun : PKWeapon {
 			spread = Clamp(double(invoker.holddur * 0.2), 2, 8.5);
 			dmg = 11;
 		}
-		PK_FireBullets(spread,spread,-1,dmg,spawnheight:player.viewz-pos.z-40,spawnofs:8.6);
+		PK_FireBullets(spread,spread,-1,dmg,spawnheight: GetPlayerAtkHeight(player.mo) - 39,spawnofs:8.6);
 		player.refire++;
 		if (invoker.hasDexterity)
 			invoker.hideFlash = !invoker.hideFlash;

@@ -413,7 +413,14 @@ Class PKWeapon : Weapon abstract {
 		for (int i = 0; i < numbullets; i++) {			
 			double hspread = held ? frandom[pkfb](-spread_horz,spread_horz) : 0;
 			double vspread = held ? frandom[pkfb](-spread_vert,spread_vert) : 0;	
-			A_FireProjectile("PK_BulletTracer",hspread,useammo:false,spawnofs_xy:spawnofs,spawnheight:spawnheight,pitch:vspread);
+			Fire3DProjectile(
+				"PK_BulletTracer",
+				forward: 48,
+				leftright:spawnofs,
+				updown:spawnheight,
+				angleoffs: hspread,
+				pitchoffs: vspread
+			);
 			A_FireBullets (hspread, vspread, -1, damage, pufftype,flags:FBF_NORANDOMPUFFZ|FBF_EXPLICITANGLE|FBF_NORANDOM);
 		}
 	}
@@ -451,7 +458,14 @@ Class PKWeapon : Weapon abstract {
 		Used in most cases instead of PK_FireArchingProjectile above
 		since it produces a more accurate movement.
 	*/
-	action Actor Fire3DProjectile(class<Actor> proj, bool useammo = true, double forward = 0, double leftright = 0, double updown = 0, bool crosshairConverge = false, double angleoffs = 0, double pitchoffs = 0) {
+	action Actor Fire3DProjectile(	class<Actor> proj, 
+										bool useammo = true, 
+										double forward = 0, 
+										double leftright = 0, 
+										double updown = 0, 
+										bool crosshairConverge = false, 
+										double angleoffs = 0, 
+										double pitchoffs = 0) {
 		if (!player || !player.mo)
 			return null;
 		

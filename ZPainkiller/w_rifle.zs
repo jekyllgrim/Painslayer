@@ -199,7 +199,7 @@ Class PK_Rifle : PKWeapon {
 				A_SoundPitch(CHAN_WEAPON,1.1);
 			double dmg = 14;
 			if (invoker.hasWmod) dmg *= 1.5;
-			PK_FireBullets(1,1,1,dmg,spawnheight:player.viewz-pos.z-40,spawnofs:8.6);
+			PK_FireBullets(1,1,1,dmg,spawnheight: GetPlayerAtkHeight(player.mo) - 37,spawnofs:6.6);
 			if (!invoker.hasWmod)
 				invoker.shots++;
 			A_OverlayPivot(RIFLE_STOCK,-1,-2.1);
