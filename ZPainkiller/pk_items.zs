@@ -382,10 +382,12 @@ Class PK_GoldGleam : PK_BaseFlare {
 	}
 	override void Tick() {
 		super.Tick();
-		if (master)
-			SetOrigin(master.pos - masterOfs,false);
-		else
+		if (!master || master.bNOSECTOR) {
 			Destroy();
+			return;
+		}
+		
+		SetOrigin(master.pos - masterOfs,false);
 	}
 	states {
 	Spawn:
