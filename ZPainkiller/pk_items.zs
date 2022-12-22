@@ -34,7 +34,8 @@ Class PK_InvReplacementControl : Inventory {
 	}
 	
 	static const name ReplacementPairs[] = {
-		//Doom:
+		// DOOM
+		// weapons:
 		"Fist:PK_Painkiller",
 		"Chainsaw:PK_Painkiller",
 		"Pistol:PK_Painkiller",
@@ -44,9 +45,26 @@ Class PK_InvReplacementControl : Inventory {
 		"RocketLauncher:PK_Boltgun",
 		"PlasmaRifle:PK_Rifle",
 		"BFG9000:PK_ElectroDriver",
+		// ammo:
+		"Clip:PK_Shells",
+		"ClipBox:PK_BulletAmmo",
+		"Shell:PK_StakeAmmo",
+		"ShellBox:PK_BoltAmmo",
+		"RocketAmmo:PK_GrenadeAmmo",
+		"RocketBox:PK_RifleBullets",
+		"Cell:PK_ShurikenAmmo",
+		"CellPack:PK_CellAmmo",
+		// items:
 		"GreenArmor:PK_SilverArmor",
 		"BlueArmor:PK_GoldArmor",
-		//Heretic:
+		"Berserk:PK_WeaponModifierGiver",
+		"InvulnerabilitySphere:PK_Pentagram",
+		"Backpack:PK_AmmoPack",
+		"AllMap:PK_AllMap",
+		"RadSuit:PK_AntiRadArmor",
+		
+		// HERETIC
+		//weapons:
 		"Staff:PK_Painkiller", //fist
 		"Gauntlets:PK_Painkiller", //chainsaw
 		"Goldwand:PK_Painkiller", //pistol
@@ -55,6 +73,24 @@ Class PK_InvReplacementControl : Inventory {
 		"PhoenixRod:PK_Stakegun", //rocket launcher
 		"SkullRod:PK_Rifle", // plasma rifle
 		"Mace:PK_ElectroDriver" //bfg
+		//ammo:
+		"BlasterAmmo:PK_Shells",
+		"BlasterHefty:PK_BulletAmmo",
+		"CrossbowAmmo:PK_StakeAmmo",
+		"CrossbowHefty:PK_BoltAmmo",
+		"PhoenixRodAmmo:PK_GrenadeAmmo",
+		"PhoenixRodHefty:PK_RifleBullets",
+		"SkullRodAmmo:PK_ShurikenAmmo",
+		"SkullRodHefty:PK_CellAmmo",
+		"MaceAmmo:PK_ShurikenAmmo",
+		"MaceHefty:PK_CellAmmo",
+		// items:
+		"SilverShield:PK_SilverArmor",
+		"EnchantedShield:PK_GoldArmor",
+		"ArtiTomeOfPower:PK_WeaponModifierGiver",
+		"InvulnerabilitySphere:PK_Pentagram",
+		"BagOfHolding:PK_AmmoPack",
+		"SuperMap:PK_AllMap"
 	};
 
 	// This checks the player's inventory for illegal (vanilla) weapons
@@ -931,8 +967,20 @@ Class PK_PowerupGiver : PowerupGiver {
 	color pickupRingColor;
 	property pickupRingColor : pickupRingColor;
 	protected transient CVar s_particles;
+	
+	Default {
+		powerup.duration -40;
+		+COUNTITEM
+		//+INVENTORY.AUTOACTIVATE
+		+INVENTORY.ALWAYSPICKUP
+		Inventory.MaxAmount 5;
+	}
+	
 	override void BeginPlay() {
 		super.BeginPlay();
+		if (GameInfo.GameType & GAME_Raven)
+			bAUTOACTIVATE = false;
+		
 		if (!pickupRingColor)
 			return;
 		let ring = Spawn("PK_PickupRing",(pos.x,pos.y,floorz));
@@ -941,13 +989,7 @@ Class PK_PowerupGiver : PowerupGiver {
 			ring.SetShade(color(pickupRingColor));
 		}
 	}
-	Default {
-		powerup.duration -40;
-		+COUNTITEM
-		+INVENTORY.AUTOACTIVATE
-		+INVENTORY.ALWAYSPICKUP
-		Inventory.MaxAmount 0;
-	}
+	
 	override bool TryPickup (in out Actor other) {
 		if (!(other.player))
 			return false;
