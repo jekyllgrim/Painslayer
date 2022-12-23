@@ -94,7 +94,8 @@ Class PainkillerHUD : BaseStatusBar {
 		mHUDFont = HUDFont.Create(hfnt, hfnt.GetCharWidth("0"), Mono_CellLeft, 1, 1);
 		mNotifFont = HUDFont.Create("consolefont");
 		diparms = InventoryBarState.Create();
-		diparms.boxsize = (30,30);
+		diparms.boxsize = (31,31);
+		diparms.box = TexMan.CheckForTexture("pkxibar");
 		// Base values for the Codex notif pop-up:
 		notifAlpha = 0.6;
 		notifAlphaMod = 0.05;
