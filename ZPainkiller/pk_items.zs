@@ -978,6 +978,8 @@ Class PK_PowerupGiver : PowerupGiver {
 	
 	override void BeginPlay() {
 		super.BeginPlay();
+		usesound = pickupsound;
+		
 		if (GameInfo.GameType & GAME_Raven)
 			bAUTOACTIVATE = false;
 		
