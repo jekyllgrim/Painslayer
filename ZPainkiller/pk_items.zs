@@ -971,7 +971,7 @@ Class PK_PowerupGiver : PowerupGiver {
 	Default {
 		powerup.duration -40;
 		+COUNTITEM
-		//+INVENTORY.AUTOACTIVATE
+		+INVENTORY.AUTOACTIVATE
 		+INVENTORY.ALWAYSPICKUP
 		Inventory.MaxAmount 5;
 	}
@@ -1010,9 +1010,7 @@ Class PK_PowerupGiver : PowerupGiver {
 Mixin Class PK_PowerUpBehavior {
 	sound runningOutSound;
 	property runningOutSound : runningOutSound;
-	Default {
-		+INVENTORY.ADDITIVETIME
-	}
+	
 	/*override void Tick () {
 		if (Owner == NULL)	{
 			Destroy ();
@@ -1025,50 +1023,23 @@ Mixin Class PK_PowerUpBehavior {
 			Destroy ();
 		}
 	}*/
+	
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner || !owner.player) {
 			Destroy();
 			return;
 		}
-		if (runningOutSound && EffectTics >= 0 && EffectTics <= 35*5 && (EffectTics % 35 == 0))
+		//console.printf("%s time: %d", GetClassName(), effectTics);
+		if (runningOutSound && EffectTics >= 0 && EffectTics <= 35*5 && (EffectTics % 35 == 0)) {
 			owner.A_StartSound(runningOutSound,CHAN_AUTO,CHANF_LOCAL|CHANF_UI);
+		}
 	}
+	
 	override void EndEffect () {
 		if (owner && owner.player && deathsound)
 			owner.A_StartSound(deathsound,CHAN_AUTO,CHANF_LOCAL|CHANF_UI);
 		super.EndEffect();
-	}
-	override bool HandlePickup (Inventory item) {
-		if (item.GetClass() == GetClass()) {
-			let power = Powerup(item);
-			if (power.EffectTics == 0)	{
-				power.bPickupGood = true;
-				return true;
-			}
-			/*	Increase the effect's duration, but do not go over
-				the default maximum duration (in contrast to vanilla
-				PowerUp). I.e. you can't extend the duration 
-				beyond max even if you pick up multiple powerups.
-			*/
-			if (power.bAdditiveTime) {
-				EffectTics = Clamp(EffectTics + power.EffectTics, 0, default.EffectTics);
-				BlendColor = power.BlendColor;
-			}
-			// If it's not blinking yet, you can't replenish the power unless the
-			// powerup is required to be picked up.
-			else if (EffectTics > BLINKTHRESHOLD && !power.bAlwaysPickup) {
-				return true;
-			}
-			// Reset the effect duration.
-			else if (power.EffectTics > EffectTics) {
-				EffectTics = power.EffectTics;
-				BlendColor = power.BlendColor;
-			}
-			power.bPickupGood = true;
-			return true;
-		}
-		return false;
 	}
 }
 
@@ -1091,6 +1062,7 @@ Class PK_WeaponModifierGiver : PK_PowerUpGiver {
 	Default {
 		inventory.pickupmessage "$PKI_WMODIFIER";
 		inventory.pickupsound "pickups/wmod/pickup";
+		inventory.icon "wmodicon";
 		Powerup.Type "PK_WeaponModifier";
 		PowerUp.duration -30;
 		xscale 0.43;
@@ -1101,6 +1073,8 @@ Class PK_WeaponModifierGiver : PK_PowerUpGiver {
 	}
 	override void Tick() {
 		super.Tick();
+		if (owner)
+			return;
 		if (!s_particles)
 			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
 		if (s_particles.GetInt() < 2)
@@ -1286,6 +1260,7 @@ Class PK_DemonEyes : PK_PowerupGiver {
 		Powerup.Type "PK_PowerDemonEyes";
 		inventory.pickupmessage "$PKI_DEMONEYES";
 		inventory.pickupsound "pickups/powerups/lightamp";
+		inventory.icon "iconeyes";
 	}
 	States {
 	Spawn:
@@ -1312,14 +1287,18 @@ Class PK_Pentagram : PK_PowerupGiver {
 		+INVENTORY.BIGPOWERUP
 		Powerup.Type "PK_PowerPentagram";
 		Inventory.PickupMessage "$GOTINVUL";
+		inventory.icon "penticon";
 		renderstyle 'Add';
 		FloatBobStrength 0.35;
 		PK_PowerUpGiver.pickupRingColor "FF1904";
 		inventory.pickupsound "pickups/powerups/pentagram";
 		scale 1.5;
 	}
+	
 	override void Tick() {
 		super.Tick();
+		if (owner)
+			return;
 		if (!s_particles)
 			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
 		if (s_particles.GetInt() < 2)
