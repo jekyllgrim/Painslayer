@@ -1,6 +1,6 @@
 Class PainkillerHUD : BaseStatusBar {
 	const noYStretch = 0.833333;
-	const PWICONSIZE = 18;
+	const PWICONSIZE = 16;
 		
 	HUDFont mIndexFont;
 	HUDFont mNotifFont;
@@ -59,7 +59,16 @@ Class PainkillerHUD : BaseStatusBar {
 		DrawImage(texture, pos, flags, Alpha, box, scale);
 	}
 	
-	// Same as above but for strings
+	// Same for DrawTexture:
+	void PK_DrawTexture(TextureID texture, Vector2 pos, int flags = 0, double Alpha = 1., Vector2 box = (-1, -1), Vector2 scale = (1, 1)) {
+		if (aspectScale.GetBool() == true) {
+			scale.y *= noYStretch;
+			pos.y *= noYStretch;
+		}
+		DrawTexture(texture, pos, flags, Alpha, box, scale);
+	}
+	
+	// Same for DrawString:
 	void PK_DrawString(HUDFont font, String string, Vector2 pos, int flags = 0, int translation = Font.CR_UNTRANSLATED, double Alpha = 1., int wrapwidth = -1, int linespacing = 4, Vector2 scale = (1, 1)) {
 		if (aspectScale.GetBool() == true) {
 			scale.y *= noYStretch;
@@ -68,7 +77,7 @@ Class PainkillerHUD : BaseStatusBar {
 		DrawString(font, string, pos, flags, translation, Alpha, wrapwidth, linespacing, scale);
 	}
 
-	// Same as above but for inventory icons
+	// Same for inventory icons:
 	void PK_DrawInventoryIcon(Inventory item, Vector2 pos, int flags = 0, double alpha = 1.0, Vector2 boxsize = (-1, -1), Vector2 scale = (1.,1.)) {
 		if (aspectScale.GetBool() == true) {
 			scale.y *= noYStretch;
@@ -85,6 +94,7 @@ Class PainkillerHUD : BaseStatusBar {
 		mHUDFont = HUDFont.Create(hfnt, hfnt.GetCharWidth("0"), Mono_CellLeft, 1, 1);
 		mNotifFont = HUDFont.Create("consolefont");
 		diparms = InventoryBarState.Create();
+		diparms.boxsize = (30,30);
 		// Base values for the Codex notif pop-up:
 		notifAlpha = 0.6;
 		notifAlphaMod = 0.05;
@@ -108,10 +118,12 @@ Class PainkillerHUD : BaseStatusBar {
 			return;
 		
 		BeginHUD();
-		//draw invulnerability overlay:
-		if (CPlayer.mo.FindInventory("PowerInvulnerable",true)) {
-			PK_DrawImage("PKHHORNS",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);
-		}
+		if (state == HUD_None)
+			return;
+		
+		// Draw visual powerup indicators, such as horns for Pentagram,
+		// helmet corners for the antirad suit, etc.:
+		DrawPowerupCues();
 		
 		// Top elements draw in Fullscreen and Alt Hud
 		// These include mosnter compass, gold and soul counters, and keys:
@@ -137,16 +149,11 @@ Class PainkillerHUD : BaseStatusBar {
 			if (!isInventoryBarVisible() && !Level.NoInventoryBar && CPlayer.mo.InvSel != null) {
 				vector2 box = (32, 32);
 				double ihofs = 48;
-				// I'm forcefully scaling it to 1.2 vertically because this function
-				// is only used for inventory items that exist outside of the mod,
-				// such as Heretic-specific pickups, and they were drawn with pixelstretch
-				// in mind, so I want them to always look correct:
 				PK_DrawInventoryIcon(
 					CPlayer.mo.InvSel, 
 					(ihofs, -4), 
 					DI_SCREEN_LEFT_BOTTOM|DI_ITEM_LEFT_BOTTOM|DI_DIMDEPLETED, 
-					boxsize: box,
-					scale: (1, 1.2)
+					boxsize: box
 				);
 				PK_DrawString(
 					mNotifFont, 
@@ -160,10 +167,33 @@ Class PainkillerHUD : BaseStatusBar {
 			// Draw inventory bar:
 			if (isInventoryBarVisible()) {
 				int iflags = state == HUD_StatusBar ? DI_SCREEN_CENTER_TOP : DI_SCREEN_CENTER_BOTTOM;
-				DrawInventoryBar(diparms, (0, 0), 7, iflags, HX_SHADOW);
+				DrawInventoryBarScaled(diparms, (0, 0), 7, iflags, HX_SHADOW);
 			}
 		}
-	}	
+	}
+	
+	void DrawPowerUpCues() {
+		//draw invulnerability overlay:
+		if (CPlayer.mo.FindInventory("PowerInvulnerable",true)) {
+			PK_DrawImage("PKHHORNS",(0,0),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_TOP);
+		}
+		
+		if (CPlayer.mo.FindInventory("PowerIronFeet",true)) {
+			PK_DrawImage("ARADVISI",(0,0),DI_SCREEN_LEFT_TOP|DI_ITEM_LEFT_TOP);
+			PK_DrawImage("ARADVISI",(0,0),DI_MIRROR|DI_SCREEN_RIGHT_TOP|DI_ITEM_RIGHT_TOP);
+		}
+		
+		/*if (CPlayer.mo.FindInventory("PK_WeaponModifier")) {
+			double swidth = horizontalResolution;
+			int width = 78;
+			int steps = swidth / width;
+			double xpos = 0;
+			for (int i = 0; i < steps; i++) {
+				PK_DrawImage("WMODVISI",(xpos,0),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_LEFT_BOTTOM);
+				xpos += width;
+			}
+		}*/
+	}
 	
 	// Draws arrow for the compass pointing at the nearest monster.
 	// Incorporates no-vertical-stretch effect from the above.
@@ -207,17 +237,69 @@ Class PainkillerHUD : BaseStatusBar {
 	// It also makes sure to not move the icons up and down when a specific
 	// icon is blinking, as opposed to the similar vanilla function.
 	override void DrawPowerUps() {
-		Vector2 pos = (-PWICONSIZE / 2, -49);
+		Vector2 pos = (-PWICONSIZE / 2, -64);
 		for (let iitem = CPlayer.mo.Inv; iitem != NULL; iitem = iitem.Inv) {
 			let item = Powerup(iitem);
 			if (item != null) {
 				let icon = item.GetPowerupIcon();
 				if (icon.IsValid()) {
-					if (!item.IsBlinking())
-						DrawTexture(icon, pos, DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_CENTER, 1.0, (PWICONSIZE, PWICONSIZE));
+					double alph = item.IsBlinking() ? 0.4 : 1.0;
+					PK_DrawInventoryIcon(item, pos, DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_CENTER, alph, (PWICONSIZE, PWICONSIZE));
 					pos.y -= PWICONSIZE;
 				}
 			}
+		}
+	}
+	
+	// Same as the vanilla DrawInventoryBar but automatically scales
+	// the icon to the size of the box:
+	void DrawInventoryBarScaled(InventoryBarState parms, Vector2 position, int numfields, int flags = 0, double bgalpha = 1., bool scaleToBox = true) {
+		double width = parms.boxsize.X * numfields;
+		[position, flags] = AdjustPosition(position, flags, width, parms.boxsize.Y);
+		
+		CPlayer.mo.InvFirst = ValidateInvFirst(numfields);
+		if (CPlayer.mo.InvFirst == null) return;	// Player has no listed inventory items.
+		
+		Vector2 boxsize = parms.boxsize;
+		Vector2 boxscale = scaleToBox ? boxsize : (-1, -1);
+		// First draw all the boxes
+		for(int i = 0; i < numfields; i++) {
+			PK_DrawTexture(parms.box, position + (boxsize.X * i, 0), flags | DI_ITEM_LEFT_TOP, bgalpha);
+		}
+		
+		// now the items and the rest
+		
+		Vector2 itempos = position + boxsize / 2;
+		Vector2 textpos = position + boxsize - (1, 1 + parms.amountfont.mFont.GetHeight());
+
+		int i = 0;
+		Inventory item;
+		for(item = CPlayer.mo.InvFirst; item != NULL && i < numfields; item = item.NextInv()) {
+			for(int j = 0; j < 2; j++) {
+				if (j ^ !!(flags & DI_DRAWCURSORFIRST)) {
+					if (item == CPlayer.mo.InvSel) {
+						double flashAlpha = bgalpha;
+						if (flags & DI_ARTIFLASH) flashAlpha *= itemflashFade;
+						PK_DrawTexture(parms.selector, position + parms.selectofs + (boxsize.X * i, 0), flags | DI_ITEM_LEFT_TOP, flashAlpha, boxscale);
+					}
+				}
+				else {
+					PK_DrawInventoryIcon(item, itempos + (boxsize.X * i, 0), flags | DI_ITEM_CENTER | DI_DIMDEPLETED, boxsize: boxscale);
+				}
+			}
+			
+			if (parms.amountfont != null && (item.Amount > 1 || (flags & DI_ALWAYSSHOWCOUNTERS))) {
+				PK_DrawString(parms.amountfont, FormatNumber(item.Amount, 0, 5), textpos + (boxsize.X * i, 0), flags | DI_TEXT_ALIGN_RIGHT, parms.cr, parms.itemalpha);
+			}
+			i++;
+		}
+		// Is there something to the left?
+		if (CPlayer.mo.FirstInv() != CPlayer.mo.InvFirst) {
+			PK_DrawTexture(parms.left, position + (-parms.arrowoffset.X, parms.arrowoffset.Y), flags | DI_ITEM_RIGHT|DI_ITEM_VCENTER, box: boxscale);
+		}
+		// Is there something to the right?
+		if (item != NULL) {
+			PK_DrawTexture(parms.right, position + parms.arrowoffset + (width, 0), flags | DI_ITEM_LEFT|DI_ITEM_VCENTER, box: boxscale);
 		}
 	}
 
@@ -331,7 +413,8 @@ Class PainkillerHUD : BaseStatusBar {
 		// Do nothing if the player disabled Codex notifs:
 		if (!notifsCvar || notifsCvar.GetBool() == false)
 			return;
-		// Do nothing if there's no recorded last pickup:
+		// Do nothing if there's no recorded last pickup
+		// or the Codex is currently open:
 		if (!invcontrol || !invcontrol.latestPickup || invcontrol.codexOpened)
 			return;
 		// Get the name of the pickup (not necessarily weapon):
@@ -671,7 +754,7 @@ Class PainkillerHUD : BaseStatusBar {
 			if (icon.IsNull()) 
 				continue;
 			vector2 iconsize = TexMan.GetScaledSize(icon) * 0.5;
-			DrawTexture(icon, iconpos, flags: DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_RIGHT_BOTTOM, scale: (0.5, 0.5));
+			PK_DrawTexture(icon, iconpos, flags: DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_RIGHT_BOTTOM, scale: (0.5, 0.5));
 			iconpos.x -= (iconsize.x + hofs);
 		}
 	}
