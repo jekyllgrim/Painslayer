@@ -1,14 +1,4 @@
 Class PK_MainHandler : EventHandler {	
-	override void RenderOverlay(renderEvent e) {
-		PlayerInfo plr = players[consoleplayer];
-		if (plr && plr.readyweapon is "PK_Boltgun") {			
-			let camTex = TexMan.CheckForTexture("Weapon.camtex", TexMan.Type_Any);
-			if (camTex.IsValid())
-			{
-				Screen.DrawTexture(camTex, false, 0.0, 0.0, DTA_Alpha, 0.0);
-			}
-		}
-	}
 	
 	array <Actor> demontargets; //holds all monsters, players and enemy projectiles
 	array <Actor> allenemies; //only monsters
@@ -104,6 +94,52 @@ Class PK_MainHandler : EventHandler {
 		}
 	}
 	
+	ui TextureID scopetex;
+	// Render crosshair reflection:
+	override void RenderOverlay(renderEvent e) {
+		if (!PlayerInGame[consoleplayer])
+			return;
+		
+		PlayerInfo plr = players[consoleplayer];
+		if (plr && plr.readyweapon && plr.readyweapon is "PK_Boltgun") {	
+			if (!scopetex)
+				scopetex = TexMan.CheckForTexture("Weapon.camtex", TexMan.Type_Any);
+			if (scopetex.IsValid()) {
+				Screen.DrawTexture(scopetex, false, 0.0, 0.0, DTA_Alpha, 0.0);
+			}
+		}
+	}
+	
+	// Render red highlight at the bottom of the screen
+	// when the player has Weapon Modifier:
+	ui TextureID gradient;
+	override void RenderUnderlay(renderEvent e) {
+		if (!PlayerInGame[consoleplayer])
+			return;
+		
+		PlayerInfo player = players[consoleplayer];		
+		let mo = player.mo;
+		if (!mo)
+			return;
+		
+		if (mo.FindInventory("PK_WeaponModifier")) {
+			double sheight = Screen.GetHeight();
+			double hheight = sheight * 0.25;
+			if (!gradient)
+				gradient = TexMan.CheckForTexture("graphics/HUD/gradient256.png");
+			if (gradient.IsValid()) {
+				Screen.DrawTexture(
+					gradient, false, 
+					0, sheight - hheight,
+					DTA_DestWidth, Screen.GetWidth(),
+					DTA_DestHeightF, hheight,
+					DTA_Alpha, 0.5
+				);
+			}
+		}
+	}
+				
+	
 	//different messages for PKGOLD cheat:
 	static const string PKCH_GoldMessage[] = {
 		"$PKCH_GIVEGOLD1",
@@ -117,6 +153,8 @@ Class PK_MainHandler : EventHandler {
 	//tarot card-related events:
 	override void NetworkProcess(consoleevent e) {
 		if (!e.isManual)
+			return;
+		if (!PlayerInGame[e.Player])
 			return;
 		let plr = players[e.Player].mo;
 		if (!plr)
