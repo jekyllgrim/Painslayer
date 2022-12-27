@@ -191,13 +191,13 @@ Class PK_DemonWeapon : PKWeapon {
 		if(players[consoleplayer] == owner.player)   {
 			owner.A_StartSound("demon/loop",CH_HELL,CHANF_UI|CHANF_LOOPING);
 			SetMusicVolume(0);
-			Shader.SetEnabled( players[consoleplayer], "DemonMorph", true);
-			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "waveSpeed", 25 );
-			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "waveAmount", 10 );
-			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "centerX", 0.5 );
-			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "centerY", 0.5 );
-			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "rippleTimer", 0);
-			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "amount", 0 );
+			PPShader.SetEnabled( "DemonMorph", true);
+			PPShader.SetUniform1f("DemonMorph", "waveSpeed", 25 );
+			PPShader.SetUniform1f("DemonMorph", "waveAmount", 10 );
+			PPShader.SetUniform1f("DemonMorph", "centerX", 0.5 );
+			PPShader.SetUniform1f("DemonMorph", "centerY", 0.5 );
+			PPShader.SetUniform1f("DemonMorph", "rippleTimer", 0);
+			PPShader.SetUniform1f("DemonMorph", "amount", 0 );
 			rippleTimer = 0;
 			runRipple = false;
 		}
@@ -296,12 +296,12 @@ Class PK_DemonWeapon : PKWeapon {
 		}
 		//do the ripple effect when the player fires
 		if(runRipple) {
-			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "rippleTimer", rippleTimer );
+			PPShader.SetUniform1f("DemonMorph", "rippleTimer", rippleTimer );
 			rippleTimer += 1.0 / 35;
-			Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "amount", 35 * (1.0 - rippleTimer) );
+			PPShader.SetUniform1f("DemonMorph", "amount", 35 * (1.0 - rippleTimer) );
 			if(rippleTimer >= 1)	{
-				Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "rippleTimer", 0);
-				Shader.SetUniform1f(players[consoleplayer], "DemonMorph", "amount", 0 );
+				PPShader.SetUniform1f("DemonMorph", "rippleTimer", 0);
+				PPShader.SetUniform1f("DemonMorph", "amount", 0 );
 				rippleTimer = 0;
 				runRipple = false;
 			}
@@ -310,7 +310,7 @@ Class PK_DemonWeapon : PKWeapon {
 	}	
 	override void DetachFromOwner() {
 		if(players[consoleplayer] == owner.player)   {
-			Shader.SetEnabled( players[consoleplayer], "DemonMorph", false);
+			PPShader.SetEnabled( "DemonMorph", false);
 			owner.A_StopSound(CH_HELL);
 			SetMusicVolume(1);
 		}

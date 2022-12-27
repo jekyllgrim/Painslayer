@@ -587,7 +587,7 @@ Class PK_ShaderHandler : StaticEventHandler {
 		PlayerInfo plr = players[consoleplayer];
 		if (!plr || !plr.mo || plr.mo.FindInventory("PK_DemonWeapon"))
 			return;
-		Shader.SetEnabled(players[consoleplayer], "DemonMorph", false);
+		PPShader.SetEnabled("DemonMorph", false);
 	}
 }
 
