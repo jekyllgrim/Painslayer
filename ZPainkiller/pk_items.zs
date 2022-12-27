@@ -962,7 +962,8 @@ Class PK_PickupRing : Actor {
 	}
 }
 
-Class PK_PowerupGiver : PowerupGiver {
+// see the 'filter' folder for the base class:
+Class PK_PowerupGiver : PK_PowerupGiverBase {
 	mixin PK_PlayerSightCheck;
 	color pickupRingColor;
 	property pickupRingColor : pickupRingColor;
@@ -971,18 +972,10 @@ Class PK_PowerupGiver : PowerupGiver {
 	Default {
 		powerup.duration -40;
 		+COUNTITEM
-		+INVENTORY.AUTOACTIVATE
-		+INVENTORY.ALWAYSPICKUP
-		Inventory.MaxAmount 5;
 	}
 	
-	override void BeginPlay() {
-		super.BeginPlay();
-		usesound = pickupsound;
-		
-		if (GameInfo.GameType & GAME_Raven)
-			bAUTOACTIVATE = false;
-		
+	override void PostBeginPlay() {
+		super.PostBeginPlay();		
 		if (!pickupRingColor)
 			return;
 		let ring = Spawn("PK_PickupRing",(pos.x,pos.y,floorz));
