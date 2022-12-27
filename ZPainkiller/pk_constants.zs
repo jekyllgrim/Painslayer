@@ -12,6 +12,8 @@ enum PK_WeaponLayers {
 	PSP_PFLASH 	= -100,
 	PSP_HIGHLIGHTS = 100,
 	
+	PSP_WMODEFFECT = 99,
+	
 	PWR_HANDLER	= -10,
 	PWR_PENTA		= -11,
 	PWR_PANTIRAD	= -12,
