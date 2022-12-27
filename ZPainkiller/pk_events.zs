@@ -133,7 +133,7 @@ Class PK_MainHandler : EventHandler {
 					0, sheight - hheight,
 					DTA_DestWidth, Screen.GetWidth(),
 					DTA_DestHeightF, hheight,
-					DTA_Alpha, 0.5
+					DTA_Alpha, 0.38
 				);
 			}
 		}
