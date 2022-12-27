@@ -1,4 +1,4 @@
-version "4.6.0"
+version "4.9"
 
 //KLAZ library by kodi:
 #include "ZPainkiller/klazer/KLAZ_kColor.zsc"
@@ -54,6 +54,7 @@ version "4.6.0"
 #include "ZPainkiller/pk_weapon.zs"
 #include "ZPainkiller/pk_ammo.zs"
 #include "ZPainkiller/pk_systems.zs"
+#include "ZPainkiller/pk_powerups.zs"
 #include "ZPainkiller/pk_items.zs"
 #include "ZPainkiller/pk_props.zs"
 #include "ZPainkiller/w_painkiller.zs"
