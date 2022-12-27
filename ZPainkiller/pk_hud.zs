@@ -662,7 +662,7 @@ Class PainkillerHUD : BaseStatusBar {
 		return size * ratio;
 	}
 	
-	protected void UpdateHealthBar(out Shape2D hb, double frac = 1, uint segments = 100)
+	protected void UpdateHealthBar(out Shape2D hb, double frac = 1, int segments = 100)
 	{
 		// Create the circle if we don't have one yet
 		if (!hb)
@@ -680,7 +680,7 @@ Class PainkillerHUD : BaseStatusBar {
 			hb.PushCoord((0.5,0.5));
 			
 			// Circumference points
-			for (uint i = 0; i < segments; ++i)
+			for (int i = 0; i < segments; ++i)
 			{
 				double c = cos(ang);
 				double s = sin(ang);
@@ -695,7 +695,7 @@ Class PainkillerHUD : BaseStatusBar {
 		// Only draw segments up to a fraction of our total segments based on remaining health
 		hb.Clear(Shape2D.C_Indices);
 		int maxSegments = ceil(segments * frac);
-		for (uint i = 1; i <= maxSegments; ++i)
+		for (int i = 1; i <= maxSegments; ++i)
 		{
 			int next = i+1;
 			if (next > segments)

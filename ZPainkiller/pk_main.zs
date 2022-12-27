@@ -268,7 +268,7 @@ Class PK_BaseActor : Actor abstract {
 			}
 			else
 			{
-				for (uint i = 0; i < CurSector.Get3DFloorCount(); ++i)
+				for (int i = 0; i < CurSector.Get3DFloorCount(); ++i)
 				{
 					let ffloor = CurSector.Get3DFloor(i);
 					if (!(ffloor.flags & F3DFloor.FF_EXISTS)

@@ -28,8 +28,8 @@ class PKZFTextInput : PKZFElement {
 	protected bool clicking;
 	protected bool typing;
 
-	protected int cursor;
-	protected int selCursor;
+	protected uint cursor;
+	protected uint selCursor;
 	protected double curOffset;
 
 	protected int blinkTimer;
@@ -199,7 +199,7 @@ class PKZFTextInput : PKZFElement {
 				break;
 			}
 		}
-		let cur = 0;
+		uint cur = 0;
 		let line = 0;
 		while (true) {
 			let lineLength = lines[line].length();
