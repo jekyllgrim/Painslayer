@@ -119,8 +119,7 @@ Class PKWeapon : Weapon abstract {
 			return;
 		if (c_switchmodes == null)
 			c_switchmodes = CVAR.GetCVar(ammoSwitchCVar,owner.player);
-		//switchmodes = c_switchmodes.GetBool(); return;
-		if (!c_switchmodes/* || switchmodes == c_switchmodes.GetBool()*/)
+		if (!c_switchmodes)
 			return;
 		if (c_switchmodes.GetBool()) {
 			ammotype1 = default.ammotype2;
@@ -409,19 +408,22 @@ Class PKWeapon : Weapon abstract {
 		bool held = (numbullets != 1 || player.refire);
 		//make sure numbullets is positive, now that the check is finished
 		numbullets = abs(numbullets);
-		//fire bullets with explicit angle and simply pass the offsets to the projectiles instead of using AimBulletMissile at puffs (because puffs don't always spawn!)
+		// fire bullets with explicit angle and simply pass the offsets 
+		// to the projectiles instead of using AimBulletMissile at puffs 
+		// (because puffs don't always spawn!)
 		for (int i = 0; i < numbullets; i++) {			
 			double hspread = held ? frandom[pkfb](-spread_horz,spread_horz) : 0;
 			double vspread = held ? frandom[pkfb](-spread_vert,spread_vert) : 0;	
 			Fire3DProjectile(
 				"PK_BulletTracer",
+				useammo: false,
 				forward: 48,
 				leftright:spawnofs,
 				updown:spawnheight,
 				angleoffs: hspread,
 				pitchoffs: vspread
 			);
-			A_FireBullets (hspread, vspread, -1, damage, pufftype,flags:FBF_NORANDOMPUFFZ|FBF_EXPLICITANGLE|FBF_NORANDOM);
+			A_FireBullets (hspread, vspread, -1, damage, pufftype, flags:FBF_NORANDOMPUFFZ|FBF_EXPLICITANGLE|FBF_NORANDOM);
 		}
 	}
 	
