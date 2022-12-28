@@ -147,9 +147,8 @@ Class PK_Stake : PK_StakeProjectile {
 	
 	
 	override void StakeBreak() {		
-		if (!s_particles)
-			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-		if (s_particles.GetInt() >= 2) {
+		
+		if (GetParticlesLevel() >= 2) {
 			for (int i = random[sfx](3,5); i > 0; i--) {
 				let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,pos.z)));
 				if (deb) {
@@ -622,9 +621,8 @@ Class PK_Grenade : PK_Projectile {
 			}
 			if (pos.z <= floorz+4) {
 				pitch+= 15;
-				if (!s_particles)
-					s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-				if (s_particles.GetInt() > 0) {
+				
+				if (GetParticlesLevel() > PK_BaseActor.PL_NONE) {
 					let smk = Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
 					if (smk) {
 						smk.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));

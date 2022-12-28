@@ -160,9 +160,8 @@ Class PK_FreezerProjectile : PK_Projectile {
 					tracer.A_SetBlend("0080FF",0.6,frz.fcounter * 1.5);
 				}
 			}
-			if (!s_particles)
-				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-			if (s_particles.GetInt() >= 1) {
+			
+			if (GetParticlesLevel() >= 1) {
 				for (int i = random[sfx](10,15); i > 0; i--) {
 					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
 					if (debris) {
@@ -365,9 +364,8 @@ Class PK_FreezeControl : PK_InventoryToken {
 			owner.bNOGRAVITY = false;
 			//spawn ice shards:			
 			int rad = owner.radius;
-			if (!s_particles)
-				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-			if (s_particles.GetInt() >= 1) {
+			
+			if (GetParticlesLevel() >= 1) {
 				for (int i = random[sfx](5,8); i > 0; i--) {
 					let ice = Spawn("PK_FrozenChunk",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
 					if (ice) {
@@ -377,7 +375,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 					}
 				}
 			}
-			if (s_particles.GetInt() >= 2) {
+			if (GetParticlesLevel() >= 2) {
 				for (int i = random[sfx](12,16); i > 0; i--) {
 					let ice = Spawn("PK_RandomDebris",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
 					if (ice) {

@@ -372,9 +372,8 @@ Class PK_ExplosiveBolt : PK_ExplosiveStake {
 			A_SetScale(frandom[sfx](0.4,0.47));
 			bSPRITEFLIP = randompick[sfx](0,1);
 			roll = random[sfx](0,359);
-			if (!s_particles)
-				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-			if (s_particles.GetInt() >= 2) {
+			
+			if (GetParticlesLevel() >= 2) {
 				for (int i = random[sfx](5,8); i > 0; i--) {
 					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
 					if (debris) {
@@ -424,9 +423,8 @@ Class PK_Bomb : PK_Projectile {
 		super.Tick();
 		if (isFrozen())
 			return;
-		if (!s_particles)
-			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-		if (s_particles.GetInt() >= 2 && !isFrozen()) {
+		
+		if (GetParticlesLevel() >= 2 && !isFrozen()) {
 			//GetAge() check makes sure bombs don't start spawning smoke
 			//while still "inside" the player, since that can cause
 			//significant slowdowns.
@@ -501,9 +499,8 @@ Class PK_Bomb : PK_Projectile {
 			A_SetScale(frandom[sfx](0.25,0.3));
 			bSPRITEFLIP = randompick[sfx](0,1);
 			roll = random[sfx](0,359);
-			if (!s_particles)
-				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-			if (s_particles.GetInt() >= 2) {
+			
+			if (GetParticlesLevel() >= 2) {
 				for (int i = random[sfx](3,6); i > 0; i--) {
 					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
 					if (debris) {

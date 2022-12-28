@@ -97,7 +97,8 @@ Class PK_BreakableChest : PK_GoldContainer {
 
 class PK_ExplosiveBarrel : ExplosiveBarrel {
 	mixin PK_PlayerSightCheck;
-	protected transient CVar s_particles;
+	mixin PK_ParticleLevelCheck;
+	
 	Default {
 		scale 0.5;
 		Deathsound "props/barrelExplode";
@@ -129,16 +130,15 @@ class PK_ExplosiveBarrel : ExplosiveBarrel {
 				frame++;
 			if (!CheckPlayerSights())
 				return null;
-			if (!s_particles)
-				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-			if (s_particles.GetInt() >= 1) {
+			
+			if (GetParticlesLevel() >= 1) {
 				A_SpawnItemEx("PK_ExplosiveBarrelTop", zofs:default.height,
 					xvel: frandom[sfx](-1,1),
 					yvel: frandom[sfx](-1,1),
 					zvel: frandom[sfx](13,20)
 				);
 			}
-			if (s_particles.GetInt() >= 2) {
+			if (GetParticlesLevel() >= 2) {
 				for (int i = 0; i < 6; i++) {
 					let prt = PK_RandomDebris( Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8), frandom[sfx](8,default.height))) );
 					if (prt) {

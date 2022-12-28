@@ -665,9 +665,8 @@ Class PK_BulletPuff : PKPuff {
 	states {
 	Crash:
 		TNT1 A 0 {
-			if (!s_particles)
-				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-			if (s_particles.GetInt() < 1)
+			
+			if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
 				return resolveState(null);
 			if (target) {
 				angle = target.angle;
@@ -681,7 +680,7 @@ Class PK_BulletPuff : PKPuff {
 				smok.alpha = 0.85;
 				smok.fade = 0.025;
 			}
-			if (s_particles.GetInt() < 2)
+			if (GetParticlesLevel() < PK_BaseActor.PL_FULL)
 				return resolveState(null);
 			let deb = Spawn("PK_RandomDebris",puffdata.Hitlocation + (0,0,debrisOfz));
 			if (deb)
@@ -877,9 +876,8 @@ Class PK_Projectile : PK_BaseActor abstract {
 		Super.Tick();
 		if (!trailcolor || !trailactor)
 			return;		
-		if (!s_particles)
-			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-		if (s_particles.GetInt() < 1)
+		
+		if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
 			return;	
 		if (!farenough) {
 			if (level.Vec3Diff(pos,spawnpos).length() < 80)
@@ -1212,8 +1210,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 		A_Quake(quakeintensity,quakeduration,0,quakeradius,"");
 		if (!CheckPlayerSights())
 			return;
-		CVar s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-		if (s_particles.GetInt() < 1)
+		if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
 			return;
 		if (randomdebris > 0) {
 			for (int i = randomdebris*frandom[sfx](0.7,1.3); i > 0; i--) {
@@ -1225,7 +1222,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 				}
 			}
 		}
-		if (s_particles.GetInt() < 2)
+		if (GetParticlesLevel() < PK_BaseActor.PL_FULL)
 			return;
 		if (smokingdebris > 0) {
 			for (int i = smokingdebris*frandom[sfx](0.7,1.3); i > 0; i--) {

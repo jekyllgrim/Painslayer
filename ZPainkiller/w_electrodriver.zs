@@ -230,9 +230,8 @@ Class PK_ElectricPuff : PKPuff {
 	states {
 	Spawn:
 		SPRK C 1 NoDelay {
-			if (!s_particles)
-				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);			
-			if (s_particles.GetInt() >= 2) {
+						
+			if (GetParticlesLevel() >= 2) {
 				for (int i = random[eld](2,4); i > 0; i--) {
 					let part = Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
 					if (part) {
@@ -242,7 +241,7 @@ Class PK_ElectricPuff : PKPuff {
 					}
 				}
 			}			
-			if (s_particles.GetInt() >= 1) {
+			if (GetParticlesLevel() >= 1) {
 				for (int i = random[eld](5,8); i > 0; i--) {
 					let part = Spawn("PK_RicochetSpark",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
 					if (part) {
@@ -326,9 +325,8 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 		}
 		if (owner.isFrozen())
 			return;
-		if (!s_particles)
-			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-		if (isFlesh && s_particles.GetInt() >= 2) {
+		
+		if (isFlesh && GetParticlesLevel() >= 2) {
 			let smk = Spawn("PK_BlackSmoke",owner.pos+(frandom[etc](-8,8),frandom[etc](-8,8),owner.height*0.5 + frandom[etc](-4,12)));
 			if (smk) {
 				smk.vel = (frandom[etc](-0.5,0.5),frandom[etc](-0.5,0.5),frandom[etc](0.6,0.9));
@@ -439,9 +437,8 @@ Class PK_Shuriken : PK_StakeProjectile {
 		+ROLLSPRITE;		
 	}
 	override void StakeBreak() {
-		if (!s_particles)
-			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-		if (s_particles.GetInt() >= 2) {
+		
+		if (GetParticlesLevel() >= 2) {
 			for (int i = random[sfx](2,4); i > 0; i--) {
 				let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,pos.z)));
 				if (deb) {
@@ -499,9 +496,8 @@ Class PK_Shuriken : PK_StakeProjectile {
 			//otherwise it's so hard to make it useful, it should at least be powerful
 			else
 				A_Explode(40,128,fulldamagedistance:64);
-			if (!s_particles)
-				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-			if (s_particles.GetInt() >= 2) {
+			
+			if (GetParticlesLevel() >= 2) {
 				for (int i = random[sfx](2,7); i > 0; i--) {
 					let debris = Spawn("PK_RandomDebris",pos);
 					if (debris) {
@@ -657,9 +653,8 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 			A_StartSound("weapons/edriver/shockloop",CHAN_VOICE,CHANF_LOOPING);
 		}
 		M000 B 3 {
-			if (!s_particles)
-				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-			if (s_particles.GetInt() >= 2) {
+			
+			if (GetParticlesLevel() >= 2) {
 				for (int i = random[eld](4,6); i > 0; i--) {
 					let part = Spawn("PK_RicochetSpark",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
 					if (part) {
@@ -669,7 +664,7 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 					}
 				}
 			}
-			if (s_particles.GetInt() >= 1) {
+			if (GetParticlesLevel() >= 1) {
 				for (int i = random[sfx](2,4); i > 0; i--) {
 					let smk = Spawn("PK_WhiteDeathSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
 					if (smk) {
@@ -692,9 +687,8 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 			roll = random[eld](0,359);
 			SetShade("8bb1ff");
 			A_Explode(128,160,flags:0);
-			if (!s_particles)
-				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-			if (s_particles.GetInt() >= 2) {
+			
+			if (GetParticlesLevel() >= 2) {
 				for (int i = 32; i > 0; i--) {
 					let part = Spawn("PK_RicochetSpark",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
 					if (part) {

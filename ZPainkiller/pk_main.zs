@@ -216,13 +216,30 @@ class PK_Keybinds {
     }
 }
 
+mixin class PK_ParticleLevelCheck {
+	protected transient CVar s_particles;
+	
+	enum ParticleLevels {
+		PL_None,
+		PL_Reduced,
+		PL_Full,
+	}
+	
+	int GetParticlesLevel() {
+		if (!s_particles)
+			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
+		
+		return s_particles.GetInt();
+	}
+}
+
 Class PK_BaseActor : Actor abstract {
 	protected double pi;
 	protected name bcolor;
 	protected int age;
-	protected transient CVar s_particles;
 	mixin PK_Math;
 	mixin PK_PlayerSightCheck;
+	mixin PK_ParticleLevelCheck;
 	
 	bool CheckLandingSize (double cradius = 0, bool checkceiling = false) {
 		if (checkceiling) {

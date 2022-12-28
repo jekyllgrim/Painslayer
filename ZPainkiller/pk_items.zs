@@ -1,7 +1,8 @@
 Class PK_InventoryToken : Inventory abstract {
 	mixin PK_Math;
+	mixin PK_ParticleLevelCheck;
 	protected int age;
-	protected transient CVar s_particles;
+	
 	Default {
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNTOSSABLE;

@@ -195,9 +195,8 @@ Class PK_PainkillerPuff : PK_BulletPuff {
 	states {
 	Crash:
 		TNT1 A 1 {
-			if (!s_particles)
-				s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-			if (s_particles.GetInt() < 1)
+			
+			if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
 				return resolveState(null);
 			if (target) {
 				angle = target.angle;
@@ -209,7 +208,7 @@ Class PK_PainkillerPuff : PK_BulletPuff {
 				if (deb)
 					deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
 			}
-			if (s_particles.GetInt() < 2)
+			if (GetParticlesLevel() < PK_BaseActor.PL_FULL)
 				return resolveState(null);
 			bool mod = target && PKWeapon.CheckWmod(target);
 			if (mod || (random[sfx](0,10) > 2)) {
