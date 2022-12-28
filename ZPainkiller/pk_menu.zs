@@ -28,11 +28,24 @@ class ListMenuItemPKTextItemCentered : ListMenuItemTextItem {
 		int h = desc ? desc.DisplayHeight() : -1;
 		
 		if (w == ListMenuDescriptor.CleanScale) {
-			screen.DrawText(fnt, color, x, y, text, ontop? DTA_CleanTop : DTA_Clean, true);
+			screen.DrawText(
+				fnt, 
+				color, 
+				x, y, 
+				text, 
+				ontop ? DTA_CleanTop : DTA_Clean, true);
 		}
 		
 		else {
-			screen.DrawText(fnt, color, x, y, text, DTA_VirtualWidth, w, DTA_VirtualHeight, h, DTA_FullscreenScale, FSMode_ScaleToFit43);
+			screen.DrawText(
+				fnt, 
+				color, 
+				x, y, 
+				text, 
+				DTA_VirtualWidth, w, 
+				DTA_VirtualHeight, h, 
+				DTA_FullscreenScale, FSMode_ScaleToFit43
+			);
 		}
 	}
 }
@@ -54,14 +67,14 @@ class PKSkillMenu : ListMenu {
 	const SWIDTH = 1920;
 	const SHEIGHT = 1080;
 	
-	override void Init(Menu parent, ListMenuDescriptor desc) {
+	/*override void Init(Menu parent, ListMenuDescriptor desc) {
 		// Remove the jank workaround
 		if (desc) {
 			desc.mYpos = 0;
 			desc.mLinespacing = LINESPACING;
 		}
 		super.Init(parent, desc);
-	}
+	}*/
 	
 	override void Drawer() {
 		// draw skill menu background:
@@ -90,7 +103,8 @@ class PKSkillMenu : ListMenu {
 				true, 
 				texpos.x, texpos.y,
 				DTA_VirtualWidth, SWIDTH,
-				DTA_VirtualHeight, SHEIGHT
+				DTA_VirtualHeight, SHEIGHT,
+				DTA_FullscreenScale, FSMode_ScaleToFit43
 			);
 			
 			// Set vertical collision for mouse selection:
@@ -109,19 +123,12 @@ class PKSkillMenu : ListMenu {
 				textpos.x, textpos.y, 
 				text, 
 				DTA_VirtualWidth, SWIDTH,
-				DTA_VirtualHeight, SHEIGHT
+				DTA_VirtualHeight, SHEIGHT,
+				DTA_FullscreenScale, FSMode_ScaleToFit43
 			);
 
 			y += mDesc.mLinespacing;
 		}
-	}
-	
-	override void onDestroy() {
-		if (mDesc) {
-			mDesc.mYpos = 0;
-			mDesc.mLinespacing = 0;
-		}
-		super.onDestroy();
 	}
 }
 

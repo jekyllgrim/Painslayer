@@ -6,8 +6,9 @@ DEFAULTLISTMENU
 
 ListMenu "MainMenu" {
 	size 1920, 1080
-	PKDrawMenuBackground 0, 0, "P_MENU"
 	LineSpacing 92
+	
+	PKDrawMenuBackground 0, 0, "P_MENU"
 
 	Position 960, 360
 	PKTextItemCentered  "$MNU_NEWGAME", "", "PlayerclassMenu"
@@ -20,9 +21,12 @@ ListMenu "MainMenu" {
 
 ListMenu "SkillMenu" {
 	class "PKSkillMenu"
+	
 	size 1920, 1080
-	Position 0, -2147483648
-	Linespacing 0
+	LineSpacing 92
+	Forcelist
+	//Position 0, -2147483648
+	//Linespacing 0
 }
 
 AddOptionMenu "OptionsMenu" before "CustomizeControls" {
