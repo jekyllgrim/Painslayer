@@ -409,6 +409,7 @@ Class PK_Bomb : PK_Projectile {
 		PK_Projectile.trailalpha 0.12;
 		-NOGRAVITY
 		+USEBOUNCESTATE
+		+EXPLODEONWATER
 		bouncetype 'hexen';
 		bouncefactor 0.65;
 		gravity 0.45;

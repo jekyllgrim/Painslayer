@@ -590,6 +590,7 @@ Class PK_Grenade : PK_Projectile {
 		PK_Projectile.trailalpha 0.3;
 		Obituary "$PKO_GRENADE";
 		-NOGRAVITY
+		+EXPLODEONWATER
 		bouncetype 'hexen';
 		bouncefactor 0.35;
 		gravity 0.45;
