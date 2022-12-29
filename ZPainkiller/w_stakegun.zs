@@ -135,6 +135,7 @@ Class PK_Stake : PK_StakeProjectile {
 		-NOGRAVITY
 		+NOEXTREMEDEATH
 		+NODECAL
+		+SKYEXPLODE
 		speed 60;
 		gravity 0.45;
 		radius 2;
@@ -148,7 +149,7 @@ Class PK_Stake : PK_StakeProjectile {
 	
 	override void StakeBreak() {		
 		
-		if (GetParticlesLevel() >= 2) {
+		if (GetParticlesLevel() >= PK_BaseActor.PL_FULL) {
 			for (int i = random[sfx](3,5); i > 0; i--) {
 				let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,pos.z)));
 				if (deb) {
@@ -351,6 +352,9 @@ Class PK_Stake : PK_StakeProjectile {
 			A_RemoveLight('PKBurningStake');
 			onFire = true;
 		}
+		stop;
+	Death.Sky:
+		TNT1 A 1 DetachVictim();
 		stop;
 	}
 }
