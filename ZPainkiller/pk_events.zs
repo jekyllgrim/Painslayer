@@ -813,8 +813,10 @@ Class PK_ReplacementHandler : EventHandler {
 		case 'BagOfHolding':
 			e.Replacement = 'PK_AmmoPack';
 			break;
-		case 'ArtiHealth':
 		case 'CrystalVial':
+			e.Replacement = 'PK_NullActor';
+			break;
+		case 'ArtiHealth':
 			e.Replacement = 'PK_AmmoSpawner_RandomAmmo';
 			break;
 		case 'SilverShield':
