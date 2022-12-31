@@ -1,2 +1,2 @@
-STARTUPTITLE="Painslayer 1.3.0pre © Jekyll Grim Payne"
+STARTUPTITLE="Painslayer 1.3.0 © Jekyll Grim Payne"
 STARTUPCOLORS="CC0000","000000"
