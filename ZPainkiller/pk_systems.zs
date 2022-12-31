@@ -295,7 +295,7 @@ Class PK_DemonWeapon : PKWeapon {
 			}
 		}
 		//do the ripple effect when the player fires
-		if(runRipple) {
+		if(runRipple && owner.player == players[consoleplayer]) {
 			PPShader.SetUniform1f("DemonMorph", "rippleTimer", rippleTimer );
 			rippleTimer += 1.0 / 35;
 			PPShader.SetUniform1f("DemonMorph", "amount", 35 * (1.0 - rippleTimer) );
