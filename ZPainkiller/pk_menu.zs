@@ -3,7 +3,7 @@
 // and also draws P_mnublk behind itself:
 class ListMenuItemPKTextItemCentered : ListMenuItemTextItem {
 	TextureID mTexture;
-	vector2 mTextureOfs;
+	vector2 mTextureSize;
 
 	override void Draw(bool selected, ListMenuDescriptor desc)	{	
 		let font = menuDelegate.PickFont(mFont);
@@ -12,10 +12,10 @@ class ListMenuItemPKTextItemCentered : ListMenuItemTextItem {
 		// Draw the selector texture:
 		if (!mTexture)
 			mTexture = TexMan.CheckForTexture("P_mnublk", TexMan.Type_Any);
-		if (mTextureOfs == (0,0))
-			mTextureOfs = TexMan.GetScaledSize(mTexture);
+		if (mTextureSize == (0,0))
+			mTextureSize = TexMan.GetScaledSize(mTexture);
 		
-		DrawTexture(desc, mTexture, mXpos - (mTextureOfs.x / 2), abs(mYpos) - (mTextureOfs.y / 2) + (fy / 2), mYpos < 0);
+		DrawTexture(desc, mTexture, mXpos - (mTextureSize.x / 2), abs(mYpos) - (mTextureSize.y / 2) + (fy / 2), mYpos < 0);
 		
 		// Draw the actual text:
 		String text = Stringtable.Localize(mText);
@@ -50,16 +50,13 @@ class ListMenuItemPKTextItemCentered : ListMenuItemTextItem {
 	}
 }
 
-// A hack to implement a custom skill menu. As long as this class
-// is set as the SkillMenu class, we can work around the stupid
-// size limitations (that will thankfully be gone in 4.10) and
-// avoid the fallback to the text-only version, by setting the 
-// positions and sizes explicitly
-// (thanks, Boondorl!)
+// An override for the Skill and Episode menus
+// that draws P_mnublk behind the text
+
 class PKSkillMenu : ListMenu {
 	TextureID mTexture;
 	TextureID mBackground;
-	vector2 mTextureOfs;
+	vector2 mTextureSize;
 	// explicit linespacing and size:
 	const LINESPACING = 92;
 	const POSX = 960;
@@ -84,24 +81,83 @@ class PKSkillMenu : ListMenu {
 		PK_StatusBarScreen.DrawTexture(mBackground, (960,540));
 		
 		int y = POSY;
-		let font = mDesc.mFont;
-		let fy = font.GetHeight();
+		let mFont = mDesc.mFont;
+		let fy = mFont.GetHeight();
 		if (!mTexture)
-			mTexture = TexMan.CheckForTexture("P_mnublk", TexMan.Type_Any);	
-		mTextureOfs = TexMan.GetScaledSize(mTexture);
+			mTexture = TexMan.CheckForTexture("P_mnublk", TexMan.Type_Any);
+		mTextureSize = TexMan.GetScaledSize(mTexture);
 		
+		// Draw the title at the top:
 		for (int i = 0; i < mDesc.mItems.Size(); ++i) {
-			// check this is actually a skill element:
+			let title = ListMenuItemStaticText(mDesc.mItems[i]);
+			if (title) {
+				string text = StringTable.Localize(title.mText);
+				vector2 textpos = ( (SWIDTH / 2) - (mFont.StringWidth(text) / 2), y / 2);
+				// draw shadow:
+				Screen.DrawText(
+					mFont, 
+					Font.CR_Untranslated,
+					textpos.x + 3, textpos.y + 3, 
+					text, 
+					DTA_VirtualWidth, SWIDTH,
+					DTA_VirtualHeight, SHEIGHT,
+					DTA_FullscreenScale, FSMode_ScaleToFit43
+				);
+				// draw the actual text:
+				Screen.DrawText(
+					mFont, 
+					mFont.FindFontColor('PKWhiteText'),
+					textpos.x, textpos.y, 
+					text, 
+					DTA_VirtualWidth, SWIDTH,
+					DTA_VirtualHeight, SHEIGHT,
+					DTA_FullscreenScale, FSMode_ScaleToFit43
+				);
+			}
+		}
+		
+		// First we need to get the widest skill/episode name,
+		// so that the background texture is scaled accordingly:
+		int textureWidth = int(mTextureSize.x);
+		for (int i = 0; i < mDesc.mItems.Size(); ++i) {
+			// check it's a clikcable element (skill or episode):
 			let item = ListMenuItemTextItem(mDesc.mItems[i]);
 			if (!item)
 				continue;
 			
-			vector2 texpos = ((SWIDTH / 2) - (mTextureOfs.x / 2), y - (mTextureOfs.y / 2) + (fy / 2));
+			string text = StringTable.Localize(item.mText);
+			int textwidth = mFont.StringWidth(text);
+			// I use 0.7 here instead of the full texture's width
+			// because it has sides with a floral pattern that
+			// shouldn't appear behidn the text. Note, it'll look
+			// wrong with *very* wide names, but I can't be bothered
+			// to implement separate drawing for those patterned
+			// sides right now...
+			double fac = 0.7;
+			if (textwidth > textureWidth * fac)
+				textureWidth = int(textwidth / fac);
+		}
+			
+		for (int i = 0; i < mDesc.mItems.Size(); ++i) {
+			// check it's a clikcable element (skill or episode):
+			let item = ListMenuItemTextItem(mDesc.mItems[i]);
+			if (!item)
+				continue;
+				
+			string text = StringTable.Localize(item.mText);
+			int textwidth = mFont.StringWidth(text);
+			
+			vector2 texpos = (
+				(SWIDTH / 2) - (textureWidth / 2), 
+				y - (mTextureSize.y / 2) + (fy / 2)
+			);
 			// draw the background:
 			Screen.DrawTexture(
 				mTexture, 
 				true, 
 				texpos.x, texpos.y,
+				// scale to fit the skill/episode name width:
+				DTA_DestWidth, textureWidth,
 				DTA_VirtualWidth, SWIDTH,
 				DTA_VirtualHeight, SHEIGHT,
 				DTA_FullscreenScale, FSMode_ScaleToFit43
@@ -115,10 +171,12 @@ class PKSkillMenu : ListMenu {
 			}
 			
 			// Draw the skill text:
-			string text = StringTable.Localize(item.mText);
-			vector2 textpos = ( (SWIDTH / 2) - (font.StringWidth(text) / 2), y);
+			vector2 textpos = (
+				(SWIDTH / 2) - (mFont.StringWidth(text) / 2), 
+				y
+			);
 			Screen.DrawText(
-				font, 
+				mFont, 
 				mDesc.mSelectedItem == i ? item.mColorSelected : mDesc.mFontColor,
 				textpos.x, textpos.y, 
 				text, 

@@ -4,6 +4,9 @@ Gameinfo {
 	StatusBarClass = "PainkillerHUD"
 	ArmorIcons = "pkharm2", 0.5, "pkharm3"
 	CursorPic = "pkmcur"
+	// Without this skill/episode menu may become invisible because
+	// it'll try to fall back to graphics patches in some games:
+	ForceTextInMenus = true
 }
 
 skill baby {

@@ -7,6 +7,27 @@ DEFAULTLISTMENU
 ListMenu "MainMenu" {
 	size 1920, 1080
 	LineSpacing 92
+	ForceList
+	
+	PKDrawMenuBackground 0, 0, "P_MENU"
+
+	Position 960, 360
+	PKTextItemCentered  "$MNU_NEWGAME", "", "PlayerclassMenu"
+	PKTextItemCentered  "$MNU_OPTIONS", "", "OptionsMenu"
+	PKTextItemCentered  "$PKM_TITLE_SHORT", "", "PK_Settings"
+	PKTextItemCentered  "$MNU_LOADGAME", "", "LoadGameMenu"
+	PKTextItemCentered  "$MNU_SAVEGAME", "", "SaveGameMenu"
+	PKTextItemCentered  "$MNU_QUITGAME", "", "QuitMenu"
+}
+
+// This is necessary because I use 'ForceTextInMenus' in MAPINFO
+// (so that skill/episode menu doesn't try back to nonexistent
+// graphic patches), and I don't want the main menu to fall back
+// to the standard Doom version:
+ListMenu "MainMenuTextOnly" {
+	size 1920, 1080
+	LineSpacing 92
+	ForceList
 	
 	PKDrawMenuBackground 0, 0, "P_MENU"
 
@@ -20,13 +41,19 @@ ListMenu "MainMenu" {
 }
 
 ListMenu "SkillMenu" {
-	class "PKSkillMenu"
-	
+	class "PKSkillMenu"	
 	size 1920, 1080
 	LineSpacing 92
 	Forcelist
-	//Position 0, -2147483648
-	//Linespacing 0
+	StaticTextCentered 960, 128, "$MNU_CHOOSESKILL"
+}
+
+ListMenu "EpisodeMenu" {
+	class "PKSkillMenu"
+	size 1920, 1080
+	LineSpacing 92
+	Forcelist
+	StaticTextCentered 960, 128, "$MNU_EPISODE"
 }
 
 AddOptionMenu "OptionsMenu" before "CustomizeControls" {
