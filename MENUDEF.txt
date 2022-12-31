@@ -1,6 +1,6 @@
 DEFAULTLISTMENU
 {
-	Font "TimesMenu", "Untranslated", "DarkRed"
+	Font "TimesMenu", "Untranslated", "Red"
 	Selector "", 0,0 //"P_mnuSel", -228, -8
 }
 
