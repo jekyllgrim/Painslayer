@@ -866,8 +866,12 @@ Class PKC_Blessing : PK_BaseSilverCard {
 	override void RemoveCard() {
 		let plr = owner.player.mo;
 		plr.BonusHealth = 0;
-		//plr.maxhealth = plr.default.maxhealth;
-		//plr.A_SetHealth(curhealth); //revert health, so that the player can't equip/unequip this card for free heals
+		int maxh = plr.GetMaxHealth();
+		if (plr.health > maxh) {
+			if (pk_debugmessages)
+				console.printf("Resetting player %d health to %d", plr.PlayerNumber(), maxh);
+			plr.A_SetHealth(maxh);
+		}
 	}
 }
 
