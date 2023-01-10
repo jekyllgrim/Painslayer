@@ -5,6 +5,7 @@
 *Painslayer* requires [GZDoom 4.7.0](https://zdoom.org/downloads).
 
 ☕ Support me on Boosty: https://boosty.to/agent_ash
+Join my Discord server: https://discord.gg/MJGdYjk
 
 # Contents
 
