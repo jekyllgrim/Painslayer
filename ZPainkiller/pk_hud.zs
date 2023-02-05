@@ -701,7 +701,7 @@ Class PainkillerHUD : BaseStatusBar {
 		
 		// Only draw segments up to a fraction of our total segments based on remaining health
 		hb.Clear(Shape2D.C_Indices);
-		int maxSegments = ceil(segments * frac);
+		int maxSegments = ceil(segments * Clamp(frac, 0., 1.));
 		for (int i = 1; i <= maxSegments; ++i)
 		{
 			int next = i+1;
