@@ -27,6 +27,7 @@ Class PainkillerHUD : BaseStatusBar {
 	protected transient CVar aspectScale;
 	
 	PK_CardControl cardcontrol;
+	DynamicValueInterpolator goldInterpolator;
 	
 	protected vector2 cardTexSize;
 	
@@ -105,6 +106,7 @@ Class PainkillerHUD : BaseStatusBar {
 		hpBarScale = TexMan.GetScaledSize(hpBartex);
 		//dimensions of a card texture:
 		cardTexSize = TexMan.GetScaledSize(TexMan.CheckForTexture("graphics/HUD/Tarot/cards/UsedCard.png"));
+		goldInterpolator = DynamicValueInterpolator.Create(0, 0.1, 1, 10);
 	}
 	
 	override void Draw (int state, double TicFrac) {
@@ -320,8 +322,11 @@ Class PainkillerHUD : BaseStatusBar {
 		//get gold amount:
 		if (!cardcontrol)
 			cardcontrol = PK_CardControl(player.FindInventory("PK_CardControl"));
-		if (cardcontrol)
+		if (cardcontrol) {
 			goldnum = cardcontrol.GetGoldAmount();
+			if (goldInterpolator)
+				goldInterpolator.Update(goldnum);
+		}
 		//get souls amount:
 		let dmcont = PK_DemonMorphControl(player.FindInventory("PK_DemonMorphControl"));
 		if (dmcont) {
@@ -564,7 +569,8 @@ Class PainkillerHUD : BaseStatusBar {
 		
 			//gold counter above health:
 			PK_DrawImage("pkhgold",(5,-38),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_CENTER);
-			PK_DrawString(mIndexFont, String.Format("%05d",goldnum), (10, -43),DI_SCREEN_LEFT_BOTTOM|DI_TEXT_ALIGN_LEFT,translation:font.CR_UNTRANSLATED);			
+			if (goldInterpolator)
+				PK_DrawString(mIndexFont, String.Format("%05d", goldInterpolator.GetValue()), (10, -43),DI_SCREEN_LEFT_BOTTOM|DI_TEXT_ALIGN_LEFT,translation:font.CR_UNTRANSLATED);			
 			//souls counter above ammo:
 			PK_DrawImage("pkhsouls",(-5,-38),DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_CENTER);
 			PK_DrawString(mIndexFont, String.Format("%05d",soulsnum), (-10,-43),DI_SCREEN_RIGHT_BOTTOM|DI_TEXT_ALIGN_RIGHT,translation:soulscol);
@@ -610,7 +616,8 @@ Class PainkillerHUD : BaseStatusBar {
 		PK_DrawImage("pkhgold",(-31,11),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_CENTER);
 		PK_DrawImage("pkhsouls",(31,11),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_ITEM_CENTER);
 		//draw souls and gold values on the top bar:
-		PK_DrawString(mIndexFont, String.Format("%05d",goldnum), (-38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_RIGHT,translation:font.CR_UNTRANSLATED);			
+		if (goldInterpolator)
+			PK_DrawString(mIndexFont, String.Format("%05d",goldInterpolator.GetValue()), (-38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_RIGHT,translation:font.CR_UNTRANSLATED);			
 		PK_DrawString(mIndexFont, String.Format("%05d",soulsnum), (38, 6),DI_SCREEN_TOP|DI_SCREEN_HCENTER|DI_TEXT_ALIGN_LEFT,translation:soulscol);
 		//if there's a boss around, draw healthbar for it:
 		DrawBossHealthBar();
