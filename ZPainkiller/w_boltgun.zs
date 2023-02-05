@@ -164,12 +164,11 @@ Class PK_Boltgun : PKWeapon {
 		loop;
 	Fire:
 		BGU1 A 0 {
-			let psp = Player.FindPSprite(PSP_WEAPON);
+			let psp = Player.FindPSprite(OverlayID());
 			if (psp)
 				invoker.prevOfs = (psp.x,psp.y);
 			A_ClearOverlays(PSP_OVERGUN,PSP_OVERGUN);
 			if (!PK_CheckAmmo(true)) {
-				let psp = player.FindPSprite(OverlayID());
 				if (psp)
 					psp.sprite = GetSpriteIndex("BGU2");
 			}
@@ -179,7 +178,6 @@ Class PK_Boltgun : PKWeapon {
 			double yofs = invoker.scoped ? 1 : -2;
 			Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: xofs, updown: yofs);
 			PK_DepleteAmmo(amount:1);
-			//A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
 			PK_AttackSound("weapons/boltgun/fire1",CHAN_5);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
