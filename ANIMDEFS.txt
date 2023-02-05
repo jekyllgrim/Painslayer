@@ -91,3 +91,67 @@ texture PCDXCORB
 	pic PCY1D tics 3
 	pic PCY1C tics 3
 	pic PCY1B tics 3
+
+/*
+texture BGU1A0 notrim
+texture BGU1B0 notrim
+texture BGU1C0 notrim
+texture BGU1D0 notrim
+texture BGU1E0 notrim
+texture BGU1F0 notrim
+texture BGU1G0 notrim
+texture BGU1H0 notrim
+texture BGU1I0 notrim
+texture BGU1J0 notrim
+texture BGU1K0 notrim
+texture BGU1L0 notrim
+texture BGU1M0 notrim
+texture BGU1N0 notrim
+texture BGU1O0 notrim
+texture BGU1P0 notrim
+texture BGU1Q0 notrim
+texture BGU1R0 notrim
+texture BGU1S0 notrim
+texture BGU1T0 notrim
+texture BGU2A0 notrim
+texture BGU2B0 notrim
+texture BGU2C0 notrim
+texture BGU2D0 notrim
+texture BGU2E0 notrim
+texture BGU2F0 notrim
+texture BGU2G0 notrim
+texture BGU2H0 notrim
+texture BGU2I0 notrim
+texture BGU2J0 notrim
+texture BGU2K0 notrim
+texture BGU2L0 notrim
+texture BGU2M0 notrim
+texture BGU2N0 notrim
+texture BGU2O0 notrim
+texture BGU2P0 notrim
+texture BGU2Q0 notrim
+texture BGU2R0 notrim
+texture BGU2S0 notrim
+texture BGU2T0 notrim
+texture BGUBA0 notrim
+texture BGUBB0 notrim
+texture BGUBC0 notrim
+texture BGUBD0 notrim
+texture BGUBE0 notrim
+texture BGUBF0 notrim
+texture BGUBG0 notrim
+texture BGUBH0 notrim
+texture BGUBI0 notrim
+texture BGUBJ0 notrim
+texture BGUBK0 notrim
+texture BGUBL0 notrim
+texture BGUBM0 notrim
+texture BGUBN0 notrim
+texture BGUNA0 notrim
+texture BGUNB0 notrim
+texture BGUNC0 notrim
+texture BGUND0 notrim
+texture BGUSE0 notrim
+texture BGUSA0 notrim
+texture BGUSF0 notrim
+texture BGUVA0 notrim
