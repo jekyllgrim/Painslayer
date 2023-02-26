@@ -1,8 +1,8 @@
-**PAINSLAYER © 2020-2021 Agent_Ash aka Jekyll Grim Payne**
+**PAINSLAYER © 2020-2023 Agent_Ash aka Jekyll Grim Payne**
 
 *Painslayer* is a gameplay mod for GZDoom engine by Agent_Ash aka Jekyll Grim Payne, inspired by *Painkiller* (2004) by People Can Fly. 
 
-*Painslayer* requires [GZDoom 4.7.0](https://zdoom.org/downloads).
+*Painslayer* requires [GZDoom 4.10.0](https://zdoom.org/downloads).
 
 ☕ Support me on Boosty: https://boosty.to/agent_ash
 
@@ -25,7 +25,7 @@ Join my Discord server: https://discord.gg/MJGdYjk
 
 ## How to play the latest stable release
 
-Releases aren't always super-stable or bug-free, but they should be playable. Some releases are development versions which don't have all the planned features implemented yet.
+Released versions should be the most stable and bug-free ones. Some releases are development versions which don't have all the planned features implemented yet.
 
 1. Navigate to the "Releases" tab at the top or following this URL: https://github.com/jekyllgrim/Painslayer/releases
 2. Download the attached PK3 file. Run it as you'd run any .wad or .pk3. For example, in the command line it shoud look as follows:
@@ -34,7 +34,7 @@ Releases aren't always super-stable or bug-free, but they should be playable. So
 gzdoom.exe -file Painslayer###.pk3
 ```
 
-(`###` in the example above stand for the version number, e.g. 085.)
+(`###` in the example above stand for the version number, e.g. 130 for version 1.3.0)
 
 ## How to play the freshest dev build
 
@@ -49,7 +49,7 @@ It's possible to play the version that is currently in the repository but hasn't
 4. Run the archive as you would run any mod; from command line or a bat file in the GZDoom directory:
    
    ```
-   gzdoom.exe -file Painslayer-master.zip 
+   gzdoom.exe -file Painslayer-master.zip
    ```
    
     Or, if you renamed it: 
