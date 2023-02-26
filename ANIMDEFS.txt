@@ -92,7 +92,7 @@ texture PCDXCORB
 	pic PCY1C tics 3
 	pic PCY1B tics 3
 
-/*
+
 texture BGU1A0 notrim
 texture BGU1B0 notrim
 texture BGU1C0 notrim
@@ -153,5 +153,5 @@ texture BGUNC0 notrim
 texture BGUND0 notrim
 texture BGUSE0 notrim
 texture BGUSA0 notrim
-texture BGUSF0 notrim
+/*texture BGUSF0 notrim
 texture BGUVA0 notrim

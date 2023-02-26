@@ -21,6 +21,34 @@ Class PK_Boltgun : PKWeapon {
 		inventory.icon "PKWIF0";
 		Tag "$PK_BOLTGUN_TAG";
 	}
+	
+	action void A_BoltgunScale(double scalex, double scaley, int flags = 0)
+	{
+		A_OverlayScale(PSP_Weapon, scalex, scaley, flags);
+		A_OverlayScale(PSP_OVERGUN, scalex, scaley, flags);
+		A_OverlayScale(PSP_SCOPE1, scalex, scaley, flags);
+		A_OverlayScale(PSP_SCOPE2, scalex, scaley, flags);
+		A_OverlayScale(PSP_SCOPE3, scalex, scaley, flags);
+	}
+	
+	action void A_BoltgunRotate(double angle, int flags = 0)
+	{
+		A_OverlayRotate(PSP_Weapon, angle, flags);
+		A_OverlayRotate(PSP_OVERGUN, angle, flags);
+		A_OverlayRotate(PSP_SCOPE1, angle, flags);
+		A_OverlayRotate(PSP_SCOPE2, angle, flags);
+		A_OverlayRotate(PSP_SCOPE3, angle, flags);
+	}
+	
+	action void A_BoltgunPivot(double wx = 0.5, double wy = 0.5, int flags = 0)
+	{
+		A_OverlayPivot(PSP_Weapon, wx, wy, flags);
+		A_OverlayPivot(PSP_OVERGUN, wx, wy, flags);
+		A_OverlayPivot(PSP_SCOPE1, wx, wy, flags);
+		A_OverlayPivot(PSP_SCOPE2, wx, wy, flags);
+		A_OverlayPivot(PSP_SCOPE3, wx, wy, flags);
+	}
+	
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner || !owner.player)
@@ -48,6 +76,7 @@ Class PK_Boltgun : PKWeapon {
 			plr.SetPSprite(PSP_HIGHLIGHTS,scopestate);
 		}
 	}
+	
 	states {
 	Cache:		
 		BGUN ABCD 0;
@@ -263,9 +292,18 @@ Class PK_Boltgun : PKWeapon {
 				invoker.prevOfs = (psp.x,psp.y);
 			A_Overlay(PSP_OVERGUN,"Bolts");
 			PK_AttackSound("weapons/boltgun/heater");
+			A_ClearOverlays(PSP_SCOPE1,PSP_SCOPE2);
+			A_BoltgunPivot(0.1, 1.0);
 		}
-		BGUB ABCD 1 A_WeaponOffset(1.2,1.2,WOF_ADD);
+		BGUB ABCD 1 
+		{
+			A_WeaponOffset(1.2,1.2,WOF_ADD);
+			A_BoltgunScale(0.03, 0.03, WOF_ADD);
+			A_BoltgunRotate(-2, WOF_ADD);
+		}
 		BGUB E 2 {
+			A_BoltgunScale(0.06, 0.036, WOF_ADD);
+			A_BoltgunRotate(-4, WOF_ADD);
 			A_WeaponOffset(6,6,WOF_ADD);
 			PK_DepleteAmmo(true);
 			double ofs = -2.2;
@@ -277,15 +315,23 @@ Class PK_Boltgun : PKWeapon {
 				ang -= 1;
 			}
 		}
-		BGUB FGHI 3 A_WeaponOffset(-2.5,-2.5,WOF_ADD);
+		BGUB FGHI 3 
+		{
+			A_BoltgunScale(-0.03, -0.03, WOF_ADD);
+			A_BoltgunRotate(2, WOF_ADD);
+			A_WeaponOffset(-2.5,-2.5,WOF_ADD);			
+		}
 		TNT1 A 0 {
+			A_Overlay(PSP_SCOPE3,"Scope");
+			A_BoltgunScale( 1, 1, WOF_INTERPOLATE);
+			A_BoltgunRotate(0, WOF_INTERPOLATE);
 			if (!PK_CheckAmmo(true)) {
 				A_WeaponOffset(invoker.prevOfs.x,invoker.prevOfs.y,WOF_INTERPOLATE);
 				return ResolveState("Ready");
 			}
 			return ResolveState(null);
 		}
-		BGUB JKLMNA 2  A_WeaponOffset(-0.1,-0.1,WOF_ADD);
+		BGUB JKLMNA 2 A_WeaponOffset(-0.1,-0.1,WOF_ADD);
 		TNT1 A 0 A_WeaponOffset(invoker.prevOfs.x,invoker.prevOfs.y,WOF_INTERPOLATE);
 		goto Ready;
 	}
