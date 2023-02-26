@@ -33,11 +33,16 @@ ListMenu "MainMenuTextOnly" {
 
 	Position 960, 360
 	PKTextItemCentered  "$MNU_NEWGAME", "", "PlayerclassMenu"
+	PKTextItemCentered  "BlackTarot", "", "MainCardsMenu"
 	PKTextItemCentered  "$MNU_OPTIONS", "", "OptionsMenu"
 	PKTextItemCentered  "$PKM_TITLE_SHORT", "", "PK_Settings"
 	PKTextItemCentered  "$MNU_LOADGAME", "", "LoadGameMenu"
 	PKTextItemCentered  "$MNU_SAVEGAME", "", "SaveGameMenu"
 	PKTextItemCentered  "$MNU_QUITGAME", "", "QuitMenu"
+}
+
+ListMenu "MainCardsMenu" {
+	Class "PKCardsMenu"
 }
 
 ListMenu "SkillMenu" {
@@ -75,6 +80,7 @@ Optionmenu "PK_Settings" {
 	PKTLTPControl "$PKM_UseCards", "$PKM_UseCards_Desc", "White", "netevent PK_UseGoldenCards"
 	PKTLTPControl "$PKM_OpenTarot", "$PKM_OpenTarot_Desc", "White", "netevent PKCOpenBoard"
 	PKTLTPControl "$PKM_OpenCodex", "$PKM_OpenCodex_Desc", "White", "netevent PKCOpenCodex"	
+	PKTLTPControl "$PKM_LastWeapon", "$PKM_LastWeapon_Desc", "White", "+user3"
 	StaticText ""
 	// gameplay options:
 	StaticText "$PKM_SUB_GAMEPLAY", yellow
@@ -85,6 +91,7 @@ Optionmenu "PK_Settings" {
 	PKTLTPScaleSlider "$PKM_QOLCATCHER",	"$PKM_QOLCATCHER_Desc", "White", "pk_QoLCatcherDistance", 0, 96, 8, "$OPTVAL_OFF"
 	PKTLTPOption "$PKM_ALLOWDEMON", "$PKM_ALLOWDEMON_DESC", "White", "pk_allowDemonMorph", "OnOff"
 	PKTLTPOption "$PKM_GIFTCARRDS", "$PKM_GIFTCARRDS_DESC", "White", "pk_allowFreeCards", "OnOff"
+	PKTLTPOption "$PKM_KeepBodies", "$PKM_KeepBodies_Desc", "White", "pk_keepbodies", "OnOff"
 	StaticText ""
 	// HUD options:
 	StaticText "$PKM_SUB_HUD", yellow
