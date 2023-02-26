@@ -420,6 +420,12 @@ in the top-left corner of the HUD. Disable this if
 they seem to add clutter.",PKM_ShowCardsInHUD_Desc,Menu,"Показывать используемые карты Чёрного Таро в верхем левом
 углу интерфейса. Эту функцию можно отключить, если вы
 предпочитаете более чистый интерфейс."
+Keep dead bodies,PKM_KeepBodies,Menu,Сохранять трупы врагов
+"Keep enemy corpses after they poof in smoke and leave a soul. This option
+will let them be resurrected by Arch-Viles. Note, after poofing it still won't be
+possible to juggle the corpses with the Killer projectile.",PKM_KeepBodies_Desc,Menu,"Отключает исчезнование трупов, после того как они оставили за собой душу.
+Это позволит Арч-Вайлам воскресить этих врагов. Учтите, после появления души
+труп все равно нельзя будет подцепить с помощью снаряда Killer."
 Open Black Tarot,PKM_OpenTarot,Menu,Открыть доску Таро
 Black Tarot Board lets you purchase and equip cards,PKM_OpenTarot_Desc,Menu,На доске Чёрного Таро можно покупать и снаряжать карты
 Use Golden Cards,PKM_UseCards,Menu,Использовать золотые карты

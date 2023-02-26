@@ -539,7 +539,7 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 				soul.bearer = masterclass;
 			}
 		}
-		if (master)
+		if (master && !pk_keepbodies)
 			master.Destroy();
 	}
 	
