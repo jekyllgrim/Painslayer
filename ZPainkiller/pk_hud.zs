@@ -169,8 +169,8 @@ Class PainkillerHUD : BaseStatusBar {
 			}
 			// Draw inventory bar:
 			if (isInventoryBarVisible()) {
-				int iflags = state == HUD_StatusBar ? DI_SCREEN_CENTER_TOP : DI_SCREEN_CENTER_BOTTOM;
-				DrawInventoryBarScaled(diparms, (0, 0), 7, iflags, HX_SHADOW);
+				double ypos = (state == HUD_StatusBar) ? -48 : -4;
+				DrawInventoryBarScaled(diparms, (0, ypos), 7, DI_SCREEN_CENTER_BOTTOM, HX_SHADOW);
 			}
 		}
 	}
