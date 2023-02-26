@@ -27,6 +27,9 @@ Class PK_InvReplacementControl : Inventory {
 	string latestPickupName; //the tag of the latest pickup
 	bool codexOpened;
 	
+	protected Weapon prevWeapon;
+	protected Weapon prevWeaponToSwitch;	
+	
 	Default {
 		+INVENTORY.UNDROPPABLE
 		+INVENTORY.UNTOSSABLE
@@ -93,6 +96,35 @@ Class PK_InvReplacementControl : Inventory {
 		"BagOfHolding:PK_AmmoPack",
 		"SuperMap:PK_AllMap"
 	};
+	
+	// Lets the player switch to the previous weapon:
+	void ReadyForQuickSwitch(Weapon readyweapon, PlayerInfo player)
+	{
+		if (readyweapon && readyweapon is 'PKWeapon')
+		{
+			if (!prevWeapon)
+				prevWeapon = readyweapon;
+			if (!prevWeaponToSwitch)
+				prevWeaponToSwitch = readyweapon;
+			
+			if (readyweapon != prevWeapon)
+			{
+				prevWeaponToSwitch = prevWeapon;
+				prevWeapon = readyweapon;
+			}
+	
+			if (readyweapon && 
+				player.WeaponState & WF_WEAPONSWITCHOK &&
+				prevWeaponToSwitch && 
+				readyweapon != prevWeaponToSwitch && 
+				player.cmd.buttons & BT_USER3 && 
+				!(player.oldbuttons & BT_USER3)
+			)
+			{
+				player.pendingweapon = prevWeaponToSwitch;
+			}
+		}
+	}
 
 	// This checks the player's inventory for illegal (vanilla) weapons
 	// continuously. This helps to account for starting items too,
@@ -107,9 +139,13 @@ Class PK_InvReplacementControl : Inventory {
 		
 		let plr = owner.player;
 		
+		Weapon readyweapon = plr.readyweapon;
+		
+		// Unrelated to the rest; this handles quick weapon switching:
+		ReadyForQuickSwitch(readyweapon, plr);	
+		
 		// We'll store the weapon that the player should switch to here:
 		class<Weapon> toSwitch;
-		Weapon readyweapon = owner.player.readyweapon;
 		
 		for (int i = 0; i < ReplacementPairs.Size(); i++) {
 			// Split the entry to get the replacement

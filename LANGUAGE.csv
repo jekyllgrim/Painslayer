@@ -424,6 +424,8 @@ Open Black Tarot,PKM_OpenTarot,Menu,Открыть доску Таро
 Black Tarot Board lets you purchase and equip cards,PKM_OpenTarot_Desc,Menu,На доске Чёрного Таро можно покупать и снаряжать карты
 Use Golden Cards,PKM_UseCards,Menu,Использовать золотые карты
 Activate currently equipped Golden Tarot Cards,PKM_UseCards_Desc,Menu,Активировать снаряженные золотые карты Таро
+Quick weapon switch,PKM_LastWeapon,Menu,Быстрая смена оружия
+Switch to the previous weapon,PKM_LastWeapon_Desc,Menu,"Выбрать оружие, которое вы использовали до этого"
 Open Codex,PKM_OpenCodex,Menu,Открыть Кодекс
 "The Codex contains useful information about weapons, items
 and various in-game mechanics.",PKM_OpenCodex_Desc,Menu,"В кодексе можно узнать полезную информацию об оружии,

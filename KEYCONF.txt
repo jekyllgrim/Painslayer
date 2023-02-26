@@ -9,7 +9,9 @@ addkeysection "Painslayer" PainslayerKeys
 addmenukey "$PKM_OpenTarot" 	"netevent PKCOpenBoard"
 addmenukey "$PKM_OpenCodex" 	"netevent PKCOpenCodex"
 addmenukey "$PKM_UseCards" 		"netevent PK_UseGoldenCards"
+addmenukey "Select last weapon"	"+user3"
 
 defaultbind Y "netevent PKCOpenBoard"
 defaultbind H "netevent PKCOpenCodex"
 defaultbind F "netevent PK_UseGoldenCards"
+defaultbind q "+user3"
