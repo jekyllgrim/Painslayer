@@ -1145,6 +1145,8 @@ Class PK_PowerDemonEyes : PK_Powerup {
 	private array <actor> feartargets;
 	const feardist = 512;
 	const fearangle = 48;
+	const LIGHTADD = 12;
+	
 	Default {
 		deathsound "pickups/powerups/lightampEnd";
 		inventory.icon "iconeyes";
@@ -1158,7 +1160,7 @@ Class PK_PowerDemonEyes : PK_Powerup {
 			eyeslight2 = PK_DemonEyesLight(Spawn("PK_DemonEyesLight",owner.pos));
 			eyeslight2.user = PlayerPawn(owner);
 			eyeslight2.isLeft = true;
-			owner.player.extralight = 12;
+			owner.player.extralight += LIGHTADD;
 		}
 		lightdir = 1;
 	}
@@ -1221,7 +1223,7 @@ Class PK_PowerDemonEyes : PK_Powerup {
 		if (eyeslight2)
 			eyeslight2.Destroy();
 		if (owner && owner.player)			
-			owner.player.extralight = 0;
+			owner.player.extralight -= LIGHTADD;
 		for (int i = 0; i < feartargets.Size(); i++) {
 			if (!feartargets[i])
 				continue;
@@ -1303,10 +1305,33 @@ Class PK_DemonEyes : PK_PowerupGiver {
 
 Class PK_PowerPentagram : PowerInvulnerable {
 	mixin PK_PowerUpBehavior;
+	
+	const LIGHTADD = 64;
+	
 	Default {
 		deathsound "pickups/powerups/pentagramEnd";
 		inventory.icon "penticon";
 		Tag "$PKC_Pentagram";
+	}
+	
+	override void AttachToOwner(actor other) {
+		super.AttachToOwner(other);
+		if (owner && owner.player) {
+			if (owner.player == players[consoleplayer])
+				PPShader.SetEnabled("Pentagram", true);
+			
+			owner.player.extralight += LIGHTADD;
+		}
+	}
+	
+	override void DetachFromOwner() {
+		if (owner && owner.player) {
+			if (owner.player == players[consoleplayer])
+				PPShader.SetEnabled("Pentagram", false);
+			
+			owner.player.extralight -= LIGHTADD;
+		}
+		super.DetachFromOwner();
 	}
 }
 

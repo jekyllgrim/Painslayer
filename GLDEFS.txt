@@ -18,6 +18,12 @@ HardwareShader PostProcess Scene
 	//Enabled
 }
 
+HardwareShader PostProcess Scene
+{
+	Name "Pentagram"
+	Shader "shaders/Pentagram.fp" 330
+}
+
 
 pointlight PKSmallGold {
 	color 1.0 0.9 0.0
