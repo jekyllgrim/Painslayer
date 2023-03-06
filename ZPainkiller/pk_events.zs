@@ -267,7 +267,10 @@ Class PK_MainHandler : EventHandler {
 		}
 		if (e.IsSaveGame || e.isReopen)
 			return;
-			
+		
+		if (pk_startsound)
+			S_StartSound("world/mapstart", CHAN_AUTO, CHANF_UI|CHANF_NOPAUSE, 1, ATTN_NONE);
+		
 		//spawn gold randomly in secret areas:
 		//iterate throguh sectors:
 		for (int i = 0; i < level.Sectors.Size(); i++) {
@@ -445,7 +448,6 @@ Class PK_MainHandler : EventHandler {
 		let plr = players[pnumber].mo;
 		if (!plr)
 			return;
-		//plr.A_StartSound("world/mapstart",CH_PKUI,CHANF_UI|CHANF_LOCAL);
 		if  (!plr.FindInventory("PK_DemonMorphControl"))
 			plr.GiveInventory("PK_DemonMorphControl",1);
 		if  (!plr.FindInventory("PK_CardControl"))
