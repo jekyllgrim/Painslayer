@@ -32,13 +32,14 @@ Class PainkillerHUD : BaseStatusBar {
 	protected vector2 cardTexSize;
 	
 	protected Actor nearestBoss;
+	protected int bossMAxHealth;
 	protected Shape2D healthBarShape;
 	protected ui double healthBarFraction;
 	protected ui double prevHealthBarFraction;
 	protected vector2 hpBarScale;
 	protected TextureID hpBarBackground;
 	protected TextureID hpBartex;
-	protected name bossSpriteName;
+	//protected name bossSpriteName;
 	protected TextureID bossSprite;
 		
 	/*	
@@ -365,21 +366,27 @@ Class PainkillerHUD : BaseStatusBar {
 					}
 				}
 			}
-			if (bossmonster) {
+			if (bossmonster && bossmonster != nearestBoss) {
 				nearestBoss = bossmonster;
 				if (nearestBoss.SpawnState && nearestBoss.SpawnState.sprite) {
 					bossSprite = nearestBoss.SpawnState.GetSpriteTexture(2);
-					bossSpriteName = TexMan.GetName(bossSprite);
+					//bossSpriteName = TexMan.GetName(bossSprite);
 				}
 				prevHealthBarFraction = healthBarFraction;
-				healthBarFraction = bossmonster.health*1. / bossmonster.GetMaxHealth(true);
+				// update max health if it's not defined yet or 
+				// if the arrow is now pointing at a new boss:
+				if (!bossMaxHealth)
+					bossMaxHealth = max(bossmonster.health, bossmonster.GetMaxHealth(true));
+				
+				healthBarFraction = double(bossmonster.health) / bossMaxHealth;
 				
 				// Only update the shape if the health actually changed
 				if (prevHealthBarFraction != healthBarFraction)
 					UpdateHealthBar(healthBarShape, healthBarFraction);
+				
 			}
 			else {
-				bossSpritename = '';
+				//bossSpritename = '';
 				nearestBoss = null;
 			}
 		}

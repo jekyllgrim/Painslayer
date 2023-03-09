@@ -992,7 +992,7 @@ Class PKCGoldCounter : PKZFFrame {
 		ret.DigitPos[0] = img.GetPos();
 		ret.GoldDigits[0] = img;
 		
-		for (int i = 5; i > 0; i--) {
+		for (int i = ret.GoldInterpolator.Size() - 1; i > 0; i--) {
 			ret.GoldInterpolator[i] = DynamicValueInterpolator.Create(0,0.1,4,64);
 		}
 		
