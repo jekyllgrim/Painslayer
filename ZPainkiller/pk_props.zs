@@ -47,7 +47,7 @@ Class PK_GoldContainer : PK_BaseActor abstract {
 			let deb = PK_RandomDebris(Spawn("PK_PropDebris",(pos.x,pos.y,pos.z) + (frandom[sfx](-radius,radius),frandom[sfx](-radius,radius),frandom[sfx](8,height))));
 			if (deb) {
 				deb.vel = (frandom[sfx](-5,5),frandom[sfx](-5,5),frandom[sfx](2,5));
-				deb.target = self;
+				deb.master = self;
 			}
 		}
 		super.Die(source, inflictor, dmgflags, MeansOfDeath);
@@ -74,11 +74,11 @@ Class PK_PropDebris : PK_RandomDebris {
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		if (target && target is "PK_GoldContainer") {
-			double targetAngle = -AngleTo(target) + frandom[debris](-40,40);
+		if (master && master is "PK_GoldContainer") {
+			double targetAngle = -AngleTo(master) + frandom[debris](-40,40);
 			VelFromAngle(frandom[debris](1,2),targetAngle);
 			vel.z = frandom[debris](2,4);
-			let prop = PK_GoldContainer(target);
+			let prop = PK_GoldContainer(master);
 			SetShade(prop.debriscolor);
 		}
 	}

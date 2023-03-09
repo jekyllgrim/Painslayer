@@ -258,10 +258,10 @@ Class PK_Stake : PK_StakeProjectile {
 		
 		//if the victim is not valid or is the shooter, fly through:
 		if (!victim || (target && victim == target))
-			return 1;		
+			return 1;
 		
 		//collision with damageable non-monster objects:
-		if (!(victim.bISMONSTER || victim.player) && (victim.bSOLID || victim.bSHOOTABLE)) {
+		if (!victim.bISMONSTER && !victim.player && (victim.bSOLID || victim.bSHOOTABLE)) {
 			victim.DamageMobj (self, target, basedmg, 'normal');
 			stickobject = victim; //if the object moves, the stake will follow it
 			return -1;
@@ -273,12 +273,17 @@ Class PK_Stake : PK_StakeProjectile {
 		//Do the damage (increased by 50% with wmod)
 		if (mod || (self.GetClassName() == "PK_Stake" && age >= 12))
 			basedmg *= 1.5;
-		victim.DamageMobj (self, target, basedmg, 'normal');
+		int dealtdmg = victim.DamageMobj (self, target, basedmg, 'normal');
 		deathsound = "";
 		A_StartSound("weapons/stakegun/hit",volume:0.7,attenuation:3);
 		
 		//if the victim is alive, insert a fake stake in its body:
-		if (victim.health > 0) {
+		// 09.03.23: added bSHOOTABLE check to make sure this only
+		// happens to shootable objects. For whatever reason, without
+		// this the stake would occasionally detect coins falling out
+		// of breakable chest (which are items) as its victim
+		// and spawn a bunch of fake stakes into them:
+		if (victim.bSHOOTABLE && victim.health > 0) {
 			let stuck = PK_StakeStuck(Spawn("PK_StakeStuck",victim.pos + (frandom(-5,5),frandom(-5,5),victim.height * 0.65 + frandom(-5,5))));
 			if (stuck) {
 				stuck.master = victim;
@@ -289,7 +294,7 @@ Class PK_Stake : PK_StakeProjectile {
 				stuck.stuckpos = stuck.pos - victim.pos;
 				stuck.sprite = sprite;
 				if (victim.player && victim.player == players[consoleplayer])
-					stuck.bINVISIBLE = true;
+					stuck.bONLYVISIBLEINMIRRORS = true;
 			}
 			if (!victim.CountInv("PK_StakeStuckCounter"))
 				victim.GiveInventory("PK_StakeStuckCounter",1);
@@ -298,6 +303,7 @@ Class PK_Stake : PK_StakeProjectile {
 				ct.stuckstakes.Push(stuck);
 			return -1;
 		}
+		
 		//if the victim is a boss or too large, destroy the stake:
 		if (victim.bBOSS || victim.mass > 400) {
 			StakeBreak();
