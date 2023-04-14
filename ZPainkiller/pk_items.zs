@@ -357,10 +357,10 @@ Mixin Class PK_PickupSound {
 }
 
 Class PK_Inventory : Inventory abstract {
+	mixin PK_ParticleLevelCheck;
 	mixin PK_PlayerSightCheck;
 	mixin PK_PickupSound;
 	mixin PK_Math;
-	protected transient CVar s_particles;
 }
 
 Class PK_GoldPickup : PK_Inventory abstract {
@@ -418,9 +418,7 @@ Class PK_GoldPickup : PK_Inventory abstract {
 			bNOGRAVITY = false;
 		}
 		
-		if (!s_particles)
-			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-		if (s_particles.GetInt() < 2)
+		if (GetParticlesLevel() < PL_Full)
 			return;
 		if (GetAge() % 10 == 0) {
 			if (CheckPlayerSights() && !gleam && frandom[sfx](1,10) > 9) {
@@ -581,12 +579,15 @@ Class PK_VeryBigGold : PK_GoldPickup {
 */
 
 Class PK_Soul : PK_Inventory {
+	protected TextureID partTex;
 	PK_BoardEventHandler event;
 	protected int age;
 	protected int maxage;
 	protected int actualAmount;
 	property maxage : maxage;
 	Class<Actor> bearer;
+	color soulcolor;
+	
 	Default {
 		+INVENTORY.NEVERRESPAWN
 		+INVENTORY.AUTOACTIVATE
@@ -612,6 +613,7 @@ Class PK_Soul : PK_Inventory {
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
+		partTex = TexMan.CheckForTexture('pksoulpg');
 		if (bearer) {
 			//define an amount between 1-20 based on monster's health (linearly mapped between 20-500):
 			//the amount is clamped to 20 (or to 80 if the monster is a boss)
@@ -624,16 +626,17 @@ Class PK_Soul : PK_Inventory {
 			scale *= Clamp(LinearMap(am, 1, 20, 0.6, 1.15), 0.7, 1.15);
 			//define color and its density based on the alpha of the soul
 			int colalpha = Clamp(LinearMap(alpha, 0.5, 1.5, 64, 255), 128 , 255);
-			color lit = Color(colalpha, 0, 255, 0);
+			soulcolor = Color(colalpha, 0, 255, 0);
 			//if the amount is over 15, make the soul red:
 			if (am >= 15) {
 				A_SetTranslation("PK_RedSoul");
 				//A_SetRenderstyle(alpha,Style_Shaded);
 				//SetShade("FF0000");
-				lit = Color(colalpha, 255, 0, 0);
+				soulcolor = Color(colalpha, 255, 0, 0);
+				partTex = TexMan.CheckForTexture('pksoulpr');
 				pickupsound = "pickups/soul/red";
 			}
-			A_AttachLight('soul',DynamicLight.PointLight,lit, 48 * scale.x, 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_NOSHADOWMAP|DYNAMICLIGHT.LF_DONTLIGHTACTORS);
+			A_AttachLight('soul',DynamicLight.PointLight, soulcolor, 48 * scale.x, 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_NOSHADOWMAP|DYNAMICLIGHT.LF_DONTLIGHTACTORS);
 		}
 		if (pk_debugmessages > 2) {
 			string str = "none";
@@ -688,6 +691,34 @@ Class PK_Soul : PK_Inventory {
 				PrintPickupMessage(tracer.CheckLocalView(), PickupMessage ());
 				CallTryPickup(tracer);
 				tracer = null;
+			}
+			if (GetParticlesLevel() >= PL_Full) {
+				int life = 25;
+				double pofs = radius * 0.3;
+				A_Face(tracer);
+				for (int i = 5; i > 0; i--) {
+					vector3 pvel = (frandom[spart](-1,1), frandom[spart](-1,1), frandom[spart](-1,1));
+					vector3 pacc = pvel / -life;					
+					A_SpawnParticleEx(
+						soulcolor,
+						partTex,
+						STYLE_Add,
+						SPF_FULLBRIGHT|SPF_RELPOS|SPF_REPLACE,
+						lifetime: 25,
+						size: 4,
+						xoff: -pofs,
+						yoff: frandom[spart](-pofs, pofs),
+						zoff: height * 0.8 + frandom[spart](-pofs, pofs),
+						velx: pvel.x,
+						vely: pvel.y,
+						velz: pvel.z,
+						//accelx: pacc.x,
+						//accely: pacc.y,
+						//accelz: pacc.z,
+						startalphaf: alpha,
+						sizestep: -0.05
+					);
+				}
 			}
 		}
 		else if (bNOINTERACTION)
@@ -759,9 +790,10 @@ Class PowerChestOfSoulsRegen : PowerRegeneration {
 
 // Soulsphere replacement. Can't be dropped by monsters.
 Class PK_GoldSoul : Health {
+	mixin PK_ParticleLevelCheck;
 	mixin PK_PlayerSightCheck;
 	mixin PK_PickupSound;
-	protected transient CVar s_particles;
+	
 	Default {
 		inventory.pickupmessage "$PKI_GOLDSOUL";
 		inventory.amount 100;
@@ -778,9 +810,7 @@ Class PK_GoldSoul : Health {
 	}
 	override void Tick() {
 		super.Tick();
-		if (!s_particles)
-			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-		if (s_particles.GetInt() < 2)
+		if (GetParticlesLevel() < PL_Full)
 			return;
 		if (isFrozen())
 			return;	
@@ -1001,10 +1031,10 @@ Class PK_PickupRing : Actor {
 
 // see the 'filter' folder for the base class:
 Class PK_PowerupGiver : PK_PowerupGiverBase {
+	mixin PK_ParticleLevelCheck;
 	mixin PK_PlayerSightCheck;
 	color pickupRingColor;
 	property pickupRingColor : pickupRingColor;
-	protected transient CVar s_particles;
 	
 	Default {
 		powerup.duration -40;
@@ -1105,9 +1135,7 @@ Class PK_WeaponModifierGiver : PK_PowerUpGiver {
 		super.Tick();
 		if (owner)
 			return;
-		if (!s_particles)
-			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-		if (s_particles.GetInt() < 2)
+		if (GetParticlesLevel() < PL_Full)
 			return;
 		if (isFrozen() || owner)
 			return;
@@ -1354,9 +1382,7 @@ Class PK_Pentagram : PK_PowerupGiver {
 		super.Tick();
 		if (owner)
 			return;
-		if (!s_particles)
-			s_particles = CVar.GetCVar('pk_particles', players[consoleplayer]);
-		if (s_particles.GetInt() < 2)
+		if (GetParticlesLevel() < PL_Full)
 			return;
 		if (isFrozen())
 			return;	
@@ -1412,6 +1438,7 @@ Class PK_AntiRadArmor : PK_PowerupGiver {
 Class PK_SafeMapMarker : MapMarker {
 	Default {
 		+NOINTERACTION
+		+NOBLOCKMAP
 		+SYNCHRONIZED
 		+DONTBLAST
 		FloatBobPhase 0;
