@@ -107,7 +107,7 @@ Class PainkillerHUD : BaseStatusBar {
 		hpBarScale = TexMan.GetScaledSize(hpBartex);
 		//dimensions of a card texture:
 		cardTexSize = TexMan.GetScaledSize(TexMan.CheckForTexture("graphics/HUD/Tarot/cards/UsedCard.png"));
-		goldInterpolator = DynamicValueInterpolator.Create(0, 0.1, 1, 10);
+		goldInterpolator = DynamicValueInterpolator.Create(0, 0.1, 5, 2000);
 	}
 	
 	override void Draw (int state, double TicFrac) {
