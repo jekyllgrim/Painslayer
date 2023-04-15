@@ -36,7 +36,7 @@ Class PK_Stakegun : PKWeapon {
 				PK_AttackSound("weapons/stakegun/fire");
 				A_WeaponOffset(11,9,WOF_ADD);
 				double pofs = (invoker.hasWmod) ? 0 : -2.5;
-				Fire3DProjectile("PK_Stake", forward: 1, leftright: 2, updown: -2, crosshairConverge: (!invoker.hasWmod), pitchoffs: pofs);
+				Fire3DProjectile("PK_Stake", forward: 1, leftright: 2, updown: -2, crosshairConverge: invoker.hasWmod, pitchoffs: pofs);
 				A_OverlayPivot(OverlayID(),0.2,1.0);
 			}
 			PSGN BBBBB 1 {
@@ -125,6 +125,9 @@ Class PK_Stake : PK_StakeProjectile {
 	actor stickvictim;
 	protected double victimOfsZ;
 	protected int victimDestroyTimer;
+	const VICTIMMAXPINTIME = 80;
+	const VICTIMMAXFLYTIME = 35 * 5;
+	const BURNLIGHT = "PKBurningStake";
 	
 	Default {
 		PK_Projectile.trailcolor "f4f4f4";
@@ -148,7 +151,7 @@ Class PK_Stake : PK_StakeProjectile {
 	
 	
 	override void StakeBreak() {		
-		
+		A_RemoveLight(BURNLIGHT);
 		if (GetParticlesLevel() >= PK_BaseActor.PL_FULL) {
 			for (int i = random[sfx](3,5); i > 0; i--) {
 				let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,pos.z)));
@@ -171,7 +174,7 @@ Class PK_Stake : PK_StakeProjectile {
 	
 	override void StickToWall() { 
 		super.StickToWall();
-		A_RemoveLight('PKBurningStake');
+		A_RemoveLight(BURNLIGHT);
 		onFire = true;
 		if (stickvictim) {
 			// If the stake is too close to the floor, detach the victim:
@@ -184,7 +187,9 @@ Class PK_Stake : PK_StakeProjectile {
 			// Otherwise stop the corpse:
 			else {
 				stickvictim.A_Stop();
-				victimDestroyTimer = 80; //this queues destroying the corpse
+				victimDestroyTimer = VICTIMMAXPINTIME; //this queues destroying the corpse
+				if (pk_keepbodies)
+					victimDestroyTimer /= 2;
 				// If we hit an actual wall (not a solid obstacle actor 				
 				// or a ceiling), flatten the corpse against the wall:
 				if (blockingline)	{
@@ -196,9 +201,37 @@ Class PK_Stake : PK_StakeProjectile {
 		}
 	}
 	
+	void AttachVictim(actor victim) {
+		if (!victim || stickvictim)
+			return;
+		//console.printf("pinned %s", victim.GetClassName());
+		victimOfsZ = victim.default.height * 0.5;
+		victim.A_Stop();
+		victim.A_Scream();
+		victim.deathsound = "";
+		victim.bNOGRAVITY = true;
+		victim.bTHRUACTORS = true;
+		victim.bSHOOTABLE = false;
+		//victim.A_SetSize(self.radius - 1, victim.default.height);
+		victim.A_SetTics(VICTIMMAXFLYTIME);
+		victimDestroyTimer = VICTIMMAXFLYTIME;
+		stickvictim = victim;
+	}
+	
+	void DetachVictim() {
+		if (!stickvictim)
+			return;
+		stickvictim.bWALLSPRITE = stickvictim.default.bWALLSPRITE;
+		if (stickvictim.curstate.nextstate)
+			stickvictim.A_SetTics(1);
+		stickvictim.bNOGRAVITY = false;
+		stickvictim.A_SetSize(stickvictim.default.radius, stickvictim.deathheight);
+		stickvictim = null;
+	}
+	
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		victimDestroyTimer = -1;
+		
 		basedmg = 160;
 		/*if (target) {
 			// In case it's fired at a floor or ceiling at 
@@ -219,39 +252,57 @@ Class PK_Stake : PK_StakeProjectile {
 		if (!onFire && (mod || age >= 12)) {
 			trailactor = "PK_StakeFlame";
 			trailscale = 0.08;
-			A_AttachLight('PKBurningStake', DynamicLight.RandomFlickerLight, "ffb30f", 40, 44, flags: DYNAMICLIGHT.LF_ATTENUATE);
+			A_AttachLight(BURNLIGHT, DynamicLight.RandomFlickerLight, "ffb30f", 40, 44, flags: DYNAMICLIGHT.LF_ATTENUATE);
 			onFire = true;
 		}
 		
-		if (stickvictim) {				
-			//console.printf("Stake pos: %d, %d, %d | Victim pos: %d, %d, %d | victim vel: %d, %d, %d", pos.x, pos.y, pos.z, stickvictim.pos.x, stickvictim.pos.y, stickvictim.pos.z, stickvictim.vel.x, stickvictim.vel.y, stickvictim.vel.z);
+		if (stickvictim) {	
 			// Make sure the attached corpse sticks to the stake
 			// (with the stake in the middle of the corpse):
-			stickvictim.SetOrigin(pos - (0,0, victimOfsZ), true);	
 			// Check if the attached corpse can continue moving.
 			// If not, detach it and let it play its death animation.
 			// This is necessary to prevent (perhaps edge) cases when the stake
 			// flies through a hole where the stake itself fits but the corpse doesn't.
-			/*vector2 newpos = stickvictim.pos.xy + vel.xy;
-			if (!stickvictim.CheckMove(newpos)) {
-				DetachVictim();
-				return;
+			// 15/03/23: Still can't make it work, dropping for now.
+			/*if (!stickvictim.bWALLSPRITE) {
+				vector2 dir = Level.Vec2Diff(stickvictim.pos.xy, stickvictim.pos.xy + vel.xy).unit();
+				int checks = int(ceil(speed / stickvictim.radius));
+				for (int i = 1; i < checks; i++) {
+					vector2 checkpos = stickvictim.pos.xy + dir * checks;
+					vector3 checkpos3 = (checkpos.x, checkpos.y, stickvictim.pos.z);
+					console.printf(
+						"%s is at (%.1f, %.1f, %.1f), speed: %.1f, radius: %.1f. No of checks: %d. Checking collision at (%.1f, %.1f, %.1f)....", 
+						stickvictim.GetClassName(), 
+						speed,
+						checks,
+						stickvictim.radius,
+						stickvictim.pos.x, 
+						stickvictim.pos.y, 
+						stickvictim.pos.z, 
+						checkpos3.x, 
+						checkpos3.y, 
+						checkpos3.z
+					);
+					Spawn("PK_DebugSpot", checkpos3);
+					if (!stickvictim.CheckMove(checkpos, PCM_NOACTORS)) {
+						DetachVictim();
+						return;
+						break;
+					}
+				}
 			}*/
-			if (victimDestroyTimer > 0)
+			stickvictim.SetOrigin(pos - (0,0, victimOfsZ), true);	
+			
+			if (victimDestroyTimer > 0) {
 				victimDestroyTimer--;
-			else if (victimDestroyTimer == 0) {
-				KillActorSilent(stickvictim);
+				if (victimDestroyTimer <= 0) {
+					if (pk_keepbodies)
+						DetachVictim();
+					else
+						KillActorSilent(stickvictim);
+				}
 			}
 		}
-	}
-	
-	void DetachVictim() {
-		if (!stickvictim)
-			return;
-		stickvictim.bWALLSPRITE = stickvictim.default.bWALLSPRITE;
-		stickvictim.A_SetTics(1);
-		stickvictim.bNOGRAVITY = false;
-		stickvictim = null;
 	}
 	
 	override int SpecialMissileHit (Actor victim) {
@@ -260,9 +311,12 @@ Class PK_Stake : PK_StakeProjectile {
 		if (!victim || (target && victim == target))
 			return 1;
 		
+		name dmgtype = onFire ? 'fire' : 'normal';
+		
 		//collision with damageable non-monster objects:
 		if (!victim.bISMONSTER && !victim.player && (victim.bSOLID || victim.bSHOOTABLE)) {
-			victim.DamageMobj (self, target, basedmg, 'normal');
+			if (victim.bSHOOTABLE)
+				victim.DamageMobj (self, target, basedmg, dmgtype);
 			stickobject = victim; //if the object moves, the stake will follow it
 			return -1;
 		}
@@ -270,21 +324,24 @@ Class PK_Stake : PK_StakeProjectile {
 		//if previously hit a victim, or carrying a corpse, pass through:
 		if (stickvictim || victim == stickvictim)
 			return 1;
-		//Do the damage (increased by 50% with wmod)
-		if (mod || (self.GetClassName() == "PK_Stake" && age >= 12))
+			
+		// Do the damage (increased by 50% with wmod or when on fire)
+		// Class type check is there to disable this  functionality
+		// for Boltgun bolts:
+		if (mod || (self.GetClass() == "PK_Stake" && onFire))
 			basedmg *= 1.5;
-		int dealtdmg = victim.DamageMobj (self, target, basedmg, 'normal');
+		int dealtdmg = victim.DamageMobj (self, target, basedmg, dmgtype);
 		deathsound = "";
 		A_StartSound("weapons/stakegun/hit",volume:0.7,attenuation:3);
 		
-		//if the victim is alive, insert a fake stake in its body:
+		// If the victim is alive, insert a fake stake in its body
 		// 09.03.23: added bSHOOTABLE check to make sure this only
 		// happens to shootable objects. For whatever reason, without
 		// this the stake would occasionally detect coins falling out
 		// of breakable chest (which are items) as its victim
 		// and spawn a bunch of fake stakes into them:
 		if (victim.bSHOOTABLE && victim.health > 0) {
-			let stuck = PK_StakeStuck(Spawn("PK_StakeStuck",victim.pos + (frandom(-5,5),frandom(-5,5),victim.height * 0.65 + frandom(-5,5))));
+			let stuck = PK_StakeStuck(Spawn("PK_StakeStuck",victim.pos + (frandom[fakestk](-5,5),frandom[fakestk](-5,5),victim.height * 0.65 + frandom[fakestk](-5,5))));
 			if (stuck) {
 				stuck.master = victim;
 				stuck.tracer = self;
@@ -312,19 +369,7 @@ Class PK_Stake : PK_StakeProjectile {
 		
 		//otherwise proceed:
 		//record the pointer to the pierced victim
-		stickvictim = victim;
-		if (stickvictim) {
-			//console.printf("pinned %s", stickvictim.GetClassName());
-			victimOfsZ = victim.default.height * 0.5;
-			stickvictim.A_Stop();
-			stickvictim.A_Scream();
-			stickvictim.deathsound = "";
-			stickvictim.bNOGRAVITY = true;
-			stickvictim.bTHRUACTORS = true;
-			stickvictim.bSHOOTABLE = false;			
-			//stickvictim.bNOINTERACTION = true;
-			stickvictim.A_SetTics(9000);
-		}
+		AttachVictim(victim);
 		return 1;
 	}
 	
@@ -349,13 +394,13 @@ Class PK_Stake : PK_StakeProjectile {
 		wait;
 	Crash:
 		TNT1 A 1 {
-			A_RemoveLight('PKBurningStake');
+			A_RemoveLight(BURNLIGHT);
 			onFire = true;
 		}
 		stop;
 	XDeath:
 		TNT1 A 1 {
-			A_RemoveLight('PKBurningStake');
+			A_RemoveLight(BURNLIGHT);
 			onFire = true;
 		}
 		stop;
@@ -502,7 +547,7 @@ Class PK_PinToWall : PK_InventoryToken {
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner || !owner.bKILLED) {
-			DepleteOrDestroy();
+			Destroy();
 			return;
 		}
 		//if (!CPlayer)
