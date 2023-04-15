@@ -6,7 +6,7 @@ enum PKZFFocusPriority {
 
 /// The base menu class for menus to inherit from.
 /// Contains a mainFrame to put items in.
-class PKZFGenericMenu : GenericMenu {
+class PKZFGenericMenu : GenericMenu { //ListMenu {
 	PKZFFrame mainFrame;
 
 	PKZFElement focusDefaults[PKZFNavEventType_FocusChangeCount];
@@ -27,9 +27,15 @@ class PKZFGenericMenu : GenericMenu {
 
 	PKZFFocusPriority getFocusPriority() { return globalStore.focusPriority; }
 	void setFocusPriority(PKZFFocusPriority focusPriority) { globalStore.focusPriority = focusPriority; }
-
+	
 	override void init(Menu parent) {
 		Super.init(parent);
+    /*override void init(Menu parent, ListMenuDescriptor desc) {
+        // outright replacing it is maybe temporary? idk what zforms should
+        // realistically do if the desc isn't NULL tho lol
+        desc = new("ListMenuDescriptor");
+		
+		Super.init(parent, desc);*/
 		mainFrame = PKZFFrame.create((0, 0), (320, 200));
 		globalStore = new("PKZFElementTreeGlobal");
 		mainFrame.setGlobalStore(globalStore);

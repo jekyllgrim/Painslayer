@@ -33,7 +33,7 @@ ListMenu "MainMenuTextOnly" {
 
 	Position 960, 360
 	PKTextItemCentered  "$MNU_NEWGAME", "", "PlayerclassMenu"
-	PKTextItemCentered  "BlackTarot", "", "MainCardsMenu"
+	//PKTextItemCentered  "BlackTarot", "", "MainCardsMenu"
 	PKTextItemCentered  "$MNU_OPTIONS", "", "OptionsMenu"
 	PKTextItemCentered  "$PKM_TITLE_SHORT", "", "PK_Settings"
 	PKTextItemCentered  "$MNU_LOADGAME", "", "LoadGameMenu"
@@ -41,9 +41,9 @@ ListMenu "MainMenuTextOnly" {
 	PKTextItemCentered  "$MNU_QUITGAME", "", "QuitMenu"
 }
 
-ListMenu "MainCardsMenu" {
+/*ListMenu "MainCardsMenu" {
 	Class "PKCardsMenu"
-}
+}*/
 
 ListMenu "SkillMenu" {
 	class "PKSkillMenu"	
