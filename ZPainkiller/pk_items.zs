@@ -10,6 +10,7 @@ Class PK_InventoryToken : Inventory abstract {
 		inventory.amount 1;
 		inventory.maxamount 1;
 	}
+
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner || (owner.player && PK_Mainhandler.IsVoodooDoll(PlayerPawn(owner)))) {
@@ -19,6 +20,7 @@ Class PK_InventoryToken : Inventory abstract {
 		if (owner && !owner.isFrozen())
 			age++;
 	}
+	
 	override void Tick() {}
 }
 
