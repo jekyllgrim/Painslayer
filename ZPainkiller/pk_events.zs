@@ -390,6 +390,7 @@ Class PK_MainHandler : EventHandler {
 				allbosses.Push(act);
 		}
 	}
+	
 	//spawn death effects on monster death and also delete them from the monster array
 	override void WorldThingDied(worldevent e) {
 		let act = e.thing;
@@ -399,8 +400,11 @@ Class PK_MainHandler : EventHandler {
 		if (act.bBOSS)
 			allbosses.delete(allbosses.Find(act));
 		let edc = PK_EnemyDeathControl(Actor.Spawn("PK_EnemyDeathControl",act.pos));
-		if (edc)
+		if (edc) {
 			edc.master = act;
+			if (pk_debugmessages > 1)
+				console.printf("Spawning death controller for %s", act.GetTag());
+		}
 		//spawn some gold from the corpse:
 		int goldchance = 0;//random[gold](0,3);
 		int mh = abs(act.health);
@@ -420,6 +424,7 @@ Class PK_MainHandler : EventHandler {
 				gg.vel = (frandom[goldchance](-2,2),frandom[goldchance](-2,2),frandom[goldchance](1,4));
 		}
 	}
+
 	override void WorldThingDestroyed(WorldEvent e) {
 		let act = e.thing;
 		if (!act)
