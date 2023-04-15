@@ -22,7 +22,6 @@ Class PK_Shotgun : PKWeapon {
 			return;
 		if (freload > 0)
 			freload--;
-		//Console.Printf("%d",freload);
 	}
 	states {
 	Spawn:
@@ -110,6 +109,9 @@ Class PK_Shotgun : PKWeapon {
 }
 	
 Class PK_FreezerProjectile : PK_Projectile {
+	const FREEZERDURATION = 70;
+	const FREEZERDURATIONMOD = FREEZERDURATION * 2;
+
 	Default {
 		Translation "112:127=%[0.00,2.00,2.00]:[0.00,0.00,1.01]";
 		renderstyle 'Add';
@@ -151,17 +153,14 @@ Class PK_FreezerProjectile : PK_Projectile {
 				tracer.GiveInventory("PK_FreezeControl",1);
 				let frz = PK_FreezeControl(tracer.FindInventory("PK_FreezeControl"));
 				if (frz) {
-					int frzdur = 70; //basic freeze duration
-					if (mod)
-						frzdur *= 2; //double it with Weapon Modifier
-					if (tracer.player)
-						frzdur / 2; //reduce it by 50% if the target is a player
-					frz.fcounter = frzdur;
+					// Double freeze duration with Weapon Modifier
+					// but only if the victim is not a player:
+					frz.fcounter = mod && !tracer.player ? FREEZERDURATIONMOD : FREEZERDURATION;
 					tracer.A_SetBlend("0080FF",0.6,frz.fcounter * 1.5);
 				}
 			}
 			
-			if (GetParticlesLevel() >= 1) {
+			if (GetParticlesLevel() > PL_None) {
 				for (int i = random[sfx](10,15); i > 0; i--) {
 					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
 					if (debris) {
@@ -186,6 +185,9 @@ Class PK_FreezerProjectile : PK_Projectile {
 
 
 Class PK_FrozenChunk : PK_SmallDebris {
+	const POOFTIME = 100;
+	int pooftimer;
+	
 	Default {
 		PK_SmallDebris.dbrake 0.9;
 		renderstyle 'Translucent';
@@ -193,24 +195,29 @@ Class PK_FrozenChunk : PK_SmallDebris {
 		scale 0.5;
 		gravity 0.3;
 	}
+	
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		wrot = frandom[sfx](4,8)*randompick[sfx](-1,1);
 		scale *= frandom[sfx](0.7,1.1);
 		frame = random[sfx](1,5);
 	}
+	
 	override void Tick() {
 		super.Tick();
 		if (!master) {
-			let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-4,4),frandom[part](-4,4),frandom[part](0,4)));
-			if (smk) {
-				smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
-				smk.scale *= 0.6;
-			}
-			destroy();
-			return;
+			//pooftimer++;
+			//if (pooftimer >= POOFTIME) {
+				let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-4,4),frandom[part](-4,4),frandom[part](0,4)));
+				if (smk) {
+					smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
+					smk.scale *= 0.6;
+				}
+				Destroy();
+			//}
 		}
 	}
+	
 	states {
 	Spawn:
 		IGIB # 1 {
@@ -255,7 +262,12 @@ Class PK_FrozenLayer : PK_BaseActor {
 			Destroy();
 			return;
 		}
-	}	
+	}
+
+	override void Die (Actor source, Actor inflictor, int dmgflags, Name MeansOfDeath) {
+		if (master)
+			master.A_TakeInventory("PK_FreezeControl", 1);
+	}
 	
 	states {
 	Spawn:
@@ -266,14 +278,28 @@ Class PK_FrozenLayer : PK_BaseActor {
 	
 Class PK_FreezeControl : PK_InventoryToken {
 	PK_FrozenLayer icelayer;
+	PK_IceCorpse icebody;
 	int fcounter;
 	protected uint prevTrans;
 	protected double prevSpeed;
 	protected bool prevGrav;
-	protected bool queueForDestroy;
-	// Separate counter for destroy queue isn't necessary
-	// because it's handled already by PK_DeathControl
-	//protected int restcounter;
+	protected int victimDestroyTimer;
+	
+	void DestroyOwner() {
+		if (!owner)
+			return;
+		owner.A_StartSound("weapons/shotgun/freezedeath", 8);
+		victimDestroyTimer = PK_EnemyDeathControl.RESTLIFE;
+		owner.A_SetTics(victimDestroyTimer);
+		
+		for (int i = 7; i >= 0; i--)
+			owner.A_SoundVolume(i,0);
+		owner.A_SetRenderstyle(owner.alpha, Style_None);
+		owner.deathsound = "";
+		//don't forget to destroy the frozen layer
+		if (icelayer)
+			icelayer.Destroy();
+	}
 	
 	override void ModifyDamage (int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
 		if (damage > 0 && inflictor && owner && passive) {
@@ -297,8 +323,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 		super.AttachToOwner(other);
 		if (!owner)
 			return;
-		if (owner.FindInventory("PK_BurnControl"))
-			owner.TakeInventory("PK_BurnControl",1);
+		owner.A_TakeInventory("PK_BurnControl", 0);
 		//record previous translation, gravity and speed values:
 		prevTrans = owner.translation;
 		prevGrav = owner.bNOGRAVITY;
@@ -316,9 +341,13 @@ Class PK_FreezeControl : PK_InventoryToken {
 		else {
 			//setting this flag actually completely freezes monsters
 			//and completely disables wake-up damage:
-			owner.bInConversation = true;
-			owner.speed = 0;
-			owner.SetState(owner.FindState("Pain"));
+			//owner.bInConversation = true;
+			//owner.speed = 0;
+			owner.freezetics = fcounter;
+			owner.vel.xy *= 0.5;
+			let ps = owner.FindState("Pain");
+			if (ps)
+				owner.SetState(ps);
 			//owner.bNOPAIN = true;
 		}
 		icelayer = PK_Frozenlayer(Spawn("PK_Frozenlayer",owner.pos));
@@ -330,7 +359,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 			icelayer.scale.y = owner.scale.y*1.07;
 			// When freezing a player, they shouldn't see their own frozen layer:
 			if (owner.player && owner.player == players[consoleplayer]) {
-				icelayer.A_SetRenderstyle(1.0, Style_None);
+				icelayer.bONLYVISIBLEINMIRRORS = true;
 			}
 		}
 	}	
@@ -339,25 +368,16 @@ Class PK_FreezeControl : PK_InventoryToken {
 		super.DoEffect();
 		if (level.isFrozen() || !owner)
 			return;
-		if (!icelayer) {
-			DepleteOrDestroy();
+		if (victimDestroyTimer > 0) {
+			victimDestroyTimer--;
+			if (victimDestroyTimer <= 0)
+				PK_BaseActor.KillActorSilent(owner);
 			return;
 		}
-		owner.A_SetTics(-1);
-		if (queueForDestroy) {
-			for (int i = 7; i >= 0; i--)
-				owner.A_SoundVolume(i,0);
-			// This isn't necessary, PK_DeathControl takes care of poofing
-			/*restcounter--;
-			if (restcounter <= 0) {
-				owner.Destroy();
-				Destroy();
-			}*/
-			return;
-		}
+		owner.A_SetTics(fcounter);
 		fcounter--;
 		if (fcounter <= 0) {
-			DepleteOrDestroy();
+			Destroy();
 			return;
 		}
 		if (owner.health <= 0) {
@@ -365,7 +385,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 			//spawn ice shards:			
 			int rad = owner.radius;
 			
-			if (GetParticlesLevel() >= 1) {
+			if (GetParticlesLevel() > PL_None) {
 				for (int i = random[sfx](5,8); i > 0; i--) {
 					let ice = Spawn("PK_FrozenChunk",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
 					if (ice) {
@@ -375,7 +395,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 					}
 				}
 			}
-			if (GetParticlesLevel() >= 2) {
+			if (GetParticlesLevel() >= PL_Full) {
 				for (int i = random[sfx](12,16); i > 0; i--) {
 					let ice = Spawn("PK_RandomDebris",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
 					if (ice) {
@@ -392,13 +412,15 @@ Class PK_FreezeControl : PK_InventoryToken {
 			double ownersize = (owner.radius * owner.default.height) / 8;
 			//standard zombieman size (or is player; players are actually smaller):
 			if (owner.player || ownersize >= 140) {
-				let icebod = PK_IceCorpse(Spawn("PK_IceCorpse",owner.pos));
-				if (icebod) {
-					icebod.master = owner;
-					icebod.A_SetScale(Clamp(owner.radius*0.05,0.1,1.5));
-					icebod.bSPRITEFLIP = random[sfx](0,1);			
+				icebody = PK_IceCorpse(Spawn("PK_IceCorpse",owner.pos));
+				if (icebody) {
+					icebody.master = owner;
+					icebody.A_SetScale(Clamp(owner.radius*0.05,0.1,1.5));
+					icebody.bSPRITEFLIP = random[sfx](0,1);		
+					icebody.gravity = 0.4;
+					icebody.vel = (frandom[sfx](-1.3,1.3),frandom[sfx](-1.3,1.3),frandom[sfx](3,4));	
 					if (owner.player && owner.player == players[consoleplayer])
-						icebod.A_SetRenderstyle(0,Style_none);
+						icebody.bONLYVISIBLEINMIRRORS = true;
 				}
 				//"ice ribcage" is a chunky-looking piece of frozen meat:
 				let rc = PK_IceRibcage(Spawn("PK_IceRibcage",owner.pos));
@@ -427,44 +449,24 @@ Class PK_FreezeControl : PK_InventoryToken {
 		}
 	}
 	
-	/*	In contrast to regular death, where PK_DeathControl
-		doesn't remove the monster but instead lets them play their
-		death animation to the end, freeze death destroys the
-		monster immediately, first making sure it drops the items
-		and does other necessary stuff.
-	*/
-	void DestroyOwner() {
-		if (!owner)
-			return;		
-		PK_BaseActor.KillActorSilent(owner, remove: false);
-		owner.A_StartSound("weapons/shotgun/freezedeath", 8);
-		//these two are largely to make the previously spawned ice corpse follow this
-		if (!owner.player) {
-			owner.gravity = 0.4;
-			owner.vel = (frandom[sfx](-1.3,1.3),frandom[sfx](-1.3,1.3),frandom[sfx](3,4));
-		}
-		queueForDestroy = true;
-		//restcounter = 100;
-		//don't forget to destroy the frozen layer
-		if (icelayer)
-			icelayer.Destroy();
-	}
-	
 	override void DetachFromOwner() {
 		if (!owner)
 			return;
+		if (pk_debugmessages > 1)
+			console.printf("Detaching freeze controller from %s (health %d)", owner.GetTag(), owner.health);
 		owner.translation = prevTrans;
 		if (owner.player) {
 			owner.player.cheats &= ~CF_TOTALLYFROZEN;
 		}
 		else {
 			//owner.bNOPAIN = owner.default.bNOPAIN;
-			owner.bInConversation = false;
+			//owner.bInConversation = false;
+			owner.freezetics = 0;
 			owner.speed = prevSpeed;
 			if (owner.health > 0) {
 				owner.bNOGRAVITY = prevGrav;
 				owner.A_SetTics(20);
-				owner.SetState(owner.FindState("See"));
+				owner.SetState(owner.seestate);
 			}
 		}
 		super.DetachFromOwner();
@@ -472,21 +474,22 @@ Class PK_FreezeControl : PK_InventoryToken {
 }
 
 class PK_IceCorpse : PK_FrozenChunk {
+	
 	Default {
 		translation "PK_IceChunk";
 		renderstyle 'Normal';
 	}
+	
 	override void PostBeginPlay() {
 		PK_SmallDebris.PostBeginPlay();
 	}
+	
 	override void Tick() {
 		Super.Tick();
-		if (!master || master.health > 0) {
-			Destroy();
-			return;
-		}
-		PK_SetOrigin(master.pos);
+		if (master)
+			PK_SetOrigin(master.pos);
 	}
+	
 	States {
 	Spawn:
 		IGBZ ABCD 3;
@@ -498,13 +501,16 @@ class PK_IceCorpse : PK_FrozenChunk {
 }
 
 class PK_IceRibcage : PK_FrozenChunk {
+	
 	Default {
 		translation "PK_IceChunk";
 		renderstyle 'Normal';
 	}
+	
 	override void PostBeginPlay() {
 		PK_SmallDebris.PostBeginPlay();
 	}
+	
 	States {
 	Spawn:
 		IGIB A -1;
@@ -544,10 +550,8 @@ Class PK_ShotgunPuff : PK_BulletPuff {
 						tracer.bROLLSPRITE = true;
 						tracer.gravity *= 0.75;
 						pac.broll = frandom[sfx](2,5) * randompick[sfx](-1,1) * (18 / pushspeed);	
-						/*	With a 15% chance we'll yeet the monster with high force just for lulz
-							But before we do that, fire a checker that confirms there's enough space
-							for the monster to fly that far. If not, don't do it because it looks bad.
-						*/
+						// With a 15% chance we'll yeet the monster with high 
+						// force just for lulz:
 						if (random[hiroller](0,100) >= 85) {
 							tracer.bROLLCENTER = true;
 							tracer.A_SetTics(500);

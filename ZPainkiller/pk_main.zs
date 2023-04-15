@@ -260,6 +260,27 @@ Class PK_BaseActor : Actor abstract {
 		}
 		return false;
 	}
+
+	static SpriteID, int GetMonsterDeathSprite(class<Actor> type) {
+		if (!type)
+			return 0, 0;
+		
+		let t = GetDefaultByType(type);
+		if (!t)
+			return 0, 0;
+		
+		state deathstate = t.FindState("Death");
+		if (!deathstate)
+			return 0, 0;
+		
+		while (deathstate.nextstate && deathstate.tics != -1) {
+			deathstate = deathstate.nextstate;
+		}
+		if (deathstate && deathstate.sprite)
+			return deathstate.sprite, deathstate.frame;
+		
+		return 0, 0;
+	}
 	
 	static const string PK_LiquidFlats[] = { 
 		"BLOOD", "LAVA", "NUKAGE", "SLIME01", "SLIME02", "SLIME03", "SLIME04", "SLIME05", "SLIME06", "SLIME07", "SLIME08", "BDT_"
@@ -331,21 +352,25 @@ Class PK_BaseActor : Actor abstract {
 	/*	Make the given actor invisible, have it drop its items
 		and call A_BossDeath if necessary.
 		If 'remove' is true, also destroy it; otherwise it's implied
-		that it's queued for destruction to be destroyed later by
+		that it's queued for destruction to be handled later by
 		the caller.
 	*/	
 	static void KillActorSilent(actor victim, bool remove = true) {
 		if (!victim)
 			return;
 		//hide the corpse
-		victim.bINVISIBLE = true;
+		victim.A_SetRenderstyle(victim.alpha, Style_None);
 		//drop the items
 		victim.A_NoBlocking();
 		//call A_BossDeath if necessary
 		if (victim.bBOSS || victim.bBOSSDEATH)
 			victim.A_BossDeath();
-		if (remove && !victim.player)
+		if (pk_debugmessages) {
+			console.printf("%s silent-killed (alpha %1.f, renderstyle %d)", victim.GetTag(), victim.alpha, victim.GetRenderstyle());
+		}
+		if (remove && !victim.player) {
 			victim.Destroy();
+		}
 	}
 	
 	States {

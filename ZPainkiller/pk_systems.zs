@@ -391,11 +391,11 @@ Class PK_DemonWeapon : PKWeapon {
 Class PK_EnemyDeathControl : PK_BaseActor {
 	PK_KillerFlyTarget kft;
 	private int restcounter;
-	private int restlife;
-	private int maxlife;
 	private bool isBoss;
 	private bool queueSilentDeath;
 	private class<Actor> masterclass;
+	const RESTLIFE = 55;
+	const MAXLIFE = 35*7;
 	
 	Default {
 		+NOINTERACTION
@@ -403,6 +403,19 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 		+SYNCHRONIZED
 		+DONTBLAST
 		FloatBobPhase 0;
+	}
+
+	static void DoPKDeath(Actor victim)
+	{
+		if (!victim)
+			return;
+		let edc = PK_EnemyDeathControl(Spawn("PK_EnemyDeathControl", victim.pos));
+		if (!edc)
+			return;
+		
+		edc.master = victim;
+		edc.masterclass = victim.GetClass();
+		edc.BodyPoof();
 	}
 	
 	override void PostBeginPlay() {
@@ -413,10 +426,8 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 		}
 		masterclass = master.GetClass();
 		isBoss = master.bBOSS;// || master.bBOSSDEATH;
-		restlife = 55;
-		maxlife = 35*7;
 		//spawn a hitbox for the Killer projectile to let the player juggle the corpse:
-		if (!master.bBOSS) {
+		if (!isBoss) {
 			kft = PK_KillerFlyTarget(Spawn("PK_KillerFlyTarget",master.pos));
 			if (kft) {
 				kft.target = master;
@@ -435,31 +446,17 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 			Destroy();
 			return;
 		}
-		//The monster plays its death animation but makes no sound and
-		//disappears once it's done:
-		if (queueSilentDeath) {
-			if (master) {
-				for (int i = 0; i <= 7; i++)
-					master.A_SoundVolume(i,0);
-				if (master.tics == -1) {
-					//console.printf("Destroying monster corpse");
-					master.Destroy();
-				}
-			}
-			if (!master) {
-				//console.printf("No more monster corpse: destroying controller");
-				Destroy();
-			}
-			return;
-		}
-		//if the monster disappeared, spawn death smoke and a soul
-		//(this should cover cases with disappearing monsters like Lost Souls)
+
+		// If the monster disappeared by this point, spawn 
+		// death smoke and a soul:
 		if (!master) {
 			//console.printf("The monster disappered, poofing the body");
 			BodyPoof();
 			Destroy();
 			return;
 		}
+		
+		// Do the rest if the corpse still exists:
 		
 		//Sync with master, increment age, set Killer target vel
 		SetOrigin(master.pos,true);
@@ -468,13 +465,12 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 		if (GetAge() == 1 && kft)
 			kft.vel = master.vel;
 			
-		//if the monster's death animation has finished, increment restcounter
+		// If the monster's death animation has finished, increment restcounter
 		if (master.tics == -1) {
 			restcounter++;
 		}
-		//console.printf("Restcounter: %d / %d || Age: %d / %d", restcounter, restlife, age, maxlife);
 		
-		//this handles death if killed in Demon Mode:
+		// This handles death if killed in Demon Mode:
 		if (!isBoss && CheckKillerIsDemon()) {
 			//If the killer is a demon, spawn some red smoke
 			//and immediately remove the monster
@@ -484,7 +480,7 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 			return;
 		}
 		//this handles regular death:
-		if (restcounter >= restlife || age >= maxlife) {
+		if (restcounter >= RESTLIFE || age >= MAXLIFE) {
 			//console.printf("Resting for too long: poofing the body");
 			BodyPoof();
 			Destroy();
@@ -539,8 +535,21 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 				soul.bearer = masterclass;
 			}
 		}
-		if (master && !pk_keepbodies)
-			master.Destroy();
+		if (master) {
+			if (pk_keepbodies) {
+				SpriteID sprt;
+				int fram;
+				[sprt, fram] = PK_BaseActor.GetMonsterDeathSprite(master.GetClass());
+				bool isReallyCorpse = (master.sprite == sprt && master.frame == fram);
+				if (isReallyCorpse) {
+					let m = GetDefaultByType(master.GetClass());	
+					master.A_SetRenderstyle(m.alpha, m.GetRenderstyle());
+					return;
+				}
+			}
+			else
+				master.Destroy();
+		}
 	}
 	
 	//Death effect when killed by a demon (spawns no souls)
@@ -560,8 +569,9 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 		}
 		//Make the controller noninteractive, the body invisible
 		//and queue for death (the body plays its death animation silently)
-		master.bINVISIBLE = true;
-		queueSilentDeath = true;
+		//master.bINVISIBLE = true;
+		//queueSilentDeath = true;
+		PK_BaseActor.KillActorSilent(master);
 	}
 }
 
