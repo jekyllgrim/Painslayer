@@ -1438,12 +1438,22 @@ Class PK_AntiRadArmor : PK_PowerupGiver {
 // A version of map marker than can be safely spawned per player
 // and won't desync the game:
 Class PK_SafeMapMarker : MapMarker {
+	Inventory attachTo;
+
 	Default {
 		+NOINTERACTION
 		+NOBLOCKMAP
 		+SYNCHRONIZED
 		+DONTBLAST
 		FloatBobPhase 0;
+	}
+
+	override void Tick() {
+		super.Tick();
+		if (!attachTo || attachTo.owner) {
+			Destroy();
+		}
+		SetOrigin(attachTo.pos, true);
 	}
 }
 

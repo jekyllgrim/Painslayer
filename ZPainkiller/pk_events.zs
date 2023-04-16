@@ -70,7 +70,6 @@ Class PK_MainHandler : EventHandler {
 		return false;
     }
 	
-	
 	void SpawnMapMarkers(PlayerInfo player) {
 		if (!player || player != players[consoleplayer])
 			return;
@@ -78,17 +77,20 @@ Class PK_MainHandler : EventHandler {
 			let itm = keyitems[i];
 			if (!itm) continue;
 			if (!itm.SpawnState || !itm.SpawnState.sprite) continue;
+			
 			let state = itm.SpawnState;
 			let targetsprite = state.sprite;
 			let spritename = TexMan.GetName(state.GetSpriteTexture(0));
+			
 			if (pk_debugmessages > 1)
 				console.printf("Spawning map marker for %s. Sprite name: %s",itm.GetClassName(),spritename);
 			if (targetsprite && spritename != 'TNT1A0') {
-				let marker = Actor.Spawn("PK_SafeMapMarker",itm.pos);			
+				let marker = PK_SafeMapMarker(Actor.Spawn("PK_SafeMapMarker",itm.pos));
 				if (marker) {
 					marker.A_SetScale(itm is "PKWeapon" ? 0.5 : 1.0);
 					marker.sprite = targetsprite;
 					marker.frame = state.frame;
+					marker.attachTo = itm;
 				}
 			}
 		}
