@@ -537,10 +537,11 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 		}
 		if (master) {
 			if (pk_keepbodies) {
-				SpriteID sprt;
-				int fram;
-				[sprt, fram] = PK_BaseActor.GetMonsterDeathSprite(master.GetClass());
-				bool isReallyCorpse = (master.sprite == sprt && master.frame == fram);
+				state dst = GetFinalStateInSequence(master.GetClass(), "Death");
+				state xdst = GetFinalStateInSequence(master.GetClass(), "XDeath");
+				bool isReallyCorpse = (dst && dst.sprite == master.sprite && dst.frame == master.frame) ||
+									(xdst && xdst.sprite == master.sprite && xdst.frame == master.frame);
+
 				if (isReallyCorpse) {
 					let m = GetDefaultByType(master.GetClass());	
 					master.A_SetRenderstyle(m.alpha, m.GetRenderstyle());

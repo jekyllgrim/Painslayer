@@ -261,25 +261,23 @@ Class PK_BaseActor : Actor abstract {
 		return false;
 	}
 
-	static SpriteID, int GetMonsterDeathSprite(class<Actor> type) {
+	static state GetFinalStateInSequence(class<Actor> type, stateLabel label) {
 		if (!type)
-			return 0, 0;
+			return null;
 		
 		let t = GetDefaultByType(type);
 		if (!t)
-			return 0, 0;
+			return null;
 		
-		state deathstate = t.FindState("Death");
-		if (!deathstate)
-			return 0, 0;
+		state targetstate = t.ResolveState(label);
+		if (!targetstate)
+			return null;
 		
-		while (deathstate.nextstate && deathstate.tics != -1) {
-			deathstate = deathstate.nextstate;
+		while (targetstate && targetstate.nextstate && targetstate.tics != -1) {
+			targetstate = targetstate.nextstate;
 		}
-		if (deathstate && deathstate.sprite)
-			return deathstate.sprite, deathstate.frame;
-		
-		return 0, 0;
+
+		return targetstate;
 	}
 	
 	static const string PK_LiquidFlats[] = { 
