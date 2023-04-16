@@ -141,7 +141,6 @@ Class PK_MainHandler : EventHandler {
 		}
 	}
 				
-	
 	//different messages for PKGOLD cheat:
 	static const string PKCH_GoldMessage[] = {
 		"$PKCH_GIVEGOLD1",
@@ -152,18 +151,22 @@ Class PK_MainHandler : EventHandler {
 		"$PKCH_TAKEGOLD1",
 		"$PKCH_TAKEGOLD2"
 	};
+
 	//tarot card-related events:
 	override void NetworkProcess(consoleevent e) {
-		if (!e.isManual)
-			return;
+		//if (!e.isManual)
+		//	return;
 		if (!PlayerInGame[e.Player])
 			return;
+		
 		let plr = players[e.Player].mo;
-		if (!plr)
+		if (!plr || PK_MainHandler.IsVoodooDoll(plr))
 			return;
+		
 		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (!cardcontrol)
 			return;
+		
 		//open black tarot board
 		if (e.name == "PKCOpenBoard" && e.player == consoleplayer) {
 			if (pk_debugmessages)
@@ -186,17 +189,23 @@ Class PK_MainHandler : EventHandler {
 					console.printf("skill: %d | health: %d | goldActive: %d | has demon weapon: %d",skill,cardcontrol.goldActive,plr.health,plr.CountInv("PK_DemonWeapon"));
 				return;
 			}
+			S_PauseSound(false, false);
 			Menu.SetMenu("PKCardsMenu");
 		}
+		
 		if (e.name == "PKCOpenCodex" && e.player == consoleplayer) {
 			Menu.SetMenu("PKCodexMenu");
 		}
+		
 		if (e.name == "PK_UseGoldenCards") {
 			cardcontrol.UseGoldenCards();
 		}
+		
 		//CHEATS:
+		
 		if (CheckCheatMode())
 			return;
+		
 		//PKGOLD cheat (gives or takes gold)
 		if (e.name == "PK_GiveGold") {
 			//gives a specified number of gold, or max gold if no number is specified:
@@ -205,19 +214,22 @@ Class PK_MainHandler : EventHandler {
 			if (e.player == consoleplayer) {				
 				string str = (amt > 0) ? Stringtable.Localize(PKCH_GoldMessage[random(0,3)]) : Stringtable.Localize(PKCH_GoldMessage[random(4,5)]);
 				console.printf(str);
-				S_StartSound("pickups/gold/vbig",CH_PKUI,CHANF_UI|CHANF_LOCAL);
+				plr.A_StartSound("pickups/gold/vbig",CH_PKUI,CHANF_UI|CHANF_LOCAL);
 			}
 		}
+		
 		//PKREFRESH cheat (reset golden card uses)
 		if (e.name == "PK_RefreshCards") {
 			cardcontrol.RefreshGoldActivations();
 		}
+		
 		if (e.name == "PK_GiveSouls") {
 			int amt = (e.args[0] == 0) ? 1 : e.args[0];
 			let dmc = PK_DemonMorphControl(plr.FindInventory("PK_DemonMorphControl"));
 			if (dmc)
 				dmc.GiveSoul(amt);
 		}
+		
 		//PKDEMON cheat (toggles demon morph instantly)
 		if (e.name == "PK_DemonMorph") {
 			let dmc = PK_DemonMorphControl(plr.FindInventory("PK_DemonMorphControl"));
@@ -230,6 +242,7 @@ Class PK_MainHandler : EventHandler {
 				dmc.GiveSoul(66);
 			}
 		}
+		
 		//PKSTOPCARDS cheat: ends the golden cards effect (mostly for debug)
 		if (e.name == "PK_StopCards") {
 			cardcontrol.StopGoldenCards();
@@ -269,9 +282,6 @@ Class PK_MainHandler : EventHandler {
 		}
 		if (e.IsSaveGame || e.isReopen)
 			return;
-		
-		if (pk_startsound)
-			S_StartSound("world/mapstart", CHAN_AUTO, CHANF_UI|CHANF_NOPAUSE, 1, ATTN_NONE);
 		
 		//spawn gold randomly in secret areas:
 		//iterate throguh sectors:
@@ -338,9 +348,11 @@ Class PK_MainHandler : EventHandler {
 	override void WorldThingspawned (worldevent e) {
 		if (level.Mapname == "TITLEMAP")
 			return;
+		
 		let act = e.thing;		
 		if (!act)
 			return;
+		
 		if (act is "PK_SmallDebris" && !(act is "PK_ProjFlare") && maxdebrisCvar) {
 			int maxdebris = maxdebrisCvar.GetInt();
 			let deb = PK_SmallDebris(act);
@@ -351,11 +363,13 @@ Class PK_MainHandler : EventHandler {
 				debris[0].Destroy();
 			}
 		}
+		
 		if (act is "Inventory") {
 			let foo = Inventory(act);
 			if (foo && (foo is  "Key" || (foo is "Weapon" && !foo.bTOSSED)))
 				keyitems.Push(foo);
 		}
+		
 		//record all stake projectiles that exist in the world (see PK_StakeStickHandler)
 		if (act is "PK_StakeProjectile") {
 			let stake = PK_StakeProjectile(act);
@@ -363,6 +377,7 @@ Class PK_MainHandler : EventHandler {
 				stakes.Push(stake);
 			}
 		}
+		
 		/*if (act.player && IsVoodooDoll(PlayerPawn(act))) {
 			console.printf("actor at %f,%f,%f is a voodoo doll",act.pos.x,act.pos.y,act.pos.z);
 		}*/
@@ -372,6 +387,7 @@ Class PK_MainHandler : EventHandler {
 			if (act.bBOSS)
 				allbosses.Push(act);
 		}
+		
 		//monsters, projectiles and players can be subjected to various effects, such as Demon Morph or Haste, so put them in an array:
 		if (act.bISMONSTER || act.bMISSILE || (act.player && !IsVoodooDoll(PlayerPawn(act)))) {
 			demontargets.push(act);
@@ -384,6 +400,7 @@ Class PK_MainHandler : EventHandler {
 				act.GiveInventory("PK_ConfusionControl",1);
 		}
 	}
+
 	override void WorldThingrevived(worldevent e) {
 		let act = e.thing;
 		if (act.bISMONSTER && !act.bFRIENDLY) {
@@ -464,26 +481,25 @@ Class PK_MainHandler : EventHandler {
 		if (!plr.FindInventory("PK_QoLCatcher"))
 			plr.GiveInventory("PK_QoLCatcher",1);
 	}
+	
 	//players need control items for demon morph, cards and item replacement handling:
 	override void PlayerRespawned(PlayerEvent e) {
 		GiveStartingPlayerItems(e.PlayerNumber);
 	}	
-	override void PlayerSpawned(PlayerEvent e) {
-		GiveStartingPlayerItems(e.PlayerNumber);
-	}
-	//open Black Tarot at map start:
+
 	override void PlayerEntered(PlayerEvent e) {
+
 		if (level.Mapname == "TITLEMAP")
 			return;
+
 		if (!PlayerInGame[e.PlayerNumber])
 			return;
+
 		let plr = players[e.PlayerNumber].mo;
 		if (!plr)
 			return;
-		
-		if (pk_autoOpenBoard && e.PlayerNumber == consoleplayer) {
-			Menu.SetMenu("PKCardsMenu");
-		}
+
+		GiveStartingPlayerItems(e.PlayerNumber);
 		
 		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (cardcontrol) {
@@ -500,6 +516,7 @@ Class PK_MainHandler : EventHandler {
 			}
 		}
 	}
+
 	void StopPlayerGoldenCards(PlayerInfo player) {
 		if (!player || !player.mo)
 			return;
@@ -511,6 +528,7 @@ Class PK_MainHandler : EventHandler {
 				console.printf("Stopping golden cards for player %d",plr.PlayerNumber());
 		}
 	}
+
 	void StopPlayerDemonMorph(PlayerInfo player) {
 		if (!player || !player.mo)
 			return;
@@ -525,6 +543,7 @@ Class PK_MainHandler : EventHandler {
 			console.printf("Removing demon weapon from player %d",plr.PlayerNumber());
 		plr.TakeInventory("PK_DemonWeapon",999);
 	}
+
 	override void PlayerDied (PlayerEvent e) {
 		PlayerInfo player = players[e.PlayerNumber];
 		StopPlayerGoldenCards(player);
@@ -537,6 +556,7 @@ Class PK_MainHandler : EventHandler {
 		if (!multiplayer)
 			player.mo.A_StartSound("world/gameover",CH_PKUI,CHANF_UI|CHANF_LOCAL);
 	}
+
 	override void WorldUnloaded (WorldEvent e) {
 		if (level.Mapname == "TITLEMAP")
 			return;
@@ -548,6 +568,7 @@ Class PK_MainHandler : EventHandler {
 			StopPlayerDemonMorph(plr);
 		}
 	}
+
 	//debug function
 	/*ui void Test_CheckWeaponInInventory(Class<Weapon> weap, double x, double y) {
 		if (!weap)
@@ -987,6 +1008,7 @@ Class PK_BoardEventHandler : EventHandler {
 		
 		if (e.name == 'PKCCloseBoard') {
 			//console.printf("trying to initalize card slots");
+			S_ResumeSound(false);
 			cardcontrol.PK_EquipCards();
 		}
 	}
