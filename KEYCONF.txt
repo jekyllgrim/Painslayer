@@ -3,7 +3,7 @@ alias "PKREFRESH" "netevent PK_RefreshCards"
 alias "PKCONSUME" "netevent PK_GiveSouls %1"
 alias "PKDEMON" "netevent PK_DemonMorph"
 alias "PKSTOPCARDS" "netevent PK_StopCards"
-alias "pk_switch_defaults" "pk_swith_Painkiller false; pk_switch_ShotgunFreezer false; pk_switch_StakeGrenade false; pk_switch_MinigunRocket false; pk_switch_ElectroDriver false; pk_switch_RifleFlamethrower false; pk_switch_BoltgunHeater false"
+alias "pk_switch_defaults" "pk_switch_Painkiller false; pk_switch_ShotgunFreezer false; pk_switch_StakeGrenade false; pk_switch_MinigunRocket true; pk_switch_ElectroDriver false; pk_switch_RifleFlamethrower false; pk_switch_BoltgunHeater false"
 
 addkeysection "Painslayer" PainslayerKeys
 addmenukey "$PKM_OpenTarot" 	"netevent PKCOpenBoard"
