@@ -515,6 +515,15 @@ Class PK_MainHandler : EventHandler {
 				scard.GetCard();
 			}
 		}
+
+		if (pk_autoOpenBoard && e.PlayerNumber == consoleplayer) {
+			EventHandler.SendNetworkEvent("PKCOpenBoard");
+		}
+		
+		if (pk_startsound) {
+			plr.A_StartSound("world/mapstart", CH_PKUI, CHANF_LOCAL, volume: 0.5);
+			plr.A_SetBlend("000000", 1.0, 35*4);
+		}
 	}
 
 	void StopPlayerGoldenCards(PlayerInfo player) {

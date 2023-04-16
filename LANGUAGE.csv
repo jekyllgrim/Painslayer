@@ -426,10 +426,9 @@ will let them be resurrected by Arch-Viles. Note, after poofing it still won't b
 possible to juggle the corpses with the Killer projectile.",PKM_KeepBodies_Desc,Menu,"Отключает исчезнование трупов, после того как они оставили за собой душу.
 Это позволит Арч-Вайлам воскресить этих врагов. Учтите, после появления души
 труп все равно нельзя будет подцепить с помощью снаряда Killer."
-Play Painkiller map start sound,PKM_MapStartSound,,Проигрывать звук начала уровня из Painkiller
-"If enabled, upon starting a new map you will hear the same sound that
-could be heard in the original Painkiller at map start.",PKM_MapStartSound_Desc,,"Если эта настройка включена, в начале уровня вы услышите тот же звук,
-который проигрывался в начале уровня в Painkiller."
+Painkiller map start effects,PKM_MapStartSound,,Звук и анимация начала уровня из Painkiller
+Enable original Painkiller map-start sound and fade-in.,PKM_MapStartSound_Desc,,"Проигрывать звук и проявление картинки из затенения в начале уровня,
+как в оригинальном Painkiller."
 Open Black Tarot,PKM_OpenTarot,Menu,Открыть доску Таро
 Black Tarot Board lets you purchase and equip cards,PKM_OpenTarot_Desc,Menu,На доске Чёрного Таро можно покупать и снаряжать карты
 Use Golden Cards,PKM_UseCards,Menu,Использовать золотые карты
