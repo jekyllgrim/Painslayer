@@ -506,31 +506,32 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 		if (kft)
 			kft.destroy();
 		A_StartSound("world/bodypoof",CHAN_AUTO);
-		
+				
 		double smkz = GetDefaultByType(masterclass).height;
 		double rad = GetDefaultByType(masterclass).radius;
+		vector3 ppos = master ? master.pos : Actor(self).pos;
 		if (master) {
 			smkz = master.height;
 			rad = master.radius;
 		}
 		for (int i = 26; i > 0; i--) {
-			let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz*1.5)));
+			let smk = Spawn("PK_DeathSmoke",ppos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz*1.5)));
 			if (smk)
 				smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
 		}
 		for (int i = 8; i > 0; i--) {
-			let smk = Spawn("PK_WhiteDeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](pos.z,smkz)));
+			let smk = Spawn("PK_WhiteDeathSmoke",ppos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](ppos.z,smkz)));
 			if (smk) {
 				smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
 				smk.A_SetScale(0.4);
 				smk.alpha = 0.5;
 			}
 		}
-		double pz = (pos.z <= floorz) ? frandom[soul](8,14) : 0;
+		double pz = (ppos.z <= floorz) ? frandom[soul](8,14) : 0;
 					
 		// Spawn soul if difficulty is below Trauma, and tell it what monster spawned it:
 		if (skill < 4) {
-			let soul = PK_Soul(Spawn("PK_Soul",pos+(0,0,pz)));
+			let soul = PK_Soul(Spawn("PK_Soul",ppos+(0,0,pz)));
 			if (soul && masterclass) {
 				soul.bearer = masterclass;
 			}

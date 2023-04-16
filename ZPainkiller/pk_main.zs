@@ -9,6 +9,15 @@ Mixin class PK_Math {
 	clearscope double LinearMap(double val, double o_min, double o_max, double n_min, double n_max) {
 		return (val - o_min) * (n_max - n_min) / (o_max - o_min) + n_min;
 	}
+
+	clearscope vector2 GetLineNormal(vector2 ppos, Line lline) {
+		vector2 linenormal;
+		linenormal = (-lline.delta.y, lline.delta.x).unit();
+		if (!PointOnLineSide(ppos, lline))
+			linenormal *= -1;
+		
+		return linenormal;
+	}
 	
 	//Utility functions by Marisa Kirisame
 	
@@ -364,9 +373,9 @@ Class PK_BaseActor : Actor abstract {
 		if (victim.bBOSS || victim.bBOSSDEATH)
 			victim.A_BossDeath();
 		if (pk_debugmessages) {
-			console.printf("%s silent-killed (alpha %1.f, renderstyle %d)", victim.GetTag(), victim.alpha, victim.GetRenderstyle());
+			console.printf("%s silent-killed | renderstyle %d | pos (%.1f, %.1f, %.1f)", victim.GetTag(), victim.GetRenderstyle(), victim.pos.x, victim.pos.y, victim.pos.z);
 		}
-		if (remove && !victim.player) {
+		if (remove && !victim.player) {			
 			victim.Destroy();
 		}
 	}
@@ -535,10 +544,8 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 					LineTrace(angle,radius+16,1,flags:TRF_THRUACTORS|TRF_NOSKY,data:hit);
 					if (hit.HitLine && hit.hittype == TRACE_HITWALL) {
 						wall = hit.HitLine;
-						wallnormal = (-hit.HitLine.delta.y,hit.HitLine.delta.x).unit();
+						wallnormal = GetLineNormal(pos.xy, wall);
 						wallpos = hit.HitLocation;
-						if (!hit.LineSide)
-							wallnormal *= -1;
 						//if the actor can bounce off walls and isn't too close to the floor, it'll bounce:
 						if (bBOUNCEONWALLS){		
 							if (wallbouncesound)

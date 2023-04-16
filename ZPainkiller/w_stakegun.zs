@@ -123,6 +123,8 @@ Class PK_Stake : PK_StakeProjectile {
 	actor hitvictim; 
 	//the victim the stake is stuck in and carries with it:
 	actor stickvictim;
+	vector2 prevSize;
+	protected vector2 wallnormal;
 	protected double victimOfsZ;
 	protected int victimDestroyTimer;
 	const VICTIMMAXPINTIME = 80;
@@ -148,7 +150,6 @@ Class PK_Stake : PK_StakeProjectile {
 		deathsound "weapons/stakegun/stakewall";
 		decal "Stakedecal";
 	}
-	
 	
 	override void StakeBreak() {		
 		A_RemoveLight(BURNLIGHT);
@@ -177,9 +178,10 @@ Class PK_Stake : PK_StakeProjectile {
 		A_RemoveLight(BURNLIGHT);
 		onFire = true;
 		if (stickvictim) {
-			// If the stake is too close to the floor, detach the victim:
+			// if the victim is a player, detach unconditionally:
 			if (stickvictim.player)
 				DetachVictim();
+			// If the stake is too close to the floor, detach the victim:
 			else if ((pos.z - floorz) <= stickvictim.height) {
 				stickvictim.SetZ(floorz);
 				DetachVictim();
@@ -193,6 +195,7 @@ Class PK_Stake : PK_StakeProjectile {
 				// If we hit an actual wall (not a solid obstacle actor 				
 				// or a ceiling), flatten the corpse against the wall:
 				if (blockingline)	{
+					wallnormal = GetLineNormal(pos.xy, blockingline);
 					stickvictim.bWALLSPRITE = true;			
 					stickvictim.bDONTFALL = true;
 					stickvictim.angle = atan2(blockingline.delta.y, blockingline.delta.x) - 90;
@@ -215,17 +218,29 @@ Class PK_Stake : PK_StakeProjectile {
 		//victim.A_SetSize(self.radius - 1, victim.default.height);
 		victim.A_SetTics(VICTIMMAXFLYTIME);
 		victimDestroyTimer = VICTIMMAXFLYTIME;
-		stickvictim = victim;
+		prevsize = (victim.radius, victim.height);
+		stickvictim = victim;		
+	}
+
+	void MoveVictimOutOfWall() {
+		if (!stickvictim)
+			return;
+		double dist = stickvictim.radius;
+		vector2 ofs = LevelLocals.Vec2Offset(stickvictim.pos.xy, wallnormal * dist);
+		console.printf("moving %s out of wall: (%.1f, %.1f) > (%.1f, %.1f)", stickvictim.GetTag(), stickvictim.pos.x, stickvictim.pos.y, ofs.x, ofs.y);
+		stickvictim.SetOrigin((ofs.x, ofs.y, stickvictim.pos.z), true);
 	}
 	
 	void DetachVictim() {
 		if (!stickvictim)
 			return;
 		stickvictim.bWALLSPRITE = stickvictim.default.bWALLSPRITE;
+		// let the corpse play out its animation:
 		if (stickvictim.curstate.nextstate)
-			stickvictim.A_SetTics(1);
+			stickvictim.A_SetTics(1);			
 		stickvictim.bNOGRAVITY = false;
-		stickvictim.A_SetSize(stickvictim.default.radius, stickvictim.deathheight);
+		// reset size:
+		stickvictim.A_SetSize(prevsize.x, prevsize.y);
 		stickvictim = null;
 	}
 	
@@ -296,6 +311,7 @@ Class PK_Stake : PK_StakeProjectile {
 			if (victimDestroyTimer > 0) {
 				victimDestroyTimer--;
 				if (victimDestroyTimer <= 0) {
+					MoveVictimOutOfWall();
 					if (pk_keepbodies)
 						DetachVictim();
 					else
