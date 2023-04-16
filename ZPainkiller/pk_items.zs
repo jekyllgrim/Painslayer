@@ -404,7 +404,7 @@ Class PK_GoldPickup : PK_Inventory abstract {
 			return;
 		
 		//Soul Catcher effect:
-		if (tracer && tracer.player) {
+		if (GetAge() > 14 && tracer && tracer.player) {
 			vel = Vec3To(tracer).Unit() * 10.5;
 			bNOCLIP = true;
 			bNOGRAVITY = true;
