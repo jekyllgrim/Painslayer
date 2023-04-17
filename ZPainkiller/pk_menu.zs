@@ -57,6 +57,11 @@ class PKSkillMenu : ListMenu {
 	TextureID mTexture;
 	TextureID mBackground;
 	vector2 mTextureSize;
+	// The skill text has to fit within this width of the
+	// background texture. Not using 100% because it has
+	// some flowerly bits on the sides that the text
+	// must not overlap:
+	const TEXFITFACTOR = 0.65;
 	// explicit linespacing and size:
 	const LINESPACING = 92;
 	const POSX = 960;
@@ -116,36 +121,20 @@ class PKSkillMenu : ListMenu {
 			}
 		}
 		
-		// First we need to get the widest skill/episode name,
-		// so that the background texture is scaled accordingly:
 		int textureWidth = int(mTextureSize.x);
+		double fitTextureWidth = textureWidth * TEXFITFACTOR;
 		for (int i = 0; i < mDesc.mItems.Size(); ++i) {
 			// check it's a clikcable element (skill or episode):
 			let item = ListMenuItemTextItem(mDesc.mItems[i]);
 			if (!item)
 				continue;
 			
+			// We'll need to squish the skill text horizontally if
+			// it's too long to fit within the panel texture:
 			string text = StringTable.Localize(item.mText);
-			int textwidth = mFont.StringWidth(text);
-			// I use 0.7 here instead of the full texture's width
-			// because it has sides with a floral pattern that
-			// shouldn't appear behidn the text. Note, it'll look
-			// wrong with *very* wide names, but I can't be bothered
-			// to implement separate drawing for those patterned
-			// sides right now...
-			double fac = 0.7;
-			if (textwidth > textureWidth * fac)
-				textureWidth = int(textwidth / fac);
-		}
-			
-		for (int i = 0; i < mDesc.mItems.Size(); ++i) {
-			// check it's a clikcable element (skill or episode):
-			let item = ListMenuItemTextItem(mDesc.mItems[i]);
-			if (!item)
-				continue;
-				
-			string text = StringTable.Localize(item.mText);
-			int textwidth = mFont.StringWidth(text);
+			double textwidth = mFont.StringWidth(text);
+			double targetTextWidth = min(textwidth, fitTextureWidth);
+			double textXScaleMul = Clamp(targetTextWidth / textwidth, 0., 1.);
 			
 			vector2 texpos = (
 				(SWIDTH / 2) - (textureWidth / 2), 
@@ -156,8 +145,6 @@ class PKSkillMenu : ListMenu {
 				mTexture, 
 				true, 
 				texpos.x, texpos.y,
-				// scale to fit the skill/episode name width:
-				DTA_DestWidth, textureWidth,
 				DTA_VirtualWidth, SWIDTH,
 				DTA_VirtualHeight, SHEIGHT,
 				DTA_FullscreenScale, FSMode_ScaleToFit43
@@ -172,14 +159,17 @@ class PKSkillMenu : ListMenu {
 			
 			// Draw the skill text:
 			vector2 textpos = (
-				(SWIDTH / 2) - (mFont.StringWidth(text) / 2), 
+				(SWIDTH / 2) - (targetTextWidth / 2), 
 				y
 			);
 			Screen.DrawText(
 				mFont, 
 				mDesc.mSelectedItem == i ? item.mColorSelected : mDesc.mFontColor,
 				textpos.x, textpos.y, 
-				text, 
+				text,
+				// Scale the text horizontally to fit
+				// within the graphic:
+				DTA_ScaleX, textXScaleMul,
 				DTA_VirtualWidth, SWIDTH,
 				DTA_VirtualHeight, SHEIGHT,
 				DTA_FullscreenScale, FSMode_ScaleToFit43
