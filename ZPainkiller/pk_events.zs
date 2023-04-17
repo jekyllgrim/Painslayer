@@ -948,7 +948,8 @@ Class PK_BoardEventHandler : EventHandler {
 				}
 				return;
 			}
-			S_PauseSound(false, false);
+			if (!multiplayer)
+				S_PauseSound(false, false);
 			if (pk_debugmessages) {
 				console.printf("Opening the board for player %d. (Board opened track: %d)", e.Player, boardOpenedTracker[e.Player]);
 			}
