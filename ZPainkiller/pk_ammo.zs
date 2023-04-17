@@ -356,8 +356,13 @@ Class PK_EquipmentSpawner : Inventory {
 				secondaryChance = secondaryChance2;
 		}
 		//ammo dropped by enemies should almost always be primary:
-		if (bTOSSED)
-			secondaryChance *= 0.25;
+		if (bTOSSED) {
+			// If secondaryChance is set above 100, make this an exception
+			// (used by Minigun/RocketLauncher to disable rocket spawning
+			// from clips):
+			if (secondaryChance <= 100)
+				secondaryChance *= 0.25;
+		}
 		//finally, decide whether we need to spawn primary or secondary ammo:
 		class<Ammo> tospawn = (secondaryChance >= frandom[ammoSpawn](1,100)) ? ammo2toSpawn : ammo1toSpawn;
 		SpawnInvPickup(pos,tospawn);
@@ -377,7 +382,7 @@ Class PK_EquipmentSpawner_Clip : PK_EquipmentSpawner {
 	Default {
 		PK_EquipmentSpawner.weapon1 "PK_Rifle";
 		PK_EquipmentSpawner.weapon2 "PK_Chaingun";
-		PK_EquipmentSpawner.secondaryChance2 100; //clip replacements should never spawn grenades
+		PK_EquipmentSpawner.secondaryChance2 101; //clip replacements should never spawn grenades
 	}
 }
 

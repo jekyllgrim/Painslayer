@@ -79,14 +79,19 @@ Class PKCardsMenu : PKZFGenericMenu {
 		
 		//checks if the board is opened for the first time on the current map:
 		menuEHandler = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
-		if (menuEHandler && mouseEnabled) {
+		if (mouseEnabled && menuEHandler) {
+			firstUse = !menuEHandler.boardOpenedTracker[consoleplayer];
+		}
+
+		/*if (menuEHandler && mouseEnabled) {
 			if (!menuEHandler.boardOpened) {
 				firstUse = true;
 				menuEHandler.boardOpened = true;
 			}
 			else
 				firstUse = false;
-		}
+			console.printf("Board first use: %d", firstuse);
+		}*/
 		
 		S_StartSound("ui/board/open",CHAN_VOICE,CHANF_UI,volume:snd_menuvolume);
 		
@@ -407,8 +412,7 @@ Class PKCardsMenu : PKZFGenericMenu {
 						card.SetBox(cardslot.slotpos, cardslot.slotsize);
 						card.buttonscale = (1,1);
 						cardslot.placedcard = card;
-						if (!firstUse)
-							card.cardlocked = true;
+						card.cardlocked = !firstUse;
 					}
 				}
 			}
@@ -432,7 +436,6 @@ Class PKCardsMenu : PKZFGenericMenu {
 					card.cardbought = true;
 					card.purchaseAnim = true;
 					UnlockedSilverCards.push(card);					
-					//elementsEHandler.UnlockedTarotCards.push(int(name(card.cardID)));
 					string eventname = String.Format("PKCBuyCard:%s",card.cardID);
 					EventHandler.SendNetworkEvent(eventname);
 				}
@@ -443,7 +446,6 @@ Class PKCardsMenu : PKZFGenericMenu {
 					card.cardbought = true;
 					card.purchaseAnim = true;
 					UnlockedGoldCards.push(card);
-					//elementsEHandler.UnlockedTarotCards.push(int(name(card.cardID)));
 					string eventname = String.Format("PKCBuyCard:%s",card.cardID);
 					EventHandler.SendNetworkEvent(eventname);
 				}
@@ -452,9 +454,9 @@ Class PKCardsMenu : PKZFGenericMenu {
 	}
 	
 	//make sound, call netevent to activate equipped cards, close the board
-	void PKCCloseBoard() {
+	void CloseBoard() {
 		S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-		EventHandler.SendNetworkEvent('PKCCloseBoard');
+		EventHandler.SendNetworkEvent('PKCCloseBoard', firstUse);
 		Close();
 	}
 
@@ -785,7 +787,7 @@ Class PKCardsMenu : PKZFGenericMenu {
 		//show "mouse needed" message if no mouse detected
 		if (needMousePopup) {
 			S_StartSound("ui/board/exit",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
-			PKCCloseBoard();
+			CloseBoard();
 			super.HandleBack();
 			return;
 		}
@@ -801,7 +803,7 @@ Class PKCardsMenu : PKZFGenericMenu {
 		}
 		//if not first use, just close the board with the right sound
 		else {
-			PKCCloseBoard();
+			CloseBoard();
 			super.HandleBack();
 			return;
 		}
@@ -1178,7 +1180,7 @@ Class PKCPromptHandler : PKZFHandler {
 			return;
 		//exit popup Yes: close the board
 		if (command == "DoExit") {	
-			menu.PKCCloseBoard();
+			menu.CloseBoard();
 			return;
 		}
 		// Card purchase popup: yes, buy the card
@@ -1265,7 +1267,7 @@ Class PKCMenuHandler : PKZFHandler {
 				menu.ShowExitPopup();	
 			//otherwise just close the board  immediately
 			else {
-				menu.PKCCloseBoard();
+				menu.CloseBoard();
 			}
 			return;
 		}
@@ -1421,7 +1423,7 @@ Class PKCMenuHandler : PKZFHandler {
 		if (!card)
 			return;
 		if (pk_debugmessages)
-			Console.Printf("Returning %s to its default slot", card.cardname);
+			Console.Printf("Returning %s to its default slot", card.cardID);
 		card.SetBox(card.defaultpos, card.defaultsize);
 		card.buttonscale = card.defaultscale;
 		//card.setDontBlockMouse(false);
@@ -1431,7 +1433,7 @@ Class PKCMenuHandler : PKZFHandler {
 		if (!card || !cardslot)
 			return;
 		if (pk_debugmessages)
-			Console.Printf("Equipping %s into a slot", card.cardname);
+			Console.Printf("Equipping %s into a slot", card.cardID);
 		card.SetBox(cardslot.slotpos, cardslot.slotsize);
 		card.buttonscale = (1,1);
 		//card.setDontBlockMouse(false);

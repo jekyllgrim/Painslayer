@@ -152,11 +152,10 @@ Class PK_MainHandler : EventHandler {
 		"$PKCH_TAKEGOLD2"
 	};
 
-	//tarot card-related events:
+	// These events can be called either from the console
+	// or with SendNetworkEvent:
 	override void NetworkProcess(consoleevent e) {
-		//if (!e.isManual)
-		//	return;
-		if (!PlayerInGame[e.Player])
+		if (!PlayerInGame[e.Player] || e.Player < 0)
 			return;
 		
 		let plr = players[e.Player].mo;
@@ -166,40 +165,6 @@ Class PK_MainHandler : EventHandler {
 		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (!cardcontrol)
 			return;
-		
-		//open black tarot board
-		if (e.name == "PKCOpenBoard" && e.player == consoleplayer) {
-			if (pk_debugmessages)
-				console.printf("Trying to open board");
-			if (skill < 1) {
-				if (e.player == consoleplayer) {
-					plr.A_StartSound("ui/board/wrongplace",CH_PKUI,CHANF_UI|CHANF_LOCAL);
-					string str = Stringtable.Localize("$TAROT_LOWSKILL");
-					console.printf("%s",str);
-				}
-				return;
-			}
-			if (cardcontrol.goldActive || plr.health <= 0 || plr.FindInventory("PK_DemonWeapon")) {
-				if (e.player == consoleplayer) {
-					plr.A_StartSound("ui/board/wrongplace",CH_PKUI,CHANF_UI|CHANF_LOCAL);
-					if (pk_debugmessages)
-						console.printf("Can't open the board at this time");
-				}
-				if (pk_debugmessages)
-					console.printf("skill: %d | health: %d | goldActive: %d | has demon weapon: %d",skill,cardcontrol.goldActive,plr.health,plr.CountInv("PK_DemonWeapon"));
-				return;
-			}
-			S_PauseSound(false, false);
-			Menu.SetMenu("PKCardsMenu");
-		}
-		
-		if (e.name == "PKCOpenCodex" && e.player == consoleplayer) {
-			Menu.SetMenu("PKCodexMenu");
-		}
-		
-		if (e.name == "PK_UseGoldenCards") {
-			cardcontrol.UseGoldenCards();
-		}
 		
 		//CHEATS:
 		
@@ -268,11 +233,12 @@ Class PK_MainHandler : EventHandler {
 		return (posMax - posMin);
 	}
 	
-	
 	override void WorldLoaded(WorldEvent e) {
 		if (level.Mapname == "TITLEMAP")
 			return;
+
 		maxdebrisCvar = Cvar.GetCvar('pk_maxdebris', players[consoleplayer]);
+
 		let it = ThinkerIterator.Create("PK_PickupsTracker", Thinker.STAT_STATIC);
 		let tracker = PK_PickupsTracker(it.Next());
 		if (!tracker) {
@@ -280,8 +246,23 @@ Class PK_MainHandler : EventHandler {
 				console.printf("Item track Thinker created");
 			new("PK_PickupsTracker").Init();
 		}
+
 		if (e.IsSaveGame || e.isReopen)
 			return;
+
+		// This is done in WorldLoaded to make sure it happens
+		// even if the player died and a map-start autosave
+		// was reloaded. (Otherwise the autosave would load
+		// without the board opening but the slots will be
+		// already locked):
+		if (pk_autoOpenBoard) {
+			for (int i = 0; i < MAXPLAYERS; i++) {
+				if (PlayerInGame[i] && i == consoleplayer) {
+					EventHandler.SendNetworkEvent("PKCOpenBoard");
+					break;
+				}
+			}
+		}
 		
 		//spawn gold randomly in secret areas:
 		//iterate throguh sectors:
@@ -345,7 +326,7 @@ Class PK_MainHandler : EventHandler {
 		}
 	}
 	
-	override void WorldThingspawned (worldevent e) {
+	override void WorldThingSpawned (worldevent e) {
 		if (level.Mapname == "TITLEMAP")
 			return;
 		
@@ -515,15 +496,15 @@ Class PK_MainHandler : EventHandler {
 				scard.GetCard();
 			}
 		}
-
-		if (pk_autoOpenBoard && e.PlayerNumber == consoleplayer) {
-			EventHandler.SendNetworkEvent("PKCOpenBoard");
-		}
 		
 		if (pk_startsound) {
 			plr.A_StartSound("world/mapstart", CH_PKUI, CHANF_LOCAL, volume: 0.5);
 			plr.A_SetBlend("000000", 1.0, 35*4);
 		}
+
+		/*if (pk_autoOpenBoard && e.PlayerNumber == consoleplayer) {
+			EventHandler.SendNetworkEvent("PKCOpenBoard");
+		}*/
 	}
 
 	void StopPlayerGoldenCards(PlayerInfo player) {
@@ -902,9 +883,12 @@ Class PK_ReplacementHandler : EventHandler {
 }
 
 Class PK_BoardEventHandler : EventHandler {
-	ui bool boardOpened; //whether the Black Tarot board has been opened on this map
-	ui bool CodexOpened;
+	//ui bool boardOpened; //whether the Black Tarot board has been opened on this map
 	bool SoulKeeper;
+	// Whether the player has opened the board in this map.
+	// Tracked in play scope, set through a netevent
+	// from the board (see CloseBoard() in pk_cardmenu2.0.zs)
+	bool boardOpenedTracker[MAXPLAYERS];
 	
 	override void WorldThingDamaged(worldevent e) {
 		if (!e.thing)
@@ -930,13 +914,68 @@ Class PK_BoardEventHandler : EventHandler {
 	}
 	
 	override void NetworkProcess(consoleevent e) {
-		if (e.isManual || e.Player < 0)
+		if (!PlayerInGame[e.Player] || e.Player < 0)
 			return;
-		if (!PlayerInGame[e.Player])
+		let plr = players[e.Player].mo;
+		if (!plr || PK_MainHandler.IsVoodooDoll(plr))
 			return;
 		
-		let plr = players[e.Player].mo;
-		if (!plr)
+		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		if (!cardcontrol)
+			return;
+
+		//open black tarot board
+		if (e.name == "PKCOpenBoard" && e.player == consoleplayer) {
+			if (pk_debugmessages)
+				console.printf("Trying to open board");
+			if (skill < 1) {
+				// Only play the sound and display a message if the player
+				// tries to open the board manually on skill 0. In case of
+				// automatic opening at map start, don't do anything,
+				// otherwise the message will appear at every map start:
+				if (e.isManual) {
+					plr.A_StartSound("ui/board/wrongplace",CH_PKUI,CHANF_UI|CHANF_LOCAL);
+					string str = Stringtable.Localize("$TAROT_LOWSKILL");
+					console.midprint(font_times, str);
+				}
+				return;
+			}
+			if (cardcontrol.goldActive || plr.health <= 0 || plr.FindInventory("PK_DemonWeapon")) {
+				if (e.player == consoleplayer) {
+					plr.A_StartSound("ui/board/wrongplace",CH_PKUI,CHANF_UI|CHANF_LOCAL);
+					if (pk_debugmessages)
+						console.printf("Player %d can't open the board. Skill: %d | health: %d | goldActive: %d | has demon weapon: %d", e.Player, skill, cardcontrol.goldActive, plr.health, plr.CountInv("PK_DemonWeapon"));
+				}
+				return;
+			}
+			S_PauseSound(false, false);
+			if (pk_debugmessages) {
+				console.printf("Opening the board for player %d. (Board opened track: %d)", e.Player, boardOpenedTracker[e.Player]);
+			}
+			Menu.SetMenu("PKCardsMenu");
+		}
+		
+		if (e.name == 'PKCCloseBoard') {
+			if (pk_debugmessages) {
+				console.printf("Closing the board for player %d. (Board opened track: %d)", e.Player, boardOpenedTracker[e.Player]);
+			}
+			S_ResumeSound(false);
+			if (e.args[0] != 0) {
+				boardOpenedTracker[e.Player] = true;
+			}
+			cardcontrol.PK_EquipCards();
+		}
+		
+		if (e.name == "PKCOpenCodex" && e.player == consoleplayer) {
+			Menu.SetMenu("PKCodexMenu");
+		}
+		
+		if (e.name == "PK_UseGoldenCards") {
+			cardcontrol.UseGoldenCards();
+		}
+		
+		// These events are only callable with SendNetworkEvent:
+		if (e.isManual)
 			return;
 		
 		if (e.name == 'PKCCodexOpened') {
@@ -945,10 +984,6 @@ Class PK_BoardEventHandler : EventHandler {
 				irc.codexOpened = true;
 			}
 		}
-		
-		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
-		if (!cardcontrol)
-			return;
 		
 		//card purchase: push the card into array, reduce current gold
 		if (e.name.IndexOf("PKCBuyCard") >= 0) {
@@ -1013,12 +1048,6 @@ Class PK_BoardEventHandler : EventHandler {
 					console.printf("Removing Forgiveness. Remaining gold activations: %d", cardcontrol.GetGoldUses());
 			}
 			cardcontrol.EquippedSlots[slotID] = '';
-		}
-		
-		if (e.name == 'PKCCloseBoard') {
-			//console.printf("trying to initalize card slots");
-			S_ResumeSound(false);
-			cardcontrol.PK_EquipCards();
 		}
 	}
 }
