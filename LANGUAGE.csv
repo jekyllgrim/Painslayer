@@ -130,20 +130,20 @@ Rocket Launcher/Chaingun,PK_CHAINGUN_TAG,Weapon names,Ракетница/пул�
 Electro/Driver,PK_ELECTRODRIVER_TAG,Weapon names,Электро/привод
 Assault Rifle/Flamethrower,PK_RIFLE_TAG,Weapon names,Автомат/огнемет
 Boltgun/Heater,PK_BOLTGUN_TAG,Weapon names,Болтомёт/шаромёт
-Pain	         /  Killer,PK_PAINKILLER_SLOT,Weapon modes for menu,Pain / Killer
-Shotgun       /  Freezer,PK_SHOTGUN_SLOT,Weapon modes for menu,Дробовик / охладитель
-Stakegun      /  G. Launcher,PK_STAKEGUN_SLOT,Weapon modes for menu,Коломёт / гранатомёт
-R. Launcher   /  Chaingun,PK_CHAINGUN_SLOT,Weapon modes for menu,Ракетница / пулемёт
-Driver        /  Electro,PK_ELECTRODRIVER_SLOT,Weapon modes for menu,Привод / электро
-Assault Rifle /  Flamethrower,PK_RIFLE_SLOT,Weapon modes for menu,Автомат / огнемет
-Boltgun       /  Heater,PK_BOLTGUN_SLOT,Weapon modes for menu,Болтомёт / шаромёт
-Killer        /  Pain,PK_PAINKILLER_ISLOT,Switched weapon modes for menu,Killer / Pain
-Freezer       /  Shotgun,PK_SHOTGUN_ISLOT,Switched weapon modes for menu,Охладитель / дробовик
-G. Launcher   /  Stakegun,PK_STAKEGUN_ISLOT,Switched weapon modes for menu,Гранатомёт / коломёт
-Chaingun      /  R. Launcher,PK_CHAINGUN_ISLOT,Switched weapon modes for menu,Пулемёт / ракетница
-Electro       /  Driver,PK_ELECTRODRIVER_ISLOT,Switched weapon modes for menu,Электро / привод
-Flamethrower  /  Assault Rifle,PK_RIFLE_ISLOT,Switched weapon modes for menu,Огнемет / автомат
-Heater        /  Boltgun,PK_BOLTGUN_ISLOT,Switched weapon modes for menu,Шаромёт / болтомёт
+Pain / Killer,PK_PAINKILLER_SLOT,Weapon modes for menu,Pain / Killer
+Shotgun / Freezer,PK_SHOTGUN_SLOT,Weapon modes for menu,Дробовик / охладитель
+Stakegun / G. Launcher,PK_STAKEGUN_SLOT,Weapon modes for menu,Коломёт / гранатомёт
+R. Launcher / Chaingun,PK_CHAINGUN_SLOT,Weapon modes for menu,Ракетница / пулемёт
+Driver / Electro,PK_ELECTRODRIVER_SLOT,Weapon modes for menu,Привод / электро
+Assault Rifle / Flamethrower,PK_RIFLE_SLOT,Weapon modes for menu,Автомат / огнемет
+Boltgun / Heater,PK_BOLTGUN_SLOT,Weapon modes for menu,Болтомёт / шаромёт
+Killer / Pain,PK_PAINKILLER_ISLOT,Switched weapon modes for menu,Killer / Pain
+Freezer / Shotgun,PK_SHOTGUN_ISLOT,Switched weapon modes for menu,Охладитель / дробовик
+G. Launcher / Stakegun,PK_STAKEGUN_ISLOT,Switched weapon modes for menu,Гранатомёт / коломёт
+Chaingun / R. Launcher,PK_CHAINGUN_ISLOT,Switched weapon modes for menu,Пулемёт / ракетница
+Electro / Driver,PK_ELECTRODRIVER_ISLOT,Switched weapon modes for menu,Электро / привод
+Flamethrower / Assault Rifle,PK_RIFLE_ISLOT,Switched weapon modes for menu,Огнемет / автомат
+Heater / Boltgun,PK_BOLTGUN_ISLOT,Switched weapon modes for menu,Шаромёт / болтомёт
 %o was ripped apart with %k's Pain,PKO_PAIN,Obituaries,%k разрывает игрока %o на части с помощью Pain
 %o couldn't dodge %k's Killer,PKO_KILLER,Obituaries,Игроку %o не удалось увернуться от Killer игрока %k
 %o was slowly burnt by %k's Killer Beam,PKO_KILLERBEAM,Obituaries,%k медленно сжигает игрока %o лучом Killer
