@@ -1452,6 +1452,7 @@ Class PK_SafeMapMarker : MapMarker {
 		super.Tick();
 		if (!attachTo || attachTo.owner) {
 			Destroy();
+			return;
 		}
 		SetOrigin(attachTo.pos, true);
 	}
