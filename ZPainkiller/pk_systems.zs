@@ -5,17 +5,21 @@ Class PK_DemonTargetControl : PK_InventoryToken {
 	private int p_renderstyle;
 	private double p_alpha;
 	private color p_color;
+	private bool prevBRIGHT;
 	private state slowstate;
 	private double speedfactor;
 	private double gravityfactor;
 	private PlayerPawn CPlayerPawn;
 	property speedfactor : speedfactor;
 	property gravityfactor : gravityfactor;
+
 	Default {
 		PK_DemonTargetControl.speedfactor 0.85;
 		PK_DemonTargetControl.gravityfactor 0.5;
 	}
+
 	override void Tick() {}
+
 	override void AttachToOwner(actor other) {
 		//only affect missiles, monsters and players:
 		if (!other.bISMONSTER && !other.bMISSILE && !(other is "PlayerPawn")) {
@@ -38,15 +42,17 @@ Class PK_DemonTargetControl : PK_InventoryToken {
 		p_renderstyle = owner.GetRenderstyle();
 		p_alpha = owner.alpha;
 		p_color = owner.fillcolor;
+		prevBRIGHT = owner.bBRIGHT;
 		//monsters and missiles have their gravity, speed and current vel lowered:
 		if (owner.bISMONSTER || owner.bMISSILE) {
 			p_gravity = owner.gravity;
-			p_speed = owner.speed;
+			p_speed = owner.speed;			
 			owner.gravity *= gravityfactor;
 			owner.speed *= speedfactor;
 			owner.vel *= speedfactor;
 		}
 	}
+
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner) {
@@ -65,8 +71,8 @@ Class PK_DemonTargetControl : PK_InventoryToken {
 				owner.SetShade("ff00ff");
 			}			
 			else {
-				owner.bBRIGHT = owner.default.bBRIGHT;
-				owner.A_SetRenderstyle(p_alpha,p_renderstyle);
+				owner.bBRIGHT = prevBRIGHT;
+				owner.A_SetRenderstyle(p_alpha, p_renderstyle);
 				owner.SetShade(p_color);
 			}
 		}
@@ -82,6 +88,7 @@ Class PK_DemonTargetControl : PK_InventoryToken {
 			}
 		}
 	}
+
 	override void DetachFromOwner() {
 		if (!owner)
 			return;
@@ -104,28 +111,36 @@ Class PK_DemonMorphControl : PK_InventoryToken {
 	private int pk_fullsouls;
 	property minsouls : pk_minsouls;
 	property fullsouls : pk_fullsouls;
+
 	Default {
 		PK_DemonMorphControl.minsouls 64;
 		PK_DemonMorphControl.fullsouls 66;
 	}
+
 	override void Tick() {}
+
 	//Some public methods to manipulate the soul amounts:
 	clearscope int GetSouls() {
 		return pk_souls;
 	}
+
 	clearscope int GetMinSouls() {
 		return pk_minsouls;
 	}
+
 	clearscope int GetFullSouls() {
 		return pk_fullsouls;
 	}
+
 	void ResetSouls() {
 		pk_souls = 0;
 	}
+
 	void ResetSoulRequirements() {
 		pk_minsouls = default.pk_minsouls;
 		pk_fullsouls = default.pk_fullsouls;
 	}
+
 	//Dark Soul silver card is the only source allowed to change
 	//the soul requirement for Demon Morph:
 	bool SetSoulRequirements(actor caller, int newmax) {
@@ -134,10 +149,12 @@ Class PK_DemonMorphControl : PK_InventoryToken {
 		pk_fullsouls = newmax;
 		pk_minsouls = pk_fullsouls - 2;
 		return (pk_minsouls == newmax - 2 && pk_fullsouls == newmax);
-	}		
+	}
+	
 	clearscope bool CheckDemon() {
 		return owner.CountInv("PK_DemonWeapon") && pk_souls >= pk_fullsouls;
 	}
+
 	void GiveSoul(int amount = 1) {
 		pk_souls = Clamp(pk_souls + amount, 0, pk_fullsouls);
 		if (!pk_allowDemonMorph || !owner || !owner.player || !owner.player.readyweapon)
@@ -160,6 +177,7 @@ Class PK_DemonWeapon : PKWeapon {
 	private double p_gravity;	
 	private double rippleTimer;
 	private bool runRipple;
+
 	Default {
 		+WEAPON.NOAUTOFIRE;
 		+WEAPON.DONTBOB;
@@ -226,6 +244,7 @@ Class PK_DemonWeapon : PKWeapon {
 		owner.player.readyweapon = self;
 		owner.player.readyweapon.crosshair = 99;
 	}
+
 	void StartDemonMode() {		
 		//disable golden cards before changing speed/gravity
 		let cardcontrol = PK_CardControl(owner.FindInventory("PK_CardControl"));
@@ -254,6 +273,7 @@ Class PK_DemonWeapon : PKWeapon {
 				console.printf("Taking \cD%s\cJ from player's inventory",powerups[i].GetClassName());
 		}
 	}
+
 	override void DoEffect() {
 		super.DoEffect();
 		// The current soul amount check should happen here, in case
@@ -310,6 +330,7 @@ Class PK_DemonWeapon : PKWeapon {
 		}
 		//console.printf("owner speed %f | owner gravity %f",owner.speed,owner.gravity);
 	}	
+
 	override void DetachFromOwner() {
 		if(players[consoleplayer] == owner.player)   {
 			PPShader.SetEnabled( "DemonMorph", false);
@@ -345,7 +366,8 @@ Class PK_DemonWeapon : PKWeapon {
 		owner.player.SetPsprite(PSP_DEMON,null);
 		super.DetachFromOwner();
 	}
-	states {
+
+	States {
 	Ready:
 		TNT1 A 1 {
 			A_Overlay(PSP_DEMON,"DemonCross");
