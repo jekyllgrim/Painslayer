@@ -636,10 +636,12 @@ Class PainkillerHUD : BaseStatusBar {
 	protected void DrawBossHealthBar(bool bottom = false) {
 		if (!nearestBoss)
 			return;
+		// Get hud scale and multiply ONLY by x,
+		// because we want this square (hud_aspectscale be screwed):
 		vector2 hudscale = GetHUDScale();
-		Vector2 barScale = (hpBarScale.x * hudscale.x, hpBarScale.y * hudscale.y);
+		Vector2 barScale = (hpBarScale.x * hudscale.x, hpBarScale.y * hudscale.x);
 		int posx = Screen.GetWidth() / 2.;
-		int posy = hpBarScale.y / 2 * hudscale.y;
+		int posy = hpBarScale.y / 2 * hudscale.x;
 		if (bottom)
 			posy = Screen.GetHeight() - posy;
 		Screen.DrawTexture(hpBarBackground, false, posx, posy,
@@ -658,7 +660,7 @@ Class PainkillerHUD : BaseStatusBar {
 		Screen.DrawShape(hpbartex, false, healthBarShape);
 		
 		//Draw boss sprite:
-		vector2 spritescale = ScaleToBox(bossSprite,barScale.x,barScale.y) * 0.65;
+		vector2 spritescale = ScaleToBox(bossSprite,barScale.x, barScale.y) * 0.65;
 		Screen.DrawTexture(bossSprite, false, posx, posy,
 			DTA_CenterOffset, true,
 			DTA_TranslationIndex, Translation.GetID('PK_HUDBoss'),
