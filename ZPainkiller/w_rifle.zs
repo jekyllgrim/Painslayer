@@ -402,10 +402,20 @@ Class PK_Rifle : PKWeapon {
 }
 
 Class PK_BurnControl : PK_InventoryToken {
+	protected int prevTranslation;
+
 	protected int timer;
 	void ResetTimer() {
 		timer = 35*5;
 	}
+
+	// Only make them scorched if they were actually killed by fire while burning:
+	override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags) {
+		if (owner && damageType == 'Fire' && owner.health > 0 && owner.health - damage <= 0) {
+			owner.A_SetTRanslation("Scorched");
+		}
+	}
+
 	override void AttachToOwner(actor other) {
 		super.AttachToOwner(other);
 		if (!owner)
@@ -413,28 +423,32 @@ Class PK_BurnControl : PK_InventoryToken {
 		ResetTimer();
 		//if (owner.FindInventory("PK_FreezeControl"))
 			//owner.TakeInventory("PK_FreezeControl",1);
+		prevTranslation = owner.translation;
 		owner.A_AttachLight('PKBurn', DynamicLight.RandomFlickerLight, "ffb30f", 48, 40, flags: DYNAMICLIGHT.LF_ATTENUATE);
 	}
+
 	override void DoEffect() {
 		super.DoEffect();
+
 		if (!owner || !target || owner.waterlevel > 1) {
-			DepleteOrDestroy();
+			Destroy();
 			return;
 		}
+
 		if (owner.isFrozen())
 			return;
+
 		if (timer <= 0) {
-			DepleteOrDestroy();
+			Destroy();
 			return;
 		}
+
 		timer--;
 		if (timer % 35 == 0) {
 			int fl = (random[burn](1,3) == 1) ? 0 : DMG_NO_PAIN;
 			owner.DamageMobj(self,target,4,"Fire",flags:DMG_THRUSTLESS|fl);
 		}
-		if (owner.health <= 0) {
-			owner.A_SetTRanslation("Scorched");
-		}
+		
 		double rad = owner.radius*0.75;		
 		
 		if (GetParticlesLevel() >= 1) {
@@ -446,9 +460,12 @@ Class PK_BurnControl : PK_InventoryToken {
 			}
 		}
 	}
+
 	override void DetachFromOwner() {
-		if (owner)
+		if (owner) {
 			owner.A_RemoveLight('PKBurn');
+			owner.translation = prevTranslation;
+		}
 		super.DetachFromOwner();
 	}
 }
