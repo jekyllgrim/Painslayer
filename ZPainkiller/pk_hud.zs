@@ -358,7 +358,7 @@ Class PainkillerHUD : BaseStatusBar {
 			double closestDist = 1400;
 			for (int i = 0; i < bosses; i++) {
 				let act = mainhandler.allbosses[i];
-				if (act && act.target) {
+				if (act && act.health > 0 && act.target) {
 					int dist = player.Distance2D(act);
 					if (closestDist > 0 && dist < closestDist) {
 						bossmonster = act;
