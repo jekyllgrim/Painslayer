@@ -55,8 +55,10 @@ Class PK_DemonTargetControl : PK_InventoryToken {
 		}
 		//monsters and players are colorized (only for consoleplayer) so that the demon shader can make them red:
 		if (owner.bISMONSTER || (owner is "PlayerPawn")) {
-			//demo shader requires them to be purple, stencil and fullbright
-			if (CPlayerPawn.FindInventory("PK_DemonWeapon")) {
+			// demo shader requires them to be purple, stencil and fullbright
+			// only apply this if monster is alive (if Keep Corpses option is 
+			// enabled)
+			if (CPlayerPawn.FindInventory("PK_DemonWeapon") && owner.health > 0) {
 				//console.printf("Modifying %s's appearance",owner.GetClassName());
 				owner.bBRIGHT = true;
 				owner.A_SetRenderstyle(1.0,Style_Stencil);
