@@ -366,24 +366,23 @@ Class PainkillerHUD : BaseStatusBar {
 					}
 				}
 			}
-			if (bossmonster && bossmonster != nearestBoss) {
+			if (bossmonster) {
 				nearestBoss = bossmonster;
 				if (nearestBoss.SpawnState && nearestBoss.SpawnState.sprite) {
 					bossSprite = nearestBoss.SpawnState.GetSpriteTexture(2);
 					//bossSpriteName = TexMan.GetName(bossSprite);
 				}
 				prevHealthBarFraction = healthBarFraction;
-				// update max health if it's not defined yet or 
-				// if the arrow is now pointing at a new boss:
-				if (!bossMaxHealth)
-					bossMaxHealth = max(bossmonster.health, bossmonster.GetMaxHealth(true));
-				
-				healthBarFraction = double(bossmonster.health) / bossMaxHealth;
+				// make sure health isn't bigger than maxhealth
+				// (covers cases when a boss's health was increased
+				// beyond starthealth, while starthealth wasn't
+				// updated):
+				int bossMaxHealth = max(bossmonster.health, bossmonster.GetMaxHealth(true));
+				healthBarFraction = double(bossmonster.health) / double(bossMaxHealth);
 				
 				// Only update the shape if the health actually changed
 				if (prevHealthBarFraction != healthBarFraction)
-					UpdateHealthBar(healthBarShape, healthBarFraction);
-				
+					UpdateHealthBar(healthBarShape, healthBarFraction);				
 			}
 			else {
 				//bossSpritename = '';
