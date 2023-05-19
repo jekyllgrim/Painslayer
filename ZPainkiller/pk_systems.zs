@@ -178,6 +178,10 @@ Class PK_DemonWeapon : PKWeapon {
 	private double rippleTimer;
 	private bool runRipple;
 
+	private int prevRenderstyle;
+	private color prevFillcolor;
+	private bool prevBRIGHT;
+
 	Default {
 		+WEAPON.NOAUTOFIRE;
 		+WEAPON.DONTBOB;
@@ -199,7 +203,8 @@ Class PK_DemonWeapon : PKWeapon {
 		minsouls = control.GetMinSouls();
 		fullsouls = control.GetFullSouls();
 		dur = 25;
-		owner.A_StartSound("demon/start",CHAN_AUTO,flags:CHANF_LOCAL);		
+		owner.A_StartSound("demon/start",CHAN_AUTO);		
+		
 		prevweapon = owner.player.readyweapon;
 		let psp = owner.player.GetPSprite(PSP_WEAPON);
 		if (psp) {
@@ -207,20 +212,23 @@ Class PK_DemonWeapon : PKWeapon {
 			owner.player.SetPSprite(PSP_WEAPON,FindState("Ready"));
 			psp.y = WEAPONTOP;
 		}
+		
+		// Play the sound and change the player's visuals
+		// (this can be heard/seen by everyone):
+		owner.A_StartSound("demon/loop", CH_HELL, CHANF_LOOPING);
+		prevRenderstyle = owner.GetRenderstyle();
+		prevFillcolor = owner.fillcolor;
+		prevBRIGHT = owner.bBRIGHT;
+		owner.A_SetRenderstyle(owner.alpha, Style_Stencil);
+		owner.SetShade("FF0000");
+		owner.bBRIGHT = true;
+
 		//enable demon shader if given to the consoleplayer
 		if(players[consoleplayer] == owner.player)   {
-			owner.A_StartSound("demon/loop",CH_HELL,CHANF_UI|CHANF_LOOPING);
-			SetMusicVolume(0);
-			PPShader.SetEnabled( "DemonMorph", true);
-			PPShader.SetUniform1f("DemonMorph", "waveSpeed", 25 );
-			PPShader.SetUniform1f("DemonMorph", "waveAmount", 10 );
-			PPShader.SetUniform1f("DemonMorph", "centerX", 0.5 );
-			PPShader.SetUniform1f("DemonMorph", "centerY", 0.5 );
-			PPShader.SetUniform1f("DemonMorph", "rippleTimer", 0);
-			PPShader.SetUniform1f("DemonMorph", "amount", 0 );
 			rippleTimer = 0;
 			runRipple = false;
 		}
+
 		handler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));
 		if (handler) {
 			for (int i = 0; i < handler.demontargets.Size(); i++) {
@@ -258,6 +266,7 @@ Class PK_DemonWeapon : PKWeapon {
 		owner.gravity *= 0.6;
 		if (pk_debugmessages)
 			console.printf("Changing player %d speed to %f and gravity to %f",owner.player.mo.PlayerNumber(),owner.speed,owner.gravity);
+		
 		//Remove all active powerups from the owner's inventory:
 		Array<Powerup> powerups;
 		for (let iitem = owner.Inv; iitem != NULL; iitem = iitem.Inv) {
@@ -266,11 +275,24 @@ Class PK_DemonWeapon : PKWeapon {
 				powerups.Push (item);
 			}
 		}
-
 		for (int i = 0; i < powerups.Size (); i++) {
-			Owner.RemoveInventory (powerups [i]);
+			owner.RemoveInventory (powerups [i]);
 			if (pk_debugmessages)
 				console.printf("Taking \cD%s\cJ from player's inventory",powerups[i].GetClassName());
+		}
+	}
+
+	void ResetWeapon() {
+		if (!owner || !owner.player || !prevweapon)
+			return;
+
+		owner.player.readyweapon = prevweapon;
+		owner.player.readyweapon.crosshair = 0;
+		owner.player.readyweapon.A_ZoomFactor(1.0);
+		let psp = owner.player.FindPSprite(PSP_WEAPON);
+		if (psp) {
+			owner.player.SetPSprite(PSP_WEAPON,prevweapon.FindState("Ready"));
+			psp.y = WEAPONTOP;
 		}
 	}
 
@@ -285,6 +307,20 @@ Class PK_DemonWeapon : PKWeapon {
 			Destroy();
 			return;
 		}
+		
+		// Keep setting the shader, because sometimes it gets
+		// deactivated if saving and loading during demon mode:
+		if(players[consoleplayer] == owner.player)   {
+			SetMusicVolume(0);
+			PPShader.SetEnabled( "DemonMorph", true);
+			PPShader.SetUniform1f("DemonMorph", "waveSpeed", 25 );
+			PPShader.SetUniform1f("DemonMorph", "waveAmount", 10 );
+			PPShader.SetUniform1f("DemonMorph", "centerX", 0.5 );
+			PPShader.SetUniform1f("DemonMorph", "centerY", 0.5 );
+			PPShader.SetUniform1f("DemonMorph", "rippleTimer", 0);
+			PPShader.SetUniform1f("DemonMorph", "amount", 0 );
+		}
+
 		if (control) {
 			// If we have 2 or 1 souls shy of the required number, show 
 			// a short "demon preview flash" but do nothing after that:
@@ -292,30 +328,21 @@ Class PK_DemonWeapon : PKWeapon {
 				// The preview lasts 20 tics, then switches you INSTANTLY 
 				// back to previous weapon:
 				if (GetAge() >= 20) {
-					owner.player.readyweapon = prevweapon;
-					let psp = owner.player.GetPsprite(PSP_WEAPON);
-					if (psp) {
-						owner.player.SetPSprite(PSP_WEAPON,prevweapon.FindState("Ready"));
-						psp.y = WEAPONTOP;
-					}
+					ResetWeapon();
 					Destroy();
 					return;
 				}
 			}
 			// This handles the actual removal of the full effect
-			// once the duration has passed
-			else if (cursouls >= fullsouls && GetAge() >= 35*dur) {
+			// once the duration has run out:
+			if (cursouls >= fullsouls && GetAge() >= 35*dur) {
 				control.ResetSouls();
-				owner.player.readyweapon = prevweapon;
-				let psp = owner.player.GetPsprite(PSP_WEAPON);
-				if (psp) {
-					owner.player.SetPSprite(PSP_WEAPON,prevweapon.FindState("Ready"));
-					psp.y = WEAPONTOP;
-				}
+				ResetWeapon();
 				Destroy();
 				return;
 			}
 		}
+
 		//do the ripple effect when the player fires
 		if(runRipple && owner.player == players[consoleplayer]) {
 			PPShader.SetUniform1f("DemonMorph", "rippleTimer", rippleTimer );
@@ -333,10 +360,10 @@ Class PK_DemonWeapon : PKWeapon {
 
 	override void DetachFromOwner() {
 		if(players[consoleplayer] == owner.player)   {
-			PPShader.SetEnabled( "DemonMorph", false);
-			owner.A_StopSound(CH_HELL);
+			PPShader.SetEnabled("DemonMorph", false);
 			SetMusicVolume(1);
 		}
+
 		if (!PK_MainHandler.CheckPlayersHave("PK_DemonWeapon") && handler) {
 			for (int i = 0; i < handler.demontargets.Size(); i++) {
 				let act = handler.demontargets[i];
@@ -346,23 +373,26 @@ Class PK_DemonWeapon : PKWeapon {
 				}
 			}
 		}
-		owner.A_StartSound("demon/end",CHAN_AUTO,CHANF_LOCAL);
+		
+		owner.A_StopSound(CH_HELL);
+		owner.A_SetRenderstyle(owner.alpha, prevRenderstyle);
+		owner.SetShade(prevFillcolor);
+		owner.bBRIGHT = prevBRIGHT;
+
+		owner.A_StartSound("demon/end",CHAN_AUTO);
 		//restore vulnerability, speed, gravity and viewbob
 		owner.bNODAMAGE = owner.default.bNODAMAGE;
 		owner.bNOBLOOD = owner.default.bNOBLOOD;
 		owner.bNOPAIN = owner.default.bNOPAIN;
+
 		if (cursouls >= fullsouls) {
 			owner.speed = owner.default.speed; //p_speed;
 			owner.gravity = owner.default.gravity; //p_gravity;
 		}
+
 		if (pk_debugmessages)
 			console.printf("Changing player %d speed to %f and gravity to %f",owner.player.mo.PlayerNumber(),owner.speed,owner.gravity);
 		owner.player.mo.viewbob = owner.player.mo.default.viewbob;
-		//instantly  switch back to previous weapon
-		if (owner.player.readyweapon) {
-			owner.player.readyweapon.crosshair = 0;
-			owner.player.readyweapon.A_ZoomFactor(1.0);
-		}
 		owner.player.SetPsprite(PSP_DEMON,null);
 		super.DetachFromOwner();
 	}
