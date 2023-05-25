@@ -320,7 +320,7 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner) {
-			DepleteOrDestroy();
+			Destroy();
 			return;
 		}
 		if (owner.isFrozen())
@@ -332,14 +332,12 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 				smk.vel = (frandom[etc](-0.5,0.5),frandom[etc](-0.5,0.5),frandom[etc](0.6,0.9));
 			}
 		}
-		if (noPainTics > 0)
-		{
+		if (noPainTics > 0) {
 			noPainTics--;
 		}
 		if (owner.health <= 0) {
 			if (!owner.bISMONSTER || owner.bBOSS) {
-				owner.A_StopSound(CH_LOOP);
-				DepleteOrDestroy();
+				Destroy();
 				return;
 			}
 			if (isFlesh)
@@ -347,16 +345,20 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 			owner.SetOrigin(owner.pos + (frandom[etc](-1,1),frandom[etc](-1,1),frandom[etc](0.5,1.5)),false);
 			deadage++;
 			if (deadage > deadtics){
-				owner.A_StopSound(CH_LOOP);
-				DepleteOrDestroy();
+				Destroy();
 				return;
 			}
 		}
-		if (GetAge() > 300 || (owner.health > 0 && GetAge() > 20)) {
-			owner.A_StopSound(CH_LOOP);
-			DepleteOrDestroy();
+		if (age > 300 || (owner.health > 0 && age > 20)) {
+			Destroy();
 			return;
 		}
+	}
+
+	override void DetachFromOwner() {
+		if (owner)
+			owner.A_StopSound(CH_LOOP);
+		super.DetachFromOwner();
 	}
 }
 
