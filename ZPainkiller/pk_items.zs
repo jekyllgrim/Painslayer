@@ -795,6 +795,8 @@ Class PK_GoldSoul : Health {
 	mixin PK_ParticleLevelCheck;
 	mixin PK_PlayerSightCheck;
 	mixin PK_PickupSound;
+
+	TextureID partTex;
 	
 	Default {
 		inventory.pickupmessage "$PKI_GOLDSOUL";
@@ -816,15 +818,25 @@ Class PK_GoldSoul : Health {
 			return;
 		if (isFrozen())
 			return;	
-		if (GetAge() % 10 == 0)
-			canSeePlayer = CheckPlayerSights();
-		if (canSeePlayer)
-			A_SpawnItemEx(
-				"PK_GoldSoulparticle",
-				xofs: frandom[part](4,10),zofs:frandom[part](16,32),
-				xvel:-0.35,zvel:frandom[part](0.5,2),
-				angle:frandom[part](0,359)
-			);
+		
+		if (!partTex)
+			partTex = TexMan.CheckForTexture("FLARB0");
+		
+		int life = random[part](25,35);
+		A_SpawnParticleEx(
+			"",
+			partTex,
+			STYLE_Add,
+			SPF_FULLBRIGHT|SPF_RELATIVE,
+			lifetime: life,
+			size: 4,
+			angle: random[part](0, 359),
+			xoff: random[part](4,10),
+			zoff:frandom[part](16,32),
+			velx: -0.35,
+			velz: frandom(0.5, 2),
+			sizestep: 4 / double(-life)
+		);
 	}
 	
 	override bool TryPickup(in out actor toucher) {
@@ -842,17 +854,6 @@ Class PK_GoldSoul : Health {
 	Idle:
 		GSOU ABCDEFGHIJKLMNOPQRSTU 2;
 		loop;
-	}
-}
-
-Class PK_GoldSoulparticle : PK_BaseFlare {
-	Default {
-		scale 0.025;
-		renderstyle 'Add';
-		PK_BaseFlare.style 1;
-		PK_BaseFlare.fadefactor 0.02;
-		PK_BaseFlare.shrinkfactor 0.9;
-		alpha 1;
 	}
 }
 
