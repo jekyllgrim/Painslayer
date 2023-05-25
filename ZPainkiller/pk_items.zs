@@ -801,7 +801,7 @@ Class PK_GoldSoul : Health {
 	Default {
 		inventory.pickupmessage "$PKI_GOLDSOUL";
 		inventory.amount 100;
-		inventory.maxamount 100;
+		inventory.maxamount 200;
 		renderstyle 'Add';
 		+NOGRAVITY
 		alpha 0.9;
