@@ -376,6 +376,12 @@ Class PK_EquipmentSpawner : Inventory {
 				SpawnInvPickup(spawnpos,tospawn2);
 		}*/
 	}
+
+	States {
+	Spawn:
+		TNT1 A 1;
+		stop;
+	}
 }
 
 Class PK_EquipmentSpawner_Clip : PK_EquipmentSpawner {
