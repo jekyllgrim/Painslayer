@@ -76,6 +76,10 @@ Class PK_Boltgun : PKWeapon {
 			plr.SetPSprite(PSP_HIGHLIGHTS,scopestate);
 		}
 	}
+
+	action void PK_FireBoltGun(double leftright = 0, double updown = 0) {
+		Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: leftright, updown: updown);
+	}
 	
 	states {
 	Cache:		
@@ -205,7 +209,7 @@ Class PK_Boltgun : PKWeapon {
 		#### A 4 {
 			double xofs = invoker.scoped ? 0 : 3;
 			double yofs = invoker.scoped ? 1 : -2;
-			Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: xofs, updown: yofs);
+			PK_FireBoltGun(xofs, yofs);
 			PK_DepleteAmmo(amount:1);
 			PK_AttackSound("weapons/boltgun/fire1",CHAN_5);
 			A_WeaponOffset(4,4,WOF_ADD);
@@ -214,11 +218,9 @@ Class PK_Boltgun : PKWeapon {
 			double xofs = invoker.scoped ? -3 : 0;
 			double yofs = invoker.scoped ? 0 : -3;
 			PK_DepleteAmmo(amount:2);
-			Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: xofs, updown: yofs);
-			//A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
+			PK_FireBoltGun(xofs, yofs);
 			xofs = invoker.scoped ? 3 : 6;
-			Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: xofs, updown: yofs);
-			//A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
+			PK_FireBoltGun(xofs, yofs);
 			A_StartSound("weapons/boltgun/fire2",CHAN_6);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
@@ -226,11 +228,9 @@ Class PK_Boltgun : PKWeapon {
 			double xofs = invoker.scoped ? -6 : -3;
 			double yofs = invoker.scoped ? -1 : -4;
 			PK_DepleteAmmo(amount:2);
-			Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: xofs, updown: yofs);
-			//A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
+			PK_FireBoltGun(xofs, yofs);
 			xofs = invoker.scoped ? 5 : 9;
-			Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: xofs, updown: yofs);
-			//A_FireProjectile("PK_Bolt",useammo:false,spawnofs_xy:xofs,spawnheight:yofs);
+			PK_FireBoltGun(xofs, yofs);
 			A_StartSound("weapons/boltgun/fire3",CHAN_7);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
