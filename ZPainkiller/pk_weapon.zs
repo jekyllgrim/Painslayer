@@ -822,7 +822,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 		PK_Projectile.trailalpha 0.4;
 		PK_Projectile.trailfade 0.1;
 		PK_Projectile.flareactor "PK_ProjFlare";
-		PK_Projectile.trailactor "PK_BaseFlare";
+		PK_Projectile.trailactor "";
 	}
 	
 	/*
@@ -869,12 +869,58 @@ Class PK_Projectile : PK_BaseActor abstract {
 			fl.falpha = flarealpha;
 		}
 	}
+
+	virtual void SpawnTrail(vector3 ppos, int life = 10, double pSize = 8., double pSizeStep = 0, vector3 pvel = (0,0,0)) {
+		if (trailvel != 0) {
+			pvel = (
+				frandom[trailfx](-trailvel,trailvel),
+				frandom[trailfx](-trailvel,trailvel),
+				frandom[trailfx](-trailvel,trailvel)
+			);
+		}
+		if (trailactor) {			
+			let trl = Spawn(trailactor,ppos+(0,0,trailz));
+			if (trl) {
+				trl.master = self;
+				let trlflr = PK_BaseFlare(trl);
+				if (trlflr) {
+					trlflr.fcolor = trailcolor;
+					trlflr.fscale = trailscale;
+					trlflr.falpha = trailalpha;
+					if (trailactor == 'PK_BaseFlare')
+						trlflr.A_SetRenderstyle(alpha,Style_Shaded);
+					if (trailfade != 0)
+						trlflr.fade = trailfade;
+					if (trailshrink != 0)
+						trlflr.shrink = trailshrink;
+				}
+				trl.vel = pvel;
+			}
+		}
+		else {
+			vector3 ppos = ppos + (0, 0, trailz) - pos;
+			//console.printf("Spawning particle. Size: %.2f", psize);
+			A_SpawnParticle(
+				trailcolor,
+				lifetime: life,
+				size: psize,
+				xoff: ppos.x,
+				yoff: ppos.y,
+				zoff: ppos.z,
+				velx: pvel.x,
+				vely: pvel.y,
+				velz: pvel.z,
+				startalphaf: trailalpha * 2,
+				sizestep: psizeStep
+			);
+		}
+	}
 	
 	//An override initially by Arctangent that spawns trails like FastProjectile does it:
 	override void Tick () {
 		Vector3 oldPos = self.pos;		
 		Super.Tick();
-		if (!trailcolor || !trailactor)
+		if (!trailcolor && !trailactor)
 			return;		
 		
 		if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
@@ -889,26 +935,12 @@ Class PK_Projectile : PK_BaseActor abstract {
 		Vector3 direction = path / distance;
 		int steps = int( distance );
 		
+		int life = ceil(trailalpha / trailfade * 2);
+		double psize = 256. * trailscale;
+		vector3 pvel = (0,0,0);		
+		double psizeStep = trailshrink != 0 ? psize / life * trailshrink : 0;
 		for( int i = 0; i < steps; i++ )  {
-		
-			let trl = Spawn(trailactor,oldPos+(0,0,trailz));
-			if (trl) {
-				trl.master = self;
-				let trlflr = PK_BaseFlare(trl);
-				if (trlflr) {
-					trlflr.fcolor = trailcolor;
-					trlflr.fscale = trailscale;
-					trlflr.falpha = trailalpha;
-					if (trailactor.GetClassName() == "PK_BaseFlare")
-						trlflr.A_SetRenderstyle(alpha,Style_Shaded);
-					if (trailfade != 0)
-						trlflr.fade = trailfade;
-					if (trailshrink != 0)
-						trlflr.shrink = trailshrink;
-				}
-				if (trailvel != 0)
-					trl.vel = (frandom(-trailvel,trailvel),frandom(-trailvel,trailvel),frandom(-trailvel,trailvel));
-			}
+			SpawnTrail(oldpos, life, psize, pSizeStep, pvel);
 			oldPos = level.vec3Offset( oldPos, direction );
 		}
 	}
