@@ -101,6 +101,69 @@ Class PK_ElectroDriver : PKWeapon {
 		return ltarget.pos+(0,0,ltarget.height*0.5);
 	}
 
+	action void A_DoElectroAttack() {
+		if (waterlevel < 2) {
+			vector3 atkpos = FindElectroTarget();
+			PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
+			PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
+			if (invoker.hasDexterity) {
+				PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.2,9.5),style:STYLE_ADD);
+				PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.9,10.5),style:STYLE_ADD);
+			}
+		}
+
+		else {
+			A_Overlay(PSP_UNDERGUN, "UnderwaterMuzzleFlash", true);
+			if (random(0,1) == 1)
+				DamageMobj(self, self, 1, 'Electricity', DMG_THRUSTLESS);
+
+			double prad = 256;
+			BlockThingsIterator itr = BlockThingsIterator.Create(self, prad * 2);
+			while (itr.next()) {
+				let next = itr.thing;
+				if (!next || next == self)
+					continue;
+				bool isValid = (next.bSHOOTABLE && ( (!next.bIsMonster && !next.player) || health > 0 ));
+				if (!isValid)
+					continue;
+				double dist = Distance3D(next);
+				if (dist > prad)
+					continue;
+				if (!CheckSight(next,SF_IGNOREWATERBOUNDARY))
+					continue;
+				PK_ElectroTargetControl.DealElectroDamage(next, self, self, 2, DMG_THRUSTLESS|DMG_PLAYERATTACK, delay:12);
+			}
+			
+			double v = 4;
+			if (invoker.GetParticlesLevel() >= PK_BaseActor.PL_FULL) {
+				for (int i = 80; i > 0; i--) {
+					/*A_SpawnParticle(
+						"6a7dfa",
+						SPF_FULLBRIGHT|SPF_RELPOS,
+						lifetime: random[epart](30, 45),
+						size: 5,
+						angle: angle,
+						zoff: height * 0.6,
+						velx: frandom[epart](-v, v),
+						vely: frandom[epart](-v, v),
+						velz: frandom[epart](-v, v)
+					);*/
+					FSpawnParticleParams electricBlip;
+					electricBlip.color1 = "6a7dfa";
+					electricBlip.flags = SPF_FULLBRIGHT;
+					electricBlip.pos.xy = self.pos.xy + (frandom[epart](-prad, prad), frandom[epart](-prad, prad));
+					electricBlip.pos.z = self.pos.z + Clamp(frandom[epart](-prad, prad), -prad, waterdepth - height * 0.5);
+					electricBlip.vel = (frandom[epart](-v, v),frandom[epart](-v, v), frandom[epart](-v, v) * 0.5);
+					electricBlip.accel = electricBlip.vel * frandom[epart](-0.1, -0.8);
+					electricBlip.startalpha = 1;
+					electricBlip.Size = frandom[epart](5,7);
+					electricBlip.lifetime = 10;
+					Level.SpawnParticle(electricBlip);
+				}
+			}
+		}
+	}
+
 	States {
 	Spawn:
 		PKWI D -1;
@@ -108,14 +171,14 @@ Class PK_ElectroDriver : PKWeapon {
 	Ready:
 		ELDR A 1 {
 			PK_WeaponReady();
-			if (PK_CheckAmmo(secondary:true))
+			if (PK_CheckAmmo(secondary:true) && waterlevel < 2)
 				A_Overlay(PSP_OVERGUN,"ElectricSpark",nooverride:true);
 		}
 		loop;
 	Fire:
 		TNT1 A 0 {
 			PK_AttackSound("weapons/edriver/starshot");
-			A_FireProjectile("PK_Shuriken",spawnofs_xy:5);
+			Fire3DProjectile("PK_Shuriken", leftright:5);
 			A_WeaponOffset(2+frandom[sfx](-0.5,0.5),34+frandom[sfx](-0.5,0.5));
 		}
 		ELDR BC 1 A_WeaponOffset(-0.5,-0.5,WOF_ADD);
@@ -143,6 +206,7 @@ Class PK_ElectroDriver : PKWeapon {
 				return ResolveState("DiskFire");
 			}
 			
+			A_StartSound("weapons/edriver/electroloop",CH_LOOP,CHANF_LOOPING);
 			invoker.celldepleterate++;
 			int req = invoker.hasDexterity ? 1 : 2;
 			if (invoker.celldepleterate > req) {				
@@ -151,15 +215,7 @@ Class PK_ElectroDriver : PKWeapon {
 					return ResolveState("AltHoldEnd");
 				PK_DepleteAmmo(secondary:true);
 			}
-
-			A_StartSound("weapons/edriver/electroloop",CH_LOOP,CHANF_LOOPING);
-			vector3 atkpos = FindElectroTarget();
-			PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
-			PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
-			if (invoker.hasDexterity) {
-				PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.2,9.5),style:STYLE_ADD);
-				PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.9,10.5),style:STYLE_ADD);
-			}
+			A_DoElectroAttack();
 			player.SetPSprite(PSP_OVERGUN, ResolveState("Null"));
 			DampedRandomOffset(5,5,1.5);
 			double brt = frandom[sfx](40,56);
