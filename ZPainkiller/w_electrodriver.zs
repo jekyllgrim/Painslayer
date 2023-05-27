@@ -1,6 +1,7 @@
 Class PK_ElectroDriver : PKWeapon {
 	private bool attackrate;
 	private int celldepleterate;
+
 	Default {
 		-PKWeapon.ALWAYSBOB
 		PKWeapon.emptysound "weapons/empty/electrodriver";
@@ -18,6 +19,7 @@ Class PK_ElectroDriver : PKWeapon {
 		Tag "$PK_ELECTRODRIVER_TAG";
 		Obituary "$PKO_ELECTRO";
 	}
+
 	action vector3 FindElectroTarget(int atkdist = 280) {
 		if (!player || !player.mo)
 			return (0,0,0);
@@ -98,7 +100,8 @@ Class PK_ElectroDriver : PKWeapon {
 		}
 		return ltarget.pos+(0,0,ltarget.height*0.5);
 	}
-	states {
+
+	States {
 	Spawn:
 		PKWI D -1;
 		stop;
@@ -106,7 +109,7 @@ Class PK_ElectroDriver : PKWeapon {
 		ELDR A 1 {
 			PK_WeaponReady();
 			if (PK_CheckAmmo(secondary:true))
-				A_Overlay(PSP_UNDERGUN,"ElectricSpark",nooverride:true);
+				A_Overlay(PSP_OVERGUN,"ElectricSpark",nooverride:true);
 		}
 		loop;
 	Fire:
@@ -157,6 +160,7 @@ Class PK_ElectroDriver : PKWeapon {
 				PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.2,9.5),style:STYLE_ADD);
 				PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.9,10.5),style:STYLE_ADD);
 			}
+			player.SetPSprite(PSP_OVERGUN, ResolveState("Null"));
 			DampedRandomOffset(5,5,1.5);
 			double brt = frandom[sfx](40,56);
 			A_AttachLight('PKWeaponlight', DynamicLight.PointLight, "5464fc", int(brt), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight));
@@ -197,22 +201,25 @@ Class PK_ElectroDriver : PKWeapon {
 			A_OverlayFlags(OverlayID(),PSPF_RENDERSTYLE|PSPF_ALPHA|PSPF_FORCEALPHA,true);
 			A_OverlayRenderstyle(OverlayID(),STYLE_Add);
 		}
-		ELDS A 1 bright {
+		ELDT # 2 bright {
 			if (!player.readyweapon || player.readyweapon != invoker || !PK_CheckAmmo(secondary:true)) {
-				A_ClearOverlays(PSP_HIGHLIGHTS,PSP_HIGHLIGHTS);
+				player.SetPSprite(PSP_HIGHLIGHTS, ResolveState("Null"));
 				return ResolveState("Null");
 			}
-			A_Overlay(PSP_HIGHLIGHTS,'ReadyLight',nooverride:true);
+			A_Overlay(PSP_HIGHLIGHTS,'ReadyHighlights',nooverride:true);
 			let psp = player.FindPSprite(overlayID());
-			if (psp)
-				psp.frame = random[sfx](0,4);
-			double alph = frandom[sfx](0.5,1);
-			A_OverlayAlpha(OverlayID(),alph);	
-			A_OverlayAlpha(PSP_HIGHLIGHTS,frandom[sfx](0.1,alph));	
+			if (psp) {
+				int newframe = random[sfx](0,5);
+				while (newframe == psp.frame) {
+					newframe = random[sfx](0,5);
+				}
+				psp.frame = newframe;
+			}
+			A_OverlayAlpha(PSP_HIGHLIGHTS,frandom[sfx](0.4,1));	
 			return ResolveState(null);
 		}
 		wait;
-	ReadyLight:
+	ReadyHighlights:
 		ELDR Y -1 bright {
 			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
 			A_OverlayRenderstyle(OverlayID(),Style_Add);

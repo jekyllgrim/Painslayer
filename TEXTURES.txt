@@ -719,6 +719,48 @@ Sprite "ELDRA0", 158, 106
 	Patch "ELDRA", 0, 0
 }
 
+Sprite "ELDTA0", 158, 106
+{
+	YScale 1.200
+	Offset -180, -96
+	Patch "ELDT00", 0, 0
+}
+
+Sprite "ELDTB0", 158, 106
+{
+	YScale 1.200
+	Offset -180, -96
+	Patch "ELDT01", 0, 0
+}
+
+Sprite "ELDTC0", 158, 106
+{
+	YScale 1.200
+	Offset -180, -96
+	Patch "ELDT02", 0, 0
+}
+
+Sprite "ELDTD0", 158, 106
+{
+	YScale 1.200
+	Offset -180, -96
+	Patch "ELDT03", 0, 0
+}
+
+Sprite "ELDTE0", 158, 106
+{
+	YScale 1.200
+	Offset -180, -96
+	Patch "ELDT04", 0, 0
+}
+
+Sprite "ELDTF0", 158, 106
+{
+	YScale 1.200
+	Offset -180, -96
+	Patch "ELDT05", 0, 0
+}
+
 Sprite "ELDRZ0", 158, 106
 {
 	YScale 1.200
