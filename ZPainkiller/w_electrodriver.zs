@@ -178,6 +178,7 @@ Class PK_ElectroDriver : PKWeapon {
 			A_StopSound(CH_LOOP);
 			A_StartSound("weapons/edriver/electroloopend",CH_LOOP);
 			A_RemoveLight('PKWeaponlight');
+			player.SetPSprite(PSP_UNDERGUN, ResolveState("Null"));
 		}
 		goto ready;	
 	Hightlights:
@@ -202,7 +203,7 @@ Class PK_ElectroDriver : PKWeapon {
 			A_OverlayRenderstyle(OverlayID(),STYLE_Add);
 		}
 		ELDT # 2 bright {
-			if (!player.readyweapon || player.readyweapon != invoker || !PK_CheckAmmo(secondary:true)) {
+			if (waterlevel >= 2 || !player.readyweapon || player.readyweapon != invoker || !PK_CheckAmmo(secondary:true)) {
 				player.SetPSprite(PSP_HIGHLIGHTS, ResolveState("Null"));
 				return ResolveState("Null");
 			}
@@ -225,6 +226,26 @@ Class PK_ElectroDriver : PKWeapon {
 			A_OverlayRenderstyle(OverlayID(),Style_Add);
 		}
 		stop;
+	UnderwaterMuzzleFlash:
+		TNT1 A 0 {
+			A_OverlayFlags(OverlayID(), PSPF_RENDERSTYLE|PSPF_FORCEALPHA, true);
+			A_OverlayRenderstyle(OverlayID(), STYLE_Add);			
+		}
+		ELDS # 1 {
+			if (waterlevel < 2)
+				return ResolveState("Null");
+			let psp = player.FindPSprite(OverlayID());
+			if (psp) {
+				psp.alpha = frandom[sfx](1, 2);
+				int newframe = random[sfx](0,11);
+				while (newframe == psp.frame) {
+					newframe = random[sfx](0,11);
+				}
+				psp.frame = newframe;
+			}
+			return ResolveState(null);
+		}
+		loop;
 	}
 }
 
