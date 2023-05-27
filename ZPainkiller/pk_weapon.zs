@@ -469,14 +469,16 @@ Class PKWeapon : Weapon abstract {
 		Used in most cases instead of PK_FireArchingProjectile above
 		since it produces a more accurate movement.
 	*/
-	action Actor Fire3DProjectile(	class<Actor> proj, 
-										bool useammo = true, 
-										double forward = 0, 
-										double leftright = 0, 
-										double updown = 0, 
-										bool crosshairConverge = false, 
-										double angleoffs = 0, 
-										double pitchoffs = 0) {
+	action Actor Fire3DProjectile (
+		class<Actor> proj, 
+		bool useammo = true, 
+		double forward = 0, 
+		double leftright = 0, 
+		double updown = 0, 
+		bool crosshairConverge = false, 
+		double angleoffs = 0, 
+		double pitchoffs = 0 ) {
+
 		if (!player || !player.mo)
 			return null;
 		

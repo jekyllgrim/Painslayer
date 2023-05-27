@@ -259,7 +259,6 @@ Class PK_Stake : PK_StakeProjectile {
 			bNOGRAVITY = true;
 			vel = vel.unit() * speed * 1.3;
 		}
-		sprite = GetSpriteIndex("M000");
 	}
 	
 	override void Tick () {
@@ -392,10 +391,9 @@ Class PK_Stake : PK_StakeProjectile {
 	states {
 	Cache:
 		M000 A 0; //stake
-		M001 A 0; //bolt
 		PSDE A 0; //stake debris
 	Spawn:
-		#### A 1 {
+		M000 A 1 {
 			if (pinvictim) {
 				pinvictim.angle = angle;			//if we already "grabbed" a fake corpse, the stake carries it with it
 				pinvictim.vel = vel;
@@ -404,9 +402,9 @@ Class PK_Stake : PK_StakeProjectile {
 		}
 		loop;
 	Death: 
-		#### A 160 StickToWall();
-		#### A 0 A_SetRenderStyle(1.0,Style_Translucent);
-		#### A 1 A_FadeOut(0.03);
+		M000 A 160 StickToWall();
+		M000 A 0 A_SetRenderStyle(1.0,Style_Translucent);
+		M000 A 1 A_FadeOut(0.03);
 		wait;
 	Crash:
 		TNT1 A 1 {
