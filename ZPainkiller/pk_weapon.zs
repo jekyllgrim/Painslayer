@@ -5,6 +5,8 @@
 
 Class PKWeapon : Weapon abstract {
 	mixin PK_Math;
+	mixin PK_ParticleLevelCheck;
+	
 	protected int PKWflags;
 	FlagDef NOAUTOPRIMARY 		: PKWflags, 0; //NOAUTOFIRE analog for primary attack only
 	FlagDef NOAUTOSECONDARY 	: PKWflags, 1; //NOAUTOFIRE analog for secondary attack only
