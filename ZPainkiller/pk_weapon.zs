@@ -818,6 +818,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 	
 	Default {
 		projectile;
+		+NOFRICTION
 		height 6;
 		radius 6;
 		PK_Projectile.flarescale 0.065;
