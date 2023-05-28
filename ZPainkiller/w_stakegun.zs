@@ -249,13 +249,7 @@ Class PK_Stake : PK_StakeProjectile {
 		super.PostBeginPlay();
 		
 		basedmg = 160;
-		/*if (target) {
-			// In case it's fired at a floor or ceiling at 
-			// point-blank range, the Spawn state won't be
-			// used and the stake won't receive proper 
-			// pitch. So, we do this:
-			pitch = target.pitch; 
-		}*/
+
 		if (mod) {
 			bNOGRAVITY = true;
 			if (waterlevel <= 0)
@@ -265,11 +259,21 @@ Class PK_Stake : PK_StakeProjectile {
 	
 	override void Tick () {
 		super.Tick();
-		if (!onFire && (mod || age >= 12)) {
-			trailactor = "PK_StakeFlame";
-			trailscale = 0.08;
-			A_AttachLight(BURNLIGHT, DynamicLight.RandomFlickerLight, "ffb30f", 40, 44, flags: DYNAMICLIGHT.LF_ATTENUATE);
-			onFire = true;
+		
+		if (GetClass() == "PK_Stake") {
+			if (!onFire && waterlevel <= 0 && (mod || age >= 12)) {
+				trailactor = "PK_StakeFlame";
+				trailscale = 0.08;
+				A_AttachLight(BURNLIGHT, DynamicLight.RandomFlickerLight, "ffb30f", 40, 44, flags: DYNAMICLIGHT.LF_ATTENUATE);
+				onFire = true;
+			}
+
+			if (waterlevel > 0 && onfire) {
+				trailactor = "";
+				trailscale = default.trailscale;
+				A_RemoveLight(BURNLIGHT);
+				onfire = false;
+			}
 		}
 		
 		if (stickvictim) {	
@@ -462,6 +466,7 @@ Class PK_StakeFlame : PK_BaseFlare {
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		roll = random[sfx](0,359);
+		scale * frandom[sfx](0.9, 1.1);
 	}
 	states {
 	Spawn:

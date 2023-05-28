@@ -369,14 +369,14 @@ Class PK_Bolt : PK_Stake {
 		scale 0.86;
 		Obituary "$PKO_BOLT";
 	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		sprite = GetSpriteIndex("M001");
 		basedmg = mod ? 70 : 53;
-		onFire = true; //this prevents it from spawning the fire trail that the stake would spawn after 12 tics
 		if (mod)
 			trailcolor = "F43510";
 	}
+
 	override void StakeBreak() {
 		for (int i = random[sfx](3,5); i > 0; i--) {
 			let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,pos.z)));
