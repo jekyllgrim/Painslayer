@@ -790,16 +790,21 @@ Class PK_Projectile : PK_BaseActor abstract {
 	mixin PK_Math;
 	protected vector3 spawnpos;
 	protected bool farenough;	
+	TextureID trailtex;
+	vector3 prevvel;
+
 	color flarecolor;
 	double flarescale;
 	double flarealpha;
 	color trailcolor;
+	string trailTexture;
 	double trailscale;
 	double trailalpha;
 	double trailfade;
 	double trailvel;
 	double trailz;
 	double trailshrink;
+	double surfaceSpeed;
 	
 	class<Actor> trailactor;
 	property trailactor : trailactor;
@@ -809,12 +814,14 @@ Class PK_Projectile : PK_BaseActor abstract {
 	property flarescale : flarescale;
 	property flarealpha : flarealpha;
 	property trailcolor : trailcolor;
+	property trailTexture : trailTexture;
 	property trailalpha : trailalpha;
 	property trailscale : trailscale;
 	property trailfade : trailfade;
 	property trailshrink : trailshrink;
 	property trailvel : trailvel;
 	property trailz : trailz;
+	property surfaceSpeed : surfaceSpeed;
 	
 	Default {
 		projectile;
@@ -827,7 +834,6 @@ Class PK_Projectile : PK_BaseActor abstract {
 		PK_Projectile.trailalpha 0.4;
 		PK_Projectile.trailfade 0.1;
 		PK_Projectile.flareactor "PK_ProjFlare";
-		PK_Projectile.trailactor "";
 	}
 	
 	/*
@@ -881,15 +887,84 @@ Class PK_Projectile : PK_BaseActor abstract {
 		}
 	}
 
-	virtual void SpawnTrail(vector3 ppos, int life = 10, double pSize = 8., double pSizeStep = 0, vector3 pvel = (0,0,0)) {
-		if (trailvel != 0) {
-			pvel = (
-				frandom[trailfx](-trailvel,trailvel),
-				frandom[trailfx](-trailvel,trailvel),
-				frandom[trailfx](-trailvel,trailvel)
+	// Prevent gravity changes underwater:
+	override void FallAndSink(double grav, double oldfloorz) {
+		if (pos.z > floorz && !bNOGRAVITY) {
+			Vel.Z -= grav;
+		}
+	}
+
+	virtual void CreateParticleTrail(vector3 ppos, double pvel, double velstep = 0) {
+		FSpawnParticleParams trail;
+		// determine if this is a textured particle
+		// update the texture if the trailTexture value changes
+		// (for projectiles that randomize the particle texture dynamically)
+		if (!trailtex || (trailTexture && trailTexture != default.trailTexture))
+			trailtex = TexMan.CheckForTexture(trailTexture);
+		// if textured, apply the texture and make translucent:
+		bool isTextured = trailtex.IsValid();
+		if (isTextured) {
+			trail.texture = trailtex;
+			trail.style = STYLE_Translucent;
+		}
+		// otherwise apply color:
+		else
+			trail.color1 = trailcolor;
+
+		// add vertical offset to position:
+		trail.pos = (ppos.x, ppos.y, ppos.z + trailz);
+		// lifetime is calculated based on alpha and doubled:
+		trail.lifetime = ceil(trailalpha / trailfade * 2);
+		// apply random velocity if pvel is not 0:
+		if (pvel != 0) {
+			trail.vel = (
+				frandom[trailfx](-pvel,pvel),
+				frandom[trailfx](-pvel,pvel),
+				frandom[trailfx](-pvel,pvel)
 			);
 		}
-		if (trailactor) {			
+		// apply acceleration if provided:
+		if (velstep > 0)
+			trail.accel = trail.vel * velstep;
+
+		// apply trailalpha as alpha directly if it's textured,
+		// otherwise apply double that (because most of actor-based
+		// trails are already partially translucent sprites,
+		// and using alpha value directly usually results in
+		// too low values):
+		trail.startalpha = isTextured ? trailalpha : trailalpha * 2;
+		trail.fadestep = -1;
+
+		// scale the particle. Since particle size = pixel size,
+		// scale the texture accordingly, and if not textured,
+		// start with 256 (because the previously used default
+		// trail texture is 256x256, so trailscale is defined
+		// in projectiles with that in mind):
+		if (isTextured)
+			trail.size = TexMan.GetSize(trailtex) * trailscale;
+		else
+			trail.size = 256. * trailscale;
+
+		// add size step if trailshrink is defined. since it's not
+		// additive, calculate the approximate value based on size
+		// and lifetime:
+		if (trailshrink != 0) {
+			trail.sizestep = -(trail.size / trail.lifetime);
+		}
+		
+		Level.SpawnParticle(trail);
+	}
+
+	virtual void SpawnTrail(vector3 ppos) {
+		if (trailactor) {
+			vector3 tvel;
+			if (trailvel != 0) {
+				tvel = (
+					frandom[trailfx](-trailvel,trailvel),
+					frandom[trailfx](-trailvel,trailvel),
+					frandom[trailfx](-trailvel,trailvel)
+				);
+			}
 			let trl = Spawn(trailactor,ppos+(0,0,trailz));
 			if (trl) {
 				trl.master = self;
@@ -905,53 +980,38 @@ Class PK_Projectile : PK_BaseActor abstract {
 					if (trailshrink != 0)
 						trlflr.shrink = trailshrink;
 				}
-				trl.vel = pvel;
+				trl.vel = tvel;
 			}
 		}
 		else {
-			vector3 ppos = ppos + (0, 0, trailz) - pos;
-			//console.printf("Spawning particle. Size: %.2f", psize);
-			A_SpawnParticle(
-				trailcolor,
-				lifetime: life,
-				size: psize,
-				xoff: ppos.x,
-				yoff: ppos.y,
-				zoff: ppos.z,
-				velx: pvel.x,
-				vely: pvel.y,
-				velz: pvel.z,
-				startalphaf: trailalpha * 2,
-				sizestep: psizeStep
-			);
+			CreateParticleTrail(ppos, trailvel);
 		}
 	}
 	
 	//An override initially by Arctangent that spawns trails like FastProjectile does it:
 	override void Tick () {
-		Vector3 oldPos = self.pos;		
+		Vector3 oldPos = self.pos;
+
 		Super.Tick();
+
 		if (!trailcolor && !trailactor)
-			return;		
-		
+			return;			
 		if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
 			return;	
-		if (!farenough) {
-			if (level.Vec3Diff(pos,spawnpos).length() < 80)
+
+		if (!farenough && target) {
+			if (level.Vec3Diff(pos,spawnpos).length() < speed + target.radius)
 				return;
 			farenough = true;
 		}
+
 		Vector3 path = level.vec3Diff( self.pos, oldPos );
 		double distance = path.length() / clamp(int(trailscale * 50),1,8); //this determines how far apart the particles are
 		Vector3 direction = path / distance;
 		int steps = int( distance );
 		
-		int life = ceil(trailalpha / trailfade * 2);
-		double psize = 256. * trailscale;
-		vector3 pvel = (0,0,0);		
-		double psizeStep = trailshrink != 0 ? psize / life * trailshrink : 0;
 		for( int i = 0; i < steps; i++ )  {
-			SpawnTrail(oldpos, life, psize, pSizeStep, pvel);
+			SpawnTrail(oldpos);
 			oldPos = level.vec3Offset( oldPos, direction );
 		}
 	}
@@ -974,7 +1034,6 @@ Class PK_StakeProjectile : PK_Projectile {
 	protected double botz; //ZAtPoint above stake
 	actor pinvictim; //The fake corpse that will be pinned to a wall
 	protected double victimofz; //the offset from the center of the stake to the victim's corpse center
-	protected state sspawn; //pointer to Spawn label
 	bool stuckToSecPlane; //a non-transient way to record whether it stuck to a wall. Used by PK_StakeStickHandler
 	
 	Default {
@@ -1093,15 +1152,10 @@ Class PK_StakeProjectile : PK_Projectile {
 			Destroy();
 	}
 	
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		sspawn = FindState("Spawn");
-	}
-	
 	override void Tick () {
 		super.Tick();
 		//all stake-like projectiles need to face their movement direction while in Spawn sequence:
-		if (!isFrozen() && sspawn && InStateSequence(curstate,sspawn)) {
+		if (!isFrozen() && spawnstate && InStateSequence(curstate,spawnstate)) {
 			A_FaceMovementDirection(flags:FMDF_INTERPOLATE );
 			/*FLineTraceData hit;
 			LineTrace(angle, radius + vel.length(), pitch, TRF_NOSKY|TRF_BLOCKSELF, data: hit);
