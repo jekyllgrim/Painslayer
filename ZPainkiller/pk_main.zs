@@ -891,7 +891,7 @@ Class PK_ProjFlare : PK_BaseFlare {
 	}
 	override void Tick() {
 		super.Tick();
-		if (!master /*|| !bdoom_debris*/) {
+		if (!master) {
 			destroy();
 			return;
 		}
