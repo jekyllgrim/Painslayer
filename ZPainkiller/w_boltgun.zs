@@ -364,9 +364,9 @@ Class PK_ReflectionCamera : Actor {
 Class PK_Bolt : PK_Stake {
 	Default {
 		PK_Projectile.trailscale 0.01;
+		PK_Projectile.surfaceSpeed 85;
 		+NOGRAVITY
 		scale 0.86;
-		speed 95;
 		Obituary "$PKO_BOLT";
 	}
 	override void PostBeginPlay() {

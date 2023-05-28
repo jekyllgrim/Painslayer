@@ -136,12 +136,13 @@ Class PK_Stake : PK_StakeProjectile {
 		PK_Projectile.trailscale 0.012;
 		PK_Projectile.trailfade 0.02;
 		PK_Projectile.trailalpha 0.2;
+		PK_Projectile.surfaceSpeed 60;
+		speed 30;
 		ProjectileKickBack 50;
 		-NOGRAVITY
 		+NOEXTREMEDEATH
 		+NODECAL
 		+SKYEXPLODE
-		speed 60;
 		gravity 0.45;
 		radius 2;
 		height 2;
@@ -257,7 +258,8 @@ Class PK_Stake : PK_StakeProjectile {
 		}*/
 		if (mod) {
 			bNOGRAVITY = true;
-			vel = vel.unit() * speed * 1.3;
+			if (waterlevel <= 0)
+				vel = vel.unit() * speed * 1.3;
 		}
 	}
 	
