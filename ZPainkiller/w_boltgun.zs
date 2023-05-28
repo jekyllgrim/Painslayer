@@ -21,6 +21,10 @@ Class PK_Boltgun : PKWeapon {
 		inventory.icon "PKWIF0";
 		Tag "$PK_BOLTGUN_TAG";
 	}
+
+	action void PK_FireBoltGun(double leftright = 0, double updown = 0) {
+		Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: leftright, updown: updown);
+	}
 	
 	action void A_BoltgunScale(double scalex, double scaley, int flags = 0)
 	{
@@ -75,10 +79,6 @@ Class PK_Boltgun : PKWeapon {
 			state scopestate = scoped ? ResolveState("GoScope") : ResolveState("Unscope");
 			plr.SetPSprite(PSP_HIGHLIGHTS,scopestate);
 		}
-	}
-
-	action void PK_FireBoltGun(double leftright = 0, double updown = 0) {
-		Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: leftright, updown: updown);
 	}
 	
 	states {
@@ -207,16 +207,16 @@ Class PK_Boltgun : PKWeapon {
 			}
 		}
 		#### A 4 {
-			double xofs = invoker.scoped ? 0 : 3;
-			double yofs = invoker.scoped ? 1 : -2;
+			double xofs = invoker.scoped ? 3 : 3;
+			double yofs = invoker.scoped ? 2 : 0;
 			PK_FireBoltGun(xofs, yofs);
 			PK_DepleteAmmo(amount:1);
 			PK_AttackSound("weapons/boltgun/fire1",CHAN_5);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
 		#### B 4 {
-			double xofs = invoker.scoped ? -3 : 0;
-			double yofs = invoker.scoped ? 0 : -3;
+			double xofs = invoker.scoped ? 0 : 0;
+			double yofs = invoker.scoped ? 1 : -1;
 			PK_DepleteAmmo(amount:2);
 			PK_FireBoltGun(xofs, yofs);
 			xofs = invoker.scoped ? 3 : 6;
@@ -226,7 +226,7 @@ Class PK_Boltgun : PKWeapon {
 		}
 		#### C 2 {
 			double xofs = invoker.scoped ? -6 : -3;
-			double yofs = invoker.scoped ? -1 : -4;
+			double yofs = invoker.scoped ? 0 : -2;
 			PK_DepleteAmmo(amount:2);
 			PK_FireBoltGun(xofs, yofs);
 			xofs = invoker.scoped ? 5 : 9;
