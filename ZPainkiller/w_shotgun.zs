@@ -129,18 +129,12 @@ Class PK_FreezerProjectile : PK_Projectile {
 		PK_Projectile.flarescale 0.065;
 		PK_Projectile.flarealpha 0.7;
 		PK_Projectile.trailcolor "08caed";
-		PK_Projectile.trailTexture "FLARY0";
+		PK_Projectile.trailTexture "FLARA0";
 		PK_Projectile.trailscale 0.05;
 		PK_Projectile.trailalpha 0.2;
 		PK_Projectile.trailfade 0.03;
 		PK_Projectile.trailshrink 0.7;
 	}	
-	
-	/*override void CreateParticleTrail(out FSpawnParticleParams trail, vector3 ppos, double pvel, double velstep) {
-		super.CreateParticleTrail(trail, ppos, pvel, velstep);
-		trail.color1 = "";
-		trail.color1 = color("0000FF");
-	}*/
 
 	override void PostBeginPlay() {
 		super.PostBeginPlay();

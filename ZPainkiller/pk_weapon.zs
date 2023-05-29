@@ -947,16 +947,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 			trailtex = TexMan.CheckForTexture(trailTexture);
 		trailtex = TexMan.CheckForTexture(trailTexture);
 		bool isTextured = trailtex.IsValid();
-		
-		/*trail.texture = trailtex;
-		trail.style = STYLE_Shaded;
-		trail.color1 = trailcolor;
-		trail.size = 4;
-		trail.lifetime = 35;
-		trail.pos = ppos;
-		trail.startalpha = 1;
-		return;*/
-			
+
 		// if textured, apply the texture:
 		if (isTextured) {
 			trail.texture = trailtex;
@@ -964,6 +955,8 @@ Class PK_Projectile : PK_BaseActor abstract {
 
 		// apply color if provided:
 		if (trailcolor) {
+			// MUST BE SHADED if we're using textured particles,
+			// otherwise the colors get weird for some reason:
 			trail.style = STYLE_Shaded;
 			trail.color1 = color(trailcolor);
 		}
