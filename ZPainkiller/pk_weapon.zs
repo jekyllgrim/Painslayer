@@ -894,6 +894,46 @@ Class PK_Projectile : PK_BaseActor abstract {
 		}
 	}
 
+	// Spawns a particle or actor-based trail:
+	virtual void SpawnTrail(vector3 ppos) {
+		// Actor based:
+		if (trailactor) {
+			vector3 tvel;
+			if (trailvel != 0) {
+				tvel = (
+					frandom[trailfx](-trailvel,trailvel),
+					frandom[trailfx](-trailvel,trailvel),
+					frandom[trailfx](-trailvel,trailvel)
+				);
+			}
+			let trl = Spawn(trailactor,ppos+(0,0,trailz));
+			if (trl) {
+				trl.master = self;
+				let trlflr = PK_BaseFlare(trl);
+				if (trlflr) {
+					trlflr.fcolor = trailcolor;
+					trlflr.fscale = trailscale;
+					trlflr.falpha = trailalpha;
+					if (trailactor == 'PK_BaseFlare')
+						trlflr.A_SetRenderstyle(alpha,Style_Shaded);
+					if (trailfade != 0)
+						trlflr.fade = trailfade;
+					if (trailshrink != 0)
+						trlflr.shrink = trailshrink;
+				}
+				trl.vel = tvel;
+			}
+		}
+		// Particle based:
+		else {
+			CreateParticleTrail(ppos, trailvel);
+		}
+	}
+
+	// Spawns a particle-based trail. This uses the same
+	// projectile values as actor-based trails but adapts
+	// them so that they match the appearance of actor-based
+	// ones in terms of size and such:
 	virtual void CreateParticleTrail(vector3 ppos, double pvel, double velstep = 0) {
 		FSpawnParticleParams trail;
 		// determine if this is a textured particle
@@ -901,19 +941,20 @@ Class PK_Projectile : PK_BaseActor abstract {
 		// (for projectiles that randomize the particle texture dynamically)
 		if (!trailtex || (trailTexture && trailTexture != default.trailTexture))
 			trailtex = TexMan.CheckForTexture(trailTexture);
-		// if textured, apply the texture and make translucent:
 		bool isTextured = trailtex.IsValid();
+		
+		// if textured, apply the texture:
 		if (isTextured) {
 			trail.texture = trailtex;
-			trail.style = STYLE_Translucent;
 		}
-		// otherwise apply color:
-		else
+		// apply color if provided:
+		if (trailcolor)
 			trail.color1 = trailcolor;
 
 		// add vertical offset to position:
 		trail.pos = (ppos.x, ppos.y, ppos.z + trailz);
-		// lifetime is calculated based on alpha and doubled:
+		// lifetime is calculated based on alpha and half of
+		// fadefactor:
 		trail.lifetime = ceil(trailalpha / trailfade * 2);
 		// apply random velocity if pvel is not 0:
 		if (pvel != 0) {
@@ -954,62 +995,39 @@ Class PK_Projectile : PK_BaseActor abstract {
 		
 		Level.SpawnParticle(trail);
 	}
-
-	virtual void SpawnTrail(vector3 ppos) {
-		if (trailactor) {
-			vector3 tvel;
-			if (trailvel != 0) {
-				tvel = (
-					frandom[trailfx](-trailvel,trailvel),
-					frandom[trailfx](-trailvel,trailvel),
-					frandom[trailfx](-trailvel,trailvel)
-				);
-			}
-			let trl = Spawn(trailactor,ppos+(0,0,trailz));
-			if (trl) {
-				trl.master = self;
-				let trlflr = PK_BaseFlare(trl);
-				if (trlflr) {
-					trlflr.fcolor = trailcolor;
-					trlflr.fscale = trailscale;
-					trlflr.falpha = trailalpha;
-					if (trailactor == 'PK_BaseFlare')
-						trlflr.A_SetRenderstyle(alpha,Style_Shaded);
-					if (trailfade != 0)
-						trlflr.fade = trailfade;
-					if (trailshrink != 0)
-						trlflr.shrink = trailshrink;
-				}
-				trl.vel = tvel;
-			}
-		}
-		else {
-			CreateParticleTrail(ppos, trailvel);
-		}
-	}
 	
-	//An override initially by Arctangent that spawns trails like FastProjectile does it:
+	// An override initially by Arctangent that spawns trails like FastProjectile does it:
 	override void Tick () {
+		// Store position from previous tick:
 		Vector3 oldPos = self.pos;
 
 		Super.Tick();
 
 		if (!trailcolor && !trailactor)
-			return;			
+			return;
+		
+		// Don't spawn particles if they're turned off in the settings:
 		if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
 			return;	
 
+		// Don't spawn particles unless the projectile's distance
+		// to the shooter is at least the projectile's speed value
+		// plus the shooter's radius (this prevents particles from
+		// appearing behind the player's actor):
 		if (!farenough && target) {
 			if (level.Vec3Diff(pos,spawnpos).length() < speed + target.radius)
 				return;
 			farenough = true;
 		}
 
+		// Get difference between current position and position from
+		// previous tick, split it into chunks and spawn a particle
+		// at every inbetween positiong:
 		Vector3 path = level.vec3Diff( self.pos, oldPos );
-		double distance = path.length() / clamp(int(trailscale * 50),1,8); //this determines how far apart the particles are
+		// This determines how far apart the particles areL
+		double distance = path.length() / clamp(int(trailscale * 50),1,8); 
 		Vector3 direction = path / distance;
-		int steps = int( distance );
-		
+		int steps = int( distance );		
 		for( int i = 0; i < steps; i++ )  {
 			SpawnTrail(oldpos);
 			oldPos = level.vec3Offset( oldPos, direction );

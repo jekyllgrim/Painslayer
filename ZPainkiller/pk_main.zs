@@ -249,6 +249,19 @@ Class PK_BaseActor : Actor abstract {
 	mixin PK_Math;
 	mixin PK_PlayerSightCheck;
 	mixin PK_ParticleLevelCheck;
+
+	static const string whiteSmokeTextures[] = {
+		"SMO2A0",
+		"SMO2B0",
+		"SMO2C0",
+		"SMO2D0",
+		"SMO2E0",
+		"SMO2F0"
+	};
+
+	static string GetRandomWhiteSmoke() {
+		return whiteSmokeTextures[random[smksfx](0, whiteSmokeTextures.Size() -1)];
+	}
 	
 	bool CheckLandingSize (double cradius = 0, bool checkceiling = false) {
 		if (checkceiling) {

@@ -234,6 +234,7 @@ Class PK_Chaingun : PKWeapon {
 
 
 Class PK_Rocket : PK_Grenade {
+
 	Default {
 		speed 30;
 		seesound "weapons/chaingun/rocketfire";
@@ -244,15 +245,34 @@ Class PK_Rocket : PK_Grenade {
 		+NOGRAVITY
 		bouncetype 'none';
 		Obituary "$PKO_ROCKET";
-		PK_Projectile.trailactor "PK_RocketSmoke";
+		//PK_Projectile.trailactor "PK_RocketSmoke";
 		PK_Projectile.trailvel 1;
+		PK_Projectile.trailshrink 1.03;
+		PK_Projectile.trailalpha 0.5;
+		PK_Projectile.trailfade 0.03;
+		PK_Projectile.trailscale 0.1;
 	}
+
 	override void PostBeginplay() {
 		PK_Projectile.PostBeginplay();
 		A_StartSound("weapons/chaingun/rocketfly",CHAN_5,flags:CHANF_LOOPING,volume:0.8,attenuation:4);
 		if (mod)
 			vel *= 1.5;
 	}
+
+	override void CreateParticleTrail(vector3 ppos, double pvel, double velstep) {		
+		trailTexture = PK_BaseActor.GetRandomWhiteSmoke();
+
+		FSpawnParticleParams trail;
+		super.CreateParticleTrail(ppos, pvel, -0.05);
+		trail.lifetime = 100;
+		trail.startRoll = random[smk](0, 359);
+		trail.rollVel = frandom[smk](8,15)*randompick[smk](-1,1);
+		//trail.rollacc = trail.rollVel * -0.02;
+		Level.SpawnParticle(trail);
+
+	}
+	
 	states {
 	Spawn:
 		M000 A 1 NoDelay A_FaceMovementDirection(flags:FMDF_INTERPOLATE);
@@ -262,8 +282,6 @@ Class PK_Rocket : PK_Grenade {
 
 Class PK_RocketSmoke : PK_BaseSmoke {
 	Default {
-		alpha 0.5;
-		scale 0.05;
 		renderstyle 'translucent';
 	}
 	override void PostBeginPlay() {
