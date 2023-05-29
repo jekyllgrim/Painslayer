@@ -120,7 +120,7 @@ Class PK_FreezerProjectile : PK_Projectile {
 		+HITTRACER
 		+ROLLSPRITE
 		+ROLLCENTER
-		scale 0.15;
+		scale 0.32;
 		seesound "";
 		deathsound "";
 		speed 50;
@@ -129,36 +129,55 @@ Class PK_FreezerProjectile : PK_Projectile {
 		PK_Projectile.flarescale 0.065;
 		PK_Projectile.flarealpha 0.7;
 		PK_Projectile.trailcolor "08caed";
+		PK_Projectile.trailTexture "FLARY0";
 		PK_Projectile.trailscale 0.05;
 		PK_Projectile.trailalpha 0.2;
-		PK_Projectile.trailfade 0.06;
+		PK_Projectile.trailfade 0.03;
 		PK_Projectile.trailshrink 0.7;
-	}
+	}	
+	
+	/*override void CreateParticleTrail(out FSpawnParticleParams trail, vector3 ppos, double pvel, double velstep) {
+		super.CreateParticleTrail(trail, ppos, pvel, velstep);
+		trail.color1 = "";
+		trail.color1 = color("0000FF");
+	}*/
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		A_AttachLight('frez', DynamicLight.PointLight, "75edff", 40, 0, flags: DYNAMICLIGHT.LF_ATTENUATE);
 		if (mod)
 			vel *= 1.5;
 	}
-	states 	{
+
+	void ApplyFreeze(Actor victim) {
+		
+		// freeze only players and monsters that aren't bosses, don't have
+		// the NOICEDEATH flag and aren't descendants of ArchVile:
+		bool valid = victim && (victim.bISMONSTER || victim.player) && !victim.bBOSS && !victim.bNOICEDEATH && !(victim is "ArchVile");
+			
+		if (valid) {
+			victim.GiveInventory("PK_FreezeControl",1);
+			let frz = PK_FreezeControl(victim.FindInventory("PK_FreezeControl"));
+			if (frz) {
+				// Double freeze duration with Weapon Modifier
+				// but only if the victim is not a player:
+				frz.fcounter = mod && !victim.player ? FREEZERDURATIONMOD : FREEZERDURATION;
+				victim.A_SetBlend("0080FF",0.6,frz.fcounter * 1.5);
+			}
+		}
+	}
+
+	States 	{
 	Spawn:
 		BAL7 A 1;
 		loop;
 	Death:
 		TNT1 A 0 {
 			A_Stop();
+			ApplyFreeze(tracer);
+
 			A_AttachLight('frez', DynamicLight.RandomFlickerLight, "75edff", 32, 52, flags: DYNAMICLIGHT.LF_ATTENUATE);
 			roll = random(0,359); 
-			if (tracer && (tracer.bISMONSTER || tracer.player) && !tracer.bBOSS && !tracer.bNOICEDEATH && !(tracer is "ArchVile")) {
-				tracer.GiveInventory("PK_FreezeControl",1);
-				let frz = PK_FreezeControl(tracer.FindInventory("PK_FreezeControl"));
-				if (frz) {
-					// Double freeze duration with Weapon Modifier
-					// but only if the victim is not a player:
-					frz.fcounter = mod && !tracer.player ? FREEZERDURATIONMOD : FREEZERDURATION;
-					tracer.A_SetBlend("0080FF",0.6,frz.fcounter * 1.5);
-				}
-			}
 			
 			if (GetParticlesLevel() > PL_None) {
 				for (int i = random[sfx](10,15); i > 0; i--) {
@@ -181,8 +200,6 @@ Class PK_FreezerProjectile : PK_Projectile {
 		wait;
 	}
 }
-
-
 
 Class PK_FrozenChunk : PK_SmallDebris {
 	const POOFTIME = 100;

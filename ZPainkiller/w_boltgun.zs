@@ -448,7 +448,7 @@ Class PK_Bomb : PK_Projectile {
 	Default {
 		PK_Projectile.trailcolor "f4f4f4";
 		PK_Projectile.trailscale 0.035;
-		PK_Projectile.trailfade 0.015;
+		PK_Projectile.trailfade 0.005;
 		PK_Projectile.trailalpha 0.12;
 		-NOGRAVITY
 		+USEBOUNCESTATE

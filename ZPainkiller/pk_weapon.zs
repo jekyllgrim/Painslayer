@@ -603,13 +603,14 @@ Class PKWeapon : Weapon abstract {
 Class PKPuff : PK_BaseActor abstract {
 	mixin PK_Math;
 	Default {
-		+NOBLOCKMAP
-		+NOGRAVITY
+		+NOINTERACTION
 		+FORCEXYBILLBOARD
 		+PUFFGETSOWNER
 		-ALLOWPARTICLES
 		+DONTSPLASH
 		-FLOORCLIP
+		radius 1;
+		height 1;
 	}
 }
 
@@ -926,7 +927,9 @@ Class PK_Projectile : PK_BaseActor abstract {
 		}
 		// Particle based:
 		else {
-			CreateParticleTrail(ppos, trailvel);
+			FSpawnParticleParams trail;
+			CreateParticleTrail(trail, ppos, trailvel);
+			Level.SpawnParticle(trail);
 		}
 	}
 
@@ -934,28 +937,41 @@ Class PK_Projectile : PK_BaseActor abstract {
 	// projectile values as actor-based trails but adapts
 	// them so that they match the appearance of actor-based
 	// ones in terms of size and such:
-	virtual void CreateParticleTrail(vector3 ppos, double pvel, double velstep = 0) {
-		FSpawnParticleParams trail;
+	virtual void CreateParticleTrail(out FSpawnParticleParams trail, vector3 ppos, double pvel, double velstep = 0) {
+		trail.flags = SPF_ROLL|SPF_REPLACE;
+
 		// determine if this is a textured particle
 		// update the texture if the trailTexture value changes
 		// (for projectiles that randomize the particle texture dynamically)
 		if (!trailtex || (trailTexture && trailTexture != default.trailTexture))
 			trailtex = TexMan.CheckForTexture(trailTexture);
+		trailtex = TexMan.CheckForTexture(trailTexture);
 		bool isTextured = trailtex.IsValid();
 		
+		/*trail.texture = trailtex;
+		trail.style = STYLE_Shaded;
+		trail.color1 = trailcolor;
+		trail.size = 4;
+		trail.lifetime = 35;
+		trail.pos = ppos;
+		trail.startalpha = 1;
+		return;*/
+			
 		// if textured, apply the texture:
 		if (isTextured) {
 			trail.texture = trailtex;
 		}
+
 		// apply color if provided:
-		if (trailcolor)
-			trail.color1 = trailcolor;
+		if (trailcolor) {
+			trail.style = STYLE_Shaded;
+			trail.color1 = color(trailcolor);
+		}
 
 		// add vertical offset to position:
 		trail.pos = (ppos.x, ppos.y, ppos.z + trailz);
-		// lifetime is calculated based on alpha and half of
-		// fadefactor:
-		trail.lifetime = ceil(trailalpha / trailfade * 2);
+		// lifetime is calculated based on alpha and fadefactor:
+		trail.lifetime = ceil(trailalpha / trailfade);
 		// apply random velocity if pvel is not 0:
 		if (pvel != 0) {
 			trail.vel = (
@@ -968,32 +984,33 @@ Class PK_Projectile : PK_BaseActor abstract {
 		if (velstep > 0)
 			trail.accel = trail.vel * velstep;
 
-		// apply trailalpha as alpha directly if it's textured,
-		// otherwise apply double that (because most of actor-based
-		// trails are already partially translucent sprites,
-		// and using alpha value directly usually results in
-		// too low values):
-		trail.startalpha = isTextured ? trailalpha : trailalpha * 2;
+		// apply trailalpha
+		trail.startalpha = trailalpha;
 		trail.fadestep = -1;
 
 		// scale the particle. Since particle size = pixel size,
-		// scale the texture accordingly, and if not textured,
-		// start with 256 (because the previously used default
-		// trail texture is 256x256, so trailscale is defined
-		// in projectiles with that in mind):
+		// scale the texture accordingly:
 		if (isTextured)
 			trail.size = TexMan.GetSize(trailtex) * trailscale;
+		// if not textured, 256 is used as a base value for scaling,
+		// because the previously used default trail texture is 
+		// 256x256, so trailscale was historically defined in 
+		// projectiles with that in mind:
 		else
 			trail.size = 256. * trailscale;
 
-		// add size step if trailshrink is defined. since it's not
-		// additive, calculate the approximate value based on size
-		// and lifetime:
+		// Add size step if trailshrink is defined. Since particle
+		// sizestep is a flat addition, I convert the float value
+		// of 'trainshrink' into a positive or negative value
+		// to convert it into a proper sizestep value:
 		if (trailshrink != 0) {
-			trail.sizestep = -(trail.size / trail.lifetime);
+			double sstep;
+			if (trailshrink > 1)
+				sstep = trail.size * (trailshrink - 1);
+			else
+				sstep = trail.size * -(1 - trailshrink);
+			trail.sizestep = sstep;
 		}
-		
-		Level.SpawnParticle(trail);
 	}
 	
 	// An override initially by Arctangent that spawns trails like FastProjectile does it:

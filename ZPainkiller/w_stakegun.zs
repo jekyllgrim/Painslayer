@@ -135,7 +135,7 @@ Class PK_Stake : PK_StakeProjectile {
 		PK_Projectile.trailcolor "f4f4f4";
 		PK_Projectile.trailscale 0.012;
 		PK_Projectile.trailfade 0.02;
-		PK_Projectile.trailalpha 0.2;
+		PK_Projectile.trailalpha 0.4;
 		PK_Projectile.surfaceSpeed 60;
 		speed 30;
 		ProjectileKickBack 50;
@@ -662,7 +662,7 @@ Class PK_Grenade : PK_Projectile {
 		PK_Projectile.trailcolor "f4f4f4";
 		PK_Projectile.trailscale 0.04;
 		PK_Projectile.trailfade 0.035;
-		PK_Projectile.trailalpha 0.3;
+		PK_Projectile.trailalpha 0.5;
 		Obituary "$PKO_GRENADE";
 		-NOGRAVITY
 		+CANBOUNCEWATER
@@ -677,18 +677,21 @@ Class PK_Grenade : PK_Projectile {
 		damage (25);
 		ExplosionDamage 140;
 	}
+
 	override void Tick() {
 		super.Tick();
 		if (pos.z <= floorz) {
 			vel *= 0.9999;
 		}
 	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		let trg = PK_GrenadeHitbox(Spawn("PK_GrenadeHitbox",pos));
 		trg.master = self;
 		trg.ggrenade = self;
 	}
+
 	states {
 	Spawn:
 		M000 A 1 {

@@ -260,7 +260,7 @@ Class PK_BaseActor : Actor abstract {
 	};
 
 	static string GetRandomWhiteSmoke() {
-		return whiteSmokeTextures[random[smksfx](0, whiteSmokeTextures.Size() -1)];
+		return PK_BaseActor.whiteSmokeTextures[random[smksfx](0, PK_BaseActor.whiteSmokeTextures.Size() -1)];
 	}
 	
 	bool CheckLandingSize (double cradius = 0, bool checkceiling = false) {
@@ -406,54 +406,10 @@ Class PK_BaseActor : Actor abstract {
 		stop;
 	}
 }
-
-Class PK_BaseDebris : PK_BaseActor abstract {
+	
+Class PK_SmallDebris : PK_BaseActor abstract {
 	protected bool landed;			//true if object landed on the floor (or ceiling, if can stick to ceiling)
 	protected bool moving; 		//marks actor as moving; sets to true automatically if actor spawns with non-zero vel
-	Default {
-		+ROLLSPRITE
-		+FORCEXYBILLBOARD
-		+INTERPOLATEANGLES
-		-ALLOWPARTICLES
-		renderstyle 'Translucent';
-		alpha 1.0;
-		radius 1;
-		height 1;
-		mass 1;
-	}
-	// thanks Gutawer for explaning the math and helping this function come to life
-	virtual void FlyBack() {
-		if (!target)
-			return;
-		SetZ(pos.z+5);
-		moving = true;
-		landed = false;
-		bFLATSPRITE = false;
-		bTHRUACTORS = true;
-		bNOGRAVITY = false;
-		gravity = 1.0;
-		A_FaceTarget();
-		
-		double dist = Distance2D(target);							//horizontal distance to target
-		double vdisp = target.pos.z - pos.z + frandom[sfx](8,32);		//height difference between gib and target + randomized height
-		double ftime = 20;											//time of flight
-		
-		double vvel = (vdisp + 0.5 * ftime*ftime) / ftime;
-		double hvel = dist / ftime;
-		
-		VelFromAngle(hvel,angle);
-		vel.z = vvel;
-	}
-	override void PostBeginPlay() {
-		if (!level.IsPointInLevel(pos)) {
-			destroy();
-			return;
-		}
-		super.PostBeginPlay();
-	}
-}
-	
-Class PK_SmallDebris : PK_BaseDebris abstract {
 	protected bool onceiling;		//true if object is stuck on ceiling (must be combined with landed)
 	protected bool onliquid;
 	protected int bounces;
@@ -484,6 +440,20 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 	property liquidsound : liquidsound;
 	
 	Default {
+		+MOVEWITHSECTOR
+		+NOBLOCKMAP
+		+SYNCHRONIZED
+		+DONTBLAST
+		FloatBobPhase 0;
+		+ROLLSPRITE
+		+FORCEXYBILLBOARD
+		+INTERPOLATEANGLES
+		-ALLOWPARTICLES
+		renderstyle 'Translucent';
+		alpha 1.0;
+		radius 1;
+		height 1;
+		mass 1;
 		gravity 0.8;
 		PK_SmallDebris.liquidsound "";
 		PK_SmallDebris.removeonfall false;
@@ -491,17 +461,18 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 		PK_SmallDebris.dbrake 0;
 		PK_SmallDebris.hitceiling false;
 		bouncecount 8;
-		+MOVEWITHSECTOR
-		-NOBLOCKMAP
-		+SYNCHRONIZED
-		+DONTBLAST
-		FloatBobPhase 0;
 	}
 	
 	override void BeginPlay() {
 		super.BeginPlay();		
 		ChangeStatnum(110);
+		d_spawn = FindState("Spawn");
+		d_death = FindState("Death");
+		d_ceiling = FindState("HitCeiling");
+		d_wall = FindState("HitWall");
+		d_liquid = FindState("DeathLiquid");
 	}
+
 	//a cheaper version of SetOrigin that also doesn't update floorz/ceilingz (because they're updated manually in Tick) - thanks phantombeta
     void PK_SetOrigin (Vector3 newPos) {
         LinkContext ctx;
@@ -509,16 +480,17 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
         SetXYZ (newPos);
         LinkToWorld (ctx);
     }
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
+		if (!level.IsPointInLevel(pos)) {
+			destroy();
+			return;
+		}
 		if (vel.length() != 0 || gravity != 0) //mark as movable if given any non-zero velocity or gravity
 			moving = true;
-		d_spawn = FindState("Spawn");
-		d_death = FindState("Death");
-		d_ceiling = FindState("HitCeiling");
-		d_wall = FindState("HitWall");
-		d_liquid = FindState("DeathLiquid");
 	}
+
 	//a chad tick override that skips Actor's super.tick!
 	override void Tick() {
 		if (alpha < 0){
@@ -641,7 +613,12 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 						return;
 				}
 				else if (!bNOGRAVITY) 
-					vel.z -= gravity;
+					vel.z -= gravity;				
+				
+				if (waterlevel >= 2) {
+					vel.z = Clamp(vel.z * 0.8, -gravity / 2., abs(vel.z));
+					vel.xy *= 0.85;
+				}
 			}
 		}
 		//finally, manually move the object:
@@ -650,6 +627,7 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 			PK_SetOrigin(level.vec3offset(pos, vel));
 		}
 	}
+
 	virtual void PK_HitFloor() {			//hit floor if close enough
 		if (removeonfall) {
 			destroy();
@@ -687,6 +665,7 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 			SetState(d_death);
 		SetZ(floorz+Voffset);
 	}
+
 	//stick to ceiling and enter "HitCeiling" state if present:
 	virtual void PK_Hitceiling() {
 		if (ceilingpic == skyflatnum) {
@@ -702,6 +681,7 @@ Class PK_SmallDebris : PK_BaseDebris abstract {
 		if (d_wall)
 			SetState(d_wall);	
 	}
+
 	states {
 	Spawn:
 		#### # -1;

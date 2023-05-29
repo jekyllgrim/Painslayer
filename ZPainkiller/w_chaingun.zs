@@ -246,10 +246,10 @@ Class PK_Rocket : PK_Grenade {
 		bouncetype 'none';
 		Obituary "$PKO_ROCKET";
 		//PK_Projectile.trailactor "PK_RocketSmoke";
-		PK_Projectile.trailvel 1;
+		PK_Projectile.trailvel 0.42;
 		PK_Projectile.trailshrink 1.03;
-		PK_Projectile.trailalpha 0.5;
-		PK_Projectile.trailfade 0.03;
+		PK_Projectile.trailalpha 0.3;
+		PK_Projectile.trailfade 0.05;
 		PK_Projectile.trailscale 0.1;
 	}
 
@@ -260,17 +260,14 @@ Class PK_Rocket : PK_Grenade {
 			vel *= 1.5;
 	}
 
-	override void CreateParticleTrail(vector3 ppos, double pvel, double velstep) {		
+	override void CreateParticleTrail(out FSpawnParticleParams trail, vector3 ppos, double pvel, double velstep) {		
 		trailTexture = PK_BaseActor.GetRandomWhiteSmoke();
 
-		FSpawnParticleParams trail;
-		super.CreateParticleTrail(ppos, pvel, -0.05);
+		super.CreateParticleTrail(trail, ppos, pvel, -0.05);
 		trail.lifetime = 100;
 		trail.startRoll = random[smk](0, 359);
 		trail.rollVel = frandom[smk](8,15)*randompick[smk](-1,1);
-		//trail.rollacc = trail.rollVel * -0.02;
-		Level.SpawnParticle(trail);
-
+		trail.rollacc = trail.rollVel * -0.05;
 	}
 	
 	states {
