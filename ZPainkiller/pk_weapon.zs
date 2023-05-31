@@ -641,9 +641,11 @@ Class PK_BulletPuff : PKPuff {
 		renderstyle 'add';
 		alpha 0.6;
 	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 	}
+
 	void FindLineNormal() {
 		LineTrace(angle,128,pitch,TRF_THRUACTORS|TRF_NOSKY,data:puffdata);
 		hitnormal = -puffdata.HitDir;
@@ -672,10 +674,12 @@ Class PK_BulletPuff : PKPuff {
 			
 			if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
 				return resolveState(null);
+
 			if (target) {
 				angle = target.angle;
 				pitch = target.pitch;
 			}
+
 			FindLineNormal();
 			TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomWhiteSmoke());
 			FSpawnParticleParams smoke;
@@ -700,6 +704,7 @@ Class PK_BulletPuff : PKPuff {
 
 			if (GetParticlesLevel() < PK_BaseActor.PL_FULL)
 				return resolveState(null);
+
 			let deb = Spawn("PK_RandomDebris",puffdata.Hitlocation + (0,0,debrisOfz));
 			if (deb)
 				deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
@@ -1428,12 +1433,23 @@ Class PK_SmokingDebris : PK_RandomDebris {
 	override void Tick () {
 		super.Tick();	
 		if (isFrozen())
-			return;
-		let smk = Spawn("PK_WhiteSmoke",pos+(frandom[smk](-4,4),frandom[smk](-4,4),frandom[smk](-4,4)));
-		if (smk) {
-			smk.alpha = alpha*0.4;
-			smk.vel = (frandom[smk](-1,1),frandom[smk](-1,1),frandom[smk](-1,1));
-		}
+			return;		
+		
+		TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomWhiteSmoke());
+		FSpawnParticleParams smoke;
+		smoke.texture = smoketex;
+		smoke.color1 = "";
+		smoke.flags = SPF_ROLL|SPF_REPLACE;
+		smoke.lifetime = 34;
+		smoke.size = TexMan.GetSize(smoketex) * 0.11;
+		smoke.sizestep = smoke.size * 0.03;
+		smoke.startalpha = alpha * 0.4;
+		smoke.fadestep = 0.01;
+		smoke.vel = (frandom[smk](-1,1),frandom[smk](-1,1),frandom[smk](-1,1));
+		smoke.pos = pos+(frandom[smk](-4,4),frandom[smk](-4,4),frandom[smk](-4,4));
+		smoke.startroll = random[sfx](0, 359);
+		smoke.rollvel = frandom[sfx](0.5,1) * randompick[sfx](-1,1);
+		Level.SpawnParticle(smoke);
 		A_FadeOut(0.03);
 	}
 }
