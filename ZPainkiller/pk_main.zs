@@ -578,10 +578,8 @@ Class PK_SmallDebris : PK_BaseActor abstract {
 								LineTrace(angle,12,0,flags:TRF_THRUACTORS|TRF_NOSKY,offsetz:1,data:hit);
 								if (hit.HitLine && hit.hittype == TRACE_HITWALL /*&& (!hit.HitLine || hit.HitLine.flags & hit.Hitline.ML_BLOCKING || hit.LinePart == Side.Bottom)*/) {
 									//console.printf("%s hit wall at %d:%d:%f | pitch: %f",GetClassName(),hit.HitLocation.x,hit.HitLocation.y,hit.HitLocation.z,pitch);
-									wallnormal = (-hit.HitLine.delta.y,hit.HitLine.delta.x).unit();
 									wallpos = hit.HitLocation;
-									if (!hit.LineSide)
-										wallnormal *= -1;
+									wallnormal = GetLineNormal(wallpos.xy, hit.Hitline);
 									vel = vel - (wallnormal,0) * 2 * (vel dot (wallnormal,0));
 									vel *= bouncefactor * 0.5;
 									A_FaceMovementDirection(flags:FMDF_NOPITCH);

@@ -662,9 +662,8 @@ Class PK_BulletPuff : PKPuff {
 				hitnormal = puffdata.HitSector.ceilingplane.Normal;
 		}
 		else if (puffdata.HitType == TRACE_HitWall) {
-			hitnormal = (-puffdata.HitLine.delta.y,puffdata.HitLine.delta.x,0).unit();
-			if (!puffdata.LineSide) 
-				hitnormal *= -1;
+			hitnormal.xy = GetLineNormal(puffdata.HitLocation.xy, puffdata.HitLine);
+			hitnormal.z = 0;
 		}
 	}
 	states {
