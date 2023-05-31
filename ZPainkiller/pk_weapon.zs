@@ -915,6 +915,8 @@ Class PK_Projectile : PK_BaseActor abstract {
 
 	// Spawns a particle or actor-based trail:
 	virtual void SpawnTrail(vector3 ppos) {
+		if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
+			return;
 		// Actor based:
 		if (trailactor) {
 			vector3 tvel;
