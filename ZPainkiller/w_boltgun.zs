@@ -468,18 +468,25 @@ Class PK_Bomb : PK_Projectile {
 		if (isFrozen())
 			return;
 		
-		if (GetParticlesLevel() >= 2 && !isFrozen()) {
-			//GetAge() check makes sure bombs don't start spawning smoke
-			//while still "inside" the player, since that can cause
-			//significant slowdowns.
-			if (bounces >= 1 && GetAge() > 6) {
-				let smk = PK_WhiteSmoke(Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-0.3,0.3),frandom[sfx](-0.3,0.3),frandom[sfx](-0.3,0.3))));
-				if (smk) {
-					smk.vel = (frandom[sfx](-1.2,1.2),frandom[sfx](-1.2,1.2),frandom[sfx](1.2,1.2));
-					smk.A_SetScale(0.08);
-					smk.alpha = 0.35;
-					smk.fade = 0.02;
-				}
+		if (!isFrozen() && GetParticlesLevel() >= PK_BaseActor.PL_Full) {
+			// start spawning smoke on top of trails
+			// when the bombs have bounced once:
+			if (bounces >= 1 && farenough) {
+				TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomWhiteSmoke());
+				FSpawnParticleParams smoke;
+				smoke.texture = smoketex;
+				smoke.color1 = "";
+				smoke.flags = SPF_ROLL|SPF_REPLACE;
+				smoke.lifetime = 18;
+				smoke.size = TexMan.GetSize(smoketex) * 0.08;
+				smoke.sizestep = smoke.size * 0.03;
+				smoke.startalpha = 0.35;
+				smoke.fadestep = 0.02;
+				smoke.vel = (frandom[sfx](-1.2,1.2),frandom[sfx](-1.2,1.2),frandom[sfx](1.2,1.2));
+				smoke.pos = pos+(frandom[sfx](-0.3,0.3),frandom[sfx](-0.3,0.3),frandom[sfx](-0.3,0.3));
+				smoke.startroll = random[sfx](0, 359);
+				smoke.rollvel = frandom[sfx](0.5,1) * randompick[sfx](-1,1);
+				Level.SpawnParticle(smoke);
 			}
 		}
 		A_SetRoll(roll += rollOfs,SPF_INTERPOLATE);
