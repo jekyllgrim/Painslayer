@@ -250,7 +250,7 @@ Class PK_BaseActor : Actor abstract {
 	mixin PK_PlayerSightCheck;
 	mixin PK_ParticleLevelCheck;
 
-	static const string whiteSmokeTextures[] = {
+	static const name whiteSmokeTextures[] = {
 		"SMO2A0",
 		"SMO2B0",
 		"SMO2C0",
@@ -259,8 +259,22 @@ Class PK_BaseActor : Actor abstract {
 		"SMO2F0"
 	};
 
+	static const name blackSmokeTextures[] = {
+		"SMOKC0",
+		"SMOKE0",
+		"SMOKG0",
+		"SMOKI0",
+		"SMOKK0",
+		"SMOKM0",
+		"SMOKO0",
+		"SMOKQ0"
+	};
 	static string GetRandomWhiteSmoke() {
 		return PK_BaseActor.whiteSmokeTextures[random[smksfx](0, PK_BaseActor.whiteSmokeTextures.Size() -1)];
+	}
+
+	static string GetRandomBlackSmoke() {
+		return PK_BaseActor.BlackSmokeTextures[random[smksfx](0, PK_BaseActor.BlackSmokeTextures.Size() -1)];
 	}
 	
 	bool CheckLandingSize (double cradius = 0, bool checkceiling = false) {
