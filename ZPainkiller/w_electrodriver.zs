@@ -410,11 +410,33 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 		if (owner.isFrozen())
 			return;
 		
-		if (isFlesh && GetParticlesLevel() >= 2) {
-			let smk = Spawn("PK_BlackSmoke",owner.pos+(frandom[etc](-8,8),frandom[etc](-8,8),owner.height*0.5 + frandom[etc](-4,12)));
+		if (isFlesh && owner.waterlevel < 2 && GetParticlesLevel() >= PK_BaseActor.PL_FULL) {
+			//if (!smoketex)
+				//smoketex = TexMan.CheckForTexture("SMOKA0");
+			
+			name smoketexname = PK_BaseActor.GetRandomBlackSmoke();		
+			owner.A_SpawnParticleEx(
+				"",
+				TexMan.CheckForTexture(smoketexname),
+				//STYLE_Add,
+				flags: SPF_REPLACE|SPF_ROLL,
+				lifetime: 30,
+				size: 48,
+				xoff: frandom[etc](-8,8),
+				yoff: frandom[etc](-8,8),
+				zoff: owner.height*0.5 + frandom[etc](-4,12),
+				velx: frandom[etc](-0.5,0.5),
+				vely: frandom[etc](-0.5,0.5),
+				velz: frandom[etc](0.6,0.9),
+				startalphaf: 0.6,
+				sizestep: -1.6,
+				startroll: frandom[etc](-20, 20)
+			);
+
+			/*let smk = Spawn("PK_BlackSmoke",owner.pos+(frandom[etc](-8,8),frandom[etc](-8,8),owner.height*0.5 + frandom[etc](-4,12)));
 			if (smk) {
 				smk.vel = (frandom[etc](-0.5,0.5),frandom[etc](-0.5,0.5),frandom[etc](0.6,0.9));
-			}
+			}*/
 		}
 		if (noPainTics > 0) {
 			noPainTics--;
