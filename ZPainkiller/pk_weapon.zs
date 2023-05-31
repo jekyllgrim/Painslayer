@@ -677,13 +677,27 @@ Class PK_BulletPuff : PKPuff {
 				pitch = target.pitch;
 			}
 			FindLineNormal();
-			let smok = PK_WhiteSmoke(Spawn("PK_WhiteSmoke",puffdata.Hitlocation + (0,0,debrisOfz)));
-			if (smok) {
-				smok.vel = (hitnormal + (frandom[sfx](-0.05,0.05),frandom[sfx](-0.05,0.05),frandom[sfx](-0.05,0.05))) * frandom[sfx](0.8,1.3);
-				smok.A_SetScale(0.085);
-				smok.alpha = 0.85;
-				smok.fade = 0.025;
-			}
+			TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomWhiteSmoke());
+			FSpawnParticleParams smoke;
+			smoke.texture = smoketex;
+			smoke.color1 = "";
+			smoke.flags = SPF_ROLL|SPF_REPLACE;
+			smoke.lifetime = 34;
+			smoke.size = TexMan.GetSize(smoketex) * 0.085;
+			smoke.sizestep = smoke.size * 0.03;
+			smoke.startalpha = 0.95;
+			smoke.fadestep = -1;
+			smoke.vel = 
+				(hitnormal + 
+					(frandom[sfx](-0.05,0.05),
+					frandom[sfx](-0.05,0.05),
+					frandom[sfx](-0.05,0.05))) 
+				* frandom[sfx](0.5,1.2);
+			smoke.pos = puffdata.Hitlocation + (0,0,debrisOfz);
+			smoke.startroll = random[sfx](0, 359);
+			smoke.rollvel = frandom[sfx](0.8,1.2) * randompick[sfx](-1,1);
+			Level.SpawnParticle(smoke);
+
 			if (GetParticlesLevel() < PK_BaseActor.PL_FULL)
 				return resolveState(null);
 			let deb = Spawn("PK_RandomDebris",puffdata.Hitlocation + (0,0,debrisOfz));
