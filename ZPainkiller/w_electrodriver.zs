@@ -20,19 +20,48 @@ Class PK_ElectroDriver : PKWeapon {
 		Obituary "$PKO_ELECTRO";
 	}
 
-	action vector3 FindElectroTarget(int atkdist = 280) {
+	// Finds a suitable target to attack. 
+	// First checks if a water sector was hit, and if so, deals area damage in water.
+	// Otherwise looks for a suitable target within a 15-degree cone around crosshair.
+	// If that fails, just finds a point in front of the player. If that point is on
+	// geometry, spawns a puff there, otherwise doesn't spawn anything.
+	// Returns coordinates where the trace ended (whether target, or geometry, or geo)
+	// and returns 'true' if the lightning is supposed to be drawn.
+	action vector3, bool FindElectroTarget(int atkdist = 280) {
 		if (!player || !player.mo)
-			return (0,0,0);
+			return (0,0,0), false;
 		
-		actor ltarget;			
 		double closestDist = atkdist;
-		// First, find potential targets close the the shooter:
+		
+		// First, try to detect water with a linetracer:
+		let tracer = PK_WaterDetectionTracer(New("PK_WaterDetectionTracer"));
+		if (tracer) {
+			Vector3 tracedir = (AngleToVector(angle, cos(pitch)), -sin(pitch));
+			tracer.Trace(pos + (0, 0, GetPlayerAtkHeight(player.mo)), cursector, tracedir, PLAYERMISSILERANGE, TRACE_NoSky);
+
+			// If a water sector was detected within attack distance,
+			// spawn an electri splash at its top and deal splash
+			// electric damage around it:
+			let hpos = tracer.results.HitPos;
+			if (tracer.watersector && Level.Vec3Diff(tracer.results.SrcFromTarget, hpos).Length() <= atkdist) {
+				let puf = PK_ElectroDamageSplash(Spawn("PK_ElectroDamageSplash", hpos));
+				if (puf) {
+					puf.waitTimer = 2;
+					puf.pitch = 0;
+				}
+				DoUnderwaterElectroDamage(puf, self);
+				return hpos, true;
+			}
+		}
+
+		actor ltarget;
+		// Try to find potential targets close the the shooter:
 		BlockThingsIterator itr = BlockThingsIterator.Create(self,atkdist);
 		while (itr.next()) {
 			let next = itr.thing;
 			if (!next || next == self)
 				continue;
-			bool isValid = (next.bSHOOTABLE && ( (!next.bIsMonster && !next.player) || health > 0 ));
+			bool isValid = (next.bSHOOTABLE && (next.bISMONSTER || next.player) && next.health > 0 );
 			if (!isValid)
 				continue;
 			double dist = Distance3D(next);
@@ -44,29 +73,54 @@ Class PK_ElectroDriver : PKWeapon {
 				continue;
 			// Get spherical coords to the potential target
 			// to make sure they're close to our crosshair:
-			vector3 targetpos = LevelLocals.SphericalCoords((pos.x,pos.y,GetPlayerAtkHeight(player.mo, true)),next.pos+(0,0,next.default.height*0.5),(angle,pitch));	
-			if (abs(targetpos.x) > 15 || abs(targetpos.y) > 15) {
-				//console.printf("%s found but out of range",next.Getclassname());
+			vector3 targetpos = Level.SphericalCoords((pos.x,pos.y,GetPlayerAtkHeight(player.mo, true)),next.pos+(0,0,next.default.height*0.5),(angle,pitch));
+			// If the target is further than 15 degrees from
+			// our crosshair, skip it:
+			double goodofs = 15 + next.radius * 0.5;
+			if (abs(targetpos.x) > goodofs  || abs(targetpos.y) > goodofs) {
 				continue;
 			}
 			// Cache the target if successful:
 			ltarget = next;
 			//console.printf("Target found: %s, (%d, %d, %d)",ltarget.Getclassname(),ltarget.pos.x,ltarget.pos.y,ltarget.pos.z);
 		}
+
 		// If we couldn't find any potential targets,
 		// aim the beam at whatever wall/plane we've hit,
-		// spawn the puff there and return the coordinates
+		// spawn the puff there, deal electri damage around it
+		// if it's underwater, and return the coordinates
 		// to that point:
 		if (!ltarget) {
+			// Otherwise fire a linetrace to detect solid
+			// actors and geometry:
 			FLineTraceData hit;
-			LineTrace(angle,atkdist,pitch,TRF_ABSPOSITION|TRF_SOLIDACTORS, GetPlayerAtkHeight(player.mo, true),pos.x,pos.y,data:hit);
-			if (hit.HitType != TRACE_HitNone && hit.HitType != TRACE_HitSky) {
-				Spawn("PK_ElectricPuff",hit.HitLocation);
+			LineTrace(angle, atkdist, pitch, TRF_NOSKY|TRF_SOLIDACTORS, GetPlayerAtkHeight(player.mo), data:hit);
+
+			if (hit.HitType != TRACE_HitNone) {
+				vector3 puffpos = hit.HitLocation;
+				double puffangle = 0;
+				// If hitting a wall, make the puff face away
+				// from the wall and move it out of it a bit:
+				if (hit.HitType == TRACE_HitWall && hit.HitLine) {
+					let wallnormal = invoker.GetLineNormal(hit.Hitlocation.xy, hit.HitLine);
+					puffpos += wallnormal * 8;
+					//puffangle = 
+				}
+				let puf = Spawn("PK_ElectricPuff", hit.HitLocation);
+				if (puf) {
+					puf.target = self;
+					puf.angle = puffangle;
+				}
 			}
-			return hit.HitLocation;
+
+			return hit.HitLocation, true;
 		}
+
 		int dmg = invoker.hasDexterity ? 8 : 4;
 		PK_ElectroTargetControl.DealElectroDamage(ltarget, self, self, dmg, DMG_THRUSTLESS|DMG_PLAYERATTACK, delay:12);
+		if (ltarget.waterlevel >= 2)
+			DoUnderwaterElectroDamage(ltarget, self);
+
 		// If the player has Weapon Modifier, the beam
 		// is supposed to split from the main target to
 		// monsters around it. So, we need another 
@@ -98,17 +152,20 @@ Class PK_ElectroDriver : PKWeapon {
 				PK_ElectroTargetControl.DealElectroDamage(next, self, self, dmg * 0.75, DMG_NO_PAIN|DMG_THRUSTLESS|DMG_PLAYERATTACK);
 			}
 		}
-		return ltarget.pos+(0,0,ltarget.height*0.5);
+		return ltarget.pos+(0,0,ltarget.height*0.5), true;
 	}
 
 	action void A_DoElectroAttack() {
 		if (waterlevel < 2) {
-			vector3 atkpos = FindElectroTarget();
-			PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
-			PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
-			if (invoker.hasDexterity) {
-				PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.2,9.5),style:STYLE_ADD);
-				PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:atkpos,masterOffset:(24,8.9,10.5),style:STYLE_ADD);
+			vector3 hitpos; bool hit;
+			[hitpos, hit] = FindElectroTarget();
+			if (hit) {
+				PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
+				PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
+				if (invoker.hasDexterity) {
+					PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.2,9.5),style:STYLE_ADD);
+					PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.9,10.5),style:STYLE_ADD);
+				}
 			}
 		}
 
@@ -116,50 +173,56 @@ Class PK_ElectroDriver : PKWeapon {
 			A_Overlay(PSP_UNDERGUN, "UnderwaterMuzzleFlash", true);
 			if (random(0,1) == 1)
 				DamageMobj(self, self, 1, 'Electricity', DMG_THRUSTLESS);
-
-			double prad = 256;
-			BlockThingsIterator itr = BlockThingsIterator.Create(self, prad * 2);
-			while (itr.next()) {
-				let next = itr.thing;
-				if (!next || next == self)
-					continue;
-				bool isValid = (next.bSHOOTABLE && ( (!next.bIsMonster && !next.player) || health > 0 ));
-				if (!isValid)
-					continue;
-				double dist = Distance3D(next);
-				if (dist > prad)
-					continue;
-				if (!CheckSight(next,SF_IGNOREWATERBOUNDARY))
-					continue;
-				PK_ElectroTargetControl.DealElectroDamage(next, self, self, 2, DMG_THRUSTLESS|DMG_PLAYERATTACK, delay:12);
-			}
 			
-			double v = 4;
-			if (invoker.GetParticlesLevel() >= PK_BaseActor.PL_FULL) {
-				for (int i = 80; i > 0; i--) {
-					/*A_SpawnParticle(
-						"6a7dfa",
-						SPF_FULLBRIGHT|SPF_RELPOS,
-						lifetime: random[epart](30, 45),
-						size: 5,
-						angle: angle,
-						zoff: height * 0.6,
-						velx: frandom[epart](-v, v),
-						vely: frandom[epart](-v, v),
-						velz: frandom[epart](-v, v)
-					);*/
-					FSpawnParticleParams electricBlip;
-					electricBlip.color1 = "6a7dfa";
-					electricBlip.flags = SPF_FULLBRIGHT;
-					electricBlip.pos.xy = self.pos.xy + (frandom[epart](-prad, prad), frandom[epart](-prad, prad));
-					electricBlip.pos.z = self.pos.z + Clamp(frandom[epart](-prad, prad), -prad, waterdepth - height * 0.5);
-					electricBlip.vel = (frandom[epart](-v, v),frandom[epart](-v, v), frandom[epart](-v, v) * 0.5);
-					electricBlip.accel = electricBlip.vel * frandom[epart](-0.1, -0.8);
-					electricBlip.startalpha = 1;
-					electricBlip.Size = frandom[epart](5,7);
-					electricBlip.lifetime = 10;
-					Level.SpawnParticle(electricBlip);
-				}
+			DoUnderwaterElectroDamage(self, self, 256);
+		}
+	}
+
+	action void DoUnderwaterElectroDamage(Actor emitter, Actor source, double rad = 320) {
+		vector3 emitPos = emitter.pos;
+		emitPos.z -= rad + Clamp(emitter.waterdepth, 0, rad);
+		BlockThingsIterator itr = BlockThingsIterator.CreateFromPos(emitPos.x, emitPos.y, emitPos.z, emitPos.z, rad, false);
+		while (itr.next()) {
+			let next = itr.thing;
+			if (!next || next == emitter || next.waterlevel < 2)
+				continue;
+			bool isValid = (next.bSHOOTABLE && (next.bIsMonster || !next.player) && next.health > 0 );
+			if (!isValid)
+				continue;
+			double dist = emitter.Distance3D(next);
+			if (dist > rad)
+				continue;
+			if (!CheckSight(next,SF_IGNOREWATERBOUNDARY))
+				continue;
+			PK_ElectroTargetControl.DealElectroDamage(next, emitter, source, 2, DMG_THRUSTLESS|DMG_PLAYERATTACK, delay:6);
+		}
+		
+		double v = 4;
+		if (invoker.GetParticlesLevel() >= PK_BaseActor.PL_REDUCED) {
+			for (int i = 80; i > 0; i--) {
+				vector3 ppos;
+				ppos = emitter.pos + (
+					frandom[epart](-rad, rad),
+					frandom[epart](-rad, rad),
+					frandom[epart](-rad, rad)
+				);
+				ppos.z = Clamp(ppos.z, emitter.pos.z - rad, emitter.pos.z + emitter.waterdepth);
+				Sector sec = Level.PointInSector(ppos.xy);
+				double wh; bool w;
+				[wh, w] = PK_BaseActor.GetWaterHeight(sec, ppos);
+				if (!w)
+					continue;
+
+				FSpawnParticleParams electricBlip;
+				electricBlip.color1 = "6a7dfa";
+				electricBlip.flags = SPF_FULLBRIGHT;
+				electricBlip.pos = ppos;
+				electricBlip.vel = (frandom[epart](-v, v),frandom[epart](-v, v), frandom[epart](-v, v) * 0.5);
+				electricBlip.accel = electricBlip.vel * frandom[epart](-0.1, -0.8);
+				electricBlip.startalpha = 1;
+				electricBlip.Size = frandom[epart](5,7);
+				electricBlip.lifetime = 10;
+				Level.SpawnParticle(electricBlip);
 			}
 		}
 	}
@@ -314,18 +377,25 @@ Class PK_ElectricPuff : PKPuff {
 	states {
 	Spawn:
 		SPRK C 1 NoDelay {
-						
-			if (GetParticlesLevel() >= 2) {
-				for (int i = random[eld](2,4); i > 0; i--) {
-					let part = Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
-					if (part) {
-						part.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
-						part.A_SetScale(0.08);
-						part.alpha = 0.35;
-					}
-				}
+			A_FaceTarget();
+			if (GetParticlesLevel() >= PL_Reduced) {					
+				TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomWhiteSmoke());
+				FSpawnParticleParams smoke;
+				smoke.lifetime = 40;
+				smoke.color1 = "";
+				smoke.style = STYLE_Translucent;
+				smoke.flags = SPF_REPLACE|SPF_ROLL;
+				smoke.texture = smoketex;
+				smoke.pos = pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2));
+				smoke.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
+				smoke.size = 30;
+				smoke.sizestep = smoke.size * 0.03;
+				smoke.startalpha = 0.8;
+				smoke.fadestep = -1;
+				smoke.rollvel = frandom[sfx](2,5)*randompick[sfx](-1,1);
+				Level.SpawnParticle(smoke);
 			}			
-			if (GetParticlesLevel() >= 1) {
+			if (GetParticlesLevel() >= PL_Full) {
 				for (int i = random[eld](5,8); i > 0; i--) {
 					let part = Spawn("PK_RicochetSpark",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
 					if (part) {
@@ -338,13 +408,97 @@ Class PK_ElectricPuff : PKPuff {
 		stop;
 	}
 }
-			
+
+class PK_WaterDetectionTracer : LineTracer {
+	Sector watersector;
+
+	override ETraceStatus TraceCallBack() {
+		if (results.CrossedWater) {
+			watersector = results.CrossedWater;
+			results.hitPos = results.CrossedWaterPos;
+			return TRACE_Stop;
+		}
+
+		if (results.Crossed3DWater) {
+			watersector = results.Crossed3DWater;
+			results.hitPos = results.Crossed3DWaterPos;
+			return TRACE_Stop;
+		}
+
+		return TRACE_Skip;
+	}
+}
+
+/*class PK_ElectroLineTracer : LineTracer {
+	Sector watersector;
+	bool hitGeo;
+	Actor tracesource;
+
+	override ETraceStatus TraceCallBack() {	
+		let hact = results.HitActor;
+		if (results.HitType == TRACE_HitActor) {
+			if (hact && hact.bSOLID && hact != tracersource)
+				return TRACE_Stop;
+			else if (hact)
+				return TRACE_Skip;
+		}
+
+		if (results.CrossedWater) {
+			console.printf("Linetracer hit water at %.1f, %.1f, %.1f", results.hitpos.x, results.hitpos.y, results.hitpos.z);
+			watersector = results.CrossedWater;
+			results.hitPos = results.CrossedWaterPos;
+			return TRACE_Stop;
+		}
+
+		if (results.Crossed3DWater) {
+			console.printf("Linetracer hit water at %.1f, %.1f, %.1f", results.hitpos.x, results.hitpos.y, results.hitpos.z);
+			watersector = results.Crossed3DWater;
+			results.hitPos = results.Crossed3DWaterPos;
+			return TRACE_Stop;
+		}
+
+		let h = results.hittype;
+		if (h == TRACE_HitWall) {
+			if (results.Tier == TIER_Lower || results.Tier == TIER_Upper ||
+				!(results.HitLine.flags & Line.ML_TWOSIDED) ||
+				(results.HitLine.flags & Line.ML_BLOCKEVERYTHING) || 
+				(results.HitLine.flags & Line.ML_BLOCKPROJECTILE) || 
+				(results.HitLine.flags & Line.ML_BLOCKHITSCAN) ) {
+
+				console.printf("Linetracer hit wall at %.1f, %.1f, %.1f", results.hitpos.x, results.hitpos.y, results.hitpos.z);
+				vector2 diff = Level.Vec2Diff(results.SrcFromTarget.xy, results.hitpos.xy);
+				vector2 dir = diff.unit();
+				results.hitpos.xy -= dir * 8;
+				hitGeo = true;
+				return TRACE_Stop;
+			}
+			return TRACE_Skip;
+		}
+
+		if (h == TRACE_HitCeiling) {
+			console.printf("Linetracer hit ceiling at %.1f, %.1f, %.1f", results.hitpos.x, results.hitpos.y, results.hitpos.z);
+			results.hitpos.z -= 1;
+			hitGeo = true;
+			return TRACE_Stop;
+		}
+
+		if (h == TRACE_HitFloor) {
+			console.printf("Linetracer hit floor at %.1f, %.1f, %.1f", results.hitpos.x, results.hitpos.y, results.hitpos.z);
+			results.hitpos.z += 1;
+			hitGeo = true;
+			return TRACE_Stop;
+		}
+
+		return TRACE_Stop;
+	}
+}*/
 
 Class PK_ElectroTargetControl : PK_InventoryToken {	
 	int noPainTics;
 	protected int deadtics;
 	protected int deadage;
 	protected bool isFlesh;
+	TextureID smoketex;
 	
 	// A universal wrapper for dealing Electro damage. Used by
 	// Electro, Electric Disk and secondary Electro beams.
@@ -392,9 +546,8 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 		owner.A_StartSound("weapons/edriver/shockloop",CH_LOOP,CHANF_LOOPING,attenuation:3);
 		deadtics = 35*random[etc](3,5);
 		for (int i = 3; i > 0; i--) {
-			let etarget = Spawn("PK_ElectroTarget",owner.pos + (0,0,owner.height*0.5));
+			let etarget = Spawn("PK_ElectroDamageSplash",owner.pos + (0,0,owner.height*0.5));
 			if (etarget) {
-				etarget.pitch = frandom[etc](10,120)*randompick[etc](-1,1);
 				etarget.tracer = owner;
 				etarget.master = self;
 			}
@@ -438,9 +591,11 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 				smk.vel = (frandom[etc](-0.5,0.5),frandom[etc](-0.5,0.5),frandom[etc](0.6,0.9));
 			}*/
 		}
+
 		if (noPainTics > 0) {
 			noPainTics--;
 		}
+
 		if (owner.health <= 0) {
 			if (!owner.bISMONSTER || owner.bBOSS) {
 				Destroy();
@@ -455,6 +610,7 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 				return;
 			}
 		}
+
 		if (age > 300 || (owner.health > 0 && age > 20)) {
 			Destroy();
 			return;
@@ -468,43 +624,51 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 	}
 }
 
-Class PK_ElectroTarget : PK_BaseFlare {
-	protected int deadtics;
-	protected int deadage;
+Class PK_ElectroDamageSplash : PK_BaseFlare {
+	//protected int deadtics;
+	//protected int deadage;
 	protected double sscale;
 	protected double bangle;
+	int waitTimer;
+
 	Default {
 		scale 0.2;
 		alpha 0.5;
 		+FLATSPRITE
 		renderstyle 'add';
 	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		deadtics = 35*random[ett](3,5);
+		//deadtics = 35*random[ett](3,5);
 		if (tracer)
 			sscale = 0.014 * tracer.radius;
 		bangle = frandom[ett](10,25)*randompick[ett](-1,1);
+		pitch = frandom[etc](10,120)*randompick[etc](-1,1);
 	}
+	
 	states {
-	Cache:
-		ELTE ABCDEFGHIJKL 0;
 	Spawn:
 		ELTE # 1 {
-			frame = random[sfx](0,11);
-			alpha = frandom[sfx](0.1,0.9);
-			A_SetScale(sscale * frandom[ett](0.75,1.0));
-			if (!tracer || !master) {
+			if (waitTimer > 0)
+				waitTimer--;
+			if (waittimer <= 0 && (!tracer || !master)) {
 				return ResolveState("End");				
 			}
+			if (tracer) {
+				SetOrigin(tracer.pos+(0,0,tracer.height*0.5),true);
+				A_SetScale(sscale * frandom[ett](0.75,1.0));
+			}
+			frame = random[sfx](0,11);
+			alpha = frandom[sfx](0.1,0.9);
 			angle+=bangle;
-			SetOrigin(tracer.pos+(0,0,tracer.height*0.5),true);
 			return ResolveState(null);
 		}
 		loop;
 	End:
 		ELTE # 1 {
 			A_FadeOut(0.1);
+			scale *= 0.95;
 		}
 		wait;
 	}
