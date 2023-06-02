@@ -2,6 +2,9 @@ Class PK_ElectroDriver : PKWeapon {
 	private bool attackrate;
 	private int celldepleterate;
 
+	TextureID splashTextures[12];
+	int curSplashTexture;
+
 	Default {
 		-PKWeapon.ALWAYSBOB
 		PKWeapon.emptysound "weapons/empty/electrodriver";
@@ -40,7 +43,7 @@ Class PK_ElectroDriver : PKWeapon {
 			tracer.Trace(pos + (0, 0, GetPlayerAtkHeight(player.mo)), cursector, tracedir, PLAYERMISSILERANGE, TRACE_NoSky);
 
 			// If a water sector was detected within attack distance,
-			// spawn an electri splash at its top and deal splash
+			// spawn an electric splash at its top and deal splash
 			// electric damage around it:
 			let hpos = tracer.results.HitPos;
 			if (tracer.watersector && Level.Vec3Diff(tracer.results.SrcFromTarget, hpos).Length() <= atkdist) {
@@ -49,7 +52,7 @@ Class PK_ElectroDriver : PKWeapon {
 					puf.waitTimer = 2;
 					puf.pitch = 0;
 				}
-				DoUnderwaterElectroDamage(puf, self);
+				PK_ElectroDriver.DoUnderwaterElectroDamage(puf, self);
 				return hpos, true;
 			}
 		}
@@ -130,7 +133,7 @@ Class PK_ElectroDriver : PKWeapon {
 		int dmg = invoker.hasDexterity ? 8 : 4;
 		PK_ElectroTargetControl.DealElectroDamage(ltarget, self, self, dmg, DMG_THRUSTLESS|DMG_PLAYERATTACK, delay:12);
 		if (ltarget.waterlevel >= 2)
-			DoUnderwaterElectroDamage(ltarget, self);
+			PK_ElectroDriver.DoUnderwaterElectroDamage(ltarget, self);
 
 		// If the player has Weapon Modifier, the beam
 		// is supposed to split from the main target to
@@ -192,7 +195,9 @@ Class PK_ElectroDriver : PKWeapon {
 		}
 	}
 
-	action void DoUnderwaterElectroDamage(Actor emitter, Actor source, double rad = 320) {
+	static const color electricBlipColors[] = { "6a7dfa", "65B0DB", "95DFF6", "2C60DB", "485FF9" };
+
+	static void DoUnderwaterElectroDamage(Actor emitter, Actor source, double rad = 320) {
 		vector3 emitPos = emitter.pos;
 		emitPos.z -= rad + Clamp(emitter.waterdepth, 0, rad);
 		BlockThingsIterator itr = BlockThingsIterator.CreateFromPos(emitPos.x, emitPos.y, emitPos.z, emitPos.z, rad, false);
@@ -200,45 +205,70 @@ Class PK_ElectroDriver : PKWeapon {
 			let next = itr.thing;
 			if (!next || next == emitter || next.waterlevel < 2)
 				continue;
-			bool isValid = (next.bSHOOTABLE && (next.bIsMonster || !next.player) && next.health > 0 );
+			bool isValid = (next.bSHOOTABLE && (next.bIsMonster || next.player) && next.health > 0 );
 			if (!isValid)
 				continue;
 			double dist = emitter.Distance3D(next);
 			if (dist > rad)
 				continue;
-			if (!CheckSight(next,SF_IGNOREWATERBOUNDARY))
+			if (!emitter.CheckSight(next,SF_IGNOREWATERBOUNDARY))
 				continue;
 			PK_ElectroTargetControl.DealElectroDamage(next, emitter, source, 2, DMG_THRUSTLESS|DMG_PLAYERATTACK, delay:6);
 		}
 		
 		double v = 4;
-		if (invoker.GetParticlesLevel() >= PK_BaseActor.PL_REDUCED) {
+		let emit = PK_BaseActor(emitter);
+		if (emit && emit.GetParticlesLevel() >= PK_BaseActor.PL_REDUCED) {
 			for (int i = 80; i > 0; i--) {
 				vector3 ppos;
-				ppos = emitter.pos + (
+				ppos = emit.pos + (
 					frandom[epart](-rad, rad),
 					frandom[epart](-rad, rad),
 					frandom[epart](-rad, rad)
 				);
-				ppos.z = Clamp(ppos.z, emitter.pos.z - rad, emitter.pos.z + emitter.waterdepth);
+				ppos.z = Clamp(ppos.z, emit.pos.z - rad, emit.pos.z + emit.waterdepth);
 				Sector sec = Level.PointInSector(ppos.xy);
 				double wh; bool w;
 				[wh, w] = PK_BaseActor.GetWaterHeight(sec, ppos);
 				if (!w)
 					continue;
 
-				FSpawnParticleParams electricBlip;
-				electricBlip.color1 = "6a7dfa";
+				/*invoker.curSplashTexture++;
+				if (invoker.curSplashTexture >= invoker.splashTextures.Size())
+					invoker.curSplashTexture = 0;
+				TextureID ptex = invoker.splashTextures[invoker.curSplashTexture];*/
+
+				FSpawnParticleParams electricBlip;				
+				electricBlip.color1 = PK_ElectroDriver.electricBlipColors[random[epart](0, PK_ElectroDriver.electricBlipColors.Size() - 1)];
+				//electricBlip.texture = ptex;
 				electricBlip.flags = SPF_FULLBRIGHT;
+				electricBlip.style = STYLE_Add;
 				electricBlip.pos = ppos;
 				electricBlip.vel = (frandom[epart](-v, v),frandom[epart](-v, v), frandom[epart](-v, v) * 0.5);
 				electricBlip.accel = electricBlip.vel * frandom[epart](-0.1, -0.8);
-				electricBlip.startalpha = 1;
-				electricBlip.Size = frandom[epart](5,7);
+				electricBlip.startalpha = 3;
+				electricBlip.fadestep = -1;
+				electricBlip.Size = frandom[epart](3,8);
 				electricBlip.lifetime = 10;
 				Level.SpawnParticle(electricBlip);
 			}
 		}
+	}
+
+	override void BeginPlay() {
+		super.BeginPlay();
+		splashTextures[0] = TexMan.CheckForTexture("ELTEA0");
+		splashTextures[1] = TexMan.CheckForTexture("ELTEB0");
+		splashTextures[2] = TexMan.CheckForTexture("ELTEC0");
+		splashTextures[3] = TexMan.CheckForTexture("ELTED0");
+		splashTextures[4] = TexMan.CheckForTexture("ELTEE0");
+		splashTextures[5] = TexMan.CheckForTexture("ELTEF0");
+		splashTextures[6] = TexMan.CheckForTexture("ELTEG0");
+		splashTextures[7] = TexMan.CheckForTexture("ELTEH0");
+		splashTextures[8] = TexMan.CheckForTexture("ELTEI0");
+		splashTextures[9] = TexMan.CheckForTexture("ELTEJ0");
+		splashTextures[10] = TexMan.CheckForTexture("ELTEK0");
+		splashTextures[11] = TexMan.CheckForTexture("ELTEL0");
 	}
 
 	States {
@@ -280,6 +310,7 @@ Class PK_ElectroDriver : PKWeapon {
 				PK_DepleteAmmo(secondary:true,80);
 				A_ClearRefire();
 				A_StopSound(CH_LOOP);
+				player.SetPSprite(PSP_UNDERGUN, ResolveState("Null"));
 				return ResolveState("DiskFire");
 			}
 			
@@ -443,70 +474,6 @@ class PK_WaterDetectionTracer : LineTracer {
 	}
 }
 
-/*class PK_ElectroLineTracer : LineTracer {
-	Sector watersector;
-	bool hitGeo;
-	Actor tracesource;
-
-	override ETraceStatus TraceCallBack() {	
-		let hact = results.HitActor;
-		if (results.HitType == TRACE_HitActor) {
-			if (hact && hact.bSOLID && hact != tracersource)
-				return TRACE_Stop;
-			else if (hact)
-				return TRACE_Skip;
-		}
-
-		if (results.CrossedWater) {
-			console.printf("Linetracer hit water at %.1f, %.1f, %.1f", results.hitpos.x, results.hitpos.y, results.hitpos.z);
-			watersector = results.CrossedWater;
-			results.hitPos = results.CrossedWaterPos;
-			return TRACE_Stop;
-		}
-
-		if (results.Crossed3DWater) {
-			console.printf("Linetracer hit water at %.1f, %.1f, %.1f", results.hitpos.x, results.hitpos.y, results.hitpos.z);
-			watersector = results.Crossed3DWater;
-			results.hitPos = results.Crossed3DWaterPos;
-			return TRACE_Stop;
-		}
-
-		let h = results.hittype;
-		if (h == TRACE_HitWall) {
-			if (results.Tier == TIER_Lower || results.Tier == TIER_Upper ||
-				!(results.HitLine.flags & Line.ML_TWOSIDED) ||
-				(results.HitLine.flags & Line.ML_BLOCKEVERYTHING) || 
-				(results.HitLine.flags & Line.ML_BLOCKPROJECTILE) || 
-				(results.HitLine.flags & Line.ML_BLOCKHITSCAN) ) {
-
-				console.printf("Linetracer hit wall at %.1f, %.1f, %.1f", results.hitpos.x, results.hitpos.y, results.hitpos.z);
-				vector2 diff = Level.Vec2Diff(results.SrcFromTarget.xy, results.hitpos.xy);
-				vector2 dir = diff.unit();
-				results.hitpos.xy -= dir * 8;
-				hitGeo = true;
-				return TRACE_Stop;
-			}
-			return TRACE_Skip;
-		}
-
-		if (h == TRACE_HitCeiling) {
-			console.printf("Linetracer hit ceiling at %.1f, %.1f, %.1f", results.hitpos.x, results.hitpos.y, results.hitpos.z);
-			results.hitpos.z -= 1;
-			hitGeo = true;
-			return TRACE_Stop;
-		}
-
-		if (h == TRACE_HitFloor) {
-			console.printf("Linetracer hit floor at %.1f, %.1f, %.1f", results.hitpos.x, results.hitpos.y, results.hitpos.z);
-			results.hitpos.z += 1;
-			hitGeo = true;
-			return TRACE_Stop;
-		}
-
-		return TRACE_Stop;
-	}
-}*/
-
 Class PK_ElectroTargetControl : PK_InventoryToken {	
 	int noPainTics;
 	protected int deadtics;
@@ -655,10 +622,11 @@ Class PK_ElectroDamageSplash : PK_BaseFlare {
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		//deadtics = 35*random[ett](3,5);
-		if (tracer)
+		if (tracer) {
 			sscale = 0.014 * tracer.radius;
+			pitch = frandom[etc](10,120)*randompick[etc](-1,1);
+		}
 		bangle = frandom[ett](10,25)*randompick[ett](-1,1);
-		pitch = frandom[etc](10,120)*randompick[etc](-1,1);
 	}
 	
 	states {
@@ -834,7 +802,6 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 		PK_Projectile.trailscale 0.022;
 		PK_Projectile.trailfade 0.03;
 		PK_Projectile.trailalpha 0.12;
-		PK_Projectile.flareactor "PK_DiskFlare";
 		PK_Projectile.flarecolor "1ba7f8";
 		obituary "$PKO_ELECTRODRIVER";
 		speed 40;
@@ -847,12 +814,14 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 		+HITTRACER;
 		gravity 0.25;
 	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		spriterotation = random(0,359);
 		if (target)
 			pitch = target.pitch;
 	}
+
 	override void Tick() {
 		super.Tick();
 		if (isFrozen())
@@ -870,6 +839,12 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 		int maxcapacity = 10;
 		if (!target)
 			return;
+
+		if (waterlevel >= 2) {
+			PK_ElectroDriver.DoUnderwaterElectroDamage(self, target, 280);
+			return;
+		}
+
 		BlockThingsIterator itr = BlockThingsIterator.Create(self,atkdist);
 		while (itr.next()) {
 			let next = itr.thing;
@@ -987,18 +962,5 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 		}
 		BOM2 ABCDEFGHIJKLMNOPQRSTUVWXY 1 bright;
 		stop;
-	}
-}
-
-
-Class PK_DiskFlare : PK_ProjFlare {
-	Default {
-		scale 0.11;		
-	}
-	override void Tick() {
-		super.Tick();
-		if (isFrozen())
-			return;
-		A_SetScale(frandom[eld](0.06,0.12));
 	}
 }
