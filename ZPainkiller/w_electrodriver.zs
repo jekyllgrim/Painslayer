@@ -55,7 +55,9 @@ Class PK_ElectroDriver : PKWeapon {
 		}
 
 		actor ltarget;
-		// Try to find potential targets close the the shooter:
+		// Try to find a monster or player pawn around the shooter's
+		// crosshair and aim the lightning at it. Only monsters/players
+		// qualify for this partial autoaim:
 		BlockThingsIterator itr = BlockThingsIterator.Create(self,atkdist);
 		while (itr.next()) {
 			let next = itr.thing;
@@ -86,16 +88,24 @@ Class PK_ElectroDriver : PKWeapon {
 		}
 
 		// If we couldn't find any potential targets,
-		// aim the beam at whatever wall/plane we've hit,
-		// spawn the puff there, deal electri damage around it
-		// if it's underwater, and return the coordinates
-		// to that point:
-		if (!ltarget) {
-			// Otherwise fire a linetrace to detect solid
-			// actors and geometry:
+		// aim the beam straight forward:
+		while (!ltarget) {
+			// detect geometry and other actors:
 			FLineTraceData hit;
 			LineTrace(angle, atkdist, pitch, TRF_NOSKY|TRF_SOLIDACTORS, GetPlayerAtkHeight(player.mo), data:hit);
 
+			// If we've found a shootable non-player, non-monster actor,
+			// that qualifies as a victim as well (but without auto-aiming):
+			if (hit.HitType == TRACE_HitActor) {
+				let vic = hit.HitActor;
+				if (vic && vic.bSHOOTABLE && vic.health > 0) {
+					ltarget = vic;
+					break;
+				}
+			}
+
+			// Geometry and non-shootable solid actors 
+			// spawn a puff:
 			if (hit.HitType != TRACE_HitNone) {
 				vector3 puffpos = hit.HitLocation;
 				double puffangle = 0;
@@ -104,7 +114,6 @@ Class PK_ElectroDriver : PKWeapon {
 				if (hit.HitType == TRACE_HitWall && hit.HitLine) {
 					let wallnormal = invoker.GetLineNormal(hit.Hitlocation.xy, hit.HitLine);
 					puffpos += wallnormal * 8;
-					//puffangle = 
 				}
 				let puf = Spawn("PK_ElectricPuff", hit.HitLocation);
 				if (puf) {
@@ -114,8 +123,10 @@ Class PK_ElectroDriver : PKWeapon {
 			}
 
 			return hit.HitLocation, true;
+			break;
 		}
 
+		// Proceed to attack the target:
 		int dmg = invoker.hasDexterity ? 8 : 4;
 		PK_ElectroTargetControl.DealElectroDamage(ltarget, self, self, dmg, DMG_THRUSTLESS|DMG_PLAYERATTACK, delay:12);
 		if (ltarget.waterlevel >= 2)
@@ -128,15 +139,18 @@ Class PK_ElectroDriver : PKWeapon {
 		if (invoker.hasWmod) {
 			double closestDist = double.infinity;
 			// Remember that this iterator should be created
-			// around the original monster, not around the player!
+			// around the victim, not around the shooter!
 			BlockThingsIterator itr = BlockThingsIterator.Create(ltarget,atkdist);
 			while (itr.next()) {
 				let next = itr.thing;
 				if (!next || next == self)
 					continue; 
-				// Perform the usual set of checks to make sure
-				// it's a valid target:
-				if (next == ltarget || next.health <= 0 || !next.bShootable || !(next.bIsMonster || (next is "PlayerPawn")) || !next.IsHostile (self) || self.bKILLED)
+				// Only split the lightning into targets that are
+				// either monsters or players, aren't the original
+				// victim and aren't the original shooter
+				// (and are alive, of course):
+				bool isValid = (next != ltarget && next != self && next.bSHOOTABLE && (next.bISMONSTER || next.player) && next.health > 0);
+				if (!isValid)
 					continue;
 				// Make sure it's the closest possible target:
 				double cdist = ltarget.Distance3D(next);
