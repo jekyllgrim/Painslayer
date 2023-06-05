@@ -365,7 +365,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 		if (icelayer) {
 			icelayer.master = owner;
 			icelayer.angle = owner.angle;
-			CopyAppearance(icelayer, owner, false);
+			PK_Utils.CopyAppearance(icelayer, owner, false);
 			icelayer.scale.x = owner.scale.x*1.15;
 			icelayer.scale.y = owner.scale.y*1.07;
 			// When freezing a player, they shouldn't see their own frozen layer:
@@ -537,19 +537,25 @@ Class PK_ShotgunPuff : PK_BulletPuff {
 	states {
 	Spawn:
 		TNT1 A 1 NoDelay {		
-			if (target && tracer && tracer.bISMONSTER && !tracer.bDONTTHRUST && !tracer.bBOSS && !tracer.bNOGRAVITY && !tracer.bFLOAT && tracer.mass <= 400 && tracer.health <= 0 && tracer.Distance3D(target) <= 200 && !tracer.CountInv("PK_PushAwayControl") && !tracer.CountInv("PK_FreezeControl")) {
+			if (target && tracer && 
+				!tracer.CountInv("PK_FreezeControl") &&
+				tracer.bISMONSTER && !tracer.bDONTTHRUST && !tracer.bBOSS && 
+				!tracer.bNOGRAVITY && !tracer.bFLOAT && 
+				tracer.mass <= 400 && tracer.health <= 0 && 
+				tracer.Distance3D(target) <= 200 && 
+				!tracer.CountInv("PK_PushAwayControl")	) {
 				tracer.GiveInventory("PK_PushAwayControl",1);
 				let pac = PK_PushAwayControl(tracer.FindInventory("PK_PushAwayControl"));
 				if (pac) {
 					//initial push away speed is based on mosnter's mass:
-					double pushspeed = LinearMap(tracer.mass,100,400,20,5);
+					double pushspeed = PK_Utils.LinearMap(tracer.mass,100,400,20,5);
 					//a modifier is added based on how far away the player is
-					double pushmod = Clamp(LinearMap(Distance3D(target),32,256,1.2,0), 0, 1);
+					double pushmod = Clamp(PK_Utils.LinearMap(Distance3D(target),32,256,1.2,0), 0, 1);
 					if (pushmod <= 0)
 						return ResolveState(null);
 					pushspeed = Clamp(pushspeed,5,20) * frandom[sfx](0.85,1.2) * pushmod;
 					//bonus Z velocity is based on the players view pitch (so that you can knock monsters further by looking up):
-					double pushz = Clamp(LinearMap(target.pitch,0,-90,0,10), 0, 10) * pushmod;
+					double pushz = Clamp(PK_Utils.LinearMap(target.pitch,0,-90,0,10), 0, 10) * pushmod;
 					tracer.Vel3DFromAngle(
 						pushspeed,
 						target.angle,

@@ -592,8 +592,8 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 		}
 		if (master) {
 			if (pk_keepbodies) {
-				state dst = GetFinalStateInSequence(master.GetClass(), "Death");
-				state xdst = GetFinalStateInSequence(master.GetClass(), "XDeath");
+				state dst = PK_Utils.GetFinalStateInSequence(master.GetClass(), "Death");
+				state xdst = PK_Utils.GetFinalStateInSequence(master.GetClass(), "XDeath");
 				bool isReallyCorpse = (dst && dst.sprite == master.sprite && dst.frame == master.frame) ||
 									(xdst && xdst.sprite == master.sprite && xdst.frame == master.frame);
 

@@ -7,7 +7,6 @@ Class PK_Rifle : PKWeapon {
 	private double prevAngle[8];
 	private double prevPitch[8];
 	private int fuelDepleteRate;
-	mixin PK_Math;
 	private bool speedup;
 
 	Default {
@@ -47,7 +46,7 @@ Class PK_Rifle : PKWeapon {
 			return;
 		if (abs(psp.rotation) < 0.05 && abs(invoker.rollangVel) < 0.045) {
 			invoker.damping = 0.018;
-			invoker.rollangVel = 0.05 * invoker.Sign(invoker.rollangVel);
+			invoker.rollangVel = 0.05 * PK_Utils.Sign(invoker.rollangVel);
 		}
 		else {
 			double pspeed = Clamp(vel.length(),0,15);
@@ -540,6 +539,7 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 		if (target && bonusvel != (0,0,0)) {
 			vel += bonusvel;
 		}
+		console.printf("Flame vel: %.2f | bonusvel: %.2f", vel.length(), bonusvel.length());
 	}
 
 	override void Tick() {
@@ -732,7 +732,7 @@ Class PK_FlamerTank : PK_Projectile {
 			if (tankmodel) {
 				tankmodel.pitch = Normalize180(tankmodel.pitch);
 				if (abs(tankmodel.pitch) < 165)
-					targetPitch = 90 * Sign(tankmodel.pitch);
+					targetPitch = 90 * PK_Utils.Sign(tankmodel.pitch);
 				else {
 					tankmodel.straight = true;
 					targetPitch = tankmodel.pitch;

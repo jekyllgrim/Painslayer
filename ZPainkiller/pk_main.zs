@@ -1,193 +1,3 @@
-Mixin class PK_Math {	
-	
-	int Sign (double i) {
-		if (i >= 0)
-			return 1;
-		return -1;
-	}
-	
-	clearscope double LinearMap(double val, double o_min, double o_max, double n_min, double n_max) {
-		return (val - o_min) * (n_max - n_min) / (o_max - o_min) + n_min;
-	}
-
-	clearscope vector2 GetLineNormal(vector2 ppos, Line lline) {
-		vector2 linenormal;
-		linenormal = (-lline.delta.y, lline.delta.x).unit();
-		if (!PointOnLineSide(ppos, lline))
-			linenormal *= -1;
-		
-		return linenormal;
-	}
-	
-	//Utility functions by Marisa Kirisame
-	
-	//Checks which side of a lindef the actor is on:
-	clearscope int PointOnLineSide( Vector2 p, Line l ) {
-		if ( !l ) return 0;
-		return (((p.y-l.v1.p.y)*l.delta.x+(l.v1.p.x-p.x)*l.delta.y) > double.epsilon);
-    }
-	
-	//Returns -1 if the box (normally an actor's radius) intersects a linedef:
-    int BoxOnLineSide( double top, double bottom, double left, double right, Line l ) {
-		if ( !l ) return 0;
-		int p1, p2;
-		if ( l.delta.x == 0 ) {
-			// ST_VERTICAL:
-			p1 = (right < l.v1.p.x);
-			p2 = (left < l.v1.p.x);
-			if ( l.delta.y < 0 ) {
-				p1 ^= 1;
-				p2 ^= 1;
-			}
-		}
-		else if ( l.delta.y == 0 )	{
-			// ST_HORIZONTAL:
-			p1 = (top > l.v1.p.y);
-			p2 = (bottom > l.v1.p.y);
-			if ( l.delta.x < 0 )		{
-				p1 ^= 1;
-				p2 ^= 1;
-			}
-		}
-		else if ( (l.delta.x*l.delta.y) >= 0 )	{
-			// ST_POSITIVE:
-			p1 = PointOnLineSide((left,top),l);
-			p2 = PointOnLineSide((right,bottom),l);
-		}
-		else {
-			// ST_NEGATIVE:
-			p1 = PointOnLineSide((right,top),l);
-			p2 = PointOnLineSide((left,bottom),l);
-		}
-		return (p1==p2)?p1:-1;
-	}
-	
-    bool CheckClippingLines(double size) {
-		BlockLinesIterator it = BlockLinesIterator.Create(self, size);
-		double tbox[4];
-		// top, bottom, left, right
-		tbox[0] = pos.y+size;
-		tbox[1] = pos.y-size;
-		tbox[2] = pos.x-size;
-		tbox[3] = pos.x+size;
-		while (it.Next()) {
-		    let l = it.CurLine;
-		    if ( !l ) continue;
-		    if ( tbox[2] > l.bbox[3] ) continue;
-		    if ( tbox[3] < l.bbox[2] ) continue;
-		    if ( tbox[0] < l.bbox[1] ) continue;
-		    if ( tbox[1] > l.bbox[0] ) continue;
-		    if (BoxOnLineSide(tbox[0],tbox[1],tbox[2],tbox[3],l) == -1 ) 
-				return true;
-		}
-		return false;
-    }
-	
-	// Find a random position around the specified position within the specified radius
-	// (backported from Alice)
-	vector3 FindRandomPosAround(vector3 actorpos, double rad = 512, double mindist = 16, double fovlimit = 0, double viewangle = 0, bool checkheight = false)
-	{
-		if (!level.IsPointInLevel(actorpos))
-			return actorpos;
-		
-		vector3 finalpos = actorpos;
-		double ofs = rad * 0.5;
-		// 64 iterations should be enough...
-		for (int i = 64; i > 0; i--)
-		{
-			// Pick a random position:
-			vector3 ppos = actorpos + (frandom[frpa](-ofs, ofs), frandom[frpa](-ofs, ofs), 0);
-			// Get the sector and distance to the point:
-			let sec = Level.PointinSector(ppos.xy);
-			double secfz = sec.NextLowestFloorAt(ppos.x, ppos.y, ppos.z);
-			let diff = LevelLocals.Vec2Diff(actorpos.xy, ppos.xy);
-			
-			// Check FOV, if necessary:
-			bool inFOV = true;
-			if (fovlimit > 0)
-			{
-				double ang = atan2(diff.y, diff.x);
-				if (AbsAngle(viewangle, ang) > fovlimit)
-					inFOV = false;
-			}			
-			
-			// We found suitable position if it's in the map,
-			// in view (optionally), on the same elevation
-			// (optionally) and not closer than necessary
-			// (optionally):
-			if (inFOV && Level.IsPointInLevel(ppos) && (!checkheight || secfz == actorpos.z) && (mindist <= 0 || diff.Length() >= mindist))
-			{
-				finalpos = ppos;
-				//console.printf("Final pos: %.1f,%.1f,%.1f", finalpos.x,finalpos.y,finalpos.z);
-				break;
-			}
-		}
-		return finalpos;
-	}
-	
-	// This is an over-optimized version, no longer in use. Finding a random position
-	// is most of the time more efficient than iterating through a grid.
-	
-	/*vector3 FindRandomPosAround(vector3 actorpos, double gridrad = 128, double step = 16) {
-		if (!level.IsPointInLevel(actorpos))
-			return actorpos;
-		//because zscript doesn't support vector3 arrays I have to do this
-		//UGH
-		array <double> tposX;
-		array <double> tposY;
-		array <double> tposZ;
-		//establish grid corners (top left and bottom right)
-		vector3 startpos = actorpos - (gridrad, gridrad, 0);
-		vector3 endpos = actorpos + (gridrad, gridrad, 0);
-		//get sector of the actorpos:
-		Sector actorsector = Level.PointInSector(actorpos.xy);
-		//start at top left:
-		vector3 curpos = startpos;
-		while (true) {
-			//save the coordinates if they're not in void and within this sector:
-			if (Level.IsPointInLevel(curpos) && Level.PointInSector(curpos.xy) == actorsector) {
-				//let itr = BlockLinesIterator.Create(self,
-				tposX.Push(curpos.x);
-				tposY.Push(curpos.y);
-				tposZ.Push(curpos.z);
-			}
-			//move one step horizontally:
-			curpos.x += step;
-			//if we're too far, reset horizontal and move one step down:
-			if (curpos.x > endpos.x) {
-				curpos.x = startpos.x;
-				curpos.y += step;
-			}
-			//if we're too far down too, stop iterating:
-			if (curpos.y > endpos.y)
-				break;
-		}
-		//in case array sizes are not equal for some reason:
-		int foo = min(tposX.Size(), tposY.Size(), tposZ.Size()) - 1;
-		//return a random position:
-		int i = random[findpos](0,foo);
-		vector3 finalpos = (tposX[i], tposY[i], tposZ[i]);
-		return finalpos;
-	}*/
-	
-	void CopyAppearance(Actor to, Actor from, bool style = true, bool size = false) {
-		if (!to || !from)
-			return;
-		to.sprite = from.sprite;
-		to.frame = from.frame;
-		to.scale = from.scale;
-		to.bSPRITEFLIP = from.bSPRITEFLIP;
-		to.bXFLIP = from.bXFLIP;
-		to.bYFLIP = from.bYFLIP;
-		if (size)
-			to.A_SetSize(from.height, from.radius);
-		if (style) {
-			to.A_SetRenderstyle(from.alpha, from.GetRenderstyle());
-			to.translation = from.translation;
-		}
-	}	
-}
-
 mixin class PK_PlayerSightCheck {
 	protected bool canSeePlayer;
 	//a simple check that returns true if the actor is in any player's LOS:
@@ -246,7 +56,6 @@ Class PK_BaseActor : Actor abstract {
 	protected double pi;
 	protected name bcolor;
 	protected int age;
-	mixin PK_Math;
 	mixin PK_PlayerSightCheck;
 	mixin PK_ParticleLevelCheck;
 
@@ -269,37 +78,6 @@ Class PK_BaseActor : Actor abstract {
 		"SMOKO0",
 		"SMOKQ0"
 	};
-
-	static double, bool GetWaterHeight(Sector sec, vector3 pos) {
-		if (sec.MoreFlags & Sector.SECMF_UNDERWATER)
-			return sec.ceilingPlane.ZAtPoint(pos.xy), true;
-		else {
-			let hsec = sec.GetHeightSec();
-			if (hsec) {
-				double top = hsec.floorPlane.ZAtPoint(pos.xy);
-				if ((hsec.MoreFlags & Sector.SECMF_UNDERWATERMASK)
-					&& (pos.z < top
-					|| (!(hsec.MoreFlags & Sector.SECMF_FAKEFLOORONLY) && pos.z > hsec.ceilingPlane.ZAtPoint(pos.xy)))) {
-					return top, true;
-				}
-			}
-			else {
-				for (int i = 0; i < sec.Get3DFloorCount(); ++i) {
-					let ffloor = sec.Get3DFloor(i);
-					if (!(ffloor.flags & F3DFloor.FF_EXISTS)
-						|| (ffloor.flags & F3DFloor.FF_SOLID)
-						|| !(ffloor.flags & F3DFloor.FF_SWIMMABLE)) {
-						continue;
-					}
-						
-					double top = ffloor.top.ZAtPoint(pos.xy);
-					if (top > pos.z && ffloor.bottom.ZAtPoint(pos.xy) <= pos.z)
-						return top, true;
-				}
-			}
-		}			
-		return 0, false;
-	}
 
 	static string GetRandomWhiteSmoke() {
 		return PK_BaseActor.whiteSmokeTextures[random[smksfx](0, PK_BaseActor.whiteSmokeTextures.Size() -1)];
@@ -328,24 +106,61 @@ Class PK_BaseActor : Actor abstract {
 		}
 		return false;
 	}
-
-	static state GetFinalStateInSequence(class<Actor> type, stateLabel label) {
-		if (!type)
-			return null;
-		
-		let t = GetDefaultByType(type);
-		if (!t)
-			return null;
-		
-		state targetstate = t.ResolveState(label);
-		if (!targetstate)
-			return null;
-		
-		while (targetstate && targetstate.nextstate && targetstate.tics != -1) {
-			targetstate = targetstate.nextstate;
+	
+    bool CheckClippingLines(double size) {
+		BlockLinesIterator it = BlockLinesIterator.Create(self, size);
+		double tbox[4];
+		// top, bottom, left, right
+		tbox[0] = pos.y+size;
+		tbox[1] = pos.y-size;
+		tbox[2] = pos.x-size;
+		tbox[3] = pos.x+size;
+		while (it.Next()) {
+		    let l = it.CurLine;
+		    if ( !l ) continue;
+		    if ( tbox[2] > l.bbox[3] ) continue;
+		    if ( tbox[3] < l.bbox[2] ) continue;
+		    if ( tbox[0] < l.bbox[1] ) continue;
+		    if ( tbox[1] > l.bbox[0] ) continue;
+		    if (BoxOnLineSide(tbox[0],tbox[1],tbox[2],tbox[3],l) == -1 ) 
+				return true;
 		}
-
-		return targetstate;
+		return false;
+    }
+	
+	//Returns -1 if the box (normally an actor's radius) intersects a linedef:
+    int BoxOnLineSide( double top, double bottom, double left, double right, Line l ) {
+		if ( !l ) return 0;
+		int p1, p2;
+		if ( l.delta.x == 0 ) {
+			// ST_VERTICAL:
+			p1 = (right < l.v1.p.x);
+			p2 = (left < l.v1.p.x);
+			if ( l.delta.y < 0 ) {
+				p1 ^= 1;
+				p2 ^= 1;
+			}
+		}
+		else if ( l.delta.y == 0 )	{
+			// ST_HORIZONTAL:
+			p1 = (top > l.v1.p.y);
+			p2 = (bottom > l.v1.p.y);
+			if ( l.delta.x < 0 )		{
+				p1 ^= 1;
+				p2 ^= 1;
+			}
+		}
+		else if ( (l.delta.x*l.delta.y) >= 0 )	{
+			// ST_POSITIVE:
+			p1 = PK_Utils.PointOnLineSide((left,top),l);
+			p2 = PK_Utils.PointOnLineSide((right,bottom),l);
+		}
+		else {
+			// ST_NEGATIVE:
+			p1 = PK_Utils.PointOnLineSide((right,top),l);
+			p2 = PK_Utils.PointOnLineSide((left,bottom),l);
+		}
+		return (p1==p2)?p1:-1;
 	}
 	
 	static const string PK_LiquidFlats[] = { 
@@ -536,7 +351,7 @@ Class PK_SmallDebris : PK_BaseActor abstract {
 					LineTrace(angle,radius+16,1,flags:TRF_THRUACTORS|TRF_NOSKY,data:hit);
 					if (hit.HitLine && hit.hittype == TRACE_HITWALL) {
 						wall = hit.HitLine;
-						wallnormal = GetLineNormal(pos.xy, wall);
+						wallnormal = PK_Utils.GetLineNormal(pos.xy, wall);
 						wallpos = hit.HitLocation;
 						//if the actor can bounce off walls and isn't too close to the floor, it'll bounce:
 						if (bBOUNCEONWALLS){		
@@ -586,7 +401,7 @@ Class PK_SmallDebris : PK_BaseActor abstract {
 								if (hit.HitLine && hit.hittype == TRACE_HITWALL /*&& (!hit.HitLine || hit.HitLine.flags & hit.Hitline.ML_BLOCKING || hit.LinePart == Side.Bottom)*/) {
 									//console.printf("%s hit wall at %d:%d:%f | pitch: %f",GetClassName(),hit.HitLocation.x,hit.HitLocation.y,hit.HitLocation.z,pitch);
 									wallpos = hit.HitLocation;
-									wallnormal = GetLineNormal(wallpos.xy, hit.Hitline);
+									wallnormal = PK_Utils.GetLineNormal(wallpos.xy, hit.Hitline);
 									vel = vel - (wallnormal,0) * 2 * (vel dot (wallnormal,0));
 									vel *= bouncefactor * 0.5;
 									A_FaceMovementDirection(flags:FMDF_NOPITCH);

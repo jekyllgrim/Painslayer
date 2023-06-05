@@ -19,7 +19,7 @@ Class PK_GoldContainer : PK_BaseActor abstract {
 		// if it's not crossing any lines:
 		bool posValid = false;
 		for (int i = 32; i > 0; i--) {
-			SetOrigin(FindRandomPosAround(pos, 128, mindist: 0),false);
+			SetOrigin(PK_Utils.FindRandomPosAround(pos, 128, mindist: 0),false);
 			if (!CheckClippingLines(radius*1.5)) {
 				posValid = true;
 				break;

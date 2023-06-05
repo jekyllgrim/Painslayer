@@ -196,7 +196,7 @@ Class PK_Stake : PK_StakeProjectile {
 				// If we hit an actual wall (not a solid obstacle actor 				
 				// or a ceiling), flatten the corpse against the wall:
 				if (blockingline)	{
-					wallnormal = GetLineNormal(pos.xy, blockingline);
+					wallnormal = PK_Utils.GetLineNormal(pos.xy, blockingline);
 					stickvictim.bWALLSPRITE = true;			
 					stickvictim.bDONTFALL = true;
 					stickvictim.angle = atan2(blockingline.delta.y, blockingline.delta.x) - 90;

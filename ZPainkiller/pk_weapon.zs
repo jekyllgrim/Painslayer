@@ -4,7 +4,6 @@
 */
 
 Class PKWeapon : Weapon abstract {
-	mixin PK_Math;
 	mixin PK_ParticleLevelCheck;
 	
 	protected int PKWflags;
@@ -445,7 +444,7 @@ Class PKWeapon : Weapon abstract {
 			return null;
 		double pitchOfs = pitch;
 		if (pitch != 0 && self.pitch < 0)
-			pitchOfs = invoker.LinearMap(self.pitch, 0, -90, pitchOfs, 0);
+			pitchOfs = PK_Utils.LinearMap(self.pitch, 0, -90, pitchOfs, 0);
 		return A_FireProjectile(missiletype, angle, useammo, spawnofs_xy, spawnheight, flags, pitchOfs);
 	}
 	
@@ -601,7 +600,6 @@ Class PKWeapon : Weapon abstract {
 }
 
 Class PKPuff : PK_BaseActor abstract {
-	mixin PK_Math;
 	Default {
 		+NOINTERACTION
 		+FORCEXYBILLBOARD

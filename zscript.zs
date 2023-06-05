@@ -46,6 +46,7 @@ version "4.10"
 
 
 //Painslayer:
+#include "ZPainkiller/pk_utils.zs"
 #include "ZPainkiller/pk_player.zs"
 #include "ZPainkiller/pk_constants.zs"
 #include "ZPainkiller/pk_main.zs"
