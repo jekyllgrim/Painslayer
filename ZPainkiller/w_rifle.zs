@@ -9,6 +9,7 @@ Class PK_Rifle : PKWeapon {
 	private int fuelDepleteRate;
 	mixin PK_Math;
 	private bool speedup;
+
 	Default {
 		PKWeapon.emptysound "weapons/empty/rifle";
 		PKWeapon.ammoSwitchCVar 'pk_switch_RifleFlamethrower';
@@ -25,18 +26,19 @@ Class PK_Rifle : PKWeapon {
 		Tag "$PK_RIFLE_TAG";
 		Obituary "$PKO_RIFLE";
 	}
+
 	action void FireFlameThrower() {
-		let flm = PK_FlameThrowerFlame(A_FireProjectile("PK_FlameThrowerFlame",angle:frandom[flt](-3,3),spawnofs_xy:3,spawnheight:4,pitch:frandom[flt](-3,3)));	
+		let flm = PK_FlameThrowerFlame(Fire3DProjectile("PK_FlameThrowerFlame", true, forward: radius, leftright: 3, updown: 0, angleoffs: frandom[flt](-3,3), pitchoffs: frandom[flt](-3,3)));
 		if (flm) {
-			flm.realspeed = 7.2;
-			flm.addvel = true;
+			flm.bonusvel = vel;
 			if (invoker.hasWmod) {
 				flm.scale *= 1.5;
-				flm.realspeed *= 1.5;
+				flm.vel = flm.vel.unit() * 1.5;			
 				flm.A_SetSize(flm.radius * 1.2, flm.height * 1.2);
 			}
 		}
 	}
+
 	action void StartStrapSwing(double rfactor = 1.0) {
 		if (!player)
 			return;
@@ -53,6 +55,7 @@ Class PK_Rifle : PKWeapon {
 		}
 		//console.printf("rollangvel: %f | damping: %f",invoker.rollangVel,invoker.damping);
 	}
+
 	action void PK_RifleFlash() {		
 		A_Overlay(RLIGHT_WEAPON,"Highlight");
 		A_Overlay(RLIGHT_BOLT,"HighlightBolt");
@@ -75,6 +78,7 @@ Class PK_Rifle : PKWeapon {
 		A_OverlayRenderstyle(RLIGHT_BARREL,Style_Add);
 		A_OverlayAlpha(RLIGHT_BARREL,0.9);
 	}
+
 	//scale all layers
 	action void PK_RifleScale(double wx, double wy, int flags = WOF_ADD) {
 		A_OverlayScale(PSP_WEAPON,wx,wy,flags);
@@ -89,6 +93,7 @@ Class PK_Rifle : PKWeapon {
 		A_OverlayScale(RLIGHT_STOCK,wx,wy,flags);
 		A_OverlayScale(RLIGHT_BARREL,wx,wy,flags);
 	}
+
 	//gradually scale down all layers
 	action void PK_RifleRestoreScale(double deduct = 0.25) {
 		if (!player)
@@ -119,12 +124,14 @@ Class PK_Rifle : PKWeapon {
 		if (psph)
 			A_OverlayScale (PSP_HIGHLIGHTS, Clamp(pspb.scale.x- deduct,1,99), Clamp(pspb.scale.y- deduct,1,99),WOF_INTERPOLATE);
 	}
+
 	action void DrawRifleOverlays(bool nooverride = true) {
 		A_Overlay(RIFLE_BOLT,"Bolt",nooverride:nooverride);
 		A_Overlay(RIFLE_STOCK,"Stock",nooverride:nooverride);
 		A_Overlay(RIFLE_BARREL,"Barrel",nooverride:nooverride);
 		A_Overlay(RIFLE_STRAP,"Strap",nooverride:nooverride);
 	}
+
 	states {
 	Spawn:
 		PKWI E -1;
@@ -392,7 +399,7 @@ Class PK_Rifle : PKWeapon {
 			A_OverlayScale(OverlayID(),0.05,0.05,WOF_ADD);
 			int i = OverlayID() + 29;
 			//console.printf ("angle %f | pitch %f || prev.angle %f | prev.pitch %f",angle,pitch,invoker.prevAngle,invoker.prevPitch);
-			A_OverlayOffset(OverlayID(),-5 - (invoker.prevAngle[i] - angle),-5 + (invoker.prevPitch[i] - pitch),WOF_ADD);
+			A_OverlayOffset(OverlayID(), -4 - (invoker.prevAngle[i] - angle), -4 + (invoker.prevPitch[i] - pitch),WOF_ADD);
 			invoker.prevAngle[i] = angle;
 			invoker.prevPitch[i] = pitch;
 			return ResolveState(null);
@@ -475,17 +482,15 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 	protected int ripdepth;
 	protected double rollOfs; //randomized roll
 	protected double scaleMul;
-	/*
-		If fired while moving, it gets some vel from the shooter.
-		This bonus vel is then quickly scaled down so that it's brought 
-		back in sync with what it would be if it were shot while standing 
-		still.
-		'realspeed' is used both to define its actual base speed, and to 
-		keep track of its bonus vel, they're continuously compared against 
-		each other .
-	*/
-	double realSpeed;
-	bool addvel;
+
+	//	If fired while moving, it gets some vel from the shooter.
+	//	This bonus vel is then quickly scaled down so that it's brought 
+	//	back in sync with what it would be if it were shot while standing 
+	//	still.
+	//	'realspeed' is used both to define its actual base speed, and to 
+	//	keep track of its bonus vel, they're continuously compared against 
+	//	each other .
+	vector3 bonusvel;
 	Default {
 		+BRIGHT
 		+ROLLSPRITE
@@ -493,13 +498,14 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 		+FORCEXYBILLBOARD
 		renderstyle 'add';
 		alpha 0.3;
-		speed 52;
+		speed 7.2;
 		scale 0.08;
 		radius 16;
 		height 22;
 		damage 0;
 		Obituary "$PKO_FLAME";
 	}
+
 	override int SpecialMissileHit(actor victim) {
 		if (victim && target && victim != target && victim.health > 0 && CheckVulnerable(victim)) {
 			if (victim != hitvictim) {
@@ -524,19 +530,18 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 		}
 		return 1;
 	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		ripdepth = 300;
 		roll = frandom[sfx](0,360);
 		rollOfs = frandom[sfx](5,20) * randompick[sfx](-1,1);
 		scaleMul = 1.02;
-		if (realspeed)
-			vel = vel.unit() * realSpeed;
-		if (target && addvel) {
-			vel += target.vel;
-			SetOrigin(pos + target.vel,false);
+		if (target && bonusvel != (0,0,0)) {
+			vel += bonusvel;
 		}
 	}
+
 	override void Tick() {
 		super.Tick();
 		if (waterlevel > 1) {
@@ -550,20 +555,21 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 		if (alpha <= 0)
 			destroy();
 	}
+
 	states {
 	Spawn:
 		FLT1 ABCDEFGHIJKLMNO 2 {
 			vel *= 0.99;
-			realSpeed *= 0.99;
+			bonusvel *= 0.99;
 			rollOfs *= 0.98;
 			roll += rollOfs;
 		}
 		FLT1 PSTUVWXYZ 2 {
 			vel *= 0.96;
-			realSpeed *= 0.96;
-			if (vel.length() > realSpeed){
+			bonusvel *= 0.96;
+			if (vel.length() > bonusvel.length()) {
 				vel *= 0.8;
-				realSpeed *= 0.8;
+				bonusvel *= 0.8;
 			}
 			rollOfs *= 0.91;
 			roll += rollOfs;
@@ -571,10 +577,10 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 		}
 		FLT2 ABCDEFG 1 {
 			vel *= 0.92;
-			realSpeed *= 0.92;
-			if (vel.length() > realSpeed){
+			bonusvel *= 0.92;
+			if (vel.length() > bonusvel.length()) {
 				vel *= 0.8;
-				realSpeed *= 0.8;
+				bonusvel *= 0.8;
 			}
 			rollOfs *= 0.91;
 			roll += rollOfs;
