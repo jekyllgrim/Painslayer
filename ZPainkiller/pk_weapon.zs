@@ -600,6 +600,10 @@ Class PKWeapon : Weapon abstract {
 }
 
 Class PKPuff : PK_BaseActor abstract {
+	protected Vector3 hitnormal;			//vector normal of the hit 
+	protected FLineTraceData puffdata;
+	double debrisOfz;
+
 	Default {
 		+NOINTERACTION
 		+FORCEXYBILLBOARD
@@ -610,9 +614,27 @@ Class PKPuff : PK_BaseActor abstract {
 		radius 1;
 		height 1;
 	}
+
+	void FindLineNormal() {
+		if (target) {
+			angle = target.angle;
+			pitch = target.pitch;
+		}
+
+		bool found;
+		[hitnormal, found] = PK_Utils.GetNormalFromPos(self, 128, angle, pitch, puffdata);
+		if (found) {
+			if (puffdata.HitType == TRACE_HitFloor) {
+				debrisOfz = 1;
+			}
+			else if (puffdata.HitType == TRACE_HitCeiling)	{
+				debrisOfz = -1;
+			}
+		}
+	}
 }
 
-Class PK_NullPuff : Actor {
+Class PK_NullPuff : PK_NullActor {
 	Default {
 		decal "none";
 		+NODECAL
@@ -621,6 +643,11 @@ Class PK_NullPuff : Actor {
 		+PAINLESS
 		+PUFFONACTORS
 		+NODAMAGETHRUST
+		+SYNCHRONIZED
+		+DONTBLAST
+		radius 1;
+		height 1;
+		FloatBobPhase 0;
 	}
 	states {
 		Spawn:
@@ -630,9 +657,6 @@ Class PK_NullPuff : Actor {
 }
 
 Class PK_BulletPuff : PKPuff {
-	protected Vector3 hitnormal;			//vector normal of the hit 
-	protected FLineTraceData puffdata;
-	double debrisOfz;
 	Default {
 		decal "BulletChip";
 		scale 0.032;
@@ -644,28 +668,6 @@ Class PK_BulletPuff : PKPuff {
 		super.PostBeginPlay();
 	}
 
-	void FindLineNormal() {
-		LineTrace(angle,128,pitch,TRF_THRUACTORS|TRF_NOSKY,data:puffdata);
-		hitnormal = -puffdata.HitDir;
-		if (puffdata.HitType == TRACE_HitFloor) {
-			debrisOfz = 1;
-			if (puffdata.Hit3DFloor) 
-				hitnormal = -puffdata.Hit3DFloor.top.Normal;
-			else 
-				hitnormal = puffdata.HitSector.floorplane.Normal;
-		}
-		else if (puffdata.HitType == TRACE_HitCeiling)	{
-			debrisOfz = -1;
-			if (puffdata.Hit3DFloor) 
-				hitnormal = -puffdata.Hit3DFloor.bottom.Normal;
-			else 
-				hitnormal = puffdata.HitSector.ceilingplane.Normal;
-		}
-		else if (puffdata.HitType == TRACE_HitWall) {
-			hitnormal.xy = GetLineNormal(puffdata.HitLocation.xy, puffdata.HitLine);
-			hitnormal.z = 0;
-		}
-	}
 	states {
 	Crash:
 		TNT1 A 0 {
@@ -673,12 +675,8 @@ Class PK_BulletPuff : PKPuff {
 			if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
 				return resolveState(null);
 
-			if (target) {
-				angle = target.angle;
-				pitch = target.pitch;
-			}
-
 			FindLineNormal();
+
 			TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomWhiteSmoke());
 			FSpawnParticleParams smoke;
 			smoke.texture = smoketex;
@@ -804,7 +802,6 @@ Class PK_WeaponIcon : Actor {
 //Base projectile class that can produce relatively solid trails:
 Class PK_Projectile : PK_BaseActor abstract {
 	protected bool mod; //affteced by Weapon Modifier
-	mixin PK_Math;
 	protected vector3 spawnpos;
 	protected bool farenough;	
 	TextureID trailtex;
@@ -1159,7 +1156,7 @@ Class PK_StakeProjectile : PK_Projectile {
 			stuckToSecPlane = true;
 			//if it's two-sided:
 			//check which side we're on:
-			int lside = PointOnLineSide(pos.xy,tline);
+			int lside = PK_Utils.PointOnLineSide(pos.xy,tline);
 			string sside = (lside == 0) ? "front" : "back";
 			//we'll attach the stake to the sector on the other side:
 			let targetsector = (lside == 0 && tline.backsector) ? tline.backsector : tline.frontsector;

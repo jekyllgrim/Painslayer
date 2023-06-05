@@ -95,37 +95,40 @@ Class PK_ElectroDriver : PKWeapon {
 		while (!ltarget) {
 			// detect geometry and other actors:
 			FLineTraceData hit;
-			LineTrace(angle, atkdist, pitch, TRF_NOSKY|TRF_SOLIDACTORS, GetPlayerAtkHeight(player.mo), data:hit);
+			LineTrace(angle, atkdist, pitch, TRF_NOSKY|TRF_SOLIDACTORS, GetPlayerAtkHeight(player.mo), data:hit);		
 
 			// If we've found a shootable non-player, non-monster actor,
 			// that qualifies as a victim as well (but without auto-aiming):
 			if (hit.HitType == TRACE_HitActor) {
 				let vic = hit.HitActor;
-				if (vic && vic.bSHOOTABLE && vic.health > 0) {
+				if (vic && vic != self && vic.bSHOOTABLE && vic.health > 0) {
 					ltarget = vic;
 					break;
 				}
 			}
-
-			// Geometry and non-shootable solid actors 
-			// spawn a puff:
-			if (hit.HitType != TRACE_HitNone) {
-				vector3 puffpos = hit.HitLocation;
-				double puffangle = 0;
-				// If hitting a wall, make the puff face away
-				// from the wall and move it out of it a bit:
-				if (hit.HitType == TRACE_HitWall && hit.HitLine) {
-					let wallnormal = invoker.GetLineNormal(hit.Hitlocation.xy, hit.HitLine);
-					puffpos += wallnormal * 8;
+			
+			let hitpos = hit.HitLocation;
+			let puf = PK_ElectricPuff(Spawn("PK_ElectricPuff", hitpos));
+			if (puf) {
+				puf.target = self;
+				if (hit.HitType == TRACE_HitFloor)	{
+					hitpos.z = puf.floorz + 1;
 				}
-				let puf = Spawn("PK_ElectricPuff", hit.HitLocation);
-				if (puf) {
-					puf.target = self;
-					puf.angle = puffangle;
+				else if (hit.HitType == TRACE_HitCeiling)	{
+					hitpos.z -= puf.height;
 				}
+				else if (hit.HitType == TRACE_HitActor) {
+					let dir = Level.Vec3Diff(hitpos, pos + (0,0, GetPlayerAtkHeight(player.mo))).Unit();
+					hitpos += dir * puf.radius;
+				}
+				else if (hit.HitType == TRACE_HitWall && hit.HitLine) {
+					let norm = PK_Utils.GetLineNormal(pos.xy, hit.HitLine);
+					hitpos += norm * puf.radius;
+				}
+				puf.SetOrigin(hitpos, false);
 			}
 
-			return hit.HitLocation, true;
+			return hitpos, true;
 			break;
 		}
 
@@ -229,7 +232,7 @@ Class PK_ElectroDriver : PKWeapon {
 				ppos.z = Clamp(ppos.z, emit.pos.z - rad, emit.pos.z + emit.waterdepth);
 				Sector sec = Level.PointInSector(ppos.xy);
 				double wh; bool w;
-				[wh, w] = PK_BaseActor.GetWaterHeight(sec, ppos);
+				[wh, w] = PK_Utils.GetWaterHeight(sec, ppos);
 				if (!w)
 					continue;
 
@@ -414,37 +417,49 @@ Class PK_ElectroDriver : PKWeapon {
 }
 
 Class PK_ElectricPuff : PKPuff {
+
 	Default {
 		renderstyle 'add';
 		alpha 0.08;
 		scale 0.1;
+		radius 8;
+		height 8;
 	}
-	states {
+
+	States {
 	Spawn:
 		SPRK C 1 NoDelay {
-			A_FaceTarget();
-			if (GetParticlesLevel() >= PL_Reduced) {					
-				TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomWhiteSmoke());
-				FSpawnParticleParams smoke;
-				smoke.lifetime = 40;
-				smoke.color1 = "";
-				smoke.style = STYLE_Translucent;
-				smoke.flags = SPF_REPLACE|SPF_ROLL;
-				smoke.texture = smoketex;
-				smoke.pos = pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2));
-				smoke.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
-				smoke.size = 30;
-				smoke.sizestep = smoke.size * 0.03;
-				smoke.startalpha = 0.8;
-				smoke.fadestep = -1;
-				smoke.rollvel = frandom[sfx](2,5)*randompick[sfx](-1,1);
-				Level.SpawnParticle(smoke);
-			}			
+			FindLineNormal();
+			//SetZ(pos.z + debrisOfz);
+			TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomWhiteSmoke());
+			FSpawnParticleParams smoke;
+			smoke.lifetime = 40;
+			smoke.color1 = "";
+			smoke.style = STYLE_Translucent;
+			smoke.flags = SPF_REPLACE|SPF_ROLL;
+			smoke.texture = smoketex;
+			smoke.pos = pos+(frandom[sfx](-2,2), frandom[sfx](-2,2), frandom[sfx](-2,2));
+			smoke.vel = (hitnormal + 
+				(frandom[sfx](-0.01,0.01),
+				frandom[sfx](-0.01,0.01),
+				frandom[sfx](-0.01,0.01)))
+				* frandom[sfx](0.2,0.8);
+			smoke.size = 30;
+			smoke.sizestep = smoke.size * 0.03;
+			smoke.startalpha = 0.8;
+			smoke.fadestep = -1;
+			smoke.rollvel = frandom[sfx](2,5)*randompick[sfx](-1,1);
+			Level.SpawnParticle(smoke);
+
 			if (GetParticlesLevel() >= PL_Full) {
 				for (int i = random[eld](5,8); i > 0; i--) {
-					let part = Spawn("PK_RicochetSpark",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
+					let part = Spawn("PK_RicochetSpark",pos+(frandom[eld](-2,2),frandom[eld](-2,2), frandom[eld](1,2)));
 					if (part) {
-						part.vel = (frandom[eld](-3,3),frandom[eld](-3,3),frandom[eld](2,5));
+						part.vel = (hitnormal + 
+							(frandom[sfx](-3,3),
+							frandom[sfx](-3,3),
+							frandom[sfx](-3,3)))
+							* frandom[sfx](0.7, 1.1);
 						part.frame = 2;
 					}
 				}
