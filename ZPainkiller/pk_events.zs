@@ -920,6 +920,15 @@ Class PK_BoardEventHandler : EventHandler {
 		if (!plr || PK_MainHandler.IsVoodooDoll(plr))
 			return;
 		
+		// for testing soul pickups:
+		if (e.name == 'pkspawnsoul') {			
+			let s = PK_Soul(Actor.Spawn("PK_Soul", plr.pos));
+			s.Warp(plr, plr.radius + s.radius, 0, 0);
+			s.age = -32000;
+			if (e.args[0] > 0)
+				s.amount = 15;
+		}
+		
 		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
 		if (!cardcontrol)
 			return;

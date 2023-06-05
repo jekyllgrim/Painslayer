@@ -583,7 +583,7 @@ Class PK_VeryBigGold : PK_GoldPickup {
 Class PK_Soul : PK_Inventory {
 	protected TextureID partTex;
 	PK_BoardEventHandler event;
-	protected int age;
+	int age;
 	protected int maxage;
 	protected int actualAmount;
 	property maxage : maxage;
