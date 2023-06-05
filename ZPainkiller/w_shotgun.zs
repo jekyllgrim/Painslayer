@@ -618,33 +618,35 @@ Class PK_PushAwayControl : PK_InventoryToken {
 		}
 		if (owner.isFrozen() || !owner.bROLLSPRITE)
 			return;
-		if (GetAge() > 1 && owner.pos.z <= owner.floorz || age > 80) {
-			owner.roll = owner.default.roll;
-			owner.bROLLSPRITE = owner.default.bROLLSPRITE;
-			if (owner.bROLLCENTER)
-				owner.A_SetTics(1);
-			owner.gravity = owner.default.gravity;
-			destroy();
-			return;
-		}
-		double vvel = owner.vel.length();
-		double rollmod = LinearMap(vvel, 0, 16, 0, 1);
-		owner.roll += (broll * rollmod);
-		if (!owner.bNOBLOOD && random[sfx](1,3) == 3)
-			owner.SpawnBlood(owner.pos,0,1);
-		broll *= 0.95;
-		
-		FLineTraceData hit;
-		owner.LineTrace(owner.angle,owner.radius+owner.vel.length(),1,flags:TRF_THRUACTORS|TRF_NOSKY,data:hit);
-		if (hit.HitLine && hit.hittype == TRACE_HITWALL) 
-		{
-			let wallnormal = (-hit.HitLine.delta.y,hit.HitLine.delta.x).unit();
-			let wallpos = hit.HitLocation;
-			if (!hit.LineSide)
-				wallnormal *= -1;
-			owner.vel = owner.vel - (wallnormal,0) * 2 * (owner.vel dot (wallnormal,0));
-			owner.vel *= 0.3;
-			owner.A_FaceMovementDirection();
+		if (GetAge() > 1) {
+			if (owner.pos.z <= owner.floorz) {
+				owner.roll = owner.default.roll;
+				owner.bROLLSPRITE = owner.default.bROLLSPRITE;
+				if (owner.bROLLCENTER)
+					owner.A_SetTics(1);
+				owner.gravity = owner.default.gravity;
+				destroy();
+				return;
+			}
+			else {
+				double vvel = owner.vel.length();
+				double rollmod = PK_Utils.LinearMap(vvel, 0, 16, 0, 1);
+				owner.roll += (broll * rollmod);
+				if (!owner.bNOBLOOD && random[sfx](1,3) == 3)
+					owner.SpawnBlood(owner.pos,0,1);
+				broll *= 0.95;
+				
+				// if the corpse hits a wall while flying,
+				// bounce off of it and significantly slow the corpse down:
+				FLineTraceData hit;
+				owner.LineTrace(owner.angle, owner.radius + vvel,1, flags:TRF_THRUACTORS|TRF_NOSKY, data:hit);
+				if (hit.HitLine && hit.hittype == TRACE_HITWALL) {
+					let wallnormal = PK_Utils.GetLineNormal(owner.pos.xy, hit.Hitline);
+					owner.vel = owner.vel - (wallnormal,0) * 2 * (owner.vel dot (wallnormal,0));
+					owner.vel.xy *= 0.3;
+					owner.A_FaceMovementDirection();
+				}
+			}
 		}
 	}
 }

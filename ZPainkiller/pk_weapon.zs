@@ -599,42 +599,7 @@ Class PKWeapon : Weapon abstract {
 	}
 }
 
-Class PKPuff : PK_BaseActor abstract {
-	protected Vector3 hitnormal;			//vector normal of the hit 
-	protected FLineTraceData puffdata;
-	double debrisOfz;
-
-	Default {
-		+NOINTERACTION
-		+FORCEXYBILLBOARD
-		+PUFFGETSOWNER
-		-ALLOWPARTICLES
-		+DONTSPLASH
-		-FLOORCLIP
-		radius 1;
-		height 1;
-	}
-
-	void FindLineNormal() {
-		if (target) {
-			angle = target.angle;
-			pitch = target.pitch;
-		}
-
-		bool found;
-		[hitnormal, found] = PK_Utils.GetNormalFromPos(self, 128, angle, pitch, puffdata);
-		if (found) {
-			if (puffdata.HitType == TRACE_HitFloor) {
-				debrisOfz = 1;
-			}
-			else if (puffdata.HitType == TRACE_HitCeiling)	{
-				debrisOfz = -1;
-			}
-		}
-	}
-}
-
-Class PK_NullPuff : PK_NullActor {
+Class PK_NullPuff : Actor {
 	Default {
 		decal "none";
 		+NODECAL
@@ -649,10 +614,44 @@ Class PK_NullPuff : PK_NullActor {
 		height 1;
 		FloatBobPhase 0;
 	}
+
 	states {
 		Spawn:
 			TNT1 A 1;
 			stop;
+	}
+}
+
+Class PKPuff : PK_BaseActor abstract {
+	protected Vector3 hitnormal;			//vector normal of the hit 
+	protected FLineTraceData puffdata;
+	vector3 debrisPos;
+
+	Default {
+		+NOINTERACTION
+		+FORCEXYBILLBOARD
+		+PUFFGETSOWNER
+		-ALLOWPARTICLES
+		+DONTSPLASH
+		-FLOORCLIP
+		radius 3;
+		height 3;
+	}
+
+	void FindLineNormal() {
+		if (target) {
+			angle = target.angle;
+			pitch = target.pitch;
+		}
+
+		bool found;
+		[hitnormal, found] = PK_Utils.GetNormalFromPos(self, 128, angle, pitch, puffdata);
+		if (found) {
+			if (puffdata.HitType != TRACE_HitNone) {
+				vector3 dir = Level.Vec3Diff(pos, puffdata.HitLocation).Unit();
+				debrisPos = pos - dir * max(radius, height);
+			}
+		}
 	}
 }
 
@@ -693,7 +692,7 @@ Class PK_BulletPuff : PKPuff {
 					frandom[sfx](-0.05,0.05),
 					frandom[sfx](-0.05,0.05))) 
 				* frandom[sfx](0.5,1.2);
-			smoke.pos = puffdata.Hitlocation + (0,0,debrisOfz);
+			smoke.pos = debrisPos;
 			smoke.startroll = random[sfx](0, 359);
 			smoke.rollvel = frandom[sfx](0.8,1.2) * randompick[sfx](-1,1);
 			Level.SpawnParticle(smoke);
@@ -701,14 +700,15 @@ Class PK_BulletPuff : PKPuff {
 			if (GetParticlesLevel() < PK_BaseActor.PL_FULL)
 				return resolveState(null);
 
-			let deb = Spawn("PK_RandomDebris",puffdata.Hitlocation + (0,0,debrisOfz));
+			let deb = Spawn("PK_RandomDebris", debrisPos);
 			if (deb)
 				deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
+
 			bool mod = target && PKWeapon.CheckWmod(target);
 			name lit = mod ? 'PK_BulletPuffMod' : 'PK_BulletPuff';
-			A_AttachLightDef('puf',lit);
+			A_AttachLightDef('puf', lit);
 			if (mod || (random[sfx](0,10) > 7)) {
-				let bull = PK_RicochetBullet(Spawn("PK_RicochetBullet",pos));
+				let bull = PK_RicochetBullet(Spawn("PK_RicochetBullet", debrisPos));
 				if (bull) {
 					bull.vel = (hitnormal + (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](-3,3)) * frandom[sfx](2,6));
 					bull.A_FaceMovementDirection();

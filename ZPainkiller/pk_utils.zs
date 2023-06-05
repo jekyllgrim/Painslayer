@@ -10,7 +10,7 @@ class PK_Utils abstract {
 		return (val - o_min) * (n_max - n_min) / (o_max - o_min) + n_min;
 	}
 	
-	//Checks which side of a lindef the actor is on:
+	//Checks which side of a linedef the actor is on:
 	static clearscope int PointOnLineSide( Vector2 p, Line l ) {
 		if ( !l ) return 0;
 		return (((p.y-l.v1.p.y)*l.delta.x+(l.v1.p.x-p.x)*l.delta.y) > double.epsilon);
@@ -72,8 +72,8 @@ class PK_Utils abstract {
 				hitnormal = normcheck.HitSector.ceilingplane.Normal;
 			return hitnormal, true;
 		}
-		else if (normcheck.HitType == TRACE_HitWall) {
-			hitnormal.xy = PK_Utils.GetLineNormal(normcheck.HitLocation.xy, normcheck.HitLine);
+		else if (normcheck.HitType == TRACE_HitWall && normcheck.HitLine) {
+			hitnormal.xy = PK_Utils.GetLineNormal(source.pos.xy, normcheck.HitLine);
 			hitnormal.z = 0;
 			return hitnormal, true;
 		}

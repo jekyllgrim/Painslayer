@@ -194,25 +194,22 @@ Class PK_PainkillerPuff : PK_BulletPuff {
 	}
 	states {
 	Crash:
-		TNT1 A 1 {
-			
+		TNT1 A 1 {			
 			if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
 				return resolveState(null);
-			if (target) {
-				angle = target.angle;
-				pitch = target.pitch;
-			}
+
 			FindLineNormal();
 			if (random[sfx](0,10) > 5) {
-				let deb = Spawn("PK_RandomDebris",puffdata.Hitlocation + (0,0,debrisOfz));
+				let deb = Spawn("PK_RandomDebris", debrisPos);
 				if (deb)
 					deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
 			}
+
 			if (GetParticlesLevel() < PK_BaseActor.PL_FULL)
 				return resolveState(null);
 			bool mod = target && PKWeapon.CheckWmod(target);
 			if (mod || (random[sfx](0,10) > 2)) {
-				let bull = PK_RicochetBullet(Spawn("PK_RicochetBullet",pos));
+				let bull = PK_RicochetBullet(Spawn("PK_RicochetBullet", debrisPos));
 				if (bull) {
 					bull.vel = (hitnormal + (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](-3,3)) * frandom[sfx](2,6));
 					bull.A_FaceMovementDirection();

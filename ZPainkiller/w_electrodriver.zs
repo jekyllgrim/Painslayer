@@ -422,15 +422,13 @@ Class PK_ElectricPuff : PKPuff {
 		renderstyle 'add';
 		alpha 0.08;
 		scale 0.1;
-		radius 8;
-		height 8;
+		radius 6;
 	}
 
 	States {
 	Spawn:
 		SPRK C 1 NoDelay {
 			FindLineNormal();
-			//SetZ(pos.z + debrisOfz);
 			TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomWhiteSmoke());
 			FSpawnParticleParams smoke;
 			smoke.lifetime = 40;
@@ -438,12 +436,12 @@ Class PK_ElectricPuff : PKPuff {
 			smoke.style = STYLE_Translucent;
 			smoke.flags = SPF_REPLACE|SPF_ROLL;
 			smoke.texture = smoketex;
-			smoke.pos = pos+(frandom[sfx](-2,2), frandom[sfx](-2,2), frandom[sfx](-2,2));
+			smoke.pos = debrisPos;
 			smoke.vel = (hitnormal + 
 				(frandom[sfx](-0.01,0.01),
 				frandom[sfx](-0.01,0.01),
 				frandom[sfx](-0.01,0.01)))
-				* frandom[sfx](0.2,0.8);
+				* frandom[sfx](0.1,0.5);
 			smoke.size = 30;
 			smoke.sizestep = smoke.size * 0.03;
 			smoke.startalpha = 0.8;
@@ -453,11 +451,11 @@ Class PK_ElectricPuff : PKPuff {
 
 			if (GetParticlesLevel() >= PL_Full) {
 				for (int i = random[eld](5,8); i > 0; i--) {
-					let part = Spawn("PK_RicochetSpark",pos+(frandom[eld](-2,2),frandom[eld](-2,2), frandom[eld](1,2)));
+					let part = Spawn("PK_RicochetSpark", debrisPos);
 					if (part) {
 						part.vel = (hitnormal + 
-							(frandom[sfx](-3,3),
-							frandom[sfx](-3,3),
+							(frandom[sfx](-1.5,1.5),
+							frandom[sfx](-1.5,1.5),
 							frandom[sfx](-3,3)))
 							* frandom[sfx](0.7, 1.1);
 						part.frame = 2;
