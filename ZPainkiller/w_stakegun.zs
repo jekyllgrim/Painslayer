@@ -732,21 +732,19 @@ Class PK_Grenade : PK_Projectile {
 				exp.scale *= 1.5;
 				//exp.explosivedebris = 10;
 				exp.smokingdebris = 4;
-				double pangle;
-				while (pangle < 360) {
-					double zp;
-					if (pos.z <= floorz)
-						zp = 12;
-					else if (pos.z >= ceilingz-12)
-						zp = -24;
-					A_SpawnItemEx(
-						"PK_FlameThrowerFlame",
-						xofs:16,
-						zofs:zp,
-						xvel:2,
-						angle:pangle
-					);
-					pangle += 30;
+				if (target) {
+					bool b; Actor fl;
+					for (int i = 0; i < 360; i+= 30) {
+						double zp;
+						if (pos.z <= floorz)
+							zp = 12;
+						else if (pos.z >= ceilingz-12)
+							zp = -24;
+						[b, fl] = A_SpawnItemEx("PK_FlameThrowerFlame", xofs:16, zofs:zp, xvel: 0.2, angle:i);
+						if (b && fl) {
+							fl.target = target;
+						}
+					}
 				}
 			}
 		}
