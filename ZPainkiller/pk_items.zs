@@ -812,13 +812,8 @@ Class PK_GoldSoul : Health {
 		+BRIGHT
 		Tag "$PKC_GoldSoul";
 	}
-	override void Tick() {
-		super.Tick();
-		if (GetParticlesLevel() < PL_Full)
-			return;
-		if (isFrozen())
-			return;	
-		
+
+	virtual void SpawnSoulParticles() {
 		if (!partTex)
 			partTex = TexMan.CheckForTexture("FLARB0");
 		
@@ -837,6 +832,17 @@ Class PK_GoldSoul : Health {
 			velz: frandom(0.5, 2),
 			sizestep: 4 / double(-life)
 		);
+	}
+
+	override void Tick() {
+		super.Tick();
+
+		if (GetParticlesLevel() < PL_Full)
+			return;
+		if (isFrozen())
+			return;	
+		
+		SpawnSoulParticles();
 	}
 	
 	override bool TryPickup(in out actor toucher) {
@@ -860,19 +866,55 @@ Class PK_GoldSoul : Health {
 // Megasphere replacement. Can't be dropped by monsters.
 // Gives 200 health and armor.
 Class PK_MegaSoul : PK_GoldSoul {
+
 	Default {
 		inventory.amount 200;
 		inventory.maxamount 200;
 		inventory.pickupsound "pickups/soul/mega";
 		inventory.pickupmessage "$PKI_MEGASOUL";
-		xscale 0.3;
-		yscale 0.25;
-		alpha 2.5;
+		//xscale 0.3;
+		//yscale 0.25;
+		//alpha 2.5;
 		Tag "$PKC_MegaSoul";
 	}
 	
-	override void Tick() {
-		Actor.Tick();
+	override void SpawnSoulParticles() {
+		if (!partTex)
+			partTex = TexMan.CheckForTexture("FLARB0");
+		
+		int life = random[part](25,35);
+		for (int i = 3; i > 0; i--) {
+			A_SpawnParticleEx(
+				"c42626",
+				partTex,
+				STYLE_AddShaded,
+				SPF_FULLBRIGHT|SPF_RELATIVE,
+				lifetime: life,
+				size: 6,
+				angle: random[part](0, 359),
+				xoff: random[part](4,10),
+				zoff:frandom[part](16,32),
+				velx: -0.35,
+				velz: frandom(0.5, 2),
+				sizestep: 4 / double(-life)
+			);
+		}
+		
+		life = random[part](20,25);
+		A_SpawnParticleEx(
+			"ffed78",
+			partTex,
+			STYLE_AddShaded,
+			SPF_FULLBRIGHT|SPF_RELATIVE,
+			lifetime: life,
+			size: 10,
+			angle: random[part](0, 359),
+			xoff: random[part](0,4),
+			zoff:frandom[part](18,26),
+			velx: -0.18,
+			velz: frandom(0.25, 1.4),
+			sizestep: 4 / double(-life)
+		);
 	}
 	
 	override bool TryPickup(in out actor toucher) {
@@ -886,7 +928,7 @@ Class PK_MegaSoul : PK_GoldSoul {
 	Spawn:
 		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
 	Idle:
-		MSOU ABCDEFGHIJKLMNOPQRSTU 2;
+		VSOU ABCDEFGHIJKLMNOPQRSTU 2;
 		loop;
 	}
 }
