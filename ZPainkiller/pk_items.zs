@@ -1,5 +1,4 @@
 Class PK_InventoryToken : Inventory abstract {
-	mixin PK_Math;
 	mixin PK_ParticleLevelCheck;
 	protected int age;
 	
@@ -362,7 +361,6 @@ Class PK_Inventory : Inventory abstract {
 	mixin PK_ParticleLevelCheck;
 	mixin PK_PlayerSightCheck;
 	mixin PK_PickupSound;
-	mixin PK_Math;
 }
 
 Class PK_GoldPickup : PK_Inventory abstract {
@@ -620,14 +618,14 @@ Class PK_Soul : PK_Inventory {
 			//define an amount between 1-20 based on monster's health (linearly mapped between 20-500):
 			//the amount is clamped to 20 (or to 80 if the monster is a boss)
 			int maxAmt = GetDefaultByType(bearer).bBOSS ? 80 : 20;
-			double am = LinearMap(double(GetDefaultByType(bearer).health), 20, 500, 1, 20);
+			double am = PK_Utils.LinearMap(double(GetDefaultByType(bearer).health), 20, 500, 1, 20);
 			amount = Clamp(am, 1, maxAmt);
 			actualAmount = amount;
 			//slightly change soul's alpha and scale based on the resulting number:
-			alpha = Clamp(LinearMap(am, 1, 20, 0.5, 1.5), 0.5 , 1.5);
-			scale *= Clamp(LinearMap(am, 1, 20, 0.6, 1.15), 0.7, 1.15);
+			alpha = Clamp(PK_Utils.LinearMap(am, 1, 20, 0.5, 1.5), 0.5 , 1.5);
+			scale *= Clamp(PK_Utils.LinearMap(am, 1, 20, 0.6, 1.15), 0.7, 1.15);
 			//define color and its density based on the alpha of the soul
-			int colalpha = Clamp(LinearMap(alpha, 0.5, 1.5, 64, 255), 128 , 255);
+			int colalpha = Clamp(PK_Utils.LinearMap(alpha, 0.5, 1.5, 64, 255), 128 , 255);
 			soulcolor = Color(colalpha, 0, 255, 0);
 			//if the amount is over 15, make the soul red:
 			if (am >= 15) {
@@ -928,7 +926,7 @@ Class PK_MegaSoul : PK_GoldSoul {
 	Spawn:
 		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
 	Idle:
-		VSOU ABCDEFGHIJKLMNOPQRSTU 2;
+		MSOU ABCDEFGHIJKLMNOPQRSTU 2;
 		loop;
 	}
 }
