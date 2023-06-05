@@ -810,11 +810,14 @@ Class PK_ShurikenDebris : PK_RandomDebris {
 Class PK_DiskProjectile : PK_StakeProjectile {
 	private int deadtics;
 	private Array < Actor > disktargets;
+	TextureID secondaryPartTex;
+
 	Default {
 		PK_Projectile.trailcolor "8bb1ff";
-		PK_Projectile.trailscale 0.022;
+		PK_Projectile.trailscale 0.028;
+		PK_Projectile.trailalpha 0.2;
 		PK_Projectile.trailfade 0.03;
-		PK_Projectile.trailalpha 0.12;
+		PK_Projectile.trailshrink 0.7;
 		PK_Projectile.flarecolor "1ba7f8";
 		obituary "$PKO_ELECTRODRIVER";
 		speed 40;
@@ -826,6 +829,27 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 		scale 0.6;
 		+HITTRACER;
 		gravity 0.25;
+	}
+	
+	override void CreateParticleTrail(out FSpawnParticleParams trail, vector3 ppos, double pvel, double velstep) {		
+		if (!secondaryPartTex)
+			secondaryPartTex = TexMan.CheckForTexture("SPRKC0");		
+		FSpawnParticleParams sTrail;
+		sTrail.texture = secondaryPartTex;
+		sTrail.color1 = "";
+		sTrail.style = STYLE_Add;
+		sTrail.flags = SPF_REPLACE;
+		sTrail.lifetime = 24;
+		sTrail.size = 5;
+		sTrail.startalpha = 1;
+		sTrail.fadestep = -1;
+		double v = 0.5;
+		sTrail.vel = (frandom[sfx](-v, v),frandom[sfx](-v, v),frandom[sfx](-v, v));
+		sTrail.pos = ppos+(frandom[sfx](-radius, radius),frandom[sfx](-radius, radius),frandom[sfx](-height * 0.5,height * 0.5));
+		Level.SpawnParticle(sTrail);
+
+		super.CreateParticleTrail(trail, ppos, pvel, velstep);
+		trail.style = Style_Add;
 	}
 
 	override void PostBeginPlay() {
@@ -841,12 +865,14 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 			return;
 		if (InStateSequence(curstate,FindState("Boom")))
 			return;
+
 		if (tracer) {
 			if (tracer.bKILLED)
 				bNOGRAVITY = false;
 			else
 				SetOrigin(tracer.pos+(0,0,tracer.height*0.5),true);
 		}
+
 		int atkdist = 190;
 		double closestDist = double.infinity;
 		int maxcapacity = 10;
@@ -863,7 +889,7 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 			let next = itr.thing;
 			if (!next || next == target)
 				continue;
-			bool isValid = (next.bSHOOTABLE && (next.bISMONSTER || next.player) && next.health > 0 && next.isHOSTILE(target));
+			bool isValid = (next.bSHOOTABLE && (next.bISMONSTER || next.player) && next.health > 0 && !next.isFriend(target));
 			if (!isValid)
 				continue;
 			double cdist = Distance3D(next);
@@ -899,6 +925,7 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 			}
 		}
 	}
+
 	int CheckDisktargetsEntries(actor trg) {
 		if (disktargets.size() == 0)
 			return 0;
@@ -909,11 +936,12 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 		}
 		return entries;
 	}
+
 	states {
 	Spawn:
 		M000 A 1 {
 			A_FaceMovementDirection(flags:FMDF_INTERPOLATE );
-			spriterotation += 10;			
+			spriterotation += 10;
 		}
 		loop;
 	Crash:
@@ -926,27 +954,42 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 			A_StartSound("weapons/edriver/starwall",attenuation:2);
 			A_StartSound("weapons/edriver/shockloop",CHAN_VOICE,CHANF_LOOPING);
 		}
-		M000 B 3 {
-			
-			if (GetParticlesLevel() >= 2) {
+		M000 B 3 {			
+			if (GetParticlesLevel() >= PK_BaseActor.PL_Full) {
 				for (int i = random[eld](4,6); i > 0; i--) {
 					let part = Spawn("PK_RicochetSpark",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
 					if (part) {
 						part.vel = (frandom[eld](-5,5),frandom[eld](-5,5),frandom[eld](4,7));
 						part.frame = 2;
-						part.A_SetScale(0.04);
+						part.A_SetScale(0.065);
 					}
 				}
 			}
-			if (GetParticlesLevel() >= 1) {
-				for (int i = random[sfx](2,4); i > 0; i--) {
-					let smk = Spawn("PK_WhiteDeathSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
-					if (smk) {
-						smk.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
-						smk.A_SetScale(0.5);					
-					}
-				}
+
+			for (int i = random[sfx](2,4); i > 0; i--) {
+				TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomBlackSmoke());
+				FSpawnParticleParams smoke;
+				smoke.texture = smoketex;
+				smoke.color1 = "";
+				smoke.style = STYLE_Add;
+				smoke.flags = SPF_ROLL|SPF_REPLACE;
+				smoke.lifetime = 28;
+				smoke.size = TexMan.GetSize(smoketex) * 0.5;
+				smoke.sizestep = smoke.size * 0.05;
+				smoke.startalpha = 0.5;
+				smoke.fadestep = -1;
+				smoke.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
+				smoke.pos = pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2));
+				smoke.startroll = frandom[etc](-20, 20);
+				Level.SpawnParticle(smoke);
+
+				/*let smk = Spawn("PK_WhiteDeathSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
+				if (smk) {
+					smk.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
+					smk.A_SetScale(0.5);					
+				}*/
 			}
+
 			deadtics++;
 			if (deadtics > 70)
 				SetStateLabel("boom");
@@ -968,7 +1011,7 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 					if (part) {
 						part.vel = (frandom[eld](-6.5,6.5),frandom[eld](-6.5,6.5),frandom[eld](4,9));
 						part.frame = 2;
-						part.A_SetScale(0.06);
+						part.A_SetScale(0.1);
 					}
 				}
 			}
