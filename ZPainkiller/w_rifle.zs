@@ -416,6 +416,7 @@ Class PK_Rifle : PKWeapon {
 
 Class PK_BurnControl : PK_InventoryToken {
 	protected int prevTranslation;
+	TextureID flamePartTex;
 
 	protected int timer;
 	void ResetTimer() {
@@ -462,16 +463,22 @@ Class PK_BurnControl : PK_InventoryToken {
 			owner.DamageMobj(self,target,4,"Fire",flags:DMG_THRUSTLESS|fl);
 		}
 		
-		double rad = owner.radius*0.75;		
-		
-		if (GetParticlesLevel() >= 1) {
-			let part = Spawn("PK_FlameParticle",owner.pos + (frandom[sfx](-rad,rad), frandom[sfx](-rad,rad), frandom[sfx](owner.pos.z,owner.height*0.75)));
-			if (part) {
-				part.vel = (frandom[sfx](-0.7,0.7), frandom[sfx](-0.7,0.7), frandom[sfx](0.8,1.8));
-				part.scale *= 2;
-				part.alpha = 0.5;
-			}
-		}
+		double rad = owner.radius*0.5;
+
+		if (!flamePartTex)
+			flamePartTex = TexMan.CheckForTexture("PFLPA0", TexMan.Type_Wall);
+		PK_FlameParticle.SpawnFlameParticle(
+			flamePartTex,
+			owner.pos + (
+				frandom[sfx](-rad,rad), 
+				frandom[sfx](-rad,rad), 
+				frandom[sfx](owner.height * 0.15, owner.height * 0.75)
+			),
+			scale: 0.4,
+			alpha: 0.65,
+			hvel: 0.5,
+			vvel: frandom[sfx](0.5,1.65)
+		);
 	}
 
 	override void DetachFromOwner() {
@@ -488,6 +495,7 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 	protected int ripdepth;
 	protected double rollOfs; //randomized roll
 	protected double scaleMul;
+	TextureID flamePartTex;
 
 	Default {
 		+BRIGHT
@@ -594,15 +602,17 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 		stop;
 	Death:
 		TNT1 A 0 A_Stop();
-		TNT1 AAAAAAAAAAAAAA random(3,6) {
-			
-			if (GetParticlesLevel() >= 2) {
-				A_SpawnItemEx(
-					"PK_FlameParticle",
-					xvel:frandom[sfx](-0.6,0.6),
-					yvel:frandom[sfx](-0.6,0.6),
-					zvel:frandom[sfx](0.4,1.5),
-					failchance: 80
+		TNT1 AAAAAAAAAAAAAA random(3,6) {			
+			if (GetParticlesLevel() >= PL_Full) {
+				if (!flamePartTex)
+					flamePartTex = TexMan.CheckForTexture("PFLPA0", TexMan.Type_Wall);
+
+				PK_FlameParticle.SpawnFlameParticle(
+					flamePartTex,
+					pos,
+					scale: 0.2,
+					hvel: 0.6,
+					vvel: frandom[sfx](0.4,1.5)
 				);
 			}
 		}
@@ -610,6 +620,9 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 	}
 }
 
+// Originally, a decorative actor that was spawned directly.
+// Now, only a container for the static function that spawns
+// animated textured particles that imitate its look:
 Class PK_FlameParticle : PK_SmallDebris {
 	protected int rollOfs;
 	Default {
@@ -619,11 +632,34 @@ Class PK_FlameParticle : PK_SmallDebris {
 		scale 0.12;
 		alpha 0.5;
 	}
+
+	static void SpawnFlameParticle(TextureID tex, vector3 pos, double scale = 0.15, double alpha = 0.5, double hvel = 0, double vvel = 0, double accelf = 0.02) {
+		if (!tex)
+			tex = TexMan.CheckForTexture("PFLPA0", TexMan.Type_Wall);
+		FSpawnParticleParams flamepart;	
+		flamepart.color1 = "";
+		flamepart.texture = tex;
+		flamepart.lifetime = 34;
+		flamepart.flags = SPF_FULLBRIGHT|SPF_ROLL|SPF_REPLACE;
+		flamepart.style = STYLE_Add;
+		flamepart.pos = pos;
+		flamepart.vel = (frandom[sfx](-hvel, hvel), frandom[sfx](-hvel, hvel), vvel);
+		flamepart.accel = flamepart.vel * -accelf;
+		flamepart.startalpha = alpha;
+		flamepart.fadestep = -1;
+		flamepart.Size = TexMan.GetSize(tex) * scale;
+		flamepart.sizeStep = flamepart.Size * 0.03;
+		flamepart.startRoll = frandom[sfx](0, 360);
+		flamepart.rollvel = frandom[sfx](2,4) * randompick[sfx](-1,1);
+		Level.SpawnParticle(flamepart);
+	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		roll = frandom[sfx](0,360);
 		rollOfs = frandom[sfx](4,8) * randompick[sfx](-1,1);
 	}
+
 	States {
 	Spawn:
 		PFLP ABCDEFGHIJILKLMNOPQR 1 {
@@ -642,6 +678,9 @@ Class PK_FlamerTank : PK_Projectile {
 	private double pitchMod;
 	private double targetPitch;
 	private double rollMod;
+
+	TextureID flamePartTex;
+
 	Default {
 		-NOGRAVITY
 		+ALLOWBOUNCEONACTORS
@@ -657,6 +696,7 @@ Class PK_FlamerTank : PK_Projectile {
 		damage (80);
 		Obituary "$PKO_FLAMETANK";
 	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		tankmodel = PK_FlamerTankModel(Spawn("PK_FlamerTankModel",pos));
@@ -668,6 +708,7 @@ Class PK_FlamerTank : PK_Projectile {
 		A_StartSound("weapons/gastank/fire",CHAN_6);
 		//tankmodel.roll = randompick[sfx](-10,10);
 	}
+
 	override void Tick() {
 		super.Tick();
 		if (isFrozen())
@@ -675,44 +716,70 @@ Class PK_FlamerTank : PK_Projectile {
 		if (!tankmodel)
 			return;			
 		
-		if (GetParticlesLevel() >= 1) {
-			let part = Spawn("PK_FlameParticle", tankmodel.pos + (frandom[sfx](-3,3), frandom[sfx](-3,3), frandom[sfx](-2,5)));
-			if (part) {
-				part.vel = (frandom[sfx](-0.7,0.7), frandom[sfx](-0.7,0.7), frandom[sfx](0.8,1.8));
-				part.scale *= 1.2;
-				part.alpha = 0.4;
-			}
+		if (GetParticlesLevel() >= PL_Reduced) {
+			if (!flamePartTex)
+				flamePartTex = TexMan.CheckForTexture("PFLPA0", TexMan.Type_Wall);
+			
+			PK_FlameParticle.SpawnFlameParticle(
+				flamePartTex,
+				tankmodel.pos + (frandom[sfx](-3,3), frandom[sfx](-3,3), frandom[sfx](-2,5)),
+				scale: 0.3,
+				alpha: 0.4,
+				hvel: 0.7,
+				vvel: frandom[sfx](0.8,1.8)
+			);
+			
+			TextureID smokePartTex = TexMan.CheckForTexture(PK_BaseActor.GetRandomBlackSmoke());
+			FSpawnParticleParams smokepart;	
+			smokepart.color1 = "";
+			smokepart.texture = smokePartTex;
+			smokepart.lifetime = 30;
+			smokepart.flags = SPF_ROLL|SPF_REPLACE;
+			smokepart.pos = tankmodel.pos + (frandom[sfx](-6,6), frandom[sfx](-6,6), frandom[sfx](10,14));
+			smokepart.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](1,1.2));
+			smokepart.startalpha = 0.5;
+			smokepart.fadestep = -1;
+			smokepart.Size = TexMan.GetSize(smokePartTex) * 0.4;
+			smokepart.sizeStep = smokepart.Size * -0.03;
+			smokepart.startRoll = frandom[etc](-20, 20);
+			Level.SpawnParticle(smokepart);
 		}
-		if (GetParticlesLevel() >= 2) {
+		/*if (GetParticlesLevel() >= 2) {
 			let smk = Spawn("PK_BlackSmoke", tankmodel.pos + (frandom[sfx](-6,6), frandom[sfx](-6,6), frandom[sfx](10,14)));
 			if (smk) {
 				smk.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](1,1.2));
 				smk.alpha = 0.35;
 				smk.scale *= 0.8;
 			}
-		}
+		}*/
 		if (!landed) {
 			//tankmodel.A_SetRoll(tankmodel.roll+10, SPF_INTERPOLATE);
 			if (age > 200)
 				SetStateLabel("XDeath");
 			return;
 		}
+		else {
+			vel *= 0.9;
+		}
+
 		if (!tankmodel.straight && abs(rollMod) > 0.01) {
 			tankmodel.A_SetRoll(tankmodel.roll+rollMod, SPF_INTERPOLATE);
 			rollMod *= 0.96;
 		}
+		
 		if ( (pitchMod > 0 && tankmodel.pitch < targetPitch) || (pitchMod < 0 && tankmodel.pitch > targetPitch)) {
 			tankmodel.A_SetPitch(Clamp(tankmodel.pitch + pitchMod, -180, 180));
 			//console.printf("targetPitch: %d | pitch: %d",targetPitch,tankmodel.pitch);
 		}
 	}
+
 	States {
 	Spawn:
 		TNT1 A 1 {
 			double vvel = vel.length();
 			//console.printf("in Spawn; vel: %f", vvel);
 			if (tankmodel)
-				tankmodel.A_SetPitch(tankmodel.pitch + vvel,SPF_INTERPOLATE);
+				tankmodel.A_SetPitch(tankmodel.pitch + vvel, SPF_INTERPOLATE);
 			if (!landed && vvel < 3 && pos.z <= floorz+20) {
 				rollMod = vvel * frandom[sfx](0.5,1) *randompick[sfx](-1,1);
 				bMISSILE = false;
@@ -759,63 +826,51 @@ Class PK_FlamerTank : PK_Projectile {
 				ex.quakeradius = 400;
 			}
 			
-			if (GetParticlesLevel() >= 1) {
-				for (int i = 4; i >= 0; i--) {
-					let debris = Spawn("PK_FlamerDebris",pos + (frandom[sfx](-6,6),frandom[sfx](-6,6),frandom[sfx](2,6)));
-					if (debris) {
-						double zvel = (pos.z > floorz) ? frandom[sfx](-2,6) : frandom[sfx](4,8);
-						debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
-						debris.frame = i;
+			if (waterlevel < 3) {
+				if (GetParticlesLevel() >= PL_Reduced) {
+					for (int i = 4; i >= 0; i--) {
+						let debris = Spawn("PK_FlameTankPiece",pos + (frandom[sfx](-6,6),frandom[sfx](-6,6),frandom[sfx](2,6)));
+						if (debris) {
+							double zvel = (pos.z > floorz) ? frandom[sfx](-2,6) : frandom[sfx](4,8);
+							debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
+							debris.frame = i;
+						}
+					}
+				}
+				if (GetParticlesLevel() >= PL_Full && tankmodel) {
+					for (int i = 15; i > 0; i--) {
+						if (!flamePartTex)
+							flamePartTex = TexMan.CheckForTexture("PFLPA0", TexMan.Type_Wall);
+
+						PK_FlameParticle.SpawnFlameParticle(
+							flamePartTex,
+							tankmodel.pos + (frandom[sfx](-6,6), frandom[sfx](-6,6), frandom[sfx](4,12)),
+							scale: 0.4,
+							alpha: 0.65,
+							hvel: 0.3,
+							vvel: frandom[sfx](6,14),
+							accelf: 0.08
+						);
+					}
+				}
+				bool b; Actor fl;
+				for (int i = 0; i < 360; i+= 20) {
+					double zp;
+					if (pos.z <= floorz)
+						zp = 12;
+					else if (pos.z >= ceilingz-12)
+						zp = -24;
+					[b, fl] = A_SpawnItemEx("PK_FlameThrowerFlame", xofs:16, zofs:zp, xvel: 2, angle:i);
+					if (b && fl) {
+						fl.target = target;
 					}
 				}
 			}
-			if (GetParticlesLevel() >= 2 && tankmodel) {
-				for (int i = 15; i > 0; i--) {
-					let part = Spawn("PK_FlameTankParticle", tankmodel.pos + (frandom[sfx](-6,6), frandom[sfx](-6,6), frandom[sfx](4,12)));
-					if (part) {
-						part.vel = (frandom[sfx](-0.3,0.3), frandom[sfx](-0.3,0.3), frandom[sfx](6,14));
-					}
-				}
-			}
+
 			if (tankmodel)
 				tankmodel.destroy();
 			int exdist = 180;
 			A_Explode(320,exdist);
-			double pangle;
-			while (pangle < 360) {
-				double zp;
-				if (pos.z <= floorz)
-					zp = 12;
-				else if (pos.z >= ceilingz-12)
-					zp = -24;
-				A_SpawnItemEx(
-					"PK_FlameThrowerFlame",
-					xofs:16,
-					zofs:zp,
-					xvel:2,
-					angle:pangle
-				);
-				pangle += 20;
-			}
-			/*(BlockThingsIterator itr = BlockThingsIterator.Create(self,exdist);
-			while (itr.next()) {
-				let trg = itr.thing;
-				if (!trg || trg == target)
-					continue; 
-				if (!trg.bShootable || !(trg.bIsMonster || (trg is "PlayerPawn")) || target.bKILLED)
-					continue;
-				double cdist = Distance3D(trg);
-				if (cdist > exdist)
-					continue;
-				if (trg.FindInventory("PK_BurnControl"))
-					continue;
-				if (!CheckSight(trg))
-					continue;				
-				trg.GiveInventory("PK_BurnControl",1);
-				let control = PK_BurnControl(trg.FindInventory("PK_BurnControl"));
-				if (control && target)
-					control.target = target;
-			}*/
 		}
 		stop;
 	}
@@ -853,27 +908,30 @@ Class PK_FlamerTankModel : Actor {
 	}
 }
 
-Class PK_FlamerDebris : PK_RandomDebris {
+Class PK_FlameTankPiece : PK_RandomDebris {
+	TextureID flamePartTex;
+
 	Default {
 		PK_RandomDebris.spritename 'PFLD';
 		scale 0.12;
 	}
+
 	override void Tick () {
-		Super.Tick();	
-		if (isFrozen())
+		Super.Tick();
+		if (isFrozen() || waterlevel > 1)
 			return;
-		if (waterlevel > 1)
-			return;
-		if (GetAge() % 3 != 0)
-			return;
-		
-		if (GetParticlesLevel() >= 2) {
-			let fir = Spawn("PK_FlameParticle",pos+(frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](0,4)));
-			if (fir) {
-				fir.A_SetScale(0.2);
-				fir.vel = (frandom[sfx](-0.6,0.6),frandom[sfx](-0.6,0.6),frandom[sfx](1,2.2));
-				fir.alpha = alpha * 0.5;
-			}
+		if (GetAge() % 3 == 0) {
+			if (!flamePartTex)
+				flamePartTex = TexMan.CheckForTexture("PFLPA0", TexMan.Type_Wall);
+
+			PK_FlameParticle.SpawnFlameParticle(
+				flamePartTex,
+				pos+(frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](0,4)),
+				scale: 0.2,
+				alpha: alpha * 0.5,
+				hvel: 0.6,
+				vvel: frandom[sfx](1,2.2)
+			);
 		}
 	}
 	states {
@@ -883,19 +941,5 @@ Class PK_FlamerDebris : PK_RandomDebris {
 			A_FadeOut(0.02);
 		}
 		wait;
-	}
-}
-
-Class PK_FlameTankParticle : PK_FlameParticle {	
-	Default {
-		scale 0.4;
-		alpha 0.65;
-	}
-	override void Tick() {
-		super.Tick();
-		if (isFrozen())
-			return;
-		vel *= 0.92;
-		scale *= 0.94;
 	}
 }
