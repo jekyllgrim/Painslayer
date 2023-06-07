@@ -244,7 +244,7 @@ Class PK_ElectroDriver : PKWeapon {
 				FSpawnParticleParams electricBlip;				
 				electricBlip.color1 = PK_ElectroDriver.electricBlipColors[random[epart](0, PK_ElectroDriver.electricBlipColors.Size() - 1)];
 				//electricBlip.texture = ptex;
-				electricBlip.flags = SPF_FULLBRIGHT;
+				electricBlip.flags = SPF_FULLBRIGHT|SPF_REPLACE;
 				electricBlip.style = STYLE_Add;
 				electricBlip.pos = ppos;
 				electricBlip.vel = (frandom[epart](-v, v),frandom[epart](-v, v), frandom[epart](-v, v) * 0.5);
