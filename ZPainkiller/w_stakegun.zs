@@ -727,7 +727,7 @@ Class PK_Grenade : PK_Projectile {
 			//A_StartSound("weapons/grenade/explosion",CHAN_5);
 			A_Explode(-1);
 			let exp = PK_GenericExplosion(Spawn("PK_GenericExplosion",pos));
-			if (mod && exp) {
+			if (waterlevel < 3 && mod && exp) {
 				Spawn("PK_FlameExplosion",pos);
 				exp.scale *= 1.5;
 				//exp.explosivedebris = 10;
