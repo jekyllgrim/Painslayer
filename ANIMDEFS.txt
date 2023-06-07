@@ -5,6 +5,8 @@ texture GSOUA0 range GSOUU0 tics 2
 texture MSOUA0 range MSOUU0 tics 2
 texture PSOCA0 range PSOCL0 tics 3
 
+texture PFLPA0 range PFLPT0 tics 1
+
 texture PCDXEYES
 	pic PDEYH0 rand 8 80
 	pic PDEYF0 tics 1
