@@ -28,13 +28,20 @@ Class PK_Rifle : PKWeapon {
 
 	action void FireFlameThrower() {
 		let flm = PK_FlameThrowerFlame(Fire3DProjectile("PK_FlameThrowerFlame", true, forward: radius, leftright: 3, updown: 0, angleoffs: frandom[flt](-3,3), pitchoffs: frandom[flt](-3,3)));
+
 		if (flm) {
-			flm.bonusvel = vel;
+			flm.vel += vel;
+			/*console.printf("Flame base vel: %1.f | added vel: %.1f | total vel: %1.f",
+				flm.basevel,
+				vel.length(),
+				flm.vel.length()
+			);*/
 			if (invoker.hasWmod) {
 				flm.scale *= 1.5;
-				flm.vel = flm.vel.unit() * 1.5;			
+				flm.vel *= 1.5;			
 				flm.A_SetSize(flm.radius * 1.2, flm.height * 1.2);
 			}
+			flm.SetOrigin(flm.pos + flm.vel, false);
 		}
 	}
 
@@ -482,14 +489,6 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 	protected double rollOfs; //randomized roll
 	protected double scaleMul;
 
-	//	If fired while moving, it gets some vel from the shooter.
-	//	This bonus vel is then quickly scaled down so that it's brought 
-	//	back in sync with what it would be if it were shot while standing 
-	//	still.
-	//	'realspeed' is used both to define its actual base speed, and to 
-	//	keep track of its bonus vel, they're continuously compared against 
-	//	each other .
-	vector3 bonusvel;
 	Default {
 		+BRIGHT
 		+ROLLSPRITE
@@ -536,10 +535,6 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 		roll = frandom[sfx](0,360);
 		rollOfs = frandom[sfx](5,20) * randompick[sfx](-1,1);
 		scaleMul = 1.02;
-		if (target && bonusvel != (0,0,0)) {
-			vel += bonusvel;
-		}
-		console.printf("Flame vel: %.2f | bonusvel: %.2f", vel.length(), bonusvel.length());
 	}
 
 	override void Tick() {
@@ -552,39 +547,44 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 			A_SetScale(Clamp(scale.x * scaleMul, 0.08, 0.7));
 			scaleMul = Clamp(scaleMul * 1.01, 1.02, 1.08);
 		}
-		if (alpha <= 0)
-			destroy();
+		if (alpha <= 0) {
+			Destroy();
+		}
 	}
+
+	void SlowDownFlame(double fac) {
+		// slow flame down:
+		vel *= fac;
+		speed *= fac;
+		// if it's higher than base vel,
+		// and base vel was recorded,
+		// scale it down further:
+		if (vel.length() > speed) {
+			vel *= 0.8;
+		}
+	}		
 
 	states {
 	Spawn:
-		FLT1 ABCDEFGHIJKLMNO 2 {
-			vel *= 0.99;
-			bonusvel *= 0.99;
+		FLT1 ABCD 2 {
+			rollOfs *= 0.98;
+			roll += rollOfs;
+		}
+		FLT1 EFGHIJKLMNO 2 {
+			SlowDownFlame(0.99);
 			rollOfs *= 0.98;
 			roll += rollOfs;
 		}
 		FLT1 PSTUVWXYZ 2 {
-			vel *= 0.96;
-			bonusvel *= 0.96;
-			if (vel.length() > bonusvel.length()) {
-				vel *= 0.8;
-				bonusvel *= 0.8;
-			}
+			SlowDownFlame(0.96);
 			rollOfs *= 0.91;
 			roll += rollOfs;
 			alpha *= 0.99;
 		}
 		FLT2 ABCDEFG 1 {
-			vel *= 0.92;
-			bonusvel *= 0.92;
-			if (vel.length() > bonusvel.length()) {
-				vel *= 0.8;
-				bonusvel *= 0.8;
-			}
+			SlowDownFlame(0.92);
 			rollOfs *= 0.91;
 			roll += rollOfs;
-			//alpha *= 0.85;
 			A_FadeOut(0.02);
 		}
 		wait;

@@ -882,8 +882,9 @@ Class PK_Projectile : PK_BaseActor abstract {
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 
-		speed = surfaceSpeed > 0 && waterlevel <= 0 ? surfaceSpeed : speed;
-		vel = vel.unit() * speed;
+		//if (surfaceSpeed > 0 && waterlevel <= 0) {
+		//	vel = vel.unit() * surfaceSpeed;
+		//}
 		//console.printf("%s - Speed: %d (default %d) | SurfaceSpeed: %d | Vel.length: %d", GetClassName(), speed, default.speed, surfaceSpeed, vel.length());
 
 		mod = target && PKWeapon.CheckWmod(target);
