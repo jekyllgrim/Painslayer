@@ -227,7 +227,7 @@ Class PK_Stake : PK_StakeProjectile {
 		if (!stickvictim)
 			return;
 		double dist = stickvictim.radius;
-		vector2 ofs = LevelLocals.Vec2Offset(stickvictim.pos.xy, wallnormal * dist);
+		vector2 ofs = Level.Vec2Offset(stickvictim.pos.xy, wallnormal * dist);
 		//console.printf("moving %s out of wall: (%.1f, %.1f) > (%.1f, %.1f)", stickvictim.GetTag(), stickvictim.pos.x, stickvictim.pos.y, ofs.x, ofs.y);
 		stickvictim.SetOrigin((ofs.x, ofs.y, stickvictim.pos.z), true);
 	}
