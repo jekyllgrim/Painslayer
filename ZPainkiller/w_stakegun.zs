@@ -395,7 +395,6 @@ Class PK_Stake : PK_StakeProjectile {
 	
 	states {
 	Cache:
-		M000 A 0; //stake
 		PSDE A 0; //stake debris
 	Spawn:
 		M000 A 1 {
@@ -485,10 +484,12 @@ Class PK_StakeStuck : PK_SmallDebris {
 	double stuckangle;
 	vector3 stuckpos;
 	class<Actor> origin;
+
 	Default {
 		+INTERPOLATEANGLES
 		+NOINTERACTION
 	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		if (!master)
@@ -500,6 +501,7 @@ Class PK_StakeStuck : PK_SmallDebris {
 		else
 			sprite = GetSpriteIndex("M001");
 	}
+
 	override void Tick () {
 		super.Tick();
 		if (GetAge() > 160) {
@@ -507,43 +509,44 @@ Class PK_StakeStuck : PK_SmallDebris {
 			A_FadeOut(0.05);
 		}
 	}
+
 	states {
-		Spawn:
-			#### A 1 NoDelay {
-				if (master) {
-					SetOrigin(master.pos + stuckpos,true);
-					angle = master.angle - stuckangle;
-					if (master.bWALLSPRITE)
-						angle -= 90;
-					if (master.bISMONSTER) {
-						if (master.health <= 0 && (master.bBOSS || master.mass > 400))
-							SetStateLabel("Fall");
-						/*else if (master.InStateSequence(master.curstate,mmissile) || master.InStateSequence(master.curstate,mmelee)) {
-							angle += frandom(-5,5);
-							SetOrigin(pos + (frandom(-0.4,0.4),frandom(-0.4,0.4),frandom(-0.4,0.4)),true);
-						}*/
-					}
-				}
-				else
-					SetStateLabel("Fall");
-			}
-			loop;
-		Fall:
-			#### A 1 {
-				vel.z -= gravity;
-				if (pos.z <= floorz) {
-					A_Stop();
-					SetOrigin((pos.x,pos.y,floorz),true);
-					pitch = 0;
-					bRELATIVETOFLOOR = true;
-					bMOVEWITHSECTOR = true;
-					SetStateLabel("End");
+	Spawn:		
+		#### A 1 NoDelay {
+			if (master) {
+				SetOrigin(master.pos + stuckpos,true);
+				angle = master.angle - stuckangle;
+				if (master.bWALLSPRITE)
+					angle -= 90;
+				if (master.bISMONSTER) {
+					if (master.health <= 0 && (master.bBOSS || master.mass > 400))
+						SetStateLabel("Fall");
+					/*else if (master.InStateSequence(master.curstate,mmissile) || master.InStateSequence(master.curstate,mmelee)) {
+						angle += frandom(-5,5);
+						SetOrigin(pos + (frandom(-0.4,0.4),frandom(-0.4,0.4),frandom(-0.4,0.4)),true);
+					}*/
 				}
 			}
-			loop;
-		End:
-			#### A 1 A_FadeOut(0.03);
-			loop;
+			else
+				SetStateLabel("Fall");
+		}
+		loop;
+	Fall:
+		#### A 1 {
+			vel.z -= gravity;
+			if (pos.z <= floorz) {
+				A_Stop();
+				SetOrigin((pos.x,pos.y,floorz),true);
+				pitch = 0;
+				bRELATIVETOFLOOR = true;
+				bMOVEWITHSECTOR = true;
+				SetStateLabel("End");
+			}
+		}
+		loop;
+	End:
+		#### A 1 A_FadeOut(0.03);
+		loop;
 	}
 }
 
