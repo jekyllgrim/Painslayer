@@ -699,7 +699,7 @@ Class PK_Shuriken : PK_StakeProjectile {
 		speed 35;
 		radius 5;
 		height 4;
-		damage (7);
+		DamageFunction (20);
 		+FORCEXYBILLBOARD;
 		+ROLLSPRITE;		
 	}
