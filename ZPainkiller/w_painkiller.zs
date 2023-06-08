@@ -250,7 +250,7 @@ Class PK_Killer : PK_Projectile {
 		+HITTRACER
 		projectile;
 		scale 0.3;
-		damage (15);
+		DamageFunction (40);
 		speed 25;
 		radius 2;
 		height 2;
