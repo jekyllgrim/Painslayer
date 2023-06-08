@@ -1330,6 +1330,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 	property quakeintensity : quakeintensity;
 	property quakeduration : quakeduration;
 	property quakeradius : quakeradius;
+
 	Default {
 		PK_GenericExplosion.randomdebris 16;
 		PK_GenericExplosion.smokingdebris 12;
@@ -1338,19 +1339,22 @@ Class PK_GenericExplosion : PK_SmallDebris {
 		PK_GenericExplosion.quakeduration 12;
 		PK_GenericExplosion.quakeradius 220;
 		+NOINTERACTION;
+		+NOBLOCKMAP;
 		renderstyle 'add';
 		+BRIGHT;
 		alpha 1;
 		scale 0.52;
 	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
+		return;
 		double rs = scale.x * frandom[sfx](0.8,1.1)*randompick[sfx](-1,1);
 		A_SetScale(rs);
 		roll = random[sfx](0,359);
 		A_Quake(quakeintensity,quakeduration,0,quakeradius,"");
-		if (!CheckPlayerSights())
-			return;
+		//if (!CheckPlayerSights())
+		//	return;
 		if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
 			return;
 		if (randomdebris > 0) {
@@ -1365,7 +1369,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 		}
 		if (GetParticlesLevel() < PK_BaseActor.PL_FULL)
 			return;
-		if (smokingdebris > 0) {
+		if (waterlevel < 3 && smokingdebris > 0) {
 			for (int i = smokingdebris*frandom[sfx](0.7,1.3); i > 0; i--) {
 				let debris = Spawn("PK_SmokingDebris",pos + (frandom[sfx](-12,12),frandom[sfx](-12,12),frandom[sfx](-12,12)));
 				if (debris) {
@@ -1374,7 +1378,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 				}
 			}
 		}
-		if (explosivedebris > 0) {
+		/*if (waterlevel < 3 && explosivedebris > 0) {
 			for (int i = explosivedebris*frandom[sfx](0.7,1.3); i > 0; i--) {
 				let debris = Spawn("PK_ExplosiveDebris",pos + (frandom[sfx](-12,12),frandom[sfx](-12,12),frandom[sfx](-12,12)));
 				if (debris) {
@@ -1382,43 +1386,13 @@ Class PK_GenericExplosion : PK_SmallDebris {
 					debris.vel = (frandom[sfx](-10,10),frandom[sfx](-10,10),zvel);
 				}
 			}
-		}
+		}*/
 	}
+
 	states {
 	Spawn:
 		BOM6 ABCDEFGHIJKLMNOPQRST 1;
 		stop;
-	}
-}
-		
-//Explosion debris that spawn black smoke and flame:
-Class PK_ExplosiveDebris : PK_RandomDebris {	
-	Default {
-		scale 0.5;
-		gravity 0.3;
-	}
-	override void Tick () {
-		Vector3 oldPos = self.pos;		
-		Super.Tick();	
-		if (isFrozen())
-			return;
-		let smk = Spawn("PK_BlackSmoke",pos+(frandom[smk](-9,9),frandom[smk](-9,9),frandom[smk](-9,9)));
-		if (smk) {
-			smk.A_SetScale(0.25);
-			smk.alpha = alpha*0.3;
-			smk.vel = (frandom[smk](-1,1),frandom[smk](-1,1),frandom[smk](-1,1));
-		}
-		Vector3 path = level.vec3Diff( self.pos, oldPos );
-		double distance = path.length() / 4; //this determines how far apart the particles are
-		Vector3 direction = path / distance;
-		int steps = int( distance );		
-		for( int i = 0; i < steps; i++ )  {
-			let trl = Spawn("PK_DebrisFlame",oldPos);
-			if (trl)
-				trl.alpha = alpha*0.75;
-			oldPos = level.vec3Offset( oldPos, direction );
-		}
-		A_FadeOut(0.022);
 	}
 }
 
@@ -1459,11 +1433,13 @@ Class PK_DebrisFlame : PK_BaseFlare {
 		renderstyle 'translucent';
 		alpha 1;
 	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		roll = random[sfx](0,359);
 		wrot = frandom[sfx](5,10)+randompick[sfx](-1,1);
 	}
+
 	states {
 	Spawn:
 		TNT1 A 0 NoDelay A_Jump(256,1,3); //randomize appearance a bit:
