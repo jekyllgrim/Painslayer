@@ -311,6 +311,8 @@ Class PK_SmallDebris : PK_BaseActor abstract {
 		}
 		if (vel.length() != 0 || gravity != 0) //mark as movable if given any non-zero velocity or gravity
 			moving = true;
+		
+		bMOVEWITHSECTOR = !bNOINTERACTION;
 	}
 
 	//a chad tick override that skips Actor's super.tick!
