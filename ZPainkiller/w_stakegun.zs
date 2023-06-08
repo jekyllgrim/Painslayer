@@ -365,12 +365,11 @@ Class PK_Stake : PK_StakeProjectile {
 			let stuck = PK_StakeStuck(Spawn("PK_StakeStuck",victim.pos + (frandom[fakestk](-5,5),frandom[fakestk](-5,5),victim.height * 0.65 + frandom[fakestk](-5,5))));
 			if (stuck) {
 				stuck.master = victim;
-				stuck.tracer = self;
 				stuck.pitch = pitch;
 				stuck.angle = angle;
+				stuck.origin = self.GetClass();
 				stuck.stuckangle = DeltaAngle(angle,victim.angle);
 				stuck.stuckpos = stuck.pos - victim.pos;
-				stuck.sprite = sprite;
 				if (victim.player && victim.player == players[consoleplayer])
 					stuck.bONLYVISIBLEINMIRRORS = true;
 			}
@@ -485,6 +484,7 @@ Class PK_StakeStuck : PK_SmallDebris {
 	state mmelee;
 	double stuckangle;
 	vector3 stuckpos;
+	class<Actor> origin;
 	Default {
 		+INTERPOLATEANGLES
 		+NOINTERACTION
@@ -495,6 +495,10 @@ Class PK_StakeStuck : PK_SmallDebris {
 			return;
 		mmissile = master.FindState("Missile");
 		mmelee = master.FindState("Melee");
+		if (origin && origin == 'PK_Stake')
+			sprite = GetSpriteIndex("M000");
+		else
+			sprite = GetSpriteIndex("M001");
 	}
 	override void Tick () {
 		super.Tick();
