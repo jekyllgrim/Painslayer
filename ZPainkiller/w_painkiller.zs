@@ -298,90 +298,90 @@ Class PK_Killer : PK_Projectile {
 	}
 	
 	states {
-		Spawn:
-			KILR A 1;
-			wait;
-		Death.Sky:
-		Crash:
-		XDeath:
-			#### # 0 {					
-				A_Stop();
-				bNOCLIP = true;
-				returning = true;
-				// The following should only execute for Killer, not for 
-				// combo projectile, so return if this isn't called from
-				// PK_Killer:
-				if (!target || !tracer || GetClassName() != "PK_Killer")
-					return null;
-					
-				// If Killer kills a monster, immediately throw that monster
-				// towards the player (PK_KillerFlyTarget hasn't spawned yet,
-				// so at this point we interact directly with the monster):
-				if (tracer && tracer.health <= 0 && tracer.bISMONSTER && !tracer.bBOSS) {
-					ThrowBody(tracer);
-					return null;
-				}
+	Spawn:
+		KILR A 1;
+		wait;
+	Death.Sky:
+	Crash:
+	XDeath:
+		#### # 0 {
+			A_Stop();
+			bNOCLIP = true;
+			returning = true;
+			// The following should only execute for Killer, not for 
+			// combo projectile, so return if this isn't called from
+			// PK_Killer:
+			if (!target || !tracer || GetClassName() != "PK_Killer")
+				return null;
 				
-				// The following will drag the body if the Killer projectile
-				// hits a PK_KillerFlyTarget, which is a "hitbox" actor
-				// (this is to drag corpses that are already on the floor);
-				if (tracer && tracer.GetClass() == "PK_KillerFlyTarget") {
-					// Get a pointer to the hitbox:
-					let kft = PK_KillerFlyTarget(tracer);
-					// The hitbox's target is a corpse it's attached to.
-					// Double-check it's valid:
-					if (kft && kft.target) {
-						// Get a pointer to the corpse:
-						let body = kft.target;
-						if (!body)
-							return null;
-						ThrowBody(body);
-					
-						// If we hit a body with a Killer projectile, spawn gold every 3 times Killer hits it:
-						kft.hitcounter++;
-						if (kft.hitcounter % 3 == 0) {
-							Class<PK_GoldPickup> gold = "PK_SmallGold";
-							//add a chance to spawn medium gold piece after a few hits:
-							if (kft.hitcounter > random[gold](6,13))
-								gold = "PK_MedGold";
-							let goldspawn = PK_GoldPickup(Spawn(gold,tracer.target.pos));
-							if (goldspawn)
-								goldspawn.A_StartSound(goldspawn.pickupsound);
-						}
-						// PK_KillerFlyTarget is attached to PK_DeathControl.
-						// Call ResetRestCounter() on PK_DeathControl in order to reset
-						// the corpse's disappearing counter:
-						if (kft.edc)
-							kft.edc.ResetRestCounter();
-					}
-				}
+			// If Killer kills a monster, immediately throw that monster
+			// towards the player (PK_KillerFlyTarget hasn't spawned yet,
+			// so at this point we interact directly with the monster):
+			if (tracer && tracer.health <= 0 && tracer.bISMONSTER && !tracer.bBOSS) {
+				ThrowBody(tracer);
 				return null;
 			}
-			#### # 1 {
-				if (target) {
-					vel = Vec3To(target).Unit() * 30;
-					if (Distance3D(target) <= 320)
-						A_StartSound("weapons/painkiller/return",CHAN_AUTO,CHANF_NOSTOP);
-					A_FaceTarget(flags:FAF_MIDDLE);
-					if (Distance3D(target) <= 64) {
-						target.A_StartSound("weapons/painkiller/killerback",CHAN_AUTO);
-						let pk = PK_Painkiller(target.FindInventory("PK_Painkiller"));
-						if (pk && target.player && target.player.readyweapon && target.player.readyweapon != pk)
-							pk.killer_fired = false;
-						Destroy();
-						return;
+			
+			// The following will drag the body if the Killer projectile
+			// hits a PK_KillerFlyTarget, which is a "hitbox" actor
+			// (this is to drag corpses that are already on the floor);
+			if (tracer && tracer.GetClass() == "PK_KillerFlyTarget") {
+				// Get a pointer to the hitbox:
+				let kft = PK_KillerFlyTarget(tracer);
+				// The hitbox's target is a corpse it's attached to.
+				// Double-check it's valid:
+				if (kft && kft.target) {
+					// Get a pointer to the corpse:
+					let body = kft.target;
+					if (!body)
+						return null;
+					ThrowBody(body);
+				
+					// If we hit a body with a Killer projectile, spawn gold every 3 times Killer hits it:
+					kft.hitcounter++;
+					if (kft.hitcounter % 3 == 0) {
+						Class<PK_GoldPickup> gold = "PK_SmallGold";
+						//add a chance to spawn medium gold piece after a few hits:
+						if (kft.hitcounter > random[gold](6,13))
+							gold = "PK_MedGold";
+						let goldspawn = PK_GoldPickup(Spawn(gold,tracer.target.pos));
+						if (goldspawn)
+							goldspawn.A_StartSound(goldspawn.pickupsound);
 					}
+					// PK_KillerFlyTarget is attached to PK_DeathControl.
+					// Call ResetRestCounter() on PK_DeathControl in order to reset
+					// the corpse's disappearing counter:
+					if (kft.edc)
+						kft.edc.ResetRestCounter();
 				}
 			}
-			wait;
-		Death:
-			KILR A -1 {
-				if (tracer && tracer.GetClassName() == "PK_KillerFlyTarget")
-					return ResolveState("XDeath");
-				A_StartSound("weapons/painkiller/stuck",attenuation:2);
-				return ResolveState(null);
+			return null;
+		}
+		#### # 1 {
+			if (target) {
+				vel = Vec3To(target).Unit() * 30;
+				if (Distance3D(target) <= 320)
+					A_StartSound("weapons/painkiller/return",CHAN_AUTO,CHANF_NOSTOP);
+				A_FaceTarget(flags:FAF_MIDDLE);
+				if (Distance3D(target) <= 64) {
+					target.A_StartSound("weapons/painkiller/killerback",CHAN_AUTO);
+					let pk = PK_Painkiller(target.FindInventory("PK_Painkiller"));
+					if (pk && target.player && target.player.readyweapon && target.player.readyweapon != pk)
+						pk.killer_fired = false;
+					Destroy();
+					return;
+				}
 			}
-			stop;
+		}
+		wait;
+	Death:
+		KILR A -1 {
+			if (tracer && tracer.GetClassName() == "PK_KillerFlyTarget")
+				return ResolveState("XDeath");
+			A_StartSound("weapons/painkiller/stuck",attenuation:2);
+			return ResolveState(null);
+		}
+		stop;
 	}
 }
 
