@@ -844,12 +844,12 @@ Class PK_FlamerTank : PK_Projectile {
 
 						PK_FlameParticle.SpawnFlameParticle(
 							flamePartTex,
-							tankmodel.pos + (frandom[sfx](-6,6), frandom[sfx](-6,6), frandom[sfx](4,12)),
+							tankmodel.pos + (frandom[sfx](-6,6), frandom[sfx](-6,6), frandom[sfx](pos.z > floorz + height ? - 12 : 4,12)),
 							scale: 0.4,
 							alpha: 0.65,
-							hvel: 0.3,
-							vvel: frandom[sfx](6,14),
-							accelf: 0.08
+							hvel: 0.5,
+							vvel: frandom[sfx](pos.z > floorz + height ? -10 : 4,10),
+							accelf: 0.03
 						);
 					}
 				}
