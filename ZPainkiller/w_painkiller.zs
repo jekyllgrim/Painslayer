@@ -559,12 +559,21 @@ Class PK_ComboKiller : PK_Killer {
 		+EXTREMEDEATH
 		+FLATSPRITE
 		+ROLLSPRITE
+		+RIPPER
 		Xscale 0.31;
 		YScale 0.2573;
 		damage (80);
-		speed 10;
-		radius 2;
-		height 2;
+		speed 9;
+	}
+
+	override int DoSpecialDamage(Actor target, int damage, name damagetype) {
+		int ret = super.DoSpecialDamage(target, damage, damagetype);
+		if (ret > 0) {
+			SetDamage(0);
+			bBLOODLESSIMPACT = true;
+			console.printf("Combo killed dealt %d damage to %s. Remaining health: %d", damage, target.GetClassName(), target.health);
+		}
+		return ret;
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
