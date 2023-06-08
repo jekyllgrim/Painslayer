@@ -234,13 +234,12 @@ Class PK_Chaingun : PKWeapon {
 
 
 Class PK_Rocket : PK_Grenade {
-
 	Default {
 		speed 30;
 		seesound "weapons/chaingun/rocketfire";
 		deathsound "weapons/chaingun/rocketboom";
 		decal 'Scorch';
-		damage (20);
+		DamageFunction (50);
 		ExplosionDamage 128;
 		+NOGRAVITY
 		bouncetype 'none';
