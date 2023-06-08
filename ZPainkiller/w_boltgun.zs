@@ -445,6 +445,8 @@ Class PK_BombHitbox : PK_GrenadeHitbox {
 Class PK_Bomb : PK_Projectile {
 	protected int bounces;
 	protected double rollOfs;
+	protected int boomCountdown;
+
 	Default {
 		PK_Projectile.trailcolor "f4f4f4";
 		PK_Projectile.trailscale 0.035;
@@ -463,6 +465,7 @@ Class PK_Bomb : PK_Projectile {
 		damage (10);
 		scale 0.3;
 	}
+
 	override void Tick() {
 		super.Tick();
 		if (isFrozen())
@@ -492,6 +495,7 @@ Class PK_Bomb : PK_Projectile {
 		A_SetRoll(roll += rollOfs,SPF_INTERPOLATE);
 		A_SetPitch(pitch += 20,SPF_INTERPOLATE);
 	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		let trg = PK_GrenadeHitbox(Spawn("PK_BombHitbox",pos));
@@ -506,7 +510,9 @@ Class PK_Bomb : PK_Projectile {
 			gravity *= 0.5;
 		}
 	}
+
 	void ActivateBomb() {
+		boomCountdown = 35 * 4;
 		A_AttachLight('Bomb',DynamicLight.FlickerLight,"DDBB00",17,12,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF);
 		let red = PK_BaseFlare(Spawn("PK_ProjFlare",pos));
 		if (red) {
@@ -516,12 +522,20 @@ Class PK_Bomb : PK_Projectile {
 			red.A_SetScale(0.06);
 		}
 	}
+
 	states {
 	Spawn:
-		M000 A -1;
-		stop;
-		//KULK ABC 2;
-		//loop;
+		M000 A 1 {
+			// Jump to death if stuck armed for too long
+			// (mostly for water or very tall sectors):
+			if (boomCountdown > 0) {
+				boomCountdown--;
+				if (boomCountdown <= 0)
+					return ResolveState("XDeath");
+			}
+			return ResolveState(null);
+		}
+		loop;
 	Bounce:
 		#### # 1 {
 			bounces++;
