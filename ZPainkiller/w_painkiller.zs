@@ -5,6 +5,7 @@ Class PK_Painkiller : PKWeapon {
 	bool combofire;
 	protected double wmodAlpha;
 	private int wmodCounter;
+
 	Default {
 		+WEAPON.MELEEWEAPON;
 		PKWeapon.ammoSwitchCVar 'pk_switch_Painkiller';
@@ -16,171 +17,177 @@ Class PK_Painkiller : PKWeapon {
 		Tag "$PK_PAINKILLER_TAG";
 		+PKWeapon.NOICON
 	}
+
 	states {
-		Spawn:
-			PKWI G -1;
-			stop;
-		BeamFlare:
-			PKOF A -1 bright {
-				A_OverlayFlags(OverlayID(),PSPF_RENDERSTYLE,true);
-				A_OverlayRenderstyle(OverlayID(),STYLE_Add);
+	Spawn:
+		PKWI G -1;
+		stop;
+	BeamFlare:
+		PKOF A -1 bright {
+			A_OverlayFlags(OverlayID(),PSPF_RENDERSTYLE,true);
+			A_OverlayRenderstyle(OverlayID(),STYLE_Add);
+		}
+		stop;
+	Ready:
+		PKIR A 1 {
+			A_WeaponOffset(0,32);
+			let bm = player.FindPSprite(PSP_UNDERGUN);
+			if (invoker.beam && !bm)
+				A_Overlay(PSP_UNDERGUN,"BeamFlare");
+			else if (!invoker.beam && bm)
+				A_Overlay(PSP_UNDERGUN,null);
+			/*if (invoker.beam)
+				A_Overlay(PSP_UNDERGUN,"BeamFlare");
+			else
+				A_Overlay(PSP_UNDERGUN,null);*/
+			if (invoker.pk_killer) {
+				let psp = Player.FindPSprite(PSP_Weapon);
+				if (psp) 
+					psp.sprite = GetSpriteIndex("PKIM");
+				PK_WeaponReady(WRF_NOPRIMARY);
 			}
-			stop;
-		Ready:
-			PKIR A 1 {
-				A_WeaponOffset(0,32);
-				let bm = player.FindPSprite(PSP_UNDERGUN);
-				if (invoker.beam && !bm)
-					A_Overlay(PSP_UNDERGUN,"BeamFlare");
-				else if (!invoker.beam && bm)
-					A_Overlay(PSP_UNDERGUN,null);
-				/*if (invoker.beam)
-					A_Overlay(PSP_UNDERGUN,"BeamFlare");
-				else
-					A_Overlay(PSP_UNDERGUN,null);*/
-				if (invoker.pk_killer) {
-					let psp = Player.FindPSprite(PSP_Weapon);
-					if (psp) 
-						psp.sprite = GetSpriteIndex("PKIM");
-					PK_WeaponReady(WRF_NOPRIMARY);
-				}
-				else if (!invoker.pk_killer && invoker.killer_fired)
-					return ResolveState("KillerReturn");
-				else
-					A_WeaponReady();
-				return ResolveState(null);
+			else if (!invoker.pk_killer && invoker.killer_fired)
+				return ResolveState("KillerReturn");
+			else
+				A_WeaponReady();
+			return ResolveState(null);
+		}
+		loop;
+	Fire:	
+		TNT1 A 0 {
+			if (invoker.pk_killer) {
+				A_ClearRefire();
+				return ResolveState("Ready");
 			}
-			loop;
-		Fire:	
-			TNT1 A 0 {
-				if (invoker.pk_killer) {
-					A_ClearRefire();
-					return ResolveState("Ready");
-				}
-				A_WeaponOffset(0,32);
-				PK_AttackSound("weapons/painkiller/start",CHAN_VOICE);
-				invoker.wmodAlpha = 0;
-				invoker.wmodCounter = 0;
-				return ResolveState(null);
-			}
-			PKIR BCDEF 1;
-			TNT1 A 0 {
-				A_StartSound("weapons/painkiller/spin",CH_LOOP,CHANF_LOOPING);
-				return ResolveState("Hold");
-			}
-			goto ready;
-		Hold:
-			TNT1 A 0 {
-				A_CustomPunch(12,true,CPF_NOTURN,"PK_PainkillerPuff",80); 
-				if (invoker.hasWmod) {
-					A_Overlay(PSP_OVERGUN,"Hold.Mod");
-					A_OverlayRenderstyle(PSP_OVERGUN,Style_AddShaded);
-					A_OverlayFlags(PSP_OVERGUN,PSPF_ALPHA|PSPF_FORCEALPHA,true);
-					A_OverlayAlpha(PSP_OVERGUN,invoker.wmodAlpha);
-				}
-			}
-			PKIL ABCD 1 {
-				double spitch = 1.0;	
-				let psp = Player.FindPSprite(OverlayID());			
-				if (invoker.hasWmod) {
-					if (invoker.wmodCounter >= 3) {
-						invoker.wmodCounter = 0;
-						A_SetTics(0);
-					}		
-					spitch += 0.05;
-					if (invoker.wmodAlpha < 1)
-						invoker.wmodAlpha += 0.07;
-					invoker.wmodCounter++;		
-					let fr = Player.FindPSprite(PSP_OVERGUN);
-					if (psp && fr)
-						fr.frame = psp.frame;
-				}
-				if (invoker.hasDexterity) {
-					spitch += 0.1;
-					invoker.wmodCounter++;	
-					if (random[sfx](0,1) == 1) {
-						if (psp && psp.frame < 3)
-							psp.frame++;
-					}
-				}		
-				A_SoundPitch(CH_LOOP,spitch);
-				if (PressingAttackButton(secondary: true, holdCheck: PAB_NOTHELD)) {
-					A_StopSound(CH_LOOP);
-					invoker.combofire = true;
-					A_ClearRefire();
-					return ResolveState("AltFire");
-				}
-				A_WeaponOffset(frandom(-0.15,0.15),frandom(32,32.3));
-				return ResolveState(null);
-			}
-			TNT1 A 0 PK_Refire();
-			goto HoldEnd;
-		Hold.Mod:
-			PKIW ### 1 bright {
+			A_WeaponOffset(0,32);
+			PK_AttackSound("weapons/painkiller/start",CHAN_VOICE);
+			invoker.wmodAlpha = 0;
+			invoker.wmodCounter = 0;
+			return ResolveState(null);
+		}
+		PKIR BCDEF 1;
+		TNT1 A 0 {
+			A_StartSound("weapons/painkiller/spin",CH_LOOP,CHANF_LOOPING);
+			return ResolveState("Hold");
+		}
+		goto ready;
+	Hold:
+		TNT1 A 0 {
+			A_CustomPunch(12,true,CPF_NOTURN,"PK_PainkillerPuff",80); 
+			if (invoker.hasWmod) {
+				A_Overlay(PSP_OVERGUN,"Hold.Mod");
+				A_OverlayRenderstyle(PSP_OVERGUN,Style_AddShaded);
+				A_OverlayFlags(PSP_OVERGUN,PSPF_ALPHA|PSPF_FORCEALPHA,true);
 				A_OverlayAlpha(PSP_OVERGUN,invoker.wmodAlpha);
 			}
-			stop;
-		HoldEnd:
-			TNT1 A 0 {
+		}
+		PKIL ABCD 1 {
+			double spitch = 1.0;	
+			let psp = Player.FindPSprite(OverlayID());			
+			if (invoker.hasWmod) {
+				if (invoker.wmodCounter >= 3) {
+					invoker.wmodCounter = 0;
+					A_SetTics(0);
+				}		
+				spitch += 0.05;
+				if (invoker.wmodAlpha < 1)
+					invoker.wmodAlpha += 0.07;
+				invoker.wmodCounter++;		
+				let fr = Player.FindPSprite(PSP_OVERGUN);
+				if (psp && fr)
+					fr.frame = psp.frame;
+			}
+			if (invoker.hasDexterity) {
+				spitch += 0.1;
+				invoker.wmodCounter++;	
+				if (random[sfx](0,1) == 1) {
+					if (psp && psp.frame < 3)
+						psp.frame++;
+				}
+			}		
+			A_SoundPitch(CH_LOOP,spitch);
+			if (PressingAttackButton(secondary: true, holdCheck: PAB_NOTHELD)) {
 				A_StopSound(CH_LOOP);
-				A_StartSound("weapons/painkiller/stop",CHAN_BODY);
+				invoker.combofire = true;
+				A_ClearRefire();
+				return ResolveState("AltFire");
 			}
-			PKIR DCBA 1 A_WeaponReady();
-			goto ready;
-		AltFire:
-			TNT1 A 0 {
-				if (invoker.pk_killer) {
-					if ((PressingAttackButton(secondary:true, holdCheck: PAB_NOTHELD)))
-						invoker.pk_killer.SetStateLabel("XDeath");
-					return ResolveState("Ready");
-				}
-				else if ((PressingAttackButton(secondary:true, holdCheck: PAB_HELD)))
-					return ResolveState("Ready");
-				A_StartSound("weapons/painkiller/killer");
-				if (invoker.combofire)
-					invoker.pk_killer = PK_ComboKiller(A_FireProjectile("PK_ComboKiller"));
-				else {
-					invoker.pk_killer = PK_Killer(A_FireProjectile("PK_Killer"));
-					A_Overlay(PSP_UNDERGUN,"BeamFlare");
-				}
-				A_WeaponOffset(0,32,WOF_INTERPOLATE);
-				invoker.combofire = false;
-				invoker.killer_fired = true;
-				return ResolveState(null);
+			A_WeaponOffset(frandom(-0.15,0.15),frandom(32,32.3));
+			return ResolveState(null);
+		}
+		TNT1 A 0 PK_Refire();
+		goto HoldEnd;
+	Hold.Mod:
+		PKIW ### 1 bright {
+			A_OverlayAlpha(PSP_OVERGUN,invoker.wmodAlpha);
+		}
+		stop;
+	HoldEnd:
+		TNT1 A 0 {
+			A_StopSound(CH_LOOP);
+			A_StartSound("weapons/painkiller/stop",CHAN_BODY);
+		}
+		PKIR DCBA 1 A_WeaponReady();
+		goto ready;
+	AltFire:
+		TNT1 A 0 {
+			if (invoker.pk_killer) {
+				if ((PressingAttackButton(secondary:true, holdCheck: PAB_NOTHELD)))
+					invoker.pk_killer.SetStateLabel("XDeath");
+				return ResolveState("Ready");
 			}
-			PKIM ABC 1 A_WeaponOffset(9,3,WOF_ADD);
-			PKIM CCC 1 {
-				A_WeaponOffset(0.5,0.3,WOF_ADD);
-				A_WeaponReady(WRF_NOBOB);
+			else if ((PressingAttackButton(secondary:true, holdCheck: PAB_HELD)))
+				return ResolveState("Ready");
+			A_StartSound("weapons/painkiller/killer");
+			if (invoker.combofire)
+				invoker.pk_killer = PK_ComboKiller(A_FireProjectile("PK_ComboKiller"));
+			else {
+				invoker.pk_killer = PK_Killer(A_FireProjectile("PK_Killer"));
+				A_Overlay(PSP_UNDERGUN,"BeamFlare");
 			}
-			PKIM BBBAAA 1 {
-				A_WeaponReady(WRF_NOBOB);
-				A_WeaponOffset(-5,-1.5,WOF_ADD);
-			}
-			goto ready;
-		KillerReturn:
-			TNT1 A 0 {
+			A_WeaponOffset(0,32,WOF_INTERPOLATE);
+			invoker.combofire = false;
+			invoker.killer_fired = true;
+			return ResolveState(null);
+		}
+		PKIM ABC 1 A_WeaponOffset(9,3,WOF_ADD);
+		PKIM CCC 1 {
+			A_WeaponOffset(0.5,0.3,WOF_ADD);
+		}
+		PKIM BBBAAA 1 {
+			A_WeaponReady(WRF_NOBOB);
+			A_WeaponOffset(-5,-1.5,WOF_ADD);
+		}
+		goto ready;
+	KillerReturn:
+		TNT1 A 0 {
+			invoker.killer_fired = false;
+			//A_StartSound("weapons/painkiller/killerback");
+		}
+		PKIR AAA 1 {
+			A_WeaponOffset(13.5,4.5,WOF_ADD);
+		}
+		PKIR AAA 1 {
+			A_WeaponOffset(0.75,0.45,WOF_ADD);
+			// If we fired a regular Killer, make the weapon ready
+			// for firing instantly. If we fired a Combo Killer,
+			// delay the readiness by 3 more tics:
+			if (invoker.pk_killer && invoker.pk_killer.GetClass() == 'PK_Killer') {
 				invoker.pk_killer = null;
-				invoker.killer_fired = false;
-				//A_StartSound("weapons/painkiller/killerback");
 			}
-			PKIM ABC 1 {
-				A_WeaponOffset(13.5,4.5,WOF_ADD);
-				//A_WeaponReady(WRF_NOBOB);
-			}
-			PKIM CCC 1 {
-				A_WeaponOffset(0.75,0.45,WOF_ADD);
+			if (!invoker.pk_killer)
 				A_WeaponReady(WRF_NOBOB);
-			}
-			PKIM BBB 1 {
-				A_WeaponReady(WRF_NOBOB);
-				A_WeaponOffset(-7.125,-1.65,WOF_ADD);
-			}
-			PKIR AAA 1 {
-				A_WeaponReady(WRF_NOBOB);
-				A_WeaponOffset(-8,-3,WOF_ADD);
-			}
-			goto ready;
+		}
+		PKIR AAA 1 {
+			invoker.pk_killer = null;
+			A_WeaponReady(WRF_NOBOB);
+			A_WeaponOffset(-7.125,-1.65,WOF_ADD);
+		}
+		PKIR AAA 1 {
+			A_WeaponReady(WRF_NOBOB);
+			A_WeaponOffset(-8,-3,WOF_ADD);
+		}
+		goto ready;
 	}
 }
 	
@@ -575,12 +582,14 @@ Class PK_ComboKiller : PK_Killer {
 		}
 		return ret;
 	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		A_StartSound("weapons/painkiller/spin",CHAN_BODY,CHANF_LOOPING);
 		if (target)
 			pitch = target.pitch-90;
 	}
+
 	states {
 		Spawn:
 			KBLD A 1 A_SetRoll(roll+80,SPF_INTERPOLATE);
