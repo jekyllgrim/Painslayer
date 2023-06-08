@@ -116,63 +116,55 @@ object PK_GenericExplosion {
     frame BOM6T { light PKROCKET_X3 }
 }
 
-pulselight PK_ExplosiveDebris {
-    color 1.0 0.7 0.0
-    attenuate 1
-    size 72
-    secondarySize 8
-    interval 1
-}
-
-object PK_ExplosiveDebris {
-	frame BDEB { light PK_ExplosiveDebris }
-}
-
-pointlight PK_Soul {
-	color 0.05 1.0 0.3
-	attenuate 1
-	size 48
-}
-
-pointlight PK_GoldSoul {
+flickerlight2 PK_GoldSoul {
 	color 1 0.8 0
 	attenuate 1
 	size 48
+	SecondarySize 54
+	interval 0.3
 }
 
 object PK_GoldSoul {
 	frame GSOU { light PK_GoldSoul }
 }
 
-pointlight PK_SecondaryRed {
-	color 1.0 0 0
+pointlight PK_MegaSoulPrimary {
+	color 1 0.8 0
 	attenuate 1
-	size 24
+	size 48
+}
+
+flickerlight2 PK_MegalSoulSecondary {
+	color 1 0.0 0
+	attenuate 1
+	size 48
+	SecondarySize 54
+	interval 0.3
 }
 
 object PK_MegaSoul {
-	frame MSOU { light PK_Soul }
-	frame MSOUA { light PK_SecondaryRed }
-	frame MSOUB { light PK_SecondaryRed }
-	frame MSOUC { light PK_SecondaryRed }
-	frame MSOUD { light PK_SecondaryRed }
-	frame MSOUE { light PK_SecondaryRed }
-	frame MSOUF { light PK_SecondaryRed }
-	frame MSOUG { light PK_SecondaryRed }
-	frame MSOUH { light PK_SecondaryRed }
-	frame MSOUI { light PK_SecondaryRed }
-	frame MSOUJ { light PK_SecondaryRed }
-	frame MSOUK { light PK_SecondaryRed }
-	frame MSOUL { light PK_SecondaryRed }
-	frame MSOUM { light PK_SecondaryRed }
-	frame MSOUN { light PK_SecondaryRed }
-	frame MSOUO { light PK_SecondaryRed }
-	frame MSOUP { light PK_SecondaryRed }
-	frame MSOUQ { light PK_SecondaryRed }
-	frame MSOUR { light PK_SecondaryRed }
-	frame MSOUS { light PK_SecondaryRed }
-	frame MSOUT { light PK_SecondaryRed }
-	frame MSOUU { light PK_SecondaryRed }
+	frame MSOU { light PK_MegaSoulPrimary }
+	frame MSOUA { light PK_MegalSoulSecondary }
+	frame MSOUB { light PK_MegalSoulSecondary }
+	frame MSOUC { light PK_MegalSoulSecondary }
+	frame MSOUD { light PK_MegalSoulSecondary }
+	frame MSOUE { light PK_MegalSoulSecondary }
+	frame MSOUF { light PK_MegalSoulSecondary }
+	frame MSOUG { light PK_MegalSoulSecondary }
+	frame MSOUH { light PK_MegalSoulSecondary }
+	frame MSOUI { light PK_MegalSoulSecondary }
+	frame MSOUJ { light PK_MegalSoulSecondary }
+	frame MSOUK { light PK_MegalSoulSecondary }
+	frame MSOUL { light PK_MegalSoulSecondary }
+	frame MSOUM { light PK_MegalSoulSecondary }
+	frame MSOUN { light PK_MegalSoulSecondary }
+	frame MSOUO { light PK_MegalSoulSecondary }
+	frame MSOUP { light PK_MegalSoulSecondary }
+	frame MSOUQ { light PK_MegalSoulSecondary }
+	frame MSOUR { light PK_MegalSoulSecondary }
+	frame MSOUS { light PK_MegalSoulSecondary }
+	frame MSOUT { light PK_MegalSoulSecondary }
+	frame MSOUU { light PK_MegalSoulSecondary }
 }
 
 pulselight PK_DeathSmoke {
