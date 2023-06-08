@@ -562,7 +562,7 @@ Class PK_ComboKiller : PK_Killer {
 		+RIPPER
 		Xscale 0.31;
 		YScale 0.2573;
-		damage (80);
+		DamageFunction (200);
 		speed 9;
 	}
 
