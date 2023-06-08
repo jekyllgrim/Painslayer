@@ -1041,7 +1041,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 		// plus the shooter's radius (this prevents particles from
 		// appearing behind the player's actor):
 		if (!farenough && target) {
-			if (level.Vec3Diff(pos,spawnpos).length() < speed + target.radius)
+			if (level.Vec3Diff(pos, spawnpos).length() < vel.length() + target.radius)
 				return;
 			farenough = true;
 		}

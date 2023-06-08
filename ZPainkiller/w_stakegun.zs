@@ -253,7 +253,7 @@ Class PK_Stake : PK_StakeProjectile {
 		if (mod) {
 			bNOGRAVITY = true;
 			if (waterlevel <= 0)
-				vel = vel.unit() * speed * 1.3;
+				vel *= 1.3;
 		}
 	}
 	
