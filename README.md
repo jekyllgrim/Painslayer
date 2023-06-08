@@ -95,14 +95,14 @@ i.   Original artwork created by the Author (usually inspired by works of People
      **Locations**: 
 
 ```
-graphics/Boltgun/
-graphics/Chaingun/
-graphics/ElectroDriver/
-graphics/hud/HUDelements/
-graphics/Items/
-graphics/Painkiller/
-graphics/Rifle/
-graphics/ShotgunFreezer/
+patches/Boltgun/
+patches/Chaingun/
+patches/ElectroDriver/
+patches/hud/HUDelements/
+patches/Items/
+patches/Painkiller/
+patches/Rifle/
+patches/ShotgunFreezer/
 graphics/StakeGun/
 sprites/debris/
 sprites/DemonEyes/
