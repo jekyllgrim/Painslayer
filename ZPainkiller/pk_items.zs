@@ -800,14 +800,14 @@ Class PK_GoldSoul : Health {
 		inventory.pickupmessage "$PKI_GOLDSOUL";
 		inventory.amount 100;
 		inventory.maxamount 200;
-		renderstyle 'Add';
 		+NOGRAVITY
+		+COUNTITEM
+		+BRIGHT
+		renderstyle 'Add';
 		alpha 0.9;
 		xscale 0.4;
 		yscale 0.332;
 		inventory.pickupsound "pickups/soul/gold";
-		+COUNTITEM
-		+BRIGHT
 		Tag "$PKC_GoldSoul";
 	}
 
@@ -870,6 +870,7 @@ Class PK_MegaSoul : PK_GoldSoul {
 		inventory.maxamount 200;
 		inventory.pickupsound "pickups/soul/mega";
 		inventory.pickupmessage "$PKI_MEGASOUL";
+		+INVENTORY.ALWAYSPICKUP
 		//xscale 0.3;
 		//yscale 0.25;
 		//alpha 2.5;
