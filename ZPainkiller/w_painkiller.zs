@@ -578,7 +578,7 @@ Class PK_ComboKiller : PK_Killer {
 		if (ret > 0) {
 			SetDamage(0);
 			bBLOODLESSIMPACT = true;
-			console.printf("Combo killed dealt %d damage to %s. Remaining health: %d", damage, target.GetClassName(), target.health);
+			//console.printf("Combo killed dealt %d damage to %s. Remaining health: %d", damage, target.GetClassName(), target.health);
 		}
 		return ret;
 	}
