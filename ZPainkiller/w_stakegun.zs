@@ -118,7 +118,7 @@ only one victim and fly through others if they exist. For that we employ a few t
 */
 Class PK_Stake : PK_StakeProjectile {
 	protected int basedmg;
-	protected bool onFire;
+	protected int burnstate;
 	//Stores the first monster hit. Allows us to deal damage only once and to only one victim
 	actor hitvictim; 
 	//the victim the stake is stuck in and carries with it:
@@ -130,6 +130,12 @@ Class PK_Stake : PK_StakeProjectile {
 	const VICTIMMAXPINTIME = 80;
 	const VICTIMMAXFLYTIME = 35 * 5;
 	const BURNLIGHT = "PKBurningStake";
+
+	enum EBurnStates {
+		BS_ReadyToBurn,
+		BS_Burning,
+		BS_CannotBurn,
+	}
 	
 	Default {
 		PK_Projectile.trailcolor "f4f4f4";
@@ -150,6 +156,42 @@ Class PK_Stake : PK_StakeProjectile {
 		obituary "$PKO_STAKE";
 		deathsound "weapons/stakegun/stakewall";
 		decal "Stakedecal";
+	}
+
+	TextureID fireTexture;
+	TextureID smokeTexture;
+
+	override void CreateParticleTrail(out FSpawnParticleParams trail, vector3 ppos, double pvel, double velstep) {		
+		if (burnstate != BS_Burning) {
+			super.CreateParticleTrail(trail, ppos, pvel, velstep);
+			return;
+		}
+
+		if (!fireTexture)
+			fireTexture = TexMan.CheckForTexture("BOM4K0");
+		if (!smokeTexture)
+			smokeTexture = TexMan.CheckForTexture("BOM5N0");
+
+		FSpawnParticleParams ftrail;
+		ftrail.pos = ppos;
+		double v = 0.3;
+		ftrail.vel = (frandom[sfx](-v, v), frandom[sfx](-v, v), frandom[sfx](-v, v));
+		ftrail.size = 12;
+		ftrail.color1 = "";
+		ftrail.flags = SPF_REPLACE|SPF_ROLL;
+		ftrail.startalpha = 0.85;
+		ftrail.fadestep = -1;
+		ftrail.startroll = frandom[sfx](0,360);
+		ftrail.rollvel = frandom[sfx](3, 6) * randompick[sfx](-1,1);
+
+		ftrail.texture = smokeTexture;
+		ftrail.lifetime = 18; 
+		Level.SpawnParticle(ftrail);
+
+		ftrail.lifetime = 8;
+		ftrail.texture = fireTexture;
+		ftrail.flags |= SPF_FULLBRIGHT;				
+		Level.SpawnParticle(ftrail);
 	}
 	
 	override void StakeBreak() {		
@@ -177,7 +219,7 @@ Class PK_Stake : PK_StakeProjectile {
 	override void StickToWall() { 
 		super.StickToWall();
 		A_RemoveLight(BURNLIGHT);
-		onFire = true;
+		burnstate = BS_CannotBurn;
 		if (stickvictim) {
 			// if the victim is a player, detach unconditionally:
 			if (stickvictim.player)
@@ -260,20 +302,18 @@ Class PK_Stake : PK_StakeProjectile {
 	override void Tick () {
 		super.Tick();
 		
-		if (GetClass() == "PK_Stake") {
-			if (!onFire && waterlevel <= 0 && (mod || age >= 12)) {
-				trailactor = "PK_StakeFlame";
-				trailscale = 0.08;
-				A_AttachLight(BURNLIGHT, DynamicLight.RandomFlickerLight, "ffb30f", 40, 44, flags: DYNAMICLIGHT.LF_ATTENUATE);
-				onFire = true;
-			}
+		if (burnstate == BS_ReadyToBurn && waterlevel <= 0 && (mod || age >= 12)) {
+			//trailactor = "PK_StakeFlame";
+			//trailscale = 0.08;
+			A_AttachLight(BURNLIGHT, DynamicLight.RandomFlickerLight, "ffb30f", 40, 44, flags: DYNAMICLIGHT.LF_ATTENUATE);
+			burnstate = BS_Burning;
+		}
 
-			if (waterlevel > 0 && onfire) {
-				trailactor = "";
-				trailscale = default.trailscale;
-				A_RemoveLight(BURNLIGHT);
-				onfire = false;
-			}
+		if (waterlevel > 0 && burnstate == BS_Burning) {
+			//trailactor = "";
+			//trailscale = default.trailscale;
+			A_RemoveLight(BURNLIGHT);
+			burnstate = BS_CannotBurn;
 		}
 		
 		if (stickvictim) {	
@@ -332,7 +372,7 @@ Class PK_Stake : PK_StakeProjectile {
 		if (!victim || (target && victim == target))
 			return 1;
 		
-		name dmgtype = onFire ? 'fire' : 'normal';
+		name dmgtype = burnstate == BS_Burning ? 'fire' : 'normal';
 		
 		//collision with damageable non-monster objects:
 		if (!victim.bISMONSTER && !victim.player && (victim.bSOLID || victim.bSHOOTABLE)) {
@@ -349,7 +389,7 @@ Class PK_Stake : PK_StakeProjectile {
 		// Do the damage (increased by 50% with wmod or when on fire)
 		// Class type check is there to disable this  functionality
 		// for Boltgun bolts:
-		if (mod || (self.GetClass() == "PK_Stake" && onFire))
+		if (mod || (burnstate == BS_Burning))
 			basedmg *= 1.5;
 		int dealtdmg = victim.DamageMobj (self, target, basedmg, dmgtype);
 		deathsound = "";
@@ -413,13 +453,13 @@ Class PK_Stake : PK_StakeProjectile {
 	Crash:
 		TNT1 A 1 {
 			A_RemoveLight(BURNLIGHT);
-			onFire = true;
+			burnstate = BS_CannotBurn;
 		}
 		stop;
 	XDeath:
 		TNT1 A 1 {
 			A_RemoveLight(BURNLIGHT);
-			onFire = true;
+			burnstate = BS_CannotBurn;
 		}
 		stop;
 	Death.Sky:
@@ -747,7 +787,7 @@ Class PK_Grenade : PK_Projectile {
 							zp = 12;
 						else if (pos.z >= ceilingz-12)
 							zp = -24;
-						[b, fl] = A_SpawnItemEx("PK_FlameThrowerFlame", xofs:16, zofs:zp, xvel: 0.2, angle:i);
+						[b, fl] = A_SpawnItemEx("PK_FlameThrowerFlame", xofs:16, zofs:zp, xvel: 1.2, angle:i);
 						if (b && fl) {
 							fl.target = target;
 						}

@@ -375,6 +375,7 @@ Class PK_Bolt : PK_Stake {
 		basedmg = mod ? 70 : 53;
 		if (mod)
 			trailcolor = "F43510";
+		burnstate = BS_CannotBurn;
 	}
 
 	override void StakeBreak() {
