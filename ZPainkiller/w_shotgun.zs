@@ -173,7 +173,7 @@ Class PK_FreezerProjectile : PK_Projectile {
 			A_AttachLight('frez', DynamicLight.RandomFlickerLight, "75edff", 32, 52, flags: DYNAMICLIGHT.LF_ATTENUATE);
 			roll = random(0,359); 
 			
-			if (GetParticlesLevel() > PL_None) {
+			if (GetParticlesLevel() >= PL_Full) {
 				for (int i = random[sfx](10,15); i > 0; i--) {
 					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
 					if (debris) {
@@ -396,7 +396,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 			//spawn ice shards:			
 			int rad = owner.radius;
 			
-			if (GetParticlesLevel() > PL_None) {
+			if (GetParticlesLevel() >= PL_Reduced) {
 				for (int i = random[sfx](5,8); i > 0; i--) {
 					let ice = Spawn("PK_FrozenChunk",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
 					if (ice) {
