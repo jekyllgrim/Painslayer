@@ -749,12 +749,28 @@ Class PK_Grenade : PK_Projectile {
 				pitch+= 15;
 				
 				if (GetParticlesLevel() > PK_BaseActor.PL_NONE) {
+					TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomWhiteSmoke());
+					FSpawnParticleParams smoke;
+					smoke.lifetime = 35;
+					smoke.color1 = "";
+					smoke.style = STYLE_Translucent;
+					smoke.flags = SPF_REPLACE|SPF_ROLL;
+					smoke.texture = smoketex;
+					smoke.pos = pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2));
+					smoke.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
+					smoke.size = TexMan.GetSize(smoketex) * 0.15;
+					smoke.sizestep = smoke.size * 0.02;
+					smoke.startalpha = 0.65;
+					smoke.fadestep = -1;
+					smoke.rollvel = frandom[sfx](2,5)*randompick[sfx](-1,1);
+					Level.SpawnParticle(smoke);
+					/*
 					let smk = Spawn("PK_WhiteSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
 					if (smk) {
 						smk.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
 						smk.A_SetScale(0.15);
 						smk.alpha = 0.35;
-					}
+					}*/
 				}
 			}
 			else
