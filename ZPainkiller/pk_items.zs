@@ -365,6 +365,7 @@ Class PK_Inventory : Inventory abstract {
 
 Class PK_GoldPickup : PK_Inventory abstract {
 	protected PK_GoldGleam gleam;
+
 	Default {
 		+INVENTORY.NEVERRESPAWN
 		+BRIGHT
@@ -375,6 +376,7 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		inventory.pickupmessage "";
 		Tag "$PKC_GOLDOBTAIN";
 	}
+
 	override bool TryPickup (in out Actor toucher) {
 		if (!toucher || !toucher.player)
 			return false;
@@ -389,6 +391,7 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		GoAwayAndDie();
 		return true;
 	}
+	
 	override void Tick() {
 		super.Tick();		
 		if (owner)

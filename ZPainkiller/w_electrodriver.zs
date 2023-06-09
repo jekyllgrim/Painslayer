@@ -582,11 +582,6 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 				sizestep: -1.6,
 				startroll: frandom[etc](-20, 20)
 			);
-
-			/*let smk = Spawn("PK_BlackSmoke",owner.pos+(frandom[etc](-8,8),frandom[etc](-8,8),owner.height*0.5 + frandom[etc](-4,12)));
-			if (smk) {
-				smk.vel = (frandom[etc](-0.5,0.5),frandom[etc](-0.5,0.5),frandom[etc](0.6,0.9));
-			}*/
 		}
 
 		if (noPainTics > 0) {
@@ -708,7 +703,7 @@ Class PK_Shuriken : PK_StakeProjectile {
 	}
 	override void StakeBreak() {
 		
-		if (GetParticlesLevel() >= 2) {
+		if (GetParticlesLevel() >= PL_Full) {
 			for (int i = random[sfx](2,4); i > 0; i--) {
 				let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,pos.z)));
 				if (deb) {
@@ -767,7 +762,7 @@ Class PK_Shuriken : PK_StakeProjectile {
 			else
 				A_Explode(40,128,fulldamagedistance:64);
 			
-			if (GetParticlesLevel() >= 2) {
+			if (GetParticlesLevel() >= PL_Full) {
 				for (int i = random[sfx](2,7); i > 0; i--) {
 					let debris = Spawn("PK_RandomDebris",pos);
 					if (debris) {
@@ -834,7 +829,7 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 		gravity 0.25;
 	}
 	
-	override void CreateParticleTrail(out FSpawnParticleParams trail, vector3 ppos, double pvel, double velstep) {		
+	override void CreateParticleTrail(out FSpawnParticleParams trail, vector3 ppos, double pvel, double velstep) {
 		if (!secondaryPartTex)
 			secondaryPartTex = TexMan.CheckForTexture("SPRKC0");		
 		FSpawnParticleParams sTrail;
@@ -969,28 +964,24 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 				}
 			}
 
-			for (int i = random[sfx](2,4); i > 0; i--) {
-				TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomBlackSmoke());
-				FSpawnParticleParams smoke;
-				smoke.texture = smoketex;
-				smoke.color1 = "";
-				smoke.style = STYLE_Add;
-				smoke.flags = SPF_ROLL|SPF_REPLACE;
-				smoke.lifetime = 28;
-				smoke.size = TexMan.GetSize(smoketex) * 0.5;
-				smoke.sizestep = smoke.size * 0.05;
-				smoke.startalpha = 0.5;
-				smoke.fadestep = -1;
-				smoke.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
-				smoke.pos = pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2));
-				smoke.startroll = frandom[etc](-20, 20);
-				Level.SpawnParticle(smoke);
-
-				/*let smk = Spawn("PK_WhiteDeathSmoke",pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2)));
-				if (smk) {
-					smk.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
-					smk.A_SetScale(0.5);					
-				}*/
+			if (GetParticlesLevel() >= PK_BaseActor.PL_Reduced) {
+				for (int i = random[sfx](2,4); i > 0; i--) {
+					TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomBlackSmoke());
+					FSpawnParticleParams smoke;
+					smoke.texture = smoketex;
+					smoke.color1 = "";
+					smoke.style = STYLE_Add;
+					smoke.flags = SPF_ROLL|SPF_REPLACE;
+					smoke.lifetime = 28;
+					smoke.size = TexMan.GetSize(smoketex) * 0.5;
+					smoke.sizestep = smoke.size * 0.05;
+					smoke.startalpha = 0.5;
+					smoke.fadestep = -1;
+					smoke.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
+					smoke.pos = pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2));
+					smoke.startroll = frandom[etc](-20, 20);
+					Level.SpawnParticle(smoke);
+				}
 			}
 
 			deadtics++;
@@ -1008,7 +999,7 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 			SetShade("8bb1ff");
 			A_Explode(128,160,flags:0);
 			
-			if (GetParticlesLevel() >= 2) {
+			if (GetParticlesLevel() >= PL_Full) {
 				for (int i = 32; i > 0; i--) {
 					let part = Spawn("PK_RicochetSpark",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
 					if (part) {

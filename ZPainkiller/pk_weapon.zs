@@ -415,7 +415,7 @@ Class PKWeapon : Weapon abstract {
 		vector2 spread = (0, 0);
 		for (int i = 0; i < numbullets; i++) {
 			spread.x = held ? random2[pkfirebull]() * (spread_horz / 256) : 0;
-			spread.y = held ? BulletSlope() - pitch + random2[BDFireBull]() * (spread_vert / 256) : 0;
+			spread.y = held ? BulletSlope() - pitch + random2[pkfirebull]() * (spread_vert / 256) : 0;
 			Fire3DProjectile(
 				"PK_BulletTracer",
 				useammo: false,
@@ -670,10 +670,8 @@ Class PK_BulletPuff : PKPuff {
 	states {
 	Crash:
 		TNT1 A 0 {
-			
 			if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
 				return resolveState(null);
-
 			FindLineNormal();
 
 			TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomWhiteSmoke());
@@ -746,13 +744,16 @@ class PK_BulletPuffSmoke : PK_BlackSmoke {
 Class PK_WeaponIcon : Actor {
 	//state mspawn;
 	PKWeapon weap;
+	
 	Default {
 		+BRIGHT
 		xscale 0.14;
 		yscale 0.1162;
 		+NOINTERACTION
+		+NOBLOCKMAP
 		+FLOATBOB
 	}
+	
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		if (master)
@@ -785,6 +786,7 @@ Class PK_WeaponIcon : Actor {
 			break;
 		}
 	}
+	
 	override void Tick () {
 		if (!weap || weap.owner) {
 			Destroy();
@@ -792,10 +794,11 @@ Class PK_WeaponIcon : Actor {
 		}
 		SetOrigin(weap.pos + (0,0,30),true);
 	}
+	
 	states {
-		Spawn:
-			PWIC # -1;
-			stop;
+	Spawn:
+		PWIC # -1;
+		stop;
 	}
 }
 
@@ -911,8 +914,6 @@ Class PK_Projectile : PK_BaseActor abstract {
 
 	// Spawns a particle or actor-based trail:
 	virtual void SpawnTrail(vector3 ppos) {
-		if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
-			return;
 		// Actor based:
 		if (trailactor) {
 			vector3 tvel;

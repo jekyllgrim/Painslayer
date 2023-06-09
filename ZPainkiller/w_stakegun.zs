@@ -15,98 +15,99 @@ Class PK_Stakegun : PKWeapon {
 		inventory.icon "PKWIB0";
 		Tag "$PK_STAKEGUN_TAG";
 	}
+
 	states {
-		Cache:
-			PSGT AHIJKLMN 0;
-		Spawn:
-			PKWI B -1;
-			stop;
-		Ready:
-			PSGN A 1 {
-				PK_WeaponReady();
-				if (!PK_CheckAmmo()) {
-					let psp = player.FindPSprite(PSP_Weapon);
-					if (psp)
-						psp.sprite = GetSpriteIndex("PSGT");
-				}
+	Cache:
+		PSGT AHIJKLMN 0;
+	Spawn:
+		PKWI B -1;
+		stop;
+	Ready:
+		PSGN A 1 {
+			PK_WeaponReady();
+			if (!PK_CheckAmmo()) {
+				let psp = player.FindPSprite(PSP_Weapon);
+				if (psp)
+					psp.sprite = GetSpriteIndex("PSGT");
 			}
-			loop;
-		Fire:
-			TNT1 A 0 {
-				PK_AttackSound("weapons/stakegun/fire");
-				A_WeaponOffset(11,9,WOF_ADD);
-				double pofs = (invoker.hasWmod) ? 0 : -2.5;
-				Fire3DProjectile("PK_Stake", forward: 1, leftright: 2, updown: -2, crosshairConverge: invoker.hasWmod, pitchoffs: pofs);
-				A_OverlayPivot(OverlayID(),0.2,1.0);
+		}
+		loop;
+	Fire:
+		TNT1 A 0 {
+			PK_AttackSound("weapons/stakegun/fire");
+			A_WeaponOffset(11,9,WOF_ADD);
+			double pofs = (invoker.hasWmod) ? 0 : -2.5;
+			Fire3DProjectile("PK_Stake", forward: 1, leftright: 2, updown: -2, crosshairConverge: invoker.hasWmod, pitchoffs: pofs);
+			A_OverlayPivot(OverlayID(),0.2,1.0);
+		}
+		PSGN BBBBB 1 {
+			A_WeaponOffset(1.44,1.2,WOF_ADD);
+			PK_WeaponRotate(-0.6,WOF_ADD);
+		}
+		PSGN CDEF 3 {
+			A_WeaponOffset(-0.8,-0.5,WOF_ADD);
+			PK_WeaponRotate(-0.2,WOF_ADD);
+		}
+		PSGN GGGGGGG 2 {
+			A_WeaponOffset(-0.12,-0.1,WOF_ADD);
+			PK_WeaponRotate(0.2923,WOF_ADD);
+		}
+		PSGN A 0 {
+			if (invoker.ammo1.amount < 1) {
+				let psp = player.FindPSprite(PSP_Weapon);
+				if (psp)
+					psp.sprite = GetSpriteIndex("PSGT");
 			}
-			PSGN BBBBB 1 {
-				A_WeaponOffset(1.44,1.2,WOF_ADD);
-				PK_WeaponRotate(-0.6,WOF_ADD);
+		}
+		#### HIJKAA 3 {
+			A_WeaponOffset(-2.35,-2.04,WOF_ADD);
+			PK_WeaponRotate(0.2923,WOF_ADD);
+		}
+		TNT1 A 0 {
+			A_WeaponOffset(0,32,WOF_INTERPOLATE);
+			PK_WeaponRotate(0);
+		}
+		goto ready;
+	AltFire:
+		PSGN A 0 {
+			PK_AttackSound("weapons/stakegun/grenade");
+			A_WeaponOffset(6,2,WOF_ADD);
+			PK_FireArchingProjectile("PK_Grenade",spawnofs_xy:1,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
+			if (!PK_CheckAmmo()) {
+				let psp = Player.FindPSprite(PSP_WEAPON);
+				if (psp)
+					psp.sprite = GetSpriteIndex("PSGT");
 			}
-			PSGN CDEF 3 {
-				A_WeaponOffset(-0.8,-0.5,WOF_ADD);
-				PK_WeaponRotate(-0.2,WOF_ADD);
-			}
-			PSGN GGGGGGG 2 {
-				A_WeaponOffset(-0.12,-0.1,WOF_ADD);
-				PK_WeaponRotate(0.2923,WOF_ADD);
-			}
-			PSGN A 0 {
-				if (invoker.ammo1.amount < 1) {
-					let psp = player.FindPSprite(PSP_Weapon);
-					if (psp)
-						psp.sprite = GetSpriteIndex("PSGT");
-				}
-			}
-			#### HIJKAA 3 {
-				A_WeaponOffset(-2.35,-2.04,WOF_ADD);
-				PK_WeaponRotate(0.2923,WOF_ADD);
-			}
-			TNT1 A 0 {
-				A_WeaponOffset(0,32,WOF_INTERPOLATE);
-				PK_WeaponRotate(0);
-			}
-			goto ready;
-		AltFire:
-			PSGN A 0 {
-				PK_AttackSound("weapons/stakegun/grenade");
-				A_WeaponOffset(6,2,WOF_ADD);
-				PK_FireArchingProjectile("PK_Grenade",spawnofs_xy:1,spawnheight:-4,flags:FPF_NOAUTOAIM,pitch:-25);
-				if (!PK_CheckAmmo()) {
-					let psp = Player.FindPSprite(PSP_WEAPON);
-					if (psp)
-						psp.sprite = GetSpriteIndex("PSGT");
-				}
-				A_OverlayPivot(OverlayID(),0.2,1.0);
-			}
-			#### AA 1 {
-				A_WeaponOffset(5,3,WOF_ADD);
-				A_OverlayRotate(OverlayID(),-2.1,WOF_ADD);
-				A_OverlayScale(OverlayID(),0.04,0.04,WOF_ADD);
-			}
-			#### A 0 {
-				if (invoker.ammo2.amount > 0)
-					A_StartSound("weapons/grenade/load",CHAN_7);
-			}
-			#### AAA 1 {
-				A_WeaponOffset(3.5,2.5,WOF_ADD);
-				A_OverlayRotate(OverlayID(),-2.1,WOF_ADD);
-				A_OverlayScale(OverlayID(),0.04,0.04,WOF_ADD);
-			}
-			#### AAAAAA 2 {
-				A_WeaponOffset(-3.2,-2,WOF_ADD);				
-				A_OverlayRotate(OverlayID(),1.75,WOF_ADD);
-				A_OverlayScale(OverlayID(),-0.03,-0.03,WOF_ADD);
-			}
-			#### AA 2 {
-				A_WeaponOffset(-0.64,-0.7,WOF_ADD);
-				A_OverlayRotate(OverlayID(),0);
-				A_OverlayScale(OverlayID(),1,1);
-				if (invoker.ammo1.amount >= invoker.ammouse1)
-					PK_WeaponReady(WRF_NOSECONDARY|WRF_NOSWITCH);
-			}
-			#### A 0 A_WeaponOffset(0,32,WOF_INTERPOLATE);
-			goto ready;
+			A_OverlayPivot(OverlayID(),0.2,1.0);
+		}
+		#### AA 1 {
+			A_WeaponOffset(5,3,WOF_ADD);
+			A_OverlayRotate(OverlayID(),-2.1,WOF_ADD);
+			A_OverlayScale(OverlayID(),0.04,0.04,WOF_ADD);
+		}
+		#### A 0 {
+			if (invoker.ammo2.amount > 0)
+				A_StartSound("weapons/grenade/load",CHAN_7);
+		}
+		#### AAA 1 {
+			A_WeaponOffset(3.5,2.5,WOF_ADD);
+			A_OverlayRotate(OverlayID(),-2.1,WOF_ADD);
+			A_OverlayScale(OverlayID(),0.04,0.04,WOF_ADD);
+		}
+		#### AAAAAA 2 {
+			A_WeaponOffset(-3.2,-2,WOF_ADD);				
+			A_OverlayRotate(OverlayID(),1.75,WOF_ADD);
+			A_OverlayScale(OverlayID(),-0.03,-0.03,WOF_ADD);
+		}
+		#### AA 2 {
+			A_WeaponOffset(-0.64,-0.7,WOF_ADD);
+			A_OverlayRotate(OverlayID(),0);
+			A_OverlayScale(OverlayID(),1,1);
+			if (invoker.ammo1.amount >= invoker.ammouse1)
+				PK_WeaponReady(WRF_NOSECONDARY|WRF_NOSWITCH);
+		}
+		#### A 0 A_WeaponOffset(0,32,WOF_INTERPOLATE);
+		goto ready;
 	}
 }
 		
@@ -493,29 +494,6 @@ Class PK_DebugStake : Actor {
 		wait;
 	}
 }
-		
-
-Class PK_StakeFlame : PK_BaseFlare {
-	Default {
-		scale 0.05;
-		renderstyle 'translucent';
-		alpha 0.85;
-	}
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		roll = random[sfx](0,359);
-		scale * frandom[sfx](0.9, 1.1);
-	}
-	states {
-	Spawn:
-		BOM4 JKLMNOPQ 1;
-		BOM5 ABCDEFGHIJKLMN 1 {
-			A_FadeOut(0.02);
-			scale *= 1.06;
-		}
-		wait;
-	}
-}
 
 //Decorative stake stuck in a living monster
 Class PK_StakeStuck : PK_SmallDebris {
@@ -666,6 +644,7 @@ Class PK_GrenadeHitbox : Actor {
 	property newstake : newstake;
 	sound combosound;
 	property combosound : combosound;
+
 	Default {
 		PK_GrenadeHitbox.collider "PK_Stake";
 		PK_GrenadeHitbox.newstake "PK_ExplosiveStake";		
@@ -675,6 +654,7 @@ Class PK_GrenadeHitbox : Actor {
 		radius 16;
 		height 24;
 	}
+
 	override bool CanCollideWith(Actor other, bool passive) {
 		if (other && passive && collider && other is collider && master && (abs(pos.z - other.pos.z) <= height)) {
 			hitstake = other;
@@ -682,6 +662,7 @@ Class PK_GrenadeHitbox : Actor {
 		}
 		return false;
 	}
+
 	override void Tick() {
 		super.Tick();
 		if (!master && hitstake) {				
@@ -747,7 +728,6 @@ Class PK_Grenade : PK_Projectile {
 			}
 			if (pos.z <= floorz+4) {
 				pitch+= 15;
-				
 				if (GetParticlesLevel() > PK_BaseActor.PL_NONE) {
 					TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomWhiteSmoke());
 					FSpawnParticleParams smoke;

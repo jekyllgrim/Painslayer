@@ -134,14 +134,14 @@ class PK_ExplosiveBarrel : ExplosiveBarrel {
 			if (!CheckPlayerSights())
 				return null;
 			
-			if (GetParticlesLevel() >= 1) {
+			if (GetParticlesLevel() >= PL_Reduced) {
 				A_SpawnItemEx("PK_ExplosiveBarrelTop", zofs:default.height,
 					xvel: frandom[sfx](-1,1),
 					yvel: frandom[sfx](-1,1),
 					zvel: frandom[sfx](13,20)
 				);
 			}
-			if (GetParticlesLevel() >= 2) {
+			if (GetParticlesLevel() >= PL_Full) {
 				for (int i = 0; i < 6; i++) {
 					let prt = PK_RandomDebris( Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8), frandom[sfx](8,default.height))) );
 					if (prt) {

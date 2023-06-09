@@ -744,14 +744,7 @@ Class PK_FlamerTank : PK_Projectile {
 			smokepart.startRoll = frandom[etc](-20, 20);
 			Level.SpawnParticle(smokepart);
 		}
-		/*if (GetParticlesLevel() >= 2) {
-			let smk = Spawn("PK_BlackSmoke", tankmodel.pos + (frandom[sfx](-6,6), frandom[sfx](-6,6), frandom[sfx](10,14)));
-			if (smk) {
-				smk.vel = (frandom[eld](-0.5,0.5),frandom[eld](-0.5,0.5),frandom[eld](1,1.2));
-				smk.alpha = 0.35;
-				smk.scale *= 0.8;
-			}
-		}*/
+		
 		if (!landed) {
 			//tankmodel.A_SetRoll(tankmodel.roll+10, SPF_INTERPOLATE);
 			if (age > 200)

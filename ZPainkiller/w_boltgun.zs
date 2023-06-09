@@ -418,7 +418,7 @@ Class PK_ExplosiveBolt : PK_ExplosiveStake {
 			bSPRITEFLIP = randompick[sfx](0,1);
 			roll = random[sfx](0,359);
 			
-			if (GetParticlesLevel() >= 2) {
+			if (GetParticlesLevel() >= PL_Full) {
 				for (int i = random[sfx](5,8); i > 0; i--) {
 					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
 					if (debris) {
@@ -472,7 +472,7 @@ Class PK_Bomb : PK_Projectile {
 		if (isFrozen())
 			return;
 		
-		if (!isFrozen() && GetParticlesLevel() >= PK_BaseActor.PL_Full) {
+		if (!isFrozen() && GetParticlesLevel() >= PK_BaseActor.PL_Reduced) {
 			// start spawning smoke on top of trails
 			// when the bombs have bounced once:
 			if (bounces >= 1 && farenough) {
@@ -566,7 +566,7 @@ Class PK_Bomb : PK_Projectile {
 			bSPRITEFLIP = randompick[sfx](0,1);
 			roll = random[sfx](0,359);
 			
-			if (GetParticlesLevel() >= 2) {
+			if (GetParticlesLevel() >= PL_Full) {
 				for (int i = random[sfx](3,6); i > 0; i--) {
 					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
 					if (debris) {
