@@ -317,7 +317,7 @@ Class PK_SmallDebris : PK_BaseActor abstract {
 
 	//a chad tick override that skips Actor's super.tick!
 	override void Tick() {
-		if (alpha < 0){
+		if (alpha <= 0){
 			destroy();
 			return;
 		}
@@ -445,7 +445,8 @@ Class PK_SmallDebris : PK_BaseActor abstract {
 		}
 		//finally, manually move the object:
 		if (moving) {
-			//this cheaper version won't automatically update floorz/ceilingz, which is good for objects like smoke that don't interact with geometry
+			// this cheaper version won't automatically update floorz/ceilingz, 
+			// which is good for objects like smoke that don't interact with geometry
 			PK_SetOrigin(level.vec3offset(pos, vel));
 		}
 	}
