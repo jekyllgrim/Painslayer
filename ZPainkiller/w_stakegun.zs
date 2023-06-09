@@ -857,6 +857,13 @@ Class PK_ExplosiveStake : PK_Projectile {
 		decal "Scorch";
 		obituary "$PKO_EXSTAKE";
 	}
+
+	override void CreateParticleTrail(out FSpawnParticleParams trail, vector3 ppos, double pvel, double velstep) {		
+		super.CreateParticleTrail(trail, ppos, pvel, velstep);
+		trail.size *= 1.15;
+		trail.flags |= SPF_FULLBRIGHT;
+	}
+
 	states {
 	Spawn:
 		M000 A 1;
