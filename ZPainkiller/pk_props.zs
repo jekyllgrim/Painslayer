@@ -43,11 +43,14 @@ Class PK_GoldContainer : PK_BaseActor abstract {
 			if (gg)
 				gg.vel = (frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](1,4));
 		}
-		for (int i = random[sfx](5,8); i > 0; i--) {
-			let deb = PK_RandomDebris(Spawn("PK_PropDebris",(pos.x,pos.y,pos.z) + (frandom[sfx](-radius,radius),frandom[sfx](-radius,radius),frandom[sfx](8,height))));
-			if (deb) {
-				deb.vel = (frandom[sfx](-5,5),frandom[sfx](-5,5),frandom[sfx](2,5));
-				deb.master = self;
+		
+		if (GetParticlesLevel() >= PL_Full) {
+			for (int i = random[sfx](5,8); i > 0; i--) {
+				let deb = PK_RandomDebris(Spawn("PK_PropDebris",(pos.x,pos.y,pos.z) + (frandom[sfx](-radius,radius),frandom[sfx](-radius,radius),frandom[sfx](8,height))));
+				if (deb) {
+					deb.vel = (frandom[sfx](-5,5),frandom[sfx](-5,5),frandom[sfx](2,5));
+					deb.master = self;
+				}
 			}
 		}
 		super.Die(source, inflictor, dmgflags, MeansOfDeath);
