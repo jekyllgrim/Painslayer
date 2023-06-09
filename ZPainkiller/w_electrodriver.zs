@@ -427,27 +427,29 @@ Class PK_ElectricPuff : PKPuff {
 
 	States {
 	Spawn:
-		SPRK C 1 NoDelay {
-			FindLineNormal();
-			TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomWhiteSmoke());
-			FSpawnParticleParams smoke;
-			smoke.lifetime = 40;
-			smoke.color1 = "";
-			smoke.style = STYLE_Translucent;
-			smoke.flags = SPF_REPLACE|SPF_ROLL;
-			smoke.texture = smoketex;
-			smoke.pos = debrisPos;
-			smoke.vel = (hitnormal + 
-				(frandom[sfx](-0.01,0.01),
-				frandom[sfx](-0.01,0.01),
-				frandom[sfx](-0.01,0.01)))
-				* frandom[sfx](0.1,0.5);
-			smoke.size = 30;
-			smoke.sizestep = smoke.size * 0.03;
-			smoke.startalpha = 0.8;
-			smoke.fadestep = -1;
-			smoke.rollvel = frandom[sfx](2,5)*randompick[sfx](-1,1);
-			Level.SpawnParticle(smoke);
+		TNT1 A 0 NoDelay {
+			if (GetParticlesLevel() >= PL_Reduced) {
+				FindLineNormal();
+				TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomWhiteSmoke());
+				FSpawnParticleParams smoke;
+				smoke.lifetime = 40;
+				smoke.color1 = "";
+				smoke.style = STYLE_Translucent;
+				smoke.flags = SPF_REPLACE|SPF_ROLL;
+				smoke.texture = smoketex;
+				smoke.pos = debrisPos;
+				smoke.vel = (hitnormal + 
+					(frandom[sfx](-0.01,0.01),
+					frandom[sfx](-0.01,0.01),
+					frandom[sfx](-0.01,0.01)))
+					* frandom[sfx](0.1,0.5);
+				smoke.size = 30;
+				smoke.sizestep = smoke.size * 0.03;
+				smoke.startalpha = 0.8;
+				smoke.fadestep = -1;
+				smoke.rollvel = frandom[sfx](2,5)*randompick[sfx](-1,1);
+				Level.SpawnParticle(smoke);
+			}
 
 			if (GetParticlesLevel() >= PL_Full) {
 				for (int i = random[eld](5,8); i > 0; i--) {
@@ -463,7 +465,8 @@ Class PK_ElectricPuff : PKPuff {
 				}
 			}
 		}
-		stop;
+		SPRK C 1 A_FadeOut(0.08);
+		wait;
 	}
 }
 
