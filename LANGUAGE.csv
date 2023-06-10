@@ -37,12 +37,12 @@ Do you want to spend \c[PKGreenText]%d gold\c[PKBaseText] to refresh the number 
 You need \c[PKGreenText]%d gold\c[PKBaseText] to refresh the number of activations. Make more gold or reach next map to refresh for free.",TAROT_REFRESH_NEEDGOLD,,"Осталось активаций: \c[PKGreenText]%d\c[PKBaseText].
 Вам нужно \c[PKGreenText]%d золота\c[PKBaseText], чтобы обновить число активаций Золотых карт. Добудьте больше золота, либо доберитесь до следующего уровня, чтобы обновить активации бесплатно."
 "\c[PKGreenText]%d\c[PKBaseText] is the maximum number of Gold Cards activations. Once you've used the cards in a map, you can come back to refresh the activation for gold.",TAROT_REFRESH_MAX,,"\c[PKGreenText]%d\c[PKBaseText] - это максимальное число активаций Золотых карт. Используйте Золотые карты на уровне, после чего вы сможете вернуться, чтобы обновить число активаций за золото."
-Black Tarot is not available on the easiest difficulty,TAROT_LOWSKILL,Black Tarot Board,Карты Таро недоступны на самой низкой сложности
+Black Tarot is not available on the lowest difficulty,TAROT_LOWSKILL,Black Tarot Board,Карты Таро недоступны на самой низкой сложности
 Take only half the damage.,PK_ENDURANCE_DESC,Tarot Cards,Вы получаете вдвое меньше урона.
 Move faster.,PK_SPEED_DESC,Tarot Cards,Вы двигаетесь быстрее.
 Golden Cards last 15 seconds longer.,PK_TIMEBONUS_DESC,Tarot Cards,Золотые карты действуют на 15 сек. дольше.
 Gain full Health and Armor on activation.,PK_REBIRTH_DESC,Tarot Cards,При активации вы получаете полные здоровье и броню.
-Confuse enemies.,PK_CONFUSION_DESC,Tarot Cards,Сбивает с толку врагов.
+Confuse enemies into attach each other.,PK_CONFUSION_DESC,Tarot Cards,"Сбивает с толку врагов, заставляя их атаковать друг друга."
 Weapons fire 2x faster.,PK_DEXTERITY_DESC,Tarot Cards,Ваше оружие стреляет вдвое быстрее.
 Activate Weapon Modifier.,PK_WMODIFIER_DESC,Tarot Cards,Активирует эффект модификатора оружия.
 Your every step damages nearby enemies.,PK_SOT_DESC,Tarot Cards,С каждым шагом вы наносите урон врагам вокруг вас.
@@ -51,7 +51,7 @@ Guns don't consume ammo.,PK_MAGICGUN_DESC,Tarot Cards,Оружие не расх
 You can't be hurt.,PK_IRONWILL_DESC,Tarot Cards,Вы неуязвимы.
 Enemies move 4x slower.,PK_HASTE_DESC,Tarot Cards,Замедляет врагов в 4 раза.
 Souls never disappear.,PK_SOULKEEPER_DESC,Tarot Cards,Души врагов никогда не исчезают.
-Increase base health to 150.,PK_BLESSING_DESC,Tarot Cards,Увеличивает базовое здоровье до 150 ед.
+Increase base health to 150 and max health to 250.,PK_BLESSING_DESC,Tarot Cards,Увеличивает базовое здоровье до 150 ед. и максимальное здоровье до 250 ед.
 Receive double the ammo from ammo pickups.,PK_REPLENISH_DESC,Tarot Cards,В коробках вдвое больше патронов.
 Morph into demon at 50 souls.,PK_DARKSOUL_DESC,Tarot Cards,Для превращения в демона достаточно 50 душ.
 Attract souls and gold from a distance.,PK_SOULCATCHER_DESC,Tarot Cards,Вы притягиваете золото и души на расстоянии.
