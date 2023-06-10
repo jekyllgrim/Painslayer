@@ -1349,33 +1349,33 @@ Class PK_GenericExplosion : PK_SmallDebris {
 
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		return;
 		double rs = scale.x * frandom[sfx](0.8,1.1)*randompick[sfx](-1,1);
 		A_SetScale(rs);
 		roll = random[sfx](0,359);
 		A_Quake(quakeintensity,quakeduration,0,quakeradius,"");
 		//if (!CheckPlayerSights())
 		//	return;
-		if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
-			return;
-		if (randomdebris > 0) {
-			for (int i = randomdebris*frandom[sfx](0.7,1.3); i > 0; i--) {
-				let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
-				if (debris) {
-					double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
-					debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
-					debris.A_SetScale(0.5);
+
+		if (GetParticlesLevel() >= PL_Reduced) {
+			if (randomdebris > 0) {
+				for (int i = randomdebris*frandom[sfx](0.7,1.3); i > 0; i--) {
+					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
+					if (debris) {
+						double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
+						debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
+						debris.A_SetScale(0.5);
+					}
 				}
 			}
 		}
-		if (GetParticlesLevel() < PK_BaseActor.PL_FULL)
-			return;
-		if (waterlevel < 3 && smokingdebris > 0) {
-			for (int i = smokingdebris*frandom[sfx](0.7,1.3); i > 0; i--) {
-				let debris = Spawn("PK_SmokingDebris",pos + (frandom[sfx](-12,12),frandom[sfx](-12,12),frandom[sfx](-12,12)));
-				if (debris) {
-					double zvel = (pos.z > floorz) ? frandom[sfx](-5,10) : frandom[sfx](5,15);
-					debris.vel = (frandom[sfx](-10,10),frandom[sfx](-10,10),zvel);
+		if (GetParticlesLevel() >= PL_Full) {
+			if (waterlevel < 3 && smokingdebris > 0) {
+				for (int i = smokingdebris*frandom[sfx](0.7,1.3); i > 0; i--) {
+					let debris = Spawn("PK_SmokingDebris",pos + (frandom[sfx](-12,12),frandom[sfx](-12,12),frandom[sfx](-12,12)));
+					if (debris) {
+						double zvel = (pos.z > floorz) ? frandom[sfx](-5,10) : frandom[sfx](5,15);
+						debris.vel = (frandom[sfx](-10,10),frandom[sfx](-10,10),zvel);
+					}
 				}
 			}
 		}
