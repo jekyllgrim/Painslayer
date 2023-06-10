@@ -6,8 +6,14 @@ class PK_Utils abstract {
 		return -1;
 	}
 	
-	static clearscope double LinearMap(double val, double o_min, double o_max, double n_min, double n_max) {
-		return (val - o_min) * (n_max - n_min) / (o_max - o_min) + n_min;
+	static clearscope double LinearMap(double val, double source_min, double source_max, double out_min, double out_max, bool clampIt = false) {
+		double d = (val - source_min) * (out_max - out_min) / (source_max - source_min) + out_min;
+		if (clampit) {
+			double truemax = out_max > out_min ? out_max : out_min;
+			double truemin = out_max > out_min ? out_min : out_max;
+			d = Clamp(d, truemin, truemax);
+		}
+		return d;
 	}
 	
 	//Checks which side of a linedef the actor is on:
