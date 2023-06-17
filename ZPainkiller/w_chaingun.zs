@@ -1,15 +1,13 @@
-Class PK_Chaingun : PKWeapon {
-	private int holddur;
+class PK_Chaingun : PKWeapon {
 	private double atkzoom;
-	private bool hideFlash;
-	//private int atkframe;
-	//private int atkframeDelay;
+
+	const CHAN_SPIN = 15; //unaffected by Dexterity, since I set pitch manually
+
+	//private int spinDur;
 	double spinTics;
-	int spinFrame;
-	enum ESpinTics {
-		ST_MIN = 1,
-		ST_MAX = 4,
-		ST_COOLMAX = 8,
+	enum ESpinSpeed {
+		SS_Min = 0,
+		SS_Max = 2,
 	}
 
 	Default {
@@ -30,116 +28,99 @@ Class PK_Chaingun : PKWeapon {
 		Obituary "$PKO_CHAINGUN";
 	}
 
-	/*action void SetMinigunFrame(int delay = 0) {
-		let psp = player.FindPsprite(OverlayID());
-		if (!psp)
-			return;
-		if (delay > 0 && invoker.atkframeDelay <= delay)
-			invoker.atkframeDelay++;
-		else {
-			invoker.atkframeDelay = 0;
-			invoker.atkframe++;
-			if (invoker.atkframe > 3)
-				invoker.atkframe = 0;
-		}
-		psp.frame = invoker.atkframe;
-	}*/
-
 	action void PK_FireChaingun() {
-		// let us fire at frame A if tics are at 1:
-		bool canFire = (invoker.hasDexterity || invoker.spinframe == 0) && invoker.spintics <= ST_MIN;
-		// AND let us fire at frame C if tics are 0:
-		if (invoker.spintics <= 0 && invoker.spinframe == 2)
-			canFire = true;
-		if (!canFire) 
+		if (invoker.spinTics > SS_Min)
 			return;
 		
 		A_StartSound("weapons/chaingun/spin",CHAN_7,CHANF_LOOPING);
-		invoker.holddur++;
 		double spread = 1;
-		double dmg = 10;
+		int dmg = 10;
 		if (!invoker.hasWmod) {
-			spread = Clamp(double(invoker.holddur * 0.2), 2, 8.5);
+			spread = Clamp(double(player.refire * 0.2), 2, 8.5);
 			dmg = 11;
 		}
+
 		PK_AttackSound("weapons/chaingun/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);	
 		PK_FireBullets(spread,spread,-1,dmg,spawnheight: GetPlayerAtkHeight(player.mo) - 39,spawnofs:8.6);
-		player.refire++;
 
 		// muzzle flash:
-		//invoker.hideFlash = invoker.hasDexterity ? !invoker.hideFlash : false;
-		//if (!invoker.hideFlash)
-			A_Overlay(PSP_PFLASH,"AltFlash");
+		A_Overlay(PSP_PFLASH,"AltFlash");
 		
 		// dynamic light:
 		double brt = frandom[sfx](40,70);
 		A_AttachLight('PKWeaponlight', DynamicLight.PointLight, "fcbb53", int(brt), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF, ofs: (32,32,player.viewheight));
-		double brt2 = (brt - 40) / 30;
 		// muzzle highlights:
-		A_Overlay(PSP_HIGHLIGHTS,"Hightlights");
-		A_OverlayFlags(PSP_HIGHLIGHTS,PSPF_Renderstyle|PSPF_ForceAlpha,true);
-		A_OverlayRenderstyle(PSP_HIGHLIGHTS,Style_Add);
-		A_OverlayAlpha(PSP_HIGHLIGHTS,frandom[sfx](0,1.2));
-		let psp = Player.FindPsprite(OverlayID());
-		let hl = Player.FindPsprite(PSP_HIGHLIGHTS);
-		if (psp && hl)
-			hl.frame = psp.frame;
+		A_Overlay(PSP_HIGHLIGHTS, "MinigunHighlights");
+		A_OverlayFlags(PSP_HIGHLIGHTS, PSPF_Renderstyle|PSPF_ForceAlpha, true);
+		A_OverlayRenderstyle(PSP_HIGHLIGHTS, Style_Add);
+		A_OverlayAlpha(PSP_HIGHLIGHTS, PK_Utils.LinearMap(brt, 0, 70, 0.0, 1.0));
 
 		// shake the gun:
-		double ofs = Clamp(invoker.holddur * 0.04, 0, 1.2);
-		//A_OverlayOffset(OverlayID(), frandom[mgun](0,ofs), frandom[mgun](0, ofs));
-		//A_OverlayOffset(PSP_HIGHLIGHTS,psp.x,psp.y);
+		double ofs = Clamp(player.refire * 0.04, 0, 1.2);
 		A_WeaponOffset(frandom[mgun](0,ofs), WEAPONTOP + frandom[mgun](0, ofs));
 
 		// slightly change fov:
-		invoker.atkzoom = Clamp(invoker.holddur * 0.001,0,0.04);
+		invoker.atkzoom = Clamp(player.refire * 0.001, 0.01, 0.04);
 		if (invoker.atkzoom < 0.04)
 			A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
 		else
 			A_ZoomFactor(frandom[mgun](0.96,0.9575),ZOOM_NOSCALETURNING);	
 	}
 
+	action void PK_FireRocketLauncher() {
+		PK_ResetMiningunSpin();
+		A_WeaponOffset(0, WEAPONTOP, WOF_INTERPOLATE);
+		A_Quake(1,9,0,32,"");
+		Fire3DProjectile("PK_Rocket", leftright:8, updown:-8, crosshairConverge: True);
+	}
+
 	action void PK_ResetMiningunSpin() {
-		player.SetPsprite(PSP_OVERGUN, ResolveState("Null"));
-		A_StopSound(CHAN_6);
+		invoker.spinTics = SS_Max;
+		A_StopSound(CHAN_SPIN);
 		A_StopSound(CHAN_7);
-		invoker.spintics = ST_MAX;
-		invoker.spinframe = 0;
-		invoker.holddur = 0;
+		player.SetPsprite(PSP_OVERGUN, ResolveState("Null"));
+		player.SetPsprite(PSP_HIGHLIGHTS, ResolveState("Null"));
 		A_ZoomFactor(1,ZOOM_NOSCALETURNING);
 	}
 
 	override void BeginPlay() {
 		super.BeginPlay();
-		spintics = ST_MAX;
+		spintics = SS_Max;
 	}
 
 	States {
 	Spawn:
 		PKWI C -1;
 		stop;
+	Select:
+		TNT1 A 0 A_Overlay(PSP_OVERGUN, "MinigunReady");
+		goto super::Select;
 	Deselect:
 		TNT1 A 0 PK_ResetMiningunSpin();
-		goto super::deselect;
+		goto super::Deselect;
 	Ready:
 		TNT1 A 1 {
-			A_Overlay(PSP_OVERGUN, "MinigunReady", true);
-			invoker.holddur = 0;
-			invoker.spintics = Clamp(invoker.spintics + 0.25, ST_MIN, ST_COOLMAX);	
-			invoker.atkzoom = Clamp(invoker.atkzoom - 0.006,0,0.1);
-			A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
+			A_Overlay(PSP_OVERGUN, "MinigunReady", true);			
+			A_SoundPitch(CHAN_SPIN, PK_Utils.LinearMap(invoker.spintics, SS_Max, SS_Min, 0.5, 1.0));
+			A_StopSound(CHAN_7);
+			invoker.atkzoom = Clamp(invoker.atkzoom - 0.006, 0.00, 0.1);
+			if (invoker.atkzoom > 0)
+				A_ZoomFactor(1 - invoker.atkzoom,ZOOM_NOSCALETURNING);
+			else
+				A_ZoomFactor(1,ZOOM_NOSCALETURNING);
+			invoker.spintics = Clamp(invoker.spintics  + 0.1, SS_Min, SS_Max + 1);
+			if (invoker.spinTics >= SS_Max) {
+				A_StopSound(CHAN_SPIN);
+			}			
 			PK_WeaponReady();
 		}
 		loop;
+	MinigunReady:
+		MIGN A -1;
+		stop;		
 	Fire:
 		MIGN A 2 {
-			PK_ResetMiningunSpin();
-
-			A_WeaponOffset(0,32,WOF_INTERPOLATE);
-			A_Quake(1,9,0,32,"");
-			PK_AttackSound();
-			//A_FireProjectile("PK_Rocket",spawnofs_xy:3.2,spawnheight:-2);
-			Fire3DProjectile("PK_Rocket", leftright:8, updown:-8, crosshairConverge: True);
+			PK_FireRocketLauncher();
 			A_ZoomFactor(0.98,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			A_OverlayPivot(OverlayID(),0.1,1.0);
 		}
@@ -177,53 +158,62 @@ Class PK_Chaingun : PKWeapon {
 		goto ready;
 	AltFire:
 		TNT1 A 0 {
-			A_Overlay(PSP_OVERGUN, "MinigunFire");
+			let psp = player.FindPSprite(PSP_OVERGUN);
+			if (!psp || InStateSequence(psp.curstate, ResolveState("MinigunReady"))) {
+				player.SetPsprite(PSP_OVERGUN, ResolveState("MinigunFire"));
+			}
 		}
 	AltHold:
 		TNT1 A 2 {
-			if (PressingAttackButton(true, PAB_HELD)) {
-				invoker.spintics = Clamp(invoker.spintics - (invoker.hasDexterity ? 0.6 : 0.35), 0, ST_MAX);
-			}
+			A_StartSound("weapons/chaingun/loop",CHAN_SPIN,CHANF_LOOPING);
+			A_SoundPitch(CHAN_SPIN, PK_Utils.LinearMap(invoker.spintics, SS_Max, SS_Min, 0.5, invoker.hasDexterity ? 1.2 : 1.0));
+			A_SetTics(invoker.hasDexterity ? 1 : 2);
+			invoker.spintics = Clamp(invoker.spintics - 0.25, SS_Min, SS_Max);
+			PK_FireChaingun();
 		}
-		TNT1 A 0 PK_ReFire();
+		TNT1 A 0 PK_Refire();
 		goto ready;
-	MinigunReady:
-		MIGN A 1;
-		loop;
 	MinigunFire:
-		MIGN # 1 {		
-			A_StartSound("weapons/chaingun/loop",CHAN_6,CHANF_LOOPING);
-			A_SoundPitch(CHAN_6, PK_Utils.LinearMap(invoker.spintics, 4, 0, 0.85, invoker.hasDexterity ? 1.25 : 1., true));
-			A_SoundVolume(CHAN_6, PK_Utils.LinearMap(invoker.spintics, 8, 1, 0.5, 1.0, true));
-			let psp = player.FindPSprite(OverlayID());
+		MIGN ABCDEFGHABCDEFGH 1 {
+			let psp = player.FindPsprite(OverlayID());
+			let lightlayer = player.FindPsprite(PSP_HIGHLIGHTS);
 			if (psp) {
-				psp.tics = (Clamp(int(invoker.spintics), ST_MIN, ST_MAX));
-				psp.frame = invoker.spinframe;
-				if (PressingAttackButton(true))
-					PK_FireChaingun();
-				else
-					A_StopSound(CHAN_7);
+				int ntics = Clamp(ceil(invoker.spintics), 1, SS_Max);
+				// check if we're at max speed:
+				if (invoker.spintics <= SS_Min) {
+					// if so, skip every second frame
+					// also skip every third, if player has Dexterity:
+					if (psp.frame % 2 == 0 || (invoker.hasDexterity && psp.frame % 3 == 0)) {
+						return psp.curstate.nextstate;
+					}
+				}
+				psp.tics = ntics;
+
+				if (lightlayer) {
+					lightlayer.frame = psp.frame;
+				}
 			}
-			//int cycles = invoker.hasDexterity || invoker.spintics < ST_MIN ? 2 : 1;
-			//for (cycles; cycles > 0; cycles--) {
-				invoker.spinframe++;
-				if (invoker.spinframe > 3)
-					invoker.spinframe = 0;
-			//}
+			return ResolveState(null);
 		}
-		#### # 0 {
-			if (invoker.spintics >= ST_COOLMAX && invoker.spinframe == 0) {
-				A_StopSound(CHAN_6);
+		TNT1 A 0 {		
+			if (invoker.spintics > SS_Max) {
 				return ResolveState("MinigunReady");
 			}
 			return ResolveState(null);
 		}
 		loop;
+	MinigunHighlights:
+		MIGF ### 1 bright {
+			let thislayer = player.FindPsprite(OverlayID());
+			if (thislayer) {
+				thislayer.alpha -= 0.1;
+			}
+		}
+		stop;
 	AltFlash:
 		CMUZ A 1 bright {
 			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
 			A_OverlayRenderstyle(OverlayID(),Style_Add);
-			A_OverlayAlpha(OverlayID(),0.95);
 			A_OverlayPivot(OverlayID(), 0.9, 0.9);
 			let fl = Player.FindPsprite(OverlayID());
 			if (fl) {
@@ -232,21 +222,6 @@ Class PK_Chaingun : PKWeapon {
 			}
 		}
 		stop;
-	Hightlights:
-		MIGF # 1 bright;
-		MIGF # 1 bright {
-			let psp = player.FindPSprite(OverlayID());
-			let mg = Player.FindPsprite(PSP_OVERGUN);		
-			if (psp && mg)
-			{
-				psp.frame = mg.frame;
-				psp.alpha -= 0.1;
-				if (psp.alpha <= 0)
-					return ResolveState("Null");
-			}
-			return ResolveState(null);
-		}
-		wait;
 	}
 }
 
