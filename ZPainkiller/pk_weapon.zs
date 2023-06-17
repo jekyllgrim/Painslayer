@@ -53,6 +53,7 @@ Class PKWeapon : Weapon abstract {
 		inventory.amount 1;
 		inventory.maxamount 1;
 	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		if (!bNOICON) {
@@ -67,6 +68,7 @@ Class PKWeapon : Weapon abstract {
 		s_altfire = FindState("AltFire");
 		s_althold = FindState("AltHold");
 	}
+
 	override void DoEffect() {
 		Super.DoEffect();
 		if (!owner || !owner.player)
@@ -95,6 +97,7 @@ Class PKWeapon : Weapon abstract {
 	action bool CheckInfiniteAmmo() {
 		return (sv_infiniteammo || FindInventory("PowerInfiniteAmmo",true) );
 	}
+
 	static bool CheckWmod(actor checker) {
 		if (!checker || !checker.player || !checker.player.readyweapon)
 			return false;
@@ -103,6 +106,7 @@ Class PKWeapon : Weapon abstract {
 			return false;
 		return true;
 	}
+
 	//plays a sound and also a WeaponModifier sound if Weaponmodifier is in inventory:
 	action void PK_AttackSound(sound snd = "", int channel = CHAN_AUTO, int flags = 0) {
 		//play regular attack sound:
@@ -122,6 +126,7 @@ Class PKWeapon : Weapon abstract {
 			c_switchmodes = CVAR.GetCVar(ammoSwitchCVar,owner.player);
 		if (!c_switchmodes)
 			return;
+
 		if (c_switchmodes.GetBool()) {
 			ammotype1 = default.ammotype2;
 			ammouse1 = default.ammouse2;
@@ -130,6 +135,7 @@ Class PKWeapon : Weapon abstract {
 			ammouse2 = default.ammouse1;
 			ammogive2 = default.ammogive1;
 		}
+
 		else {
 			ammotype1 = default.ammotype1;
 			ammouse1 = default.ammouse1;
@@ -150,6 +156,7 @@ Class PKWeapon : Weapon abstract {
 		}
 		return super.GetAtkState(hold);
 	}	
+
 	override State GetAltAtkState (bool hold)	{
 		if (switchmodes) {
 			return super.GetAtkState(hold);
@@ -180,11 +187,7 @@ Class PKWeapon : Weapon abstract {
 	action void PK_DepleteAmmo(bool secondary = false, int amount = -1) {
 		if (CheckInfiniteAmmo())
 			return;
-		/*let tAmmo = secondary ? invoker.ammo2 : invoker.ammo1;
-		if (invoker.switchmodes)
-			tAmmo = secondary ? invoker.ammo1 : invoker.ammo2;
-		if (!tAmmo)
-			return;*/
+
 		let tAmmoType = secondary ? invoker.AmmoType2 : invoker.AmmoType1;
 		if (invoker.switchmodes)
 			tAmmoType = secondary ? invoker.AmmoType1 : invoker.AmmoType2;
@@ -195,7 +198,8 @@ Class PKWeapon : Weapon abstract {
 			if (invoker.switchmodes)
 				amount = secondary ? invoker.ammouse1 : invoker.ammouse2;
 		}
-		TakeInventory(tAmmoType,amount);
+
+		TakeInventory(tAmmoType, amount);
 	}
 	
 	
@@ -205,6 +209,7 @@ Class PKWeapon : Weapon abstract {
 		PAB_NOTHELD,	//check if the button is NOT held down
 		PAB_HELDONLY	//check ONLY if the button is held down and ignore if it's pressed now
 	}
+
 	//A variation on GetPlayerInput that incorporates the switching primary/secondary attack feature:
 	action bool PressingAttackButton(bool secondary = false, int holdCheck = PAB_ANY) {
 		if (!player)
@@ -277,11 +282,13 @@ Class PKWeapon : Weapon abstract {
 				}
 			}
 		}
+
 		//Perform jump if the state is not null and set refire:
 		if (targetState) {
 			player.refire++;
 			player.SetPsprite(OverlayID(),targetState);
 		}
+		
 		//otherwise unset refire, because why wouldn't we just do it here?
 		else {
 			player.refire = 0;			
