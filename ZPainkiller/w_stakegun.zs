@@ -701,14 +701,14 @@ Class PK_Grenade : PK_Projectile {
 		deathsound "weapons/grenade/explosion";
 		height 6;
 		radius 8;
-		speed 13;		
-		damage (25);
+		speed 13;
+		DamageFunction (50);
 		ExplosionDamage 140;
 	}
 
 	override void Tick() {
 		super.Tick();
-		if (pos.z <= floorz) {
+		if (!isFrozen() && pos.z <= floorz) {
 			vel *= 0.9999;
 		}
 	}
@@ -833,7 +833,7 @@ Class PK_ExplosiveStake : PK_Projectile {
 		gravity 0.45;
 		radius 4;
 		height 4;
-		damage (40);
+		DamageFunction (60);
 		decal "Scorch";
 		obituary "$PKO_EXSTAKE";
 	}
