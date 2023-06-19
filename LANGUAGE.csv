@@ -447,19 +447,15 @@ to change that behavior.",PKM_AutoOpenTarot_Desc,Menu,"Когда вы перв�
 покупать и снаряжать карты бесплатно (затем ячейки блокируются).
 По умолчанию доска открывается в начале уровня автоматически.
 Эта настройка позволяет изменить это."
-PERFORMANCE,PKM_Sub_Performance,Menu,ПРОИЗВОДИТЕЛЬНОСТЬ
-Particles intensity,PKM_ParticlesAmount,Menu,Интенсивность частиц
-"Fidelity of the particles spawned by projectiles, explosions,
-certain items and SFX objects. At 'Reduced' some of the secondary
-effects, such as smoke trails, are disabled.",PKM_ParticlesAmount_Desc,Menu,"Интенсивность частиц, создаваемых снарядами, взрывами, предметами
-и визуальными эффектами. На настройке \""Уменьшенная\"" не отображаются
-некоторые вторичные частицы (например, дымовые следы)."
+VISUALS,PKM_Sub_Performance,Menu,ВИЗУАЛ
+Particle intensity,PKM_ParticlesAmount,Menu,Интенсивность частиц
+"Controls visual particles spawned projectiles and puffs.
+At 'Reduced' some of the more visually intense particles don't spawn.",PKM_ParticlesAmount_Desc,Menu,"Интенсивность частиц, создаваемых снарядами и взрывами.
+На настройке \""Уменьшенная\"" не отображаются некоторые более яркие частицы."
 Max. number of particles,PKM_DebrisNumber,,Макс. количество частиц
-"The absolute maximum of particles that can exist at the same time.
-May affect performance, especially when multiple special effects
-such as explosions appear at the same time.",PKM_DebrisNumber_Desc,,"Максимальное количество частиц, которые могут существовать одновременно.
-Может влиять на производительность, особенно когда на карте появляется
-много спецэффектов, вроде взрывов."
+"The maximum amount of particles used by projectile trails, smoke and flames.
+Very low performance impact. Over 8,000 recommended.",PKM_DebrisNumber_Desc,,"Максимальное количество частиц дыма, огня и следов от снарядов.
+Слабо влияет на производительность. Рекомендуется более 8000."
 Full,PKM_Full,Menu,Полная
 Reduced,PKM_Reduced,Menu,Уменьшенная
 Weapon fire modes,PKM_FIREMODES,Menu,Настройка режимов стрельбы

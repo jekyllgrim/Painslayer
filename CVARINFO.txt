@@ -8,7 +8,7 @@ server bool pk_startsound = true;
 user bool pk_CodexNotifs = true;
 user bool pk_ShowCardsInHUD = true;
 user int pk_particles = 2;
-user int pk_maxdebris = 800;
+//user int pk_maxdebris = 800;
 
 // Weapon Primary/Secondary fire settings
 

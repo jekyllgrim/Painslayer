@@ -92,7 +92,6 @@ Optionmenu "PK_Settings" {
 	PKTLTPOption "$PKM_ALLOWDEMON", "$PKM_ALLOWDEMON_DESC", "White", "pk_allowDemonMorph", "OnOff"
 	PKTLTPOption "$PKM_GIFTCARRDS", "$PKM_GIFTCARRDS_DESC", "White", "pk_allowFreeCards", "OnOff"
 	PKTLTPOption "$PKM_KeepBodies", "$PKM_KeepBodies_Desc", "White", "pk_keepbodies", "OnOff"
-	PKTLTPOption "$PKM_MapStartSound", "$PKM_MapStartSound_Desc", "White", "pk_startsound", "OnOff"
 	StaticText ""
 	// HUD options:
 	StaticText "$PKM_SUB_HUD", yellow
@@ -105,7 +104,9 @@ Optionmenu "PK_Settings" {
 	StaticText "$PKM_Sub_Performance", yellow
 	StaticText ""
 	PKTLTPOption "$PKM_ParticlesAmount", "$PKM_ParticlesAmount_Desc", "White", "pk_particles", "ParticlesAmount"
-	PKTLTPScaleSlider "$PKM_DebrisNumber", "$PKM_DebrisNumber_Desc", "white", "pk_maxdebris", 100, 3000, 100, ""
+	PKTLTPScaleSlider "$DSPLYMNU_MAXPARTICLES", "$PKM_DebrisNumber_Desc", "white", "r_maxparticles", 3000, 32000, 100, ""
+	//PKTLTPScaleSlider "$PKM_DebrisNumber", "$PKM_DebrisNumber_Desc", "white", "pk_maxdebris", 100, 3000, 100, ""
+	PKTLTPOption "$PKM_MapStartSound", "$PKM_MapStartSound_Desc", "White", "pk_startsound", "OnOff"
 	StaticText ""
 	// a section where you can switch primary/secondary
 	// fire modes for any weapon:
