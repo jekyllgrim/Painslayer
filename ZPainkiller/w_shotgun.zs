@@ -1,5 +1,8 @@
-Class PK_Shotgun : PKWeapon {
+Class PK_Shotgun : PKWeapon {	
 	int freload; //counter for freezer reload to prevent from quickly re-entering AltFire by using Fire first
+	const FRELOAD_NORMAL = 55;
+	const FRELOAD_DEX = FRELOAD_NORMAL / 2;
+
 	Default {
 		PKWeapon.emptysound "weapons/empty/shotgun";
 		PKWeapon.ammoSwitchCVar 'pk_switch_ShotgunFreezer';
@@ -16,13 +19,16 @@ Class PK_Shotgun : PKWeapon {
 		Tag "$PK_SHOTGUN_TAG";
 		Obituary "$PKO_SHOTGUN";
 	}
+
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner || level.isFrozen())
 			return;
-		if (freload > 0)
+		if (freload > 0) {
 			freload--;
+		}
 	}
+
 	states {
 	Spawn:
 		PKWI A -1;
@@ -66,7 +72,7 @@ Class PK_Shotgun : PKWeapon {
 			PK_AttackSound("weapons/shotgun/freezer",CHAN_7);
 			A_FireProjectile("PK_FreezerProjectile",0,true,-4,spawnheight:6);
 			A_FireProjectile("PK_FreezerProjectile",0,false,4,spawnheight:6);
-			invoker.freload = 55;
+			invoker.freload = invoker.hasDexterity ? FRELOAD_DEX : FRELOAD_NORMAL;
 		}
 		PSHF BCDE 2 {
 			A_WeaponOffset(-1,   1.2,WOF_ADD);
