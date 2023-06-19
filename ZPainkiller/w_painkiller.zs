@@ -202,7 +202,7 @@ Class PK_PainkillerPuff : PK_BulletPuff {
 	states {
 	Crash:
 		TNT1 A 1 {			
-			if (GetParticlesLevel() < PK_BaseActor.PL_REDUCED)
+			if (GetParticlesLevel() < PL_Full)
 				return resolveState(null);
 
 			FindLineNormal();
@@ -212,8 +212,6 @@ Class PK_PainkillerPuff : PK_BulletPuff {
 					deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
 			}
 
-			if (GetParticlesLevel() < PK_BaseActor.PL_FULL)
-				return resolveState(null);
 			bool mod = target && PKWeapon.CheckWmod(target);
 			if (mod || (random[sfx](0,10) > 2)) {
 				let bull = PK_RicochetBullet(Spawn("PK_RicochetBullet", debrisPos));
