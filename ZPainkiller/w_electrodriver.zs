@@ -142,7 +142,7 @@ Class PK_ElectroDriver : PKWeapon {
 		// is supposed to split from the main target to
 		// monsters around it. So, we need another 
 		// BlockThingsIterator to find more targets:
-		if (invoker.hasWmod) {
+		else if (invoker.hasWmod) {
 			double closestDist = double.infinity;
 			// Remember that this iterator should be created
 			// around the victim, not around the shooter!
@@ -220,41 +220,38 @@ Class PK_ElectroDriver : PKWeapon {
 		}
 		
 		double v = 4;
-		let emit = PK_BaseActor(emitter);
-		if (emit && emit.GetParticlesLevel() >= PK_BaseActor.PL_REDUCED) {
-			for (int i = 80; i > 0; i--) {
-				vector3 ppos;
-				ppos = emit.pos + (
-					frandom[epart](-rad, rad),
-					frandom[epart](-rad, rad),
-					frandom[epart](-rad, rad)
-				);
-				ppos.z = Clamp(ppos.z, emit.pos.z - rad, emit.pos.z + emit.waterdepth);
-				Sector sec = Level.PointInSector(ppos.xy);
-				double wh; bool w;
-				[wh, w] = PK_Utils.GetWaterHeight(sec, ppos);
-				if (!w)
-					continue;
+		for (int i = 80; i > 0; i--) {
+			vector3 ppos;
+			ppos = emitter.pos + (
+				frandom[epart](-rad, rad),
+				frandom[epart](-rad, rad),
+				frandom[epart](-rad, rad)
+			);
+			ppos.z = Clamp(ppos.z, emitter.pos.z - rad, emitter.pos.z + emitter.waterdepth);
+			Sector sec = Level.PointInSector(ppos.xy);
+			double wh; bool w;
+			[wh, w] = PK_Utils.GetWaterHeight(sec, ppos);
+			if (!w)
+				continue;
 
-				/*invoker.curSplashTexture++;
-				if (invoker.curSplashTexture >= invoker.splashTextures.Size())
-					invoker.curSplashTexture = 0;
-				TextureID ptex = invoker.splashTextures[invoker.curSplashTexture];*/
+			/*invoker.curSplashTexture++;
+			if (invoker.curSplashTexture >= invoker.splashTextures.Size())
+				invoker.curSplashTexture = 0;
+			TextureID ptex = invoker.splashTextures[invoker.curSplashTexture];*/
 
-				FSpawnParticleParams electricBlip;				
-				electricBlip.color1 = PK_ElectroDriver.electricBlipColors[random[epart](0, PK_ElectroDriver.electricBlipColors.Size() - 1)];
-				//electricBlip.texture = ptex;
-				electricBlip.flags = SPF_FULLBRIGHT|SPF_REPLACE;
-				electricBlip.style = STYLE_Add;
-				electricBlip.pos = ppos;
-				electricBlip.vel = (frandom[epart](-v, v),frandom[epart](-v, v), frandom[epart](-v, v) * 0.5);
-				electricBlip.accel = electricBlip.vel * frandom[epart](-0.1, -0.8);
-				electricBlip.startalpha = 3;
-				electricBlip.fadestep = -1;
-				electricBlip.Size = frandom[epart](3,8);
-				electricBlip.lifetime = 10;
-				Level.SpawnParticle(electricBlip);
-			}
+			FSpawnParticleParams electricBlip;				
+			electricBlip.color1 = PK_ElectroDriver.electricBlipColors[random[epart](0, PK_ElectroDriver.electricBlipColors.Size() - 1)];
+			//electricBlip.texture = ptex;
+			electricBlip.flags = SPF_FULLBRIGHT|SPF_REPLACE;
+			electricBlip.style = STYLE_Add;
+			electricBlip.pos = ppos;
+			electricBlip.vel = (frandom[epart](-v, v),frandom[epart](-v, v), frandom[epart](-v, v) * 0.5);
+			electricBlip.accel = electricBlip.vel * frandom[epart](-0.1, -0.8);
+			electricBlip.startalpha = 3;
+			electricBlip.fadestep = -1;
+			electricBlip.Size = frandom[epart](3,8);
+			electricBlip.lifetime = 10;
+			Level.SpawnParticle(electricBlip);
 		}
 	}
 
