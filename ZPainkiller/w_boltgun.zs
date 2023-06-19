@@ -372,7 +372,7 @@ Class PK_Bolt : PK_Stake {
 
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		basedmg = mod ? 70 : 53;
+		basedmg = mod ? 70 : 57;
 		if (mod)
 			trailcolor = "F43510";
 		burnstate = BS_CannotBurn;
@@ -401,7 +401,7 @@ Class PK_ExplosiveBolt : PK_ExplosiveStake {
 		PK_Projectile.trailfade 0.04;
 		PK_Projectile.trailalpha 0.35;
 		speed 75;
-		damage (25);
+		DamageFunction (35);
 		decal "Scorch";
 		obituary "$PKO_EXBOLT";
 	}
@@ -412,7 +412,7 @@ Class PK_ExplosiveBolt : PK_ExplosiveStake {
 			bFORCEXYBILLBOARD = true;
 			A_Quake(1,6,0,160,"");
 			A_StartSound("weapons/boltgun/explosion",attenuation:1);
-			A_Explode(32,80);				
+			A_Explode(64,96);				
 			A_SetRenderstyle(alpha,STYLE_Add);
 			A_SetScale(frandom[sfx](0.4,0.47));
 			bSPRITEFLIP = randompick[sfx](0,1);
@@ -463,7 +463,7 @@ Class PK_Bomb : PK_Projectile {
 		radius 4;
 		bouncesound "weapons/boltgun/bounce";
 		speed 15;		
-		damage (10);
+		DamageFunction (35);
 		scale 0.3;
 	}
 
@@ -560,7 +560,7 @@ Class PK_Bomb : PK_Projectile {
 			A_StopSound(4);
 			A_Quake(1,6,0,160,"");
 			A_StartSound("weapons/boltgun/explosion",CHAN_5);
-			A_Explode(32,80);				
+			A_Explode(32,80);
 			A_SetRenderstyle(alpha,STYLE_Add);
 			A_SetScale(frandom[sfx](0.25,0.3));
 			bSPRITEFLIP = randompick[sfx](0,1);
