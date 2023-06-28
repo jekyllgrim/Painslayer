@@ -84,7 +84,7 @@ Painslayer gameplay modification for GZDoom engine ("Painslayer") by Agent_Ash a
 
 * Most of the graphics in Painslayer (specifically, weapon and pickup sprites) are owned by the Author and may NOT be used, copied or edited by anyone for any purpose without first obtaining an explicit permission from the Author.
 * The code used in Painslayer was produced by several authors and can be freely used by anyone for any purpose, provided the authors are credited, the required licenses are applied to the derivative works, and the relevant license and copyright information is kept intact (i.e. all files containing license information shall be copied to derivate works).
-* The sounds used in Painslayer are owned by People Can Fly and are used under Fair Use doctrine. They may be removed from Painslayer, should People Can Fly request it.
+* The sounds used in Painslayer are owned by People Can Fly and are used under Fair Use. They may be removed from Painslayer, should People Can Fly request it.
 
 ## The Artwork
 
@@ -114,7 +114,7 @@ sprites/WeaponIcons/
 ```
 
 ii.  Graphics, originally created by People Can Fly, modified in various ways, including but not limited to rescaling, color correction and partial redrawing  
-     **Permissions**: these assets is used under the Fair Use doctrine. The Author does not own this artwork or any licenses to it. This artwork may be removed from Painslayer, should People Can Fly request it. You may use this artwork, as long as your use still falls under the Fair Use doctrine.  
+     **Permissions**: these assets are used under Fair Use. The Author does not own this artwork or any licenses to it. This artwork may be removed from Painslayer, should People Can Fly request it. You may use this artwork, as long as your use still falls under Fair Use.  
      **Locations**:
 
 ```
@@ -196,7 +196,7 @@ Refer to the aforementioned code locations for license information on each code 
 
 ## The Audio
 
-All sounds used in Painslayer are owned by People Can Fly and are used under Fair Use doctrine. The Author does not own any of the sounds or any licenses to them. They may be removed from Painslayer, should People Can Fly request it.
+All sounds used in Painslayer are owned by People Can Fly and are used under Fair Use. The Author does not own any of the sounds or any licenses to them. They may be removed from Painslayer, should People Can Fly request it.
 
 # Credits
 
