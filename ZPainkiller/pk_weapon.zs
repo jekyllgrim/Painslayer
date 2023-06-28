@@ -1386,7 +1386,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 				}
 			}
 		}
-		/*if (waterlevel < 3 && explosivedebris > 0) {
+		if (waterlevel < 3 && explosivedebris > 0) {
 			for (int i = explosivedebris*frandom[sfx](0.7,1.3); i > 0; i--) {
 				let debris = Spawn("PK_ExplosiveDebris",pos + (frandom[sfx](-12,12),frandom[sfx](-12,12),frandom[sfx](-12,12)));
 				if (debris) {
@@ -1394,13 +1394,71 @@ Class PK_GenericExplosion : PK_SmallDebris {
 					debris.vel = (frandom[sfx](-10,10),frandom[sfx](-10,10),zvel);
 				}
 			}
-		}*/
+		}
 	}
 
 	states {
 	Spawn:
 		BOM6 ABCDEFGHIJKLMNOPQRST 1;
 		stop;
+	}
+}
+
+Class PK_ExplosiveDebris : PK_RandomDebris {	
+	static const name flameTextures[] = { "BOM4I0", "BOM4J0", "BOM4K0", "BOM4L0" };
+
+	Default {
+		scale 0.5;
+		gravity 0.3;
+	}
+
+	override void Tick () {
+		if (isFrozen())
+			return;
+
+		Vector3 oldPos = self.pos;
+		Super.Tick();	
+		
+		TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomBlackSmoke());
+		FSpawnParticleParams smoke;
+		smoke.texture = smoketex;
+		smoke.color1 = "";
+		smoke.flags = SPF_ROLL|SPF_REPLACE;
+		smoke.lifetime = 34;
+		smoke.size = TexMan.GetSize(smoketex) * 0.25;
+		smoke.sizestep = -1.4;
+		smoke.startalpha = alpha * 0.3;
+		smoke.fadestep = -1;
+		smoke.vel = (frandom[smk](-1,1),frandom[smk](-1,1),frandom[smk](-1,1));
+		smoke.pos = pos+(frandom[smk](-9,9),frandom[smk](-9,9),frandom[smk](-9,9));
+		smoke.startroll = frandom[sfx](-40,40);
+		smoke.rollvel = frandom[sfx](0.5,1) * randompick[sfx](-1,1);
+		Level.SpawnParticle(smoke);
+
+		Vector3 path = level.vec3Diff( self.pos, oldPos );
+		double distance = path.length() / 4;
+		Vector3 direction = path / distance;
+		int steps = int( distance );		
+		for( int i = 0; i < steps; i++ )  {
+			TextureID flametex = TexMan.CheckForTexture(flameTextures[random[sfx](0, flameTextures.Size() - 1)]);
+			FSpawnParticleParams flame;
+			flame.texture = flametex;
+			flame.color1 = "";
+			flame.style - STYLE_Add;
+			flame.flags = SPF_ROLL|SPF_REPLACE|SPF_FULLBRIGHT;
+			flame.lifetime = 40;
+			flame.pos = oldpos;
+			flame.size = TexMan.GetSize(flametex) * 0.1;
+			flame.sizestep = flame.size * 0.05;
+			flame.startalpha = alpha * 0.3;
+			flame.fadestep = -1;
+			flame.startroll = frandom[sfx](0,360);
+			flame.rollvel = frandom[sfx](5,10)+randompick[sfx](-1,1);
+			Level.SpawnParticle(flame);
+
+			oldPos = level.vec3Offset( oldPos, direction );
+		}
+		A_FadeOut(0.022);
 	}
 }
 
