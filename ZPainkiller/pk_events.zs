@@ -5,9 +5,8 @@ Class PK_MainHandler : EventHandler {
 	array <Actor> allbosses; //only boss monsters
 	array <PK_StakeProjectile> stakes; //stake projectiles
 	array <Inventory> keyitems; //pre-placed weapons and keys, to be displayed when the player picks up a Crystal Ball
-	protected array <PK_SmallDebris> debris;
-	protected transient CVar maxdebrisCvar;
-	//const maxdebris = 1000; //shouldn't need more than this
+	//protected array <PK_SmallDebris> debris;
+	//protected transient CVar maxdebrisCvar;
 	
 	//By default returns true if ANY of the players has the item.
 	//If 'checkall' argument is true, the function returns true if ALL players have the item.
@@ -237,7 +236,7 @@ Class PK_MainHandler : EventHandler {
 		if (level.Mapname == "TITLEMAP")
 			return;
 
-		maxdebrisCvar = Cvar.GetCvar('pk_maxdebris', players[consoleplayer]);
+		//maxdebrisCvar = Cvar.GetCvar('pk_maxdebris', players[consoleplayer]);
 
 		let it = ThinkerIterator.Create("PK_PickupsTracker", Thinker.STAT_STATIC);
 		let tracker = PK_PickupsTracker(it.Next());
@@ -334,7 +333,7 @@ Class PK_MainHandler : EventHandler {
 		if (!act)
 			return;
 		
-		if (act is "PK_SmallDebris" && !(act is "PK_ProjFlare") && maxdebrisCvar) {
+		/*if (act is "PK_SmallDebris" && !(act is "PK_ProjFlare") && maxdebrisCvar) {
 			int maxdebris = maxdebrisCvar.GetInt();
 			let deb = PK_SmallDebris(act);
 			if (deb) {
@@ -343,7 +342,7 @@ Class PK_MainHandler : EventHandler {
 			if (debris.Size() > maxdebris && debris[0]) {
 				debris[0].Destroy();
 			}
-		}
+		}*/
 		
 		if (act is "Inventory") {
 			let foo = Inventory(act);
@@ -437,8 +436,8 @@ Class PK_MainHandler : EventHandler {
 			//console.printf("Deleting %s from demontargets",act.GetClassName());
 		}
 		
-		if (act is "PK_SmallDebris")
-			debris.Delete(debris.Find(act));
+		//if (act is "PK_SmallDebris")
+		//	debris.Delete(debris.Find(act));
 			
 		if (act is "PK_StakeProjectile")
 			stakes.delete(stakes.Find(act));
@@ -926,7 +925,7 @@ Class PK_BoardEventHandler : EventHandler {
 			s.Warp(plr, plr.radius + s.radius, 0, 0);
 			s.age = -32000;
 			if (e.args[0] > 0)
-				s.amount = 15;
+				s.amount = e.args[0];
 		}
 		
 		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));

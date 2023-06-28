@@ -783,25 +783,6 @@ Class PK_Shuriken : PK_StakeProjectile {
 	}
 }
 
-//unused
-Class PK_ShurikenDebris : PK_RandomDebris {
-	Default {
-		gravity 0.25;
-	}
-	override void Tick() {
-		super.Tick();
-		if (isFrozen())
-			return;
-		let trl = Spawn("PK_DebrisFlame",pos);
-		if (trl) {
-			trl.alpha = alpha*0.6;
-			trl.scale *= 0.5;
-		}
-		A_FadeOut(0.05);
-	}
-}
-
-
 Class PK_DiskProjectile : PK_StakeProjectile {
 	private int deadtics;
 	private Array < Actor > disktargets;

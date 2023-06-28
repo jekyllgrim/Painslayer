@@ -1491,29 +1491,3 @@ Class PK_SmokingDebris : PK_RandomDebris {
 		A_FadeOut(0.03);
 	}
 }
-
-//Flame spawned by burning debris:
-Class PK_DebrisFlame : PK_BaseFlare {
-	Default {
-		scale 0.05;
-		renderstyle 'translucent';
-		alpha 1;
-	}
-
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		roll = random[sfx](0,359);
-		wrot = frandom[sfx](5,10)+randompick[sfx](-1,1);
-	}
-
-	states {
-	Spawn:
-		TNT1 A 0 NoDelay A_Jump(256,1,3); //randomize appearance a bit:
-		BOM4 IJKLMNOPQ 1 {
-			A_FadeOut(0.05);
-			roll += wrot;
-			scale *= 1.1;
-		}
-		wait;
-	}
-}
