@@ -55,6 +55,7 @@ Class PKCardsMenu : PKZFGenericMenu {
 			PK_StatusBarScreen.Fill("000000",0,0,statscr_base_width,statscr_base_height,1);
 			super.Drawer();
 	}
+
 	override void Init (Menu parent) {
 		super.Init(parent);
 		
@@ -864,6 +865,7 @@ Class PKCardsMenu : PKZFGenericMenu {
 				SelectedCard.SetBox(boardelements.screenToRel(GetMousePos()) - SelectedCard.GetSize() / 2, SelectedCard.GetSize());
 			}
 		}
+		
 		//show card info if mouse hovers over a card and there's no card selected:
 		if ((!cardinfo || cardinfo.isHidden()) && HoveredCard && HoveredCard.isEnabled() && !HoveredCard.isHidden() && !SelectedCard)
 			ShowCardToolTip(HoveredCard);
@@ -1441,7 +1443,7 @@ Class PKCMenuHandler : PKZFHandler {
 		string eventname = String.Format("PKCCardToSlot:%s",card.cardID);
 		EventHandler.SendNetworkEvent(eventname,cardslot.slotID);
 		if (menu) {
-			menu.SelectedCard = null; //detach from cursor
+			menu.DeselectCard(); //detach from cursor
 		}
 	}
 	
