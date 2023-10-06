@@ -468,7 +468,7 @@ Class PK_ElectricPuff : PKPuff {
 }
 
 class PK_WaterDetectionTracer : LineTracer {
-	Sector watersector;
+	bool watersector;
 
 	override ETraceStatus TraceCallBack() {
 		if (results.CrossedWater) {
