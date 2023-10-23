@@ -370,7 +370,7 @@ Class PK_Stake : PK_StakeProjectile {
 	override int SpecialMissileHit (Actor victim) {
 		
 		//if the victim is not valid or is the shooter, fly through:
-		if (!victim || (target && victim == target) || !victim.bNONSHOOTABLE || !(victim.bSOLID || victim.bSHOOTABLE))
+		if (!victim || (target && victim == target) || victim.bNONSHOOTABLE || !(victim.bSOLID || victim.bSHOOTABLE))
 			return 1;
 		
 		//if previously hit a victim, or carrying a corpse, pass through:
