@@ -370,22 +370,22 @@ Class PK_Stake : PK_StakeProjectile {
 	override int SpecialMissileHit (Actor victim) {
 		
 		//if the victim is not valid or is the shooter, fly through:
-		if (!victim || (target && victim == target))
+		if (!victim || (target && victim == target) || !victim.bNONSHOOTABLE || !(victim.bSOLID || victim.bSHOOTABLE))
+			return 1;
+		
+		//if previously hit a victim, or carrying a corpse, pass through:
+		if (stickvictim || victim == stickvictim)
 			return 1;
 		
 		name dmgtype = burnstate == BS_Burning ? 'fire' : 'normal';
 		
 		//collision with damageable non-monster objects:
-		if (!victim.bISMONSTER && !victim.player && (victim.bSOLID || victim.bSHOOTABLE)) {
+		if (!victim.bISMONSTER && !victim.player) {
 			if (victim.bSHOOTABLE)
 				victim.DamageMobj (self, target, basedmg, dmgtype);
 			stickobject = victim; //if the object moves, the stake will follow it
 			return -1;
 		}
-		
-		//if previously hit a victim, or carrying a corpse, pass through:
-		if (stickvictim || victim == stickvictim)
-			return 1;
 			
 		// Do the damage (increased by 50% with wmod or when on fire)
 		// Class type check is there to disable this  functionality
