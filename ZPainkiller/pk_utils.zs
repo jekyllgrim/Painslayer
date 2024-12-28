@@ -25,8 +25,9 @@ class PK_Utils abstract {
 	static clearscope vector2 GetLineNormal(vector2 ppos, Line lline) {
 		vector2 linenormal;
 		linenormal = (-lline.delta.y, lline.delta.x).unit();
-		if (!PK_Utils.PointOnLineSide(ppos, lline))
+		if (!PointOnLineSide(ppos, lline)) {
 			linenormal *= -1;
+		}
 		
 		return linenormal;
 	}
