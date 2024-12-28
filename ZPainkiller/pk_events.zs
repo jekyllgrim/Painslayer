@@ -67,8 +67,8 @@ Class PK_MainHandler : EventHandler {
 			return true;
 		}
 		return false;
-    }
-	
+	}
+
 	void SpawnMapMarkers(PlayerInfo player) {
 		if (!player || player != players[consoleplayer])
 			return;
@@ -81,15 +81,16 @@ Class PK_MainHandler : EventHandler {
 			let targetsprite = state.sprite;
 			let spritename = TexMan.GetName(state.GetSpriteTexture(0));
 			
-			if (pk_debugmessages > 1)
-				console.printf("Spawning map marker for %s. Sprite name: %s",itm.GetClassName(),spritename);
 			if (targetsprite && spritename != 'TNT1A0') {
 				let marker = PK_SafeMapMarker(Actor.Spawn("PK_SafeMapMarker",itm.pos));
 				if (marker) {
 					marker.A_SetScale(itm is "PKWeapon" ? 0.5 : 1.0);
+					//marker.picnum = state.GetSpriteTexture(0);
 					marker.sprite = targetsprite;
 					marker.frame = state.frame;
 					marker.attachTo = itm;
+					if (pk_debugmessages > 1)
+						console.printf("Spawning map marker for %s. Sprite name: %s", itm.GetClassName(), ""..marker.sprite);
 				}
 			}
 		}
@@ -439,11 +440,13 @@ Class PK_MainHandler : EventHandler {
 		//if (act is "PK_SmallDebris")
 		//	debris.Delete(debris.Find(act));
 			
-		if (act is "PK_StakeProjectile")
-			stakes.delete(stakes.Find(act));
+		if (act is "PK_StakeProjectile") {
+			stakes.delete(stakes.Find(PK_StakeProjectile(act)));
+		}
 			
-		if (act is "Inventory")
-			keyitems.delete(keyitems.Find(act));
+		if (act is "Inventory") {
+			keyitems.delete(keyitems.Find(Inventory(act)));
+		}
 	}
 	
 	void GiveStartingPlayerItems(int pnumber) {
@@ -599,6 +602,27 @@ Class PK_MainHandler : EventHandler {
 		Test_CheckWeaponInInventory("PK_Rifle",tx,ty); ty += parag;
 		Test_CheckWeaponInInventory("PK_Electrodriver",tx,ty); ty += parag;
 	}*/
+}
+
+class PK_BossStatTracker : Object play
+{
+	actor boss;
+	int bossMaxHealth;
+	
+	static PK_BossStatTracker Create (actor boss)
+	{
+		if (!boss)
+			return null;
+			
+		let tracker = PK_BossStatTracker(New("PK_BossStatTracker"));
+		if (tracker)
+		{
+			tracker.boss = boss;
+			tracker.bossMaxHealth = max(boss.health, boss.GetMaxHealth(true));
+		}
+		
+		return tracker;
+	}
 }
 
 Class PK_ShaderHandler : StaticEventHandler {
@@ -1002,7 +1026,7 @@ Class PK_BoardEventHandler : EventHandler {
 			if (cardname.Size() == 2) {
 				name thiscard = name(cardname[1]);
 				// apparently, dynamic arrays are iffy, se we need int(name):
-				cardcontrol.UnlockedTarotCards.Push(int(thiscard));
+				cardcontrol.UnlockedTarotCards.Push(thiscard);
 				int cost = e.args[0];
 				cardcontrol.GiveGoldAmount(-cost);
 				if (pk_debugmessages)

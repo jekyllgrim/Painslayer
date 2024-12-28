@@ -297,7 +297,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 	PK_FrozenLayer icelayer;
 	PK_IceCorpse icebody;
 	int fcounter;
-	protected uint prevTrans;
+	protected TranslationID prevTrans;
 	protected double prevSpeed;
 	protected bool prevGrav;
 	protected int victimDestroyTimer;

@@ -402,7 +402,7 @@ Class PKCardsMenu : PKZFGenericMenu {
 
 			if (goldcontrol) {
 				//check if the card is already unlocked:
-				if (goldcontrol.UnlockedTarotCards.Find(int(name(card.cardID))) != goldcontrol.UnlockedTarotCards.Size()) {
+				if (goldcontrol.UnlockedTarotCards.Find(card.cardID) != goldcontrol.UnlockedTarotCards.Size()) {
 					//console.printf("%s is bought",card.cardID);
 					card.cardbought = true;
 				}

@@ -415,7 +415,7 @@ Class PK_Rifle : PKWeapon {
 }
 
 Class PK_BurnControl : PK_InventoryToken {
-	protected int prevTranslation;
+	protected TranslationID prevTranslation;
 	TextureID flamePartTex;
 
 	protected int timer;

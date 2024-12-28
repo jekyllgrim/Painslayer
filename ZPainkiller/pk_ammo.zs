@@ -571,7 +571,7 @@ Class PK_BaseWeaponSpawner : PK_EquipmentSpawner {
 		*/
 		else {
 			rhandler = PK_ReplacementHandler(EventHandler.Find("PK_ReplacementHandler"));	
-			rhandler.mapweapons.Push(toSpawn);
+			rhandler.mapweapons.Push((class<Weapon>)(toSpawn));
 		}
 	}
 	States {
