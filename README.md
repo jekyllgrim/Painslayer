@@ -1,10 +1,16 @@
-**PAINSLAYER © 2020-2023 Agent_Ash aka Jekyll Grim Payne**
+**PAINSLAYER © 2020 Agent_Ash aka Jekyll Grim Payne**
 
 *Painslayer* is a gameplay mod for GZDoom engine by Agent_Ash aka Jekyll Grim Payne, inspired by *Painkiller* (2004) by People Can Fly. 
 
-*Painslayer* requires [GZDoom 4.10.0](https://zdoom.org/downloads).
+Requirements:
 
-☕ Support me on Boosty: https://boosty.to/agent_ash
+* Version 2.0.1 and below: [GZDoom 4.10.0](https://zdoom.org/downloads).
+
+* Version 2.0.2: [GZDoom 4.14.0](https://zdoom.org/downloads).
+
+<u>Using at least GZDoom 4.14.0 is highly recommended, since previous versions contained security vulnerabilities.</u>
+
+☕ Support me on [Boosty](https://boosty.to/agent_ash) or [Hipolink](https://hipolink.me/agent_ash/tips).
 
 Join my Discord server: https://discord.gg/MJGdYjk
 
