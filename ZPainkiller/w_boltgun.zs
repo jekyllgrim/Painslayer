@@ -207,7 +207,7 @@ Class PK_Boltgun : PKWeapon {
 			}
 		}
 		#### A 4 {
-			double xofs = invoker.scoped ? 3 : 3;
+			double xofs = invoker.scoped ? 0 : 3;
 			double yofs = invoker.scoped ? 2 : 0;
 			PK_FireBoltGun(xofs, yofs);
 			PK_DepleteAmmo(amount:1);
@@ -215,17 +215,17 @@ Class PK_Boltgun : PKWeapon {
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
 		#### B 4 {
-			double xofs = invoker.scoped ? 0 : 0;
+			double xofs = invoker.scoped ? -2.5 : 0;
 			double yofs = invoker.scoped ? 1 : -1;
 			PK_DepleteAmmo(amount:2);
 			PK_FireBoltGun(xofs, yofs);
-			xofs = invoker.scoped ? 3 : 6;
+			xofs = invoker.scoped ? 2.5 : 6;
 			PK_FireBoltGun(xofs, yofs);
 			A_StartSound("weapons/boltgun/fire2",CHAN_6);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
 		#### C 2 {
-			double xofs = invoker.scoped ? -6 : -3;
+			double xofs = invoker.scoped ? -5 : -3;
 			double yofs = invoker.scoped ? 0 : -2;
 			PK_DepleteAmmo(amount:2);
 			PK_FireBoltGun(xofs, yofs);
