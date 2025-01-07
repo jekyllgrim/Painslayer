@@ -1,10 +1,7 @@
 version "4.14.0"
 
-//KLAZ library by kodi:
-#include "ZPainkiller/klazer/KLAZ_kColor.zsc"
-#include "ZPainkiller/klazer/KLAZ_Beam.zsc"
-//matrix4 by Marisa KirisameL
-#include "ZPainkiller/mk_matrix/mk_matrix.zsc"
+//GZBeamz by Lewisk3:
+#include "ZPainkiller/GZBeamz/laser_base.zsc"
 //StatusBarScreen by Lewisk3:
 #include "ZPainkiller/StatusBarScreen/StatusScreen_base.zsc"
 #include "ZPainkiller/StatusBarScreen/StatusScreen_3D.zsc"

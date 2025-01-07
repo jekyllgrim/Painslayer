@@ -83,7 +83,7 @@ Class PK_Painkiller : PKWeapon {
 		}
 		PKIL ABCD 1 {
 			double spitch = 1.0;	
-			let psp = Player.FindPSprite(OverlayID());			
+			let psp = Player.FindPSprite(OverlayID());
 			if (invoker.hasWmod) {
 				if (invoker.wmodCounter >= 3) {
 					invoker.wmodCounter = 0;
@@ -235,7 +235,11 @@ Class PK_PainkillerPuff : PK_BulletPuff {
 }
 	
 Class PK_Killer : PK_Projectile {
+	PK_LaserBeam beam_outer;
+	PK_LaserBeam beam_inner;
+	protected string prevspecies;
 	bool returning;
+
 	Default {
 		PK_Projectile.flarecolor "fed101";
 		PK_Projectile.flarescale 0.2;
@@ -253,29 +257,71 @@ Class PK_Killer : PK_Projectile {
 		radius 2;
 		height 2;
 	}
+
+	override String GetObituary (Actor victim, Actor inflictor, Name mod, bool playerattack) {
+		if (mod == 'PK_KillerBeam') {
+			return StringTable.Localize("$PKO_KILLERBEAM");
+		}
+		return StringTable.Localize(obituary);
+	}
 	
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		if (self.GetClassName() != "PK_Killer" || !target) {
+		if (!target || !target.player) {
 			return;
-		}	
-		A_FaceMovementDirection(0,0,0);
-		actor emit = Spawn("Killer_BeamEmitter",pos);
-		if (emit) {
-			emit.target = target; //this is to track kill credit
-			emit.master = target;
-			emit.tracer = self;
-			emit.pitch = pitch;
-			//console.printf("killer pitch %d", pitch);
 		}
+		A_FaceMovementDirection();
+
+		Vector3 beamofs = (12, 11.2, -11);
+		beam_outer = PK_LaserBeam.Create(target, beamofs.x, beamofs.y, beamofs.z);
+		beam_outer.shade = 0xf2ac21;
+		beam_outer.alpha = 0.5;
+		beam_outer.scale.x = 5;
+		beam_outer.trackPSprite = true;
+		beam_outer.trackPSLayer = PSP_WEAPON;
+
+		beam_inner = PK_LaserBeam.Create(target, beamofs.x, beamofs.y, beamofs.z);
+		beam_inner.shade = 0xffffff;
+		beam_inner.scale.x = beam_outer.scale.x * 0.35;
+		beam_inner.alpha = 1.0;
+		beam_inner.trackPSprite = true;
+		beam_inner.trackPSLayer = PSP_WEAPON;
 	}
-	
-	override void Tick() {
-		super.Tick();
-		if (isFrozen() || !target)
-			return;
-		if (target.player.readyweapon && !(target.player.readyweapon is "PK_Painkiller") && !InStateSequence(curstate,FindState("XDeath")))
-			SetStateLabel("XDeath");
+
+	void StartBeams() {
+
+		let weap = PK_Painkiller(target.FindInventory("PK_Painkiller"));
+		if (weap)
+			weap.beam = true;
+
+		if (beam_outer) {
+			beam_outer.SetEnabled(true);
+			beam_outer.StartTracking(self.pos);
+		}
+		if (beam_inner) {
+			beam_inner.SetEnabled(true);
+			beam_inner.StartTracking(self.pos);
+		}
+
+		target.A_StartSound("weapons/painkiller/laser",CHAN_VOICE,CHANF_LOOPING,volume:0.5);
+	}
+
+	void StopBeams() {
+		if (target.IsActorPlayingSound(CHAN_VOICE, "weapons/painkiller/laser")) {
+			target.A_StopSound(CHAN_VOICE);
+		}
+		
+		let weap = PK_Painkiller(target.FindInventory("PK_Painkiller"));
+		if (weap)
+			weap.beam = false;
+
+		if(beam_outer) {
+			beam_outer.SetEnabled(false);
+		}
+
+		if(beam_inner) {
+			beam_inner.SetEnabled(false);
+		}
 	}
 	
 	void ThrowBody(Actor body) {
@@ -302,6 +348,60 @@ Class PK_Killer : PK_Projectile {
 		body.gravity = 0.7;
 	}
 	
+	override void Tick() {
+		super.Tick();
+
+		if (isFrozen() || !target || !target.player)
+			return;
+
+		if ((!target.player.readyweapon || target.player.readyweapon.GetClass() != 'PK_Painkiller') &&
+			!InStateSequence(curstate,FindState("XDeath"))) {
+			SetStateLabel("XDeath");
+		}
+
+		if (!target || !CheckSight(target,SF_IGNOREWATERBOUNDARY)) {
+			StopBeams();
+			return;
+		}
+
+		Vector3 start = (target.pos.xy, target.player.viewz);
+		Vector3 view = level.SphericalCoords(start, self.pos, (target.angle, target.pitch));
+		if (!PKWeapon.CheckWmod(target) && (abs(view.x) > 16 || abs(view.y) > 20)) {
+			StopBeams();
+			return;
+		}
+
+		StartBeams();
+		Vector3 dir = level.Vec3Diff(start, self.pos).Unit();
+		let tracer = PK_KillerBeamTracer.Fire(target, start, direction: dir, range: view.z);
+		if (!tracer) return;
+
+		/*double step = tracer.results.distance * 0.05;
+		while (step < tracer.results.distance) {
+			FSpawnParticleParams p;
+			p.size = 5;
+			p.lifetime = 2;
+			p.startalpha = 1.0;
+			p.fadestep = -1;
+			p.flags = SPF_FULLBRIGHT;
+			p.color1 = 0xff0000;
+			p.pos = level.Vec3Offset(start, tracer.results.hitVector.Unit()*step);
+			level.SpawnParticle(p);
+			step += step;
+		}*/
+		
+		foreach (victim : tracer.beamVictims) {
+			if (victim) {
+				victim.A_StartSound("weapons/painkiller/laserhit", CHAN_VOICE, CHANF_NOSTOP, volume:0.8, attenuation:4);
+				int dmg = victim.DamageMobj(self, target, 2, 'PK_KillerBeam', DMG_THRUSTLESS|DMG_NO_FACTOR|DMG_NO_PAIN);
+				if (dmg > 0) {
+					victim.SpawnBlood(level.Vec3Offset(start, dir * (target.Distance3D(victim) - victim.radius)), victim.AngleTo(target), dmg);
+					victim.TraceBleed(dmg, target);
+				}
+			}
+		}
+	}
+	
 	states {
 	Spawn:
 		KILR A 1;
@@ -317,14 +417,14 @@ Class PK_Killer : PK_Projectile {
 			// combo projectile, so return if this isn't called from
 			// PK_Killer:
 			if (!target || !tracer || GetClassName() != "PK_Killer")
-				return null;
+				return ResolveState(null);
 				
 			// If Killer kills a monster, immediately throw that monster
 			// towards the player (PK_KillerFlyTarget hasn't spawned yet,
 			// so at this point we interact directly with the monster):
 			if (tracer && tracer.health <= 0 && tracer.bISMONSTER && !tracer.bBOSS) {
 				ThrowBody(tracer);
-				return null;
+				return ResolveState(null);
 			}
 			
 			// The following will drag the body if the Killer projectile
@@ -339,7 +439,7 @@ Class PK_Killer : PK_Projectile {
 					// Get a pointer to the corpse:
 					let body = kft.target;
 					if (!body)
-						return null;
+						return ResolveState(null);
 					ThrowBody(body);
 				
 					// If we hit a body with a Killer projectile, spawn gold every 3 times Killer hits it:
@@ -360,23 +460,29 @@ Class PK_Killer : PK_Projectile {
 						kft.edc.ResetRestCounter();
 				}
 			}
-			return null;
+			return ResolveState(null);
 		}
 		#### # 1 {
 			if (target) {
-				vel = Vec3To(target).Unit() * 30;
-				if (Distance3D(target) <= 320)
+				double dist = Distance3D(target);
+				vel = Vec3To(target).Unit() * min(30, dist);
+				if (dist <= 320)
 					A_StartSound("weapons/painkiller/return",CHAN_AUTO,CHANF_NOSTOP);
 				A_FaceTarget(flags:FAF_MIDDLE);
-				if (Distance3D(target) <= 64) {
+				if (dist <= 64) {
 					target.A_StartSound("weapons/painkiller/killerback",CHAN_AUTO);
 					let pk = PK_Painkiller(target.FindInventory("PK_Painkiller"));
 					if (pk && target.player && target.player.readyweapon && target.player.readyweapon != pk)
 						pk.killer_fired = false;
-					Destroy();
-					return;
+					StopBeams();
+					if (beam_outer)
+						beam_outer.Destroy();
+					if (beam_inner)
+						beam_inner.Destroy();
+					return ResolveState("Null");
 				}
 			}
+			return ResolveState(null);
 		}
 		wait;
 	Death:
@@ -452,106 +558,56 @@ Class PK_KillerFlyTarget : Actor {
 		stop;
 	}
 }
-		
 
-Class Killer_BeamEmitter : Actor {
-	Default {
-		radius 1;
-		height 1;
-		+MISSILE
-		Obituary "$PKO_KILLERBEAM";
-	}
-	PK_TrackingBeam beam1;
-	PK_TrackingBeam beam2;
-	protected string prevspecies;
-	void StartBeams() {
-		if (!master)
-			return;
-		let weap = PK_Painkiller(master.FindInventory("PK_Painkiller"));
-		if (weap)
-			weap.beam = true;
-		string curspecies = master.species;
-		if (curspecies.IndexOf("PKPlayerSpecies") < 0) {
-			prevspecies = master.species;
-			master.species = String.Format("PKPlayerSpecies%d",master.PlayerNumber());
-			species = master.species;
-			//Console.printf("master species: %s",master.species);
-		}
-		beam1 = PK_TrackingBeam.MakeBeam("PK_TrackingBeam",master,tracer,"f2ac21",radius: 9.0,masterOffset:(13,13,12), style: STYLE_ADDSHADED);
-		if(beam1) {
-			beam1.alpha = 0.5;
-		}
-		beam2 = PK_TrackingBeam.MakeBeam("PK_TrackingBeam",master,tracer,"FFFFFF",radius: 1.6,masterOffset:(13,13,12),style: STYLE_ADDSHADED);
-		if(beam2) {
-			beam2.alpha = 3.0;
-		}
-		master.A_StartSound("weapons/painkiller/laser",CHAN_VOICE,CHANF_LOOPING,volume:0.5);
-	}	
-	void StopBeams() {
-		if (master) {
-			master.A_StopSound(CHAN_VOICE);
-			let weap = PK_Painkiller(master.FindInventory("PK_Painkiller"));
-			if (weap)
-				weap.beam = false;
-			string curspecies = master.species;
-			if (curspecies.IndexOf("PKPlayerSpecies") >= 0) {
-				master.species = prevspecies;
-				//Console.printf("master species: %s",master.species);
-			}
-		}
-		if(beam1) {
-			beam1.destroy();
-		}
-		if(beam2)
-			beam2.destroy();
-	}	
-	override void Tick() {
-		if (!master || !tracer) {
-			StopBeams();
-			destroy();
-			return;
-		}
-		SetOrigin(tracer.pos,true);
-		A_Facemaster(0,0,flags:FAF_MIDDLE);
-		if (!master || !PKWeapon.CheckWmod(master)) {
-			let adiff = DeltaAngle(angle,master.angle);
-			if (adiff < 163 && adiff > -170) {
-				StopBeams();
-				return;
-			}
-			let pdiff = abs(pitch - -master.pitch);
-			//console.printf("pitch %d | master pitch %d | diff %d",pitch,master.pitch,pdiff);
-			if (pdiff > 10) {
-				StopBeams();
-				return;
-			}
-		}
-		if (!CheckSight(master,SF_IGNOREWATERBOUNDARY)) {
-			StopBeams();
-			return;
-		}
-		StartBeams();
-		//this rail deals the actual damage, it doesn't define any visuals
-		A_CustomRailGun(2,color1:"FFFFFF",flags:RGF_SILENT,pufftype:"PK_KillerBeamPuff",range:Distance3D(master),duration:1,sparsity:1024);
-	}
-}
+class PK_KillerBeamTracer : LineTracer
+{
+	Actor beamSource;
+	array<Actor> beamVictims;
 
-Class PK_KillerBeamPuff : Actor {
-	Default {
-		+PAINLESS
-		+NOEXTREMEDEATH
-		+NODAMAGETHRUST
-		+ALLOWTHRUFLAGS
-		+MTHRUSPECIES
-		+HITTRACER
-		+ALWAYSPUFF
-	}	
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		if (tracer) {
-			//Console.Printf("beam tracer: %s",tracer.GetClassName());
-			tracer.A_StartSound("weapons/painkiller/laserhit",CHAN_VOICE,CHANF_NOSTOP,volume:0.8,attenuation:4);
+	static PK_KillerBeamTracer Fire(Actor source, Vector3 start, Vector3 direction, double range)
+	{
+		let tracer = new('PK_KillerBeamTracer');
+		tracer.beamSource = source;
+		if (tracer.Trace(start, source.cursector, direction, range,
+			TRACE_HitSky,
+			wallmask: Line.ML_BLOCKEVERYTHING,
+			ignore: source) == false)
+		{
+			return null;
 		}
+		return tracer;
+	}
+
+	override ETraceStatus TraceCallback()
+	{
+		if (results.HitType == TRACE_HitActor && results.HitActor)
+		{
+			let victim = results.HitActor;
+			// hit its shooter:
+			if (victim == beamSource)
+			{
+				return TRACE_Skip;
+			}
+			// not shotable:
+			if (!victim.bShootable || victim.health <= 0)
+			{
+				return TRACE_Skip;
+			}
+			beamVictims.Push(victim);
+			return TRACE_Continue;
+		}
+
+		switch (results.HitType)
+		{
+			case TRACE_HitWall:
+			case TRACE_HitFloor:
+			case TRACE_HitCeiling:
+			case TRACE_HasHitSky:
+				return TRACE_Stop;
+				break;
+		}
+
+		return TRACE_Continue;
 	}
 }
 
@@ -582,10 +638,14 @@ Class PK_ComboKiller : PK_Killer {
 	}
 
 	override void PostBeginPlay() {
-		super.PostBeginPlay();
+		Actor.PostBeginPlay();
 		A_StartSound("weapons/painkiller/spin",CHAN_BODY,CHANF_LOOPING);
 		if (target)
 			pitch = target.pitch-90;
+	}
+
+	override void Tick() {
+		Actor.Tick();
 	}
 
 	states {

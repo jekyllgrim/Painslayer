@@ -123,13 +123,22 @@ Model PK_BulletTracer {
 	FrameIndex M000 A 0 0
 }
 
-model "PK_TrackingBeam" {
+/*model "PK_TrackingBeam" {
 	model 0 "models/CrossSectionPrimitive.obj"
 	skin 0 "models/shaftB.png"
 	scale 1.0 1.0 1.2 //the 1.2 z-scale is for pixel ratio adjustment
 	USEACTORPITCH
 	DONTCULLBACKFACES //the model has only two planes
 	
+	FrameIndex M000 A 0 0
+}*/
+
+model PK_LaserBeam {
+	Path "Models/GZBeam"
+	Model 0 "beam_cyl.md3"
+	Skin 0 "beam.png"
+	USEACTORPITCH
+	USEACTORROLL
 	FrameIndex M000 A 0 0
 }
 
@@ -293,7 +302,7 @@ Model PK_DiskProjectile {
 	FrameIndex M000 B 0 0
 }
 
-Model PK_Lightning {
+/*Model PK_Lightning {
 	Path "models"
 	Model 0 "flatbeam.obj"
 	Scale 1.0 1.0 1.2
@@ -388,7 +397,7 @@ Model PK_Lightning2 {
 	AngleOffset 0
 	SurfaceSkin 0 0 "lightning/electrobolt_10.png"	
 	FrameIndex M000 J 0 0
-}
+}*/
 
 Model PK_Pentagram {
 	Path "models/penta"

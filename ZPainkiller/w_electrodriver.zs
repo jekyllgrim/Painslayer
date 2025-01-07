@@ -166,7 +166,7 @@ Class PK_ElectroDriver : PKWeapon {
 					closestDist = cdist;
 				if (!CheckSight(next,SF_IGNOREWATERBOUNDARY))
 					continue;
-				PK_TrackingBeam.MakeBeam("PK_Lightning",ltarget,radius:32,hitpoint:next.pos+(0,0,next.height*0.5),masterOffset:(0,0,ltarget.height*0.5),style:STYLE_ADD);
+				//PK_TrackingBeam.MakeBeam("PK_Lightning",ltarget,radius:32,hitpoint:next.pos+(0,0,next.height*0.5),masterOffset:(0,0,ltarget.height*0.5),style:STYLE_ADD);
 				// The secondary damage is 75% of the base beam damage
 				// and never causes pain:
 				PK_ElectroTargetControl.DealElectroDamage(next, self, self, dmg * 0.75, DMG_NO_PAIN|DMG_THRUSTLESS|DMG_PLAYERATTACK);
@@ -180,11 +180,11 @@ Class PK_ElectroDriver : PKWeapon {
 			vector3 hitpos; bool hit;
 			[hitpos, hit] = FindElectroTarget();
 			if (hit) {
-				PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
-				PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
+				//PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
+				//PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
 				if (invoker.hasDexterity) {
-					PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.2,9.5),style:STYLE_ADD);
-					PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.9,10.5),style:STYLE_ADD);
+					//PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.2,9.5),style:STYLE_ADD);
+					//PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.9,10.5),style:STYLE_ADD);
 				}
 			}
 		}
@@ -666,7 +666,7 @@ Class PK_ElectroDamageSplash : PK_BaseFlare {
 
 	
 
-Class PK_Lightning : PK_TrackingBeam {
+/*Class PK_Lightning : PK_TrackingBeam {
 	States	{
 		cache:
 			M000 ABCDEFGHIJ 0;
@@ -679,10 +679,10 @@ Class PK_Lightning : PK_TrackingBeam {
 			#### # 0 A_JumpIf(lifetimer <=0,"death");
 			loop;
 	}
-}
+}*/
 
 //same but the model attached to it is angled differently
-Class PK_Lightning2 : PK_Lightning {}
+//Class PK_Lightning2 : PK_Lightning {}
 
 Class PK_Shuriken : PK_StakeProjectile {
 	Default {
@@ -889,7 +889,7 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 					if (Distance3D(trg) > atkdist)
 						disktargets.delete(i);					
 					else {
-						PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:trg.pos+(0,0,trg.height*0.5),style:STYLE_ADD);
+						//PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:trg.pos+(0,0,trg.height*0.5),style:STYLE_ADD);
 						PK_ElectroTargetControl.DealElectroDamage(trg, self, target, 2, DMG_THRUSTLESS, delay: 17);
 						if (!CheckSight(trg,SF_IGNOREWATERBOUNDARY)) {
 							//Console.printf("LOF check failed");

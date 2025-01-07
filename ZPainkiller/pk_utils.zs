@@ -19,7 +19,7 @@ class PK_Utils abstract {
 	//Checks which side of a linedef the actor is on:
 	static clearscope int PointOnLineSide( Vector2 p, Line l ) {
 		if ( !l ) return 0;
-		return (((p.y-l.v1.p.y)*l.delta.x+(l.v1.p.x-p.x)*l.delta.y) > double.epsilon);
+		return LevelLocals.PointOnLineSide(p, l);
     }
 
 	static clearscope vector2 GetLineNormal(vector2 ppos, Line lline) {
