@@ -1,17 +1,15 @@
-Agent_Ash aka Jekyll Grim Payne: Idea, code, weapon and item sprites
+People Can Fly: Painkiller, Painkiller sounds, HUD graphics
 
-kodi: Beam library
+Agent_Ash aka Jekyll Grim Payne: Idea, code, weapon and item sprites
 
 Cherno: Demon Morph shaders
 
-Lewisk3: StatusBarScreen (https://github.com/Lewisk3/StatusBarScreen), scripting help
+Lewisk3: GZBeamz, scripting help
 
 Boondolr: Boss healthbar code, scripting help
 
-phantombeta, Gutawer: ZForms (https://gitlab.com/Gutawer/gzdoom-zforms)
+phantombeta, Gutawer: ZForms
 
-Gutawer: Gutamatics (https://gitlab.com/Gutawer/gzdoom-gutamatics/)
+Gutawer: Gutamatics
 
-Nero: Tooltips (https://github.com/Saican/Tooltips/tree/master)
-
-Marisa Kirisame: MK_Matrix
+Nero: Tooltips
