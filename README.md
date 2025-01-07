@@ -188,15 +188,11 @@ The code libraries, their license types and their locations are as follows:
 3. *ToolTips* library by Nero  
     **License**: GPLv3  
     **Location**: `ZPainkiller/Tooltips/`
-4. *StatusBarScreen* library by Lewisk3  
-    **License**: MIT License  
-    **Location**: `ZPainkiller/StatusBarScreen/`
-5. *MK_Matrix* library by Marisa Kirisame  
-    **License**: GNU GPL  
-    **Location**: `ZPainkiller/mk_matrix/`
-6. *Gutamatics* library by Gutawer
+4. *Gutamatics* library by Gutawer
     **License**: MIT License
     **Location**: `ZPainkiller/PK_Gutamatics/`
+
+
 
 Refer to the aforementioned code locations for license information on each code component.
 
@@ -210,11 +206,11 @@ All sounds used in Painslayer are owned by People Can Fly and are used under Fai
 
 **Agent_Ash aka Jekyll Grim Payne**: Idea, code, weapon and item sprites
 
-**kodi**: Beam library
+
 
 **Cherno**: Demon Morph shaders
 
-**Lewisk3**: [StatusBarScreen](https://github.com/Lewisk3/StatusBarScreen), scripting help
+**Lewisk3**: [GZBeamz](https://github.com/Lewisk3/GZBeamz/), scripting help
 
 Boondolr: Boss healthbar code, scripting help
 
@@ -223,5 +219,3 @@ phantombeta, Gutawer: [ZForms](https://gitlab.com/Gutawer/gzdoom-zforms)
 Gutawer: [Gutamatics](https://gitlab.com/Gutawer/gzdoom-gutamatics/)
 
 Nero: [Tooltips](https://github.com/Saican/Tooltips/tree/master)
-
-Marisa Kirisame: MK_Matrix
