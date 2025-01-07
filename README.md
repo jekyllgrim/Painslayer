@@ -191,8 +191,9 @@ The code libraries, their license types and their locations are as follows:
 4. *Gutamatics* library by Gutawer
     **License**: MIT License
     **Location**: `ZPainkiller/PK_Gutamatics/`
-
-
+5. *GZBeamz* library by Lewisk3
+   **License:** MIT License
+   **Location:** `ZPainkiller/GZBeamz/`
 
 Refer to the aforementioned code locations for license information on each code component.
 
@@ -205,8 +206,6 @@ All sounds used in Painslayer are owned by People Can Fly and are used under Fai
 **People Can Fly**: Painkiller, Painkiller sounds, HUD graphics
 
 **Agent_Ash aka Jekyll Grim Payne**: Idea, code, weapon and item sprites
-
-
 
 **Cherno**: Demon Morph shaders
 

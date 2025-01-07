@@ -95,16 +95,19 @@ The code libraries, their license types and their locations are as follows:
 
 1. Original code by the Author (with the occasional help of the members of the ZDoom community)  
    License: GPLv3  
-   Location: `ZPainkiller/` (not including any subfolders)
+   Location: "ZPainkiller" (not including any subfolders)
 2. *ZForms* library by Jessica Russell and Chronos "phantombeta" Ouroboros  
    License: free license  
-   Location: `ZPainkiller/Zforms/`
+   Location: "ZPainkiller/Zforms"
 3. *ToolTips* library by Nero  
    License: GPLv3  
-   Location: `ZPainkiller/Tooltips/`
+   Location: "ZPainkiller/Tooltips"
 4. *Gutamatics* library by Gutawer
    License: MIT License
-   Location: `ZPainkiller/PK_Gutamatics/`
+   Location: "ZPainkiller/PK_Gutamatics"
+5. *GZBeamz* library by Lewisk3
+   License: MIT License
+   Location: "ZPainkiller/GZBeamz"
 
 Refer to the aforementioned code locations for license information on each code component.
 
