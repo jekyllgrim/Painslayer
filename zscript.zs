@@ -2,10 +2,6 @@ version "4.14.0"
 
 //GZBeamz by Lewisk3:
 #include "ZPainkiller/GZBeamz/laser_base.zsc"
-//StatusBarScreen by Lewisk3:
-#include "ZPainkiller/StatusBarScreen/StatusScreen_base.zsc"
-#include "ZPainkiller/StatusBarScreen/StatusScreen_3D.zsc"
-#include "ZPainkiller/StatusBarScreen/StatusScreen_shape2D.zsc"
 //tooltips by nero:
 #include "ZPainkiller/Tooltips/ToolTips_Lists.zs"
 #include "ZPainkiller/Tooltips/ToolTips_Options.zs"

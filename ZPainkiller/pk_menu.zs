@@ -2,20 +2,20 @@
 // centered like ListMenuItemStaticPatchCentered,
 // and also draws P_mnublk behind itself:
 class ListMenuItemPKTextItemCentered : ListMenuItemTextItem {
-	TextureID mTexture;
-	vector2 mTextureSize;
+	TextureID menuBlockTex;
+	vector2 menuBlockTexSize;
 
 	override void Draw(bool selected, ListMenuDescriptor desc)	{	
 		let font = menuDelegate.PickFont(mFont);
 		let fy = font.GetHeight();
 		
 		// Draw the selector texture:
-		if (!mTexture)
-			mTexture = TexMan.CheckForTexture("P_mnublk", TexMan.Type_Any);
-		if (mTextureSize == (0,0))
-			mTextureSize = TexMan.GetScaledSize(mTexture);
+		if (!menuBlockTex)
+			menuBlockTex = TexMan.CheckForTexture("P_mnublk", TexMan.Type_Any);
+		if (menuBlockTexSize == (0,0))
+			menuBlockTexSize = TexMan.GetScaledSize(menuBlockTex);
 		
-		DrawTexture(desc, mTexture, mXpos - (mTextureSize.x / 2), abs(mYpos) - (mTextureSize.y / 2) + (fy / 2), mYpos < 0);
+		DrawTexture(desc, menuBlockTex, mXpos - (menuBlockTexSize.x / 2), abs(mYpos) - (menuBlockTexSize.y / 2) + (fy / 2), mYpos < 0);
 		
 		// Draw the actual text:
 		String text = Stringtable.Localize(mText);
@@ -54,9 +54,10 @@ class ListMenuItemPKTextItemCentered : ListMenuItemTextItem {
 // that draws P_mnublk behind the text
 
 class PKSkillMenu : ListMenu {
-	TextureID mTexture;
-	TextureID mBackground;
-	vector2 mTextureSize;
+	TextureID backgroundTex;
+	vector2 backgroundTexSize;
+	TextureID menuBlockTex;
+	vector2 menuBlockTexSize;
 	// The skill text has to fit within this width of the
 	// background texture. Not using 100% because it has
 	// some flowerly bits on the sides that the text
@@ -80,17 +81,24 @@ class PKSkillMenu : ListMenu {
 	
 	override void Drawer() {
 		// draw skill menu background:
-		PK_StatusBarScreen.Fill("000000",0,0, SWIDTH, SHEIGHT,1);
-		if (!mBackground)
-			mBackground = TexMan.CheckForTexture("P_MENU", TexMan.Type_Any);
-		PK_StatusBarScreen.DrawTexture(mBackground, (960,540));
+		Screen.Dim(0x000000, 1.0, 0, 0, Screen.GetWidth(), Screen.GetHeight());
+		if (!backgroundTex.IsValid()) {
+			backgroundTex = TexMan.CheckForTexture("P_MENU", TexMan.Type_Any);
+			backgroundTexSize = TexMan.GetScaledSize(backgroundTex);
+		}
+		Screen.DrawTexture(backgroundTex, false,
+			0, 0,
+			DTA_VirtualWidthF, backgroundTexSize.x,
+			DTA_VirtualHeightF, backgroundTexSize.y,
+			DTA_FullScreenScale, FSMode_ScaleToFit43);
 		
 		int y = POSY;
 		let mFont = mDesc.mFont;
 		let fy = mFont.GetHeight();
-		if (!mTexture)
-			mTexture = TexMan.CheckForTexture("P_mnublk", TexMan.Type_Any);
-		mTextureSize = TexMan.GetScaledSize(mTexture);
+		if (!menuBlockTex.IsValid()) {
+			menuBlockTex = TexMan.CheckForTexture("P_mnublk", TexMan.Type_Any);
+			menuBlockTexSize = TexMan.GetScaledSize(menuBlockTex);
+		}
 		
 		// Draw the title at the top:
 		for (int i = 0; i < mDesc.mItems.Size(); ++i) {
@@ -121,7 +129,7 @@ class PKSkillMenu : ListMenu {
 			}
 		}
 		
-		int textureWidth = int(mTextureSize.x);
+		int textureWidth = int(menuBlockTexSize.x);
 		double fitTextureWidth = textureWidth * TEXFITFACTOR;
 		for (int i = 0; i < mDesc.mItems.Size(); ++i) {
 			// check it's a clikcable element (skill or episode):
@@ -138,11 +146,11 @@ class PKSkillMenu : ListMenu {
 			
 			vector2 texpos = (
 				(SWIDTH / 2) - (textureWidth / 2), 
-				y - (mTextureSize.y / 2) + (fy / 2)
+				y - (menuBlockTexSize.y / 2) + (fy / 2)
 			);
 			// draw the background:
 			Screen.DrawTexture(
-				mTexture, 
+				menuBlockTex, 
 				true, 
 				texpos.x, texpos.y,
 				DTA_VirtualWidth, SWIDTH,
@@ -189,8 +197,13 @@ class ListMenuItemPKDrawMenuBackground : ListMenuItemStaticPatch {
 			return;
 		if (!mTexture.Exists())
 			return;
-		PK_StatusBarScreen.Fill("000000",0,0,statscr_base_width,statscr_base_height,1);
-		PK_StatusBarScreen.DrawTexture(mTexture, (960,540));
+		Screen.Dim(0x000000, 1.0, 0, 0, Screen.GetWidth(), Screen.GetHeight());
+		Vector2 tSize = TexMan.GetScaledSize(mTexture);
+		Screen.DrawTexture(mTexture, false,
+			0, 0,
+			DTA_VirtualWidthF, tSize.x,
+			DTA_VirtualHeightF, tSize.y,
+			DTA_FullScreenScale, FSMode_ScaleToFit43);
 	}
 }
 

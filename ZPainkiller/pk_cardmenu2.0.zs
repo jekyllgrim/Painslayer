@@ -52,7 +52,7 @@ Class PKCardsMenu : PKZFGenericMenu {
 	
 	override void Drawer() {
 		if (!multiplayer)
-			PK_StatusBarScreen.Fill("000000",0,0,statscr_base_width,statscr_base_height,1);
+			Screen.Dim(0x000000, 1.0, 0, 0, Screen.GetWidth(), Screen.GetHeight());
 			super.Drawer();
 	}
 
