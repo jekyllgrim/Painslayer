@@ -294,7 +294,7 @@ Model PK_DiskProjectile {
 
 Model PK_Lightning {
 	Path "models/lightning"
-	Model 0 "flatbeam.obj"
+	Model 0 "bolt.iqm"
 	USEACTORPITCH
 	DONTCULLBACKFACES
 

@@ -434,8 +434,12 @@ class PK_Lightning : PK_LaserBeam {
 			if (from.player)
 				beam.bNOTIMEFREEZE = true;
 			if (temporary) {
-				beam.lifetime = 5;
+				beam.lifetime = 4;
 				beam.alpha *= 0.2;
+				beam.scale.x *= 0.6;
+			}
+			else {
+				beam.lifetime = -1;
 			}
 			beam.SetEnabled(true);
 			beam.StartTracking(aimpos);
@@ -470,13 +474,11 @@ class PK_Lightning : PK_LaserBeam {
 	States	{
 	Spawn:
 		M000 A 1 NoDelay {
-			for (int i = 0; i < 2; i ++) {
+			for (int i = 0; i < 2; i++) {
 				A_ChangeModel("",
 					skinindex: i,
 					skinpath: "models/lightning",
-					skin: i == 0? 
-						String.Format("electrobolt_%d.png",random[ghwfgh](0,9)) : 
-						String.Format("electrobolt_%d.png", random[kfgsxdfygh](0,9)),
+					skin: String.Format("electrobolt_%d.png",random[sfxlit](0,9)),
 					flags: CMDL_USESURFACESKIN);
 			}
 		}
