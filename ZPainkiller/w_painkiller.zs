@@ -382,13 +382,12 @@ Class PK_Killer : PK_Projectile {
 		let tracer = PK_KillerBeamTracer.Fire(target, start, direction: dir, range: view.z);
 		if (!tracer) return;
 
-		/*double step = tracer.results.distance * 0.05;
+		/*double step = tracer.results.distance * 0.025;
 		while (step < tracer.results.distance) {
 			FSpawnParticleParams p;
-			p.size = 5;
-			p.lifetime = 2;
+			p.size = 2;
+			p.lifetime = 1;
 			p.startalpha = 1.0;
-			p.fadestep = -1;
 			p.flags = SPF_FULLBRIGHT;
 			p.color1 = 0xff0000;
 			p.pos = level.Vec3Offset(start, tracer.results.hitVector.Unit()*step);
@@ -569,46 +568,30 @@ Class PK_KillerFlyTarget : Actor {
 	}
 }
 
-class PK_KillerBeamTracer : LineTracer
-{
+class PK_KillerBeamTracer : LineTracer {
 	Actor beamSource;
 	array<Actor> beamVictims;
 
-	static PK_KillerBeamTracer Fire(Actor source, Vector3 start, Vector3 direction, double range)
-	{
+	static PK_KillerBeamTracer Fire(Actor source, Vector3 start, Vector3 direction, double range) 	{
 		let tracer = new('PK_KillerBeamTracer');
 		tracer.beamSource = source;
-		if (tracer.Trace(start, source.cursector, direction, range,
+		tracer.Trace(start, source.cursector, direction, range,
 			TRACE_HitSky,
 			wallmask: Line.ML_BLOCKEVERYTHING,
-			ignore: source) == false)
-		{
-			return null;
-		}
+			ignore: source);
 		return tracer;
 	}
 
-	override ETraceStatus TraceCallback()
-	{
-		if (results.HitType == TRACE_HitActor && results.HitActor)
-		{
+	override ETraceStatus TraceCallback() {
+		if (results.HitType == TRACE_HitActor && results.HitActor) {
 			let victim = results.HitActor;
-			// hit its shooter:
-			if (victim == beamSource)
-			{
-				return TRACE_Skip;
+			if (victim != beamSource && victim.bShootable && victim.health > 0) {
+				beamVictims.Push(victim);
 			}
-			// not shotable:
-			if (!victim.bShootable || victim.health <= 0)
-			{
-				return TRACE_Skip;
-			}
-			beamVictims.Push(victim);
 			return TRACE_Continue;
 		}
 
-		switch (results.HitType)
-		{
+		switch (results.HitType) {
 			case TRACE_HitWall:
 			case TRACE_HitFloor:
 			case TRACE_HitCeiling:
@@ -641,7 +624,6 @@ Class PK_ComboKiller : PK_Killer {
 		int ret = super.DoSpecialDamage(target, damage, damagetype);
 		if (ret > 0) {
 			SetDamage(0);
-			//console.printf("Combo killed dealt %d damage to %s. Remaining health: %d", damage, target.GetClassName(), target.health);
 		}
 		return ret;
 	}
