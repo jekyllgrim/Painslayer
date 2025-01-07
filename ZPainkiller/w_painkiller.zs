@@ -250,6 +250,7 @@ Class PK_Killer : PK_Projectile {
 		+NOEXTREMEDEATH
 		+NODAMAGETHRUST
 		+HITTRACER
+		+BLOODSPLATTER
 		projectile;
 		scale 0.3;
 		DamageFunction (40);
@@ -351,8 +352,13 @@ Class PK_Killer : PK_Projectile {
 	override void Tick() {
 		super.Tick();
 
-		if (isFrozen() || !target || !target.player)
+		if (isFrozen())
 			return;
+
+		if (!target || !target.player || target.health <= 0) {
+			Stopbeams();
+			return;
+		}
 
 		if ((!target.player.readyweapon || target.player.readyweapon.GetClass() != 'PK_Painkiller') &&
 			!InStateSequence(curstate,FindState("XDeath"))) {
@@ -400,6 +406,15 @@ Class PK_Killer : PK_Projectile {
 				}
 			}
 		}
+	}
+
+	override void OnDestroy() {
+		StopBeams();
+		if (beam_outer)
+			beam_outer.Destroy();
+		if (beam_inner)
+			beam_inner.Destroy();
+		Super.OnDestroy();
 	}
 	
 	states {
@@ -474,11 +489,6 @@ Class PK_Killer : PK_Projectile {
 					let pk = PK_Painkiller(target.FindInventory("PK_Painkiller"));
 					if (pk && target.player && target.player.readyweapon && target.player.readyweapon != pk)
 						pk.killer_fired = false;
-					StopBeams();
-					if (beam_outer)
-						beam_outer.Destroy();
-					if (beam_inner)
-						beam_inner.Destroy();
 					return ResolveState("Null");
 				}
 			}
@@ -631,7 +641,6 @@ Class PK_ComboKiller : PK_Killer {
 		int ret = super.DoSpecialDamage(target, damage, damagetype);
 		if (ret > 0) {
 			SetDamage(0);
-			bBLOODLESSIMPACT = true;
 			//console.printf("Combo killed dealt %d damage to %s. Remaining health: %d", damage, target.GetClassName(), target.health);
 		}
 		return ret;
