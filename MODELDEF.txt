@@ -123,16 +123,6 @@ Model PK_BulletTracer {
 	FrameIndex M000 A 0 0
 }
 
-/*model "PK_TrackingBeam" {
-	model 0 "models/CrossSectionPrimitive.obj"
-	skin 0 "models/shaftB.png"
-	scale 1.0 1.0 1.2 //the 1.2 z-scale is for pixel ratio adjustment
-	USEACTORPITCH
-	DONTCULLBACKFACES //the model has only two planes
-	
-	FrameIndex M000 A 0 0
-}*/
-
 model PK_LaserBeam {
 	Path "Models/GZBeam"
 	Model 0 "beam_cyl.md3"
@@ -302,102 +292,14 @@ Model PK_DiskProjectile {
 	FrameIndex M000 B 0 0
 }
 
-/*Model PK_Lightning {
-	Path "models"
+Model PK_Lightning {
+	Path "models/lightning"
 	Model 0 "flatbeam.obj"
-	Scale 1.0 1.0 1.2
 	USEACTORPITCH
 	DONTCULLBACKFACES
-	
-	AngleOffset 45
-	SurfaceSkin 0 0 "lightning/electrobolt_01.png"
+
 	FrameIndex M000 A 0 0
-	
-	AngleOffset 50
-	SurfaceSkin 0 0 "lightning/electrobolt_02.png"	
-	FrameIndex M000 B 0 0
-	
-	AngleOffset 55
-	SurfaceSkin 0 0 "lightning/electrobolt_03.png"	
-	FrameIndex M000 C 0 0
-	
-	AngleOffset 60
-	SurfaceSkin 0 0 "lightning/electrobolt_04.png"	
-	FrameIndex M000 D 0 0
-	
-	AngleOffset 65
-	SurfaceSkin 0 0 "lightning/electrobolt_05.png"	
-	FrameIndex M000 E 0 0
-	
-	AngleOffset 60
-	SurfaceSkin 0 0 "lightning/electrobolt_06.png"	
-	FrameIndex M000 F 0 0
-	
-	AngleOffset 55
-	SurfaceSkin 0 0 "lightning/electrobolt_07.png"	
-	FrameIndex M000 G 0 0
-	
-	AngleOffset 50
-	SurfaceSkin 0 0 "lightning/electrobolt_08.png"	
-	FrameIndex M000 H 0 0
-	
-	AngleOffset 45
-	SurfaceSkin 0 0 "lightning/electrobolt_09.png"	
-	FrameIndex M000 I 0 0
-	
-	AngleOffset 50
-	SurfaceSkin 0 0 "lightning/electrobolt_10.png"	
-	FrameIndex M000 J 0 0
 }
-	
-	
-Model PK_Lightning2 {
-	Path "models"
-	Model 0 "flatbeam.obj"
-	Scale 1.0 1.0 1.2
-	USEACTORPITCH
-	DONTCULLBACKFACES
-	
-	AngleOffset -15
-	SurfaceSkin 0 0 "lightning/electrobolt_01.png"
-	FrameIndex M000 A 0 0
-	
-	AngleOffset -10
-	SurfaceSkin 0 0 "lightning/electrobolt_02.png"	
-	FrameIndex M000 B 0 0
-	
-	AngleOffset 5
-	SurfaceSkin 0 0 "lightning/electrobolt_03.png"	
-	FrameIndex M000 C 0 0
-	
-	AngleOffset 0
-	SurfaceSkin 0 0 "lightning/electrobolt_04.png"	
-	FrameIndex M000 D 0 0
-	
-	AngleOffset 5
-	SurfaceSkin 0 0 "lightning/electrobolt_05.png"	
-	FrameIndex M000 E 0 0
-	
-	AngleOffset 10
-	SurfaceSkin 0 0 "lightning/electrobolt_06.png"	
-	FrameIndex M000 F 0 0
-	
-	AngleOffset 15
-	SurfaceSkin 0 0 "lightning/electrobolt_07.png"	
-	FrameIndex M000 G 0 0
-	
-	AngleOffset 10
-	SurfaceSkin 0 0 "lightning/electrobolt_08.png"	
-	FrameIndex M000 H 0 0
-	
-	AngleOffset 5
-	SurfaceSkin 0 0 "lightning/electrobolt_09.png"	
-	FrameIndex M000 I 0 0
-	
-	AngleOffset 0
-	SurfaceSkin 0 0 "lightning/electrobolt_10.png"	
-	FrameIndex M000 J 0 0
-}*/
 
 Model PK_Pentagram {
 	Path "models/penta"

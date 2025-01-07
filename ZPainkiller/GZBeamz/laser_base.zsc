@@ -103,7 +103,7 @@ class PK_LaserBeam : Actor
 	
 	virtual void BeamTick()
 	{
-		// Implement cusPK laser logic here.
+		// Implement custom laser logic here.
 	}
 	
 	virtual void OnImpact(vector3 hitPos, Actor hitActor)

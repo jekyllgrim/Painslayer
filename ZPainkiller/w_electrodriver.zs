@@ -1,9 +1,7 @@
 Class PK_ElectroDriver : PKWeapon {
 	private bool attackrate;
 	private int celldepleterate;
-
-	TextureID splashTextures[12];
-	int curSplashTexture;
+	private PK_LaserBeam lightningBeam;
 
 	Default {
 		-PKWeapon.ALWAYSBOB
@@ -166,7 +164,7 @@ Class PK_ElectroDriver : PKWeapon {
 					closestDist = cdist;
 				if (!CheckSight(next,SF_IGNOREWATERBOUNDARY))
 					continue;
-				//PK_TrackingBeam.MakeBeam("PK_Lightning",ltarget,radius:32,hitpoint:next.pos+(0,0,next.height*0.5),masterOffset:(0,0,ltarget.height*0.5),style:STYLE_ADD);
+				PK_Lightning.Fire(ltarget, next.pos+(0,0,next.height*0.5), temporary: true);
 				// The secondary damage is 75% of the base beam damage
 				// and never causes pain:
 				PK_ElectroTargetControl.DealElectroDamage(next, self, self, dmg * 0.75, DMG_NO_PAIN|DMG_THRUSTLESS|DMG_PLAYERATTACK);
@@ -175,18 +173,29 @@ Class PK_ElectroDriver : PKWeapon {
 		return ltarget.pos+(0,0,ltarget.height*0.5), true;
 	}
 
+	void FireLightning(Actor from, Vector3 aimpos, double fw, double lr, double ud) {
+		if (!lightningBeam) {
+			lightningBeam = PK_Lightning.Fire(from, aimpos, fw, lr, ud);
+		}
+		lightningBeam.SetEnabled(true);
+		lightningBeam.StartTracking(aimpos);
+	}
+
+	void StopLightning() {
+		if (lightningBeam) {
+			lightningBeam.SetEnabled(false);
+		}
+	}
+
 	action void A_DoElectroAttack() {
 		if (waterlevel < 2) {
 			vector3 hitpos; bool hit;
 			[hitpos, hit] = FindElectroTarget();
-			if (hit) {
-				//PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
-				//PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.5,10),style:STYLE_ADD);
-				if (invoker.hasDexterity) {
-					//PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.2,9.5),style:STYLE_ADD);
-					//PK_TrackingBeam.MakeBeam("PK_Lightning2",self,radius:32,hitpoint:hitpos,masterOffset:(24,8.9,10.5),style:STYLE_ADD);
-				}
+			if (!hit) {
+				invoker.StopLightning();
 			}
+
+			invoker.FireLightning(self, hitpos, 24, 8.5, 10);
 		}
 
 		else {
@@ -234,11 +243,6 @@ Class PK_ElectroDriver : PKWeapon {
 			if (!w)
 				continue;
 
-			/*invoker.curSplashTexture++;
-			if (invoker.curSplashTexture >= invoker.splashTextures.Size())
-				invoker.curSplashTexture = 0;
-			TextureID ptex = invoker.splashTextures[invoker.curSplashTexture];*/
-
 			FSpawnParticleParams electricBlip;				
 			electricBlip.color1 = PK_ElectroDriver.electricBlipColors[random[epart](0, PK_ElectroDriver.electricBlipColors.Size() - 1)];
 			//electricBlip.texture = ptex;
@@ -255,20 +259,19 @@ Class PK_ElectroDriver : PKWeapon {
 		}
 	}
 
-	override void BeginPlay() {
-		super.BeginPlay();
-		splashTextures[0] = TexMan.CheckForTexture("ELTEA0");
-		splashTextures[1] = TexMan.CheckForTexture("ELTEB0");
-		splashTextures[2] = TexMan.CheckForTexture("ELTEC0");
-		splashTextures[3] = TexMan.CheckForTexture("ELTED0");
-		splashTextures[4] = TexMan.CheckForTexture("ELTEE0");
-		splashTextures[5] = TexMan.CheckForTexture("ELTEF0");
-		splashTextures[6] = TexMan.CheckForTexture("ELTEG0");
-		splashTextures[7] = TexMan.CheckForTexture("ELTEH0");
-		splashTextures[8] = TexMan.CheckForTexture("ELTEI0");
-		splashTextures[9] = TexMan.CheckForTexture("ELTEJ0");
-		splashTextures[10] = TexMan.CheckForTexture("ELTEK0");
-		splashTextures[11] = TexMan.CheckForTexture("ELTEL0");
+	override void Tick() {
+		Super.Tick();
+		if (lightningBeam) {
+			if (!owner || !owner.player || owner.health <= 0 ||
+				!owner.player.readyweapon || owner.player.readyweapon != self) {
+				lightningBeam.Destroy();
+				return;
+			}
+			let psp = owner.player.FindPSprite(PSP_WEAPON);
+			if (!psp || !psp.curstate.InStateSequence(FindState("AltFire"))) {
+				lightningBeam.Destroy();
+			}
+		}
 	}
 
 	States {
@@ -306,7 +309,8 @@ Class PK_ElectroDriver : PKWeapon {
 	AltHold:
 		ELDR A 1 {
 			if (PressingAttackButton() && PK_CheckAmmo(secondary:true, 80)) {
-				A_WeaponOffset(0,32);
+				invoker.StopLightning();
+				A_WeaponOffset(0,WEAPONTOP);
 				PK_DepleteAmmo(secondary:true,80);
 				A_ClearRefire();
 				A_StopSound(CH_LOOP);
@@ -317,7 +321,7 @@ Class PK_ElectroDriver : PKWeapon {
 			A_StartSound("weapons/edriver/electroloop",CH_LOOP,CHANF_LOOPING);
 			invoker.celldepleterate++;
 			int req = invoker.hasDexterity ? 1 : 2;
-			if (invoker.celldepleterate > req) {				
+			if (invoker.celldepleterate > req) {
 				invoker.celldepleterate = 0;
 				if (!PK_CheckAmmo(secondary:true))
 					return ResolveState("AltHoldEnd");
@@ -338,6 +342,7 @@ Class PK_ElectroDriver : PKWeapon {
 		TNT1 A 0 PK_Refire();
 	AltHoldEnd:
 		TNT1 A 0 {
+			invoker.StopLightning();
 			A_ClearRefire();
 			A_StopSound(CH_LOOP);
 			A_StartSound("weapons/edriver/electroloopend",CH_LOOP);
@@ -408,6 +413,68 @@ Class PK_ElectroDriver : PKWeapon {
 				psp.frame = newframe;
 			}
 			return ResolveState(null);
+		}
+		loop;
+	}
+}
+
+class PK_Lightning : PK_LaserBeam {
+	int lifetime;
+	Default {
+		PK_LaserBeam.LaserColor "";
+		Renderstyle 'Add';
+		Alpha 3;
+		XScale 50;
+		YScale 1;
+	}
+
+	static PK_Lightning Fire(Actor from, Vector3 aimpos, double fw = 0, double lr = 0, double ud = 0, bool temporary = false) {
+		let beam = PK_Lightning(PK_LaserBeam.Create(from, fw, lr, -ud, type: 'PK_Lightning'));
+		if (beam) {
+			if (from.player)
+				beam.bNOTIMEFREEZE = true;
+			if (temporary)
+				beam.lifetime = 5;
+			beam.SetEnabled(true);
+			beam.StartTracking(aimpos);
+		}
+		return beam;
+	}
+
+	override void Tick() {
+		Super.Tick();
+		if (lifetime > 0) {
+			lifetime--;
+			if (lifetime == 0) {
+				Destroy();
+				return;
+			}
+		}
+		if (tics >= 0) {
+			if (tics > 0)
+				tics--;
+			while (!tics) {	
+				if (!curstate.nextState) {
+					Destroy();
+					return;
+				}
+				else {
+					SetState (CurState.NextState);
+				}
+			}
+		}
+	}
+
+	States	{
+	Spawn:
+		M000 A 1 NoDelay {
+			for (int i = 0; i < 2; i ++) {
+				A_ChangeModel("",
+					skinindex: i,
+					skinpath: "models/lightning",
+					skin: String.Format("electrobolt_%d.png", random[sfxlit](0,9)),
+					flags: CMDL_USESURFACESKIN);
+			}
 		}
 		loop;
 	}
@@ -664,26 +731,6 @@ Class PK_ElectroDamageSplash : PK_BaseFlare {
 	}
 }
 
-	
-
-/*Class PK_Lightning : PK_TrackingBeam {
-	States	{
-		cache:
-			M000 ABCDEFGHIJ 0;
-		Spawn:
-			TNT1 A 0;
-			M000 A 1 bright {
-				lifetimer--;
-				frame = random[lit](0,9);
-			}
-			#### # 0 A_JumpIf(lifetimer <=0,"death");
-			loop;
-	}
-}*/
-
-//same but the model attached to it is angled differently
-//Class PK_Lightning2 : PK_Lightning {}
-
 Class PK_Shuriken : PK_StakeProjectile {
 	Default {
 		PK_Projectile.trailcolor "f4f4f4";
@@ -889,7 +936,7 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 					if (Distance3D(trg) > atkdist)
 						disktargets.delete(i);					
 					else {
-						//PK_TrackingBeam.MakeBeam("PK_Lightning",self,radius:32,hitpoint:trg.pos+(0,0,trg.height*0.5),style:STYLE_ADD);
+						PK_Lightning.Fire(self, trg.pos+(0,0,trg.height*0.5), temporary: true);
 						PK_ElectroTargetControl.DealElectroDamage(trg, self, target, 2, DMG_THRUSTLESS, delay: 17);
 						if (!CheckSight(trg,SF_IGNOREWATERBOUNDARY)) {
 							//Console.printf("LOF check failed");
