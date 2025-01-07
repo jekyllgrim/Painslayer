@@ -72,24 +72,8 @@ Class PKWeapon : Weapon abstract {
 	override void DoEffect() {
 		Super.DoEffect();
 		if (!owner || !owner.player)
-			return;		
-		SwitchAmmoTypes();
-		/*let weap = owner.player.readyweapon;
-		if (!weap)
 			return;
-		if (weap == self) {
-			let psp = owner.player.FindPSprite(PSP_WEAPON);
-			if (psp && InStateSequence(psp.curstate, FindState("Ready"))) {
-				if (abs(idleScaleDir) != 1)
-					idleScaleDir = 1;
-				double change = 0.0025 * idleScaleDir;
-				psp.scale += (change, change);
-				if (psp.scale.x < 1. || psp.scale.x > 1.08)
-					idleScaleDir *= -1;
-			}
-		}*/
-		//if (bALWAYSBOB && weap == self)
-			//owner.player.WeaponState |= WF_WEAPONBOBBING;
+		SwitchAmmoTypes();
 		hasDexterity = owner.FindInventory("PowerDoubleFiringSpeed",subclass:true);
 		hasWmod = owner.FindInventory("PK_WeaponModifier",subclass:true);
 	}
