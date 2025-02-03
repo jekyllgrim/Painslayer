@@ -308,13 +308,15 @@ Class PK_Killer : PK_Projectile {
 	}
 
 	void StopBeams() {
-		if (target.IsActorPlayingSound(CHAN_VOICE, "weapons/painkiller/laser")) {
-			target.A_StopSound(CHAN_VOICE);
+		if (target) {
+			if (target.IsActorPlayingSound(CHAN_VOICE, "weapons/painkiller/laser")) {
+				target.A_StopSound(CHAN_VOICE);
+			}
+			
+			let weap = PK_Painkiller(target.FindInventory("PK_Painkiller"));
+			if (weap)
+				weap.beam = false;
 		}
-		
-		let weap = PK_Painkiller(target.FindInventory("PK_Painkiller"));
-		if (weap)
-			weap.beam = false;
 
 		if(beam_outer) {
 			beam_outer.SetEnabled(false);
