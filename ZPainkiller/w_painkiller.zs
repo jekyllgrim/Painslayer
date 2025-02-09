@@ -397,13 +397,35 @@ Class PK_Killer : PK_Projectile {
 			step += step;
 		}*/
 		
+		FSpawnParticleParams p;
+		p.color1 = "";
+		p.texture = TexMan.CheckForTexture("SPRKA0");
+		p.startalpha = 1.0;
+		p.fadestep = -1;
+		p.flags = SPF_FULLBRIGHT|SPF_REPLACE;
+		p.style = STYLE_Add;
 		foreach (victim : tracer.beamVictims) {
 			if (victim) {
+				Vector3 bpos = level.Vec3Offset(start, dir * (target.Distance3D(victim) - victim.radius));
 				victim.A_StartSound("weapons/painkiller/laserhit", CHAN_VOICE, CHANF_NOSTOP, volume:0.8, attenuation:4);
 				int dmg = victim.DamageMobj(self, target, 2, 'PK_KillerBeam', DMG_THRUSTLESS|DMG_NO_FACTOR|DMG_NO_PAIN);
 				if (dmg > 0) {
-					victim.SpawnBlood(level.Vec3Offset(start, dir * (target.Distance3D(victim) - victim.radius)), victim.AngleTo(target), dmg);
-					victim.TraceBleed(dmg, target);
+					if (!victim.bNoBlood && !victim.bDormant) {
+						victim.SpawnBlood(bpos, victim.AngleTo(target), dmg);
+						victim.TraceBleed(dmg, target);
+					}
+					else {
+						p.pos = bpos;
+						p.accel.z = -0.5;
+						for (int i = random[sfx](1, 4); i > 0; i--) {
+							p.size = frandom[sfx](2, 5);
+							p.lifetime = random[sfx](30, 45);
+							p.vel.xy = Actor.RotateVector((frandom[sfx](0.5, 2.0), 0), victim.AngleTo(target) + frandom[sfx](-25, 25));
+							p.vel.z = frandom[sfx](0.75, 2.5);
+							p.accel.xy = p.vel.xy / p.lifetime;
+							level.SpawnParticle(p);
+						}
+					}
 				}
 			}
 		}
