@@ -39,6 +39,7 @@ version "4.14.0"
 
 
 //Painslayer:
+#include "ZPainkiller/AshMovement/ashmove.zs"
 #include "ZPainkiller/pk_utils.zs"
 #include "ZPainkiller/pk_player.zs"
 #include "ZPainkiller/pk_constants.zs"

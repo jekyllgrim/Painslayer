@@ -1,4 +1,8 @@
 class PK_Utils abstract {
+
+	static clearscope bool IsVoodooDoll(PlayerPawn mo) {
+		return !mo.player || !mo.player.mo || mo.player.mo != mo;
+	}
 	
 	static clearscope int Sign (double i) {
 		if (i >= 0)
@@ -14,6 +18,16 @@ class PK_Utils abstract {
 			d = Clamp(d, truemin, truemax);
 		}
 		return d;
+	}
+
+	// rise and fall: lower = smoother, higher = more rapid
+	static clearscope double CubicBezierPulse(double frequency = TICRATE, int time = -1, double startVal = 1.0, double rise = 0.2, double fall = 0.8, double endVal = 1.0) {
+		if (time < 0) time = level.mapTime;
+
+		// Normalize time:
+		double t = (time / frequency) - floor(time / frequency);
+
+		return (1 - t) * (1 - t) * (1 - t) * startVal + 3 * (1 - t) * (1 - t) * t * rise + 3 * (1 - t) * t * t * fall + t * t * t * endVal;
 	}
 	
 	//Checks which side of a linedef the actor is on:
@@ -31,28 +45,6 @@ class PK_Utils abstract {
 		
 		return linenormal;
 	}
-
-	/*
-	static play Actor SpawnPuffFromPos(class<Actor> puffclass, vector3 startpos, double dist, double angle, double pitch, FLineTraceData puffdata) {
-
-		let puf = Actor.Spawn(puffclass, startpos);
-		puf.LineTrace(angle, dist, pitch, TRF_ABSPOSITION|TRF_SOLIDACTORS|TRF_NOSKY, startpos.z, startpos.x, startpos.y, puffdata);
-		vector3 hitpos = puffdata.hitlocation;
-
-		if (puffdata.HitType == TRACE_HitFloor) {
-			puf.SetOrigin(hitpos, false);
-		}
-		else if (puffdata.HitType == TRACE_HitCeiling)	{
-			puf.SetOrigin(Level.Vec3Diff(hitpos, puf.pos - (0, 0, puf.height)), false);
-		}
-		else if (puffdata.HitType == TRACE_HitWall || puffdata.HitType == TRACE_HitActor) {
-			let dir = Level.Vec3Diff(hitpos, startpos).Unit();
-			puf.SetOrigin(hitpos - dir * puf.radius, false);
-		}
-
-		puf.Destroy();
-		return puf;
-	}*/
 
 	static play vector3, bool GetNormalFromPos(Actor source, double dist, double angle, double pitch, FLineTraceData normcheck) {
 		if (!source) {
@@ -90,6 +82,29 @@ class PK_Utils abstract {
 		return hitnormal, false;
 	}
 
+	// Obtains a normal vector from TraceResults
+	// depending on what it hit:
+	static clearscope Vector3 GetNormalFromTracer(TraceResults res) {
+		Vector3 normal = -res.HitVector;
+		bool hit3DFloor = res.ffloor != null;
+		switch(res.HitType) {
+			case TRACE_HitFloor:
+				normal = hit3DFloor? res.ffloor.top.normal : res.HitSector.floorplane.normal;
+				break;
+			case TRACE_HitCeiling:
+				normal = hit3DFloor? res.ffloor.bottom.normal : res.HitSector.ceilingplane.normal;
+				break;
+			case TRACE_HitWall:
+				normal.xy = (-res.HitLine.delta.y, res.HitLine.delta.x).Unit();
+				if (res.Side == Line.front) {
+					normal.xy *= -1;
+				}
+				normal.z = 0;
+				break;
+		}
+		return normal;
+	}
+
 	static play double, bool GetWaterHeight(Sector sec, vector3 pos) {
 		if (sec.MoreFlags & Sector.SECMF_UNDERWATER)
 			return sec.ceilingPlane.ZAtPoint(pos.xy), true;
@@ -123,16 +138,14 @@ class PK_Utils abstract {
 	
 	// Find a random position around the specified position within the specified radius
 	// (backported from Alice)
-	static play vector3 FindRandomPosAround(vector3 actorpos, double rad = 512, double mindist = 16, double fovlimit = 0, double viewangle = 0, bool checkheight = false)
-	{
+	static play vector3 FindRandomPosAround(vector3 actorpos, double rad = 512, double mindist = 16, double fovlimit = 0, double viewangle = 0, bool checkheight = false) {
 		if (!level.IsPointInLevel(actorpos))
 			return actorpos;
 		
 		vector3 finalpos = actorpos;
 		double ofs = rad * 0.5;
 		// 64 iterations should be enough...
-		for (int i = 64; i > 0; i--)
-		{
+		for (int i = 64; i > 0; i--) {
 			// Pick a random position:
 			vector3 ppos = actorpos + (frandom[frpa](-ofs, ofs), frandom[frpa](-ofs, ofs), 0);
 			// Get the sector and distance to the point:
@@ -142,8 +155,7 @@ class PK_Utils abstract {
 			
 			// Check FOV, if necessary:
 			bool inFOV = true;
-			if (fovlimit > 0)
-			{
+			if (fovlimit > 0) {
 				double ang = atan2(diff.y, diff.x);
 				if (Actor.AbsAngle(viewangle, ang) > fovlimit)
 					inFOV = false;
@@ -153,8 +165,7 @@ class PK_Utils abstract {
 			// in view (optionally), on the same elevation
 			// (optionally) and not closer than necessary
 			// (optionally):
-			if (inFOV && Level.IsPointInLevel(ppos) && (!checkheight || secfz == actorpos.z) && (mindist <= 0 || diff.Length() >= mindist))
-			{
+			if (inFOV && Level.IsPointInLevel(ppos) && (!checkheight || secfz == actorpos.z) && (mindist <= 0 || diff.Length() >= mindist)) {
 				finalpos = ppos;
 				//console.printf("Final pos: %.1f,%.1f,%.1f", finalpos.x,finalpos.y,finalpos.z);
 				break;
@@ -199,4 +210,123 @@ class PK_Utils abstract {
 		return targetstate;
 	}
 }
-	
+
+class PK_ValueInterpolator : Object
+{
+	double pk_current;
+	double pk_minStep;
+	double pk_maxStep;
+	double pk_stepFactor;
+	bool pk_isDynamic;
+
+	static PK_ValueInterpolator Create(double startval, double stepFactor, double minstep, double maxstep, bool dynamic = false) {
+		let v = new('PK_ValueInterpolator');
+		v.pk_current = startval;
+		v.pk_stepFactor = stepFactor;
+		v.pk_minStep = minstep;
+		v.pk_maxStep = maxstep;
+		v.pk_isDynamic = dynamic;
+		return v;
+	}
+
+	void Reset(double value) {
+		pk_current = value;
+	}
+
+	void Update(double destvalue, double delta = 1.0) {
+		double diff = pk_isDynamic? clamp(abs(destvalue - pk_current) * pk_stepFactor, pk_minStep, pk_maxStep) : pk_maxStep;
+		diff *= delta;
+		if (pk_current > destvalue) {
+			pk_current = max(destvalue, pk_current - diff);
+		}
+		else {
+			pk_current = min(destvalue, pk_current + diff);
+		}
+	}
+
+	double GetValue() {
+		return pk_current;
+	}
+}
+
+class PK_CollisionTracer : LineTracer
+{
+	static bool, Vector3, PK_CollisionTracer DetectFromTo(Vector3 start, Vector3 end, Actor source = null) {
+		let tracer = new('PK_CollisionTracer');
+		if (!tracer) {
+			return false, (0,0,0), null;
+		}
+
+		Vector3 diff = level.Vec3Diff(start, end);
+		tracer.Trace(start,
+			sec: source? source.cursector : level.PointInSector(start.xy),
+			direction: diff.Unit(),
+			maxdist: diff.Length() + 1,
+			traceFlags: TRACE_HitSky,
+			wallmask: Line.ML_BLOCKEVERYTHING,
+			ignore: source
+		);
+
+		let res = tracer.results;
+		bool collided = res.HitType != TRACE_HitNone;
+		Vector3 normal = PK_Utils.GetNormalFromTracer(res);
+
+		return collided, normal, tracer;
+	}
+
+	static bool, Vector3, PK_CollisionTracer DetectAt(Vector3 start, Vector3 dir, Actor source = null) {
+		let tracer = new('PK_CollisionTracer');
+		if (!tracer) {
+			return false, (0,0,0), null;
+		}
+
+		tracer.Trace(start,
+			sec: source? source.cursector : level.PointInSector(start.xy),
+			direction: dir.Unit(),
+			maxdist: PLAYERMISSILERANGE,
+			traceFlags: TRACE_HitSky,
+			wallmask: Line.ML_BLOCKEVERYTHING,
+			ignore: source
+		);
+
+		let res = tracer.results;
+		bool collided = res.HitType != TRACE_HitNone;
+		Vector3 normal = PK_Utils.GetNormalFromTracer(res);
+
+		return collided, normal, tracer;
+	}
+
+	override ETraceStatus TraceCallback() {
+		int res = TRACE_Skip;
+
+		switch (results.HitType) {
+		case TRACE_HitActor:
+			if (results.HitActor && results.HitActor.bSolid) {
+				res = TRACE_Stop;
+			}
+			break;
+		case TRACE_HitWall:
+		case TRACE_HasHitSky:
+		case TRACE_HitFloor:
+		case TRACE_HitCeiling:
+			res = TRACE_Stop;
+			break;
+		}
+
+		return res;
+	}
+}
+
+class PK_Math abstract {
+	int RoundInt(double value) {
+		return int(round(value));
+	}
+
+	int CeilInt(double value) {
+		return int(ceil(value));
+	}
+
+	int FloorInt(double value) {
+		return int(floor(value));
+	}
+}
