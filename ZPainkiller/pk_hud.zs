@@ -23,7 +23,7 @@ Class PainkillerHUD : BaseStatusBar {
 	protected int soulscol;
 	protected bool isDemon;
 	protected PK_Mainhandler mainhandler;
-	protected PK_InvReplacementControl invcontrol;
+	protected PK_CodexData invcontrol;
 	protected transient CVar aspectScale;
 	
 	PK_CardControl cardcontrol;
@@ -322,7 +322,7 @@ Class PainkillerHUD : BaseStatusBar {
 			return;
 		//get gold amount:
 		if (!cardcontrol)
-			cardcontrol = PK_CardControl(player.FindInventory("PK_CardControl"));
+			cardcontrol = PK_CardControl.GetUI();
 		if (cardcontrol) {
 			goldnum = cardcontrol.GetGoldAmount();
 			if (goldInterpolator)
@@ -453,7 +453,7 @@ Class PainkillerHUD : BaseStatusBar {
 		if (notifsCvar.GetBool() == false)
 			return;
 		if (!invcontrol)
-			invcontrol = PK_InvReplacementControl(player.FindInventory("PK_InvReplacementControl"));
+			invcontrol = PK_CodexData.GetUI();
 		// Do nothing if there's no recorded last pickup:
 		if (!invcontrol || !invcontrol.latestPickup || invcontrol.codexOpened)
 			return;

@@ -12,7 +12,7 @@ Class PK_InventoryToken : Inventory abstract {
 
 	override void DoEffect() {
 		super.DoEffect();
-		if (!owner || (owner.player && PK_Mainhandler.IsVoodooDoll(PlayerPawn(owner)))) {
+		if (!owner || (owner.player && PK_Utils.IsVoodooDoll(PlayerPawn(owner)))) {
 			Destroy();
 			return;
 		}
@@ -189,9 +189,9 @@ Class PK_InvReplacementControl : Inventory {
 	
 	// This overrides the player's ability to receive vanilla weapons
 	// to account for cheats and GiveInventory ACS scripts:
-    override bool HandlePickup (Inventory item) {	
+	override bool HandlePickup (Inventory item) {	
 		let oldItemClass = item.GetClassName();
-        Class<Inventory> replacement = null;
+		Class<Inventory> replacement = null;
 		
 		// Iterate through the array:
 		for (int i = 0; i < ReplacementPairs.Size(); i++) {
@@ -230,106 +230,11 @@ Class PK_InvReplacementControl : Inventory {
 			if (pk_debugmessages) {
 				console.printf("Replacing %s with %s (amount: %d)",oldItemClass,replacement.GetClassName(),r_amount);
 			}
-			RecordLastPickup(replacement ? replacement : item.GetClass());
 			return true;
-		}		
-		
-        return false;
-    }
-	
-	/*	This function records the latest item the player has picked up
-		for the first time. Used by the Codex to display the tab
-		for that item (if available). See pk_codex.zs.
-	*/	
-	void RecordLastPickup(class<Inventory> toRecord) {
-		if (!toRecord || !owner || !owner.player)
-			return;
-		
-		bool isInCodex = false;
-		for (int i = 0; i < CodexCoveredClasses.Size(); i++) {
-			if (toRecord is CodexCoveredClasses[i]) {
-				isInCodex = true;
-				break;
-			}
 		}
 		
-		if (!isInCodex)
-			return;
-		
-		int pnum = owner.PlayerNumber();
-		if (pnum < 0)
-		  return;
-
-		let it = ThinkerIterator.Create("PK_PickupsTracker", STAT_STATIC);	
-		let tracker = PK_PickupsTracker(it.Next());
-		if (!tracker) {
-			if (pk_debugmessages)
-				console.printf("Item track Thinker not found");
-			return;
-		}
-
-		/*	We use a dynamic array to check that the player hasn't
-			picked up this item before, because CountInv won't catch
-			the items that don't actually get placed in the inventory,
-			such as armor.
-		*/
-		if (toRecord is "PK_GoldPickup" && tracker.pickups[pnum].pickups.Find((class<Inventory>)("PK_GoldPickup")) == tracker.pickups[pnum].pickups.Size()) {
-			tracker.pickups[pnum].pickups.Push((class<Inventory>)("PK_GoldPickup"));
-			latestPickup = toRecord;
-			latestPickupName = GetDefaultByType(toRecord).GetTag();
-			codexOpened = false;
-			if (pk_debugmessages) {
-				console.printf("Latest pickup is %s",latestPickup.GetClassName());
-			}
-		}
-		
-		else if (tracker.pickups[pnum].pickups.Find(toRecord) == tracker.pickups[pnum].pickups.Size()) {
-			tracker.pickups[pnum].pickups.Push(toRecord);
-			latestPickup = toRecord;
-			latestPickupName = GetDefaultByType(toRecord).GetTag();
-			codexOpened = false;
-			if (pk_debugmessages) {
-				console.printf("Latest pickup is %s",latestPickup.GetClassName());
-			}
-		}
+		return false;
 	}
-	
-	static const Class<Actor> CodexCoveredClasses[] = {
-		'PK_Painkiller',
-		'PK_Shotgun',
-		'PK_Stakegun',
-		'PK_Chaingun',
-		'PK_ElectroDriver',
-		'PK_Rifle',
-		'PK_Boltgun',
-		'PK_Soul',
-		'PK_GoldSoul',
-		'PK_MegaSoul',
-		'PK_BronzeArmor',
-		'PK_SilverArmor',
-		'PK_GoldArmor',
-		'PK_AmmoPack',
-		'PK_PowerAntiRad',
-		'PK_AllMap',
-		'PowerChestOfSoulsRegen',
-		'PK_WeaponModifier',
-		'PK_PowerDemonEyes',
-		'PK_PowerPentagram',
-		'PK_GoldPickup'
-	};
-}
-
-struct PK_PlayerItems {
-    Array<class<Inventory> > pickups;
-}
-
-class PK_PickupsTracker : Thinker {
-    PK_PlayerItems pickups[MAXPLAYERS];
-	
-	PK_PickupsTracker Init(void) {
-        ChangeStatNum(STAT_STATIC);
-		return self;
-    }
 }
 
 Mixin Class PK_PickupSound {
@@ -380,14 +285,11 @@ Class PK_GoldPickup : PK_Inventory abstract {
 	override bool TryPickup (in out Actor toucher) {
 		if (!toucher || !toucher.player)
 			return false;
-		let cont = PK_CardControl(toucher.FindInventory("PK_CardControl"));
+		let cont = PK_CardControl.Get(toucher.PlayerNumber());
 		if (cont) {
 			int goldmul = (toucher.FindInventory("PKC_Greed")) ? 2 : 1;
 			cont.GiveGoldAmount(amount*goldmul);
 		}
-		let irc = PK_InvReplacementControl(toucher.FindInventory("PK_InvReplacementControl"));
-		if (irc)
-			irc.RecordLastPickup(self.GetClass());
 		GoAwayAndDie();
 		return true;
 	}
@@ -658,9 +560,6 @@ Class PK_Soul : PK_Inventory {
 		if (toucher.FindInventory("PKC_SoulRedeemer"))
 			amount *= 2;
 		toucher.GiveBody(Amount, MaxAmount);
-		let irc = PK_InvReplacementControl(toucher.FindInventory("PK_InvReplacementControl"));
-		if (irc)
-			irc.RecordLastPickup(self.GetClass());
 		GoAwayAndDie();
 		return true;
 	}
@@ -846,15 +745,6 @@ Class PK_GoldSoul : Health {
 		SpawnSoulParticles();
 	}
 	
-	override bool TryPickup(in out actor toucher) {
-		if (toucher && toucher.player) {
-			let irc = PK_InvReplacementControl(toucher.FindInventory("PK_InvReplacementControl"));
-			if (irc)
-				irc.RecordLastPickup(self.GetClass());
-		}
-		return super.TryPickup(toucher);
-	}
-	
 	states {
 	Spawn:
 		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
@@ -1003,19 +893,7 @@ Class PK_AmmoPack : Backpack {
 		yscale 0.38;
 		Tag "$PKC_AmmoPack";
 	}
-	/*	Sometimes for some reason this item doesn't call
-		HandlePickup on PK_InvReplacementControl, so I had to add
-		this manual call so it gets registered as "latest pickup"
-		properly:
-	*/
-	override bool TryPickup(in out actor toucher) {
-		if (toucher && toucher.player) {
-			let irc = PK_InvReplacementControl(toucher.FindInventory("PK_InvReplacementControl"));
-			if (irc)
-				irc.RecordLastPickup(self.GetClass());
-		}
-		return super.TryPickup(toucher);
-	}
+
 	states {
 	Spawn:
 		AMPK A -1;
@@ -1511,19 +1389,6 @@ class PK_AllMap : AllMap {
 		PK_AllMap.pickupRingColor "ce73fe";
 		Tag "$PKC_CrystalBall";
 	}
-	override bool TryPickup (in out Actor toucher) {
-		bool ret = super.TryPickup(toucher);
-		if (ret) {
-			if (toucher && toucher.player && toucher.player == players[consoleplayer]) {
-				let handler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));
-				handler.SpawnMapMarkers(toucher.player);
-			}
-			let irc = PK_InvReplacementControl(toucher.FindInventory("PK_InvReplacementControl"));
-			if (irc)
-				irc.RecordLastPickup(self.GetClass());
-		}
-		return ret;
-	}			
 	States {
 	Spawn:
 		PCY1 ABCDEFGH 3;

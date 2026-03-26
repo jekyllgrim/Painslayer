@@ -1,3 +1,44 @@
+class PK_DataContainer : Thinker abstract {
+	PlayerPawn owner;
+	int playernumber;
+
+	static play PK_DataContainer InitDefault(int playernumber, class<PK_DataContainer> cls) {
+		if (!PlayerInGame[playernumber]) {
+			Console.Printf("\cgTried initializing PK_DataContainer for player %d who is not in game.");
+			return null;
+		}
+		let cont = PK_DataContainer(new(cls));
+		cont.ChangeStatNum(STAT_STATIC); //makes it persist between levels
+		cont.playerNumber = playernumber;
+		cont.owner = players[playernumber].mo;
+		return cont;
+	}
+
+	static play PK_DataContainer GetBase(int playernumber, class<PK_DataContainer> cls) {
+		PK_DataContainer cont = GetReadonlyBase(playernumber, cls);
+		if (cont) {
+			return cont;
+		}
+		return InitDefault(playerNumber, cls);
+	}
+
+	static clearscope PK_DataContainer GetReadonlyBase(int playernumber, class<PK_DataContainer> cls) {
+		foreach(PK_DataContainer cont : ThinkerIterator.Create(cls, STAT_STATIC)) {
+			if (cont && cont.playernumber == playernumber) {
+				return cont;
+			}
+		}
+		if (pk_debugmessages) {
+			Console.Printf("\cgCouldn't get readonly access to %s for player %d", cls.GetClassName(), playernumber);
+		}
+		return null;
+	}
+
+	static ui PK_DataContainer GetUIBase(class<PK_DataContainer> cls) {
+		return GetReadonlyBase(consoleplayer, cls);
+	}
+}
+
 mixin class PK_PlayerSightCheck {
 	protected bool canSeePlayer;
 	//a simple check that returns true if the actor is in any player's LOS:
@@ -53,7 +94,7 @@ mixin class PK_ParticleLevelCheck {
 }
 
 Class PK_BaseActor : Actor abstract {
-	protected double pi;
+	const PI = 3.141592653589793;
 	protected name bcolor;
 	protected int age;
 	mixin PK_PlayerSightCheck;
@@ -178,12 +219,7 @@ Class PK_BaseActor : Actor abstract {
 				return true;
 		}
 		return false;
-	}	
-	
-	override void BeginPlay() {
-		super.BeginPlay();
-		pi = 3.141592653589793;
-	}	
+	}
 	
 	override void Tick() {
 		super.Tick();

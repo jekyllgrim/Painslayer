@@ -1,3 +1,75 @@
+class PK_CodexData : PK_DataContainer {
+	bool codexOpened;
+	class<Inventory> latestPickup;
+	String latestPickupName;
+
+	static const Class<Actor> CodexCoveredClasses[] = {
+		'PK_Painkiller',
+		'PK_Shotgun',
+		'PK_Stakegun',
+		'PK_Chaingun',
+		'PK_ElectroDriver',
+		'PK_Rifle',
+		'PK_Boltgun',
+		'PK_Soul',
+		'PK_GoldSoul',
+		'PK_MegaSoul',
+		'PK_BronzeArmor',
+		'PK_SilverArmor',
+		'PK_GoldArmor',
+		'PK_AmmoPack',
+		'PK_PowerAntiRad',
+		'PK_AllMap',
+		'PowerChestOfSoulsRegen',
+		'PK_WeaponModifier',
+		'PK_PowerDemonEyes',
+		'PK_PowerPentagram',
+		'PK_GoldPickup'
+	};
+
+	array < class<Actor> > processedClasses;
+
+	static clearscope bool IsCodexClass(class<Actor> cls) {
+		if (!cls) return false;
+		for (int i = 0; i < PK_CodexData.CodexCoveredClasses.Size(); i++ ) {
+			if (cls == PK_CodexData.CodexCoveredClasses[i]) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool TryAddingClass(class<Actor> cls) {
+		let itemcls = (class<Inventory>)(cls);
+		if (!itemcls) return false;
+
+		if (IsCodexClass(cls) && !IsRecorded(cls)) {
+			processedClasses.Push(itemcls);
+			codexOpened = false;
+			latestPickup = itemcls;
+			latestPickupName = GetDefaultByType(itemcls).GetTag();
+			return true;
+		}
+		return false;
+	}
+
+	clearscope bool IsRecorded(class<Actor> cls) {
+		return cls && processedClasses.Find(cls) != processedClasses.Size();
+	}
+	
+	static play PK_CodexData Init(int playernumber) {
+		return PK_CodexData(PK_DataContainer.InitDefault(playernumber, 'PK_CodexData'));
+	}
+
+	static play PK_CodexData Get(int playernumber) {
+		return PK_CodexData(GetBase(playernumber, 'PK_CodexData'));
+	}
+
+	static ui PK_CodexData GetUI() {
+		return PK_CodexData(GetUIBase('PK_CodexData'));
+	}
+}
+
 Class PKCodexMenu : PKZFGenericMenu {
 	
 	vector2 backgroundsize;
@@ -285,7 +357,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 		//Create TAROT tab:
 		TarotTabInit();
 		
-		let irc = PK_InvReplacementControl(players[consoleplayer].mo.FindInventory("PK_InvReplacementControl"));
+		let irc = PK_CodexData.GetUI();
 		if (irc) {
 			FocusRelevantTab(irc.latestPickup);
 		}
@@ -535,7 +607,9 @@ Class PKCodexMenu : PKZFGenericMenu {
 					fire_name,
 					StringTable.Localize("$PKC_RLauncher"),
 					StringTable.Localize("$PKC_RLauncherDesc")
-				);				alttext1 = String.Format(					"\c[PKGreenText]%s: \cI%s\c[PKRedText]\n\n%s",
+				);
+				alttext1 = String.Format(
+					"\c[PKGreenText]%s: \cI%s\c[PKRedText]\n\n%s",
 					fire_name,
 					StringTable.Localize("$PKC_RLauncher"),
 					StringTable.Localize("$PKC_RLauncherDescWM")

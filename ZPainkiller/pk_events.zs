@@ -1,5 +1,5 @@
 Class PK_MainHandler : EventHandler {	
-	
+	array < Class<Weapon> > mapweapons;
 	array <Actor> demontargets; //holds all monsters, players and enemy projectiles
 	array <Actor> allenemies; //only monsters
 	array <Actor> allbosses; //only boss monsters
@@ -50,10 +50,6 @@ Class PK_MainHandler : EventHandler {
 			}
 		}
 		return found;
-	}
-	
-	static bool IsVoodooDoll(PlayerPawn mo) {
-		return !mo.player || !mo.player.mo || mo.player.mo != mo;
 	}
 	
 	//converted from source code by 3saster:
@@ -159,10 +155,18 @@ Class PK_MainHandler : EventHandler {
 			return;
 		
 		let plr = players[e.Player].mo;
-		if (!plr || PK_MainHandler.IsVoodooDoll(plr))
+		if (!plr || PK_Utils.IsVoodooDoll(plr))
 			return;
 		
-		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		if (e.name == "PKCOpenCodex" && e.player == consoleplayer) {
+			let codex = PK_CodexData.Get(e.Player);
+			if (codex) {
+				codex.codexOpened = true;
+			}
+			Menu.SetMenu("PKCodexMenu");
+		}
+		
+		let cardcontrol = PK_CardControl.Get(e.Player);
 		if (!cardcontrol)
 			return;
 		
@@ -176,7 +180,7 @@ Class PK_MainHandler : EventHandler {
 			//gives a specified number of gold, or max gold if no number is specified:
 			int amt = (e.args[0] == 0) ? 99990 : e.args[0];
 			cardcontrol.GiveGoldAmount(amt);
-			if (e.player == consoleplayer) {				
+			if (e.player == consoleplayer) {
 				string str = (amt > 0) ? Stringtable.Localize(PKCH_GoldMessage[random(0,3)]) : Stringtable.Localize(PKCH_GoldMessage[random(4,5)]);
 				console.printf(str);
 				plr.A_StartSound("pickups/gold/vbig",CH_PKUI,CHANF_UI|CHANF_LOCAL);
@@ -234,20 +238,8 @@ Class PK_MainHandler : EventHandler {
 	}
 	
 	override void WorldLoaded(WorldEvent e) {
-		if (level.Mapname == "TITLEMAP")
-			return;
-
-		//maxdebrisCvar = Cvar.GetCvar('pk_maxdebris', players[consoleplayer]);
-
-		let it = ThinkerIterator.Create("PK_PickupsTracker", Thinker.STAT_STATIC);
-		let tracker = PK_PickupsTracker(it.Next());
-		if (!tracker) {
-			if (pk_debugmessages)
-				console.printf("Item track Thinker created");
-			new("PK_PickupsTracker").Init();
-		}
-
-		if (e.IsSaveGame || e.isReopen)
+		
+		if (level.Mapname == "TITLEMAP" || e.IsSaveGame || e.isReopen)
 			return;
 
 		// This is done in WorldLoaded to make sure it happens
@@ -256,12 +248,7 @@ Class PK_MainHandler : EventHandler {
 		// without the board opening but the slots will be
 		// already locked):
 		if (pk_autoOpenBoard) {
-			for (int i = 0; i < MAXPLAYERS; i++) {
-				if (PlayerInGame[i] && i == consoleplayer) {
-					EventHandler.SendNetworkEvent("PKCOpenBoard");
-					break;
-				}
-			}
+			EventHandler.SendNetworkEvent("PKCOpenBoard");
 		}
 		
 		//spawn gold randomly in secret areas:
@@ -334,16 +321,17 @@ Class PK_MainHandler : EventHandler {
 		if (!act)
 			return;
 		
-		/*if (act is "PK_SmallDebris" && !(act is "PK_ProjFlare") && maxdebrisCvar) {
-			int maxdebris = maxdebrisCvar.GetInt();
-			let deb = PK_SmallDebris(act);
-			if (deb) {
-				debris.Push(deb);
+		if (act.GetClass() == "PK_BronzeArmor") {
+			double checkdist = 1200;
+			let itr = BlockThingsIterator.Create(act, checkdist);
+			while (itr.Next()) {
+				let arm = PK_BronzeArmor(itr.thing);
+				if (arm && arm != act && act.GetClass() == "PK_BronzeArmor" && act.Distance3D(arm) <= checkdist) {
+					act.Destroy();
+					return;
+				}
 			}
-			if (debris.Size() > maxdebris && debris[0]) {
-				debris[0].Destroy();
-			}
-		}*/
+		}
 		
 		if (act is "Inventory") {
 			let foo = Inventory(act);
@@ -359,9 +347,6 @@ Class PK_MainHandler : EventHandler {
 			}
 		}
 		
-		/*if (act.player && IsVoodooDoll(PlayerPawn(act))) {
-			console.printf("actor at %f,%f,%f is a voodoo doll",act.pos.x,act.pos.y,act.pos.z);
-		}*/
 		//this is only used by the HUD compass:
 		if (act.bISMONSTER && !act.bFRIENDLY) {
 			allenemies.push(act);
@@ -370,7 +355,7 @@ Class PK_MainHandler : EventHandler {
 		}
 		
 		//monsters, projectiles and players can be subjected to various effects, such as Demon Morph or Haste, so put them in an array:
-		if (act.bISMONSTER || act.bMISSILE || (act.player && !IsVoodooDoll(PlayerPawn(act)))) {
+		if (act.bISMONSTER || act.bMISSILE || (act.player && !PK_Utils.IsVoodooDoll(PlayerPawn(act)))) {
 			demontargets.push(act);
 			//console.printf("Pushing %s into the demontargets array",act.GetClassName());
 			if (CheckPlayersHave("PK_DemonWeapon"))
@@ -457,8 +442,6 @@ Class PK_MainHandler : EventHandler {
 			return;
 		if  (!plr.FindInventory("PK_DemonMorphControl"))
 			plr.GiveInventory("PK_DemonMorphControl",1);
-		if  (!plr.FindInventory("PK_CardControl"))
-			plr.GiveInventory("PK_CardControl",1);
 		if (!plr.FindInventory("PK_InvReplacementControl"))
 			plr.GiveInventory("PK_InvReplacementControl",1);
 		if (!plr.FindInventory("PK_QoLCatcher"))
@@ -484,7 +467,7 @@ Class PK_MainHandler : EventHandler {
 
 		GiveStartingPlayerItems(e.PlayerNumber);
 		
-		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
+		let cardcontrol = PK_CardControl.Get(e.PlayerNumber);
 		if (cardcontrol) {
 			int i = cardcontrol.RefreshGoldActivations();
 			if (pk_debugmessages)
@@ -503,21 +486,14 @@ Class PK_MainHandler : EventHandler {
 			plr.A_StartSound("world/mapstart", CH_PKUI, CHANF_LOCAL, volume: 0.5);
 			plr.A_SetBlend("000000", 1.0, 35*4);
 		}
-
-		/*if (pk_autoOpenBoard && e.PlayerNumber == consoleplayer) {
-			EventHandler.SendNetworkEvent("PKCOpenBoard");
-		}*/
 	}
 
-	void StopPlayerGoldenCards(PlayerInfo player) {
-		if (!player || !player.mo)
-			return;
-		let plr = player.mo;		
-		let control = PK_CardControl(plr.FindInventory("PK_CardControl"));
+	void StopPlayerGoldenCards(int playernumber) {
+		let control = PK_CardControl.Get(playernumber);
 		if (control) {
 			control.StopGoldenCards();
 			if (pk_debugmessages)
-				console.printf("Stopping golden cards for player %d",plr.PlayerNumber());
+				console.printf("Stopping golden cards for player %d", playernumber);
 		}
 	}
 
@@ -538,7 +514,7 @@ Class PK_MainHandler : EventHandler {
 
 	override void PlayerDied (PlayerEvent e) {
 		PlayerInfo player = players[e.PlayerNumber];
-		StopPlayerGoldenCards(player);
+		StopPlayerGoldenCards(e.PlayerNumber);
 		if (player) {
 			for (int i = 1000; i > 0; i--)
 				player.SetPSprite(i,null);
@@ -556,7 +532,7 @@ Class PK_MainHandler : EventHandler {
 			if (!playerInGame[pn])
 				continue;
 			PlayerInfo plr = players[pn];
-			StopPlayerGoldenCards(plr);
+			StopPlayerGoldenCards(pn);
 			StopPlayerDemonMorph(plr);
 		}
 	}
@@ -602,71 +578,8 @@ Class PK_MainHandler : EventHandler {
 		Test_CheckWeaponInInventory("PK_Rifle",tx,ty); ty += parag;
 		Test_CheckWeaponInInventory("PK_Electrodriver",tx,ty); ty += parag;
 	}*/
-}
 
-class PK_BossStatTracker : Object play
-{
-	actor boss;
-	int bossMaxHealth;
-	
-	static PK_BossStatTracker Create (actor boss)
-	{
-		if (!boss)
-			return null;
-			
-		let tracker = PK_BossStatTracker(New("PK_BossStatTracker"));
-		if (tracker)
-		{
-			tracker.boss = boss;
-			tracker.bossMaxHealth = max(boss.health, boss.GetMaxHealth(true));
-		}
-		
-		return tracker;
-	}
-}
-
-Class PK_ShaderHandler : StaticEventHandler {
-	override void WorldLoaded(WorldEvent e) {
-		PlayerInfo plr = players[consoleplayer];
-		if (!plr || !plr.mo || plr.mo.FindInventory("PK_DemonWeapon"))
-			return;
-		PPShader.SetEnabled("DemonMorph", false);
-	}
-}
-
-/*	When hitting a wall, stakes get attached to a secplane of the sector
-	behind the wall, so that if the wall moves (as a door/lift), the stake
-	will move with it.
-	Since for whatever reason secplane can't be saved into save games,
-	and the secplane variable used by stakes has to be transient,
-	(see pk_weapons.zs/PK_StakeProjectile), whenever a save is loaded,
-	I make all existing dead stakes call their StickToWall() function again
-	to make them find the required stickplane AGAIN.
-*/
-Class PK_StakeStickHandler : StaticEventHandler {
-	override void WorldLoaded(WorldEvent e) {
-		if (!e.isSaveGame)
-			return;
-		let handler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));
-		if (!handler)
-			return;
-		for (int i = 0; i < handler.stakes.Size(); i++) {
-			PK_StakeProjectile stake = handler.stakes[i];
-			if (!stake)
-				continue;
-			if (!stake.stuckToSecPlane)
-				continue;
-			stake.StickToWall();
-		}
-	}
-}
-
-//weapon and item replacements
-Class PK_ReplacementHandler : EventHandler {
-	//array <Weapon> mapweapons;
-	array < Class<Weapon> > mapweapons;
-	
-	override void CheckReplacement (ReplaceEvent e) {
+		override void CheckReplacement (ReplaceEvent e) {
 		switch (e.Replacee.GetClassName()) {
 		//// DOOM
 		// Doom weapons:
@@ -888,19 +801,31 @@ Class PK_ReplacementHandler : EventHandler {
 			break;
 		}
 	}
-	
-	override void WorldThingSpawned(WorldEvent e) {
-		let act = e.thing;
-		if (!act || act.GetClass() != "PK_BronzeArmor")
+}
+
+/*	When hitting a wall, stakes get attached to a secplane of the sector
+	behind the wall, so that if the wall moves (as a door/lift), the stake
+	will move with it.
+	Since for whatever reason secplane can't be saved into save games,
+	and the secplane variable used by stakes has to be transient,
+	(see pk_weapons.zs/PK_StakeProjectile), whenever a save is loaded,
+	I make all existing dead stakes call their StickToWall() function again
+	to make them find the required stickplane AGAIN.
+*/
+Class PK_StakeStickHandler : StaticEventHandler {
+	override void WorldLoaded(WorldEvent e) {
+		if (!e.isSaveGame)
 			return;
-		double checkdist = 1200;
-		let itr = BlockThingsIterator.Create(act, checkdist);
-		while (itr.Next()) {
-			let arm = PK_BronzeArmor(itr.thing);
-			if (arm && arm != act && act.GetClass() == "PK_BronzeArmor" && act.Distance3D(arm) <= checkdist) {
-				act.Destroy();
-				return;
-			}
+		let handler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));
+		if (!handler)
+			return;
+		for (int i = 0; i < handler.stakes.Size(); i++) {
+			PK_StakeProjectile stake = handler.stakes[i];
+			if (!stake)
+				continue;
+			if (!stake.stuckToSecPlane)
+				continue;
+			stake.StickToWall();
 		}
 	}
 }
@@ -912,6 +837,17 @@ Class PK_BoardEventHandler : EventHandler {
 	// Tracked in play scope, set through a netevent
 	// from the board (see CloseBoard() in pk_cardmenu2.0.zs)
 	bool boardOpenedTracker[MAXPLAYERS];
+
+	// TICK ALL CARD CONTROLLERS
+	override void WorldTick() {
+		for (int pn = 0; pn < MAXPLAYERS; pn++) {
+			if (!PlayerInGame[pn]) continue;
+			let cont = PK_CardControl.Get(pn);
+			if (cont) {
+				cont.Tick();
+			}
+		}
+	}
 	
 	override void WorldThingDamaged(worldevent e) {
 		if (!e.thing)
@@ -940,11 +876,11 @@ Class PK_BoardEventHandler : EventHandler {
 		if (!PlayerInGame[e.Player] || e.Player < 0)
 			return;
 		let plr = players[e.Player].mo;
-		if (!plr || PK_MainHandler.IsVoodooDoll(plr))
+		if (!plr || PK_Utils.IsVoodooDoll(plr))
 			return;
 		
 		// for testing soul pickups:
-		if (e.name == 'pkspawnsoul') {			
+		if (e.name == 'pkspawnsoul') {
 			let s = PK_Soul(Actor.Spawn("PK_Soul", plr.pos));
 			s.Warp(plr, plr.radius + s.radius, 0, 0);
 			s.age = -32000;
@@ -952,9 +888,12 @@ Class PK_BoardEventHandler : EventHandler {
 				s.amount = e.args[0];
 		}
 		
-		let cardcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
-		if (!cardcontrol)
+		let cardcontrol = PK_CardControl.Get(e.Player);
+		if (!cardcontrol) {
+			if (pk_debugmessages)
+				console.printf("Could not get PK_CardControl for player %d", e.player);
 			return;
+		}
 
 		//open black tarot board
 		if (e.name == "PKCOpenBoard" && e.player == consoleplayer) {
@@ -997,10 +936,6 @@ Class PK_BoardEventHandler : EventHandler {
 				boardOpenedTracker[e.Player] = true;
 			}
 			cardcontrol.PK_EquipCards();
-		}
-		
-		if (e.name == "PKCOpenCodex" && e.player == consoleplayer) {
-			Menu.SetMenu("PKCodexMenu");
 		}
 		
 		if (e.name == "PK_UseGoldenCards") {

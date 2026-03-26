@@ -312,7 +312,7 @@ Class PK_EquipmentSpawner : Inventory {
 		if (PK_MainHandler.CheckPlayersHave(checkWeapon))
 			return true;
 		//check the array that contains all spawned weapon classes:
-		PK_ReplacementHandler handler = PK_ReplacementHandler(EventHandler.Find("PK_ReplacementHandler"));
+		PK_MainHandler handler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));
 		if (handler && handler.mapweapons.Find(checkWeapon) != handler.mapweapons.Size())
 			return true;
 		return false;
@@ -504,7 +504,7 @@ Class PK_AmmoSpawner_RandomAmmo : PK_EquipmentSpawner {
 
 Class PK_BaseWeaponSpawner : PK_EquipmentSpawner {
 	Class<Inventory> toSpawn;
-	PK_ReplacementHandler rhandler;
+	PK_MainHandler rhandler;
 	bool stagger; //if true, delay spawning by 1 tic to first check how many weapons of the same class are on the map
 	Default {
 		PK_EquipmentSpawner.secondaryChance 50;
@@ -570,7 +570,7 @@ Class PK_BaseWeaponSpawner : PK_EquipmentSpawner {
 		  of all weapons on the map instead of spawning directly:
 		*/
 		else {
-			rhandler = PK_ReplacementHandler(EventHandler.Find("PK_ReplacementHandler"));	
+			rhandler = PK_MainHandler(EventHandler.Find("PK_MainHandler"));	
 			rhandler.mapweapons.Push((class<Weapon>)(toSpawn));
 		}
 	}

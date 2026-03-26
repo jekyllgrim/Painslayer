@@ -253,9 +253,9 @@ Class PK_DemonWeapon : PKWeapon {
 		owner.player.readyweapon.crosshair = 99;
 	}
 
-	void StartDemonMode() {		
+	void StartDemonMode() {
 		//disable golden cards before changing speed/gravity
-		let cardcontrol = PK_CardControl(owner.FindInventory("PK_CardControl"));
+		let cardcontrol = PK_CardControl.Get(owner.PlayerNumber());
 		if (cardcontrol && cardcontrol.goldActive)
 			cardcontrol.StopGoldenCards();
 		//record previous speed and gravity for the slowmo effect
@@ -637,7 +637,9 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 	Also keeps track of currently active powerups so that the HUD
 	can draw timers for them.
 */
-Class PK_CardControl : PK_InventoryToken {	
+class PK_CardControl : PK_DataContainer {
+	const DEFAULT_GOLD_USES = 1;
+	const DEFAULT_GOLD_DURATION = 30;
 	protected int pk_gold; //current amount of gold
 	array <name> UnlockedTarotCards; //holds names of all purchased cards for the board
 	name EquippedSlots[5]; //holds names of all cards equipped into slots
@@ -647,13 +649,30 @@ Class PK_CardControl : PK_InventoryToken {
 	private int goldUses;
 	private int totalGoldUses;
 	int goldDuration;
-	property goldUses : goldUses;
-	property goldDuration : goldDuration;
-		
-	Default {
-		PK_CardControl.goldUses 1;
-		PK_CardControl.goldDuration 30;
+
+	static play PK_CardControl Init(int playernumber) {
+		PK_CardControl cont = PK_CardControl(PK_DataContainer.InitDefault(playernumber, 'PK_CardControl'));
+		if (!cont) {
+			if (pk_debugmessages)
+				console.printf("\cgPK_CardControl.Init() failed for player %d", playernumber);
+			return null;
+		}
+		cont.goldUses = DEFAULT_GOLD_USES;
+		cont.goldDuration = DEFAULT_GOLD_DURATION;
+		if (pk_debugmessages) {
+			Console.Printf("\cyPK_CardControl initialized for player %d", playernumber);
+		}
+		return cont;
 	}
+
+	static play PK_CardControl Get(int playernumber) {
+		return PK_CardControl(GetBase(playernumber, 'PK_CardControl'));
+	}
+
+	static ui PK_CardControl GetUI() {
+		return PK_CardControl(GetUIBase('PK_CardControl'));
+	}
+
 	
 	/*	When you try to use cards when out of uses, a sound will be played
 		and red card icons will appear in the hud. They'll appear for a short
@@ -753,7 +772,7 @@ Class PK_CardControl : PK_InventoryToken {
 	//Make current golden cards inactive, play a sound (optionally):
 	void StopGoldenCards(bool silent = false) {
 		goldActive = false;
-		goldDuration = default.goldDuration;
+		goldDuration = DEFAULT_GOLD_DURATION;
 		owner.A_StopSound(CH_PWR);
 		if (!silent)
 			owner.A_StartSound("cards/end",CHAN_AUTO,CHANF_LOCAL);
@@ -833,8 +852,8 @@ Class PK_CardControl : PK_InventoryToken {
 		}
 	}
 	
-	override void DoEffect() {
-		super.DoEffect();
+	override void Tick() {
+		super.Tick();
 		if (!owner || !owner.player) {
 			return;
 		}
@@ -842,7 +861,7 @@ Class PK_CardControl : PK_InventoryToken {
 			dryUseTimer = Clamp(dryUseTimer - 1,0,45);
 		if (!goldActive)
 			return;
-		else if (level.time % 35 == 0) {
+		else if (level.time % TICRATE == 0) {
 			if (goldDuration > 0 && owner.health > 0)
 				goldDuration--;
 			else
@@ -862,7 +881,7 @@ Class PK_BaseSilverCard : PK_InventoryToken abstract {
 			return;
 		}
 		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
-		control = PK_CardControl(owner.FindInventory("PK_CardControl"));
+		control = PK_CardControl.Get(owner.PlayerNumber());
 		if (!event || !control)
 			return;
 		GetCard();
@@ -882,7 +901,7 @@ Class PK_BaseSilverCard : PK_InventoryToken abstract {
 		if (!event)
 			event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
 		if (!control)
-			control = PK_CardControl(owner.FindInventory("PK_CardControl"));
+			control = PK_CardControl.Get(owner.PlayerNumber());
 	}
 	virtual void RemoveCard() {}
 }
@@ -1241,7 +1260,7 @@ Class PKC_TimeBonus : PK_BaseGoldenCard {
 	override void GoldenCardEnd() {
 		super.GoldenCardEnd();
 		if (control)
-			control.goldDuration = control.default.goldDuration;
+			control.goldDuration = control.DEFAULT_GOLD_DURATION;
 	}
 }
 

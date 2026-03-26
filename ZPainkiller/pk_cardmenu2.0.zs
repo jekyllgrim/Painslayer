@@ -15,7 +15,7 @@ Class PKCardsMenu : PKZFGenericMenu {
 	vector2 boardTopLeft;
 	
 	PlayerPawn plr;
-	PK_CardControl goldcontrol;
+	PK_CardControl cardController;
 	
 	PK_BoardEventHandler menuEHandler;
 	
@@ -69,8 +69,8 @@ Class PKCardsMenu : PKZFGenericMenu {
 			return;
 		}
 		//check the player has the control item
-		goldcontrol = PK_CardControl(plr.FindInventory("PK_CardControl"));
-		if (!goldcontrol || goldcontrol.goldActive) {
+		cardController = PK_CardControl.GetUI();
+		if (!cardController || cardController.goldActive) {
 			queueForClose = true;
 			return;
 		}
@@ -400,15 +400,15 @@ Class PKCardsMenu : PKZFGenericMenu {
 			}
 			card.Pack(boardelements);
 
-			if (goldcontrol) {
+			if (cardController) {
 				//check if the card is already unlocked:
-				if (goldcontrol.UnlockedTarotCards.Find(card.cardID) != goldcontrol.UnlockedTarotCards.Size()) {
+				if (cardController.UnlockedTarotCards.Find(card.cardID) != cardController.UnlockedTarotCards.Size()) {
 					//console.printf("%s is bought",card.cardID);
 					card.cardbought = true;
 				}
 				//check if the card is already equipped, and if so, place it in that slot:
 				for (int i = 0; i < cardslots.Size(); i++) {
-					if (goldcontrol.EquippedSlots[i] == card.cardID) {
+					if (cardController.EquippedSlots[i] == card.cardID) {
 						let cardslot = cardslots[i];
 						card.SetBox(cardslot.slotpos, cardslot.slotsize);
 						card.buttonscale = (1,1);
@@ -420,7 +420,7 @@ Class PKCardsMenu : PKZFGenericMenu {
 			
 		}
 		//unlock 2 random silver and 3 random gold cards if you have none unlocked ("pistol start") and a CVAR allows that:	
-		if (pk_allowFreeCards && goldcontrol && goldcontrol.UnlockedTarotCards.Size() == 0) {
+		if (pk_allowFreeCards && cardController && cardController.UnlockedTarotCards.Size() == 0) {
 			//S_StartSound("ui/board/cardunlocked",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			S_StartSound("ui/board/cardburn",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
 			//console.printf("fist unlock");			
@@ -561,8 +561,8 @@ Class PKCardsMenu : PKZFGenericMenu {
 		promptPopup.pack(mainFrame);
 		
 		int gold;
-		if (goldcontrol)
-			gold = goldcontrol.GetGoldAmount();
+		if (cardController)
+			gold = cardController.GetGoldAmount();
 		
 		string purchaseLine;
 		if (!unequip)
@@ -634,7 +634,7 @@ Class PKCardsMenu : PKZFGenericMenu {
 	}
 	
 	void ShowRefreshPopup() {
-		if (!boardElements || !goldcontrol)
+		if (!boardElements || !cardController)
 			return;
 			
 		S_StartSound("ui/menu/accept",CHAN_AUTO,CHANF_UI,volume:snd_menuvolume);
@@ -651,7 +651,7 @@ Class PKCardsMenu : PKZFGenericMenu {
 		}				
 		
 		int maxUses = 1;
-		if (goldcontrol.EquippedSlots[0] == "Forgiveness" || goldcontrol.EquippedSlots[1] == "Forgiveness")
+		if (cardController.EquippedSlots[0] == "Forgiveness" || cardController.EquippedSlots[1] == "Forgiveness")
 			maxUses = 2;
 		string refresh_spend = String.Format(Stringtable.Localize("$TAROT_REFRESH_REMAINING"), goldUses, refreshCost, maxUses);
 		string refresh_needgold = String.Format(Stringtable.Localize("$TAROT_REFRESH_NEEDGOLD"), goldUses, refreshCost);
@@ -660,7 +660,7 @@ Class PKCardsMenu : PKZFGenericMenu {
 		string refreshMsg;
 		if (goldUses >= maxUses) 
 			refreshMsg = refresh_atmax;
-		else if (goldcontrol.GetGoldAmount() >= refreshCost)
+		else if (cardController.GetGoldAmount() >= refreshCost)
 			refreshMsg = refresh_spend;
 		else
 			refreshMsg = refresh_needgold;
@@ -883,8 +883,8 @@ Class PKCardsMenu : PKZFGenericMenu {
 		}
 		
 		// Track the number of remaining Golden Card activations:
-		if (goldcontrol) {
-			goldUses = goldcontrol.GetGoldUses();
+		if (cardController) {
+			goldUses = cardController.GetGoldUses();
 			// Update the value of the visual counter:
 			if (goldUsesCounter)
 				goldUsesCounter.setText(String.Format("%d", goldUses));
@@ -971,7 +971,7 @@ Class PKCBoardMessage : PKZFFrame {
 }
 
 Class PKCGoldCounter : PKZFFrame {
-	PK_CardControl goldcontrol;	//this item holds the amount of gold
+	PK_CardControl cardController;	//this item holds the amount of gold
 	PKZFImage GoldDigits[6]; //there's a total of 6 digits
 	vector2 DigitPos[6];
 	//digits are not spaced totally evently, so we define their X pos explicitly:
@@ -1001,16 +1001,16 @@ Class PKCGoldCounter : PKZFFrame {
 		}
 		
 		//cast the gold item
-		ret.goldcontrol = PK_CardControl(players[consoleplayer].mo.FindInventory("PK_CardControl"));
+		ret.cardController = PK_CardControl.GetUI();
 
 		return ret;
 	}
 	
 	override void ticker() {
 		super.ticker();
-		if (!goldcontrol)
+		if (!cardController)
 			return;		
-		int gold = goldcontrol.GetGoldAmount(); //check how much gold we have
+		int gold = cardController.GetGoldAmount(); //check how much gold we have
 		vector2 digitsize = (32,640);	//digit size is fixed
 		//iterate through digits, right to left:
 		//we don't modify the rightmost one, so it's > 0, not >= 0:
