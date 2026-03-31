@@ -20,7 +20,7 @@ user bool pk_switch_ElectroDriver		= false;
 user bool pk_switch_RifleFlamethrower 	= false;
 user bool pk_switch_BoltgunHeater 		= false;
 
-// ZMovement
+// Movement
 
 server bool pk_movement = false;
 server bool pkzm_autojump = false;

@@ -1,3 +1,4 @@
+#include "sounds/Footsteps/SNDINFO_fs.txt"
 
 misc/secret "sounds/world/light_from_hole.wav"
 misc/teleport "sounds/world/teleport.wav"
@@ -45,16 +46,18 @@ pkpjump2 "sounds/player/hero_jump_2.wav"
 pkpland1 "sounds/player/hero-jump_end1.wav"
 pkpland2 "sounds/player/hero-jump_end2.wav"
 
-$playeralias		player	male	*death		pkplayer/death
-$playeralias		player	male	*xdeath		pkplayer/xdeath
-$playeralias		player	male	*gibbed		pkplayer/xdeath
-$playeralias		player	male	*pain100	pkplayer/pain1
-$playeralias		player	male	*pain75		pkplayer/pain1
-$playeralias		player	male	*pain50		pkplayer/pain2
-$playeralias		player	male	*pain25		pkplayer/pain2
-$playeralias		player	male	*grunt		pkplayer/land
-$playeralias		player	male	*land		dsempty
-$playeralias		player	male	*jump		pkplayer/jump
+$playeralias	player	male	*death		pkplayer/death
+$playeralias	player	male	*xdeath		pkplayer/xdeath
+$playeralias	player	male	*gibbed		pkplayer/xdeath
+$playeralias	player	male	*pain100	pkplayer/pain1
+$playeralias	player	male	*pain75		pkplayer/pain1
+$playeralias	player	male	*pain50		pkplayer/pain2
+$playeralias	player	male	*pain25		pkplayer/pain2
+$playeralias	player	male	*grunt		pkplayer/land
+$playeralias	player	male	*jump		pkplayer/jump
+$playeralias	player	male	*land		pkplayer/steps/land
+$playeralias	player	male	*landliquid	pkplayer/steps/water-in
+$playeralias	player	male	*swimstep	pkplayer/steps/paddle
 
 //cards:
 cards/cantuse "sounds/items/card-cannot_use.wav"
@@ -394,3 +397,18 @@ pickups/wmod/pickup		"sounds/items/item-wm-take.wav"
 pickups/wmod/end		"sounds/items/item-wm-timeout.wav"
 pickups/wmod/use		"sounds/items/item-wm-use.wav"
 pickups/wmod/loop		"sounds/items/item-wm-loop.wav"
+
+// Meat splashes:
+// meat:
+pkmeat/splash1 "sounds/meatsplash/meat-splash1.wav"
+pkmeat/splash2 "sounds/meatsplash/meat-splash2.wav"
+pkmeat/splash3 "sounds/meatsplash/meat-splash3.wav"
+pkmeat/splash4 "sounds/meatsplash/meat-splash4.wav"
+pkmeat/splash5 "sounds/meatsplash/meat-splash5.wav"
+$random pkmeat/splash {
+	pkmeat/splash1
+	pkmeat/splash2
+	pkmeat/splash3
+	pkmeat/splash4
+	pkmeat/splash5
+}

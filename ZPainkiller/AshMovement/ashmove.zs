@@ -1,5 +1,12 @@
 class PK_PlayerPawn : DoomPlayer
 {
+	enum EStepMode
+	{
+		PK_STEP_RIGHT,
+		PK_STEP_LEFT,
+		PK_STEP_BOTH,
+	}
+
 	protected bool am_deathrolled;
 
 	protected uint am_coyotetime;
@@ -7,6 +14,8 @@ class PK_PlayerPawn : DoomPlayer
 
 	protected double am_prevbobphase;
 	protected double am_bobphase;
+	protected double am_prevfootstepphase;
+	protected double am_footstepphase;
 	protected double am_weapBobDamp;
 	protected double am_prevWeapBobDamp;
 	protected bool am_blockfootstep;
@@ -37,12 +46,14 @@ class PK_PlayerPawn : DoomPlayer
 	property MaxCoyoteTime				: am_maxcoyotetime;
 
 	double am_maxBobFreq;
+	double am_maxFootstepFreq;
 	double am_landViewDipDist;
 	double am_viewBobRangeVert;
 	double am_viewBobrangeHorz;
 	double am_weapBobRangeHorz;
 	double am_weapBobRangeVert;
 	property MaxBobFrequency			: am_maxBobFreq;
+	property MaxFootstepFrequency		: am_maxFootstepFreq;
 	property LandingViewDipDistance 	: am_landViewDipDist;
 	property VerticalViewBobRange		: am_viewBobRangeVert;
 	property HorizontalViewBobRange		: am_viewBobrangeHorz;
@@ -87,6 +98,11 @@ class PK_PlayerPawn : DoomPlayer
 		// possible speed. Affects both view and weapon bob. Doesn't affect
 		// the range of bobbing:
 		PK_PlayerPawn.MaxBobFrequency 30.0;
+		// Maximum frequency of footstep. If at the default 0.0, footsteps
+		// are perfectly synced with view and weapon bobbing (which is
+		// usually desirable). If this is positive, footsteps will be
+		// calculated separately from view bobbing:
+		PK_PlayerPawn.MaxFootstepFrequency 0.0;
 
 		// Maximum vertical (downward) range of view (not weapon) bobbing:
 		PK_PlayerPawn.VerticalViewBobRange 5.0;
@@ -245,6 +261,10 @@ class PK_PlayerPawn : DoomPlayer
 			{
 				PK_LandedInLiquid(true, null);
 			}
+			else if (am_prevwaterlevel > 0 && waterlevel == 0)
+			{
+				A_StartSound("pkplayer/steps/water-out", CHAN_AUTO);
+			}
 			am_prevwaterlevel = waterlevel;
 		}
 	}
@@ -398,8 +418,10 @@ class PK_PlayerPawn : DoomPlayer
 		// am_prevWeapBobDamp and am_weapBobDamp are calculated in
 		// PlayerThink(), then lerp'd here:
 		double bobdamp = am_prevWeapBobDamp + (am_weapBobDamp - am_prevWeapBobDamp) * ticfrac;
-		bobrange.x = PK_Utils.LinearMap(self.vel.xy.Length(), 0, PK_GetBaseRunVel(), 0, am_weapBobRangeHorz) * bobdamp;
-		bobrange.y = PK_Utils.LinearMap(self.vel.xy.Length(), 0, PK_GetBaseRunVel(), 0, am_weapBobRangeVert) * bobdamp;
+		double horVelLength = self.vel.xy.Length();
+		double baseRunVel = PK_GetBaseRunVel();
+		bobrange.x = PK_Utils.LinearMap(horVelLength, 0, baseRunVel, 0, am_weapBobRangeHorz) * bobdamp;
+		bobrange.y = PK_Utils.LinearMap(horVelLength, 0, baseRunVel, 0, am_weapBobRangeVert) * bobdamp;
 		// deeper downward movement when underwater:
 		if (waterlevel) bobrange.y *= 1.8;
 		// multiply by weapon-specific bobranges:
@@ -576,7 +598,7 @@ class PK_PlayerPawn : DoomPlayer
 			// Low velocity - play footstep sound:
 			if (zvel > -10)
 			{
-				PK_PlayFootstep();
+				PK_PlayFootstep(PK_STEP_BOTH);
 			}
 			// High velocity - play landing sound (ideally this should be
 			// a custom sound separate from *grunt, as opposed to how it
@@ -643,7 +665,7 @@ class PK_PlayerPawn : DoomPlayer
 	override void CalcHeight()
 	{
 		let player = self.player;
-		double bob, bobrange, bobfreq;
+		double bob, bobrange, bobfreq, footstepfreq;
 	
 		// [AA] New view bobbing. This is also used for weapon bobbing
 		// (in contrast to vanilla where it's calculated separately).
@@ -652,8 +674,9 @@ class PK_PlayerPawn : DoomPlayer
 			double hvel = vel.xy.length();
 			double maxvel = PK_GetBaseRunVel();
 			if (waterlevel) hvel *= 0.7;
-			bobfreq = PK_Utils.LinearMap(hvel, 0, maxvel, 0, am_maxBobFreq, true);
 			bobrange = PK_Utils.LinearMap(hvel, 0, maxvel, 0, am_viewBobRangeVert, true);
+			bobfreq = PK_Utils.LinearMap(hvel, 0, maxvel, 0, am_maxBobFreq, true);
+			footstepfreq = am_maxFootstepFreq <= 0? bobfreq : PK_Utils.LinearMap(hvel, 0, maxvel, 0, am_maxFootstepFreq, true);
 		}
 		else
 		{
@@ -665,6 +688,9 @@ class PK_PlayerPawn : DoomPlayer
 		// changes, avoiding any odd jumps):
 		am_prevbobphase = am_bobphase;
 		am_bobphase += bobfreq;
+		// [AA] Same for footsteps:
+		am_prevfootstepphase = am_footstepphase;
+		am_footstepphase += footstepfreq;
 		
 		// [AA] Slight vertical bobbing and even slighter yaw bobbing,
 		// with range and speed based on velocity:
@@ -672,9 +698,16 @@ class PK_PlayerPawn : DoomPlayer
 		A_SetViewAngle(sin(am_bobphase*0.5) * am_viewBobrangeHorz, SPF_INTERPOLATE);
 
 		// [AA] Play footstep sounds at the end of the bob:
-		if (!waterlevel && cos(am_prevbobphase) > 0 && cos(am_bobphase) <= 0)
+		if (cos(am_prevfootstepphase) > 0 && cos(am_footstepphase) <= 0)
 		{
-			PK_PlayFootstep();
+			if (!waterlevel)
+			{
+				PK_PlayFootstep(sin(am_bobphase*0.5) > 0? PK_STEP_LEFT : PK_STEP_RIGHT);
+			}
+			else
+			{
+				PK_PlaySwimming();
+			}
 		}
 
 		// [AA] Slight camera dip at the start/end of a jump:
@@ -737,17 +770,35 @@ class PK_PlayerPawn : DoomPlayer
 		attackZOffset = player.viewz - pos.z - height*0.5;
 	}
 
-	virtual void PK_PlayFootstep()
+	virtual void PK_PlayFootstep(EStepMode mode)
 	{
 		let ter = self.GetFloorTerrain();
-		Sound snd;
 		if (ter)
 		{
-			snd = random[fstepsnd](0, 1) == 0? ter.RightStepSound : ter.LeftStepSound;
-			if (!snd) snd = ter.StepSound;
+			Sound snd_R = ter.RightStepSound? ter.RightStepSound : ter.StepSound;
+			Sound snd_L = ter.LeftStepSound? ter.LeftStepSound : snd_R;
+			switch (mode)
+			{
+				case PK_STEP_RIGHT:
+					Console.Printf("Right step");
+					A_StartSound(snd_R, 8, CHANF_OVERLAP);
+					break;
+				case PK_STEP_LEFT:
+					Console.Printf("Left step");
+					A_StartSound(snd_L, 8, CHANF_OVERLAP);
+					break;
+				case PK_STEP_BOTH:
+					Console.Printf("Both steps");
+					A_StartSound(snd_R, 8, CHANF_OVERLAP);
+					A_StartSoundIfNotSame(snd_L, snd_R, 8, CHANF_OVERLAP);
+					break;
+			}
 		}
+	}
 
-		A_StartSound(snd, 8, CHANF_OVERLAP);
+	virtual void PK_PlaySwimming()
+	{
+		A_StartSound("*swimstep", 8, CHANF_OVERLAP);
 	}
 
 	override void DeathThink()
@@ -838,6 +889,14 @@ class PK_PlayerPawn : DoomPlayer
 		}
 	}
 
+	virtual bool PK_IsJumpingAllowed() {
+		return !(player.oldbuttons & BT_JUMP) &&      // holding jump doesn't let you keep jumping
+		       player.crouchfactor > 0.5 &&           // can't jump while crouching but can when standing up
+		       level.IsJumpingAllowed() &&
+		       (player.onground || am_coyotetime) &&  // can jump in coyote time
+		       player.jumpTics >= 0;
+	}
+
 	override void CheckJump()
 	{
 		let player = self.player;
@@ -852,12 +911,7 @@ class PK_PlayerPawn : DoomPlayer
 			Vel.Z = 3.;
 		}
 		// [AA] The actual jumping with some changes to the default:
-		else if (!(player.oldbuttons & BT_JUMP) && // holding jump doesn't let you keep jumping
-				player.crouchfactor > 0.5 && // can't jump while crouching but can when standing up
-				level.IsJumpingAllowed() &&
-				(player.onground || am_coyotetime) && // can jump in coyote time
-				player.jumpTics >= 0 // can jump immediately after landing, no delay
-		)
+		else if (PK_IsJumpingAllowed())
 		{
 			if (am_coyotetime)
 			{

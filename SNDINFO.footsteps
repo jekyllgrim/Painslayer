@@ -1,0 +1,149 @@
+pkplayer/steps/water-in		"sounds/footsteps/jump-water.wav"
+$alias pkplayer/steps/water-out	pkplayer/steps/paddle
+pkplayer/steps/land			"sounds/footsteps/naskok-default.wav"
+
+
+ // metal thin:
+pkplayer/steps/metal-left1	"sounds/footsteps/walk-metal-left1.wav"
+pkplayer/steps/metal-left2	"sounds/footsteps/walk-metal-left2.wav"
+pkplayer/steps/metal-right1	"sounds/footsteps/walk-metal-right1.wav"
+pkplayer/steps/metal-right2	"sounds/footsteps/walk-metal-right2.wav"
+$random pkplayer/steps/metal {
+	pkplayer/steps/metal-left1
+	pkplayer/steps/metal-left2
+	pkplayer/steps/metal-right1
+	pkplayer/steps/metal-right2
+}
+
+// metal big/heavy:
+pkplayer/steps/metalbig-left1	"sounds/footsteps/walk-metalbig-left1.wav"
+pkplayer/steps/metalbig-left2	"sounds/footsteps/walk-metalbig-left2.wav"
+pkplayer/steps/metalbig-right1	"sounds/footsteps/walk-metalbig-right1.wav"
+pkplayer/steps/metalbig-right2	"sounds/footsteps/walk-metalbig-right2.wav"
+$random pkplayer/steps/metalbig {
+	pkplayer/steps/metalbig-left1
+	pkplayer/steps/metalbig-left2
+	pkplayer/steps/metalbig-right1
+	pkplayer/steps/metalbig-right2
+}
+
+// paddle:
+pkplayer/steps/paddle-left1	"sounds/footsteps/walk-paddle-left1.wav"
+pkplayer/steps/paddle-left2	"sounds/footsteps/walk-paddle-left2.wav"
+pkplayer/steps/paddle-right1	"sounds/footsteps/walk-paddle-right1.wav"
+pkplayer/steps/paddle-right2	"sounds/footsteps/walk-paddle-right2.wav"
+$random pkplayer/steps/paddle {
+	pkplayer/steps/paddle-left1
+	pkplayer/steps/paddle-left2
+	pkplayer/steps/paddle-right1
+	pkplayer/steps/paddle-right2
+}
+
+// sand:
+pkplayer/steps/sand-left1	"sounds/footsteps/walk-sand-left1.wav"
+pkplayer/steps/sand-left2	"sounds/footsteps/walk-sand-left2.wav"
+pkplayer/steps/sand-right1	"sounds/footsteps/walk-sand-right1.wav"
+pkplayer/steps/sand-right2	"sounds/footsteps/walk-sand-right2.wav"
+$random pkplayer/steps/sand {
+	pkplayer/steps/sand-left1
+	pkplayer/steps/sand-left2
+	pkplayer/steps/sand-right1
+	pkplayer/steps/sand-right2
+}
+
+// dirt:
+pkplayer/steps/dirt-left1	"sounds/footsteps/walk-dirt-left1.wav"
+pkplayer/steps/dirt-left2	"sounds/footsteps/walk-dirt-left2.wav"
+pkplayer/steps/dirt-right1	"sounds/footsteps/walk-dirt-right1.wav"
+pkplayer/steps/dirt-right2	"sounds/footsteps/walk-dirt-right2.wav"
+$random pkplayer/steps/dirt {
+	pkplayer/steps/dirt-left1
+	pkplayer/steps/dirt-left2
+	pkplayer/steps/dirt-right1
+	pkplayer/steps/dirt-right2
+}
+
+// snow:
+pkplayer/steps/snow-left1	"sounds/footsteps/walk-snow-left1.wav"
+pkplayer/steps/snow-left2	"sounds/footsteps/walk-snow-left2.wav"
+pkplayer/steps/snow-right1	"sounds/footsteps/walk-snow-right1.wav"
+pkplayer/steps/snow-right2	"sounds/footsteps/walk-snow-right2.wav"
+$random pkplayer/steps/snow {
+	pkplayer/steps/snow-left1
+	pkplayer/steps/snow-left2
+	pkplayer/steps/snow-right1
+	pkplayer/steps/snow-right2
+}
+
+// stone/tile:
+pkplayer/steps/stone-left1	"sounds/footsteps/walk-stone-left1.wav"
+pkplayer/steps/stone-left2	"sounds/footsteps/walk-stone-left2.wav"
+pkplayer/steps/stone-right1	"sounds/footsteps/walk-stone-right1.wav"
+pkplayer/steps/stone-right2	"sounds/footsteps/walk-stone-right2.wav"
+$random pkplayer/steps/stone {
+	pkplayer/steps/stone-left1
+	pkplayer/steps/stone-left2
+	pkplayer/steps/stone-right1
+	pkplayer/steps/stone-right2
+}
+
+// water:
+pkplayer/steps/wet-left1	"sounds/footsteps/walk-wet-left1.wav"
+pkplayer/steps/wet-left2	"sounds/footsteps/walk-wet-left2.wav"
+pkplayer/steps/wet-right1	"sounds/footsteps/walk-wet-right1.wav"
+pkplayer/steps/wet-right2	"sounds/footsteps/walk-wet-right2.wav"
+$random pkplayer/steps/wet {
+	pkplayer/steps/wet-left1
+	pkplayer/steps/wet-left2
+	pkplayer/steps/wet-right1
+	pkplayer/steps/wet-right2
+}
+
+// shallow water:
+pkplayer/steps/wetsmall-left1	"sounds/footsteps/walk-wetsmall-left1.wav"
+pkplayer/steps/wetsmall-left2	"sounds/footsteps/walk-wetsmall-left2.wav"
+pkplayer/steps/wetsmall-right1	"sounds/footsteps/walk-wetsmall-right1.wav"
+pkplayer/steps/wetsmall-right2	"sounds/footsteps/walk-wetsmall-right2.wav"
+$random pkplayer/steps/wetsmall {
+	pkplayer/steps/wetsmall-left1
+	pkplayer/steps/wetsmall-left2
+	pkplayer/steps/wetsmall-right1
+	pkplayer/steps/wetsmall-right2
+}
+
+// creaky wood:
+pkplayer/steps/wood-left1	"sounds/footsteps/walk-wood-left1.wav"
+pkplayer/steps/wood-left2	"sounds/footsteps/walk-wood-left2.wav"
+pkplayer/steps/wood-right1	"sounds/footsteps/walk-wood-right1.wav"
+pkplayer/steps/wood-right2	"sounds/footsteps/walk-wood-right2.wav"
+$random pkplayer/steps/wood {
+	pkplayer/steps/wood-left1
+	pkplayer/steps/wood-left2
+	pkplayer/steps/wood-right1
+	pkplayer/steps/wood-right2
+}
+
+// hardwood:
+pkplayer/steps/woodfloor-left1	"sounds/footsteps/walk-woodfloor-left1.wav"
+pkplayer/steps/woodfloor-left2	"sounds/footsteps/walk-woodfloor-left2.wav"
+pkplayer/steps/woodfloor-right1	"sounds/footsteps/walk-woodfloor-right1.wav"
+pkplayer/steps/woodfloor-right2	"sounds/footsteps/walk-woodfloor-right2.wav"
+$random pkplayer/steps/woodfloor {
+	pkplayer/steps/woodfloor-left1
+	pkplayer/steps/woodfloor-left2
+	pkplayer/steps/woodfloor-right1
+	pkplayer/steps/woodfloor-right2
+}
+
+// swamp:
+pkplayer/steps/swamp1 "sounds/Footsteps/Swamp_bubbleOut1.wav"
+pkplayer/steps/swamp2 "sounds/Footsteps/Swamp_bubbleOut2.wav"
+pkplayer/steps/swamp3 "sounds/Footsteps/Swamp_bubbleOut3.wav"
+$random pkplayer/steps/swamp {
+	pkplayer/steps/swamp1
+	pkplayer/steps/swamp2
+	pkplayer/steps/swamp3
+}
+$volume pkplayer/steps/swamp 0.7
+
+$alias pkplayer/steps/meat pkmeat/splash
