@@ -44,7 +44,7 @@ Class PK_ElectroDriver : PKWeapon {
 			// spawn an electric splash at its top and deal splash
 			// electric damage around it:
 			let hpos = tracer.results.HitPos;
-			if (tracer.watersector && Level.Vec3Diff(tracer.results.SrcFromTarget, hpos).Length() <= atkdist) {
+			if (tracer.hitWaterType != PK_WaterDetectionTracer.WH_NOTWATER && tracer.results.distance <= atkdist) {
 				let puf = PK_ElectroDamageSplash(Spawn("PK_ElectroDamageSplash", hpos));
 				if (puf) {
 					puf.waitTimer = 2;
@@ -223,27 +223,23 @@ Class PK_ElectroDriver : PKWeapon {
 			double dist = emitter.Distance3D(next);
 			if (dist > rad)
 				continue;
-			if (!emitter.CheckSight(next,SF_IGNOREWATERBOUNDARY))
+			if (!emitter.CheckSight(next, SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY))
 				continue;
 			PK_ElectroTargetControl.DealElectroDamage(next, emitter, source, 2, DMG_THRUSTLESS|DMG_PLAYERATTACK, delay:6);
 		}
 		
 		double v = 4;
+		Vector3 ppos;
 		for (int i = 80; i > 0; i--) {
-			vector3 ppos;
-			ppos = emitter.pos + (
-				frandom[epart](-rad, rad),
-				frandom[epart](-rad, rad),
-				frandom[epart](-rad, rad)
-			);
-			ppos.z = Clamp(ppos.z, emitter.pos.z - rad, emitter.pos.z + emitter.waterdepth);
+			ppos.xy = level.Vec2Offset(emitter.pos.xy, Actor.RotateVector((frandom[epart](1, rad), 0), frandom[epart](0,360)));
+			ppos.z = min(emitter.pos.z + frandom[epart](-rad, rad), emitter.pos.z + emitter.waterdepth);
 			Sector sec = Level.PointInSector(ppos.xy);
 			double wh; bool w;
 			[wh, w] = PK_Utils.GetWaterHeight(sec, ppos);
 			if (!w)
 				continue;
 
-			FSpawnParticleParams electricBlip;				
+			FSpawnParticleParams electricBlip;
 			electricBlip.color1 = PK_ElectroDriver.electricBlipColors[random[epart](0, PK_ElectroDriver.electricBlipColors.Size() - 1)];
 			//electricBlip.texture = ptex;
 			electricBlip.flags = SPF_FULLBRIGHT|SPF_REPLACE;
@@ -541,17 +537,23 @@ Class PK_ElectricPuff : PKPuff {
 }
 
 class PK_WaterDetectionTracer : LineTracer {
-	bool watersector;
+	enum EWaterHitType {
+		WH_NOTWATER,
+		WH_3DWATER,
+		WH_FLATWATER,
+	}
+
+	int hitWaterType;
 
 	override ETraceStatus TraceCallBack() {
 		if (results.CrossedWater) {
-			watersector = results.CrossedWater;
+			hitWaterType = WH_3DWATER;
 			results.hitPos = results.CrossedWaterPos;
 			return TRACE_Stop;
 		}
 
 		if (results.Crossed3DWater) {
-			watersector = results.Crossed3DWater;
+			hitWaterType = WH_3DWATER;
 			results.hitPos = results.Crossed3DWaterPos;
 			return TRACE_Stop;
 		}
