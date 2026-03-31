@@ -7,8 +7,8 @@ Class PainkillerHUD : BaseStatusBar {
 	HUDFont mHUDFont; //used only by inv bar
 	InventoryBarState diparms;
 	//HUDFont mStatFont;
-	protected class<Inventory> prevLatestPickup;
-	protected class<Inventory> curLatestPickup;
+	protected class<Actor> prevLatestPickup;
+	protected class<Actor> curLatestPickup;
 	protected double notifAlpha;
 	protected double notifAlphaMod;
 	protected int notifDur;

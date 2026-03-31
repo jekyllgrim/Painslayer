@@ -1,8 +1,4 @@
 class PK_CodexData : PK_DataContainer {
-	bool codexOpened;
-	class<Inventory> latestPickup;
-	String latestPickupName;
-
 	static const Class<Actor> CodexCoveredClasses[] = {
 		'PK_Painkiller',
 		'PK_Shotgun',
@@ -27,27 +23,33 @@ class PK_CodexData : PK_DataContainer {
 		'PK_GoldPickup'
 	};
 
+	bool codexOpened;
+	class<Actor> latestPickup;
+	String latestPickupName;
 	array < class<Actor> > processedClasses;
 
-	static clearscope bool IsCodexClass(class<Actor> cls) {
-		if (!cls) return false;
+	static clearscope class<Actor> IsCodexClass(class<Actor> cls) {
+		if (!cls) return null;
+		
+		class<Actor> codexClass;
 		for (int i = 0; i < PK_CodexData.CodexCoveredClasses.Size(); i++ ) {
-			if (cls == PK_CodexData.CodexCoveredClasses[i]) {
-				return true;
+			codexClass = PK_CodexData.CodexCoveredClasses[i];
+			if (cls == codexClass || cls is codexClass) {
+				return codexClass;
 			}
 		}
-		return false;
+		return null;
 	}
 
-	bool TryAddingClass(class<Actor> cls) {
-		let itemcls = (class<Inventory>)(cls);
-		if (!itemcls) return false;
+	bool TryAddToCodex(class<Actor> cls) {
+		let codexClass = IsCodexClass(cls);
+		if (!codexClass) return false;
 
-		if (IsCodexClass(cls) && !IsRecorded(cls)) {
-			processedClasses.Push(itemcls);
+		if (!IsRecorded(codexClass)) {
+			processedClasses.Push(codexClass);
 			codexOpened = false;
-			latestPickup = itemcls;
-			latestPickupName = GetDefaultByType(itemcls).GetTag();
+			latestPickup = codexClass;
+			latestPickupName = GetDefaultByType(codexClass).GetTag();
 			return true;
 		}
 		return false;
@@ -368,7 +370,7 @@ Class PKCodexMenu : PKZFGenericMenu {
 		for the first time.
 		See PKZFCodexTabController for details.
 	*/	
-	void FocusRelevantTab(class<Inventory> item) {
+	void FocusRelevantTab(class<Actor> item) {
 		if (!item)
 			return;
 		PKZFCodexTabController focustab; //pointer to controller

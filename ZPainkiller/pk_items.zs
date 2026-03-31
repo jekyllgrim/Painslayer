@@ -813,7 +813,7 @@ Class PK_MegaSoul : PK_GoldSoul {
 		if (toucher && toucher.player) {
 			toucher.GiveInventory("PK_GoldArmor", 1);
 		}
-		return super.TryPickup(toucher);
+		return Super.TryPickup(toucher);
 	}
 	
 	States {
