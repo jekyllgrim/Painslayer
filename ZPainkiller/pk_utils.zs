@@ -36,6 +36,16 @@ class PK_Utils abstract {
 		return LevelLocals.PointOnLineSide(p, l);
     }
 
+	// startPos: original position to operate around
+	// angles: (angle, pitch, roll) of the desired actor. viewAngle/viewPitch/viewRoll can be added or used instead.
+	// offset: desired relative offset as (forward/back, right/left, up/down)
+	// isPosition: if TRUE, adds startpos to the final result.
+	static clearscope Vector3 RelativeToGlobalOffset(Vector3 startpos, Vector3 angles, Vector3 offset, bool isPosition = true) {
+		Quat dir = Quat.FromAngles(angles.x, angles.y, angles.z);
+		Vector3 ofs = dir * (offset.x, -offset.y, offset.z);
+		return isPosition? Level.Vec3offset(startpos, ofs) : ofs;
+	}
+
 	static clearscope vector2 GetLineNormal(vector2 ppos, Line lline) {
 		vector2 linenormal;
 		linenormal = (-lline.delta.y, lline.delta.x).unit();
@@ -77,15 +87,15 @@ class PK_Utils abstract {
 			return hitnormal, true;
 		}
 
-		if (pk_debugmessages)
-			console.printf("GetNormalFromPos: couldn't find a surface. Returning hitlocation.");
+		//if (pk_debugmessages)
+		//	console.printf("GetNormalFromPos: couldn't find a surface. Returning hitlocation.");
 		return hitnormal, false;
 	}
 
 	// Obtains a normal vector from TraceResults
 	// depending on what it hit:
 	static clearscope Vector3 GetNormalFromTracer(TraceResults res) {
-		Vector3 normal = -res.HitVector;
+		Vector3 normal = (0,0,0);
 		bool hit3DFloor = res.ffloor != null;
 		switch(res.HitType) {
 			case TRACE_HitFloor:
@@ -99,40 +109,107 @@ class PK_Utils abstract {
 				if (res.Side == Line.front) {
 					normal.xy *= -1;
 				}
-				normal.z = 0;
+				break;
+			case TRACE_HitActor:
+				normal = -res.HitVector.Unit();
 				break;
 		}
 		return normal;
 	}
 
-	static play double, bool GetWaterHeight(Sector sec, vector3 pos) {
-		if (sec.MoreFlags & Sector.SECMF_UNDERWATER)
+	static clearscope vector3 GetNormalFromTrace(FLineTraceData data) {
+		Vector3 normal = (0,0,0);
+		bool hit3DFloor = data.Hit3DFloor != null;
+		switch(data.HitType) {
+			case TRACE_HitFloor:
+				normal = hit3DFloor? data.Hit3DFloor.top.normal : data.HitSector.floorplane.normal;
+				break;
+			case TRACE_HitCeiling:
+				normal = hit3DFloor? data.Hit3DFloor.bottom.normal : data.HitSector.ceilingplane.normal;
+				break;
+			case TRACE_HitWall:
+				normal.xy = (-data.HitLine.delta.y, data.HitLine.delta.x).Unit();
+				if (data.LineSide == Line.front) {
+					normal.xy *= -1;
+				}
+				break;
+			case TRACE_HitActor:
+				normal = -data.HitDir.Unit();
+				break;
+		}
+		return normal;
+	}
+
+	static play void OrientActorToNormal(Actor thing, Vector3 normal) {
+		normal = normal.Unit();
+		if (!(normal.x ~== 0 && normal.y ~== 0)) {
+			thing.angle = normal.Angle();
+		}
+		thing.pitch = -atan2(normal.z, normal.xy.Length()) + 90;
+	}
+
+	// Checks if given 3D floor is swimmable:
+	static clearscope bool Is3DFloorSwimmable(F3DFloor ffloor) {
+		return ffloor &&
+		      (ffloor.flags & F3DFloor.FF_EXISTS) &&
+		     !(ffloor.flags & F3DFloor.FF_SOLID) &&
+		      (ffloor.flags & F3DFloor.FF_SWIMMABLE);
+	}
+
+	// Checks if given position is inside a swimmable 3D floor:
+	static clearscope bool, double, double IsPointUnderwater(Vector3 pos, Sector sec = null) {
+		// If sector is null, obtain sector from position.
+		// Otherwise, the given sector will be checked
+		// explicitly:
+		if (!sec) {
+			sec = level.PointInSector(pos.xy);
+		}
+		if (!sec) return false, 0, 0;
+
+		F3DFloor ff;
+		double top, bottom;
+		for (int i = sec.Get3DFloorCount() - 1; i >= 0; i--) {
+			ff = sec.Get3DFloor(i);
+			if (!Is3DFloorSwimmable(ff)) continue;
+
+			top = ff.top.ZAtPoint(pos.xy);
+			bottom = ff.bottom.ZAtPoint(pos.xy);
+			if (top >= pos.z && bottom <= pos.z) {
+				return true, top, bottom;
+			}
+		}
+		return false, 0, 0;
+	}
+
+
+	static clearscope double, bool GetWaterHeight(Sector sec, vector3 pos) {
+		if (sec.MoreFlags & Sector.SECMF_UNDERWATER) {
 			return sec.ceilingPlane.ZAtPoint(pos.xy), true;
+		}
+		let hsec = sec.GetHeightSec();
+		if (hsec) {
+			double top = hsec.floorPlane.ZAtPoint(pos.xy);
+			if ((hsec.MoreFlags & Sector.SECMF_UNDERWATERMASK)
+				&& (pos.z < top
+				|| (!(hsec.MoreFlags & Sector.SECMF_FAKEFLOORONLY) && pos.z > hsec.ceilingPlane.ZAtPoint(pos.xy)))) {
+				return top, true;
+			}
+		}
 		else {
-			let hsec = sec.GetHeightSec();
-			if (hsec) {
-				double top = hsec.floorPlane.ZAtPoint(pos.xy);
-				if ((hsec.MoreFlags & Sector.SECMF_UNDERWATERMASK)
-					&& (pos.z < top
-					|| (!(hsec.MoreFlags & Sector.SECMF_FAKEFLOORONLY) && pos.z > hsec.ceilingPlane.ZAtPoint(pos.xy)))) {
+			for (int i = sec.Get3DFloorCount() - 1; i >=0; i--) {
+				let ffloor = sec.Get3DFloor(i);
+				if (!(ffloor.flags & F3DFloor.FF_EXISTS)
+					|| (ffloor.flags & F3DFloor.FF_SOLID)
+					|| !(ffloor.flags & F3DFloor.FF_SWIMMABLE)) {
+					continue;
+				}
+					
+				double top = ffloor.top.ZAtPoint(pos.xy);
+				if (top > pos.z && ffloor.bottom.ZAtPoint(pos.xy) <= pos.z) {
 					return top, true;
 				}
 			}
-			else {
-				for (int i = 0; i < sec.Get3DFloorCount(); ++i) {
-					let ffloor = sec.Get3DFloor(i);
-					if (!(ffloor.flags & F3DFloor.FF_EXISTS)
-						|| (ffloor.flags & F3DFloor.FF_SOLID)
-						|| !(ffloor.flags & F3DFloor.FF_SWIMMABLE)) {
-						continue;
-					}
-						
-					double top = ffloor.top.ZAtPoint(pos.xy);
-					if (top > pos.z && ffloor.bottom.ZAtPoint(pos.xy) <= pos.z)
-						return top, true;
-				}
-			}
-		}			
+		}	
 		return 0, false;
 	}	
 	
@@ -251,82 +328,129 @@ class PK_ValueInterpolator : Object
 
 class PK_CollisionTracer : LineTracer
 {
-	static bool, Vector3, PK_CollisionTracer DetectFromTo(Vector3 start, Vector3 end, Actor source = null) {
-		let tracer = new('PK_CollisionTracer');
-		if (!tracer) {
-			return false, (0,0,0), null;
-		}
-
-		Vector3 diff = level.Vec3Diff(start, end);
-		tracer.Trace(start,
-			sec: source? source.cursector : level.PointInSector(start.xy),
-			direction: diff.Unit(),
-			maxdist: diff.Length() + 1,
-			traceFlags: TRACE_HitSky,
-			wallmask: Line.ML_BLOCKEVERYTHING,
-			ignore: source
-		);
-
-		let res = tracer.results;
-		bool collided = res.HitType != TRACE_HitNone;
-		Vector3 normal = PK_Utils.GetNormalFromTracer(res);
-
-		return collided, normal, tracer;
+	//Vector3 spawnPos;
+	//double maxDistance;
+	bool stopAtWater;
+	bool hitWater;
+	EActorCollisionFlags actorflags;
+	enum EActorCollisionFlags {
+		AC_SOLID = 2,
+		AC_SHOOTABLE = 4,
+		AC_SOLIDSHOOTABLE = AC_SOLID|AC_SHOOTABLE,
 	}
 
-	static bool, Vector3, PK_CollisionTracer DetectAt(Vector3 start, Vector3 dir, Actor source = null) {
+	static bool, Vector3, PK_CollisionTracer Detect(Vector3 start, Vector3 dir, Actor source = null, double maxdist = PLAYERMISSILERANGE, EActorCollisionFlags actorflags = AC_SOLID) {
 		let tracer = new('PK_CollisionTracer');
-		if (!tracer) {
-			return false, (0,0,0), null;
-		}
-
+		tracer.actorflags = actorflags;
+		//tracer.maxDistance = maxdist;
+		//tracer.spawnPos = start;
 		tracer.Trace(start,
 			sec: source? source.cursector : level.PointInSector(start.xy),
 			direction: dir.Unit(),
-			maxdist: PLAYERMISSILERANGE,
+			maxdist: maxdist,
 			traceFlags: TRACE_HitSky,
 			wallmask: Line.ML_BLOCKEVERYTHING,
 			ignore: source
 		);
-
+		
 		let res = tracer.results;
 		bool collided = res.HitType != TRACE_HitNone;
 		Vector3 normal = PK_Utils.GetNormalFromTracer(res);
-
 		return collided, normal, tracer;
 	}
 
 	override ETraceStatus TraceCallback() {
-		int res = TRACE_Skip;
-
-		switch (results.HitType) {
-		case TRACE_HitActor:
-			if (results.HitActor && results.HitActor.bSolid) {
-				res = TRACE_Stop;
+		if (stopAtWater) {
+			if (results.crossedWater || results.crossed3DWater) {
+				hitWater = true;
+				results.HitPos = results.crossedWater? results.crossedWaterPos : results.crossed3DWaterPos;
+				return TRACE_Stop;
 			}
-			break;
-		case TRACE_HitWall:
-		case TRACE_HasHitSky:
-		case TRACE_HitFloor:
-		case TRACE_HitCeiling:
-			res = TRACE_Stop;
-			break;
+			return TRACE_Skip;
 		}
 
-		return res;
+		switch (results.HitType) {
+			case TRACE_HitActor:
+				let act = results.HitActor;
+				if (act &&
+					(!(actorflags & AC_SOLID) || act.bSolid) &&
+					(!(actorflags & AC_SHOOTABLE) || act.bShootable) ) {
+					return TRACE_Stop;
+				}
+				break;
+			case TRACE_HitWall:
+			case TRACE_HasHitSky:
+			case TRACE_HitFloor:
+			case TRACE_HitCeiling:
+				return TRACE_Stop;
+				break;
+		}
+
+		/*if (results.distance > maxDistance) {
+			results.HitPos = level.Vec3Offset(results.HitPos, results.HitVector.Unit() * -(results.distance - maxDistance));
+			return TRACE_Stop;
+		}*/
+
+		return TRACE_Skip;
 	}
 }
 
-class PK_Math abstract {
-	int RoundInt(double value) {
-		return int(round(value));
-	}
+class PK_WaterCollisionTracer : LineTracer {
+	/*uint callbacknum;
+	static const String hittypeNames[] =
+	{
+		"None",
+		"Floor",
+		"Ceiling",
+		"Wall",
+		"Actor",
+		"Portal",
+		"Sky"
+	};*/
 
-	int CeilInt(double value) {
-		return int(ceil(value));
-	}
+	bool hitWater;
 
-	int FloorInt(double value) {
-		return int(floor(value));
+	static bool, Vector3, PK_WaterCollisionTracer Detect(Vector3 start, Vector3 dir, Actor source = null) {
+		let tracer = new('PK_WaterCollisionTracer');
+		tracer.Trace(start,
+			sec: source? source.cursector : level.PointInSector(start.xy),
+			direction: dir.Unit(),
+			maxdist: PLAYERMISSILERANGE,
+			0,
+			ignore: source
+		);
+		
+		return tracer.HitWater, tracer.results.HitPos, tracer;
+	}
+	override ETraceStatus TraceCallback() {
+		// this should detect top of water consistently:
+		if (results.crossedWater || results.crossed3DWater) {
+			hitWater = true;
+			results.HitPos = results.crossedWater? results.crossedWaterPos : results.crossed3DWaterPos;
+			return TRACE_Stop;
+		}
+
+		else if (results.HitType == TRACE_HitActor) {
+			return TRACE_Skip;
+		}
+
+		// detect side of water:
+		else if (results.HitType == TRACE_HitWall) {
+			Line hitline = results.HitLine;
+			// null line? should not happen, but just in case:
+			if (!hitline) return TRACE_Skip;
+			// get Sector on the other side from the one we hit:
+			Sector otherSideSec = results.Side == Line.Front? hitline.backsector : hitline.frontsector;
+			// no other side - this is one-sided line, so stop here:
+			if (!otherSideSec) return TRACE_Stop;
+			// iterate over 3d floors associated with that sector:
+			if (PK_Utils.IsPointUnderwater(results.HitPos, otherSideSec)) {
+				hitwater = true;
+				return TRACE_Stop;
+			}
+			return (hitline.flags & Line.ML_BLOCKEVERYTHING)? TRACE_Stop : TRACE_Skip;
+		}
+
+		return TRACE_Skip;
 	}
 }
