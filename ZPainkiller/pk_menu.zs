@@ -239,7 +239,7 @@ class OptionMenuItemPKCrosshairOption : OptionMenuItemOption
 			
 		// Get the size of the menu item:
 		String label = Stringtable.Localize(mLabel);
-		int labelW = Menu.OptionWidth(label) * 1.2;
+		int labelW = int(Menu.OptionWidth(label) * 1.2);
 		int labelH = Menu.Optionheight();		
 		// Define graphic's offsets based
 		// on the size of the label:

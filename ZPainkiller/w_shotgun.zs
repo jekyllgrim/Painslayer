@@ -162,7 +162,7 @@ Class PK_FreezerProjectile : PK_Projectile {
 				// Double freeze duration with Weapon Modifier
 				// but only if the victim is not a player:
 				frz.fcounter = mod && !victim.player ? FREEZERDURATIONMOD : FREEZERDURATION;
-				victim.A_SetBlend("0080FF",0.6,frz.fcounter * 1.5);
+				victim.A_SetBlend("0080FF",0.6, int(round(frz.fcounter * 1.5)));
 			}
 		}
 	}
@@ -322,17 +322,17 @@ Class PK_FreezeControl : PK_InventoryToken {
 		if (damage > 0 && inflictor && owner && passive) {
 			//reduces fire damage:
 			if (damagetype == 'Fire') {
-				newdamage = damage * 0.1;
+				newdamage = int(round(damage * 0.1));
 				if (icelayer) {
 					icelayer.DamageMobj(inflictor, source, damage, 'normal');
 				}
 			}
 			//x1.5 damage if hitting with a shotgun blast:
 			else if (inflictor && inflictor.GetClass() == "PK_ShotgunPuff")
-				newdamage = damage * 1.5;
+				newdamage = int(round(damage * 1.5));
 			//for all other weapons x1.25 damage:
 			else
-				newdamage = damage*1.25;
+				newdamage = int(round(damage*1.25));
 		}
 	}
 	
@@ -399,8 +399,8 @@ Class PK_FreezeControl : PK_InventoryToken {
 		}
 		if (owner.health <= 0) {
 			owner.bNOGRAVITY = false;
-			//spawn ice shards:			
-			int rad = owner.radius;
+			//spawn ice shards:
+			int rad = int(owner.radius);
 			
 			if (GetParticlesLevel() >= PL_Reduced) {
 				for (int i = random[sfx](5,8); i > 0; i--) {
@@ -542,7 +542,7 @@ Class PK_ShotgunPuff : PK_BulletPuff {
 	}
 	states {
 	Spawn:
-		TNT1 A 1 NoDelay {		
+		TNT1 A 1 NoDelay {
 			if (target && tracer && 
 				!tracer.CountInv("PK_FreezeControl") &&
 				tracer.bISMONSTER && !tracer.bDONTTHRUST && !tracer.bBOSS && 

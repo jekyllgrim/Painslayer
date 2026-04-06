@@ -524,13 +524,13 @@ Class PK_Soul : PK_Inventory {
 			//the amount is clamped to 20 (or to 80 if the monster is a boss)
 			int maxAmt = GetDefaultByType(bearer).bBOSS ? 80 : 20;
 			double am = PK_Utils.LinearMap(double(GetDefaultByType(bearer).health), 20, 500, 1, 20);
-			amount = Clamp(am, 1, maxAmt);
+			amount = int(Clamp(am, 1, maxAmt));
 			actualAmount = amount;
 			//slightly change soul's alpha and scale based on the resulting number:
 			alpha = Clamp(PK_Utils.LinearMap(am, 1, 20, 0.5, 1.5), 0.5 , 1.5);
 			scale *= Clamp(PK_Utils.LinearMap(am, 1, 20, 0.6, 1.15), 0.7, 1.15);
 			//define color and its density based on the alpha of the soul
-			int colalpha = Clamp(PK_Utils.LinearMap(alpha, 0.5, 1.5, 64, 255), 128 , 255);
+			int colalpha = int(Clamp(PK_Utils.LinearMap(alpha, 0.5, 1.5, 64, 255), 128 , 255));
 			soulcolor = Color(colalpha, 0, 255, 0);
 			//if the amount is over 15, make the soul red:
 			if (am >= 15) {
@@ -541,7 +541,7 @@ Class PK_Soul : PK_Inventory {
 				partTex = TexMan.CheckForTexture('pksoulpr');
 				pickupsound = "pickups/soul/red";
 			}
-			A_AttachLight('soul',DynamicLight.PointLight, soulcolor, 48 * scale.x, 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_NOSHADOWMAP|DYNAMICLIGHT.LF_DONTLIGHTACTORS);
+			A_AttachLight('soul',DynamicLight.PointLight, soulcolor, int(round(48 * scale.x)), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_NOSHADOWMAP|DYNAMICLIGHT.LF_DONTLIGHTACTORS);
 		}
 		if (pk_debugmessages > 2) {
 			string str = "none";

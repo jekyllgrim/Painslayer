@@ -271,7 +271,7 @@ Class PK_MainHandler : EventHandler {
 			
 			if (secsize < 24)
 				continue;
-			int goldnum = Clamp((secSize / 72.),1,10);
+			int goldnum = int(clamp((secSize / 72.), 1, 10));
 			
 			//spawn big gold:
 			for (int i = goldnum; i > 0; i--) {

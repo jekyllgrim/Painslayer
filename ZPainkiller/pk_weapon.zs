@@ -972,7 +972,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 		// add vertical offset to position:
 		trail.pos = (ppos.x, ppos.y, ppos.z + trailz);
 		// lifetime is calculated based on alpha and fadefactor:
-		trail.lifetime = ceil(trailalpha / trailfade);
+		trail.lifetime = int(ceil(trailalpha / trailfade));
 		// apply random velocity if pvel is not 0:
 		if (pvel != 0) {
 			trail.vel = (
@@ -1349,7 +1349,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 
 		if (GetParticlesLevel() >= PL_Reduced) {
 			if (randomdebris > 0) {
-				for (int i = randomdebris*frandom[sfx](0.7,1.3); i > 0; i--) {
+				for (int i = int(round(randomdebris*frandom[sfx](0.7,1.3))); i > 0; i--) {
 					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
 					if (debris) {
 						double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
@@ -1361,7 +1361,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 		}
 		if (GetParticlesLevel() >= PL_Full) {
 			if (waterlevel < 3 && smokingdebris > 0) {
-				for (int i = smokingdebris*frandom[sfx](0.7,1.3); i > 0; i--) {
+				for (int i = int(round(smokingdebris*frandom[sfx](0.7,1.3))); i > 0; i--) {
 					let debris = Spawn("PK_SmokingDebris",pos + (frandom[sfx](-12,12),frandom[sfx](-12,12),frandom[sfx](-12,12)));
 					if (debris) {
 						double zvel = (pos.z > floorz) ? frandom[sfx](-5,10) : frandom[sfx](5,15);
@@ -1371,7 +1371,7 @@ Class PK_GenericExplosion : PK_SmallDebris {
 			}
 		}
 		if (waterlevel < 3 && explosivedebris > 0) {
-			for (int i = explosivedebris*frandom[sfx](0.7,1.3); i > 0; i--) {
+			for (int i = int(round(explosivedebris*frandom[sfx](0.7,1.3))); i > 0; i--) {
 				let debris = Spawn("PK_ExplosiveDebris",pos + (frandom[sfx](-12,12),frandom[sfx](-12,12),frandom[sfx](-12,12)));
 				if (debris) {
 					double zvel = (pos.z > floorz) ? frandom[sfx](-5,10) : frandom[sfx](5,15);
