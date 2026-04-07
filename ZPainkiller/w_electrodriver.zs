@@ -106,7 +106,7 @@ Class PK_ElectroDriver : PKWeapon {
 				puf.splash_anglestep = 0;
 				PK_Utils.OrientActorToNormal(puf, PK_Utils.GetNormalFromTracer(watertracer.results));
 			}
-			PK_ElectroDriver.DoUnderwaterElectroDamage(puf, self);
+			PK_ElectroDriver.DealWaterDamage(puf, self);
 			// do nothing else:
 			return waterPos;
 		}
@@ -121,6 +121,35 @@ Class PK_ElectroDriver : PKWeapon {
 			// if we hit something, also draw a puff there:
 			let normal = PK_Utils.GetNormalFromTrace(tracedata);
 			Vector3 pufpos = level.Vec3Offset(hitPos, normal * 5);
+			bool hitflatwater = false;
+			// if that something is flat water, deal damage across that:
+			if (tracedata.HitType == TRACE_HitFloor && tracedata.hitTexture.isValid()) {
+				String texname = TexMan.GetName(tracedata.hitTexture);
+				let puf = PK_ElectroDamageSplash(Spawn("PK_ElectroDamageSplash", pufpos));
+				if (puf) {
+					puf.waitTimer = 2;
+					puf.splash_anglestep = 0;
+					PK_Utils.OrientActorToNormal(puf, normal);
+				}
+				if (puf && puf.GetFloorTerrain().isLiquid) {
+					hitflatwater = true;
+				}
+				else {
+					for (int i = PK_BaseActor.PK_LiquidFlats.Size() - 1; i >= 0; i--) {
+						if (texname.IndexOf(PK_BaseActor.PK_LiquidFlats[i]) >= 0) {
+							hitflatwater = true;
+							break;
+						}
+					}
+				}
+				if (hitflatwater && puf) {
+					PK_ElectroDriver.DealWaterDamage(puf, self, flatTexName: texname);
+					return pufpos;
+				}
+				else if (puf) {
+					puf.Destroy();
+				}
+			}
 			let puf = Spawn('PK_ElectricPuff', pufpos);
 			if (puf) {
 				puf.target = self;
@@ -134,7 +163,7 @@ Class PK_ElectroDriver : PKWeapon {
 		PK_ElectroTargetControl.DealElectroDamage(victim, self, self, dmg, DMG_THRUSTLESS|DMG_PLAYERATTACK, delay:12);
 		// if victim's in water, deal electric damage around it:
 		if (victim.waterlevel > 0) {
-			PK_ElectroDriver.DoUnderwaterElectroDamage(victim, self);
+			PK_ElectroDriver.DealWaterDamage(victim, self);
 		}
 
 		// If the player has Weapon Modifier, the beam
@@ -199,26 +228,40 @@ Class PK_ElectroDriver : PKWeapon {
 			if (random(0,1) == 1)
 				DamageMobj(self, self, 1, 'Electricity', DMG_THRUSTLESS);
 			
-			DoUnderwaterElectroDamage(self, self, 256);
+			DealWaterDamage(self, self, 256);
 		}
 	}
 
 	static const color electricBlipColors[] = { "6a7dfa", "65B0DB", "95DFF6", "2C60DB", "485FF9" };
 
-	static void DoUnderwaterElectroDamage(Actor emitter, Actor source, double rad = 320) {
+	static void DealWaterDamage(Actor emitter, Actor source, double rad = 320, name flatTexName = 'none') {
 		Vector3 emitPos = emitter.pos;
+		TextureID watertex;
+		waterTex.SetInvalid();
+		if (flatTexName != 'none') {
+			watertex = TexMan.CheckForTexture(flatTexName);
+		}
+		bool flatwater = watertex.IsValid();
 		BlockThingsIterator itr = BlockThingsIterator.CreateFromPos(emitPos.x, emitPos.y, emitPos.z, emitPos.z, rad, false);
 		double dist = rad * rad;
 		while (itr.next()) {
 			let next = itr.thing;
-			if (!next ||
-				next == emitter ||
-				next.waterlevel < 1 ||
-				next.health <= 0 || 
-				!next.bSHOOTABLE || 
-				(!next.bIsMonster && !next.player) || 
-				emitter.Distance3DSquared(next) > dist ||
-				!emitter.CheckSight(next, SF_IGNOREVISIBILITY|SF_IGNOREWATERBOUNDARY)) {
+			// only damage shootable, alive monsters or players:
+			if (!next || next == emitter || next.health <= 0 ||
+			    !next.bShootable || (!next.bIsMonster && !next.player))
+				continue;
+			
+			// flat water - check distance, that the texture
+			// undex next matches, and it's close enough to
+			// the floor:
+			if (flatwater) {
+				if (emitter.Distance2DSquared(next) > dist ||
+				    next.floorpic != watertex ||
+				    abs(next.pos.z - next.floorz) > 10)
+				continue;
+			}
+			// 3d water - check distance and waterlevel:
+			else if (emitter.Distance3DSquared(next) > dist || next.waterlevel <= 0) {
 				continue;
 			}
 			PK_ElectroTargetControl.DealElectroDamage(next, emitter, source, 2, DMG_THRUSTLESS|DMG_PLAYERATTACK, delay:6);
@@ -242,14 +285,18 @@ Class PK_ElectroDriver : PKWeapon {
 
 			pDist = rad * (frandom[etp](0.0, 1.0) ** 0.3334);
 			pp.pos = level.Vec3Offset(emitpos, pdir * pDist);
+			emitter.SetOrigin((pp.pos), false);
+			if (flatwater) {
+				pp.pos.z = emitter.cursector.floorplane.ZAtPoint(pp.pos.xy);
+				emitter.SetZ(pp.pos.z);
+			}
+			emitter.UpdateWaterLevel(false);
 			if (!level.IsPointInLevel(pp.pos)) {
 				continue;
 			}
-			emitter.SetOrigin((pp.pos), false);
-			emitter.UpdateWaterLevel(false);
-			if (emitter.waterlevel) {
+			if ((flatwater && emitter.floorpic == watertex) || emitter.waterlevel) {
 				pp.color1 = PK_ElectroDriver.electricBlipColors[random[epart](0, PK_ElectroDriver.electricBlipColors.Size() - 1)];
-				pp.Size = frandom[epart](3,8);
+				pp.Size = frandom[epart](10, 22);
 				level.SpawnParticle(pp);
 			}
 		}
@@ -784,8 +831,8 @@ Class PK_ElectroDamageSplash : PK_BaseFlare {
 		if (tracer) {
 			splash_scalestep = 0.014 * tracer.radius;
 			pitch = frandom[ett](10,120)*randompick[ett](-1,1);
+			splash_anglestep = frandom[ett](10,25)*randompick[ett](-1,1);
 		}
-		splash_anglestep = frandom[ett](10,25)*randompick[ett](-1,1);
 	}
 	
 	states {
@@ -802,8 +849,8 @@ Class PK_ElectroDamageSplash : PK_BaseFlare {
 			}
 			frame = random[sfx](0,11);
 			alpha = frandom[sfx](0.1,0.9);
-			angle += splash_anglestep;
-			//Console.Printf("Angles %.1f %.1f", angle, pitch);
+			if (tracer)
+				angle += splash_anglestep;
 			return ResolveState(null);
 		}
 		loop;
@@ -987,7 +1034,7 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 		double atkdist = 190;
 
 		if (waterlevel >= 2) {
-			PK_ElectroDriver.DoUnderwaterElectroDamage(self, target, 280);
+			PK_ElectroDriver.DealWaterDamage(self, target, 280);
 			return;
 		}
 

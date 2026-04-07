@@ -205,7 +205,7 @@ Class PK_BaseActor : Actor abstract {
 	}
 	
 	static const string PK_LiquidFlats[] = { 
-		"BLOOD", "LAVA", "NUKAGE", "SLIME01", "SLIME02", "SLIME03", "SLIME04", "SLIME05", "SLIME06", "SLIME07", "SLIME08", "BDT_"
+		"BLOOD", "LAVA", "NUKAGE", "WATER", "SLIME01", "SLIME02", "SLIME03", "SLIME04", "SLIME05", "SLIME06", "SLIME07", "SLIME08", "BDT_"
 	};
 	
 	bool CheckLiquidFlat() {

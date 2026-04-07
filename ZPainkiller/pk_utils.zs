@@ -148,39 +148,48 @@ class PK_Utils abstract {
 		thing.pitch = -atan2(normal.z, normal.xy.Length()) + 90;
 	}
 
-	// Checks if given 3D floor is swimmable:
-	static clearscope bool Is3DFloorSwimmable(F3DFloor ffloor) {
-		return ffloor &&
-		      (ffloor.flags & F3DFloor.FF_EXISTS) &&
-		     !(ffloor.flags & F3DFloor.FF_SOLID) &&
-		      (ffloor.flags & F3DFloor.FF_SWIMMABLE);
-	}
-
-	// Checks if given position is inside a swimmable 3D floor:
-	static clearscope bool, double, double IsPointUnderwater(Vector3 pos, Sector sec = null) {
+	// Checks if given position is inside a 3D floor and if so,
+	// returns it, and its top and bottom points:
+	static clearscope F3DFloor, double, double Get3DFloorAt(Vector3 pos, Sector sec = null, int requiredFlags = 0, int forbiddenflags = 0) {
 		// If sector is null, obtain sector from position.
 		// Otherwise, the given sector will be checked
 		// explicitly:
 		if (!sec) {
 			sec = level.PointInSector(pos.xy);
 		}
-		if (!sec) return false, 0, 0;
+		if (!sec) return null, 0, 0;
 
-		F3DFloor ff;
+		F3DFloor ffloor;
 		double top, bottom;
 		for (int i = sec.Get3DFloorCount() - 1; i >= 0; i--) {
-			ff = sec.Get3DFloor(i);
-			if (!Is3DFloorSwimmable(ff)) continue;
-
-			top = ff.top.ZAtPoint(pos.xy);
-			bottom = ff.bottom.ZAtPoint(pos.xy);
-			if (top >= pos.z && bottom <= pos.z) {
-				return true, top, bottom;
+			ffloor = sec.Get3DFloor(i);
+			if (!ffloor || !(ffloor.flags & F3DFloor.FF_EXISTS|requiredFlags) || (ffloor.flags & forbiddenflags)) {
+				continue;
 			}
+
+			top = ffloor.top.ZAtPoint(pos.xy);
+			bottom = ffloor.bottom.ZAtPoint(pos.xy);
+			if (top >= pos.z && bottom <= pos.z) {
+				return ffloor, top, bottom;
+			}
+		}
+		return null, 0, 0;
+	}
+
+	// Checks if given position is inside a swimmable 3D floor;
+	// if so, returns true, its top and bottom:
+	static clearscope bool, double, double IsPointUnderwater(Vector3 pos, Sector sec = null) {
+		if (!sec) {
+			sec = level.PointInSector(pos.xy);
+		}
+		if (!sec) return false, 0, 0;
+
+		let [ffloor, top, bottom] = Get3DFloorAt(pos, sec, requiredflags: F3DFloor.FF_SWIMMABLE, forbiddenflags: F3DFloor.FF_SOLID);
+		if (ffloor) {
+			return true, top, bottom;
 		}
 		return false, 0, 0;
 	}
-
 
 	static clearscope double, bool GetWaterHeight(Sector sec, vector3 pos) {
 		if (sec.MoreFlags & Sector.SECMF_UNDERWATER) {
@@ -328,9 +337,6 @@ class PK_ValueInterpolator : Object
 
 class PK_CollisionTracer : LineTracer
 {
-	//Vector3 spawnPos;
-	//double maxDistance;
-	bool stopAtWater;
 	bool hitWater;
 	EActorCollisionFlags actorflags;
 	enum EActorCollisionFlags {
@@ -342,8 +348,6 @@ class PK_CollisionTracer : LineTracer
 	static bool, Vector3, PK_CollisionTracer Detect(Vector3 start, Vector3 dir, Actor source = null, double maxdist = PLAYERMISSILERANGE, EActorCollisionFlags actorflags = AC_SOLID) {
 		let tracer = new('PK_CollisionTracer');
 		tracer.actorflags = actorflags;
-		//tracer.maxDistance = maxdist;
-		//tracer.spawnPos = start;
 		tracer.Trace(start,
 			sec: source? source.cursector : level.PointInSector(start.xy),
 			direction: dir.Unit(),
@@ -360,15 +364,6 @@ class PK_CollisionTracer : LineTracer
 	}
 
 	override ETraceStatus TraceCallback() {
-		if (stopAtWater) {
-			if (results.crossedWater || results.crossed3DWater) {
-				hitWater = true;
-				results.HitPos = results.crossedWater? results.crossedWaterPos : results.crossed3DWaterPos;
-				return TRACE_Stop;
-			}
-			return TRACE_Skip;
-		}
-
 		switch (results.HitType) {
 			case TRACE_HitActor:
 				let act = results.HitActor;
@@ -386,28 +381,11 @@ class PK_CollisionTracer : LineTracer
 				break;
 		}
 
-		/*if (results.distance > maxDistance) {
-			results.HitPos = level.Vec3Offset(results.HitPos, results.HitVector.Unit() * -(results.distance - maxDistance));
-			return TRACE_Stop;
-		}*/
-
 		return TRACE_Skip;
 	}
 }
 
 class PK_WaterCollisionTracer : LineTracer {
-	/*uint callbacknum;
-	static const String hittypeNames[] =
-	{
-		"None",
-		"Floor",
-		"Ceiling",
-		"Wall",
-		"Actor",
-		"Portal",
-		"Sky"
-	};*/
-
 	bool hitWater;
 
 	static bool, Vector3, PK_WaterCollisionTracer Detect(Vector3 start, Vector3 dir, Actor source = null) {
@@ -422,11 +400,20 @@ class PK_WaterCollisionTracer : LineTracer {
 		
 		return tracer.HitWater, tracer.results.HitPos, tracer;
 	}
+
 	override ETraceStatus TraceCallback() {
 		// this should detect top of water consistently:
 		if (results.crossedWater || results.crossed3DWater) {
 			hitWater = true;
 			results.HitPos = results.crossedWater? results.crossedWaterPos : results.crossed3DWaterPos;
+			// expressly record the 3D floor when hitting it:
+			if (results.crossed3DWater) {
+				let [ffloor, top, bottom] = PK_Utils.Get3DFloorAt(results.HitPos, requiredflags: F3DFloor.FF_SWIMMABLE, forbiddenflags: F3DFloor.FF_SOLID);
+				if (ffloor) {
+					results.ffloor = ffloor;
+					results.HitType = (top - results.HitPos.z < results.HitPos.z - bottom)? TRACE_HitFloor : TRACE_HitCeiling;
+				}
+			}
 			return TRACE_Stop;
 		}
 
@@ -450,6 +437,18 @@ class PK_WaterCollisionTracer : LineTracer {
 			}
 			return (hitline.flags & Line.ML_BLOCKEVERYTHING)? TRACE_Stop : TRACE_Skip;
 		}
+
+		/*else if (results.HitType == TRACE_HitFloor) {
+			if (!results.HitTexture.IsValid()) return TRACE_Skip;
+
+			String texname = TexMan.GetName(results.HitTexture);
+			for (int i = PK_BaseActor.PK_LiquidFlats.Size() - 1; i >= 0; i--) {
+				if (PK_BaseActor.PK_LiquidFlats[i].IndexOf(texname) >= 0) {
+					hitwater = true;
+					return TRACE_Stop;
+				}
+			}
+		}*/
 
 		return TRACE_Skip;
 	}
