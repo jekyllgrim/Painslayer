@@ -207,18 +207,24 @@ Class PK_BaseActor : Actor abstract {
 	static const string PK_LiquidFlats[] = { 
 		"BLOOD", "LAVA", "NUKAGE", "WATER", "SLIME01", "SLIME02", "SLIME03", "SLIME04", "SLIME05", "SLIME06", "SLIME07", "SLIME08", "BDT_"
 	};
+
+	static clearscope bool IsLiquidTexture(TextureID tex) {
+		if (!tex.IsValid()) return false;
+		String texname = TexMan.GetName(tex);
+		for (int i = PK_BaseActor.PK_LiquidFlats.Size() - 1; i >= 0; i--) {
+			if (texname.IndexOf(PK_BaseActor.PK_LiquidFlats[i]) >= 0) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	bool CheckLiquidFlat() {
 		if (!self)
 			return false;
 		if (GetFloorTerrain().isLiquid == true)
 			return true;
-		string tex = TexMan.GetName(floorpic);
-		for (int i = 0; i < PK_LiquidFlats.Size(); i++) {
-			if (tex.IndexOf(PK_LiquidFlats[i]) >= 0 )
-				return true;
-		}
-		return false;
+		return IsLiquidTexture(self.floorpic);
 	}
 	
 	override void Tick() {

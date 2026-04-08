@@ -124,7 +124,6 @@ Class PK_ElectroDriver : PKWeapon {
 			bool hitflatwater = false;
 			// if that something is flat water, deal damage across that:
 			if (tracedata.HitType == TRACE_HitFloor && tracedata.hitTexture.isValid()) {
-				String texname = TexMan.GetName(tracedata.hitTexture);
 				let puf = PK_ElectroDamageSplash(Spawn("PK_ElectroDamageSplash", pufpos));
 				if (puf) {
 					puf.waitTimer = 2;
@@ -134,16 +133,11 @@ Class PK_ElectroDriver : PKWeapon {
 				if (puf && puf.GetFloorTerrain().isLiquid) {
 					hitflatwater = true;
 				}
-				else {
-					for (int i = PK_BaseActor.PK_LiquidFlats.Size() - 1; i >= 0; i--) {
-						if (texname.IndexOf(PK_BaseActor.PK_LiquidFlats[i]) >= 0) {
-							hitflatwater = true;
-							break;
-						}
-					}
+				else if (PK_BaseActor.IsLiquidTexture(tracedata.HitTexture)) {
+					hitflatwater = true;
 				}
 				if (hitflatwater && puf) {
-					PK_ElectroDriver.DealWaterDamage(puf, self, flatTexName: texname);
+					PK_ElectroDriver.DealWaterDamage(puf, self, flatTexName: TexMan.GetName(tracedata.hitTexture));
 					return pufpos;
 				}
 				else if (puf) {
