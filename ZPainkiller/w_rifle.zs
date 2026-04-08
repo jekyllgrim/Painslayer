@@ -547,7 +547,7 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 
 	override void Tick() {
 		super.Tick();
-		if (waterlevel > 1) {
+		if (waterlevel > 0) {
 			Destroy();
 			return;
 		}
@@ -601,8 +601,15 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 		TNT1 A 1;
 		stop;
 	Death:
-		TNT1 A 0 A_Stop();
-		TNT1 AAAAAAAAAAAAAA random(3,6) {			
+		TNT1 A 0
+		{
+			A_Stop();
+			if (pos.z <= floorz + height && (GetFloorTerrain().isLiquid || PK_BaseActor.IsLiquidTexture(floorpic))) {
+				return ResolveState("Null");
+			}
+			return ResolveState(null);
+		}
+		TNT1 AAAAAAAAAAAAAA random(3,6) {
 			if (GetParticlesLevel() >= PL_Full) {
 				if (!flamePartTex)
 					flamePartTex = TexMan.CheckForTexture("PFLPA0", TexMan.Type_Wall);
