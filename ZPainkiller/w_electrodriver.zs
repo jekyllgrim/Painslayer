@@ -242,6 +242,26 @@ Class PK_ElectroDriver : PKWeapon {
 			watertex = TexMan.CheckForTexture(flatTexName);
 		}
 		bool flatwater = watertex.IsValid();
+		// build an array of connected sectors (used for flat water):
+		/*array<Sector> connectedSectors;
+		if (flatwater) {
+			Sector cursector, othersector;
+			cursector = emitter.cursector;
+			connectedSectors.Push(cursector);
+			Line curline;
+			for (int i = cursector.lines.Size() - 1; i >= 0; i--) {
+				curline = cursector.lines[i];
+				if (!curline) continue;
+				othersector = curline.frontsector == cursector? curline.backsector : curline.frontsector;
+				if (othersector == cursector) continue;
+				if (othersector.GetTexture(Sector.floor) != watertex) continue;
+
+				if (othersector && connectedSectors.Find(othersector) == connectedSectors.Size()) {
+					connectedSectors.Push(othersector);
+				}
+			}
+		}*/
+
 		BlockThingsIterator itr = BlockThingsIterator.CreateFromPos(emitPos.x, emitPos.y, emitPos.z, emitPos.z, rad, false);
 		double dist = rad * rad;
 		while (itr.next()) {
@@ -252,12 +272,13 @@ Class PK_ElectroDriver : PKWeapon {
 				continue;
 			
 			// flat water - check distance, that the texture
-			// undex next matches, and it's close enough to
-			// the floor:
+			// undex next matches, actor is close enough to
+			// the floor, and is in a connected sector:
 			if (flatwater) {
 				if (emitter.Distance2DSquared(next) > dist ||
 				    next.floorpic != watertex ||
-				    abs(next.pos.z - next.floorz) > 10)
+				    abs(next.pos.z - next.floorz) > 10/* ||
+					connectedSectors.Find(next.cursector) == connectedSectors.Size()*/)
 				continue;
 			}
 			// 3d water - check distance and waterlevel:
@@ -274,6 +295,7 @@ Class PK_ElectroDriver : PKWeapon {
 		pp.fadestep = -1;
 		pp.lifetime = 10;
 		double pz, pr, pAngle, pDist;
+
 		Vector3 pdir;
 		for (int i = int(round(rad / 4.0)); i > 0; i--) {
 			pz = frandom[etp](-1.0, 1.0);
@@ -286,15 +308,15 @@ Class PK_ElectroDriver : PKWeapon {
 			pDist = rad * (frandom[etp](0.0, 1.0) ** 0.3334);
 			pp.pos = level.Vec3Offset(emitpos, pdir * pDist);
 			emitter.SetOrigin((pp.pos), false);
-			if (flatwater) {
+			emitter.UpdateWaterLevel(false);
+			if (flatwater && emitter.waterlevel <= 0) {
 				pp.pos.z = emitter.cursector.floorplane.ZAtPoint(pp.pos.xy);
 				emitter.SetZ(pp.pos.z);
 			}
-			emitter.UpdateWaterLevel(false);
 			if (!level.IsPointInLevel(pp.pos)) {
 				continue;
 			}
-			if ((flatwater && emitter.floorpic == watertex) || emitter.waterlevel) {
+			if ((flatwater && emitter.floorpic == watertex/* && connectedSectors.Find(emitter.cursector) != connectedSectors.Size()*/) || emitter.waterlevel) {
 				pp.color1 = PK_ElectroDriver.electricBlipColors[random[epart](0, PK_ElectroDriver.electricBlipColors.Size() - 1)];
 				pp.Size = frandom[epart](10, 22);
 				level.SpawnParticle(pp);
@@ -490,6 +512,76 @@ class PK_Lightning : PK_LaserBeam {
 			beam.StartTracking(aimpos);
 		}
 		return beam;
+	}
+
+	static void DrawParticleLightning(Vector3 from, Vector3 to)
+	{
+		let diff = Level.Vec3Diff(from, to);
+		let dir = diff.Unit();
+		let dist = diff.Length();
+		double nodeDist = Clamp(dist / 10, min(8, dist), min(80, dist));
+		int steps = nodeDist < dist? floor(dist / nodeDist) : 1;
+		double ofss = nodeDist / 4.0;
+
+		array <double> litPosX;
+		array <double> litPosY;
+		array <double> litPosZ;
+		Vector3 partPos = from;
+		Vector3 node;
+		for (int i = 1; i <= steps; i++)
+		{
+			partPos += dir*nodeDist;
+			node = partPos;
+			if (i < steps)
+			{
+				node += (frandom[lightningpart](-ofss, ofss), 
+						frandom[lightningpart](-ofss, ofss), 
+						frandom[lightningpart](-ofss, ofss));
+			}
+			litPosX.Push(node.x);
+			litPosY.Push(node.y);
+			litPosZ.Push(node.z);
+		}
+
+		steps = min(litPosX.Size(), litPosY.Size(), litPosZ.Size());
+		for (int i = 0; i < steps; i++)
+		{
+			node.x = litPosX[i];
+			node.y = litPosY[i];
+			node.z = litPosZ[i];
+			DrawParticleLightningSegment(from, node, density: 1, size: 4, posOfs: 0);
+			from = node;
+		}
+	}
+
+	static void DrawParticleLightningSegment(Vector3 from, Vector3 to, double density = 8, double size = 10, double posOfs = 2)
+	{
+		let diff = Level.Vec3Diff(from, to); // difference between two points
+		let dir = diff.Unit(); // direction from point 1 to point 2
+		int steps = floor(diff.Length() / density); // how many steps to take:
+
+		// Generic particle properties:
+		posOfs = abs(posOfs);
+		FSpawnParticleParams pp;
+		pp.color1 = 0xFFCCCCFF;
+		pp.flags = SPF_FULLBRIGHT|SPF_REPLACE;
+		pp.lifetime = 1;
+		pp.size = size; // size
+		pp.style = STYLE_Add; //additive renderstyle
+		pp.startalpha = 1;
+		Vector3 partPos = from; //initial position
+		for (int i = 0; i <= steps; i++)
+		{
+			pp.pos = partPos;
+			if (posOfs > 0)
+			{
+				pp.pos + (frandom[lightningpart](-posOfs,posOfs), frandom[lightningpart](-posOfs,posOfs), frandom[lightningpart](-posOfs,posOfs));
+			}
+			// spawn the particle:
+			Level.SpawnParticle(pp);
+			// Move position from point 1 topwards point 2:
+			partPos += dir*density;
+		}
 	}
 
 	// --------------------------------------------------------------------------

@@ -199,24 +199,15 @@ class PK_Utils abstract {
 		if (hsec) {
 			double top = hsec.floorPlane.ZAtPoint(pos.xy);
 			if ((hsec.MoreFlags & Sector.SECMF_UNDERWATERMASK)
-				&& (pos.z < top
+				&& (pos.z <= top
 				|| (!(hsec.MoreFlags & Sector.SECMF_FAKEFLOORONLY) && pos.z > hsec.ceilingPlane.ZAtPoint(pos.xy)))) {
 				return top, true;
 			}
 		}
 		else {
-			for (int i = sec.Get3DFloorCount() - 1; i >=0; i--) {
-				let ffloor = sec.Get3DFloor(i);
-				if (!(ffloor.flags & F3DFloor.FF_EXISTS)
-					|| (ffloor.flags & F3DFloor.FF_SOLID)
-					|| !(ffloor.flags & F3DFloor.FF_SWIMMABLE)) {
-					continue;
-				}
-					
-				double top = ffloor.top.ZAtPoint(pos.xy);
-				if (top > pos.z && ffloor.bottom.ZAtPoint(pos.xy) <= pos.z) {
-					return top, true;
-				}
+			let [isunderwater, top, bottom] = IsPointUnderwater(pos, sec);
+			if (isunderwater) {
+				return top, true;
 			}
 		}	
 		return 0, false;
@@ -405,6 +396,7 @@ class PK_WaterCollisionTracer : LineTracer {
 		// this should detect top of water consistently:
 		if (results.crossedWater || results.crossed3DWater) {
 			hitWater = true;
+			// record water position in HitPos:
 			results.HitPos = results.crossedWater? results.crossedWaterPos : results.crossed3DWaterPos;
 			// expressly record the 3D floor when hitting it:
 			if (results.crossed3DWater) {
@@ -414,6 +406,7 @@ class PK_WaterCollisionTracer : LineTracer {
 					results.HitType = (top - results.HitPos.z < results.HitPos.z - bottom)? TRACE_HitFloor : TRACE_HitCeiling;
 				}
 			}
+			// TODO: handling for non-3d water (if anything special is needed?
 			return TRACE_Stop;
 		}
 
@@ -437,18 +430,6 @@ class PK_WaterCollisionTracer : LineTracer {
 			}
 			return (hitline.flags & Line.ML_BLOCKEVERYTHING)? TRACE_Stop : TRACE_Skip;
 		}
-
-		/*else if (results.HitType == TRACE_HitFloor) {
-			if (!results.HitTexture.IsValid()) return TRACE_Skip;
-
-			String texname = TexMan.GetName(results.HitTexture);
-			for (int i = PK_BaseActor.PK_LiquidFlats.Size() - 1; i >= 0; i--) {
-				if (PK_BaseActor.PK_LiquidFlats[i].IndexOf(texname) >= 0) {
-					hitwater = true;
-					return TRACE_Stop;
-				}
-			}
-		}*/
 
 		return TRACE_Skip;
 	}
