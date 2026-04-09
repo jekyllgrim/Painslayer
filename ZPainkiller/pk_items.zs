@@ -479,13 +479,89 @@ Class PK_VeryBigGold : PK_GoldPickup {
 // ENEMY SOULS (healing) //
 ///////////////////////////
 
+class PK_SoulParticle : VisualThinker {
+	Inventory soulmaster;
+	double rotationAngle;
+	double rotationSpeed;
+	Vector3 rotationOffset;
+	Quat rotationTilt;
+	FSpawnParticleParams ptrail;
+
+	static void P_CreateSoulVisuals(Inventory soulmaster, Color soulcolor = -1) {
+		PK_SoulParticle p;
+		for (int i = 0; i < 4; i++) {
+			p = P_Spawn(soulmaster, 90 * i, -70 + 70*i, i % 2 == 0? 8 : -8);
+			if (soulcolor != -1 && p) {
+				p.SetRenderStyle(STYLE_AddShaded);
+				p.scolor = soulcolor;
+			}
+		}
+	}
+
+	static PK_SoulParticle P_Spawn(Inventory soulmaster, double angle, double roll, double rotspeed = 10, double offset = 16) {
+		if (!soulmaster) return null;
+		let deb = PK_SoulParticle(VisualThinker.Spawn('PK_SoulParticle',
+			tex: TexMan.CheckForTexture("SPRKB0"),
+			pos: soulmaster.pos,
+			alpha: 1.0,
+			flags: SPF_FULLBRIGHT,
+			scale: (0.1, 0.1),
+			style: STYLE_ADD));
+		if (deb) {
+			deb.soulmaster = soulmaster;
+			deb.rotationTilt = Quat.FromAngles(0, roll, 0);
+			deb.rotationAngle = angle;
+			deb.rotationSpeed = rotspeed;
+			deb.rotationOffset = (0, offset, 0);
+		}
+		return deb;
+	}
+
+	void UpdateParticle() {
+		ptrail.lifetime = 28;
+		ptrail.pos = pos;
+		if (self.scolor == 0xffffff) {
+			ptrail.color1 = "";
+		}
+		else {
+			ptrail.color1 = self.scolor;
+		}
+		ptrail.texture = self.texture;
+		ptrail.startalpha = self.alpha;
+		ptrail.fadestep = -1;
+		ptrail.style = self.GetRenderStyle();
+		ptrail.flags = SPF_FULLBRIGHT;
+		ptrail.size = 14;
+		ptrail.sizestep = -(ptrail.size / TICRATE);
+	}
+
+	override void Tick() {
+		if (!soulmaster || soulmaster.bNoSector) {
+			Destroy();
+			return;
+		}
+
+		alpha = soulmaster.alpha;
+
+		if (ptrail.lifetime == 0) {
+			UpdateParticle();
+		}
+		ptrail.startalpha = self.alpha;
+		//level.SpawnParticle(ptrail);
+
+		Quat spin = Quat.FromAngles(rotationAngle, 0, 0);
+		pos = level.Vec3Offset(soulmaster.pos.PlusZ(soulmaster.height), rotationTilt * spin * rotationOffset);
+		rotationAngle += rotationSpeed;
+	}
+}
+
 /*	Enemies spawn souls that will heal the player.
 	The amount healed is based on the monster's spawnhealth
 */
 
 Class PK_Soul : PK_Inventory {
 	protected TextureID partTex;
-	PK_BoardEventHandler event;
+	PK_BoardEventHandler boardhandler;
 	int age;
 	protected int maxage;
 	protected int actualAmount;
@@ -504,7 +580,7 @@ Class PK_Soul : PK_Inventory {
 		inventory.pickupmessage "$PKI_SOUL";
 		inventory.amount 2;
 		inventory.maxamount 100;
-		renderstyle 'Add';
+		renderstyle 'None';//'Add';
 		gravity 0.025;
 		alpha 1;
 		xscale 0.3;
@@ -517,7 +593,7 @@ Class PK_Soul : PK_Inventory {
 	
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
+		boardhandler = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
 		partTex = TexMan.CheckForTexture('pksoulpg');
 		if (bearer) {
 			//define an amount between 1-20 based on monster's health (linearly mapped between 20-500):
@@ -549,6 +625,7 @@ Class PK_Soul : PK_Inventory {
 				str = bearer.GetClassName();
 			console.printf("Spawned soul, bearer: %s, amount: %d",str,amount);
 		}
+		PK_SoulParticle.P_CreateSoulVisuals(self);
 	}
 	
 	override bool TryPickup (in out Actor toucher) {
@@ -581,7 +658,7 @@ Class PK_Soul : PK_Inventory {
 		if (isFrozen())
 			return;
 		// Increase age unless Soul Keeper is in effect:
-		if (!event || !event.SoulKeeper)
+		if (!boardhandler || !boardhandler.SoulKeeper)
 			age++;
 		
 		//Soul Catcher effect:
