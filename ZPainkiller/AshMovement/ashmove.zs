@@ -337,26 +337,31 @@ class PK_PlayerPawn : DoomPlayer
 				// values:
 				Vector2 accel = (fm, -sm) * movefactor  * (35 / TICRATE);
 				Vector2 wishvel = accel / (1.0 - friction);
-				// [AA] rotate to current yaw (facing angle):
-				wishvel = Actor.RotateVector(wishvel, angle);
 				
-				// [AA] Since we're not using ForwardThrust(), this bit is
-				// moved out of it to still allow underwater movement by
-				// by pressing forward:
+				// [AA] Since we're not using ForwardThrust(), we need to
+				// recreate it to allow the player to fly/swim by using
+				// forward/back input (this has to be done before wishvel
+				// is rotated):
 				if ((waterlevel || bNoGravity) && !(pitch ~== 0) && !player.GetClassicFlight())
 				{
-					// [AA] Note zpush is calculated from accel, NOT wishvel:
-					double zpush = accel.Length() * sin(Pitch);
+					// [AA] Zpush is calculated from accel (desired velocity)
+					// not wishvel (real velocity). Only the X (forward)
+					// component is used, since sideways movement should not
+					// cause up/down fly/swim movement:
+					double zpush = accel.x * sin(Pitch);
 					if (waterlevel && waterlevel < 2 && zpush < 0)
 					{
 						zpush = 0;
 					}
 					vel.z -= zpush;
-					// [AA] but wishvel has to be reduced here accordingly,
+					// [AA] but wishvel.x has to be reduced here accordingly,
 					// so forward momentum is reduced relative to vertical
 					// momentum gained:
-					wishvel *= cos(Pitch);
+					wishvel.x *= cos(Pitch);
 				}
+
+				// [AA] Rotate wishvel to current yaw (facing angle):
+				wishvel = Actor.RotateVector(wishvel, angle);
 
 				am_accelfac = clamp(am_accelfac, 0.01, 1.0);
 				wishvel /= am_accelfac / (1.0 - friction + am_accelfac);
