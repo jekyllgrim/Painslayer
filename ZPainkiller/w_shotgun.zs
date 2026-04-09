@@ -482,8 +482,10 @@ Class PK_FreezeControl : PK_InventoryToken {
 			owner.speed = prevSpeed;
 			if (owner.health > 0) {
 				owner.bNOGRAVITY = prevGrav;
-				owner.A_SetTics(20);
-				owner.SetState(owner.seestate);
+				if (owner.seestate)
+					owner.SetState(owner.seestate);
+				else if (owner.spawnstate)
+					owner.SetState(owner.spawnstate);
 			}
 		}
 		super.DetachFromOwner();
