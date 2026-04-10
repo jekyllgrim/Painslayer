@@ -5,7 +5,7 @@ Class PK_GoldContainer : PK_BaseActor abstract {
 		+SHOOTABLE
 		+VULNERABLE
 		+NOBLOODDECALS
-		bloodtype "PK_PropDebris";
+		+NOBLOOD
 		mass 1000;
 		health 100;
 		radius 20;
@@ -13,6 +13,7 @@ Class PK_GoldContainer : PK_BaseActor abstract {
 		scale 0.6;
 		PK_GoldContainer.debriscolor "3a2B19";
 	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		// Change the chest's position randomly, then check
@@ -31,6 +32,29 @@ Class PK_GoldContainer : PK_BaseActor abstract {
 			Destroy();
 		}
 	}
+
+	override int DamagemObj(Actor inflictor, Actor source, int damage, name mod, int flags, double angle) {
+		int dmg = Super.DamageMobj(inflictor, source, damage, mod, flags, angle);
+		if (dmg > 0 && GetParticlesLevel() >= PL_REDUCED) {
+			for (int i = random[sfx](1,3); i > 0; i--) {
+				let deb = PK_LightDebris.PK_SpawnDebris(
+					PK_LightDebris.GetRandomDebrisTex(),
+					pos + (frandom[sfx](-radius, radius), frandom[sfx](-radius, radius), frandom[sfx](8, height)),
+					vel: (frandom[sfx](-5,5),frandom[sfx](-5,5),frandom[sfx](2,5)),
+					gravity: 0.35,
+					size: frandom[sfx](6, 10),
+					sizefac: 0.98,
+					rollstep: frandom[sfx](-15, 15),
+					hordampen: 0.96);
+				if (deb) {
+					deb.SetRenderStyle(STYLE_Shaded);
+					deb.scolor = 0x101010;
+				}
+			}
+		}
+		return dmg;
+	}
+
 	override void Die(Actor source, Actor inflictor, int dmgflags, Name MeansOfDeath) {
 		double zofs = default.height;
 		for (int i = random[gold](4,7); i > 0; i--) {
@@ -44,12 +68,20 @@ Class PK_GoldContainer : PK_BaseActor abstract {
 				gg.vel = (frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](1,4));
 		}
 		
-		if (GetParticlesLevel() >= PL_Full) {
-			for (int i = random[sfx](5,8); i > 0; i--) {
-				let deb = PK_RandomDebris(Spawn("PK_PropDebris",(pos.x,pos.y,pos.z) + (frandom[sfx](-radius,radius),frandom[sfx](-radius,radius),frandom[sfx](8,height))));
+		if (GetParticlesLevel() >= PL_REDUCED) {
+			for (int i = random[sfx](7,10); i > 0; i--) {
+				let deb = PK_LightDebris.PK_SpawnDebris(
+					PK_LightDebris.GetRandomDebrisTex(),
+					pos + (frandom[sfx](-radius, radius), frandom[sfx](-radius, radius), frandom[sfx](8, height)),
+					vel: (frandom[sfx](-5,5),frandom[sfx](-5,5),frandom[sfx](2,5)),
+					gravity: 0.35,
+					size: frandom[sfx](9, 14),
+					sizefac: 0.98,
+					rollstep: frandom[sfx](-15, 15),
+					hordampen: 0.96);
 				if (deb) {
-					deb.vel = (frandom[sfx](-5,5),frandom[sfx](-5,5),frandom[sfx](2,5));
-					deb.master = self;
+					deb.SetRenderStyle(STYLE_Shaded);
+					deb.scolor = 0x101010;
 				}
 			}
 		}
@@ -66,24 +98,6 @@ Class PK_GoldContainer : PK_BaseActor abstract {
 	Death:
 		#### C -1 A_Scream;
 		stop;
-	}
-}
-
-Class PK_PropDebris : PK_RandomDebris {
-	Default {
-		+PUFFGETSOWNER
-		scale 0.3;
-		renderstyle 'Shaded';
-	}
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		if (master && master is "PK_GoldContainer") {
-			double targetAngle = -AngleTo(master) + frandom[debris](-40,40);
-			VelFromAngle(frandom[debris](1,2),targetAngle);
-			vel.z = frandom[debris](2,4);
-			let prop = PK_GoldContainer(master);
-			SetShade(prop.debriscolor);
-		}
 	}
 }
 	
