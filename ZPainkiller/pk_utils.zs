@@ -434,3 +434,53 @@ class PK_WaterCollisionTracer : LineTracer {
 		return TRACE_Skip;
 	}
 }
+
+class PK_Prop_Shootable : Actor
+{
+	Default
+	{
+		+SOLID
+		height 56;
+		radius 16;
+		+SHOOTABLE
+		+NOBLOOD
+		+BUDDHA
+		+DONTTHRUST
+	}
+
+	States {
+	Spawn:
+		COLU A -1;
+		stop;
+	}
+}
+
+class PK_Prop_Monster : PK_Prop_Shootable
+{
+	Default
+	{
+		+ISMONSTER
+		Translation "0:255=#[255,128,128]";
+		-NOBLOOD
+	}
+
+	States {
+	Spawn:
+		POSS A -1;
+		stop;
+	}
+}
+
+class PK_Prop_MonsterFlying : PK_Prop_Monster
+{
+	Default
+	{
+		+NOGRAVITY
+	}
+
+	States {
+	Spawn:
+		HEAD A -1;
+		stop;
+	}
+}
