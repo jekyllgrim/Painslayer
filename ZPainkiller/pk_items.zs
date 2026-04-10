@@ -481,45 +481,63 @@ Class PK_VeryBigGold : PK_GoldPickup {
 
 class PK_SoulParticle : VisualThinker {
 	Inventory soulmaster;
+	double particleSize;
 	double rotationAngle;
 	double rotationSpeed;
 	Vector3 rotationOffset;
 	Quat rotationTilt;
+	Quat rotationYaw;
 	FSpawnParticleParams ptrail;
 
-	static void P_CreateSoulVisuals(Inventory soulmaster, Color soulcolor = -1) {
+	static void P_CreateSoulVisuals(Inventory soulmaster, Color soulcolor = -1, double rotspeed = 8, double offset = 16, String texture = "SPRKB0", double size = 16) {
 		PK_SoulParticle p;
+		double startroll = frandom[sfx](-75, 75);
+		Quat yaw = Quat.FromAngles(0, 0, frandom[sfx](0,360));
 		for (int i = 0; i < 4; i++) {
-			p = P_Spawn(soulmaster, 90 * i, -70 + 70*i, i % 2 == 0? 8 : -8);
+			p = P_Spawn(soulmaster,
+				angle: 90 * i,
+				roll: startroll + 70*i + frandom[sfx](-4, 4),
+				rotspeed: i % 2 == 0? rotspeed : -rotspeed,
+				offset: offset,
+				texture: texture,
+				size: size
+			);
 			if (soulcolor != -1 && p) {
 				p.SetRenderStyle(STYLE_AddShaded);
 				p.scolor = soulcolor;
+				p.rotationYaw = yaw;
 			}
 		}
 	}
 
-	static PK_SoulParticle P_Spawn(Inventory soulmaster, double angle, double roll, double rotspeed = 10, double offset = 16) {
+	static PK_SoulParticle P_Spawn(Inventory soulmaster, double angle, double roll, double rotspeed, double offset, String texture, double size) {
 		if (!soulmaster) return null;
+		TextureID tex = TexMan.CheckForTexture(texture);
+		if (!tex.isValid()) return null;
+		Vector2 texsize = TexMan.GetScaledSize(tex);
+		Vector2 scale = (size / texsize.x, size / texsize.y);
 		let deb = PK_SoulParticle(VisualThinker.Spawn('PK_SoulParticle',
-			tex: TexMan.CheckForTexture("SPRKB0"),
+			tex: tex,
 			pos: soulmaster.pos,
 			alpha: 1.0,
 			flags: SPF_FULLBRIGHT,
-			scale: (0.1, 0.1),
+			scale: scale,
 			style: STYLE_ADD));
 		if (deb) {
 			deb.soulmaster = soulmaster;
 			deb.rotationTilt = Quat.FromAngles(0, roll, 0);
+			deb.rotationYaw = Quat.FromAngles(0, 0, frandom[sfx](0,360));
 			deb.rotationAngle = angle;
 			deb.rotationSpeed = rotspeed;
 			deb.rotationOffset = (0, offset, 0);
+			deb.particleSize = size;
 		}
 		return deb;
 	}
 
+	// fixed parameters for the particle trail:
 	void UpdateParticle() {
 		ptrail.lifetime = 28;
-		ptrail.pos = pos;
 		if (self.scolor == 0xffffff) {
 			ptrail.color1 = "";
 		}
@@ -527,11 +545,10 @@ class PK_SoulParticle : VisualThinker {
 			ptrail.color1 = self.scolor;
 		}
 		ptrail.texture = self.texture;
-		ptrail.startalpha = self.alpha;
 		ptrail.fadestep = -1;
 		ptrail.style = self.GetRenderStyle();
 		ptrail.flags = SPF_FULLBRIGHT;
-		ptrail.size = 14;
+		ptrail.size = self.particleSize;
 		ptrail.sizestep = -(ptrail.size / TICRATE);
 	}
 
@@ -540,17 +557,27 @@ class PK_SoulParticle : VisualThinker {
 			Destroy();
 			return;
 		}
+		if (isFrozen()) return;
+		if (soulmaster.renderRequired > -1) {
+			self.alpha = 0;
+			return;
+		}
+		Super.Tick();
 
 		alpha = soulmaster.alpha;
-
+		// Has to be continuously checked, since FSpawnParticleParams
+		// seems to be non-serializable, so it may need to be updated
+		// upon loading a save:
 		if (ptrail.lifetime == 0) {
 			UpdateParticle();
 		}
+		ptrail.pos = self.pos;
 		ptrail.startalpha = self.alpha;
-		//level.SpawnParticle(ptrail);
+		level.SpawnParticle(ptrail);
+
 
 		Quat spin = Quat.FromAngles(rotationAngle, 0, 0);
-		pos = level.Vec3Offset(soulmaster.pos.PlusZ(soulmaster.height), rotationTilt * spin * rotationOffset);
+		pos = level.Vec3Offset(soulmaster.pos.PlusZ(soulmaster.height), rotationYaw * rotationTilt * spin * rotationOffset);
 		rotationAngle += rotationSpeed;
 	}
 }
@@ -559,9 +586,55 @@ class PK_SoulParticle : VisualThinker {
 	The amount healed is based on the monster's spawnhealth
 */
 
-Class PK_Soul : PK_Inventory {
-	protected TextureID partTex;
-	PK_BoardEventHandler boardhandler;
+class PK_SoulBase : Health abstract {
+	mixin PK_ParticleLevelCheck;
+	mixin PK_PlayerSightCheck;
+	mixin PK_PickupSound;
+
+	TextureID partTex;
+	
+	Default {
+		+BRIGHT
+		+DONTGIB
+		+FORCEXYBILLBOARD
+		+Inventory.AUTOACTIVATE //does nothing on its own, this is needed for ALWAYSPICKUP
+		renderstyle 'Add';
+		gravity 0.025;
+		alpha 1;
+		xscale 0.3;
+		yscale 0.26;
+		radius 16;
+		height 20;
+	}
+
+	void UpdateDisplayStyle() {
+		if (self.renderRequired >= 0 && GetParticlesLevel() >= PL_FULL) {
+			self.renderRequired = -1;
+		}
+		if (self.renderRequired < 0 && GetParticlesLevel() < PL_FULL) {
+			self.renderRequired = 1;
+		}
+	}
+
+	virtual void PK_SoulSpawned() {}
+	virtual void PK_SoulTick() {}
+
+	override void PostBeginPlay() {
+		Super.PostBeginPlay();
+		PK_SoulSpawned();
+	}
+
+	override void Tick() {
+		Super.Tick();
+		if (self && !self.bNoSector && !self.IsFrozen()) {
+			PK_SoulTick();
+		}
+	}
+}
+
+
+Class PK_Soul : PK_SoulBase {
+	PK_BoardEventHandler event;
 	int age;
 	protected int maxage;
 	protected int actualAmount;
@@ -573,27 +646,16 @@ Class PK_Soul : PK_Inventory {
 		+INVENTORY.NEVERRESPAWN
 		+INVENTORY.AUTOACTIVATE
 		+INVENTORY.ALWAYSPICKUP
-		+BRIGHT
-		+DONTGIB
-		+FORCEXYBILLBOARD
 		PK_Soul.maxage 350;
 		inventory.pickupmessage "$PKI_SOUL";
 		inventory.amount 2;
 		inventory.maxamount 100;
-		renderstyle 'None';//'Add';
-		gravity 0.025;
-		alpha 1;
-		xscale 0.3;
-		yscale 0.26;
-		radius 16;
-		height 20;
 		inventory.pickupsound "pickups/soul";
 		Tag "$PKC_Souls";
 	}
 	
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		boardhandler = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
+	override void PK_SoulSpawned() {
+		event = PK_BoardEventHandler(EventHandler.Find("PK_BoardEventHandler"));
 		partTex = TexMan.CheckForTexture('pksoulpg');
 		if (bearer) {
 			//define an amount between 1-20 based on monster's health (linearly mapped between 20-500):
@@ -619,13 +681,13 @@ Class PK_Soul : PK_Inventory {
 			}
 			A_AttachLight('soul',DynamicLight.PointLight, soulcolor, int(round(48 * scale.x)), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_NOSHADOWMAP|DYNAMICLIGHT.LF_DONTLIGHTACTORS);
 		}
+		PK_SoulParticle.P_CreateSoulVisuals(self, self.amount >= 15? 0xff0000 : -1);
 		if (pk_debugmessages > 2) {
 			string str = "none";
 			if (bearer)
 				str = bearer.GetClassName();
 			console.printf("Spawned soul, bearer: %s, amount: %d",str,amount);
 		}
-		PK_SoulParticle.P_CreateSoulVisuals(self);
 	}
 	
 	override bool TryPickup (in out Actor toucher) {
@@ -641,67 +703,57 @@ Class PK_Soul : PK_Inventory {
 		return true;
 	}
 	
-	/*override bool Use (bool pickup) { 
-		if (!owner)
-			return true;
-		let cont = PK_DemonMorphControl(owner.FindInventory("PK_DemonMorphControl"));
-		if (cont)
-			cont.GiveSoul();
-		if (owner.FindInventory("PKC_SoulRedeemer"))
-			amount *= 2;
-		owner.GiveBody(Amount, MaxAmount);
-		return true; 
-	}*/
-	
-	override void Tick() {
-		super.Tick();
-		if (isFrozen())
-			return;
+	override void PK_SoulTick() {
 		// Increase age unless Soul Keeper is in effect:
-		if (!boardhandler || !boardhandler.SoulKeeper)
+		if (!event || !event.SoulKeeper)
 			age++;
+
+		UpdateDisplayStyle();
 		
-		//Soul Catcher effect:
-		if (tracer && tracer.player) {
-			vel = Vec3To(tracer).Unit() * 10.5;
-			bNOINTERACTION = true;
-			if (Distance3D(tracer) < 32) {
-				PlayPickupSound(tracer);
-				PrintPickupMessage(tracer.CheckLocalView(), PickupMessage ());
-				CallTryPickup(tracer);
-				tracer = null;
-			}
-			if (GetParticlesLevel() >= PL_Full) {
-				int life = 25;
-				double pofs = radius * 0.3;
-				A_Face(tracer);
-				for (int i = 5; i > 0; i--) {
-					vector3 pvel = (frandom[spart](-1,1), frandom[spart](-1,1), frandom[spart](-1,1));
-					vector3 pacc = pvel / -life;					
-					A_SpawnParticleEx(
-						soulcolor,
-						partTex,
-						STYLE_Add,
-						SPF_FULLBRIGHT|SPF_RELPOS|SPF_REPLACE,
-						lifetime: 25,
-						size: 4,
-						xoff: -pofs,
-						yoff: frandom[spart](-pofs, pofs),
-						zoff: height * 0.8 + frandom[spart](-pofs, pofs),
-						velx: pvel.x,
-						vely: pvel.y,
-						velz: pvel.z,
-						//accelx: pacc.x,
-						//accely: pacc.y,
-						//accelz: pacc.z,
-						startalphaf: alpha,
-						sizestep: -0.05
-					);
-				}
+		if (!tracer || !tracer.player) {
+			bNoInteraction = false;
+			return;
+		}
+
+		// Soul Catcher effect:
+		// close enough to pick up:
+		double distTo = self.Distance3D(tracer);
+		if (distTo <= self.radius + tracer.radius) {
+			PlayPickupSound(tracer);
+			PrintPickupMessage(tracer.CheckLocalView(), PickupMessage ());
+			CallTryPickup(tracer);
+			tracer = null;
+			return;
+		}
+		// too far - fly towards player:
+		vel = Vec3To(tracer).Unit() * min(distTo, 10.5);
+		bNOINTERACTION = true;
+
+		// spawn trailing particles when flying (only in sprite mode):
+		if (self.renderRequired > -1 && GetParticlesLevel() >= PL_REDUCED) {
+			int life = 25;
+			double pofs = radius * 0.3;
+			A_Face(tracer);
+			for (int i = 5; i > 0; i--) {
+				vector3 pvel = (frandom[spart](-1,1), frandom[spart](-1,1), frandom[spart](-1,1));
+				A_SpawnParticleEx(
+					soulcolor,
+					partTex,
+					STYLE_Add,
+					SPF_FULLBRIGHT|SPF_RELPOS|SPF_REPLACE,
+					lifetime: 25,
+					size: 4,
+					xoff: -pofs,
+					yoff: frandom[spart](-pofs, pofs),
+					zoff: height * 0.8 + frandom[spart](-pofs, pofs),
+					velx: pvel.x,
+					vely: pvel.y,
+					velz: pvel.z,
+					startalphaf: alpha,
+					sizestep: -0.05
+				);
 			}
 		}
-		else if (bNOINTERACTION)
-			bNOINTERACTION = false;
 	}
 	
 	// The amount healed is printed in the pickup message:
@@ -717,6 +769,133 @@ Class PK_Soul : PK_Inventory {
 			if (age > maxage)
 				A_FadeOut(0.05);
 		}
+		loop;
+	}
+}
+
+// Soulsphere replacement. Can't be dropped by monsters.
+Class PK_GoldSoul : PK_SoulBase {
+	Default {
+		inventory.pickupmessage "$PKI_GOLDSOUL";
+		inventory.amount 100;
+		inventory.maxamount 200;
+		+NOGRAVITY
+		+COUNTITEM
+		alpha 0.9;
+		xscale 0.4;
+		yscale 0.332;
+		inventory.pickupsound "pickups/soul/gold";
+		Tag "$PKC_GoldSoul";
+	}
+
+	override void PK_SoulSpawned() {
+		PK_SoulParticle.P_CreateSoulVisuals(self, offset: 12, texture: "SPRKD0");
+	}
+
+	override void PK_SoulTick() {
+		UpdateDisplayStyle();
+		if (GetParticlesLevel() >= PL_FULL) {
+			if (!partTex)
+				partTex = TexMan.CheckForTexture("FLARB0");
+			
+			int life = random[part](25,35);
+			A_SpawnParticleEx(
+				"",
+				partTex,
+				STYLE_Add,
+				SPF_FULLBRIGHT|SPF_RELATIVE,
+				lifetime: life,
+				size: 4,
+				angle: random[part](0, 359),
+				xoff: random[part](4,10),
+				zoff:frandom[part](16,32),
+				velx: -0.35,
+				velz: frandom(0.5, 2),
+				sizestep: 4 / double(-life)
+			);
+		}
+	}
+	
+	states {
+	Spawn:
+		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
+	Idle:
+		GSOU ABCDEFGHIJKLMNOPQRSTU 2;
+		loop;
+	}
+}
+
+// Megasphere replacement. Can't be dropped by monsters.
+// Gives 200 health and armor.
+Class PK_MegaSoul : PK_GoldSoul {
+
+	Default {
+		inventory.amount 200;
+		inventory.maxamount 200;
+		inventory.pickupsound "pickups/soul/mega";
+		inventory.pickupmessage "$PKI_MEGASOUL";
+		+INVENTORY.ALWAYSPICKUP
+		Tag "$PKC_MegaSoul";
+	}
+
+	override void PK_SoulSpawned() {
+		PK_SoulParticle.P_CreateSoulVisuals(self, rotspeed: 6, offset: 18, size: 26, texture: "SPRKE0");
+		PK_SoulParticle.P_CreateSoulVisuals(self, rotspeed: 12, offset: 5, size: 12, texture: "SPRKD0");
+	}
+
+	override void PK_SoulTick() {
+		UpdateDisplayStyle();
+		if (GetParticlesLevel() >= PL_FULL) {
+			if (!partTex)
+				partTex = TexMan.CheckForTexture("FLARB0");
+			
+			int life = random[part](25,35);
+			for (int i = 3; i > 0; i--) {
+				A_SpawnParticleEx(
+					"c42626",
+					partTex,
+					STYLE_AddShaded,
+					SPF_FULLBRIGHT|SPF_RELATIVE,
+					lifetime: life,
+					size: 6,
+					angle: random[part](0, 359),
+					xoff: random[part](4,10),
+					zoff:frandom[part](16,32),
+					velx: -0.35,
+					velz: frandom(0.5, 2),
+					sizestep: 4 / double(-life)
+				);
+			}
+			life = random[part](20,25);
+			A_SpawnParticleEx(
+				"ffed78",
+				partTex,
+				STYLE_AddShaded,
+				SPF_FULLBRIGHT|SPF_RELATIVE,
+				lifetime: life,
+				size: 10,
+				angle: random[part](0, 359),
+				xoff: random[part](0,4),
+				zoff:frandom[part](18,26),
+				velx: -0.18,
+				velz: frandom(0.25, 1.4),
+				sizestep: 4 / double(-life)
+			);
+		}
+	}
+	
+	override bool TryPickup(in out actor toucher) {
+		if (toucher && toucher.player) {
+			toucher.GiveInventory("PK_GoldArmor", 1);
+		}
+		return Super.TryPickup(toucher);
+	}
+	
+	States {
+	Spawn:
+		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
+	Idle:
+		MSOU ABCDEFGHIJKLMNOPQRSTU 2;
 		loop;
 	}
 }
@@ -764,141 +943,6 @@ Class PowerChestOfSoulsRegen : PowerRegeneration {
 		Powerup.Duration -20;
 		Powerup.Strength 1;
 		Tag "$PKC_ChestOfSouls";
-	}
-}
-
-// Soulsphere replacement. Can't be dropped by monsters.
-Class PK_GoldSoul : Health {
-	mixin PK_ParticleLevelCheck;
-	mixin PK_PlayerSightCheck;
-	mixin PK_PickupSound;
-
-	TextureID partTex;
-	
-	Default {
-		inventory.pickupmessage "$PKI_GOLDSOUL";
-		inventory.amount 100;
-		inventory.maxamount 200;
-		+NOGRAVITY
-		+COUNTITEM
-		+BRIGHT
-		renderstyle 'Add';
-		alpha 0.9;
-		xscale 0.4;
-		yscale 0.332;
-		inventory.pickupsound "pickups/soul/gold";
-		Tag "$PKC_GoldSoul";
-	}
-
-	virtual void SpawnSoulParticles() {
-		if (!partTex)
-			partTex = TexMan.CheckForTexture("FLARB0");
-		
-		int life = random[part](25,35);
-		A_SpawnParticleEx(
-			"",
-			partTex,
-			STYLE_Add,
-			SPF_FULLBRIGHT|SPF_RELATIVE,
-			lifetime: life,
-			size: 4,
-			angle: random[part](0, 359),
-			xoff: random[part](4,10),
-			zoff:frandom[part](16,32),
-			velx: -0.35,
-			velz: frandom(0.5, 2),
-			sizestep: 4 / double(-life)
-		);
-	}
-
-	override void Tick() {
-		super.Tick();
-
-		if (GetParticlesLevel() < PL_Full)
-			return;
-		if (isFrozen())
-			return;	
-		
-		SpawnSoulParticles();
-	}
-	
-	states {
-	Spawn:
-		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
-	Idle:
-		GSOU ABCDEFGHIJKLMNOPQRSTU 2;
-		loop;
-	}
-}
-
-// Megasphere replacement. Can't be dropped by monsters.
-// Gives 200 health and armor.
-Class PK_MegaSoul : PK_GoldSoul {
-
-	Default {
-		inventory.amount 200;
-		inventory.maxamount 200;
-		inventory.pickupsound "pickups/soul/mega";
-		inventory.pickupmessage "$PKI_MEGASOUL";
-		+INVENTORY.ALWAYSPICKUP
-		//xscale 0.3;
-		//yscale 0.25;
-		//alpha 2.5;
-		Tag "$PKC_MegaSoul";
-	}
-	
-	override void SpawnSoulParticles() {
-		if (!partTex)
-			partTex = TexMan.CheckForTexture("FLARB0");
-		
-		int life = random[part](25,35);
-		for (int i = 3; i > 0; i--) {
-			A_SpawnParticleEx(
-				"c42626",
-				partTex,
-				STYLE_AddShaded,
-				SPF_FULLBRIGHT|SPF_RELATIVE,
-				lifetime: life,
-				size: 6,
-				angle: random[part](0, 359),
-				xoff: random[part](4,10),
-				zoff:frandom[part](16,32),
-				velx: -0.35,
-				velz: frandom(0.5, 2),
-				sizestep: 4 / double(-life)
-			);
-		}
-		
-		life = random[part](20,25);
-		A_SpawnParticleEx(
-			"ffed78",
-			partTex,
-			STYLE_AddShaded,
-			SPF_FULLBRIGHT|SPF_RELATIVE,
-			lifetime: life,
-			size: 10,
-			angle: random[part](0, 359),
-			xoff: random[part](0,4),
-			zoff:frandom[part](18,26),
-			velx: -0.18,
-			velz: frandom(0.25, 1.4),
-			sizestep: 4 / double(-life)
-		);
-	}
-	
-	override bool TryPickup(in out actor toucher) {
-		if (toucher && toucher.player) {
-			toucher.GiveInventory("PK_GoldArmor", 1);
-		}
-		return Super.TryPickup(toucher);
-	}
-	
-	States {
-	Spawn:
-		TNT1 A 0 NoDelay A_Jump(256,random[soul](1,20));
-	Idle:
-		MSOU ABCDEFGHIJKLMNOPQRSTU 2;
-		loop;
 	}
 }
 
