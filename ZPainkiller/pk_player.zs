@@ -139,7 +139,7 @@ class PK_PainkillerPlayer : PK_PlayerPawn {
 	// Generic check for whether we're currently mid-jump:
 	bool PK_IsJumping() {
 		// not on ground, not in water, affected by gravity, not in coyote time:
-		return !player.onground && !waterlevel && !bNoGravity && (am_coyoteTime > 0 || player.jumptics != 0) && !PK_IsPlayerFlying();
+		return player.jumptics != 0 && !player.onground && !waterlevel && !bNoGravity && !PK_IsPlayerFlying();
 	}
 
 	// Record relative angle at which we perform a jump:
