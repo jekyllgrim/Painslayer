@@ -181,13 +181,23 @@ Class PK_FreezerProjectile : PK_Projectile {
 			
 			if (GetParticlesLevel() >= PL_Full) {
 				for (int i = random[sfx](10,15); i > 0; i--) {
-					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
-					if (debris) {
-						double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
-						debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
-						debris.A_SetScale(frandom[sfx](0.12,0.25));
-						debris.A_SetRenderstyle(0.65,Style_AddShaded);
-						debris.SetShade("08caed");
+					let deb = PK_LightDebris.PK_SpawnDebris(
+						PK_LightDebris.GetRandomDebrisTex(),
+						pos: pos + (frandom[sfx](-8,8),
+						       frandom[sfx](-8,8),
+						       frandom[sfx](-8,8)),
+						vel: (frandom[sfx](-7, 7),
+						      frandom[sfx](-7, 7),
+						      pos.z <= floorz? frandom[sfx](4,12) : frandom[sfx](-5, 5)),
+						gravity: 0.35,
+						fadestep: 0.01,
+						hordampen: 0.98,
+						rollstep: frandom[sfx](-15, 15)
+					);
+					if (deb) {
+						deb.SetRenderstyle(STYLE_AddShaded);
+						deb.scolor = 0x08caed;
+						deb.scale = (0.12, 0.65) * frandom[sfx](0.9, 1.3);
 					}
 				}
 			}
@@ -411,19 +421,28 @@ Class PK_FreezeControl : PK_InventoryToken {
 						ice.gravity = 0.7;
 					}
 				}
-			}
-			if (GetParticlesLevel() >= PL_Full) {
-				for (int i = random[sfx](12,16); i > 0; i--) {
-					let ice = Spawn("PK_RandomDebris",owner.pos + (frandom[sfx](-rad,rad),frandom[sfx](-rad,rad),frandom[sfx](0,owner.default.height)));
-					if (ice) {
-						ice.master = owner;
-						ice.vel = (frandom[sfx](-3.5,3.5),frandom[sfx](-3.5,3.5),frandom[sfx](3,7));
-						ice.gravity = 0.5;
-						ice.A_SetRenderstyle(1.0,Style_AddShaded);
-						ice.SetShade("08caed");
-						ice.A_SetScale(frandom[sfx](0.4,0.75));
+				for (int i = random[sfx](25,30); i > 0; i--) {
+					let deb = PK_LightDebris.PK_SpawnDebris(
+						PK_LightDebris.GetRandomDebrisTex(),
+						pos: owner.pos + (frandom[sfx](-rad,rad),
+						                  frandom[sfx](-rad,rad),
+						                  frandom[sfx](0,owner.default.height)),
+						vel: (frandom[sfx](-3.5, 3.5),
+						      frandom[sfx](-3.5, 3.5),
+						      frandom[sfx](3, 7)),
+						gravity: 0.35,
+						fadestep: 0.01,
+						hordampen: 0.98,
+						rollstep: frandom[sfx](-15, 15)
+					);
+					if (deb) {
+						deb.SetRenderstyle(STYLE_AddShaded);
+						deb.scolor = 0x08caed;
+						deb.scale = (0.12, 0.65) * frandom[sfx](1.2, 1.8);
 					}
 				}
+			}
+			if (GetParticlesLevel() >= PL_Full) {
 			}
 			//spawn ice corpse:
 			double ownersize = (owner.radius * owner.default.height) / 8;
@@ -452,7 +471,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 				}
 			}
 			//large size: spawn another "ribcage"
-			if (ownersize >= 190) {				
+			if (ownersize >= 190) {
 				let rc = PK_IceRibcage(Spawn("PK_IceRibcage",owner.pos));
 				if (rc) {
 					rc.master = owner;

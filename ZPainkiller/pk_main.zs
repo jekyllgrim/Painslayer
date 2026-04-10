@@ -554,29 +554,235 @@ Class PK_SmallDebris : PK_BaseActor abstract {
 	}
 }
 
-Class PK_RicochetSpark : PK_SmallDebris {
-	Default {
-		PK_SmallDebris.dbrake 0.8;
-		alpha 1.5;
-		radius 3;
-		height 3;
-		scale 0.035;
-		+BRIGHT
+class PK_LightDebris : VisualThinker
+{
+	double p_gravity;
+	double p_horDampen;
+	double p_fadestep;
+	double p_sizeFac;
+	double p_size;
+	double p_rollstep;
+	int p_lifetime;
+	int p_maxlife;
+	bool p_nonInteractive;
+
+	static const name PK_DebrisTextures[] = {
+		'PDEBA0',
+		'PDEBB0',
+		'PDEBC0',
+		'PDEBD0',
+		'PDEBE0',
+		'PDEBF0'
+	};
+
+	static clearscope TextureID GetRandomDebrisTex() {
+		let id = random[sfx](0, PK_LightDebris.PK_DebrisTextures.Size()-1);
+		return TexMan.CheckForTexture(PK_LightDebris.PK_DebrisTextures[id]);
 	}
-	override Void PostBeginPlay() {
-		if (waterlevel > 1) {
-			destroy();
+
+	static PK_LightDebris PK_SpawnNonInteractive(Vector3 pos, TextureID tex, double size, int maxlife, ERenderStyle style = STYLE_Normal, int flags = 0)
+	{
+		let deb = PK_Spawn(
+			tex,
+			pos: pos,
+			size: size,
+			sizefac: 1.0,
+			alpha: 1.0,
+			flags: flags|SPF_ROLL|SPF_LOCAL_ANIM,
+			style: style,
+			maxlife: maxlife,
+			vel: (0,0,0),
+			horDampen: 0,
+			gravity: 0,
+			fadestep: 0,
+			rollstep: 0,
+			nonInteractive: true
+		);
+		return deb;
+	}
+	static PK_LightDebris PK_SpawnSpark(TextureID tex,
+		Vector3 pos,
+		Vector3 vel,
+		double horDampen = 0.0,
+		double gravity = 1.0,
+		double size = 1.0,
+		double sizeFac = 0.96,
+		double alpha = 1.0,
+		double fadestep = 0.0,
+		double rollstep = 0.0,
+		int maxlife = 0
+	) {
+		return PK_Spawn(tex, pos, vel, horDampen, gravity, size, sizeFac, alpha, fadestep, rollstep, SPF_FULLBRIGHT|SPF_LOCAL_ANIM|SPF_ROLL, STYLE_Add, maxlife);
+	}
+
+	static PK_LightDebris PK_SpawnDebris(TextureID tex,
+		Vector3 pos,
+		Vector3 vel,
+		double horDampen = 0.965,
+		double gravity = 0.7,
+		double size = 1.0,
+		double sizeFac = 0.96,
+		double alpha = 1.0,
+		double fadestep = 0.0,
+		double rollstep = 0.0,
+		int maxlife = 0
+	) {
+		return PK_Spawn(tex, pos, vel, horDampen, gravity, size, sizeFac, alpha, fadestep, rollstep, SPF_LOCAL_ANIM|SPF_ROLL, STYLE_Normal, maxlife);
+	}
+
+	static PK_LightDebris PK_Spawn(
+		TextureID tex,
+		Vector3 pos,
+		Vector3 vel,
+		double horDampen,
+		double gravity,
+		double size,
+		double sizeFac,
+		double alpha,
+		double fadestep,
+		double rollstep,
+		int flags,
+		ERenderStyle style,
+		int maxlife = 0,
+		class<PK_LightDebris> type = 'PK_LightDebris',
+		bool nonInteractive = false
+	)
+	{
+		if (!tex.IsValid())
+		{
+			return null;
+		}
+		Vector2 scale;
+		// negative size is treated like scale:
+		if (size < 0)
+		{
+			scale = (abs(size), abs(size));
+		}
+		else
+		{
+			Vector2 texSize = TexMan.GetScaledSize(tex);
+			scale.x = size / texSize.x;
+			scale.y = size / texSize.y;
+		}
+
+		let deb = PK_LightDebris(VisualThinker.Spawn(type,
+			tex:tex,
+			pos:pos,
+			vel:vel,
+			alpha:alpha,
+			flags:flags,
+			scale: scale,
+			style: style)
+		);
+		if (deb)
+		{
+			deb.p_gravity = gravity;
+			deb.p_hordampen = horDampen;
+			deb.p_fadestep = fadestep;
+			deb.p_sizeFac = sizeFac;
+			deb.p_size = size;
+			deb.p_rollstep = rollstep;
+			deb.p_lifetime = maxlife > 0? maxlife : TICRATE * 60 * 5;
+			deb.p_maxlife = deb.p_maxlife;
+			deb.p_nonInteractive = nonInteractive;
+		}
+		return deb;
+	}
+
+	override void Tick()
+	{
+		Super.Tick();
+		if (isFrozen()) return;
+		
+		if (p_lifetime <= 0 || alpha <= 0 || scale.x <= 0.005 || scale.y <= 0.005)
+		{
+			Destroy();
 			return;
 		}
-		super.PostbeginPlay();
+
+		PK_DebrisTick();
+		if (!self || self.bDestroyed) return;
+
+		PK_HandleCollision();
+		if (!self || self.bDestroyed) return;
+
+		vel.xy *= p_horDampen;
+		alpha -= p_fadestep;
+		scale *= p_sizeFac;
+		p_size *= p_sizeFac;
+		roll += p_rollstep;
+		p_lifetime--;
 	}
-	states {
-	Spawn:
-		SPRK # 1 {
-			A_FadeOut(0.03);
-			scale *= 0.95;
+
+	virtual void PK_DebrisTick()
+	{}
+
+	virtual void PK_HandleCollision()
+	{
+		if (p_nonInteractive || !curSector) return;
+
+		let tracer = new('PK_CollisionTracer');
+		if (!tracer) return;
+
+		// check straight down if it's on the floor:
+		tracer.Trace(pos, cursector, (0, 0, -1.0), p_size, TRACE_HitSky, Line.ML_BLOCKEVERYTHING, true);
+		let tres = tracer.results;
+		if (PK_BaseActor.IsLiquidTexture(tres.HitTexture))
+		{
+			Destroy();
+			return;
 		}
-		loop;
+		// if so, dampen hor velocity again to simulate simple friction:
+		if (tracer.results.HitType == TRACE_HitFloor && vel.z <= 0)
+		{
+			vel.z = 0;
+			vel.xy *= p_horDampen;
+			//roll = 0;
+			p_rollstep = 0;
+			if (tres.ffloor)
+			{
+				pos = tres.HitPos - tres.ffloor.top.normal * p_size * 0.5;
+			}
+			else
+			{
+				pos = tres.HitPos + tres.hitSector.floorplane.normal * p_size * 0.5;
+			}
+			return;
+		}
+		
+		// check what we're about to hit:
+		tracer.Trace(pos, cursector, vel.Unit(), vel.Length(), TRACE_HitSky, Line.ML_BLOCKEVERYTHING, true);
+		tres = tracer.results;
+		if (PK_BaseActor.IsLiquidTexture(tres.HitTexture))
+		{
+			Destroy();
+			return;
+		}
+		switch(tres.HitType)
+		{
+			case TRACE_HasHitSky:
+				Destroy();
+				return;
+				break;
+			// hit ceiling - bounce off:
+			case TRACE_HitCeiling:
+				vel.z = min(-cursector.gravity * p_gravity, 0);
+				break;
+			// hit floor - stop falling:
+			case TRACE_HitFloor:
+				vel.z = 0;
+				break;
+			// hit wall - bounce off normal:
+			case TRACE_HitWall:
+				Vector2 norm = PK_Utils.GetLineNormal(pos.xy, tres.HitLine);
+				Vector2 v = vel.xy;
+				vel.xy = v - norm * (v dot norm);
+				break;
+			// falling through the air:
+			case TRACE_HitNone:
+				vel.z -= cursector.gravity * p_gravity;
+				break;
+		}
 	}
 }
 
@@ -601,7 +807,7 @@ Class PK_RandomDebris : PK_SmallDebris {
 		scale 0.2;
 	}
 	override void PostBeginPlay() {
-		super.PostBeginPlay();		
+		super.PostBeginPlay();
 		if (randomroll)
 			roll = random[sfx](0,359);
 		wrot = (wrot * frandom[sfx](0.8,1.2))*randompick[sfx](-1,1);

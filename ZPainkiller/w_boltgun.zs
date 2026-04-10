@@ -379,14 +379,19 @@ Class PK_Bolt : PK_Stake {
 	}
 
 	override void StakeBreak() {
-		for (int i = random[sfx](3,5); i > 0; i--) {
-			let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,pos.z)));
-			if (deb) {
-				deb.A_SetScale(0.5);
-				double vz = frandom[sfx](-1,-4);
-				if (pos.z <= botz)
-					vz = frandom[sfx](3,6);
-				deb.vel = (frandom[sfx](-5,5),frandom[sfx](-5,5),vz);
+		if (GetParticlesLevel() >= PL_REDUCED) {
+			for (int i = random[sfx](3,5); i > 0; i--) {
+				PK_LightDebris.PK_SpawnDebris(
+					PK_LightDebris.GetRandomDebrisTex(),
+					pos,
+					vel: (frandom[sfx](-5,5),
+						frandom[sfx](-5,5),
+						pos.z <= botz? frandom[sfx](3,6) : frandom(-1, -4)),
+					gravity:0.35,
+					size:frandom[sfx](4, 7),
+					sizefac: 0.98,
+					rollstep: frandom[sfx](-15, 15),
+					hordampen: 0.96);
 			}
 		}
 		A_StartSound("weapons/boltgun/boltbreak",volume:0.8, attenuation:3);
@@ -418,14 +423,19 @@ Class PK_ExplosiveBolt : PK_ExplosiveStake {
 			bSPRITEFLIP = randompick[sfx](0,1);
 			roll = random[sfx](0,359);
 			
-			if (GetParticlesLevel() >= PL_Full) {
+			if (GetParticlesLevel() >= PL_REDUCED) {
 				for (int i = random[sfx](5,8); i > 0; i--) {
-					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
-					if (debris) {
-						double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](6,14);
-						debris.vel = (frandom[sfx](-9,9),frandom[sfx](-9,9),zvel);
-						debris.A_SetScale(0.5);
-					}
+					PK_LightDebris.PK_SpawnDebris(
+						PK_LightDebris.GetRandomDebrisTex(),
+						pos,
+						vel: (frandom[sfx](-5,5),
+						      frandom[sfx](-5,5),
+						      pos.z <= floorz? frandom[sfx](6,14) : frandom(-5, -5)),
+						gravity:0.35,
+						size:frandom[sfx](4, 7),
+						sizefac: 0.98,
+						rollstep: frandom[sfx](-15, 15),
+						hordampen: 0.96);
 				}
 			}
 			A_AttachLight('Bomb',DynamicLight.PulseLight,"FFAA00",0,32,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF,param:1.2);
@@ -566,14 +576,19 @@ Class PK_Bomb : PK_Projectile {
 			bSPRITEFLIP = randompick[sfx](0,1);
 			roll = random[sfx](0,359);
 			
-			if (GetParticlesLevel() >= PL_Full) {
+			if (GetParticlesLevel() >= PL_REDUCED) {
 				for (int i = random[sfx](3,6); i > 0; i--) {
-					let debris = Spawn("PK_RandomDebris",pos + (frandom[sfx](-8,8),frandom[sfx](-8,8),frandom[sfx](-8,8)));
-					if (debris) {
-						double zvel = (pos.z > floorz) ? frandom[sfx](-5,5) : frandom[sfx](4,12);
-						debris.vel = (frandom[sfx](-7,7),frandom[sfx](-7,7),zvel);
-						debris.A_SetScale(0.5);
-					}
+					PK_LightDebris.PK_SpawnDebris(
+						PK_LightDebris.GetRandomDebrisTex(),
+						pos,
+						vel: (frandom[sfx](-5,5),
+						      frandom[sfx](-5,5),
+						      pos.z <= floorz? frandom[sfx](-5,5) : frandom(4, 12)),
+						gravity:0.35,
+						size:frandom[sfx](6, 10),
+						sizefac: 0.98,
+						rollstep: frandom[sfx](-15, 15),
+						hordampen: 0.96);
 				}
 			}
 			A_AttachLight('Bomb',DynamicLight.PulseLight,"FFAA00",0,18,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF,param:0.7);

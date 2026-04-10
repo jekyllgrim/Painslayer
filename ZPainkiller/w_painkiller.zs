@@ -206,14 +206,20 @@ Class PK_PainkillerPuff : PK_BulletPuff {
 				return resolveState(null);
 
 			FindLineNormal();
-			if (random[sfx](0,10) > 5) {
-				let deb = Spawn("PK_RandomDebris", debrisPos);
-				if (deb)
-					deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
+			if (GetParticlesLevel() >= PL_Reduced && random[sfx](0,10) > 5) {
+				PK_LightDebris.PK_SpawnDebris(
+					PK_LightDebris.GetRandomDebrisTex(),
+					debrisPos,
+					vel: (hitnormal + (frandom[sfx](-1,1),frandom[sfx](-1,1),frandom[sfx](-1,1))) * frandom[sfx](2, 5),
+					gravity:0.35,
+					size:frandom[sfx](6, 10),
+					sizefac: 0.98,
+					rollstep: frandom[sfx](-15, 15),
+					hordampen: 0.96);
 			}
 
 			bool mod = target && PKWeapon.CheckWmod(target);
-			if (mod || (random[sfx](0,10) > 2)) {
+			if (GetParticlesLevel() >= PL_FULL &&( mod || (random[sfx](0,10) > 2))) {
 				let bull = PK_RicochetBullet(Spawn("PK_RicochetBullet", debrisPos));
 				if (bull) {
 					bull.vel = (hitnormal + (frandom[sfx](-3,3),frandom[sfx](-3,3),frandom[sfx](-3,3)) * frandom[sfx](2,6));
@@ -221,7 +227,6 @@ Class PK_PainkillerPuff : PK_BulletPuff {
 					if (mod) {
 						bull.A_SetRenderstyle(bull.alpha,Style_AddShaded);
 						bull.SetShade("FF6000");
-						//bull.scale *= 2;
 					}
 				}
 			}

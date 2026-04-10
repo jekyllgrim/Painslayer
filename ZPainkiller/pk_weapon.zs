@@ -675,24 +675,32 @@ Class PK_BulletPuff : PKPuff {
 			smoke.sizestep = smoke.size * 0.03;
 			smoke.startalpha = 0.95;
 			smoke.fadestep = -1;
-			smoke.vel = 
-				(hitnormal + 
-					(frandom[sfx](-0.05,0.05),
-					frandom[sfx](-0.05,0.05),
-					frandom[sfx](-0.05,0.05))) 
-				* frandom[sfx](0.5,1.2);
+			smoke.vel = (hitnormal + 
+			            (frandom[sfx](-0.05,0.05),
+			             frandom[sfx](-0.05,0.05),
+			             frandom[sfx](-0.05,0.05))) *
+			            frandom[sfx](0.5,1.2);
 			smoke.pos = debrisPos;
 			smoke.startroll = random[sfx](0, 359);
 			smoke.rollvel = frandom[sfx](0.8,1.2) * randompick[sfx](-1,1);
 			Level.SpawnParticle(smoke);
 
+			if (GetParticlesLevel() >= PL_REDUCED) {
+				PK_LightDebris.PK_SpawnDebris(
+					PK_LightDebris.GetRandomDebrisTex(),
+					pos,
+					vel: (hitnormal + 
+					     (frandom[sfx](-1,1),frandom[sfx](-1,1),frandom[sfx](-1,1))) *
+				         frandom[sfx](2, 4),
+					gravity:0.35,
+					size:frandom[sfx](6, 10),
+					sizefac: 0.98,
+					rollstep: frandom[sfx](-15, 15),
+					hordampen: 0.96);
+			}
+
 			if (GetParticlesLevel() < PK_BaseActor.PL_FULL)
 				return resolveState(null);
-
-			let deb = Spawn("PK_RandomDebris", debrisPos);
-			if (deb)
-				deb.vel = (hitnormal + (frandom[sfx](-4,4),frandom[sfx](-4,4),frandom[sfx](3,5)));
-
 			bool mod = target && PKWeapon.CheckWmod(target);
 			name lit = mod ? 'PK_BulletPuffMod' : 'PK_BulletPuff';
 			A_AttachLightDef('puf', lit);
@@ -704,7 +712,6 @@ Class PK_BulletPuff : PKPuff {
 					if (mod) {
 						bull.A_SetRenderstyle(bull.alpha,Style_AddShaded);
 						bull.SetShade("FF2000");
-						//bull.scale *= 2;
 					}
 				}
 			}
@@ -1344,8 +1351,6 @@ Class PK_GenericExplosion : PK_SmallDebris {
 		A_SetScale(rs);
 		roll = random[sfx](0,359);
 		A_Quake(quakeintensity,quakeduration,0,quakeradius,"");
-		//if (!CheckPlayerSights())
-		//	return;
 
 		if (GetParticlesLevel() >= PL_Reduced) {
 			if (randomdebris > 0) {
@@ -1422,20 +1427,20 @@ Class PK_ExplosiveDebris : PK_RandomDebris {
 		Vector3 path = level.vec3Diff( self.pos, oldPos );
 		double distance = path.length() / 4;
 		Vector3 direction = path / distance;
-		int steps = int( distance );		
+		int steps = int( distance );
+		FSpawnParticleParams flame;
+		flame.color1 = "";
+		flame.style - STYLE_Add;
+		flame.flags = SPF_ROLL|SPF_REPLACE|SPF_FULLBRIGHT;
+		flame.lifetime = 40;
+		flame.startalpha = alpha * 0.3;
+		flame.fadestep = -1;
 		for( int i = 0; i < steps; i++ )  {
 			TextureID flametex = TexMan.CheckForTexture(flameTextures[random[sfx](0, flameTextures.Size() - 1)]);
-			FSpawnParticleParams flame;
 			flame.texture = flametex;
-			flame.color1 = "";
-			flame.style - STYLE_Add;
-			flame.flags = SPF_ROLL|SPF_REPLACE|SPF_FULLBRIGHT;
-			flame.lifetime = 40;
 			flame.pos = oldpos;
 			flame.size = TexMan.GetSize(flametex) * 0.1;
 			flame.sizestep = flame.size * 0.05;
-			flame.startalpha = alpha * 0.3;
-			flame.fadestep = -1;
 			flame.startroll = frandom[sfx](0,360);
 			flame.rollvel = frandom[sfx](5,10)+randompick[sfx](-1,1);
 			Level.SpawnParticle(flame);

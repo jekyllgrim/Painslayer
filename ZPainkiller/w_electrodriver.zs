@@ -652,18 +652,16 @@ Class PK_ElectricPuff : PKPuff {
 				Level.SpawnParticle(smoke);
 			}
 
-			if (GetParticlesLevel() >= PL_Full) {
-				for (int i = random[eld](5,8); i > 0; i--) {
-					let part = Spawn("PK_RicochetSpark", debrisPos);
-					if (part) {
-						part.vel = (hitnormal + 
-							(frandom[sfx](-1.5,1.5),
-							frandom[sfx](-1.5,1.5),
-							frandom[sfx](-3,3)))
-							* frandom[sfx](0.7, 1.1);
-						part.frame = 2;
-					}
-				}
+			TextureID sparktex = TexMan.CheckForTexture("SPRKC0");
+			for (int i = random[eld](5,8); i > 0; i--) {
+				PK_LightDebris.PK_SpawnSpark(sparktex,
+					debrispos,
+					vel: (hitnormal + (frandom[sfx](-1,1),frandom[sfx](-1,1),frandom[sfx](-1,1))) * frandom[sfx](0.1, 4),
+					hordampen: 0.95,
+					size: frandom[sfx](5, 8),
+					gravity: 0.35,
+					sizefac: 0.96
+				);
 			}
 		}
 		SPRK C 1 A_FadeOut(0.08);
@@ -861,17 +859,19 @@ Class PK_Shuriken : PK_StakeProjectile {
 		+ROLLSPRITE;		
 	}
 	override void StakeBreak() {
-		
-		if (GetParticlesLevel() >= PL_Full) {
+		if (GetParticlesLevel() >= PL_REDUCED) {
 			for (int i = random[sfx](2,4); i > 0; i--) {
-				let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,pos.z)));
-				if (deb) {
-					deb.A_SetScale(0.3);
-					double vz = frandom[sfx](-1,-4);
-					if (pos.z <= botz)
-						vz = frandom[sfx](3,6);
-					deb.vel = (frandom[sfx](-5,5),frandom[sfx](-5,5),vz);
-				}
+				PK_LightDebris.PK_SpawnDebris(
+					PK_LightDebris.GetRandomDebrisTex(),
+					pos,
+					vel: (frandom[sfx](-5,5),
+					      frandom[sfx](-5,5),
+					      pos.z <= botz? frandom[sfx](3,6) : frandom(-1, -4)),
+					gravity:0.35,
+					size:frandom[sfx](6, 10),
+					sizefac: 0.98,
+					rollstep: frandom[sfx](-15, 15),
+					hordampen: 0.96);
 			}
 		}
 		A_StartSound("weapons/edriver/starbreak",volume:0.8, attenuation:4);
@@ -921,14 +921,19 @@ Class PK_Shuriken : PK_StakeProjectile {
 			else
 				A_Explode(40,128,fulldamagedistance:64);
 			
-			if (GetParticlesLevel() >= PL_Full) {
+			if (GetParticlesLevel() >= PL_REDUCED) {
 				for (int i = random[sfx](2,7); i > 0; i--) {
-					let debris = Spawn("PK_RandomDebris",pos);
-					if (debris) {
-						debris.vel = (frandom[sfx](-5,5),frandom[sfx](-5,5),frandom[sfx](-2,6));
-						debris.A_SetScale(0.25);
-						debris.gravity = 0.25;
-					}
+					PK_LightDebris.PK_SpawnDebris(
+						PK_LightDebris.GetRandomDebrisTex(),
+						pos,
+						vel: (frandom[sfx](-5,5),
+						      frandom[sfx](-5,5),
+						      frandom[sfx](-2,6)),
+						gravity:0.3,
+						size:frandom[sfx](6, 10),
+						sizefac: 0.98,
+						rollstep: frandom[sfx](-15, 15),
+						hordampen: 0.96);
 				}
 			}
 		}
@@ -1088,31 +1093,32 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 			A_StartSound("weapons/edriver/starwall",attenuation:2);
 			A_StartSound("weapons/edriver/shockloop",CHAN_VOICE,CHANF_LOOPING);
 		}
-		M000 B 3 {			
-			if (GetParticlesLevel() >= PK_BaseActor.PL_Full) {
+		M000 B 3 {
+			if (waterlevel < 2 && GetParticlesLevel() >= PK_BaseActor.PL_Reduced) {
+				TextureID sparktex = TexMan.CheckForTexture("SPRKC0");
 				for (int i = random[eld](4,6); i > 0; i--) {
-					let part = Spawn("PK_RicochetSpark",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
-					if (part) {
-						part.vel = (frandom[eld](-5,5),frandom[eld](-5,5),frandom[eld](4,7));
-						part.frame = 2;
-						part.A_SetScale(0.065);
-					}
+					PK_LightDebris.PK_SpawnSpark(sparktex,
+						pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)),
+						vel: (frandom[eld](-5,5),frandom[eld](-5,5),frandom[eld](4,7)),
+						hordampen: 0.95,
+						size: frandom[sfx](8, 12),
+						gravity: 0.35,
+						sizefac: 0.98
+					);
 				}
-			}
 
-			if (GetParticlesLevel() >= PK_BaseActor.PL_Reduced) {
+				TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomBlackSmoke());
+				FSpawnParticleParams smoke;
+				smoke.texture = smoketex;
+				smoke.color1 = "";
+				smoke.style = STYLE_Add;
+				smoke.flags = SPF_ROLL|SPF_REPLACE;
+				smoke.lifetime = 28;
+				smoke.size = TexMan.GetSize(smoketex) * 0.5;
+				smoke.sizestep = smoke.size * 0.05;
+				smoke.startalpha = 0.5;
+				smoke.fadestep = -1;
 				for (int i = random[sfx](2,4); i > 0; i--) {
-					TextureID smoketex = TexMan.CheckForTexture(PK_BaseActor.GetRandomBlackSmoke());
-					FSpawnParticleParams smoke;
-					smoke.texture = smoketex;
-					smoke.color1 = "";
-					smoke.style = STYLE_Add;
-					smoke.flags = SPF_ROLL|SPF_REPLACE;
-					smoke.lifetime = 28;
-					smoke.size = TexMan.GetSize(smoketex) * 0.5;
-					smoke.sizestep = smoke.size * 0.05;
-					smoke.startalpha = 0.5;
-					smoke.fadestep = -1;
 					smoke.vel = (frandom[sfx](-0.5,0.5),frandom[sfx](-0.5,0.5),frandom[sfx](0.2,0.5));
 					smoke.pos = pos+(frandom[sfx](-2,2),frandom[sfx](-2,2),frandom[sfx](-2,2));
 					smoke.startroll = frandom[etc](-20, 20);
@@ -1135,14 +1141,17 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 			SetShade("8bb1ff");
 			A_Explode(128,160,flags:0);
 			
-			if (GetParticlesLevel() >= PL_Full) {
+			if (waterlevel < 2 && GetParticlesLevel() >= PK_BaseActor.PL_Reduced) {
+				TextureID sparktex = TexMan.CheckForTexture("SPRKC0");
 				for (int i = 32; i > 0; i--) {
-					let part = Spawn("PK_RicochetSpark",pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)));
-					if (part) {
-						part.vel = (frandom[eld](-6.5,6.5),frandom[eld](-6.5,6.5),frandom[eld](4,9));
-						part.frame = 2;
-						part.A_SetScale(0.1);
-					}
+					PK_LightDebris.PK_SpawnSpark(sparktex,
+						pos+(frandom[eld](-2,2),frandom[eld](-2,2),frandom[eld](-2,2)),
+						vel: (frandom[eld](-5,5),frandom[eld](-5,5),frandom[eld](-5,5)),
+						hordampen: 0.95,
+						size: frandom[sfx](12, 15),
+						gravity: 0.2,
+						sizefac: 0.95
+					);
 				}
 			}
 		}
