@@ -197,18 +197,19 @@ Class PK_Stake : PK_StakeProjectile {
 	
 	override void StakeBreak() {		
 		A_RemoveLight(BURNLIGHT);
-		if (GetParticlesLevel() >= PK_BaseActor.PL_FULL) {
-			for (int i = random[sfx](3,5); i > 0; i--) {
-				let deb = PK_RandomDebris(Spawn("PK_RandomDebris",(pos.x,pos.y,pos.z)));
-				if (deb) {
-					deb.spritename = "PSDE";
-					deb.frame = i;
-					deb.A_SetScale(0.15);
-					double vz = frandom[sfx](-1,-4);
-					if (pos.z <= botz)
-						vz = frandom[sfx](3,6);
-					deb.vel = (frandom[sfx](-5,5),frandom[sfx](-5,5),vz);
-				}
+		if (GetParticlesLevel() >= PK_BaseActor.PL_REDUCED) {
+			for (int i = random[sfx](4,6); i > 0; i--) {
+				PK_LightDebris.PK_SpawnDebris(
+					PK_LightDebris.GetStakeDebrisTex(),
+					pos,
+					vel: (frandom[sfx](-5,5),
+							frandom[sfx](-5,5),
+							pos.z <= floorz? frandom[sfx](-5,5) : frandom(4, 12)),
+					gravity:0.35,
+					size: 8,
+					sizefac: 0.95,
+					rollstep: frandom[sfx](-15, 15),
+					hordampen: 0.945);
 			}
 		}
 		if (stickvictim)
@@ -647,8 +648,8 @@ Class PK_GrenadeHitbox : Actor {
 
 	Default {
 		PK_GrenadeHitbox.collider "PK_Stake";
-		PK_GrenadeHitbox.newstake "PK_ExplosiveStake";		
-		PK_GrenadeHitbox.combosound "weapons/stakegun/combo";		
+		PK_GrenadeHitbox.newstake "PK_ExplosiveStake";
+		PK_GrenadeHitbox.combosound "weapons/stakegun/combo";
 		+NOGRAVITY
 		+SOLID
 		radius 16;
@@ -658,14 +659,14 @@ Class PK_GrenadeHitbox : Actor {
 	override bool CanCollideWith(Actor other, bool passive) {
 		if (other && passive && collider && other is collider && master && (abs(pos.z - other.pos.z) <= height)) {
 			hitstake = other;
-			master = null;			
+			master = null;
 		}
 		return false;
 	}
 
 	override void Tick() {
 		super.Tick();
-		if (!master && hitstake) {				
+		if (!master && hitstake) {
 			let exs = Spawn(newstake,hitstake.pos);
 			if (exs) {
 				exs.vel = hitstake.vel;

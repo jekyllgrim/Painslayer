@@ -94,7 +94,6 @@ mixin class PK_ParticleLevelCheck {
 }
 
 Class PK_BaseActor : Actor abstract {
-	const PI = 3.141592653589793;
 	protected name bcolor;
 	protected int age;
 	mixin PK_PlayerSightCheck;
@@ -575,9 +574,24 @@ class PK_LightDebris : VisualThinker
 		'PDEBF0'
 	};
 
+	static const name PK_StakeDebrisTextures[] = {
+		'PSDEA0',
+		'PSDEB0',
+		'PSDEC0',
+		'PSDED0',
+		'PSDEE0',
+		'PSDEF0'
+	};
+
 	static clearscope TextureID GetRandomDebrisTex() {
 		let id = random[sfx](0, PK_LightDebris.PK_DebrisTextures.Size()-1);
 		return TexMan.CheckForTexture(PK_LightDebris.PK_DebrisTextures[id]);
+	}
+
+
+	static clearscope TextureID GetStakeDebrisTex() {
+		let id = random[sfx](0, PK_LightDebris.PK_StakeDebrisTextures.Size()-1);
+		return TexMan.CheckForTexture(PK_LightDebris.PK_StakeDebrisTextures[id]);
 	}
 
 	static PK_LightDebris PK_SpawnNonInteractive(Vector3 pos, TextureID tex, double size, int maxlife, ERenderStyle style = STYLE_Normal, int flags = 0)
