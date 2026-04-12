@@ -23,7 +23,6 @@ Class PK_Boltgun : PKWeapon {
 	}
 
 	action void PK_FireBoltGun(double leftright = 0, double updown = 0) {
-		Console.Printf("Firing boltgun with LR: %.1f | UD: %.1f", leftright + (!invoker.scoped? 5 : 0), updown + (!invoker.scoped? -6 : 0));
 		Fire3DProjectile("PK_Bolt",
 			useammo: false,
 			forward: 1,
