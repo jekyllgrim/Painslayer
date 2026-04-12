@@ -187,16 +187,17 @@ Class PainkillerHUD : BaseStatusBar {
 			PK_DrawImage("ARADVISI",(0,0),DI_MIRROR|DI_SCREEN_RIGHT_TOP|DI_ITEM_RIGHT_TOP);
 		}
 		
-		/*if (CPlayer.mo.FindInventory("PK_WeaponModifier")) {
-			double swidth = horizontalResolution;
-			int width = 78;
-			int steps = swidth / width;
-			double xpos = 0;
-			for (int i = 0; i < steps; i++) {
-				PK_DrawImage("WMODVISI",(xpos,0),DI_SCREEN_LEFT_BOTTOM|DI_ITEM_LEFT_BOTTOM);
-				xpos += width;
-			}
-		}*/
+		if (CPlayer.mo.FindInventory("PK_WeaponModifier")) {
+			double sheight = Screen.GetHeight();
+			double hheight = sheight * 0.25;
+			Screen.DrawTexture(
+				TexMan.CheckForTexture("graphics/HUD/gradient256.png"), false, 
+				0, sheight - hheight,
+				DTA_DestWidth, Screen.GetWidth(),
+				DTA_DestHeightF, hheight,
+				DTA_Alpha, 0.38
+			);
+		}
 	}
 	
 	// Draws arrow for the compass pointing at the nearest monster.

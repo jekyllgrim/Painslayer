@@ -107,35 +107,6 @@ Class PK_MainHandler : EventHandler {
 			}
 		}
 	}
-	
-	// Render red highlight at the bottom of the screen
-	// when the player has Weapon Modifier:
-	ui TextureID gradient;
-	override void RenderUnderlay(renderEvent e) {
-		if (!PlayerInGame[consoleplayer])
-			return;
-		
-		PlayerInfo player = players[consoleplayer];		
-		let mo = player.mo;
-		if (!mo)
-			return;
-		
-		if (mo.FindInventory("PK_WeaponModifier")) {
-			double sheight = Screen.GetHeight();
-			double hheight = sheight * 0.25;
-			if (!gradient)
-				gradient = TexMan.CheckForTexture("graphics/HUD/gradient256.png");
-			if (gradient.IsValid()) {
-				Screen.DrawTexture(
-					gradient, false, 
-					0, sheight - hheight,
-					DTA_DestWidth, Screen.GetWidth(),
-					DTA_DestHeightF, hheight,
-					DTA_Alpha, 0.38
-				);
-			}
-		}
-	}
 				
 	//different messages for PKGOLD cheat:
 	static const string PKCH_GoldMessage[] = {
