@@ -476,7 +476,7 @@ Class PK_SmallDebris : PK_BaseActor abstract {
 						return;
 				}
 				else if (!bNOGRAVITY) 
-					vel.z -= gravity;				
+					vel.z -= gravity;
 				
 				if (waterlevel >= 2) {
 					vel.z = Clamp(vel.z * 0.8, -gravity / 2., abs(vel.z));

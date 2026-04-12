@@ -111,10 +111,9 @@ Class PK_ElectroDriver : PKWeapon {
 			return waterPos;
 		}
 
-		// If we didn't hit water and didn't hit a shootable actor,
-		// return linetrace's end position to draw the lightning
-		// towards:
+		// If no victim is found, handle other types of collision:
 		if (!victim) {
+			// Hit nothing - return the position where the trace ended:
 			if (tracedata.HitType == TRACE_HitNone) {
 				return hitPos;
 			}
@@ -165,7 +164,6 @@ Class PK_ElectroDriver : PKWeapon {
 		// monsters around it. So, we need another 
 		// BlockThingsIterator to find more targets:
 		else if (invoker.hasWmod) {
-			double closestDist = double.infinity;
 			// Remember that this iterator should be created
 			// around the victim, not around the shooter!
 			BlockThingsIterator itr = BlockThingsIterator.Create(victim, atkdist);
