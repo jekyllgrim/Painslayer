@@ -23,7 +23,16 @@ Class PK_Boltgun : PKWeapon {
 	}
 
 	action void PK_FireBoltGun(double leftright = 0, double updown = 0) {
-		Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: leftright, updown: updown -3);
+		Console.Printf("Firing boltgun with LR: %.1f | UD: %.1f", leftright + (!invoker.scoped? 5 : 0), updown + (!invoker.scoped? -6 : 0));
+		Fire3DProjectile("PK_Bolt",
+			useammo: false,
+			forward: 1,
+			leftright:            leftright + (!invoker.scoped? 5 : 0),
+			updown:               updown + (!invoker.scoped? -6 : 0),
+			crosshairConverge:    true,
+			convergeLeftRightOfs: leftright,
+			convergeUpDownOfs:    updown
+		);
 	}
 	
 	action void A_BoltgunScale(double scalex, double scaley, int flags = 0)
@@ -83,9 +92,9 @@ Class PK_Boltgun : PKWeapon {
 	
 	states {
 	Cache:		
-		BGUN ABCD 0;
-		BGU1 ABCDEFGHIIJKLMNOPQRST 0;
-		BGU2 ABCDEFGHIIJKLMNOPQRST 0;		
+		BGUN A 0;
+		BGU1 A 0;
+		BGU2 A 0;		
 	Spawn:
 		PKWI F -1;
 		stop;
@@ -116,17 +125,6 @@ Class PK_Boltgun : PKWeapon {
 			}
 			A_Overlay(PSP_OVERGUN,"Bolts",nooverride:true);
 			A_Overlay(PSP_SCOPE3,"Scope",nooverride:true);
-			/*if (player.cmd.buttons & BT_ZOOM && !(player.oldbuttons & BT_ZOOM)) {
-				if (!invoker.scoped) {
-					A_ZoomFactor(2);
-					A_Overlay(PSP_HIGHLIGHTS,"GoScope",nooverride:true);
-					invoker.scoped = true;
-				}
-				else {
-					A_ZoomFactor(1.0);
-					invoker.scoped = false;
-				}
-			}*/
 			PK_WeaponReady(invoker.scoped ? WRF_NOBOB : 0);
 		}
 		loop;
@@ -207,30 +205,22 @@ Class PK_Boltgun : PKWeapon {
 			}
 		}
 		#### A 4 {
-			double xofs = invoker.scoped ? 0 : 3;
-			double yofs = invoker.scoped ? 2 : 0;
-			PK_FireBoltGun(xofs, yofs);
+			PK_FireBoltGun();
 			PK_DepleteAmmo(amount:1);
 			PK_AttackSound("weapons/boltgun/fire1",CHAN_5);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
 		#### B 4 {
-			double xofs = invoker.scoped ? -2.5 : 0;
-			double yofs = invoker.scoped ? 1 : -1;
 			PK_DepleteAmmo(amount:2);
-			PK_FireBoltGun(xofs, yofs);
-			xofs = invoker.scoped ? 2.5 : 6;
-			PK_FireBoltGun(xofs, yofs);
+			PK_FireBoltGun(-3, -1.5);
+			PK_FireBoltGun(3, -1.5);
 			A_StartSound("weapons/boltgun/fire2",CHAN_6);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}
 		#### C 2 {
-			double xofs = invoker.scoped ? -5 : -3;
-			double yofs = invoker.scoped ? 0 : -2;
 			PK_DepleteAmmo(amount:2);
-			PK_FireBoltGun(xofs, yofs);
-			xofs = invoker.scoped ? 5 : 9;
-			PK_FireBoltGun(xofs, yofs);
+			PK_FireBoltGun(-6, -3);
+			PK_FireBoltGun(6, -3);
 			A_StartSound("weapons/boltgun/fire3",CHAN_7);
 			A_WeaponOffset(4,4,WOF_ADD);
 		}

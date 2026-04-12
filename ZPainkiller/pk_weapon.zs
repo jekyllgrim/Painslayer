@@ -448,10 +448,9 @@ Class PKWeapon : Weapon abstract {
 		return h;
 	}
 	
-	/*	Function by Lewisk3 using Gutamatics to fire stake projectiles.
-		Used in most cases instead of PK_FireArchingProjectile above
-		since it produces a more accurate movement.
-	*/
+	// Simple function for firing projectiles without
+	// A_FireProjectile fluff but with Quat-based spawn
+	// offsets and an option to converge to crosshair:
 	action Actor Fire3DProjectile (class<Actor> missile,
 	                               bool useammo = true,
 	                               double forward = 0,
@@ -459,7 +458,9 @@ Class PKWeapon : Weapon abstract {
 	                               double updown = 0,
 	                               bool crosshairConverge = false,
 	                               double angleoffs = 0,
-	                               double pitchoffs = 0 ) {
+	                               double pitchoffs = 0,
+	                               double convergeLeftRightOfs = 0,
+	                               double convergeUpDownOfs = 0 ) {
 
 		if (!player || !player.mo)
 			return null;
@@ -479,19 +480,26 @@ Class PKWeapon : Weapon abstract {
 			true);
 		
 		Vector3 aimdir;
-		if(crosshairConverge) {
-			FLineTraceData lt;
-			LineTrace(angle, PLAYERMISSILERANGE, pitch, offsetz: player.viewz-pos.z, data:lt);
-			double projrad = GetDefaultByType(missile).radius;
-			Vector3 aimpos = lt.HitLocation;
-			Vector3 normal = PK_Utils.GetNormalFromTrace(lt);
-			if (normal ~== (0,0,0)) {
-				aimpos = level.Vec3Diff(aimpos, normal * radius);
-			}
-			aimdir = level.Vec3Diff(spawnpos, aimpos).Unit();
-		}
-		else {
+		// no converging:
+		if (!crosshairConverge) {
 			aimdir = (AngleToVector(angles.x, cos(angles.y)), -sin(angles.y));
+		}
+		// converging:
+		else {
+			FLineTraceData lt;
+			// convergeLeftRightOfs and convergeUpDownOfs allow adding
+			// offsets to the converted position itself. This allows
+			// projectiles to still converge to crosshair, yet land with
+			// an offset relative to each other. Intended for cases when
+			// several projectiles are fired explicitly offset relative
+			// to each other:
+			LineTrace(angle, PLAYERMISSILERANGE, pitch,
+				offsetside: convergeLeftRightOfs,
+				offsetz: player.viewz-pos.z + convergeUpDownOfs,
+				data:lt);
+			double projrad = GetDefaultByType(missile).radius;
+			Vector3 aimpos = level.Vec3Offset(lt.hitlocation, PK_Utils.GetNormalFromTrace(lt) * projrad);
+			aimdir = level.Vec3Diff(spawnpos, aimpos).Unit();
 		}
 		
 		// Spawn projectile
@@ -1265,7 +1273,12 @@ Class PK_BulletTracer : Actor {
 		Vector3 spawnpos = level.Vec3Offset((pawn.pos.xy, pawn.player.viewz), dir * (40, -leftright, updown));
 		FLineTraceData lt;
 		pawn.LineTrace(pawn.angle + angleofs, PLAYERMISSILERANGE, pawn.pitch + pitchofs, offsetz: pawn.player.viewz - pawn.pos.z, data: lt);
-		return P_Fire(spawnpos, lt.hitlocation);
+		let tracer = P_Fire(spawnpos, lt.hitlocation);
+		if (tracer && pawn.FindInventory('PK_WeaponModifier')) {
+			tracer.A_SetRenderstyle(tracer.alpha, STYLE_AddShaded);
+			tracer.SetShade(0xff0000);
+		}
+		return tracer;
 	}
 
 	static PK_BulletTracer P_Fire(Vector3 spawnpos, Vector3 endpos) {
