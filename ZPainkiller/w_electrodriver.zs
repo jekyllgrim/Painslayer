@@ -349,7 +349,7 @@ Class PK_ElectroDriver : PKWeapon {
 	Fire:
 		TNT1 A 0 {
 			PK_AttackSound("weapons/edriver/starshot");
-			Fire3DProjectile("PK_Shuriken", leftright:5);
+			Fire3DProjectile("PK_Shuriken", updown: -6.5, leftright:8, crosshairConverge: true);
 			A_WeaponOffset(2+frandom[sfx](-0.5,0.5),34+frandom[sfx](-0.5,0.5));
 		}
 		ELDR BC 1 A_WeaponOffset(-0.5,-0.5,WOF_ADD);

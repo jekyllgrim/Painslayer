@@ -23,7 +23,7 @@ Class PK_Boltgun : PKWeapon {
 	}
 
 	action void PK_FireBoltGun(double leftright = 0, double updown = 0) {
-		Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: leftright, updown: updown);
+		Fire3DProjectile("PK_Bolt", useammo: false, forward: 1, leftright: leftright, updown: updown -3);
 	}
 	
 	action void A_BoltgunScale(double scalex, double scaley, int flags = 0)

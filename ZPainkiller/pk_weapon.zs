@@ -404,18 +404,11 @@ Class PKWeapon : Weapon abstract {
 		// to the projectiles instead of using AimBulletMissile at puffs 
 		// (because puffs don't always spawn!)
 		vector2 spread = (0, 0);
+		FLineTraceData lt;
 		for (int i = 0; i < numbullets; i++) {
 			spread.x = held ? random2[pkfirebull]() * (spread_horz / 256) : 0;
 			spread.y = held ? BulletSlope() - pitch + random2[pkfirebull]() * (spread_vert / 256) : 0;
-			Fire3DProjectile(
-				"PK_BulletTracer",
-				useammo: false,
-				forward: 48,
-				leftright:spawnofs,
-				updown:spawnheight,
-				angleoffs: spread.x,
-				pitchoffs: spread.y
-			);
+			PK_BulletTracer.P_FireFromPlayer(self, leftright: spawnofs, updown: spawnheight, angleofs: spread.x, pitchofs: spread.y);
 			A_FireBullets (
 				spread.x, spread.y, 
 				-1, 
@@ -459,15 +452,14 @@ Class PKWeapon : Weapon abstract {
 		Used in most cases instead of PK_FireArchingProjectile above
 		since it produces a more accurate movement.
 	*/
-	action Actor Fire3DProjectile (
-		class<Actor> proj, 
-		bool useammo = true, 
-		double forward = 0, 
-		double leftright = 0, 
-		double updown = 0, 
-		bool crosshairConverge = false, 
-		double angleoffs = 0, 
-		double pitchoffs = 0 ) {
+	action Actor Fire3DProjectile (class<Actor> missile,
+	                               bool useammo = true,
+	                               double forward = 0,
+	                               double leftright = 0,
+	                               double updown = 0,
+	                               bool crosshairConverge = false,
+	                               double angleoffs = 0,
+	                               double pitchoffs = 0 ) {
 
 		if (!player || !player.mo)
 			return null;
@@ -476,46 +468,40 @@ Class PKWeapon : Weapon abstract {
 		if (useammo && weapon && stateinfo && stateinfo.mStateType == STATE_Psprite) {
 			if (!weapon.DepleteAmmo(weapon.bAltFire, true))
 				return null;
-		}		
-		double a = angle + angleoffs;
-		double p = Clamp(pitch + pitchoffs, -90, 90);
-		double r = roll;
-		let mat = PK_GM_Matrix.fromEulerAngles(a, p, r);
-		mat = mat.multiplyVector3((forward, -leftright, updown));
-		vector3 offsetPos = mat.asVector3(false);
+		}
+
+		Vector3 angles = (angle + angleoffs, pitch + pitchoffs, roll);
+
+		Vector3 spawnpos = PK_Utils.RelativeToGlobalOffset(
+			(pos.xy, player.viewz),
+			angles,
+			(forward + radius, leftright, updown),
+			true);
 		
-		vector3 shooterPos = (pos.xy, GetPlayerAtkHeight(player.mo, absolute:true));
-		offsetPos = level.vec3offset(offsetPos, shooterPos);
-		
-		// Get velocity
-		vector3 aimpos;
+		Vector3 aimdir;
 		if(crosshairConverge) {
 			FLineTraceData lt;
-			LineTrace(a, PLAYERMISSILERANGE, p, 0, GetPlayerAtkHeight(player.mo), 0, data:lt);
-			double projrad = GetDefaultByType(proj).radius;			
-			aimPos = (lt.HitLocation.xy - lt.HitDir.xy*projrad, lt.HitLocation.z);
-			
-			//Spawn("PK_DebugSpot", aimPos);
-		
-			vector3 aimAngles = level.SphericalCoords(offsetPos, aimPos, (a, p));
-			
-			a -= aimAngles.x;
-			p -= aimAngles.y;
+			LineTrace(angle, PLAYERMISSILERANGE, pitch, offsetz: player.viewz-pos.z, data:lt);
+			double projrad = GetDefaultByType(missile).radius;
+			Vector3 aimpos = lt.HitLocation;
+			Vector3 normal = PK_Utils.GetNormalFromTrace(lt);
+			if (normal ~== (0,0,0)) {
+				aimpos = level.Vec3Diff(aimpos, normal * radius);
+			}
+			aimdir = level.Vec3Diff(spawnpos, aimpos).Unit();
+		}
+		else {
+			aimdir = (AngleToVector(angles.x, cos(angles.y)), -sin(angles.y));
 		}
 		
-		mat = PK_GM_Matrix.fromEulerAngles(a, p, r);
-		mat = mat.multiplyVector3((1.0,0,0));
-		
-		vector3 projVel = mat.asVector3(false) * GetDefaultByType(proj).Speed;
-		
 		// Spawn projectile
-		let proj = Spawn(proj, offsetPos);
+		let proj = Spawn(missile, spawnpos);
 		if(proj) {
-			proj.angle = a;
-			proj.pitch = p;
-			proj.roll = r;
-			proj.vel = projVel;
 			proj.target = self;
+			proj.angle = angles.x;
+			proj.pitch = angles.y;
+			proj.roll = angles.z;
+			proj.vel = aimdir * GetDefaultByType(missile).speed;
 			if (proj.seesound)
 				proj.A_StartSound(proj.seesound);
 		}
@@ -1258,34 +1244,79 @@ Class PK_DummyProjectile : PK_BaseActor {
 	}
 }
 
-Class PK_BulletTracer : FastProjectile {
+Class PK_BulletTracer : Actor {
+	uint tracerLifeTime;
 	Default {
-		-ACTIVATEIMPACT;
-		-ACTIVATEPCROSS;
-		+BLOODLESSIMPACT;
+		Speed 180; // Base speed for the calculation
+		+NOINTERACTION
+		+NOBLOCKMAP
 		+BRIGHT
-		damage 0;
-		radius 4;
-		height 4;
-		speed 180;
+		radius 1;
+		height 1;
 		renderstyle 'add';
 		alpha 2;
 		scale 0.3;
 	}
+
+	static PK_BulletTracer P_FireFromPlayer(Actor ppawn, double leftright = 0, double updown = 0, double angleofs = 0, double pitchofs = 0) {
+		PlayerPawn pawn = PlayerPawn(ppawn);
+		if (!pawn) return null;
+		Quat dir = Quat.FromAngles(pawn.angle, pawn.pitch, pawn.roll);
+		Vector3 spawnpos = level.Vec3Offset((pawn.pos.xy, pawn.player.viewz), dir * (40, -leftright, updown));
+		FLineTraceData lt;
+		pawn.LineTrace(pawn.angle + angleofs, PLAYERMISSILERANGE, pawn.pitch + pitchofs, offsetz: pawn.player.viewz - pawn.pos.z, data: lt);
+		return P_Fire(spawnpos, lt.hitlocation);
+	}
+
+	static PK_BulletTracer P_Fire(Vector3 spawnpos, Vector3 endpos) {
+		if (!level.isPointInMap(spawnpos)) {
+			return null;
+		}
+		Vector3 diff = level.Vec3Diff(spawnpos, endpos);
+		double dist = diff.Length();
+		Vector3 dir = diff.Unit();
+		let tracer = PK_BulletTracer(Actor.Spawn('PK_BulletTracer', spawnpos));
+		if (tracer && !tracer.TestMobjLocation()) {
+			tracer.Destroy();
+			return null;
+		}
+		double floatTics = dist / tracer.speed;
+		// Get rounded number of tics it'll take to reach
+		// end position:
+		tracer.tracerLifeTime = uint(round(floatTics));
+		// Next, adjust the speed based on the difference
+		// of the int and float values, so it actually
+		// reaches end position over that nubmer of tics:
+		tracer.speed *= tracer.tracerLifeTime / floatTics;
+		tracer.angle = dir.xy.Angle();
+		tracer.pitch = asin(-dir.z);
+		tracer.vel = dir * tracer.speed;
+		return tracer;
+	}
+
 	override void PostBeginPlay() {
-		super.PostBeginPlay();		
+		super.PostBeginPlay();
 		if (target && PKWeapon.CheckWmod(target)) {
-			A_SetRenderstyle(5,Style_AddShaded);
+			A_SetRenderstyle(5, Style_AddShaded);
 			SetShade("FF2000");
 			scale *= 2;
 		}
 	}
+
+	override void Tick() {
+		if (isFrozen()) return;
+
+		if (tracerLifeTime <= 0) {
+			Destroy();
+			return;
+		}
+		tracerLifeTime--;
+		SetOrigin(level.Vec3Offset(self.pos, vel), true);
+	}
+
 	states {
 	Spawn:
 		M000 A -1;
-		stop;
-	Death:
-		TNT1 A 1;
 		stop;
 	}
 }

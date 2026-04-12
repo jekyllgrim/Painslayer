@@ -41,7 +41,7 @@ class PK_Chaingun : PKWeapon {
 		}
 
 		PK_AttackSound("weapons/chaingun/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);	
-		PK_FireBullets(spread,spread,-1,dmg,spawnheight: GetPlayerAtkHeight(player.mo) - 39,spawnofs:8.6);
+		PK_FireBullets(spread,spread,-1,dmg,spawnheight: -6.5,spawnofs:8.6);
 
 		// muzzle flash:
 		A_Overlay(PSP_PFLASH,"AltFlash");
