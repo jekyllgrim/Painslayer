@@ -232,26 +232,40 @@ Class PK_BaseActor : Actor abstract {
 			age++;
 	}
 	
-	/*	Make the given actor invisible, have it drop its items
-		and call A_BossDeath if necessary.
-		If 'remove' is true, also destroy it; otherwise it's implied
-		that it's queued for destruction to be handled later by
-		the caller.
-	*/	
+	// Kills the actor silently and hides the body.
+	// If 'remove' is true, also destroys it. Meant
+	// to be called on just-killed actors, although
+	// it can kill them by itself if necessary.
+	// Mainly used for kills in Demon mode:
 	static void KillActorSilent(actor victim, bool remove = true) {
-		if (!victim)
+		// NODAMAGE actors are not supposed to be processed:
+		if (!victim || victim.bNoDamage)
 			return;
-		//hide the corpse
+		// Make sure the victim is really dead
+		// (although it should alreayd be):
+		if (victim.health > 0) {
+			victim.DamageMobj(victim, victim, victim.health, 'normal', DMG_NO_FACTOR|DMG_FORCED|DMG_THRUSTLESS|DMG_NO_PAIN, 0);
+		}
+		// Instantly progress the current state sequence until the end.
+		// While this MAY lead to odd things like the dying actor
+		// spawning various shit, this is the only surefire way
+		// to make sure everything that needs to happen upon the
+		// actor's death ACTUALLY happens. Such as A_KeenDie.
+		while (victim && victim.curstate && victim.curstate.nextstate) {
+			victim.SetState(victim.curstate.nextstate);
+			victim.A_StopAllSounds(); // At least the sounds should be blocked
+		}
+		// The victim may already be gone at this point; if so,
+		// stop here.
+		if (!victim || victim.tics == 0) return;
+		// Hide the corpse
 		victim.A_SetRenderstyle(victim.alpha, Style_None);
-		//drop the items
-		victim.A_NoBlocking();
-		//call A_BossDeath if necessary
-		if (victim.bBOSS || victim.bBOSSDEATH)
-			victim.A_BossDeath();
 		if (pk_debugmessages) {
 			console.printf("%s silent-killed | renderstyle %d | pos (%.1f, %.1f, %.1f)", victim.GetTag(), victim.GetRenderstyle(), victim.pos.x, victim.pos.y, victim.pos.z);
 		}
-		if (remove && !victim.player) {			
+		// Remove the victim, if 'remove' is true and it's
+		// not a player:
+		if (remove && !victim.player) {
 			victim.Destroy();
 		}
 	}
