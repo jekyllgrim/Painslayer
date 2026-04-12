@@ -370,7 +370,6 @@ Class PK_Killer : PK_Projectile {
 		}
 
 		if (!CheckSight(target,SF_IGNOREWATERBOUNDARY)) {
-			Console.Printf("Disabling beam - lost sight of player");
 			StopBeams();
 			return;
 		}
@@ -378,7 +377,6 @@ Class PK_Killer : PK_Projectile {
 		Vector3 start = (target.pos.xy, target.player.viewz);
 		Vector3 view = level.SphericalCoords(start, self.pos, (target.angle, target.pitch));
 		if (!PKWeapon.CheckWmod(target) && (abs(view.x) > 16 || abs(view.y) > 20)) {
-			Console.Printf("Disabling beam - too far from crosshair");
 			StopBeams();
 			return;
 		}
