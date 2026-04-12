@@ -1,6 +1,6 @@
 Class PK_Painkiller : PKWeapon {
 	PK_Killer pk_killer;
-	bool beam;
+	bool killer_beam;
 	bool killer_fired;
 	bool combofire;
 	protected double wmodAlpha;
@@ -32,14 +32,10 @@ Class PK_Painkiller : PKWeapon {
 		PKIR A 1 {
 			A_WeaponOffset(0,32);
 			let bm = player.FindPSprite(PSP_UNDERGUN);
-			if (invoker.beam && !bm)
+			if (invoker.killer_beam && !bm)
 				A_Overlay(PSP_UNDERGUN,"BeamFlare");
-			else if (!invoker.beam && bm)
+			else if (!invoker.killer_beam && bm)
 				A_Overlay(PSP_UNDERGUN,null);
-			/*if (invoker.beam)
-				A_Overlay(PSP_UNDERGUN,"BeamFlare");
-			else
-				A_Overlay(PSP_UNDERGUN,null);*/
 			if (invoker.pk_killer) {
 				let psp = Player.FindPSprite(PSP_Weapon);
 				if (psp) 
@@ -162,7 +158,8 @@ Class PK_Painkiller : PKWeapon {
 	KillerReturn:
 		TNT1 A 0 {
 			invoker.killer_fired = false;
-			//A_StartSound("weapons/painkiller/killerback");
+			invoker.killer_beam = false;
+			A_Overlay(PSP_UNDERGUN,null);
 		}
 		PKIR AAA 1 {
 			A_WeaponOffset(13.5,4.5,WOF_ADD);
@@ -298,7 +295,7 @@ Class PK_Killer : PK_Projectile {
 
 		let weap = PK_Painkiller(target.FindInventory("PK_Painkiller"));
 		if (weap)
-			weap.beam = true;
+			weap.killer_beam = true;
 
 		if (beam_outer) {
 			beam_outer.SetEnabled(true);
@@ -320,7 +317,7 @@ Class PK_Killer : PK_Projectile {
 			
 			let weap = PK_Painkiller(target.FindInventory("PK_Painkiller"));
 			if (weap)
-				weap.beam = false;
+				weap.killer_beam = false;
 		}
 
 		if(beam_outer) {
@@ -372,7 +369,8 @@ Class PK_Killer : PK_Projectile {
 			SetStateLabel("XDeath");
 		}
 
-		if (!target || !CheckSight(target,SF_IGNOREWATERBOUNDARY)) {
+		if (!CheckSight(target,SF_IGNOREWATERBOUNDARY)) {
+			Console.Printf("Disabling beam - lost sight of player");
 			StopBeams();
 			return;
 		}
@@ -380,6 +378,7 @@ Class PK_Killer : PK_Projectile {
 		Vector3 start = (target.pos.xy, target.player.viewz);
 		Vector3 view = level.SphericalCoords(start, self.pos, (target.angle, target.pitch));
 		if (!PKWeapon.CheckWmod(target) && (abs(view.x) > 16 || abs(view.y) > 20)) {
+			Console.Printf("Disabling beam - too far from crosshair");
 			StopBeams();
 			return;
 		}
@@ -388,19 +387,6 @@ Class PK_Killer : PK_Projectile {
 		Vector3 dir = level.Vec3Diff(start, self.pos).Unit();
 		let tracer = PK_KillerBeamTracer.Fire(target, start, direction: dir, range: view.z);
 		if (!tracer) return;
-
-		/*double step = tracer.results.distance * 0.025;
-		while (step < tracer.results.distance) {
-			FSpawnParticleParams p;
-			p.size = 2;
-			p.lifetime = 1;
-			p.startalpha = 1.0;
-			p.flags = SPF_FULLBRIGHT;
-			p.color1 = 0xff0000;
-			p.pos = level.Vec3Offset(start, tracer.results.hitVector.Unit()*step);
-			level.SpawnParticle(p);
-			step += step;
-		}*/
 		
 		FSpawnParticleParams p;
 		p.color1 = "";
