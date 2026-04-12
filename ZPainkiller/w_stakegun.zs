@@ -37,7 +37,7 @@ Class PK_Stakegun : PKWeapon {
 			PK_AttackSound("weapons/stakegun/fire");
 			A_WeaponOffset(11,9,WOF_ADD);
 			double pofs = (invoker.hasWmod) ? 0 : -2.5;
-			Fire3DProjectile("PK_Stake", forward: 1, leftright: 2, updown: -2, crosshairConverge: invoker.hasWmod, pitchoffs: pofs);
+			Fire3DProjectile("PK_Stake", forward: 1, leftright: 2, updown: -2, crosshairConverge: invoker.hasWmod? CONVERGE_FULL : CONVERGE_WITH_OFFSETS, pitchoffs: pofs);
 			A_OverlayPivot(OverlayID(),0.2,1.0);
 		}
 		PSGN BBBBB 1 {

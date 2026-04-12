@@ -347,7 +347,7 @@ Class PK_ElectroDriver : PKWeapon {
 	Fire:
 		TNT1 A 0 {
 			PK_AttackSound("weapons/edriver/starshot");
-			Fire3DProjectile("PK_Shuriken", updown: -6.5, leftright:8, crosshairConverge: true);
+			Fire3DProjectile("PK_Shuriken", updown: -6.5, leftright:8, crosshairConverge: CONVERGE_FULL, convergeRange: 560);
 			A_WeaponOffset(2+frandom[sfx](-0.5,0.5),34+frandom[sfx](-0.5,0.5));
 		}
 		ELDR BC 1 A_WeaponOffset(-0.5,-0.5,WOF_ADD);
@@ -843,6 +843,7 @@ Class PK_ElectroDamageSplash : PK_BaseFlare {
 }
 
 Class PK_Shuriken : PK_StakeProjectile {
+
 	Default {
 		PK_Projectile.trailcolor "f4f4f4";
 		PK_Projectile.trailscale 0.018;
@@ -856,6 +857,7 @@ Class PK_Shuriken : PK_StakeProjectile {
 		+FORCEXYBILLBOARD;
 		+ROLLSPRITE;		
 	}
+
 	override void StakeBreak() {
 		if (GetParticlesLevel() >= PL_REDUCED) {
 			for (int i = random[sfx](2,4); i > 0; i--) {
@@ -875,6 +877,7 @@ Class PK_Shuriken : PK_StakeProjectile {
 		A_StartSound("weapons/edriver/starbreak",volume:0.8, attenuation:4);
 		super.StakeBreak();
 	}
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		spriterotation = random(0,359);
@@ -884,6 +887,7 @@ Class PK_Shuriken : PK_StakeProjectile {
 		if (mod)
 			vel *= 1.35;
 	}
+
 	states {
 	Spawn:
 		M000 A 1 NoDelay {

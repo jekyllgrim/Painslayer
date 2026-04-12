@@ -4,6 +4,12 @@
 */
 
 Class PKWeapon : Weapon abstract {
+	// used by Fire3DProjectile:
+	enum EConvergeStyle {
+		CONVERGE_NONE,
+		CONVERGE_WITH_OFFSETS,
+		CONVERGE_FULL,
+	} 
 	mixin PK_ParticleLevelCheck;
 	
 	protected int PKWflags;
@@ -456,11 +462,12 @@ Class PKWeapon : Weapon abstract {
 	                               double forward = 0,
 	                               double leftright = 0,
 	                               double updown = 0,
-	                               bool crosshairConverge = false,
+	                               EConvergeStyle crosshairConverge = CONVERGE_NONE,
 	                               double angleoffs = 0,
 	                               double pitchoffs = 0,
 	                               double convergeLeftRightOfs = 0,
-	                               double convergeUpDownOfs = 0 ) {
+	                               double convergeUpDownOfs = 0,
+	                               double convergeRange = PLAYERMISSILERANGE) {
 
 		if (!player || !player.mo)
 			return null;
@@ -481,7 +488,7 @@ Class PKWeapon : Weapon abstract {
 		
 		Vector3 aimdir;
 		// no converging:
-		if (!crosshairConverge) {
+		if (crosshairConverge == CONVERGE_NONE) {
 			aimdir = (AngleToVector(angles.x, cos(angles.y)), -sin(angles.y));
 		}
 		// converging:
@@ -493,7 +500,9 @@ Class PKWeapon : Weapon abstract {
 			// an offset relative to each other. Intended for cases when
 			// several projectiles are fired explicitly offset relative
 			// to each other:
-			LineTrace(angle, PLAYERMISSILERANGE, pitch,
+			LineTrace(angle + (crosshairConverge == CONVERGE_WITH_OFFSETS? angleoffs : 0),
+				convergeRange,
+				pitch + (crosshairConverge == CONVERGE_WITH_OFFSETS? pitchoffs : 0),
 				offsetside: convergeLeftRightOfs,
 				offsetz: player.viewz-pos.z + convergeUpDownOfs,
 				data:lt);
@@ -1233,22 +1242,6 @@ Class PK_StakeProjectile : PK_Projectile {
 			if (pinvictim)
 				pinvictim.SetZ(pos.z + victimofz);
 		}
-	}
-}
-
-Class PK_DummyProjectile : PK_BaseActor {
-	Default {
-		projectile;
-		damage 0;
-		+INVISIBLE
-	}
-	States {
-	Spawn:
-		TNT1 A -1;
-		stop;
-	Death:
-		TNT1 A 1;
-		stop;
 	}
 }
 

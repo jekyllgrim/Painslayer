@@ -28,7 +28,7 @@ Class PK_Boltgun : PKWeapon {
 			forward: 1,
 			leftright:            leftright + (!invoker.scoped? 5 : 0),
 			updown:               updown + (!invoker.scoped? -6 : 0),
-			crosshairConverge:    true,
+			crosshairConverge:    CONVERGE_FULL,
 			convergeLeftRightOfs: leftright,
 			convergeUpDownOfs:    updown
 		);

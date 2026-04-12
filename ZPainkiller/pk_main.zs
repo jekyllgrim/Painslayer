@@ -950,9 +950,9 @@ Class PK_BaseFlare : PK_SmallDebris {
 	states {
 	Spawn:
 		FLAR A 1 {
-			if (fade != 0)
+			if (fade > 0)
 				A_FadeOut(fade);
-			if (shrink != 0) {
+			if (!(shrink ~== 0)) {
 				scale *= shrink;
 			}
 		}
