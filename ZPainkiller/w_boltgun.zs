@@ -69,7 +69,7 @@ Class PK_Boltgun : PKWeapon {
 		if (wpn == self && !cam) {
 			cam = PK_ReflectionCamera(Spawn("PK_ReflectionCamera", pos));
 			cam.plr = PlayerPawn(owner);
-			TexMan.SetCameraToTexture(cam, "Weapon.camtex", 120/*owner.player.FOV*/);
+			TexMan.SetCameraToTexture(cam, "PKBoltgun.camtex", 120/*owner.player.FOV*/);
 		}
 		if (wpn != self && cam) {
 			cam.Destroy();

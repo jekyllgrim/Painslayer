@@ -101,7 +101,7 @@ Class PK_MainHandler : EventHandler {
 		PlayerInfo plr = players[consoleplayer];
 		if (plr && plr.readyweapon && plr.readyweapon is "PK_Boltgun") {	
 			if (!scopetex)
-				scopetex = TexMan.CheckForTexture("Weapon.camtex", TexMan.Type_Any);
+				scopetex = TexMan.CheckForTexture("PKBoltgun.camtex", TexMan.Type_Any);
 			if (scopetex.IsValid()) {
 				Screen.DrawTexture(scopetex, false, 0.0, 0.0, DTA_Alpha, 0.0);
 			}

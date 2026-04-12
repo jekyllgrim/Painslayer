@@ -1,4 +1,4 @@
-CameraTexture "Weapon.camtex" 200 200
+CameraTexture "PKBoltgun.camtex" 80 80
 
 texture PCDXSOUA range PCDXSOUU tics 2
 texture GSOUA0 range GSOUU0 tics 2

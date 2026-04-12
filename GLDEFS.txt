@@ -1,7 +1,7 @@
 Material Sprite "BGUSA0"
 {
 	Shader "shaders/CamTexweapon.fp"
-	Texture camTex "Weapon.camtex"
+	Texture camTex "PKBoltgun.camtex"
 }
 
 HardwareShader PostProcess Scene
