@@ -367,6 +367,20 @@ Sprite "PKIMC0", 283, 189
 	Patch "PKIMC", 0, 0
 }
 
+Sprite "PKIMD0", 283, 189
+{
+	YScale 1.200
+	Offset -66, -16
+	Patch "PKIMD", 0, 0
+}
+
+Sprite "PKIME0", 283, 189
+{
+	YScale 1.200
+	Offset -66, -16
+	Patch "PKIME", 0, 0
+}
+
 Sprite "PKIRA0", 283, 189
 {
 	YScale 1.200

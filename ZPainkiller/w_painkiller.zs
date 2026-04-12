@@ -146,11 +146,11 @@ Class PK_Painkiller : PKWeapon {
 			invoker.killer_fired = true;
 			return ResolveState(null);
 		}
-		PKIM ABC 1 A_WeaponOffset(9,3,WOF_ADD);
-		PKIM CCC 1 {
+		PKIM BCD 1 A_WeaponOffset(9,3,WOF_ADD);
+		PKIM EEE 1 {
 			A_WeaponOffset(0.5,0.3,WOF_ADD);
 		}
-		PKIM BBBAAA 1 {
+		PKIM DDCCBA 1 {
 			A_WeaponReady(WRF_NOBOB);
 			A_WeaponOffset(-5,-1.5,WOF_ADD);
 		}
