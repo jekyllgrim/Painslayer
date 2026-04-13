@@ -637,7 +637,6 @@ Class PK_PinVictim : PK_BaseActor {
 }
 
 Class PK_GrenadeHitbox : Actor {
-	Actor hitstake;
 	Actor ggrenade;
 	class<Actor> collider;
 	property collider : collider;
@@ -658,31 +657,32 @@ Class PK_GrenadeHitbox : Actor {
 
 	override bool CanCollideWith(Actor other, bool passive) {
 		if (other && passive && collider && other is collider && master && (abs(pos.z - other.pos.z) <= height)) {
-			hitstake = other;
-			master = null;
+			return true;
 		}
 		return false;
 	}
 
+	override void CollidedWith(Actor other, bool passive) {
+		master = null;
+		let exs = Spawn(newstake, other.pos);
+		if (exs) {
+			exs.vel = other.vel;
+			exs.angle = other.angle;
+			exs.pitch = other.pitch+5;
+			exs.target = other.target;
+			A_StartSound(combosound);
+		}
+		other.destroy();
+		if (ggrenade)
+			ggrenade.destroy();
+		SetStateLabel("Null");
+	}
+
 	override void Tick() {
 		super.Tick();
-		if (!master && hitstake) {
-			let exs = Spawn(newstake,hitstake.pos);
-			if (exs) {
-				exs.vel = hitstake.vel;
-				exs.angle = hitstake.angle;
-				exs.pitch = hitstake.pitch+5;
-				exs.target = hitstake.target;
-				A_StartSound(combosound);
-			}
-			hitstake.destroy();
-			if (ggrenade)
-				ggrenade.destroy();
-			destroy();
-			return;
-		}
-		if (master)
+		if (master && !master.isFrozen()) {
 			SetOrigin(master.pos - (0,0,height * 0.5),false);
+		}
 	}
 }
 	
