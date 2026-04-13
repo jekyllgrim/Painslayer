@@ -635,7 +635,7 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 // Now, only a container for the static function that spawns
 // animated textured particles that imitate its look:
 Class PK_FlameParticle : PK_SmallDebris {
-	protected int rollOfs;
+	protected double rollOfs;
 	Default {
 		+NOINTERACTION
 		+BRIGHT
