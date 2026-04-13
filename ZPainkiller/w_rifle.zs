@@ -664,7 +664,7 @@ Class PK_FlameParticle : PK_SmallDebris {
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		roll = frandom[sfx](0,360);
-		rollOfs = frandom[sfx](4,8) * randompick[sfx](-1,1);
+		rollOfs = frandom[sfx](4,8) * frandompick[sfx](-1,1);
 	}
 
 	States {

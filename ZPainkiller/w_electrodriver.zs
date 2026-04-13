@@ -184,7 +184,7 @@ Class PK_ElectroDriver : PKWeapon {
 				PK_Lightning.Fire(victim, next.pos+(0,0,next.height*0.5), temporary: true);
 				// The secondary damage is 75% of the base beam damage
 				// and never causes pain:
-				PK_ElectroTargetControl.DealElectroDamage(next, self, self, dmg * 0.75, DMG_NO_PAIN|DMG_THRUSTLESS|DMG_PLAYERATTACK);
+				PK_ElectroTargetControl.DealElectroDamage(next, self, self, int(round(dmg * 0.75)), DMG_NO_PAIN|DMG_THRUSTLESS|DMG_PLAYERATTACK);
 			}
 		}
 		return victim.pos.PlusZ(victim.height*0.5);
@@ -512,7 +512,7 @@ class PK_Lightning : PK_LaserBeam {
 		let dir = diff.Unit();
 		let dist = diff.Length();
 		double nodeDist = Clamp(dist / 10, min(8, dist), min(80, dist));
-		int steps = nodeDist < dist? floor(dist / nodeDist) : 1;
+		int steps = nodeDist < dist? int(floor(dist / nodeDist)) : 1;
 		double ofss = nodeDist / 4.0;
 
 		array <double> litPosX;
@@ -550,7 +550,7 @@ class PK_Lightning : PK_LaserBeam {
 	{
 		let diff = Level.Vec3Diff(from, to); // difference between two points
 		let dir = diff.Unit(); // direction from point 1 to point 2
-		int steps = floor(diff.Length() / density); // how many steps to take:
+		int steps = int(floor(diff.Length() / density)); // how many steps to take:
 
 		// Generic particle properties:
 		posOfs = abs(posOfs);

@@ -392,7 +392,7 @@ Class PK_Stake : PK_StakeProjectile {
 		// Class type check is there to disable this  functionality
 		// for Boltgun bolts:
 		if (mod || (burnstate == BS_Burning))
-			basedmg *= 1.5;
+			basedmg *= int(ceil(1.5));
 		int dealtdmg = victim.DamageMobj (self, target, basedmg, dmgtype);
 		deathsound = "";
 		A_StartSound("weapons/stakegun/hit",volume:0.7,attenuation:3);

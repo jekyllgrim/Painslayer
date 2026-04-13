@@ -16,7 +16,7 @@ Class PainkillerHUD : BaseStatusBar {
 	protected CVar showCards;
 	
 	protected int hudstate;
-	protected int arrowangle;
+	protected double arrowangle;
 	protected int checktic;
 	protected int goldnum;
 	protected int soulsnum;
@@ -356,11 +356,11 @@ Class PainkillerHUD : BaseStatusBar {
 		int bosses = mainhandler.allbosses.size();
 		if (bosses > 0) {
 			actor bossmonster;
-			double closestDist = 1400;
+			double closestDist = 1400*1400;
 			for (int i = 0; i < bosses; i++) {
 				let act = mainhandler.allbosses[i];
 				if (act && act.health > 0 && act.target) {
-					int dist = player.Distance2D(act);
+					double dist = player.Distance2DSquared(act);
 					if (closestDist > 0 && dist < closestDist) {
 						bossmonster = act;
 						closestDist = dist;
@@ -402,7 +402,7 @@ Class PainkillerHUD : BaseStatusBar {
 			for (int i = 0; i < enemies; i++) {
 				let act = mainhandler.allenemies[i];
 				if (act) {
-					int dist = player.Distance2DSquared(act);
+					double dist = player.Distance2DSquared(act);
 					if (closestDist > 0 && dist < closestDist) {
 						closestMonst = act;
 						closestDist = dist;
