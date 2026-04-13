@@ -238,30 +238,16 @@ class OptionMenuItemPKCrosshairOption : OptionMenuItemOption
 			return indent;
 			
 		// Get the size of the menu item:
-		String label = Stringtable.Localize(mLabel);
-		int labelW = int(Menu.OptionWidth(label) * 1.2);
-		int labelH = Menu.Optionheight();		
-		// Define graphic's offsets based
-		// on the size of the label:
-		int x = (screen.GetWidth() + labelW) / 2;
-		y += labelH; // this centers the graphic next to the label
+		int labelH = int(Menu.Optionheight() * CleanYfac_1);
+		int ofsy = Menu.Optionheight() * CleanYfac_1 / 2;
+		Vector2 size = TexMan.GetScaledSize(tex);
+		double scale = min(labelH / size.x, labelH / size.y);
 		
-		// Get the graphic size and scale it down
-		// by the font's height:
-		vector2 texsize = TexMan.GetScaledSize(tex);
-		double texScale = texsize.y / labelH / 2;
-		
-		int w = screen.GetWidth();
-		int h = screen.GetHeight();
 		Screen.DrawTexture(
 			tex, true, 
-			x, y, 
-			DTA_VirtualWidth, w, 
-			DTA_VirtualHeight, h, 
-			DTA_FullscreenScale, FSMode_ScaleToFit43,
-			DTA_LegacyRenderStyle, Style_Add/*,
-			DTA_ScaleX, texScale,
-			DTA_ScaleY, texScale*/
+			indent + labelH * 2, y + ofsy/2,
+			DTA_ScaleX, scale,
+			DTA_ScaleY, scale
 		);
 		return indent;
 	}
@@ -269,7 +255,7 @@ class OptionMenuItemPKCrosshairOption : OptionMenuItemOption
 
 class OptionMenuItemPKTooltip : OptionMenuItemStaticText {
 	OptionMenuItemPKTooltip Init(String tooltipText) {
-		Super.Init(tooltiptext, -1, null, 0, 'hide');
+		Super.Init(tooltiptext);
 		return self;
 	}
 
