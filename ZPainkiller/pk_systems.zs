@@ -83,7 +83,7 @@ Class PK_DemonTargetControl : PK_InventoryToken {
 			for (int i = CH_END; i > 0; i--)
 				owner.A_SoundPitch(i,0.9);
 			if (owner.CurState != slowstate) {
-				owner.A_SetTics(owner.tics*1.5);
+				owner.A_SetTics(int(ceil(owner.tics*1.5)));
 				slowstate = Owner.CurState;
 			}
 		}
@@ -1008,7 +1008,7 @@ Class PKC_SoulCatcher : PK_BaseSilverCard {
 	bool CheckPath(Actor from, Actor to) {
 		if (!from || !to)
 			return false;
-		int stepCount = from.Distance2d(to)/from.radius + 1;
+		int stepCount = int(ceil(from.Distance2d(to) / from.radius + 1));
 		for (int i = 0; i < stepCount; ++i) {
 			if (from.CheckBlock(CBF_NOACTORS | CBF_ABSOLUTEANGLE, AAPTR_DEFAULT, i*from.radius, 0, 0, from.AngleTo(to))) {
 				return false;
@@ -1025,7 +1025,7 @@ Class PKC_SoulCatcher : PK_BaseSilverCard {
 			return;
 		if (owner.bNOCLIP || owner.bNOINTERACTION)
 			return;
-		int edist = effectDistance + owner.radius;
+		int edist = int(effectDistance + owner.radius);
 		BlockThingsIterator itr = BlockThingsIterator.Create(owner,edist);
 		while (itr.next()) {
 			let trg = itr.thing;
@@ -1127,7 +1127,7 @@ Class PKC_HealthStealer : PK_BaseSilverCard {
 		together and then limited to 8 HP max.
 		*/
 		if (level.time % 10 == 0 && drainedHP > 0) {
-			int drain = Clamp(drainedHP,1,8);
+			int drain = int(clamp(drainedHP,1,8));
 			owner.GiveBody(drain,100);
 			if (pk_debugmessages)
 				console.printf("Drained %d HP (%f\%)",drainedHP,drain);
@@ -1243,7 +1243,7 @@ Class PKC_Endurance : PK_BaseGoldenCard {
 	}
 	override void ModifyDamage(int damage, Name damageType, out int newdamage, bool passive, Actor inflictor, Actor source, int flags)	{
 		if (cardActive && passive && damage > 0)
-			newdamage = max(0, ApplyDamageFactors(GetClass(), damageType, damage, damage * 0.5));
+			newdamage = max(0, ApplyDamageFactors(GetClass(), damageType, damage, int(round(damage * 0.5))));
 	}
 }
 
@@ -1654,7 +1654,7 @@ Class PK_HasteControl : PK_InventoryToken {
 			for (int i = CH_END; i > 0; i--)
 				owner.A_SoundPitch(i,0.6);
 			if (owner.CurState != slowstate) {
-				owner.A_SetTics(owner.tics*1.8);
+				owner.A_SetTics(int(ceil(owner.tics*1.8)));
 				slowstate = Owner.CurState;
 			}
 			/* make sure its speed is not too high, to override stuff like A_SkullAttack
@@ -1677,7 +1677,7 @@ Class PK_HasteControl : PK_InventoryToken {
 				for (int i = CH_END; i > 0; i--)
 					owner.A_SoundPitch(i,0.8);
 				if (owner.CurState != slowstate) {
-					owner.A_SetTics(owner.tics*1.5);
+					owner.A_SetTics(int(ceil(owner.tics*1.5)));
 					slowstate = Owner.CurState;
 				}				
 			}
@@ -1694,23 +1694,23 @@ Class PK_HasteControl : PK_InventoryToken {
 				if (!ps0)
 					return;
 				ticvar = !ticvar;	
-				if (ps0.curstate != wstate0) {		
-					ps0.tics = Clamp(double(ps0.tics*fac),2,5);
+				if (ps0.curstate != wstate0) {
+					ps0.tics = int(clamp(double(ps0.tics*fac),2,5));
 					wstate0 = ps0.curstate;
 				}
 				let ps1 = owner.player.FindPSprite(PSP_UNDERGUN);
-				if (ps1 && ps1.curstate != wstate1) {					
-					ps1.tics = Clamp(double(ps1.tics*fac),2,5);
+				if (ps1 && ps1.curstate != wstate1) {
+					ps1.tics = int(clamp(double(ps1.tics*fac),2,5));
 					wstate1 = ps1.curstate;
 				}		
 				let ps2 = owner.player.FindPSprite(PSP_OVERGUN);
-				if (ps2 && ps2.curstate != wstate2) {					
-					ps2.tics = Clamp(double(ps2.tics*fac),2,5);
+				if (ps2 && ps2.curstate != wstate2) {
+					ps2.tics = int(clamp(double(ps2.tics*fac),2,5));
 					wstate2 = ps2.curstate;
 				}		
 				let ps3 = owner.player.FindPSprite(PSP_PFLASH);
-				if (ps3 && ps3.curstate != wstate3) {					
-					ps3.tics = Clamp(double(ps3.tics*fac),2,5);
+				if (ps3 && ps3.curstate != wstate3) {
+					ps3.tics = int(clamp(double(ps3.tics*fac),2,5));
 					wstate3 = ps3.curstate;
 				}			
 			}

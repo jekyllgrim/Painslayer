@@ -26,11 +26,22 @@ Class PK_Rifle : PKWeapon {
 		Obituary "$PKO_RIFLE";
 	}
 
+	action void PK_FireRifle() {
+		PK_AttackSound("weapons/rifle/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
+		if (invoker.hasDexterity)
+			A_SoundPitch(CHAN_WEAPON,1.1);
+		double dmg = 14;
+		if (invoker.hasWmod) dmg *= 1.5;
+		PK_FireBullets(1, 1, 1, int(dmg), spawnheight: -6,spawnofs: 6.6);
+		if (!invoker.hasWmod)
+			invoker.shots++;
+	}
+
 	action void FireFlameThrower() {
 		let flm = PK_FlameThrowerFlame(Fire3DProjectile("PK_FlameThrowerFlame", true, forward: radius, leftright: 3, updown: 0, angleoffs: frandom[flt](-3,3), pitchoffs: frandom[flt](-3,3)));
 
 		if (flm) {
-			flm.vel += vel;
+			flm.vel += vel*0.8;
 			/*console.printf("Flame base vel: %1.f | added vel: %.1f | total vel: %1.f",
 				flm.basevel,
 				vel.length(),
@@ -207,14 +218,7 @@ Class PK_Rifle : PKWeapon {
 		goto ready;
 	Fire:
 		TNT1 A 0 {
-			PK_AttackSound("weapons/rifle/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
-			if (invoker.hasDexterity)
-				A_SoundPitch(CHAN_WEAPON,1.1);
-			double dmg = 14;
-			if (invoker.hasWmod) dmg *= 1.5;
-			PK_FireBullets(1,1,1,dmg, spawnheight: -6,spawnofs:6.6);
-			if (!invoker.hasWmod)
-				invoker.shots++;
+			PK_FireRifle();
 			A_OverlayPivot(RIFLE_STOCK,-1,-2.1);
 			A_OverlayPivot(RLIGHT_STOCK,-1,-2.1);
 			//A_ClearOverlays(PSP_HIGHLIGHTS,PSP_HIGHLIGHTS);
@@ -289,7 +293,7 @@ Class PK_Rifle : PKWeapon {
 		goto ready;
 	Flash:
 		RMUZ A 1 bright {
-			A_AttachLight('PKWeaponlight', DynamicLight.PointLight, "ffcd66", frandom[sfx](32,46), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF, ofs: (32,32,player.viewheight));
+			A_AttachLight('PKWeaponlight', DynamicLight.PointLight, 0xffcd66, random[sfx](32,46), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF, ofs: (32,32,player.viewheight));
 			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
 			A_OverlayFlags(OverlayID(),PSPF_ADDWEAPON,false);
 			A_OverlayOffset(OverlayID(),0,32);
@@ -541,7 +545,7 @@ Class PK_FlameThrowerFlame : PK_Projectile {
 		super.PostBeginPlay();
 		ripdepth = 300;
 		roll = frandom[sfx](0,360);
-		rollOfs = frandom[sfx](5,20) * randompick[sfx](-1,1);
+		rollOfs = frandom[sfx](5,20) * frandompick[sfx](-1,1);
 		scaleMul = 1.02;
 	}
 
@@ -664,7 +668,7 @@ Class PK_FlameParticle : PK_SmallDebris {
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
 		roll = frandom[sfx](0,360);
-		rollOfs = frandom[sfx](4,8) * frandompick[sfx](-1,1);
+		rollOfs = frandom[sfx](4.0, 8.0) * frandompick[sfx](-1.0, 1.0);
 	}
 
 	States {

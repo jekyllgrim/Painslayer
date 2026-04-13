@@ -641,8 +641,8 @@ Class PainkillerHUD : BaseStatusBar {
 		// because we want this square (hud_aspectscale be screwed):
 		vector2 hudscale = GetHUDScale();
 		Vector2 barScale = (hpBarScale.x * hudscale.x, hpBarScale.y * hudscale.x);
-		int posx = Screen.GetWidth() / 2.;
-		int posy = hpBarScale.y / 2 * hudscale.x;
+		int posx = Screen.GetWidth() / 2;
+		int posy = int(hpBarScale.y / 2 * hudscale.x);
 		if (bottom)
 			posy = Screen.GetHeight() - posy;
 		Screen.DrawTexture(hpBarBackground, false, posx, posy,
@@ -661,7 +661,7 @@ Class PainkillerHUD : BaseStatusBar {
 		Screen.DrawShape(hpbartex, false, healthBarShape);
 		
 		//Draw boss sprite:
-		vector2 spritescale = ScaleToBox(bossSprite,barScale.x, barScale.y) * 0.65;
+		vector2 spritescale = ScaleToBox(bossSprite, barScale.x, barScale.y) * 0.65;
 		Screen.DrawTexture(bossSprite, false, posx, posy,
 			DTA_CenterOffset, true,
 			DTA_TranslationIndex, Translation.GetID('PK_HUDBoss'),
@@ -671,7 +671,7 @@ Class PainkillerHUD : BaseStatusBar {
 	}
 	
 	// Scales an image to box keeping its ratio:
-	vector2 ScaleToBox(TextureID tex, int w, int h) {
+	vector2 ScaleToBox(TextureID tex, double w, double h) {
 		Vector2 size = TexMan.GetScaledSize(tex);
 		double ratio = min(w / size.x, h / size.y*1.2);
 
@@ -710,7 +710,7 @@ Class PainkillerHUD : BaseStatusBar {
 		
 		// Only draw segments up to a fraction of our total segments based on remaining health
 		hb.Clear(Shape2D.C_Indices);
-		int maxSegments = ceil(segments * Clamp(frac, 0., 1.));
+		int maxSegments = int(ceil(segments * Clamp(frac, 0., 1.)));
 		for (int i = 1; i <= maxSegments; ++i)
 		{
 			int next = i+1;

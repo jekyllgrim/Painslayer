@@ -178,7 +178,7 @@ class PK_Chaingun : PKWeapon {
 			let psp = player.FindPsprite(OverlayID());
 			let lightlayer = player.FindPsprite(PSP_HIGHLIGHTS);
 			if (psp) {
-				int ntics = Clamp(ceil(invoker.spintics), 1, SS_Max);
+				int ntics = int(clamp(ceil(invoker.spintics), 1, SS_Max));
 				// check if we're at max speed:
 				if (invoker.spintics <= SS_Min) {
 					// if so, skip every second frame
