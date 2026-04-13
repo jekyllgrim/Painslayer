@@ -68,28 +68,14 @@ It's possible to play the version that is currently in the repository but hasn't
 
 6. Enjoy!
 
-## How to play Painslayer with Beautiful Doom
-
-1. Download a fresh release of Beautiful Doom: https://github.com/jekyllgrim/Beautiful-Doom/releases
-
-2. Run the game so that Painslayer is placed *after* Beautiful Doom in the load order. For example:
-   
-   ```
-   gzdoom.exe -file Beautiful_Doom_715.pk3 Painslayer102.pk3
-   ```
-
-3. In the Main Menu, before starting the game, navigate to **Options** > **Beautiful Doom Settings** > scroll down, find **Beautiful Doom Weapons** > set to **Disabled**.
-
-4. Play the game, and you'll have Beautiful Doom visuals with Painslayer weapons and mechanics!
-
 # Copyright information and permissions
 
-Painslayer gameplay modification for GZDoom engine ("Painslayer") by Agent_Ash also known as Jekyll Grim Payne ("the Author") is based on the Painkiller game series by People Can Fly and consists of several components that are subject to different licenses and permissions.
+Painslayer modification for GZDoom/UZDoom engines ("Painslayer") by Agent_Ash also known as Jekyll Grim Payne ("the Author") is based on the Painkiller game series by People Can Fly and consists of several components that are subject to different licenses and permissions.
 
 ### Short summary of the permissions (not equivalent to the full text):
 
-* Most of the graphics in Painslayer (specifically, weapon and pickup sprites) are owned by the Author and may NOT be used, copied or edited by anyone for any purpose without first obtaining an explicit permission from the Author.
-* The code used in Painslayer was produced by several authors and can be freely used by anyone for any purpose, provided the authors are credited, the required licenses are applied to the derivative works, and the relevant license and copyright information is kept intact (i.e. all files containing license information shall be copied to derivate works).
+* Most of the graphics in Painslayer (specifically, weapon and pickup sprites) were created and are owned by the Author and may NOT be used, copied or edited by anyone for any purpose without first obtaining an explicit permission from the Author.
+* The code used in Painslayer is open-source, was produced by several authors and can be freely used by anyone for any purpose, provided the authors are credited, the required licenses are applied to the derivative works, and the relevant license and copyright information is kept intact (i.e. all files containing license information shall be copied to derivate works).
 * The sounds used in Painslayer are owned by People Can Fly and are used under Fair Use. They may be removed from Painslayer, should People Can Fly request it.
 
 ## The Artwork
@@ -141,7 +127,7 @@ sprites/souls/
 sprites/Flamethrower/
 ```
 
-iii. Open-source assets  
+iii. Small assets by various authors  
      **Permissions**: can be used by anyone for any purpose.  
      **Locations**:
 
@@ -169,31 +155,16 @@ sprites/SFX/
 
 ## The Code
 
-The codebase of Painslayer includes original code produced by the Author, as well as several libraries, each under their own license.
+The codebase of Painslayer includes original code produced by the Author, as well as several libraries, each under their own license. Painslayer codebase can be used freely by anyone for any purpose, provided the attached licene information is kept intact and the original authors are credited in all derivative works. Some of the code in Painslayer is licensed under GPLv3. All code that is borrowed or based on that code also has to be licensed under GPLv3.
 
-**Summary of the permissions (not equivalent to the full license text):** 
+The following code is used in Painslayer:
 
-* Painslayer codebase can be used freely by anyone for any purpose, provided the attached licene information is kept intact and the original authors are credited in all derivative works. 
-
-* Some of the code in Painslayer is licensed under GPLv3. All code that is borrowed or based on that code also has to be licensed under GPLv3.
-
-The code libraries, their license types and their locations are as follows:
-
-1. Original code by the Author (with the occasional help of the members of the ZDoom community)  
-    **License**: GPLv3  
-    **Location**: `ZPainkiller/` (not including any subfolders)
-2. *ZForms* library by Jessica Russell and Chronos "phantombeta" Ouroboros  
-    **License**: free license  
-    **Location**: `ZPainkiller/Zforms/`
-3. *ToolTips* library by Nero  
-    **License**: GPLv3  
-    **Location**: `ZPainkiller/Tooltips/`
-4. *Gutamatics* library by Gutawer
-    **License**: MIT License
-    **Location**: `ZPainkiller/PK_Gutamatics/`
-5. *GZBeamz* library by Lewisk3
-   **License:** MIT License
-   **Location:** `ZPainkiller/GZBeamz/`
+| Type of asset | Author(s)                                           | License      | Location in the project                 |
+| ------------- | --------------------------------------------------- | ------------ | --------------------------------------- |
+| Original code | Agent_Ash                                           | GPLv3        | `ZPainkiller/` not including subfolders |
+| AshMovement   | Agent_Ash                                           | GPLv3        | `ZPainkiller/AshMovement/`              |
+| ZForms        | Jessica Russell<br/>Chronos "phantombeta" Ouroboros | free license | `ZPainkiller/Zforms/`                   |
+| GZBeamz       | Lewisk3                                             | MIT          | `ZPainkiller/GZBeamz`                   |
 
 Refer to the aforementioned code locations for license information on each code component.
 
@@ -203,18 +174,14 @@ All sounds used in Painslayer are owned by People Can Fly and are used under Fai
 
 # Credits
 
-**People Can Fly**: Painkiller, Painkiller sounds, HUD graphics
+**People Can Fly**: Painkiller, Painkiller sounds, Painkiller graphics
 
 **Agent_Ash aka Jekyll Grim Payne**: Idea, code, weapon and item sprites
 
-**Cherno**: Demon Morph shaders
-
 **Lewisk3**: [GZBeamz](https://github.com/Lewisk3/GZBeamz/), scripting help
+
+**Cherno**: Demon Morph shaders
 
 Boondolr: Boss healthbar code, scripting help
 
 phantombeta, Gutawer: [ZForms](https://gitlab.com/Gutawer/gzdoom-zforms)
-
-Gutawer: [Gutamatics](https://gitlab.com/Gutawer/gzdoom-gutamatics/)
-
-Nero: [Tooltips](https://github.com/Saican/Tooltips/tree/master)

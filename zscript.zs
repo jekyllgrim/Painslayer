@@ -2,9 +2,6 @@ version "4.14.3"
 
 //GZBeamz by Lewisk3:
 #include "ZPainkiller/GZBeamz/laser_base.zsc"
-//tooltips by nero:
-#include "ZPainkiller/Tooltips/ToolTips_Lists.zs"
-#include "ZPainkiller/Tooltips/ToolTips_Options.zs"
 //zforms 2.0:
 #include "ZPainkiller/ZForms2.0/BaseMenu.zsc"
 #include "ZPainkiller/ZForms2.0/BoundingBox.zsc"

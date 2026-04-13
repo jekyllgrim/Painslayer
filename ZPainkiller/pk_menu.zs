@@ -266,3 +266,118 @@ class OptionMenuItemPKCrosshairOption : OptionMenuItemOption
 		return indent;
 	}
 }
+
+class OptionMenuItemPKTooltip : OptionMenuItemStaticText {
+	OptionMenuItemPKTooltip Init(String tooltipText) {
+		Super.Init(tooltiptext, -1, null, 0, 'hide');
+		return self;
+	}
+
+	override bool Selectable() {
+		return false;
+	}
+
+	override bool Visible() {
+		return false;
+	}
+}
+
+
+class PK_ModSettingsMenu : OptionMenu {
+	const TOOLTIP_RES_X = 800;
+	const TOOLTIP_RES_Y = 600;
+
+	override void Drawer() {
+		Super.Drawer();
+		OptionMenuItemPKTooltip tooltip;
+		String curlabel;
+		for (int i = 0; i < mDesc.mItems.Size() - 1; i ++) {
+			if (mDesc.mSelectedItem != i) continue;
+			tooltip = OptionMenuItemPKTooltip(mDesc.mItems[i+1]);
+			if (tooltip) {
+				curlabel = mDesc.mItems[i].mLabel;
+				break;
+			}
+		}
+		if (!tooltip) return;
+		String text = StringTable.Localize(tooltip.mLabel);
+		if (!text) return;
+		int screenCenter = TOOLTIP_RES_X / 2;
+		int width = int(ceil(TOOLTIP_RES_X * 0.8));
+		int height = int(ceil(TOOLTIP_RES_Y * 0.2));
+		int posx = screenCenter - (width / 2);
+
+		int posy;
+		// set posy to the top or bottom based on where the cursor is:
+		int last = LastSelectableItem();
+		int firstSelectable = -1;
+		int lastSelectable = -1;
+		int visible;
+		for (int i = max(0, mDesc.mScrollPos); visible < MaxItems && i <= last; i++)
+		{
+			if (!mDesc.mItems[i].Visible()) continue;
+			visible++;
+			if (!mDesc.mItems[i].Selectable()) continue;
+			lastSelectable = i;
+			if (firstSelectable == -1) firstSelectable = i;
+		}
+		if (mDesc.mSelectedItem - firstSelectable < visible * 0.75) {
+			posy = TOOLTIP_RES_Y - height - 8;
+		}
+		else {
+			posy = 8;
+		}
+
+		TextureID tex = TexMan.CheckForTexture("graphics/hud/tarot/tooltip_bg.png");
+		Screen.DrawTexture(tex, false,
+			posx, posy,
+			DTA_VirtualWidth, TOOLTIP_RES_X,
+			DTA_VirtualHeight, TOOLTIP_RES_Y,
+			DTA_DestWidth, width,
+			DTA_DestHeight, height,
+			DTA_ColorOverlay, 0xbbffffbb
+		);
+		Screen.DrawTexture(tex, false,
+			posx+4, posy+4,
+			DTA_VirtualWidth, TOOLTIP_RES_X,
+			DTA_VirtualHeight, TOOLTIP_RES_Y,
+			DTA_DestWidth, width - 8,
+			DTA_DestHeight, height - 8,
+			DTA_Alpha, 0.9,
+			DTA_ColorOverlay, 0xbb000000
+		);
+
+		int indentX = 20;
+		int indentY = 12;
+		int lineheight = newconsolefont.GetHeight();
+		if (curlabel) {
+			curlabel = StringTable.Localize(curlabel);
+			int linewidth = newconsolefont.StringWidth(curlabel);
+			Screen.DrawText(newconsolefont, Font.CR_Gold,
+				screenCenter - (linewidth / 2),
+				(posy + indentY), 
+				curlabel,
+				DTA_VirtualWidth, TOOLTIP_RES_X,
+				DTA_VirtualHeight, TOOLTIP_RES_Y,
+				DTA_FullscreenScale, FSMode_ScaleToFit43
+			);
+			posy += lineheight*2;
+		}
+
+		BrokenLines lines = newconsolefont.BreakLines(text, width - indentX*2);
+		String curline;
+		for (int i = 0; i < lines.Count(); i++) {
+			curline = lines.StringAt(i);
+			curline.Replace("\n", " ");
+			Screen.DrawText(newconsolefont, Font.CR_White,
+				(posx + indentX),
+				(posy + indentY), 
+				curline,
+				DTA_VirtualWidth, TOOLTIP_RES_X,
+				DTA_VirtualHeight, TOOLTIP_RES_Y,
+				DTA_FullscreenScale, FSMode_ScaleToFit43
+			);
+			posy += lineheight;
+		}
+	}
+}
