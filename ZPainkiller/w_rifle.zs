@@ -881,12 +881,20 @@ Class PK_FlamerTankModel : Actor {
 	Default {
 		+NOGRAVITY
 		+SHOOTABLE
-		+THRUACTORS
+		+SOLID
 		+NOBLOOD
 		health 50;
 		radius 24;
 		height 20;
 	}
+
+	override bool CanCollideWith(Actor other, bool passive) {
+		if (passive && other && other.bMissile && other != master) {
+			return true;
+		}
+		return false;
+	}
+
 	override void Tick() {
 		super.Tick();
 		if (!master) {
@@ -896,11 +904,13 @@ Class PK_FlamerTankModel : Actor {
 		double pz = straight ? 20 : 6;
 		SetOrigin(master.pos + (0,0,pz),true);
 	}
+
 	override void Die(Actor source, Actor inflictor, int dmgflags, Name MeansOfDeath) {
 		if (master)
 			master.SetStateLabel("XDeath");
 		super.Die(source, inflictor, dmgflags, MeansOfDeath);
 	}
+
 	States {
 	Spawn:
 		M000 A -1;
