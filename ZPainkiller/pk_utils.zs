@@ -179,11 +179,6 @@ class PK_Utils abstract {
 	// Checks if given position is inside a swimmable 3D floor;
 	// if so, returns true, its top and bottom:
 	static clearscope bool, double, double IsPointUnderwater(Vector3 pos, Sector sec = null) {
-		if (!sec) {
-			sec = level.PointInSector(pos.xy);
-		}
-		if (!sec) return false, 0, 0;
-
 		let [ffloor, top, bottom] = Get3DFloorAt(pos, sec, requiredflags: F3DFloor.FF_SWIMMABLE, forbiddenflags: F3DFloor.FF_SOLID);
 		if (ffloor) {
 			return true, top, bottom;

@@ -351,7 +351,7 @@ Class PK_MainHandler : EventHandler {
 	override void WorldThingDied(worldevent e) {
 		let act = e.thing;
 		if (!act || !act.bISMONSTER)
-			return;		
+			return;
 		allenemies.delete(allenemies.Find(act));
 		if (act.bBOSS)
 			allbosses.delete(allbosses.Find(act));
