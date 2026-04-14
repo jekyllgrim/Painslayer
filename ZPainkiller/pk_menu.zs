@@ -367,3 +367,25 @@ class PK_ModSettingsMenu : OptionMenu {
 		}
 	}
 }
+
+class ListMenuItemPKBuildInfo : ListMenuItem {
+	transient String buildinfo;
+	
+	void Init (ListMenuDescriptor desc) {
+		Super.Init(0, 0);
+		let lump = Wads.FindLump("painbuild.txt");
+		if (lump >= 0) {
+			buildinfo = String.Format("Painslayer build %s", Wads.ReadLump(lump));
+		}
+	}
+
+	override void Draw(bool selected, ListMenuDescriptor desc) {
+		if (buildinfo) {
+			Screen.DrawText(newConsoleFont, Font.CR_White,
+				Screen.GetWidth() - newConsoleFont.StringWidth(buildinfo), Screen.GetHeight() - newConsoleFont.GetHeight() - 2,
+				buildinfo,
+				DTA_Alpha, 0.6
+			);
+		}
+	}
+}

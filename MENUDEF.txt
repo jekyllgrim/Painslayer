@@ -18,6 +18,7 @@ ListMenu "MainMenu" {
 	PKTextItemCentered  "$MNU_LOADGAME", "", "LoadGameMenu"
 	PKTextItemCentered  "$MNU_SAVEGAME", "", "SaveGameMenu"
 	PKTextItemCentered  "$MNU_QUITGAME", "", "QuitMenu"
+	PKBuildInfo
 }
 
 // This is necessary because I use 'ForceTextInMenus' in MAPINFO
@@ -39,6 +40,7 @@ ListMenu "MainMenuTextOnly" {
 	PKTextItemCentered  "$MNU_LOADGAME", "", "LoadGameMenu"
 	PKTextItemCentered  "$MNU_SAVEGAME", "", "SaveGameMenu"
 	PKTextItemCentered  "$MNU_QUITGAME", "", "QuitMenu"
+	PKBuildInfo
 }
 
 /*ListMenu "MainCardsMenu" {
