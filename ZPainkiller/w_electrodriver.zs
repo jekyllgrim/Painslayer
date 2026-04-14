@@ -1021,13 +1021,15 @@ Class PK_DiskProjectile : PK_StakeProjectile {
 
 		if (!target)
 			return;
-		double atkdist = 190;
+
+		A_AttachLight('0', DynamicLight.PointLight, "5464fc", random[sfx](40, 60), 0, flags: DYNAMICLIGHT.LF_ATTENUATE);
 
 		if (waterlevel >= 2) {
 			PK_ElectroDriver.DealWaterDamage(self, target, 280);
 			return;
 		}
 
+		double atkdist = 190;
 		BlockThingsIterator itr = BlockThingsIterator.Create(self,atkdist);
 		while (itr.next()) {
 			let next = itr.thing;
