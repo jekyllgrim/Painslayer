@@ -253,7 +253,7 @@ class OptionMenuItemPKCrosshairOption : OptionMenuItemOption
 	}
 }
 
-class OptionMenuItemPKTooltip : OptionMenuItemStaticText {
+/*class OptionMenuItemPKTooltip : OptionMenuItemStaticText {
 	OptionMenuItemPKTooltip Init(String tooltipText) {
 		Super.Init(tooltiptext);
 		return self;
@@ -266,28 +266,41 @@ class OptionMenuItemPKTooltip : OptionMenuItemStaticText {
 	override bool Visible() {
 		return false;
 	}
-}
-
+}*/
 
 class PK_ModSettingsMenu : OptionMenu {
 	const TOOLTIP_RES_X = 800;
 	const TOOLTIP_RES_Y = 600;
 
-	override void Drawer() {
-		Super.Drawer();
-		OptionMenuItemPKTooltip tooltip;
-		String curlabel;
-		for (int i = 0; i < mDesc.mItems.Size() - 1; i ++) {
-			if (mDesc.mSelectedItem != i) continue;
-			tooltip = OptionMenuItemPKTooltip(mDesc.mItems[i+1]);
-			if (tooltip) {
-				curlabel = mDesc.mItems[i].mLabel;
-				break;
+	Map<String, String> pk_modTooltips;
+
+	override void Init(Menu parent, OptionMenuDescriptor desc) {
+		Super.Init(parent, desc);
+
+		array<String> label;
+		OptionMenuItem item;
+		for (int i = mDesc.mItems.Size() - 1; i >= 0; i--) {
+			item = mDesc.mItems[i];
+			if (!item) continue;
+			if (item.mLabel.IndexOf("|")  >= 0) {
+				label.Clear();
+				item.mLabel.Split(label, "|");
+				if (label.Size() < 2) continue;
+				item.mLabel = label[0];
+				pk_modTooltips.Insert(label[0], label[1]);
 			}
 		}
+	}
+
+	override void Drawer() {
+		Super.Drawer();
+
+		OptionMenuItem item = mDesc.mItems[mDesc.mSelectedItem];
+		String tooltip = pk_modTooltips.Get(item.mLabel);
 		if (!tooltip) return;
-		String text = StringTable.Localize(tooltip.mLabel);
-		if (!text) return;
+		tooltip = StringTable.Localize(tooltip);
+		String curlabel = StringTable.Localize(item.mLabel);
+		
 		int screenCenter = TOOLTIP_RES_X / 2;
 		int width = int(ceil(TOOLTIP_RES_X * 0.8));
 		int height = int(ceil(TOOLTIP_RES_Y * 0.2));
@@ -295,19 +308,9 @@ class PK_ModSettingsMenu : OptionMenu {
 
 		int posy;
 		// set posy to the top or bottom based on where the cursor is:
-		int last = LastSelectableItem();
-		int firstSelectable = -1;
-		int lastSelectable = -1;
-		int visible;
-		for (int i = max(0, mDesc.mScrollPos); visible < MaxItems && i <= last; i++)
-		{
-			if (!mDesc.mItems[i].Visible()) continue;
-			visible++;
-			if (!mDesc.mItems[i].Selectable()) continue;
-			lastSelectable = i;
-			if (firstSelectable == -1) firstSelectable = i;
-		}
-		if (mDesc.mSelectedItem - firstSelectable < visible * 0.75) {
+		int firstVisible = mDesc.mScrollTop + mDesc.mScrollPos;
+		int visHeight = visBottom - firstVisible;
+		if (mDesc.mSelectedItem < firstVisible + visHeight*0.6) {
 			posy = TOOLTIP_RES_Y - height - 8;
 		}
 		else {
@@ -337,7 +340,6 @@ class PK_ModSettingsMenu : OptionMenu {
 		int indentY = 12;
 		int lineheight = newconsolefont.GetHeight();
 		if (curlabel) {
-			curlabel = StringTable.Localize(curlabel);
 			int linewidth = newconsolefont.StringWidth(curlabel);
 			Screen.DrawText(newconsolefont, Font.CR_Gold,
 				screenCenter - (linewidth / 2),
@@ -350,7 +352,7 @@ class PK_ModSettingsMenu : OptionMenu {
 			posy += lineheight*2;
 		}
 
-		BrokenLines lines = newconsolefont.BreakLines(text, width - indentX*2);
+		BrokenLines lines = newconsolefont.BreakLines(tooltip, width - indentX*2);
 		String curline;
 		for (int i = 0; i < lines.Count(); i++) {
 			curline = lines.StringAt(i);
