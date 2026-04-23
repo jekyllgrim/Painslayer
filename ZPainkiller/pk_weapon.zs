@@ -824,10 +824,10 @@ Class PK_Projectile : PK_BaseActor abstract {
 	double trailshrink;
 	double surfaceSpeed;
 	
-	class<Actor> trailactor;
-	property trailactor : trailactor;
-	class<PK_ProjFlare> flareactor;	
-	property flareactor : flareactor;
+	class<PK_BaseFlare> trailclass;
+	property trailclass : trailclass;
+	class<PK_ProjFlare> flareclass;	
+	property flareclass : flareclass;
 	property flarecolor : flarecolor;
 	property flarescale : flarescale;
 	property flarealpha : flarealpha;
@@ -851,7 +851,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 		PK_Projectile.trailscale 0.04;
 		PK_Projectile.trailalpha 0.4;
 		PK_Projectile.trailfade 0.1;
-		PK_Projectile.flareactor "PK_ProjFlare";
+		PK_Projectile.flareclass 'PK_ProjFlare';
 	}
 	
 	/*
@@ -895,15 +895,19 @@ Class PK_Projectile : PK_BaseActor abstract {
 
 		if (trailcolor)
 			spawnpos = pos;
-		if (!flarecolor || !flareactor)
+		if (!flarecolor || !flareclass)
 			return;
-		let fl = PK_ProjFlare( Spawn(flareactor,pos) );
-		if (fl) {
-			fl.master = self;
-			fl.fcolor = flarecolor;
-			fl.fscale = flarescale;
-			fl.falpha = flarealpha;
+		if (flarecolor) {
+			flarecolor = color(255, flarecolor.r, flarecolor.g, flarecolor.b);
 		}
+		PK_BaseFlare.P_Spawn(self.pos,
+			scale: flarescale,
+			alpha: flarealpha,
+			scolor: flarecolor,
+			master: self,
+			cls: flareclass,
+			style: flarecolor.a > 0? STYLE_AddShaded : STYLE_Normal
+		);
 	}
 
 	// Prevent gravity changes underwater:
@@ -915,32 +919,20 @@ Class PK_Projectile : PK_BaseActor abstract {
 
 	// Spawns a particle or actor-based trail:
 	virtual void SpawnTrail(vector3 ppos) {
-		// Actor based:
-		if (trailactor) {
-			vector3 tvel;
-			if (trailvel != 0) {
-				tvel = (
-					frandom[trailfx](-trailvel,trailvel),
-					frandom[trailfx](-trailvel,trailvel),
-					frandom[trailfx](-trailvel,trailvel)
-				);
-			}
-			let trl = Spawn(trailactor,ppos+(0,0,trailz));
+		// VisualThinker-based:
+		if (trailclass) {
+			let trl = PK_BaseFlare.P_Spawn(ppos, trailscale, trailshrink, trailalpha, trailfade, style: STYLE_Shaded, cls: trailclass);
 			if (trl) {
-				trl.master = self;
-				let trlflr = PK_BaseFlare(trl);
-				if (trlflr) {
-					trlflr.fcolor = trailcolor;
-					trlflr.fscale = trailscale;
-					trlflr.falpha = trailalpha;
-					if (trailactor == 'PK_BaseFlare')
-						trlflr.A_SetRenderstyle(alpha,Style_Shaded);
-					if (trailfade != 0)
-						trlflr.fade = trailfade;
-					if (trailshrink != 0)
-						trlflr.shrink = trailshrink;
+				if (trailvel > 0) {
+					trl.vel = (
+						frandom[trailfx](-trailvel,trailvel),
+						frandom[trailfx](-trailvel,trailvel),
+						frandom[trailfx](-trailvel,trailvel)
+					);
 				}
-				trl.vel = tvel;
+				if (trailcolor) {
+					trl.scolor = color(255, trailcolor.r, trailcolor.g, trailcolor. b);
+				}
 			}
 		}
 		// Particle based:
@@ -1014,7 +1006,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 		// sizestep is a flat addition, I convert the float value
 		// of 'trainshrink' into a positive or negative value
 		// to convert it into a proper sizestep value:
-		if (trailshrink != 0) {
+		if (!(trailshrink ~== 0)) {
 			double sstep;
 			if (trailshrink > 1)
 				sstep = trail.size * (trailshrink - 1);
@@ -1031,7 +1023,7 @@ Class PK_Projectile : PK_BaseActor abstract {
 
 		Super.Tick();
 
-		if (!trailcolor && !trailactor)
+		if (!trailcolor && !trailclass)
 			return;
 		
 		// Don't spawn particles if they're turned off in the settings:

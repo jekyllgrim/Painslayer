@@ -514,13 +514,7 @@ Class PK_Bomb : PK_Projectile {
 	void ActivateBomb() {
 		boomCountdown = 35 * 4;
 		A_AttachLight('Bomb',DynamicLight.FlickerLight,"DDBB00",17,12,DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF);
-		let red = PK_BaseFlare(Spawn("PK_ProjFlare",pos));
-		if (red) {
-			red.fcolor = "FF0000";
-			red.master = self;
-			red.alpha = 0.65;
-			red.A_SetScale(0.06);
-		}
+		PK_BaseFlare.P_Spawn(pos, master: self, alpha: 0.65, scale: 0.06, scolor: 0xffff0000, cls: 'PK_ProjFlare');
 	}
 
 	states {

@@ -916,84 +916,83 @@ Class PK_Tracer : FastProjectile {
 	}
 }
 	
-Class PK_BaseFlare : PK_SmallDebris {
+class PK_BaseFlare : VisualThinker {
+	Actor f_master;
 	protected state mdeath;
 	protected state mxdeath;
-	color fcolor;
-	property fcolor : fcolor;
-	bool style;
-	property style : style;
-	double fscale;		//scale; used when it's set externally from the spawner
-	double falpha;		//alpha; used when it's set externally from the spawner
-	double fade;
-	property fadefactor : fade;
-	double shrink;
-	property shrinkfactor : shrink;
-	Default {
-		+BRIGHT
-		+NOINTERACTION
-		renderstyle 'AddShaded';
-		alpha 0.4;
-		scale 0.4;
-		gravity 0;
-	}
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		if (master) {
-			mdeath = master.FindState("Death");
-			mxdeath = master.FindState("XDeath");
+	double scalefactor;
+	double fadestep;
+
+	static PK_BaseFlare P_Spawn(Vector3 pos,
+	                            double scale = 0.4,
+	                            double scalefactor = 0.0,
+	                            double alpha = 0.4,
+	                            double fadestep = 0.0,
+	                            String texture = "FLARA0",
+	                            Color scolor = 0x00000000,
+	                            Actor master = null,
+	                            ERenderStyle style = STYLE_AddShaded,
+	                            class<PK_BaseFlare> cls = 'PK_BaseFlare') {
+		TextureID tex = TexMan.CheckForTexture(texture);
+		if (!tex.IsValid()) {
+			Console.Printf("\cgPK_BaseFlare error:\c- \cd%s\c- is not a valid texture", texture);
+			return null;
 		}
-		SetColor();
-	}
-	virtual void SetColor() { //fcolor is meant to be set by the actor that spawns the flare
-		if (GetRenderstyle() == Style_AddShaded || GetRenderstyle() == Style_Shaded) {
-			if (!fcolor) {
-				destroy();
-				return;
-			}				
-			else {
-				SetShade(fcolor);
+		PK_BaseFlare flare = PK_BaseFlare(
+			VisualThinker.Spawn(cls,
+				tex: tex,
+				pos: pos,
+				alpha: alpha,
+				flags: SPF_FULLBRIGHT,
+				scale: (scale, scale),
+				style: style
+			)
+		);
+		if (flare) {
+			if (master) {
+				flare.f_master = master;
+				flare.mdeath = master.FindState("Death");
+				flare.mxdeath = master.FindState("XDeath");
+			}
+			flare.scalefactor = scalefactor;
+			flare.fadestep = fadestep;
+			if (scolor.a > 0) {
+				flare.scolor = scolor;
 			}
 		}
-		//frame = style;
-		if (fscale != 0)
-			A_SetScale(fscale);
-		if (falpha != 0)
-			alpha = falpha;
+		return flare;
 	}
-	states {
-	Spawn:
-		FLAR A 1 {
-			if (fade > 0)
-				A_FadeOut(fade);
-			if (!(shrink ~== 0)) {
-				scale *= shrink;
-			}
+
+	override void Tick() {
+		Super.Tick();
+		if (isFrozen()) return;
+
+		if (alpha <= 0.001 || max(scale.x, scale.y) <= 0.01) {
+			Destroy();
+			return;
 		}
-		loop;
+
+		if (f_master) {
+			pos = f_master.pos;
+		}
+
+		if (fadestep > 0) {
+			alpha -= fadestep;
+		}
+
+		if (scalefactor > 0) {
+			scale *= scalefactor;
+		}
 	}
 }
 
-Class PK_ProjFlare : PK_BaseFlare {
-	double xoffset;
-	Default {
-		PK_BaseFlare.fcolor "FF0000";
-		alpha 0.8;
-		scale 0.11;
-	}
+class PK_ProjFlare : PK_BaseFlare {
 	override void Tick() {
 		super.Tick();
-		if (!master) {
+		if (self && !f_master) {
 			destroy();
 			return;
 		}
-		if (isFrozen())
-			return;
-		Warp(master,xoffset,0,0,flags:WARPF_INTERPOLATE);
-		/*if (master.InstateSequence(master.curstate,mdeath) || master.InstateSequence(master.curstate,mxdeath)) {
-			Destroy();
-			return;
-		}*/
 	}
 }
 

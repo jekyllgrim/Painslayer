@@ -269,7 +269,7 @@ Class PK_Inventory : Inventory abstract {
 }
 
 Class PK_GoldPickup : PK_Inventory abstract {
-	protected PK_GoldGleam gleam;
+	protected PK_GoldGleam goldgleam;
 
 	Default {
 		+INVENTORY.NEVERRESPAWN
@@ -295,7 +295,7 @@ Class PK_GoldPickup : PK_Inventory abstract {
 	}
 	
 	override void Tick() {
-		super.Tick();		
+		super.Tick();
 		if (owner)
 			return;
 		if (isFrozen())
@@ -308,13 +308,16 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		
 		//Soul Catcher effect:
 		if (GetAge() > 14 && tracer && tracer.player) {
-			vel = Vec3To(tracer).Unit() * 10.5;
-			bNOCLIP = true;
-			bNOGRAVITY = true;
-			if (Distance3D(tracer) < 32) {
+			double dist = Distance3D(tracer);
+			if (dist < 32) {
 				PlayPickupSound(tracer);
 				CallTryPickup(tracer);
 				tracer = null;
+			}
+			else {
+				vel = Vec3To(tracer).Unit() * min(dist, 10.5);
+				bNOCLIP = true;
+				bNOGRAVITY = true;
 			}
 		}
 		
@@ -326,12 +329,18 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		if (GetParticlesLevel() < PL_Full)
 			return;
 		if (GetAge() % 10 == 0) {
-			if (CheckPlayerSights() && !gleam && frandom[sfx](1,10) > 9) {
-				gleam = PK_GoldGleam(Spawn("PK_GoldGleam",pos+(0,0,frandom(2,height))));
-				if (gleam) {
-					gleam.scale *= frandom[sfx](1,1.4);
-					gleam.master = self;
-				}
+			if (CheckPlayerSights() && !goldgleam && frandom[sfx](1,10) > 9) {
+				goldgleam = PK_GoldGleam(
+					PK_BaseFlare.P_Spawn(
+						level.Vec3Offset(self.pos, ((frandom[sfx](-1.2, 1.2), frandom[sfx](-1.2, 1.2), frandom[sfx](2, height)))),
+						scale: frandom[sfx](1, 2),
+						alpha: 1.0,
+						master: self,
+						texture: "PGLDZ0",
+						style: STYLE_Translucent,
+						cls: 'PK_GoldGleam'
+					)
+				);
 			}
 		}
 	}
@@ -345,41 +354,36 @@ Class PK_GoldPickup : PK_Inventory abstract {
 Class PK_GoldGleam : PK_BaseFlare {
 	vector3 masterofs;
 	private int scaledir;
-	Default {
-		renderstyle 'Translucent';
-		+ROLLCENTER
-		alpha 3;
-		scale 1;
-	}
+	Vector2 baseScale;
+
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
-		if (!master) {
+		if (!f_master) {
 			Destroy();
 			return;
 		}
-		masterOfs = master.pos - pos;
+		masterOfs = level.Vec3Diff(f_master.pos, pos);
 		scaledir = 1;
+		baseScale = scale;
+		SetRenderStyle(STYLE_Add);
 	}
+
 	override void Tick() {
-		super.Tick();
-		if (!master || master.bNOSECTOR) {
+		VisualThinker.Tick();
+		if (!f_master || f_master.bNOSECTOR) {
 			Destroy();
 			return;
 		}
+
+		if (isFrozen()) return;
 		
-		SetOrigin(master.pos - masterOfs,false);
-	}
-	states {
-	Spawn:
-		PGLD Z 1 {
-			//roll -= 5;
-			A_SetScale(scale.x+(0.02 * scaledir));
-			if (scale.x > default.scale.x*1.1)
-				scaledir = -1;
-			if (scale.x < default.scale.x*0.1)
-				destroy();
-		}
-		loop;
+		pos = level.Vec3Offset(f_master.pos, masterOfs);
+		scale.x += 0.02 * scaledir;
+		scale.y += 0.02 * scaledir;
+		if (scale.x > baseScale.x*1.1)
+			scaledir = -1;
+		else if (scale.x < baseScale.x*0.1)
+			destroy();
 	}
 }
 
@@ -414,15 +418,15 @@ Class PK_GoldCoin : PK_GoldPickup {
 	}
 	States {
 	Spawn:
-		PGLC ABCDEFGH 1 A_SetRoll(roll+broll);
+		PGLC ABCDEFGH 1 A_SetRoll(roll+broll, SPF_INTERPOLATE);
 		loop;
 	Death:
-		TNT1 A 0 { roll = randompick[sfx](-90,90); }
+		TNT1 A 0 A_SetRoll(randompick[sfx](-90,90), SPF_INTERPOLATE);
 		PGLC ABC 1;
 		PGLC DEF 2;
-		PGLC GGGG 1 { roll *= 0.5; }
+		PGLC GGGG 1 A_SetRoll(roll * 0.5, SPF_INTERPOLATE);
 	DeathEnd:
-		PGLC G -1 { roll = 0; }
+		PGLC G -1 A_SetRoll(0, SPF_INTERPOLATE);
 		stop;
 	}
 }

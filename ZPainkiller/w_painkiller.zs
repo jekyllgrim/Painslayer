@@ -246,7 +246,7 @@ Class PK_Killer : PK_Projectile {
 		PK_Projectile.flarecolor "fed101";
 		PK_Projectile.flarescale 0.2;
 		PK_Projectile.flarealpha 0.75;
-		PK_Projectile.flareactor "PK_KillerFlare";
+		PK_Projectile.flareclass "PK_KillerFlare";
 		Obituary "$PKO_KILLER";
 		+SKYEXPLODE
 		+NOEXTREMEDEATH
@@ -518,27 +518,26 @@ Class PK_Killer : PK_Projectile {
 	}
 }
 
-Class PK_KillerFlare : PK_ProjFlare {
-	Default {
-		renderstyle 'add';
+class PK_KillerFlare : PK_ProjFlare {
+	override void PostBeginPlay() {
+		Super.PostBeginPlay();
+		SetRenderStyle(STYLE_Add);
+		texture = TexMan.CheckForTexture("FLARB0");
+		alpha = 0.8;
 	}
+
 	override void Tick() {
-		super.Tick();
-		if (isFrozen())
-			return;
-		if (scale.x > 0.06) {
+		Super.Tick();
+		if (!self || isFrozen()) return;
+
+		if (min(scale.x, scale.y) > 0.06) {
 			scale *= 0.96;
 			alpha *= 0.98;
 		}
 		else {
-			A_SetScale(0.18);
-			alpha = default.alpha;
+			scale = (0.18, 0.18);
+			alpha = 0.8;
 		}
-	}
-	states {
-	Spawn:
-		FLAR B -1;
-		stop;
 	}
 }
 
@@ -568,7 +567,7 @@ Class PK_KillerFlyTarget : Actor {
 	}
 	
 	override bool CanCollideWith (Actor other, bool passive) {
-		if (other.GetClassName() == "PK_Killer" && passive) {
+		if (passive && other.GetClass() == 'PK_Killer') {
 			return true;
 		}
 		return false;

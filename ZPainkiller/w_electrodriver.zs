@@ -793,12 +793,14 @@ Class PK_ElectroTargetControl : PK_InventoryToken {
 	}
 }
 
-Class PK_ElectroDamageSplash : PK_BaseFlare {
+Class PK_ElectroDamageSplash : PK_BaseActor {
 	double splash_scalestep;
 	double splash_anglestep;
 	int waitTimer;
 
 	Default {
+		+NOINTERACTION
+		+NOBLOCKMAP
 		scale 0.2;
 		alpha 0.5;
 		+FLATSPRITE
