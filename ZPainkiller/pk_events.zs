@@ -119,6 +119,15 @@ Class PK_MainHandler : EventHandler {
 		"$PKCH_TAKEGOLD2"
 	};
 
+	override void InterfaceProcess(consoleevent e) {
+		if (e.name ~== "PKBoostDemonCrosshair") {
+			let hud = PainkillerHUD(statusbar);
+			if (hud) {
+				hud.BoostDemonCrosshair();
+			}
+		}
+	}
+
 	// These events can be called either from the console
 	// or with SendNetworkEvent:
 	override void NetworkProcess(consoleevent e) {

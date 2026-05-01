@@ -1602,46 +1602,6 @@ Sprite "CMUZD0", 180, 180
 	Patch "CMUZD", 0, 0
 }
 
-Sprite "DCRHA0", 128, 128
-{
-	XScale 2.200
-	YScale 2.600
-	Offset -288, -197
-	Patch "DCRHA", 0, 0
-}
-
-Sprite "DCRHB0", 128, 128
-{
-	XScale 2.100
-	YScale 2.500
-	Offset -272, -186
-	Patch "DCRHA", 0, 0
-}
-
-Sprite "DCRHC0", 128, 128
-{
-	XScale 2.000
-	YScale 2.400
-	Offset -256, -177
-	Patch "DCRHA", 0, 0
-}
-
-Sprite "DCRHD0", 128, 128
-{
-	XScale 1.900
-	YScale 2.300
-	Offset -240, -167
-	Patch "DCRHA", 0, 0
-}
-
-Sprite "DCRHE0", 128, 128
-{
-	XScale 1.800
-	YScale 2.200
-	Offset -224, -156
-	Patch "DCRHA", 0, 0
-}
-
 Graphic "PKHARROW", 62, 92
 {
 	XScale 1.800

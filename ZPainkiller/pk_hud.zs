@@ -1,6 +1,7 @@
 Class PainkillerHUD : BaseStatusBar {
 	const noYStretch = 0.833333;
 	const PWICONSIZE = 16;
+	const DELTATIMEFREQ = 1000.0 / TICRATE;
 		
 	HUDFont mIndexFont;
 	HUDFont mNotifFont;
@@ -16,7 +17,12 @@ Class PainkillerHUD : BaseStatusBar {
 	protected CVar showCards;
 	
 	protected int hudstate;
-	protected double arrowangle;
+	protected double hudTicFrac;
+	protected double prevMSTime;
+	protected double deltaTime;
+	protected double demonCrosshairScale;
+	protected double prevArrowAngle;
+	protected double arrowAngle;
 	protected int checktic;
 	protected int goldnum;
 	protected int soulsnum;
@@ -32,6 +38,7 @@ Class PainkillerHUD : BaseStatusBar {
 	protected vector2 cardTexSize;
 	
 	protected Actor nearestBoss;
+	protected Actor nearestMonster;
 	protected int bossMAxHealth;
 	protected Shape2D healthBarShape;
 	protected ui double healthBarFraction;
@@ -41,6 +48,17 @@ Class PainkillerHUD : BaseStatusBar {
 	protected TextureID hpBartex;
 	//protected name bossSpriteName;
 	protected TextureID bossSprite;
+	
+	void UpdateDeltaTime() {
+		double curMS = MSTimeF();
+		if (!prevMSTime) {
+			prevMSTime = curMS;
+		}
+
+		double ftime = curMS - prevMSTime;
+		deltaTime = ftime / DELTATIMEFREQ;
+		prevMSTime = curMS;
+	}
 		
 	/*	
 		I'm using these wrappers to counteract Doom's native vertical
@@ -111,19 +129,46 @@ Class PainkillerHUD : BaseStatusBar {
 	}
 	
 	override void Draw (int state, double TicFrac) {
-		Super.Draw (state, TicFrac);
 		if (aspectScale == null)
 			aspectScale = CVar.GetCvar('hud_aspectscale',CPlayer);
+
+		if (state == HUD_StatusBar)
+		{
+			RefreshBackground();
+		}
+
+		if (idmypos)
+		{ 
+			// Draw current coordinates
+			DrawMyPos();
+		}
+
+		if (viewactive)
+		{
+			if (CPlayer && CPlayer.camera && CPlayer.camera.player)
+			{
+				if (isDemon) {
+					DrawDemonCrosshair();
+				}
+				else {
+					DrawCrosshair(TicFrac);
+				}
+			}
+		}
+		else if (automapactive)
+		{
+			DrawAutomapHUD(TicFrac);
+		}
 		
 		hudstate = state;
+		hudTicFrac = TicFrac;
+		UpdateDeltaTime();
 		//the hud is completely skipped if automap is active or the player
 		//is in a demon mode and debug messages aren't active:
 		if (state == HUD_none || automapactive || (isDemon /*&& !pk_debugmessages*/))
 			return;
 		
 		BeginHUD();
-		if (state == HUD_None)
-			return;
 		
 		// Draw visual powerup indicators, such as horns for Pentagram,
 		// helmet corners for the antirad suit, etc.:
@@ -139,7 +184,6 @@ Class PainkillerHUD : BaseStatusBar {
 		// keys, gold and soul counters to the bottom
 		if (state == HUD_StatusBar || state == HUD_Fullscreen)
 			DrawBottomElements();
-		
 		DrawEquippedCards();
 		DrawCardUses();
 		DrawCodexNotif();
@@ -214,25 +258,38 @@ Class PainkillerHUD : BaseStatusBar {
 			arrowPos.y *= noYStretch;
 			shadowOfs.y *= noYStretch;
 		}
+		double ang = prevArrowAngle + (arrowAngle - prevArrowAngle) * hudTicFrac;
 		if (shadowofs != (0,0)) {
-			DrawImageRotated("pkharrow", arrowPos+shadowOfs, fflags, arrowangle, scale: arrowscale, col:color(128,0,0,0));	
+			DrawImageRotated("pkharrow", arrowPos+shadowOfs, fflags, ang, scale: arrowscale, col:color(128,0,0,0));	
 		}
-		DrawImageRotated("pkharrow", arrowPos, fflags, arrowangle, scale: arrowscale);
+		DrawImageRotated("pkharrow", arrowPos, fflags, ang, scale: arrowscale);
+		/*if (nearestMonster) {
+			Screen.DrawText(smallfont, Font.CR_Green,
+				512, 128,
+				""..nearestMonster.GetClassName(),
+				DTA_VirtualWidth, 1920,
+				DTA_Virtualheight, 1080,
+				DTA_FullScreenScale, FSMode_ScaletoFit43
+			);
+		}*/
 	}
 	
 	//show 3 active golden cards at the lower center of the screen
 	protected void DrawActiveGoldenCards() {
 		if (!cardcontrol || (!cardcontrol.goldActive && cardcontrol.GetDryUseTimer() <= 0))
-			return;			
+			return;
+		int fflags = DI_SCREEN_CENTER_BOTTOM|DI_ITEM_LEFT_TOP;
+		bool used = cardcontrol.GetDryUseTimer() > 0;
+		Vector2 scale = (0.14, 0.14);
 		for (int i = 2; i < 5; i++) {
 			if (cardcontrol.EquippedSlots[i]) {
 				string texpath = String.Format("graphics/HUD/Tarot/cards/%s.png",cardcontrol.EquippedSlots[i]);
 				vector2 cardpos = ((-77 + i*22),-80);
-				int fflags = DI_SCREEN_CENTER_BOTTOM|DI_ITEM_LEFT_TOP;
-				PK_DrawImage(texpath,cardpos,fflags,scale:(0.14,0.14));
+				PK_DrawImage(texpath,cardpos,fflags,scale:scale);
 				//if out of uses, draw a red overlay atop the cards
-				if (cardcontrol.GetDryUseTimer() > 0)
-					PK_DrawImage("graphics/HUD/Tarot/cards/UsedCard.png",cardpos,fflags,alpha:0.75,scale:(0.14,0.14));
+				if (used) {
+					PK_DrawImage("graphics/HUD/Tarot/cards/UsedCard.png",cardpos,fflags,alpha:0.75,scale:scale);
+				}
 			}
 		}
 	}
@@ -342,7 +399,7 @@ Class PainkillerHUD : BaseStatusBar {
 	
 	// Update information for the monster compass to determine
 	// where the arrow is going to point:
-	protected void UpdateMonsterCompass() {		
+	protected void UpdateMonsterCompass() {
 		let player = CPlayer.mo;
 		if (!player)
 			return;
@@ -383,7 +440,7 @@ Class PainkillerHUD : BaseStatusBar {
 				
 				// Only update the shape if the health actually changed
 				if (prevHealthBarFraction != healthBarFraction)
-					UpdateHealthBar(healthBarShape, healthBarFraction);				
+					UpdateHealthBar(healthBarShape, healthBarFraction);
 			}
 			else {
 				//bossSpritename = '';
@@ -395,24 +452,24 @@ Class PainkillerHUD : BaseStatusBar {
 		
 		//If no bosses around, find nearest regular monster:
 		int enemies = mainhandler.allenemies.size();
+		nearestMonster = null;
 		if (enemies > 0) {
 			//check 2D distance to every monster in the array and find the closest one:
-			actor closestMonst;
 			double closestDist = double.infinity;
 			for (int i = 0; i < enemies; i++) {
 				let act = mainhandler.allenemies[i];
 				if (act) {
 					double dist = player.Distance2DSquared(act);
 					if (closestDist > 0 && dist < closestDist) {
-						closestMonst = act;
+						nearestMonster = act;
 						closestDist = dist;
 					}
 				}
 			}
 			//define the angle for the monster compass arrow based on the relative position of the monster:
-			if (closestMonst) {
-				arrowangle = (Actor.DeltaAngle(player.angle, player.AngleTo(closestMonst)));
-				//console.printf("%s angle %d",closestMonst.GetClassName(),arrowangle);
+			if (nearestMonster) {
+				prevArrowAngle = arrowAngle;
+				arrowAngle = (Actor.DeltaAngle(player.angle, player.AngleTo(nearestMonster)));
 			}
 		}
 	}
@@ -568,7 +625,7 @@ Class PainkillerHUD : BaseStatusBar {
 		
 		// If using statusbar, we don't draw the top bar at all 
 		// and we draw souls/gold counters as well as compass at the bottom:
-		if (hudstate == HUD_StatusBar) {		
+		if (hudstate == HUD_StatusBar) {
 			//draw compass at bottom center
 			PK_DrawImage("pkxtop0",(0,4),DI_SCREEN_BOTTOM|DI_SCREEN_HCENTER|DI_ITEM_BOTTOM);
 			//draw arrow and outline (shadow and glass are skipped in this version for simplicity)
@@ -764,7 +821,7 @@ Class PainkillerHUD : BaseStatusBar {
 		if (hudstate == HUD_StatusBar)
 			iconpos.y -= 10;
 		
-		int count = Key.GetKeyTypeCount();			
+		int count = Key.GetKeyTypeCount();
 		for(int i = 0; i < count; i++)	{
 			Key inv = Key(CPlayer.mo.FindInventory(Key.GetKeyType(i)));
 			TextureID icon = GetKeyTexture(inv);
@@ -774,5 +831,32 @@ Class PainkillerHUD : BaseStatusBar {
 			PK_DrawTexture(icon, iconpos, flags: DI_SCREEN_RIGHT_BOTTOM|DI_ITEM_RIGHT_BOTTOM, scale: (0.5, 0.5));
 			iconpos.x -= (iconsize.x + hofs);
 		}
+	}
+
+	void BoostDemonCrosshair() {
+		demonCrosshairScale = 0.4;
+	}
+
+	void DrawDemonCrosshair() {
+		if (demonCrosshairScale > 0) {
+			demonCrosshairScale -= 0.025 * deltaTime;
+		}
+		if (!CPlayer.readyweapon || CPlayer.readyweapon.GetClass() != 'PK_DemonWeapon') return;
+
+		TextureID tex = TexMan.CheckForTexture("graphics/hud/demon_crosshair.png");
+		if (!tex.isValid()) return;
+
+		double scale = 1.0 + demonCrosshairScale;
+		int halfsize = int(round(64 * scale));
+
+		Screen.DrawTexture(tex, false,
+			256 - halfsize, 256 - halfsize,
+			DTA_VirtualWidth, 512,
+			DTA_Virtualheight, 512,
+			DTA_ScaleX, scale,
+			DTA_ScaleY, scale,
+			DTA_FullScreenScale, FSMode_ScaletoFit43,
+			DTA_LegacyRenderstyle, STYLE_Add
+		);
 	}
 }

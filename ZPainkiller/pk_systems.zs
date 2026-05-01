@@ -250,7 +250,6 @@ Class PK_DemonWeapon : PKWeapon {
 		owner.player.mo.viewbob = 0.4;		
 		//and INSTANTLY switch the current weapon to Demon Weapon
 		owner.player.readyweapon = self;
-		owner.player.readyweapon.crosshair = 99;
 	}
 
 	void StartDemonMode() {
@@ -287,7 +286,6 @@ Class PK_DemonWeapon : PKWeapon {
 			return;
 
 		owner.player.readyweapon = prevweapon;
-		owner.player.readyweapon.crosshair = 0;
 		owner.player.readyweapon.A_ZoomFactor(1.0);
 		let psp = owner.player.FindPSprite(PSP_WEAPON);
 		if (psp) {
@@ -306,19 +304,6 @@ Class PK_DemonWeapon : PKWeapon {
 		if (!owner || !owner.player || owner.bKILLED || !control || cursouls < minsouls) {
 			Destroy();
 			return;
-		}
-		
-		// Keep setting the shader, because sometimes it gets
-		// deactivated if saving and loading during demon mode:
-		if(players[consoleplayer] == owner.player)   {
-			SetMusicVolume(0);
-			PPShader.SetEnabled( "DemonMorph", true);
-			PPShader.SetUniform1f("DemonMorph", "waveSpeed", 25 );
-			PPShader.SetUniform1f("DemonMorph", "waveAmount", 10 );
-			PPShader.SetUniform1f("DemonMorph", "centerX", 0.5 );
-			PPShader.SetUniform1f("DemonMorph", "centerY", 0.5 );
-			PPShader.SetUniform1f("DemonMorph", "rippleTimer", 0);
-			PPShader.SetUniform1f("DemonMorph", "amount", 0 );
 		}
 
 		if (control) {
@@ -342,17 +327,30 @@ Class PK_DemonWeapon : PKWeapon {
 				return;
 			}
 		}
+		
+		// Keep setting the shader, because sometimes it gets
+		// deactivated if saving and loading during demon mode:
+		if(players[consoleplayer] == owner.player) {
+			SetMusicVolume(0);
+			PPShader.SetEnabled( "DemonMorph", true);
+			PPShader.SetUniform1f("DemonMorph", "waveSpeed", 25 );
+			PPShader.SetUniform1f("DemonMorph", "waveAmount", 10 );
+			PPShader.SetUniform1f("DemonMorph", "centerX", 0.5 );
+			PPShader.SetUniform1f("DemonMorph", "centerY", 0.5 );
+			PPShader.SetUniform1f("DemonMorph", "rippleTimer", 0);
+			PPShader.SetUniform1f("DemonMorph", "amount", 0 );
 
-		//do the ripple effect when the player fires
-		if(runRipple && owner.player == players[consoleplayer]) {
-			PPShader.SetUniform1f("DemonMorph", "rippleTimer", rippleTimer );
-			rippleTimer += 1.0 / 35;
-			PPShader.SetUniform1f("DemonMorph", "amount", 35 * (1.0 - rippleTimer) );
-			if(rippleTimer >= 1)	{
-				PPShader.SetUniform1f("DemonMorph", "rippleTimer", 0);
-				PPShader.SetUniform1f("DemonMorph", "amount", 0 );
-				rippleTimer = 0;
-				runRipple = false;
+			//do the ripple effect when the player fires
+			if(runRipple) {
+				PPShader.SetUniform1f("DemonMorph", "rippleTimer", rippleTimer );
+				rippleTimer += 1.0 / 35;
+				PPShader.SetUniform1f("DemonMorph", "amount", 35 * (1.0 - rippleTimer) );
+				if(rippleTimer >= 1)	{
+					PPShader.SetUniform1f("DemonMorph", "rippleTimer", 0);
+					PPShader.SetUniform1f("DemonMorph", "amount", 0 );
+					rippleTimer = 0;
+					runRipple = false;
+				}
 			}
 		}
 		//console.printf("owner speed %f | owner gravity %f",owner.speed,owner.gravity);
@@ -412,32 +410,20 @@ Class PK_DemonWeapon : PKWeapon {
 		loop;
 	Fire:
 		TNT1 A 20 {
-			A_Overlay(PSP_DEMON,"DemonCrossFire");
+			EventHandler.SendInterfaceEvent(self.PlayerNumber(), "PKBoostDemonCrosshair");
 			A_WeaponOffset(0,0);
 			A_StartSound("demon/fire",CHAN_AUTO);
-			A_FireBullets(5,5,50,50,"PK_NullPuff",FBF_NORANDOM);
+			A_FireBullets(5,5,50,50,"PK_DemonWeaponPuff",FBF_NORANDOM);
 			invoker.rippleTimer = 0;
 			invoker.runRipple = true;
 		}
 		goto ready;
-	DemonCross:
-		DCRH A 25 {
-			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
-			A_OverlayFlags(OverlayID(),PSPF_ADDWEAPON,false);
-			A_OverlayRenderstyle(OverlayID(),Style_Add);
-			A_OverlayAlpha(OverlayID(),0.5);
-		}
-		stop;
-	DemonCrossFire:
-		DCRH E 2 {
-			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
-			A_OverlayFlags(OverlayID(),PSPF_ADDWEAPON,false);
-			A_OverlayRenderstyle(OverlayID(),Style_Add);
-			A_OverlayAlpha(OverlayID(),0.5);
-		}
-		DCRH DCB 2;
-		DCRH A 15;
-		stop;
+	}
+}
+
+class PK_DemonWeaponPuff : PK_NullPuff {
+	Default {
+		DamageType "PKDemonDamage";
 	}
 }
 
