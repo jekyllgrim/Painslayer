@@ -11,11 +11,10 @@ class PK_Utils abstract {
 	}
 	
 	static clearscope double LinearMap(double val, double source_min, double source_max, double out_min, double out_max, bool clampIt = false) {
+		if (source_max - source_min ~== 0) return 0;
 		double d = (val - source_min) * (out_max - out_min) / (source_max - source_min) + out_min;
 		if (clampit) {
-			double truemax = out_max > out_min ? out_max : out_min;
-			double truemin = out_max > out_min ? out_min : out_max;
-			d = Clamp(d, truemin, truemax);
+			d = clamp(d, min(out_min, out_max), max(out_min, out_max));
 		}
 		return d;
 	}
