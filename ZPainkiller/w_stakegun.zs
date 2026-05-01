@@ -362,7 +362,7 @@ Class PK_Stake : PK_StakeProjectile {
 					if (pk_keepbodies)
 						DetachVictim();
 					else
-						KillActorSilent(stickvictim);
+						KillActorSilent(stickvictim, true);
 				}
 			}
 		}
@@ -854,7 +854,7 @@ Class PK_ExplosiveStake : PK_Projectile {
 			bNOGRAVITY = true;
 			A_Quake(1,8,0,256,"");
 			A_StartSound("weapons/stakegun/comboexplosion",CHAN_AUTO);
-			A_Explode(256,200);			
+			A_Explode(256,200);
 			let ex = Spawn("PK_GenericExplosion",pos);
 			if (ex)
 				ex.A_SetScale(0.5);

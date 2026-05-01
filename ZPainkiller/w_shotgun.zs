@@ -398,7 +398,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 		if (victimDestroyTimer > 0) {
 			victimDestroyTimer--;
 			if (victimDestroyTimer <= 0)
-				PK_BaseActor.KillActorSilent(owner);
+				PK_BaseActor.KillActorSilent(owner, true);
 			return;
 		}
 		owner.A_SetTics(fcounter);

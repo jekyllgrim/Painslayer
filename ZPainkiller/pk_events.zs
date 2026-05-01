@@ -358,35 +358,48 @@ Class PK_MainHandler : EventHandler {
 	
 	//spawn death effects on monster death and also delete them from the monster array
 	override void WorldThingDied(worldevent e) {
-		let act = e.thing;
-		if (!act || !act.bISMONSTER)
-			return;
-		allenemies.delete(allenemies.Find(act));
-		if (act.bBOSS)
-			allbosses.delete(allbosses.Find(act));
-		let edc = PK_EnemyDeathControl(Actor.Spawn("PK_EnemyDeathControl",act.pos));
-		if (edc) {
-			edc.master = act;
-			if (pk_debugmessages > 1)
-				console.printf("Spawning death controller for %s", act.GetTag());
+		let victim = e.thing;
+		if (!victim || !victim.bISMONSTER) return;
+
+		allenemies.Delete(allenemies.Find(victim));
+		if (victim.bBOSS) {
+			allbosses.Delete(allbosses.Find(victim));
 		}
-		//spawn some gold from the corpse:
-		int goldchance = 0;//random[gold](0,3);
-		int mh = abs(act.health);
-		//increase chance of gold if the monster was gibbed:
-		bool gibbed = (mh >= act.SpawnHealth() || (act.gibhealth > 0 && mh >= act.gibhealth));
-		if (gibbed)
-			goldchance = Clamp(goldchance * 3,3,10);
-		double zofs = act.default.height;
-		for (int i = goldchance; i > 0; i--) {
-			let gg = Actor.Spawn("PK_GoldCoin",act.pos + (0,0,zofs*frandom[gold](0.8,1.2)));
-			if (gg)
-				gg.vel = (frandom[goldchance](-3,3),frandom[goldchance](-3,3),frandom[goldchance](2,5));
+
+		bool pkKillSuccess = false;
+		bool killedbyDemon = e.inflictor && e.inflictor.GetClass() == 'PK_DemonWeaponPuff';
+		if (killedbyDemon && !victim.bBoss) {
+			pkKillSuccess = PK_EnemyDeathControl.DoDemonModeDeath(victim);
 		}
-		if (gibbed) {
-			let gg = Actor.Spawn("PK_MedGold",act.pos + (0,0,zofs*frandom[gold](0.8,1.2)));
-			if (gg)
-				gg.vel = (frandom[goldchance](-2,2),frandom[goldchance](-2,2),frandom[goldchance](1,4));
+		else {
+			pkKillSuccess = PK_EnemyDeathControl.DoPKDeath(victim);
+		}
+		if (!pkKillSuccess) return;
+
+		if (victim) {
+			// spawn some gold from the corpse:
+			int goldchance = 0;
+			// increase chance of gold if the monster was gibbed (but not
+			// for cases when killed by demon, which tends to always gib):
+			bool gibbed = victim.health < max(victim.GetGibHealth(), -victim.SpawnHealth()) && !killedbyDemon;
+			if (gibbed) {
+				goldchance = Clamp(goldchance * 3, 3, 10);
+			}
+			double zofs = victim.default.height;
+			for (int i = goldchance; i > 0; i--) {
+				victim.A_SpawnItemEx('PK_GoldCoin',
+					zofs: zofs*frandom[gold](0.8,1.2),
+					xvel: frandom[goldchance](-3,3),
+					yvel: frandom[goldchance](-3,3),
+					zvel: frandom[goldchance](2,5));
+			}
+			if (gibbed) {
+				victim.A_SpawnItemEx('PK_MedGold',
+					zofs: zofs*frandom[gold](0.8,1.2),
+					xvel: frandom[goldchance](-2,2),
+					yvel: frandom[goldchance](-2,2),
+					zvel: frandom[goldchance](1,4));
+			}
 		}
 	}
 

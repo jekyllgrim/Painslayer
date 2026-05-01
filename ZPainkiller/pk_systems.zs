@@ -155,6 +155,12 @@ Class PK_DemonMorphControl : PK_InventoryToken {
 		return owner.CountInv("PK_DemonWeapon") && pk_souls >= pk_fullsouls;
 	}
 
+	static clearscope bool IsActorDemon(Actor who) {
+		if (!who) return false;
+		let control = PK_DemonMorphControl(who.FindInventory('PK_DemonMorphControl'));
+		return control && control.CheckDemon();
+	}
+
 	void GiveSoul(int amount = 1) {
 		pk_souls = Clamp(pk_souls + amount, 0, pk_fullsouls);
 		if (!pk_allowDemonMorph || !owner || !owner.player || !owner.player.readyweapon)
@@ -398,7 +404,6 @@ Class PK_DemonWeapon : PKWeapon {
 	States {
 	Ready:
 		TNT1 A 1 {
-			A_Overlay(PSP_DEMON,"DemonCross");
 			A_ZoomFactor(0.85,ZOOM_NOSCALETURNING);
 			let psp = player.GetPSprite(PSP_WEAPON);
 			psp.y = WEAPONTOP;
@@ -428,60 +433,78 @@ class PK_DemonWeaponPuff : PK_NullPuff {
 }
 
 
-Class PK_EnemyDeathControl : PK_BaseActor {
+Class PK_EnemyDeathControl : Thinker {
+	private int age;
+	private Vector3 victimPos;
+	private double victimFloorz;
+	private double victimCeilingz;
+	private Actor victim;
+	private class<Actor> victimClass;
 	PK_KillerFlyTarget kft;
 	private int restcounter;
 	private bool isBoss;
 	private bool queueSilentDeath;
-	private class<Actor> masterclass;
 	const RESTLIFE = 55;
 	const MAXLIFE = 35*7;
-	
-	Default {
-		+NOINTERACTION
-		+NOSECTOR
-		+SYNCHRONIZED
-		+DONTBLAST
-		FloatBobPhase 0;
+
+	// Initiates the usual prolonged death handling:
+	// waits until the monster plays its death
+	// animation, then a couple more seconds, then
+	// poofs the body and spawns a soul:
+	static bool DoPKDeath(Actor victim)
+	{
+		if (!victim || victim.health > 0)
+			return false;
+		let edc = new('PK_EnemyDeathControl');
+		if (!edc)
+			return false;
+		edc.P_Init(victim);
+		return true;
 	}
 
-	static void DoPKDeath(Actor victim)
-	{
-		if (!victim)
-			return;
-		let edc = PK_EnemyDeathControl(Spawn("PK_EnemyDeathControl", victim.pos));
-		if (!edc)
-			return;
-		
-		edc.master = victim;
-		edc.masterclass = victim.GetClass();
-		edc.BodyPoof();
-	}
-	
-	override void PostBeginPlay() {
-		super.PostBeginPlay();
-		if (!master || master.health > 0) {
-			destroy();
-			return;
-		}
-		masterclass = master.GetClass();
-		isBoss = master.bBOSS;// || master.bBOSSDEATH;
-		//spawn a hitbox for the Killer projectile to let the player juggle the corpse:
-		if (!isBoss) {
-			kft = PK_KillerFlyTarget(Spawn("PK_KillerFlyTarget",master.pos));
-			if (kft) {
-				kft.target = master;
-				kft.edc = PK_EnemyDeathControl(self);
-				kft.A_SetSize(master.radius*1.15,master.default.height*0.35);
-				kft.vel = master.vel;
-				kft.mass = master.mass;
+	// Instantly kills the given actor and spawns
+	// smoke, leaving no soul and not instantiating
+	// this thinker:
+	static bool DoDemonModeDeath(Actor victim) {
+		if (!victim || victim.health > 0)
+			return false;
+		double smkz = victim.default.height;
+		double rad = victim.radius;
+		for (int i = random[sfx](30,40); i > 0; i--) {
+			let smk = Actor.Spawn("PK_DeathSmoke",victim.pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz)));
+			if (smk) {
+				smk.vel = (frandom[part](-0.4,0.4),frandom[part](-0.4,0.4),frandom[part](0,1));
+				smk.A_SetRenderstyle(1.0,Style_Stencil);
+				smk.SetShade("FF00FF");
+				smk.bBRIGHT = true;
 			}
 		}
-	}	
-	
+		PK_BaseActor.KillActorSilent(victim, true);
+		return true;
+	}
+
+	void P_Init(Actor victim) {
+		self.victim = victim;
+		self.victimPos = victim.pos;
+		self.victimFloorz = victim.floorz;
+		self.victimCeilingz = victim.ceilingz;
+		victimClass = victim.GetClass();
+		isBoss = victim.bBoss;
+		if (!isBoss) {
+			kft = PK_KillerFlyTarget(Actor.Spawn("PK_KillerFlyTarget", victim.pos));
+			if (kft) {
+				kft.target = victim;
+				kft.edc = self;
+				kft.A_SetSize(victim.radius*1.15, max(victim.deathheight, victim.default.height*0.4));
+				kft.vel = victim.vel;
+				kft.mass = victim.mass;
+			}
+		}
+	}
+
 	override void Tick () {
 		//do nothing if for some reason the monster is alive:
-		if (master && master.health > 0) {
+		if (victim && victim.health > 0) {
 			//console.printf("The monster is alive: destroying controller");
 			Destroy();
 			return;
@@ -489,36 +512,27 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 
 		// If the monster disappeared by this point, spawn 
 		// death smoke and a soul:
-		if (!master) {
-			//console.printf("The monster disappered, poofing the body");
+		if (!victim) {
 			BodyPoof();
 			Destroy();
 			return;
 		}
+
+		victimPos = victim.pos;
+		victimFloorz = victim.floorz;
+		victimCeilingz = victim.ceilingz;
 		
 		// Do the rest if the corpse still exists:
-		
-		//Sync with master, increment age, set Killer target vel
-		SetOrigin(master.pos,true);
-		if (!master.isFrozen())
+
+		if (!victim.isFrozen()) {
 			age++;
-		if (GetAge() == 1 && kft)
-			kft.vel = master.vel;
+		}
 			
 		// If the monster's death animation has finished, increment restcounter
-		if (master.tics == -1) {
+		if (victim.tics < 0) {
 			restcounter++;
 		}
-		
-		// This handles death if killed in Demon Mode:
-		if (!isBoss && CheckKillerIsDemon()) {
-			//If the killer is a demon, spawn some red smoke
-			//and immediately remove the monster
-			//(Actually continues its Death animation but quietly)
-			DemonModeDeath();
-			//console.printf("Monster killed by a Demon");
-			return;
-		}
+
 		//this handles regular death:
 		if (restcounter >= RESTLIFE || age >= MAXLIFE) {
 			//console.printf("Resting for too long: poofing the body");
@@ -526,14 +540,6 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 			Destroy();
 			return;
 		}
-	}
-	
-	//Check that the killer is a Demon, not getting a Demon-mode preview:
-	bool CheckKillerIsDemon() {
-		if (!master || !master.target || !master.target.CountInv("PK_DemonMorphControl"))
-			return false;
-		let cont = PK_DemonMorphControl(master.target.FindInventory("PK_DemonMorphControl"));
-		return cont && cont.CheckDemon();
 	}
 		
 	//Reset counter (used by Killer)
@@ -545,75 +551,53 @@ Class PK_EnemyDeathControl : PK_BaseActor {
 	void BodyPoof() {
 		if (kft)
 			kft.destroy();
-		A_StartSound("world/bodypoof",CHAN_AUTO);
+
+		S_StartSoundAt(victimPos, "world/bodypoof", CHAN_AUTO);
 				
-		double smkz = GetDefaultByType(masterclass).height;
-		double rad = GetDefaultByType(masterclass).radius;
-		vector3 ppos = master ? master.pos : Actor(self).pos;
-		if (master) {
-			smkz = master.height;
-			rad = master.radius;
+		double smkz = GetDefaultByType(victimClass).height;
+		double rad = GetDefaultByType(victimClass).radius;
+		if (victim) {
+			smkz = victim.height;
+			rad = victim.radius;
 		}
 		for (int i = 26; i > 0; i--) {
-			let smk = Spawn("PK_DeathSmoke",ppos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz*1.5)));
+			let smk = Actor.Spawn("PK_DeathSmoke",victimPos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz*1.5)));
 			if (smk)
 				smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
 		}
 		for (int i = 8; i > 0; i--) {
-			let smk = Spawn("PK_WhiteDeathSmoke",ppos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](ppos.z,smkz)));
+			let smk = Actor.Spawn("PK_WhiteDeathSmoke",victimPos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](victimPos.z,smkz)));
 			if (smk) {
 				smk.vel = (frandom[part](-0.5,0.5),frandom[part](-0.5,0.5),frandom[part](0.3,1));
 				smk.A_SetScale(0.4);
 				smk.alpha = 0.5;
 			}
 		}
-		double pz = (ppos.z <= floorz) ? frandom[soul](8,14) : 0;
+		double pz = (victimPos.z <= victimCeilingz) ? frandom[soul](8,14) : 0;
 					
 		// Spawn soul if difficulty is below Trauma, and tell it what monster spawned it:
 		if (skill < 4) {
-			let soul = PK_Soul(Spawn("PK_Soul",ppos+(0,0,pz)));
-			if (soul && masterclass) {
-				soul.bearer = masterclass;
+			let soul = PK_Soul(Actor.Spawn("PK_Soul",victimPos+(0,0,pz)));
+			if (soul && victimClass) {
+				soul.bearer = victimClass;
 			}
 		}
-		if (master) {
+		if (victim) {
 			if (pk_keepbodies) {
-				state dst = PK_Utils.GetFinalStateInSequence(master.GetClass(), "Death");
-				state xdst = PK_Utils.GetFinalStateInSequence(master.GetClass(), "XDeath");
-				bool isReallyCorpse = (dst && dst.sprite == master.sprite && dst.frame == master.frame) ||
-									(xdst && xdst.sprite == master.sprite && xdst.frame == master.frame);
+				state dst = PK_Utils.GetFinalStateInSequence(victim.GetClass(), "Death");
+				state xdst = PK_Utils.GetFinalStateInSequence(victim.GetClass(), "XDeath");
+				bool isReallyCorpse = (dst && dst.sprite == victim.sprite && dst.frame == victim.frame) ||
+									(xdst && xdst.sprite == victim.sprite && xdst.frame == victim.frame);
 
 				if (isReallyCorpse) {
-					let m = GetDefaultByType(master.GetClass());	
-					master.A_SetRenderstyle(m.alpha, m.GetRenderstyle());
+					let m = GetDefaultByType(victim.GetClass());	
+					victim.A_SetRenderstyle(m.alpha, m.GetRenderstyle());
 					return;
 				}
 			}
 			else
-				master.Destroy();
+				victim.Destroy();
 		}
-	}
-	
-	//Death effect when killed by a demon (spawns no souls)
-	void DemonModeDeath() {
-		if (!master)
-			return;
-		double smkz = master.default.height;
-		double rad = master.radius;
-		for (int i = random[sfx](30,40); i > 0; i--) {
-			let smk = Spawn("PK_DeathSmoke",pos+(frandom[part](-rad,rad),frandom[part](-rad,rad),frandom[part](0,smkz)));
-			if (smk) {
-				smk.vel = (frandom[part](-0.4,0.4),frandom[part](-0.4,0.4),frandom[part](0,1));
-				smk.A_SetRenderstyle(1.0,Style_Stencil);
-				smk.SetShade("FF00FF");
-				smk.bBRIGHT = true;
-			}
-		}
-		//Make the controller noninteractive, the body invisible
-		//and queue for death (the body plays its death animation silently)
-		//master.bINVISIBLE = true;
-		//queueSilentDeath = true;
-		PK_BaseActor.KillActorSilent(master);
 	}
 }
 

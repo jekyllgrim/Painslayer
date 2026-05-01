@@ -237,10 +237,13 @@ Class PK_BaseActor : Actor abstract {
 	// to be called on just-killed actors, although
 	// it can kill them by itself if necessary.
 	// Mainly used for kills in Demon mode:
-	static void KillActorSilent(actor victim, bool remove = true) {
+	static void KillActorSilent(actor victim, bool remove) {
+		//Console.Printf("running KillActorSilent on "..victim.GetTag()); 
 		// NODAMAGE actors are not supposed to be processed:
-		if (!victim || victim.bNoDamage)
+		if (!victim || victim.bNoDamage) {
+			//Console.Printf("victim can't be damaged because %s", victim? "it has bNODAMAGE" : "it's null");
 			return;
+		}
 		// Make sure the victim is really dead
 		// (although it should alreayd be):
 		if (victim.health > 0) {
@@ -251,17 +254,30 @@ Class PK_BaseActor : Actor abstract {
 		// spawning various shit, this is the only surefire way
 		// to make sure everything that needs to happen upon the
 		// actor's death ACTUALLY happens. Such as A_KeenDie.
-		while (victim && victim.curstate && victim.curstate.nextstate) {
-			victim.SetState(victim.curstate.nextstate);
+		//Console.Printf("%s beginning to progress states at state %p sprite \cd%s\c- ", victim.GetClassName(), victim.curstate, TexMan.GetName(victim.curstate.GetSpriteTexture(0)));
+		State deathstate = victim.FindState('Death');
+		if (deathstate && victim.curstate != deathstate) {
+			victim.SetState(deathstate);
+		}
+		array<State> processedStates;
+		while (victim &&
+		       victim.curstate &&
+		       victim.curstate.nextstate) {
+			if (!victim.SetState(victim.curstate.nextstate) || processedStates.Find(victim.curstate) != processedStates.Size()) {
+				//Console.Printf(victim.GetTAg().." has no more states");
+				break;
+			}
+			processedStates.Push(victim.curstate);
 			victim.A_StopAllSounds(); // At least the sounds should be blocked
+			//Console.Printf("%s progressing through state %p sprite \cd%s\c- ", victim.GetClassName(), victim.curstate, TexMan.GetName(victim.curstate.GetSpriteTexture(0)));
 		}
 		// The victim may already be gone at this point; if so,
 		// stop here.
-		if (!victim || victim.tics == 0) return;
+		if (!victim) return;
 		// Hide the corpse
 		victim.A_SetRenderstyle(victim.alpha, Style_None);
 		if (pk_debugmessages) {
-			console.printf("%s silent-killed | renderstyle %d | pos (%.1f, %.1f, %.1f)", victim.GetTag(), victim.GetRenderstyle(), victim.pos.x, victim.pos.y, victim.pos.z);
+			//console.printf("%s silent-killed | renderstyle %d | pos (%.1f, %.1f, %.1f)", victim.GetTag(), victim.GetRenderstyle(), victim.pos.x, victim.pos.y, victim.pos.z);
 		}
 		// Remove the victim, if 'remove' is true and it's
 		// not a player:
