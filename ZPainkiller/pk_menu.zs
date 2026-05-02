@@ -253,27 +253,17 @@ class OptionMenuItemPKCrosshairOption : OptionMenuItemOption
 	}
 }
 
-/*class OptionMenuItemPKTooltip : OptionMenuItemStaticText {
-	OptionMenuItemPKTooltip Init(String tooltipText) {
-		Super.Init(tooltiptext);
-		return self;
-	}
-
-	override bool Selectable() {
-		return false;
-	}
-
-	override bool Visible() {
-		return false;
-	}
-}*/
-
 class PK_ModSettingsMenu : OptionMenu {
 	const TOOLTIP_RES_X = 800;
 	const TOOLTIP_RES_Y = 600;
 
+	// Tooltips are provided as "LABEL_LANGUAGE_KEY|TOOLTIP_LANGUAGE_KEY"
+	// in MENUDEF. In Init(), the item labels are split, with their
+	// labels being set to "$LABEL_LANGUAGE_KEY", and tooltip keys
+	// are stored in this assoc map to be retrieved in Drawer():
 	Map<String, String> pk_modTooltips;
 
+	// Build tooltips on initialization:
 	override void Init(Menu parent, OptionMenuDescriptor desc) {
 		Super.Init(parent, desc);
 
@@ -286,10 +276,38 @@ class PK_ModSettingsMenu : OptionMenu {
 				label.Clear();
 				item.mLabel.Split(label, "|");
 				if (label.Size() < 2) continue;
+
+				// These are defined without $ in MENUDEDF to avoid
+				// "translation missing" errors in UZDoom, so add
+				// those here:
+	
+				if (label[0].IndexOf("$") < 0)
+					label[0] = "$"..label[0];
+				if (label[1].IndexOf("$") < 0)
+					label[1] = "$"..label[1];
+
 				item.mLabel = label[0];
 				pk_modTooltips.Insert(label[0], label[1]);
+				//Console.Printf("Mapped \cd%s\c- to \cy%s\c-", label[0], label[1]);
 			}
 		}
+	}
+
+	// Restore original item labels on menu close:
+	override void OnDestroy() {
+		OptionMenuItem item;
+		String tooltip;
+		for (int i = mDesc.mItems.Size() - 1; i >= 0; i--) {
+			item = mDesc.mItems[i];
+			if (!item) continue;
+			tooltip = pk_modTooltips.Get(item.mLabel);
+			if (tooltip) {
+				item.mLabel = item.mLabel.."|"..tooltip;
+				item.mLabel.Replace("$", "");
+				//Console.Printf("Restored original label \cd%s\c-", item.mLabel);
+			}
+		}
+		Super.OnDestroy();
 	}
 
 	override void Drawer() {
