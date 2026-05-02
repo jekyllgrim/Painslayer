@@ -72,8 +72,6 @@ class PK_PainkillerPlayer : PK_PlayerPawn {
 	// -----------------------------------
 
 	void PK_BuildFootstepSounds() {
-		if (pk_floorsounds.CountUsed()) return;
-
 		Sound snd;
 		String texturelist;
 		array<String> definition;
@@ -93,7 +91,7 @@ class PK_PainkillerPlayer : PK_PlayerPawn {
 
 	Sound PK_FindFootstepSound(TextureID tex) {
 		if (!tex.IsValid() || tex == skyflatnum) return "";
-		if (pk_floorsounds.CountUsed() == 0) {
+		if (pk_floorsounds.CountUsed() <= 1) {
 			PK_BuildFootstepSounds();
 		}
 		name texname = TexMan.GetName(tex);
@@ -139,7 +137,7 @@ class PK_PainkillerPlayer : PK_PlayerPawn {
 	// Generic check for whether we're currently mid-jump:
 	bool PK_IsJumping() {
 		// not on ground, not in water, affected by gravity, not in coyote time:
-		return player.jumptics != 0 && !player.onground && !waterlevel && !bNoGravity && !PK_IsPlayerFlying();
+		return /*player.jumptics != 0 && */!player.onground && !waterlevel && !bNoGravity && !PK_IsPlayerFlying();
 	}
 
 	// Record relative angle at which we perform a jump:
@@ -171,31 +169,31 @@ class PK_PainkillerPlayer : PK_PlayerPawn {
 	}
 	
 	override Vector2 PK_ApplyAirControl(Vector2 wishvel) {
-		if (PK_IsJumping()) {
-			// Painkiller-like aircontrol ignores level.aircontrol entirely):
-
-			// velocity dir (Y needs flipping to compare with input)
-			Vector2 velDir = (vel.x, -vel.y).Unit();
-			// input dir rotated to be comparable to velocity
-			Vector2 inputDir = Actor.RotateVector((player.cmd.forwardmove, player.cmd.sidemove), -angle).Unit();
-			// Compare the direction of velocity and input
-			// (-1 = opposite, 0 = sideways, 1 = same)
-			double dd = velDir.Unit() dot inputDir.Unit();
-
-			// input is ~ same direction of vel - move there directly:
-			if (dd > 0.85) {
-				return wishvel;
-			}
-			// input is ~ opposite direction of vel - stop immediately:
-			else if (dd < -0.85) {
-				return (0,0);
-			}
-			// sideways input - no effect:
-			else {
-				return vel.xy;
-			}
+		if (!PK_IsJumping()) {
+			return Super.PK_ApplyAirControl(wishvel);
 		}
-		return wishvel;
+		// Painkiller-like aircontrol ignores level.aircontrol entirely):
+
+		// velocity dir (Y needs flipping to compare with input)
+		Vector2 velDir = (vel.x, -vel.y).Unit();
+		// input dir rotated to be comparable to velocity
+		Vector2 inputDir = Actor.RotateVector((player.cmd.forwardmove, player.cmd.sidemove), -angle).Unit();
+		// Compare the direction of velocity and input
+		// (-1 = opposite, 0 = sideways, 1 = same)
+		double dd = velDir.Unit() dot inputDir.Unit();
+
+		// input is ~ same direction of vel - move there directly:
+		if (dd > 0.85) {
+			return wishvel;
+		}
+		// input is ~ opposite direction of vel - stop immediately:
+		else if (dd < -0.85) {
+			return (0,0);
+		}
+		// sideways input - no effect:
+		else {
+			return vel.xy;
+		}
 	}
 
 	override void PlayerThink() {
@@ -260,5 +258,8 @@ class PK_PainkillerPlayer : PK_PlayerPawn {
 			return;
 		}
 		Super.FallAndSink(grav, oldfloorz);
+		if (floorz < oldfloorz && player.jumptics == 0) {
+			pk_jumpDirAngle = Normalize180(self.angle) - self.vel.xy.Angle();
+		}
 	}
 }
