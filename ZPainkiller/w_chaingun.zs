@@ -214,11 +214,18 @@ class PK_Chaingun : PKWeapon {
 		CMUZ A 1 bright {
 			A_OverlayFlags(OverlayID(),PSPF_Renderstyle|PSPF_Alpha|PSPF_ForceAlpha,true);
 			A_OverlayRenderstyle(OverlayID(),Style_Add);
+			A_OverlayAlpha(OverlayID(), 1.0);
 			A_OverlayPivot(OverlayID(), 0.9, 0.9);
 			let fl = Player.FindPsprite(OverlayID());
 			if (fl) {
 				fl.frame = random[sfx](0,3);
 				fl.scale *= frandom[sfx](0.8, 1.1);
+			}
+		}
+		#### # 1 bright {
+			let psp = player.FindPSprite(OverlayID());
+			if (psp) {
+				psp.scale *= frandom[sfx](0.8, 1.07);
 			}
 		}
 		stop;
