@@ -42,7 +42,7 @@ PK_ENDURANCE_DESC,Tarot Cards,Take only half the damage.,Вы получаете
 PK_SPEED_DESC,Tarot Cards,Move faster.,Вы двигаетесь быстрее.
 PK_TIMEBONUS_DESC,Tarot Cards,Golden Cards last 15 seconds longer.,Золотые карты действуют на 15 сек. дольше.
 PK_REBIRTH_DESC,Tarot Cards,Gain full Health and Armor on activation.,При активации вы получаете полные здоровье и броню.
-PK_CONFUSION_DESC,Tarot Cards,Confuse enemies into attach each other.,"Сбивает с толку врагов, заставляя их атаковать друг друга."
+PK_CONFUSION_DESC,Tarot Cards,Confuse enemies into attacking each other.,"Сбивает с толку врагов, заставляя их атаковать друг друга."
 PK_DEXTERITY_DESC,Tarot Cards,Weapons fire 2x faster.,Ваше оружие стреляет вдвое быстрее.
 PK_WMODIFIER_DESC,Tarot Cards,Activate Weapon Modifier.,Активирует эффект модификатора оружия.
 PK_SOT_DESC,Tarot Cards,Your every step damages nearby enemies.,С каждым шагом вы наносите урон врагам вокруг вас.
