@@ -2,15 +2,21 @@ class PK_DataContainer : Thinker abstract {
 	PlayerPawn owner;
 	int playernumber;
 
-	static play PK_DataContainer InitDefault(int playernumber, class<PK_DataContainer> cls) {
+	virtual void Init() {}
+
+	static play PK_DataContainer Create(int playernumber, class<PK_DataContainer> cls) {
 		if (!PlayerInGame[playernumber]) {
-			Console.Printf("\cgTried initializing PK_DataContainer for player %d who is not in game.");
+			Console.Printf("\cgData container:\c- Tried initializing \cy%s\c- for player \cd%d\c- who is not in game.",
+				cls.GetClassName(),
+				playernumber
+			);
 			return null;
 		}
 		let cont = PK_DataContainer(new(cls));
-		cont.ChangeStatNum(STAT_STATIC); //makes it persist between levels
-		cont.playerNumber = playernumber;
+		cont.ChangeStatNum(STAT_STATIC);
+		cont.playernumber = playernumber;
 		cont.owner = players[playernumber].mo;
+		cont.Init();
 		return cont;
 	}
 
@@ -19,7 +25,7 @@ class PK_DataContainer : Thinker abstract {
 		if (cont) {
 			return cont;
 		}
-		return InitDefault(playerNumber, cls);
+		return Create(playernumber, cls);
 	}
 
 	static clearscope PK_DataContainer GetReadonlyBase(int playernumber, class<PK_DataContainer> cls) {
@@ -28,14 +34,26 @@ class PK_DataContainer : Thinker abstract {
 				return cont;
 			}
 		}
-		if (pk_debugmessages) {
-			Console.Printf("\cgCouldn't get readonly access to %s for player %d", cls.GetClassName(), playernumber);
-		}
+		Console.Printf("\cgData container:\c- Couldn't get readonly access to \cy%s\c- for player \cd%d\c-",
+			cls.GetClassName(),
+			playernumber
+		);
 		return null;
 	}
 
-	static ui PK_DataContainer GetUIBase(class<PK_DataContainer> cls) {
-		return GetReadonlyBase(consoleplayer, cls);
+	override void Tick() {
+		Super.Tick();
+		if (!PlayerInGame[playernumber]) {
+			Console.Printf("\cgData container:\c- Destroying \cy%s\c- for player \cd%d\c- because that player is not in game",
+				self.GetClassName(),
+				playernumber
+			);
+			Destroy();
+			return;
+		}
+		if (!owner) {
+			owner = players[playernumber].mo;
+		}
 	}
 }
 

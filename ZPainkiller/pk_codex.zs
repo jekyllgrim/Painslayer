@@ -58,17 +58,13 @@ class PK_CodexData : PK_DataContainer {
 	clearscope bool IsRecorded(class<Actor> cls) {
 		return cls && processedClasses.Find(cls) != processedClasses.Size();
 	}
-	
-	static play PK_CodexData Init(int playernumber) {
-		return PK_CodexData(PK_DataContainer.InitDefault(playernumber, 'PK_CodexData'));
-	}
 
 	static play PK_CodexData Get(int playernumber) {
 		return PK_CodexData(GetBase(playernumber, 'PK_CodexData'));
 	}
 
 	static ui PK_CodexData GetUI() {
-		return PK_CodexData(GetUIBase('PK_CodexData'));
+		return PK_CodexData(GetReadonlyBase(consoleplayer, 'PK_CodexData'));
 	}
 }
 

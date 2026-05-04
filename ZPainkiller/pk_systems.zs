@@ -620,19 +620,10 @@ class PK_CardControl : PK_DataContainer {
 	private int totalGoldUses;
 	int goldDuration;
 
-	static play PK_CardControl Init(int playernumber) {
-		PK_CardControl cont = PK_CardControl(PK_DataContainer.InitDefault(playernumber, 'PK_CardControl'));
-		if (!cont) {
-			if (pk_debugmessages)
-				console.printf("\cgPK_CardControl.Init() failed for player %d", playernumber);
-			return null;
-		}
-		cont.goldUses = DEFAULT_GOLD_USES;
-		cont.goldDuration = DEFAULT_GOLD_DURATION;
-		if (pk_debugmessages) {
-			Console.Printf("\cyPK_CardControl initialized for player %d", playernumber);
-		}
-		return cont;
+	override void Init() {
+		Super.Init();
+		self.goldUses = DEFAULT_GOLD_USES;
+		self.goldDuration = DEFAULT_GOLD_DURATION;
 	}
 
 	static play PK_CardControl Get(int playernumber) {
@@ -640,7 +631,7 @@ class PK_CardControl : PK_DataContainer {
 	}
 
 	static ui PK_CardControl GetUI() {
-		return PK_CardControl(GetUIBase('PK_CardControl'));
+		return PK_CardControl(GetReadonlyBase(consoleplayer, 'PK_CardControl'));
 	}
 
 	
@@ -827,6 +818,7 @@ class PK_CardControl : PK_DataContainer {
 		if (!owner || !owner.player) {
 			return;
 		}
+		//Console.Printf("Data container persisting "..goldDuration);
 		if (dryUseTimer > 0)
 			dryUseTimer = Clamp(dryUseTimer - 1,0,45);
 		if (!goldActive)
