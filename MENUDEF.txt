@@ -79,48 +79,48 @@ Optionmenu "PK_Settings" {
 	// mod controls:
 	StaticText "$PKM_SUB_CONTROLS", yellow
 	StaticText ""
-	Control "PKM_UseCards|PKM_UseCards_Desc", "netevent PK_UseGoldenCards"
-	Control "PKM_OpenTarot|PKM_OpenTarot_Desc", "netevent PKCOpenBoard"
-	Control "PKM_OpenCodex|PKM_OpenCodex_Desc", "netevent PKCOpenCodex"	
-	Control "PKM_LastWeapon|PKM_LastWeapon_Desc", "+user3"
+	Control "$PKM_UseCards", "netevent PK_UseGoldenCards"
+	Control "$PKM_OpenTarot", "netevent PKCOpenBoard"
+	Control "$PKM_OpenCodex", "netevent PKCOpenCodex"	
+	Control "$PKM_LastWeapon", "+user3"
 	StaticText ""
 	// gameplay options:
 	StaticText "$PKM_SUB_GAMEPLAY", yellow
 	StaticText ""
-	Option "PKM_PKMovement|PKM_PKMovement_Desc", "pk_movement", "OnOff"
-	Option "PKM_PKMAutoJump|PKM_PKMAutoJump_Desc", "pkzm_autojump", "OnOff", "pk_movement"
-	Option "PKM_AutoOpenTarot|PKM_AutoOpenTarot_Desc", "pk_autoOpenBoard", "OnOff"
-	ScaleSlider "PKM_QOLCATCHER|PKM_QOLCATCHER_Desc", "pk_QoLCatcherDistance", 0, 96, 8, "$OPTVAL_OFF"
-	Option "PKM_ALLOWDEMON|PKM_ALLOWDEMON_DESC", "pk_allowDemonMorph", "OnOff"
-	Option "PKM_GIFTCARRDS|PKM_GIFTCARRDS_DESC", "pk_allowFreeCards", "OnOff"
-	Option "PKM_KeepBodies|PKM_KeepBodies_Desc", "pk_keepbodies", "OnOff"
+	Option "$PKM_PKMovement", "pk_movement", "OnOff"
+	Option "$PKM_PKMAutoJump", "pkzm_autojump", "OnOff", "pk_movement"
+	Option "$PKM_AutoOpenTarot", "pk_autoOpenBoard", "OnOff"
+	ScaleSlider "$PKM_QOLCATCHER", "pk_QoLCatcherDistance", 0, 96, 8, "$OPTVAL_OFF"
+	Option "$PKM_ALLOWDEMON", "pk_allowDemonMorph", "OnOff"
+	Option "$PKM_GIFTCARRDS", "pk_allowFreeCards", "OnOff"
+	Option "$PKM_KeepBodies", "pk_keepbodies", "OnOff"
 	StaticText ""
 	// HUD options:
 	StaticText "$PKM_SUB_HUD", yellow
 	StaticText ""
 	PKCrosshairOption "$HUDMNU_CROSSHAIRON", "crosshair"
-	Option "PKM_ShowCodexNotifs|PKM_ShowCodexNotifs_Desc", "pk_CodexNotifs", "OnOff"
-	Option "PKM_ShowCardsInHUD|PKM_ShowCardsInHUD_Desc", "pk_ShowCardsInHUD", "OnOff"
+	Option "$PKM_ShowCodexNotifs", "pk_CodexNotifs", "OnOff"
+	Option "$PKM_ShowCardsInHUD", "pk_ShowCardsInHUD", "OnOff"
 	StaticText ""
 	// performance options:
 	StaticText "$PKM_Sub_Performance", yellow
 	StaticText ""
-	Option "PKM_ParticlesAmount|PKM_ParticlesAmount_Desc", "pk_particles", "ParticlesAmount"
-	ScaleSlider "DSPLYMNU_MAXPARTICLES|PKM_DebrisNumber_Desc", "r_maxparticles", 3000, 32000, 100, ""
-	//ScaleSlider "PKM_DebrisNumber|PKM_DebrisNumber_Desc", "pk_maxdebris", 100, 3000, 100, ""
-	Option "PKM_MapStartSound|PKM_MapStartSound_Desc", "pk_startsound", "OnOff"
+	Option "$PKM_ParticlesAmount", "pk_particles", "ParticlesAmount"
+	ScaleSlider "$DSPLYMNU_MAXPARTICLES", "r_maxparticles", 3000, 32000, 100, ""
+	//ScaleSlider "$PKM_DebrisNumber", "pk_maxdebris", 100, 3000, 100, ""
+	Option "$PKM_MapStartSound", "pk_startsound", "OnOff"
 	StaticText ""
 	// a section where you can switch primary/secondary
 	// fire modes for any weapon:
 	StaticText "$PKM_FIREMODES", yellow
 	StaticText ""
-	Option "CNTRLMNU_SLOT1|PKM_FIREMODES_DESC", "pk_switch_Painkiller", 			"PKIL_MODES"
-	Option "CNTRLMNU_SLOT2|PKM_FIREMODES_DESC", "pk_switch_ShotgunFreezer", 		"SHFR_MODES"
-	Option "CNTRLMNU_SLOT3|PKM_FIREMODES_DESC", "pk_switch_StakeGrenade",			"STGR_MODES"
-	Option "CNTRLMNU_SLOT4|PKM_FIREMODES_DESC", "pk_switch_MinigunRocket", 		"CGUN_MODES"
-	Option "CNTRLMNU_SLOT5|PKM_FIREMODES_DESC", "pk_switch_ElectroDriver", 		"ELDR_MODES"
-	Option "CNTRLMNU_SLOT6|PKM_FIREMODES_DESC", "pk_switch_RifleFlamethrower", 	"RIFT_MODES"
-	Option "CNTRLMNU_SLOT7|PKM_FIREMODES_DESC", "pk_switch_BoltgunHeater", 		"BOHE_MODES"
+	Option "$CNTRLMNU_SLOT1", "pk_switch_Painkiller", 			"PKIL_MODES"
+	Option "$CNTRLMNU_SLOT2", "pk_switch_ShotgunFreezer", 		"SHFR_MODES"
+	Option "$CNTRLMNU_SLOT3", "pk_switch_StakeGrenade",			"STGR_MODES"
+	Option "$CNTRLMNU_SLOT4", "pk_switch_MinigunRocket", 		"CGUN_MODES"
+	Option "$CNTRLMNU_SLOT5", "pk_switch_ElectroDriver", 		"ELDR_MODES"
+	Option "$CNTRLMNU_SLOT6", "pk_switch_RifleFlamethrower", 	"RIFT_MODES"
+	Option "$CNTRLMNU_SLOT7", "pk_switch_BoltgunHeater", 		"BOHE_MODES"
 	Command "$OPTMNU_DEFAULTS", "pk_switch_defaults"
 }
 

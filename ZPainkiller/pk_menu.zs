@@ -262,57 +262,48 @@ class PK_ModSettingsMenu : OptionMenu {
 	// labels being set to "$LABEL_LANGUAGE_KEY", and tooltip keys
 	// are stored in this assoc map to be retrieved in Drawer():
 	Map<String, String> pk_modTooltips;
+	static const String pk_tooltipKeys[] = {
+		"$PKM_UseCards|$PKM_UseCards_Desc",
+		"$PKM_OpenTarot|$PKM_OpenTarot_Desc",
+		"$PKM_OpenCodex|$PKM_OpenCodex_Desc",
+		"$PKM_LastWeapon|$PKM_LastWeapon_Desc",
+		"$PKM_PKMovement|$PKM_PKMovement_Desc",
+		"$PKM_PKMAutoJump|$PKM_PKMAutoJump_Desc",
+		"$PKM_AutoOpenTarot|$PKM_AutoOpenTarot_Desc",
+		"$PKM_QOLCATCHER|$PKM_QOLCATCHER_Desc",
+		"$PKM_ALLOWDEMON|$PKM_ALLOWDEMON_DESC",
+		"$PKM_GIFTCARRDS|$PKM_GIFTCARRDS_DESC",
+		"$PKM_KeepBodies|$PKM_KeepBodies_Desc",
+		"$PKM_ShowCodexNotifs|$PKM_ShowCodexNotifs_Desc",
+		"$PKM_ShowCardsInHUD|$PKM_ShowCardsInHUD_Desc",
+		"$PKM_ParticlesAmount|$PKM_ParticlesAmount_Desc",
+		"$DSPLYMNU_MAXPARTICLES|$PKM_DebrisNumber_Desc",
+		"$PKM_MapStartSound|$PKM_MapStartSound_Desc",
+		"$CNTRLMNU_SLOT1|$PKM_FIREMODES_DESC",
+		"$CNTRLMNU_SLOT2|$PKM_FIREMODES_DESC",
+		"$CNTRLMNU_SLOT3|$PKM_FIREMODES_DESC",
+		"$CNTRLMNU_SLOT4|$PKM_FIREMODES_DESC",
+		"$CNTRLMNU_SLOT5|$PKM_FIREMODES_DESC",
+		"$CNTRLMNU_SLOT6|$PKM_FIREMODES_DESC",
+		"$CNTRLMNU_SLOT7|$PKM_FIREMODES_DESC"
+	};
 
 	// Build tooltips on initialization:
 	override void Init(Menu parent, OptionMenuDescriptor desc) {
 		Super.Init(parent, desc);
 
 		array<String> label;
-		OptionMenuItem item;
-		for (int i = mDesc.mItems.Size() - 1; i >= 0; i--) {
-			item = mDesc.mItems[i];
-			if (!item) continue;
-			if (item.mLabel.IndexOf("|")  >= 0) {
-				label.Clear();
-				item.mLabel.Split(label, "|");
-				if (label.Size() < 2) continue;
-
-				// These are defined without $ in MENUDEDF to avoid
-				// "translation missing" errors in UZDoom, so add
-				// those here:
-	
-				if (label[0].IndexOf("$") < 0)
-					label[0] = "$"..label[0];
-				if (label[1].IndexOf("$") < 0)
-					label[1] = "$"..label[1];
-
-				item.mLabel = label[0];
-				pk_modTooltips.Insert(label[0], label[1]);
-				//Console.Printf("Mapped \cd%s\c- to \cy%s\c-", label[0], label[1]);
-			}
+		String current;
+		for (int i = pk_tooltipKeys.Size() - 1; i >= 0; i--) {
+			label.Clear();
+			pk_tooltipKeys[i].Split(label, "|");
+			pk_modTooltips.Insert(label[0], label[1]);
 		}
-	}
-
-	// Restore original item labels on menu close:
-	override void OnDestroy() {
-		OptionMenuItem item;
-		String tooltip;
-		for (int i = mDesc.mItems.Size() - 1; i >= 0; i--) {
-			item = mDesc.mItems[i];
-			if (!item) continue;
-			tooltip = pk_modTooltips.Get(item.mLabel);
-			if (tooltip) {
-				item.mLabel = item.mLabel.."|"..tooltip;
-				item.mLabel.Replace("$", "");
-				//Console.Printf("Restored original label \cd%s\c-", item.mLabel);
-			}
-		}
-		Super.OnDestroy();
 	}
 
 	override void Drawer() {
 		Super.Drawer();
-
+		if (mDesc.mSelectedItem < 0) return;
 		OptionMenuItem item = mDesc.mItems[mDesc.mSelectedItem];
 		String tooltip = pk_modTooltips.Get(item.mLabel);
 		if (!tooltip) return;
