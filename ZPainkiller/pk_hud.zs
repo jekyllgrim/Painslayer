@@ -1,7 +1,8 @@
 Class PainkillerHUD : BaseStatusBar {
-	const noYStretch = 0.833333;
+	const NO_ASPECT_CORR = 0.833333;
 	const PWICONSIZE = 16;
 	const DELTATIMEFREQ = 1000.0 / TICRATE;
+	const DEATHSCREENTIME = TICRATE * 3.0;
 		
 	HUDFont mIndexFont;
 	HUDFont mNotifFont;
@@ -48,6 +49,8 @@ Class PainkillerHUD : BaseStatusBar {
 	protected TextureID hpBartex;
 	//protected name bossSpriteName;
 	protected TextureID bossSprite;
+
+	protected double deathScreenTics;
 	
 	void UpdateDeltaTime() {
 		double curMS = MSTimeF();
@@ -73,8 +76,8 @@ Class PainkillerHUD : BaseStatusBar {
 	*/
 	void PK_DrawImage(String texture, Vector2 pos, int flags = 0, double Alpha = 1., Vector2 box = (-1, -1), Vector2 scale = (1, 1)) {
 		if (aspectScale.GetBool() == true) {
-			scale.y *= noYStretch;
-			pos.y *= noYStretch;
+			scale.y *= NO_ASPECT_CORR;
+			pos.y *= NO_ASPECT_CORR;
 		}
 		DrawImage(texture, pos, flags, Alpha, box, scale);
 	}
@@ -82,8 +85,8 @@ Class PainkillerHUD : BaseStatusBar {
 	// Same for DrawTexture:
 	void PK_DrawTexture(TextureID texture, Vector2 pos, int flags = 0, double Alpha = 1., Vector2 box = (-1, -1), Vector2 scale = (1, 1)) {
 		if (aspectScale.GetBool() == true) {
-			scale.y *= noYStretch;
-			pos.y *= noYStretch;
+			scale.y *= NO_ASPECT_CORR;
+			pos.y *= NO_ASPECT_CORR;
 		}
 		DrawTexture(texture, pos, flags, Alpha, box, scale);
 	}
@@ -91,8 +94,8 @@ Class PainkillerHUD : BaseStatusBar {
 	// Same for DrawString:
 	void PK_DrawString(HUDFont font, String string, Vector2 pos, int flags = 0, int translation = Font.CR_UNTRANSLATED, double Alpha = 1., int wrapwidth = -1, int linespacing = 4, Vector2 scale = (1, 1)) {
 		if (aspectScale.GetBool() == true) {
-			scale.y *= noYStretch;
-			pos.y *= noYStretch;
+			scale.y *= NO_ASPECT_CORR;
+			pos.y *= NO_ASPECT_CORR;
 		}
 		DrawString(font, string, pos, flags, translation, Alpha, wrapwidth, linespacing, scale);
 	}
@@ -100,8 +103,8 @@ Class PainkillerHUD : BaseStatusBar {
 	// Same for inventory icons:
 	void PK_DrawInventoryIcon(Inventory item, Vector2 pos, int flags = 0, double alpha = 1.0, Vector2 boxsize = (-1, -1), Vector2 scale = (1.,1.)) {
 		if (aspectScale.GetBool() == true) {
-			scale.y *= noYStretch;
-			pos.y *= noYStretch;
+			scale.y *= NO_ASPECT_CORR;
+			pos.y *= NO_ASPECT_CORR;
 		}
 		DrawInventoryIcon(item, pos, flags, alpha, boxsize, scale);
 	}
@@ -139,7 +142,6 @@ Class PainkillerHUD : BaseStatusBar {
 
 		if (idmypos)
 		{ 
-			// Draw current coordinates
 			DrawMyPos();
 		}
 
@@ -163,61 +165,62 @@ Class PainkillerHUD : BaseStatusBar {
 		hudstate = state;
 		hudTicFrac = TicFrac;
 		UpdateDeltaTime();
+		DrawDeathScreen();
 		//the hud is completely skipped if automap is active or the player
 		//is in a demon mode and debug messages aren't active:
-		if (state == HUD_none || automapactive || (isDemon /*&& !pk_debugmessages*/))
-			return;
-		
-		BeginHUD();
-		
-		// Draw visual powerup indicators, such as horns for Pentagram,
-		// helmet corners for the antirad suit, etc.:
-		DrawPowerupCues();
-		
-		// Top elements draw in Fullscreen and Alt Hud
-		// These include mosnter compass, gold and soul counters, and keys:
-		if (state == HUD_Fullscreen || state == HUD_AltHud)
-			DrawTopElements();
-		
-		// Health, armor, ammo, etc.
-		// In statusbar mode it also moves the monster compass,
-		// keys, gold and soul counters to the bottom
-		if (state == HUD_StatusBar || state == HUD_Fullscreen)
-			DrawBottomElements();
-		DrawEquippedCards();
-		DrawCardUses();
-		DrawCodexNotif();
-		DrawActiveGoldenCards();
-		
-		// Keys and inv bar are already present in the AltHud:
-		if (state != HUD_AltHud) {
-			DrawKeys();
+		if (state != HUD_none && !automapactive && !isDemon) {
+			BeginHUD();
+			
+			// Draw visual powerup indicators, such as horns for Pentagram,
+			// helmet corners for the antirad suit, etc.:
+			DrawPowerupCues();
+			
+			// Top elements draw in Fullscreen and Alt Hud
+			// These include mosnter compass, gold and soul counters, and keys:
+			if (state == HUD_Fullscreen || state == HUD_AltHud)
+				DrawTopElements();
+			
+			// Health, armor, ammo, etc.
+			// In statusbar mode it also moves the monster compass,
+			// keys, gold and soul counters to the bottom
+			if (state == HUD_StatusBar || state == HUD_Fullscreen)
+				DrawBottomElements();
+			DrawEquippedCards();
+			DrawCardUses();
+			DrawCodexNotif();
+			DrawActiveGoldenCards();
+			
+			// Keys and inv bar are already present in the AltHud:
+			if (state != HUD_AltHud) {
+				DrawKeys();
 
-			// Draw selected item:
-			if (!isInventoryBarVisible() && !Level.NoInventoryBar && CPlayer.mo.InvSel != null) {
-				vector2 box = (32, 32);
-				double ihofs = 48;
-				PK_DrawInventoryIcon(
-					CPlayer.mo.InvSel, 
-					(ihofs, -4), 
-					DI_SCREEN_LEFT_BOTTOM|DI_ITEM_LEFT_BOTTOM|DI_DIMDEPLETED, 
-					boxsize: box
-				);
-				PK_DrawString(
-					mNotifFont, 
-					FormatNumber(CPlayer.mo.InvSel.Amount, 3), 
-					(ihofs + (box.x * 0.9), -7), 
-					DI_SCREEN_LEFT_BOTTOM|DI_TEXT_ALIGN_RIGHT, 
-					translation: Font.CR_GOLD,
-					scale: (0.75, 0.85)
-				);
-			}
-			// Draw inventory bar:
-			if (isInventoryBarVisible()) {
-				double ypos = (state == HUD_StatusBar) ? -48 : -4;
-				DrawInventoryBarScaled(diparms, (0, ypos), 7, DI_SCREEN_CENTER_BOTTOM, HX_SHADOW);
+				// Draw selected item:
+				if (!isInventoryBarVisible() && !Level.NoInventoryBar && CPlayer.mo.InvSel != null) {
+					vector2 box = (32, 32);
+					double ihofs = 48;
+					PK_DrawInventoryIcon(
+						CPlayer.mo.InvSel, 
+						(ihofs, -4), 
+						DI_SCREEN_LEFT_BOTTOM|DI_ITEM_LEFT_BOTTOM|DI_DIMDEPLETED, 
+						boxsize: box
+					);
+					PK_DrawString(
+						mNotifFont, 
+						FormatNumber(CPlayer.mo.InvSel.Amount, 3), 
+						(ihofs + (box.x * 0.9), -7), 
+						DI_SCREEN_LEFT_BOTTOM|DI_TEXT_ALIGN_RIGHT, 
+						translation: Font.CR_GOLD,
+						scale: (0.75, 0.85)
+					);
+				}
+				// Draw inventory bar:
+				if (isInventoryBarVisible()) {
+					double ypos = (state == HUD_StatusBar) ? -48 : -4;
+					DrawInventoryBarScaled(diparms, (0, ypos), 7, DI_SCREEN_CENTER_BOTTOM, HX_SHADOW);
+				}
 			}
 		}
+		DrawDeathScreen();
 	}
 	
 	void DrawPowerUpCues() {
@@ -254,9 +257,9 @@ Class PainkillerHUD : BaseStatusBar {
 		if (hudstate == HUD_StatusBar)
 			arrowscale *= 1.2;
 		if (aspectScale.GetBool() == true) {
-			arrowscale.y /= noYStretch;
-			arrowPos.y *= noYStretch;
-			shadowOfs.y *= noYStretch;
+			arrowscale.y /= NO_ASPECT_CORR;
+			arrowPos.y *= NO_ASPECT_CORR;
+			shadowOfs.y *= NO_ASPECT_CORR;
 		}
 		double ang = prevArrowAngle + (arrowAngle - prevArrowAngle) * hudTicFrac;
 		if (shadowofs != (0,0)) {
@@ -857,6 +860,33 @@ Class PainkillerHUD : BaseStatusBar {
 			DTA_ScaleY, scale,
 			DTA_FullScreenScale, FSMode_ScaletoFit43,
 			DTA_LegacyRenderstyle, STYLE_Add
+		);
+	}
+
+	void DrawDeathScreen() {
+		if (CPlayer.health > 0) {
+			deathScreenTics = 0;
+			return;
+		}
+		deathScreenTics = min(DEATHSCREENTIME, deathScreenTics + 1.0 * deltaTime);
+		double frac = deathScreenTics / DEATHSCREENTIME;
+		Screen.Dim(0x500000, frac * 0.5, 0, 0, Screen.GetWidth(), Screen.GetHeight());
+		String str = "GAME OVER";
+		Font fnt = Font.GetFont('TimesMenu');
+		Screen.DrawText(fnt, Font.CR_UNTRANSLATED, int(320.0 - fnt.StringWidth(str)*1.02*0.5), 198, str,
+			DTA_VirtualWidth, 640,
+			DTA_VirtualHeight, 480,
+			DTA_FullScreenScale, FSMode_ScaletoFit43,
+			DTA_Alpha, frac,
+			DTA_FillColor, 0xff000000,
+			DTA_ScaleX, 1.02,
+			DTA_ScaleY, 1.08
+		);
+		Screen.DrawText(fnt, Font.CR_White, int(320.0 - fnt.StringWidth(str)*0.5), 200, str,
+			DTA_VirtualWidth, 640,
+			DTA_VirtualHeight, 480,
+			DTA_FullScreenScale, FSMode_ScaletoFit43,
+			DTA_Alpha, frac
 		);
 	}
 }

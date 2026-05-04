@@ -172,7 +172,7 @@ class PK_PainkillerPlayer : PK_PlayerPawn {
 		if (!PK_IsJumping()) {
 			return Super.PK_ApplyAirControl(wishvel);
 		}
-		// Painkiller-like aircontrol ignores level.aircontrol entirely):
+		// Painkiller-like aircontrol (ignores level.aircontrol entirely):
 
 		// velocity dir (Y needs flipping to compare with input)
 		Vector2 velDir = (vel.x, -vel.y).Unit();
@@ -193,6 +193,18 @@ class PK_PainkillerPlayer : PK_PlayerPawn {
 		// sideways input - no effect:
 		else {
 			return vel.xy;
+		}
+	}
+
+	override void DeathThink() {
+		if ((player.cmd.buttons & BT_USE || ((deathmatch || alwaysapplydmflags) && sv_forcerespawn)) && !sv_norespawn) {
+			if (Level.maptime >= player.respawn_time || ((player.cmd.buttons & BT_USE) && player.Bot == NULL)) {
+				player.cls = NULL;		// Force a new class if the player is using a random class
+				player.playerstate = (multiplayer || level.AllowRespawn || sv_singleplayerrespawn || G_SkillPropertyInt(SKILLP_PlayerRespawn)) ? PST_REBORN : PST_ENTER;
+				if (special1 > 2) {
+					special1 = 0;
+				}
+			}
 		}
 	}
 
@@ -242,14 +254,6 @@ class PK_PainkillerPlayer : PK_PlayerPawn {
 			return;
 		}
 		Super.CalcHeight();
-	}
-
-	override void DeathThink() {
-		if (!pk_movement) {
-			DoomPlayer.DeathThink();
-			return;
-		}
-		Super.DeathThink();
 	}
 
 	override void FallAndSink(double grav, double oldfloorz) {
