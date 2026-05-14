@@ -39,7 +39,7 @@ class PK_PainkillerPlayer : PK_PlayerPawn {
 		Player.WeaponSlot 6, "PK_Rifle";
 		Player.WeaponSlot 7, "PK_Boltgun";
 
-		PK_PlayerPawn.AccelerationFactor 0.75;
+		PK_PlayerPawn.AccelerationFactor 0.3;
 		PK_PlayerPawn.HorizontalViewBobRange 0.0;
 		PK_PlayerPawn.MaxFootstepFrequency 30.0;
 		PK_PlayerPawn.MaxBobFrequency 24;
