@@ -6,8 +6,8 @@ Class PK_InventoryToken : Inventory abstract {
 		+INVENTORY.UNDROPPABLE;
 		+INVENTORY.UNTOSSABLE;
 		+INVENTORY.PERSISTENTPOWER;
-		inventory.amount 1;
-		inventory.maxamount 1;
+		Inventory.amount 1;
+		Inventory.maxamount 1;
 	}
 
 	override void DoEffect() {
@@ -35,7 +35,7 @@ Class PK_InvReplacementControl : Inventory {
 		+INVENTORY.UNDROPPABLE
 		+INVENTORY.UNTOSSABLE
 		+INVENTORY.PERSISTENTPOWER
-		inventory.maxamount 1;
+		Inventory.maxamount 1;
 	}
 	
 	static const name ReplacementPairs[] = {
@@ -277,8 +277,8 @@ Class PK_GoldPickup : PK_Inventory abstract {
 		+NOTELEPORT
 		xscale 0.5;
 		yscale 0.415;
-		inventory.amount 1;
-		inventory.pickupmessage "";
+		Inventory.amount 1;
+		Inventory.PickupMessage "";
 		Tag "$PKC_GOLDOBTAIN";
 	}
 
@@ -390,10 +390,10 @@ Class PK_GoldGleam : PK_BaseFlare {
 Class PK_GoldCoin : PK_GoldPickup {
 	double broll;
 	Default {
-		inventory.amount 5;
+		Inventory.amount 5;
 		+INVENTORY.NOSCREENFLASH
 		height 4;
-		inventory.pickupsound "pickups/gold/coin";
+		Inventory.PickupSound "pickups/gold/coin";
 		bouncesound "pickups/gold/coindrop";
 		bouncetype 'Doom';
 		bouncecount 4;
@@ -433,9 +433,9 @@ Class PK_GoldCoin : PK_GoldPickup {
 
 Class PK_SmallGold : PK_GoldPickup {
 	Default {
-		inventory.amount 10;
+		Inventory.amount 10;
 		height 4;
-		inventory.pickupsound "pickups/gold/small";
+		Inventory.PickupSound "pickups/gold/small";
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -445,9 +445,9 @@ Class PK_SmallGold : PK_GoldPickup {
 
 Class PK_MedGold : PK_GoldPickup {
 	Default {
-		inventory.amount 25;
+		Inventory.amount 25;
 		height 8;
-		inventory.pickupsound "pickups/gold/med";
+		Inventory.PickupSound "pickups/gold/med";
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -457,9 +457,9 @@ Class PK_MedGold : PK_GoldPickup {
 
 Class PK_BigGold : PK_GoldPickup {
 	Default {
-		inventory.amount 100;
+		Inventory.amount 100;
 		height 11;
-		inventory.pickupsound "pickups/gold/big";
+		Inventory.PickupSound "pickups/gold/big";
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -469,9 +469,9 @@ Class PK_BigGold : PK_GoldPickup {
 
 Class PK_VeryBigGold : PK_GoldPickup {
 	Default {
-		inventory.amount 500;
+		Inventory.amount 500;
 		height 16;
-		inventory.pickupsound "pickups/gold/vbig";
+		Inventory.PickupSound "pickups/gold/vbig";
 	}
 	override void PostBeginPlay() {
 		super.PostBeginPlay();
@@ -601,6 +601,7 @@ class PK_SoulBase : Health abstract {
 		+BRIGHT
 		+DONTGIB
 		+FORCEXYBILLBOARD
+		+Inventory.ISHEALTH
 		+Inventory.AUTOACTIVATE //does nothing on its own, this is needed for ALWAYSPICKUP
 		renderstyle 'Add';
 		gravity 0.025;
@@ -651,10 +652,10 @@ Class PK_Soul : PK_SoulBase {
 		+INVENTORY.AUTOACTIVATE
 		+INVENTORY.ALWAYSPICKUP
 		PK_Soul.maxage 350;
-		inventory.pickupmessage "$PKI_SOUL";
-		inventory.amount 2;
-		inventory.maxamount 100;
-		inventory.pickupsound "pickups/soul";
+		Inventory.PickupMessage "$PKI_SOUL";
+		Inventory.amount 2;
+		Inventory.maxamount 100;
+		Inventory.PickupSound "pickups/soul";
 		Tag "$PKC_Souls";
 	}
 	
@@ -681,7 +682,7 @@ Class PK_Soul : PK_SoulBase {
 				//SetShade("FF0000");
 				soulcolor = Color(colalpha, 255, 0, 0);
 				partTex = TexMan.CheckForTexture('pksoulpr');
-				pickupsound = "pickups/soul/red";
+				PickupSound = "pickups/soul/red";
 			}
 			A_AttachLight('soul',DynamicLight.PointLight, soulcolor, int(round(48 * scale.x)), 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_NOSHADOWMAP|DYNAMICLIGHT.LF_DONTLIGHTACTORS);
 		}
@@ -780,15 +781,15 @@ Class PK_Soul : PK_SoulBase {
 // Soulsphere replacement. Can't be dropped by monsters.
 Class PK_GoldSoul : PK_SoulBase {
 	Default {
-		inventory.pickupmessage "$PKI_GOLDSOUL";
-		inventory.amount 100;
-		inventory.maxamount 200;
+		Inventory.PickupMessage "$PKI_GOLDSOUL";
+		Inventory.amount 100;
+		Inventory.maxamount 200;
 		+NOGRAVITY
 		+COUNTITEM
 		alpha 0.9;
 		xscale 0.4;
 		yscale 0.332;
-		inventory.pickupsound "pickups/soul/gold";
+		Inventory.PickupSound "pickups/soul/gold";
 		Tag "$PKC_GoldSoul";
 	}
 
@@ -834,11 +835,12 @@ Class PK_GoldSoul : PK_SoulBase {
 Class PK_MegaSoul : PK_GoldSoul {
 
 	Default {
-		inventory.amount 200;
-		inventory.maxamount 200;
-		inventory.pickupsound "pickups/soul/mega";
-		inventory.pickupmessage "$PKI_MEGASOUL";
-		+INVENTORY.ALWAYSPICKUP
+		Inventory.amount 200;
+		Inventory.maxamount 200;
+		Inventory.PickupSound "pickups/soul/mega";
+		Inventory.PickupMessage "$PKI_MEGASOUL";
+		+Inventory.ALWAYSPICKUP
+		+Inventory.ISARMOR
 		Tag "$PKC_MegaSoul";
 	}
 
@@ -856,7 +858,7 @@ Class PK_MegaSoul : PK_GoldSoul {
 			int life = random[part](25,35);
 			for (int i = 3; i > 0; i--) {
 				A_SpawnParticleEx(
-					"c42626",
+					0xc42626,
 					partTex,
 					STYLE_AddShaded,
 					SPF_FULLBRIGHT|SPF_RELATIVE,
@@ -872,7 +874,7 @@ Class PK_MegaSoul : PK_GoldSoul {
 			}
 			life = random[part](20,25);
 			A_SpawnParticleEx(
-				"ffed78",
+				0xffed78,
 				partTex,
 				STYLE_AddShaded,
 				SPF_FULLBRIGHT|SPF_RELATIVE,
@@ -958,12 +960,12 @@ Class PowerChestOfSoulsRegen : PowerRegeneration {
 
 Class PK_BronzeArmor : GreenArmor  {
 	Default {
-		inventory.pickupsound "pickups/armor/bronze";
-		inventory.pickupmessage "$PKI_ARMOR1";
+		Inventory.PickupSound "pickups/armor/bronze";
+		Inventory.PickupMessage "$PKI_ARMOR1";
 		Armor.SavePercent 33.335;
 		Armor.SaveAmount 100;
 		scale 0.65;
-		inventory.icon "pkharm1";
+		Inventory.icon "pkharm1";
 		Tag "$PKC_Armor";
 	}
 	states {
@@ -975,11 +977,11 @@ Class PK_BronzeArmor : GreenArmor  {
 
 Class PK_SilverArmor : PK_BronzeArmor  {
 	Default {
-		inventory.pickupsound "pickups/armor/silver";
-		inventory.pickupmessage "$PKI_ARMOR2";
+		Inventory.PickupSound "pickups/armor/silver";
+		Inventory.PickupMessage "$PKI_ARMOR2";
 		Armor.SavePercent 60;
 		Armor.SaveAmount 150;
-		inventory.icon "pkharm2";
+		Inventory.icon "pkharm2";
 	}
 	states {
 	Spawn:
@@ -990,11 +992,11 @@ Class PK_SilverArmor : PK_BronzeArmor  {
 
 Class PK_GoldArmor : PK_BronzeArmor  {
 	Default {
-		inventory.pickupsound "pickups/armor/gold";
-		inventory.pickupmessage "$PKI_ARMOR3";
+		Inventory.PickupSound "pickups/armor/gold";
+		Inventory.PickupMessage "$PKI_ARMOR3";
 		Armor.SavePercent 80;
 		Armor.SaveAmount 200;
-		inventory.icon "pkharm3";
+		Inventory.icon "pkharm3";
 	}
 	states {
 	Spawn:
@@ -1012,8 +1014,8 @@ Class PK_GoldArmor : PK_BronzeArmor  {
 
 Class PK_AmmoPack : Backpack {
 	Default {
-		inventory.pickupsound "pickups/ammopack";
-		inventory.pickupmessage "$PKI_AMMOPACK";
+		Inventory.PickupSound "pickups/ammopack";
+		Inventory.PickupMessage "$PKI_AMMOPACK";
 		xscale 0.42;
 		yscale 0.38;
 		Tag "$PKC_AmmoPack";
@@ -1092,7 +1094,7 @@ Class PK_PowerupGiver : PK_PowerupGiverBase {
 	}
 	
 	override void PostBeginPlay() {
-		super.PostBeginPlay();		
+		super.PostBeginPlay();
 		if (!pickupRingColor)
 			return;
 		let ring = Spawn("PK_PickupRing",(pos.x,pos.y,floorz));
@@ -1163,24 +1165,27 @@ class PK_Powerup : Powerup {
 Class PK_WeaponModifier : PK_Powerup {
 	Default {
 		deathsound "pickups/wmod/end";
-		inventory.icon "wmodicon";
+		Inventory.icon "wmodicon";
 		Tag "$PKC_WeaponModifier";
 	}
-}		
+}
 
 Class PK_WeaponModifierGiver : PK_PowerUpGiver {
 	Default {
-		inventory.pickupmessage "$PKI_WMODIFIER";
-		inventory.pickupsound "pickups/wmod/pickup";
-		inventory.icon "wmodicon";
+		Inventory.PickupMessage "$PKI_WMODIFIER";
+		Inventory.PickupSound "pickups/wmod/pickup";
+		Inventory.icon "wmodicon";
 		Powerup.Type "PK_WeaponModifier";
-		PowerUp.duration -30;
+		PowerUp.Duration -30;
+		+Inventory.ALWAYSPICKUP
+		+Inventory.ISHEALTH
 		xscale 0.43;
 		yscale 0.36;
 		+FLOATBOB
 		FloatBobStrength 0.32;
 		PK_PowerUpGiver.pickupRingColor "f77300";
 	}
+
 	override void Tick() {
 		super.Tick();
 		if (owner)
@@ -1204,12 +1209,14 @@ Class PK_WeaponModifierGiver : PK_PowerUpGiver {
 			);
 		}
 	}
+
 	override bool TryPickup (in out Actor other) {
 		bool ret = super.TryPickup(other);
 		if (ret && other is "PlayerPawn")
 			other.GiveBody(100,100);
 		return ret;
 	}
+
 	states {
 	Spawn:
 		PMOD A -1;
@@ -1227,9 +1234,10 @@ Class PK_PowerDemonEyes : PK_Powerup {
 	
 	Default {
 		deathsound "pickups/powerups/lightampEnd";
-		inventory.icon "iconeyes";
+		Inventory.icon "iconeyes";
 		Tag "$PKC_DemonEyes";
 	}
+
 	override void InitEffect() {
 		super.InitEffect();
 		if (owner && owner.player) {
@@ -1242,6 +1250,7 @@ Class PK_PowerDemonEyes : PK_Powerup {
 		}
 		lightdir = 1;
 	}
+
 	override void DoEffect() {
 		super.DoEffect();
 		if (!owner) {
@@ -1295,6 +1304,7 @@ Class PK_PowerDemonEyes : PK_Powerup {
 			trg.bFRIGHTENED = true;
 		}
 	}
+
 	override void EndEffect() {
 		if (eyeslight1)
 			eyeslight1.Destroy();
@@ -1368,9 +1378,10 @@ Class PK_DemonEyes : PK_PowerupGiver {
 		FloatBobStrength 0.3;
 		PK_PowerUpGiver.pickupRingColor "fefc6a";
 		Powerup.Type "PK_PowerDemonEyes";
-		inventory.pickupmessage "$PKI_DEMONEYES";
-		inventory.pickupsound "pickups/powerups/lightamp";
-		inventory.icon "iconeyes";
+		Inventory.PickupMessage "$PKI_DEMONEYES";
+		Inventory.PickupSound "pickups/powerups/lightamp";
+		Inventory.icon "iconeyes";
+		+Inventory.ALWAYSPICKUP
 	}
 	States {
 	Spawn:
@@ -1383,12 +1394,11 @@ Class PK_DemonEyes : PK_PowerupGiver {
 
 Class PK_PowerPentagram : PowerInvulnerable {
 	mixin PK_PowerUpBehavior;
-	
 	const LIGHTADD = 64;
 	
 	Default {
 		deathsound "pickups/powerups/pentagramEnd";
-		inventory.icon "penticon";
+		Inventory.icon "penticon";
 		Tag "$PKC_Pentagram";
 	}
 	
@@ -1420,11 +1430,11 @@ Class PK_Pentagram : PK_PowerupGiver {
 		+INVENTORY.BIGPOWERUP
 		Powerup.Type "PK_PowerPentagram";
 		Inventory.PickupMessage "$GOTINVUL";
-		inventory.icon "penticon";
+		Inventory.icon "penticon";
 		renderstyle 'Add';
 		FloatBobStrength 0.35;
 		PK_PowerUpGiver.pickupRingColor "FF1904";
-		inventory.pickupsound "pickups/powerups/pentagram";
+		Inventory.PickupSound "pickups/powerups/pentagram";
 		scale 1.5;
 	}
 	
@@ -1440,7 +1450,7 @@ Class PK_Pentagram : PK_PowerupGiver {
 			canSeePlayer = CheckPlayerSights();
 		if (canSeePlayer)
 			A_SpawnParticle(
-				"fc5a2d",
+				0xfc5a2d,
 				SPF_FULLBRIGHT|SPF_RELVEL|SPF_RELACCEL,
 				lifetime:random(20,60),size:frandom[sfx](2,4.2),
 				angle:frandom[sfx](0,359),
@@ -1462,17 +1472,19 @@ Class PK_PowerAntiRad : PowerIronFeet {
 	Default {
 		deathsound "pickups/powerups/radsuitEnd";
 		Powerup.Color "000000", 0;
-		inventory.icon "HLBOA0";
+		Inventory.icon "HLBOA0";
 		Tag "$PKC_Antirad";
 	}
 }
 
 Class PK_AntiRadArmor : PK_PowerupGiver {
 	Default {
+		Height 46;
 		Powerup.Type "PK_PowerAntiRad";
 		Inventory.PickupMessage "$PKI_ANTIRAD";
+		Inventory.PickupSound "pickups/powerups/radsuit";
 		PK_PowerUpGiver.pickupRingColor "11821c";
-		inventory.pickupsound "pickups/powerups/radsuit";
+		+Inventory.ALWAYSPICKUP
 		xscale 0.38;
 		yscale 0.33;
 	}
@@ -1510,7 +1522,7 @@ class PK_AllMap : AllMap {
 	mixin PK_SpawnPickupRing;
 	Default {
 		scale 0.6;
-		inventory.pickupmessage "$PKI_ALLMAP";
+		Inventory.PickupMessage "$PKI_ALLMAP";
 		PK_AllMap.pickupRingColor "ce73fe";
 		Tag "$PKC_CrystalBall";
 	}
