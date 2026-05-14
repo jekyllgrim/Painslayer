@@ -476,8 +476,14 @@ Class PK_MainHandler : EventHandler {
 		}
 		
 		if (pk_startsound) {
-			plr.A_StartSound("world/mapstart", CH_PKUI, CHANF_LOCAL, volume: 0.5);
+			plr.A_StartSound("world/mapstart", CH_PKUI, CHANF_LOCAL, volume: 0.4);
 			plr.A_SetBlend("000000", 1.0, 35*4);
+		}
+	}
+
+	override void WorldTick() {
+		if (pk_startsound && level.maptime <= TICRATE * 10) {
+			SetMusicVolume(PK_Utils.LinearMap(level.maptime, 3*TICRATE, 10*TICRATE, 0.0, 1.0, true));
 		}
 	}
 
