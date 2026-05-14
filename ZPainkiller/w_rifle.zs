@@ -30,9 +30,7 @@ Class PK_Rifle : PKWeapon {
 		PK_AttackSound("weapons/rifle/fire",CHAN_WEAPON,flags:CHANF_OVERLAP);
 		if (invoker.hasDexterity)
 			A_SoundPitch(CHAN_WEAPON,1.1);
-		double dmg = 14;
-		if (invoker.hasWmod) dmg *= 1.5;
-		PK_FireBullets(1, 1, 1, int(dmg), spawnheight: -6,spawnofs: 6.6);
+		PK_FireBullets(1, 1, 1, invoker.hasWmod? 22 : 15, spawnheight: -6,spawnofs: 6.6);
 		if (!invoker.hasWmod)
 			invoker.shots++;
 	}
