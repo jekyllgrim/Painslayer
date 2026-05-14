@@ -51,7 +51,7 @@ Class PK_Shotgun : PKWeapon {
 			PK_AttackSound("weapons/shotgun/fire",CHAN_VOICE);
 			A_Overlay(PSP_PFLASH,"Flash");
 			vector2 spread = (invoker.hasWmod) ? (2.8, 2.3) : (7, 5);
-			PK_FireBullets(spread.x,spread.y,10,9,pufftype:"PK_ShotgunPuff", spawnheight: -4,spawnofs:9);
+			PK_FireBullets(spread.x,spread.y, 10, 7, pufftype:"PK_ShotgunPuff", spawnheight: -4, spawnofs:9);
 			A_ZoomFactor(0.99,ZOOM_INSTANT|ZOOM_NOSCALETURNING);
 			A_AttachLight('PKWeaponlight', DynamicLight.PulseLight, "e1b03e", 64, 0, flags: DYNAMICLIGHT.LF_ATTENUATE|DYNAMICLIGHT.LF_DONTLIGHTSELF|DYNAMICLIGHT.LF_ATTENUATE, ofs: (32,32,player.viewheight), param: 0.1);
 		}
@@ -319,8 +319,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 		victimDestroyTimer = PK_EnemyDeathControl.RESTLIFE;
 		owner.A_SetTics(victimDestroyTimer);
 		
-		for (int i = 7; i >= 0; i--)
-			owner.A_SoundVolume(i,0);
+		owner.A_StopAllSounds();
 		owner.A_SetRenderstyle(owner.alpha, Style_None);
 		owner.deathsound = "";
 		//don't forget to destroy the frozen layer
@@ -339,7 +338,7 @@ Class PK_FreezeControl : PK_InventoryToken {
 			}
 			//x1.5 damage if hitting with a shotgun blast:
 			else if (inflictor && inflictor.GetClass() == "PK_ShotgunPuff")
-				newdamage = int(round(damage * 1.5));
+				newdamage = int(round(damage * 1.7));
 			//for all other weapons x1.25 damage:
 			else
 				newdamage = int(round(damage*1.25));
