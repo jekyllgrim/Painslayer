@@ -2779,4 +2779,252 @@ Graphic "PCDXGOBT", 880, 255
 	Patch "CODX_GOB", 0, 0
 }
 
+Graphic "XHAIRB66", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB66", 0, 0
+}
+
+Graphic "XHAIRB67", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB67", 0, 0
+}
+
+Graphic "XHAIRB68", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB68", 0, 0
+}
+
+Graphic "XHAIRB69", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB69", 0, 0
+}
+
+Graphic "XHAIRB70", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB70", 0, 0
+}
+
+Graphic "XHAIRB71", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB71", 0, 0
+}
+
+Graphic "XHAIRB72", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB72", 0, 0
+}
+
+Graphic "XHAIRB73", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB73", 0, 0
+}
+
+Graphic "XHAIRB74", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB74", 0, 0
+}
+
+Graphic "XHAIRB75", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB75", 0, 0
+}
+
+Graphic "XHAIRB76", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB76", 0, 0
+}
+
+Graphic "XHAIRB77", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB77", 0, 0
+}
+
+Graphic "XHAIRB78", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB78", 0, 0
+}
+
+Graphic "XHAIRB79", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB79", 0, 0
+}
+
+Graphic "XHAIRB80", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB80", 0, 0
+}
+
+Graphic "XHAIRB81", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB81", 0, 0
+}
+
+Graphic "XHAIRB82", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB82", 0, 0
+}
+
+Graphic "XHAIRB83", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB83", 0, 0
+}
+
+Graphic "XHAIRB84", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB84", 0, 0
+}
+
+Graphic "XHAIRB85", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB85", 0, 0
+}
+
+Graphic "XHAIRB86", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB86", 0, 0
+}
+
+Graphic "XHAIRB87", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB87", 0, 0
+}
+
+Graphic "XHAIRB88", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB88", 0, 0
+}
+
+Graphic "XHAIRB89", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB89", 0, 0
+}
+
+Graphic "XHAIRB90", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB90", 0, 0
+}
+
+Graphic "XHAIRB91", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB91", 0, 0
+}
+
+Graphic "XHAIRB92", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB92", 0, 0
+}
+
+Graphic "XHAIRB93", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB93", 0, 0
+}
+
+Graphic "XHAIRB94", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB94", 0, 0
+}
+
+Graphic "XHAIRB95", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB95", 0, 0
+}
+
+Graphic "XHAIRB96", 44, 44
+{
+	XScale 2.000
+	YScale 2.000
+	Offset 22, 22
+	Patch "XHAIRB96", 0, 0
+}
+
 // End of texture definitions
