@@ -263,18 +263,6 @@ class PKSkillMenu : ListMenu {
 				(SWIDTH / 2) - (textureWidth / 2), 
 				y - (menuBlockTexSize.y / 2) + (fy / 2)
 			);
-			/*if (i == 0) {
-				let [box_coords, box_size] = Screen.VirtualToRealCoords(
-					texpos, 
-					(SWIDTH, SKILL_AREA_HEIGHT),
-					(SWIDTH, SHEIGHT)
-				);
-
-				Console.Printf("\cdTexture\c- virtual top %.2f | real top %.2f",
-					texpos.y,
-					box_coords.y
-				);
-			}*/
 
 			// draw the background:
 			Screen.DrawTexture(
