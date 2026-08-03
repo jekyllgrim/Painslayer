@@ -11,5 +11,3 @@ Boondolr: Boss healthbar code, scripting help
 phantombeta, Gutawer: ZForms
 
 Gutawer: Gutamatics
-
-Nero: Tooltips
