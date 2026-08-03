@@ -4,11 +4,11 @@
 
 Requirements:
 
-* Version 2.0.1 and below: [GZDoom 4.10.0](https://zdoom.org/downloads).
+* Version 3.0.0: [UZDoom 5.0.0 or Preview](https://github.com/UZDoom/UZDoom/releases)
 
 * Version 2.0.2: [GZDoom 4.14.0](https://zdoom.org/downloads).
 
-<u>Using at least GZDoom 4.14.0 is highly recommended, since previous versions contained security vulnerabilities.</u>
+* Version 2.0.1 and below: [GZDoom 4.10.0](https://zdoom.org/downloads).
 
 ☕ Support me on [Boosty](https://boosty.to/agent_ash) or [Hipolink](https://hipolink.me/agent_ash/tips).
 
@@ -37,10 +37,12 @@ Released versions should be the most stable and bug-free ones. Some releases are
 2. Download the attached PK3 file. Run it as you'd run any .wad or .pk3. For example, in the command line it shoud look as follows:
 
 ```
-gzdoom.exe -file Painslayer###.pk3
+uzdoom.exe -file Painslayer###.pk3
 ```
 
 (`###` in the example above stand for the version number, e.g. 130 for version 1.3.0)
+
+...Or use any other method you prefer: a launcher like ZDL, drag-n-drop, etc.
 
 ## How to play the freshest dev build
 
@@ -55,13 +57,13 @@ It's possible to play the version that is currently in the repository but hasn't
 4. Run the archive as you would run any mod; from command line or a bat file in the GZDoom directory:
    
    ```
-   gzdoom.exe -file Painslayer-master.zip
+   uzdoom.exe -file Painslayer-master.zip
    ```
    
     Or, if you renamed it: 
    
    ```
-   gzdoom.exe -file Painslayer-master.pk3
+   uzdoom.exe -file Painslayer-master.pk3
    ```
 
 5. If you're getting errors, try running it with the latest [development build of GZDoom](https://devbuilds.drdteam.org/gzdoom/). Github builds may contain features that haven't made it into a stable GZDoom release yet.
@@ -159,12 +161,12 @@ The codebase of Painslayer includes original code produced by the Author, as wel
 
 The following code is used in Painslayer:
 
-| Type of asset | Author(s)                                           | License      | Location in the project                 |
-| ------------- | --------------------------------------------------- | ------------ | --------------------------------------- |
-| Original code | Agent_Ash                                           | GPLv3        | `ZPainkiller/` not including subfolders |
-| AshMovement   | Agent_Ash                                           | GPLv3        | `ZPainkiller/AshMovement/`              |
-| ZForms        | Jessica Russell<br/>Chronos "phantombeta" Ouroboros | free license | `ZPainkiller/Zforms/`                   |
-| GZBeamz       | Lewisk3                                             | MIT          | `ZPainkiller/GZBeamz`                   |
+| Type of asset | Author(s)                                           | License | Location in the project                 |
+| ------------- | --------------------------------------------------- | ------- | --------------------------------------- |
+| Original code | Agent_Ash                                           | GPLv3   | `ZPainkiller/` not including subfolders |
+| AshMovement   | Agent_Ash                                           | GPLv3   | `ZPainkiller/AshMovement/`              |
+| ZForms        | Jessica Russell<br/>Chronos "phantombeta" Ouroboros | MIT     | `ZPainkiller/Zforms/`                   |
+| GZBeamz       | Lewisk3                                             | MIT     | `ZPainkiller/GZBeamz`                   |
 
 Refer to the aforementioned code locations for license information on each code component.
 
