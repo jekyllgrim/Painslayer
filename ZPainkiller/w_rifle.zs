@@ -463,6 +463,11 @@ Class PK_BurnControl : PK_InventoryToken {
 		if (timer % 35 == 0) {
 			int fl = (random[burn](1,3) == 1) ? 0 : DMG_NO_PAIN;
 			owner.DamageMobj(self,target,4,"Fire",flags:DMG_THRUSTLESS|fl);
+			//the owner might disappear after being damaged:
+			if (!owner || owner.bDestroyed) {
+				Destroy();
+				return;
+			}
 		}
 		
 		double rad = owner.radius*0.5;
