@@ -6,10 +6,11 @@ class PK_DataContainer : Thinker abstract {
 
 	static play PK_DataContainer Create(int playernumber, class<PK_DataContainer> cls) {
 		if (!PlayerInGame[playernumber]) {
-			Console.Printf("\cgData container:\c- Tried initializing \cy%s\c- for player \cd%d\c- who is not in game.",
-				cls.GetClassName(),
-				playernumber
-			);
+			if (pk_debugmessages > 0)
+				Console.Printf("\cgData container:\c- Tried initializing \cy%s\c- for player \cd%d\c- who is not in game.",
+					cls.GetClassName(),
+					playernumber
+				);
 			return null;
 		}
 		let cont = PK_DataContainer(new(cls));
@@ -34,20 +35,22 @@ class PK_DataContainer : Thinker abstract {
 				return cont;
 			}
 		}
-		Console.Printf("\cgData container:\c- Couldn't get readonly access to \cy%s\c- for player \cd%d\c-",
-			cls.GetClassName(),
-			playernumber
-		);
+		if (pk_debugmessages > 0)
+			Console.Printf("\cgData container:\c- Couldn't get readonly access to \cy%s\c- for player \cd%d\c-",
+				cls.GetClassName(),
+				playernumber
+			);
 		return null;
 	}
 
 	override void Tick() {
 		Super.Tick();
 		if (!PlayerInGame[playernumber]) {
-			Console.Printf("\cgData container:\c- Destroying \cy%s\c- for player \cd%d\c- because that player is not in game",
-				self.GetClassName(),
-				playernumber
-			);
+			if (pk_debugmessages > 0)
+				Console.Printf("\cgData container:\c- Destroying \cy%s\c- for player \cd%d\c- because that player is not in game",
+					self.GetClassName(),
+					playernumber
+				);
 			Destroy();
 			return;
 		}
